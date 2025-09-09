@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
+import logoImage from "@/assets/logo.png";
 import { Twitter, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 
 const Footer = () => {
@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <img 
-                src={logo} 
+                src={logoImage} 
                 alt="JobAssist.ai" 
                 className="h-8 w-8 rounded-lg"
               />

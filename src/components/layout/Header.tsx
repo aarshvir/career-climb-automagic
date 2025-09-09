@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
+import logoImage from "@/assets/logo.png";
 
 const Header = () => {
   return (
@@ -7,7 +7,7 @@ const Header = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center space-x-2">
           <img 
-            src={logo} 
+            src={logoImage} 
             alt="JobAssist.ai" 
             className="h-10 w-10 rounded-lg"
           />
