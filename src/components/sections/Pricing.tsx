@@ -20,7 +20,7 @@ const Pricing = () => {
       ],
       popular: false,
       cta: "Start Free Trial",
-      variantId: "starter_variant_id" // Replace with your actual Lemon Squeezy variant ID
+      variantId: "991795"
     },
     {
       name: "Professional",
@@ -39,7 +39,7 @@ const Pricing = () => {
       ],
       popular: true,
       cta: "Most Popular",
-      variantId: "professional_variant_id" // Replace with your actual Lemon Squeezy variant ID
+      variantId: "991797"
     },
     {
       name: "Enterprise",
@@ -60,7 +60,7 @@ const Pricing = () => {
       ],
       popular: false,
       cta: "Contact Sales",
-      variantId: "enterprise_variant_id" // Replace with your actual Lemon Squeezy variant ID
+      variantId: "991798"
     }
   ];
 
