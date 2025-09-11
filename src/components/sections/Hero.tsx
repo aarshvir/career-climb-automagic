@@ -1,7 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { ArrowRight, Bot, Briefcase, Target } from "lucide-react";
 
 const Hero = () => {
+  const { user, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      signInWithGoogle();
+    }
+  };
   return (
     <section id="home" className="relative py-20 lg:py-32 overflow-hidden">
       {/* Background gradient */}
@@ -31,8 +43,8 @@ const Hero = () => {
 
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-up">
-            <Button variant="hero" size="xl" className="group">
-              Start Your Job Hunt
+            <Button variant="hero" size="xl" className="group" onClick={handleGetStarted}>
+              {user ? 'Go to Dashboard' : 'Start Your Job Hunt'}
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button variant="outline" size="xl">
