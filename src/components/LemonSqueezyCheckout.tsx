@@ -23,7 +23,7 @@ const LemonSqueezyCheckout = ({
     
     try {
       // Open Lemon Squeezy checkout
-      const checkoutUrl = `https://gvftdfriujrkpptdueyb.supabase.co/functions/v1/lemon-squeezy-webhook?variant=${variantId}`;
+      const checkoutUrl = `https://jobassist.lemonsqueezy.com/checkout/buy/${variantId}`;
       window.open(checkoutUrl, '_blank');
       
       toast({
