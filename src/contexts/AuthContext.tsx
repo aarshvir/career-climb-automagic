@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Only try to connect if we have real Supabase credentials
     const hasValidCredentials = import.meta.env.VITE_SUPABASE_URL && 
-                               import.meta.env.VITE_SUPABASE_ANON_KEY && 
+                               import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY && 
                                !import.meta.env.VITE_SUPABASE_URL.includes('placeholder')
 
     if (!hasValidCredentials) {
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGoogle = async () => {
     const hasValidCredentials = import.meta.env.VITE_SUPABASE_URL && 
-                               import.meta.env.VITE_SUPABASE_ANON_KEY && 
+                               import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY && 
                                !import.meta.env.VITE_SUPABASE_URL.includes('placeholder')
 
     if (!hasValidCredentials) {
