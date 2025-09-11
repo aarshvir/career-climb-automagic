@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Zap, Star, Shield } from "lucide-react";
+import LemonSqueezyCheckout from "@/components/LemonSqueezyCheckout";
 
 const Pricing = () => {
   const plans = [
     {
       name: "Starter",
-      price: "$4.99",
+      price: "$29.99",
       period: "per month",
       description: "Perfect for students and entry-level professionals",
       features: [
@@ -18,7 +19,8 @@ const Pricing = () => {
         "Basic analytics"
       ],
       popular: false,
-      cta: "Start Free Trial"
+      cta: "Start Free Trial",
+      variantId: "starter_variant_id" // Replace with your actual Lemon Squeezy variant ID
     },
     {
       name: "Professional",
@@ -36,7 +38,8 @@ const Pricing = () => {
         "Application tracking dashboard"
       ],
       popular: true,
-      cta: "Most Popular"
+      cta: "Most Popular",
+      variantId: "professional_variant_id" // Replace with your actual Lemon Squeezy variant ID
     },
     {
       name: "Enterprise",
@@ -56,7 +59,8 @@ const Pricing = () => {
         "Salary negotiation guidance"
       ],
       popular: false,
-      cta: "Contact Sales"
+      cta: "Contact Sales",
+      variantId: "enterprise_variant_id" // Replace with your actual Lemon Squeezy variant ID
     }
   ];
 
@@ -108,13 +112,13 @@ const Pricing = () => {
               </CardHeader>
               
               <CardContent className="pt-4">
-                <Button 
-                  variant={plan.popular ? "hero" : "default"} 
-                  className="w-full mb-6"
-                  size="lg"
+                <LemonSqueezyCheckout
+                  variantId={plan.variantId}
+                  planName={plan.name}
+                  className={`w-full mb-6 ${plan.popular ? "hero" : "default"}`}
                 >
                   {plan.cta}
-                </Button>
+                </LemonSqueezyCheckout>
                 
                 <ul className="space-y-3">
                   {plan.features.map((feature, featureIndex) => (
