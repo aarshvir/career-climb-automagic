@@ -7,107 +7,60 @@ import { Calendar, Clock, ArrowRight, Search, User } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import SEOHead from '@/components/SEOHead'
-import { supabase } from '@/lib/supabase'
+import { posts } from './blog/posts'
+import { Link } from 'react-router-dom'
 
-interface BlogPost {
-  id: string
-  title: string
-  slug: string
-  excerpt: string
-  featured_image: string | null
-  author: string
-  tags: string[]
-  created_at: string
-  seo_title: string
-  meta_description: string
-}
 
 const Blog = () => {
-  const [posts, setPosts] = useState<BlogPost[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
-  // Mock data for now - in production this would come from Supabase
-  const mockPosts: BlogPost[] = [
-    {
-      id: '1',
-      title: '5 Resume Mistakes That Cost You Job Interviews',
-      slug: '5-resume-mistakes-cost-job-interviews',
-      excerpt: 'Learn about the most common resume mistakes that prevent you from getting interviews and how to fix them.',
-      featured_image: null,
-      author: 'Sarah Johnson',
-      tags: ['Resume Tips', 'Career Advice', 'Interview Prep'],
-      created_at: '2024-01-15T10:00:00Z',
-      seo_title: '5 Resume Mistakes That Cost You Job Interviews - JobVance.io',
-      meta_description: 'Discover the top 5 resume mistakes that prevent job seekers from getting interviews and learn how to avoid them with expert tips.'
-    },
-    {
-      id: '2',
-      title: 'How AI is Revolutionizing Job Applications',
-      slug: 'ai-revolutionizing-job-applications',
-      excerpt: 'Discover how artificial intelligence is changing the job application process and what it means for job seekers.',
-      featured_image: null,
-      author: 'Alex Chen',
-      tags: ['AI Technology', 'Job Search', 'Career Trends'],
-      created_at: '2024-01-12T14:30:00Z',
-      seo_title: 'How AI is Revolutionizing Job Applications - JobVance.io',
-      meta_description: 'Learn how AI technology is transforming job applications and helping job seekers find opportunities faster than ever before.'
-    },
-    {
-      id: '3',
-      title: 'The Ultimate Guide to LinkedIn Job Searching',
-      slug: 'ultimate-guide-linkedin-job-searching',
-      excerpt: 'Master LinkedIn job search with proven strategies that help you stand out to recruiters and hiring managers.',
-      featured_image: null,
-      author: 'Marcus Rodriguez',
-      tags: ['LinkedIn', 'Networking', 'Job Search'],
-      created_at: '2024-01-10T09:15:00Z',
-      seo_title: 'The Ultimate Guide to LinkedIn Job Searching - JobVance.io',
-      meta_description: 'Complete guide to finding jobs on LinkedIn with expert tips on optimizing your profile and networking effectively.'
-    },
-    {
-      id: '4',
-      title: 'What Recruiters Really Look for in 2024',
-      slug: 'what-recruiters-look-for-2024',
-      excerpt: 'Get insider insights into what recruiters prioritize when reviewing candidates in today\'s competitive job market.',
-      featured_image: null,
-      author: 'Emily Davis',
-      tags: ['Recruiter Insights', 'Hiring Trends', 'Career Advice'],
-      created_at: '2024-01-08T16:45:00Z',
-      seo_title: 'What Recruiters Really Look for in 2024 - JobVance.io',
-      meta_description: 'Discover what recruiters and hiring managers are looking for in job candidates in 2024 with insights from industry experts.'
-    },
-    {
-      id: '5',
-      title: 'Salary Negotiation: A Complete Guide',
-      slug: 'salary-negotiation-complete-guide',
-      excerpt: 'Learn the art of salary negotiation with proven strategies to maximize your earning potential.',
-      featured_image: null,
-      author: 'David Wilson',
-      tags: ['Salary Negotiation', 'Career Growth', 'Professional Development'],
-      created_at: '2024-01-05T11:20:00Z',
-      seo_title: 'Salary Negotiation: A Complete Guide - JobVance.io',
-      meta_description: 'Master salary negotiation with this comprehensive guide including tactics, timing, and scripts for better compensation.'
-    },
-    {
-      id: '6',
-      title: 'Remote Work Interview Tips for 2024',
-      slug: 'remote-work-interview-tips-2024',
-      excerpt: 'Navigate remote work interviews successfully with these essential tips for virtual job interviews.',
-      featured_image: null,
-      author: 'Lisa Thompson',
-      tags: ['Remote Work', 'Interview Tips', 'Virtual Interviews'],
-      created_at: '2024-01-03T13:10:00Z',
-      seo_title: 'Remote Work Interview Tips for 2024 - JobVance.io',
-      meta_description: 'Ace your remote work interviews with proven tips for virtual interviews and landing remote positions.'
-    }
-  ]
-
   useEffect(() => {
-    // For now, use mock data. In production, fetch from Supabase
-    setPosts(mockPosts)
-    setLoading(false)
+    document.title = "JobVance Blog | Job Search Automation Tips";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute(
+        "content",
+        "Expert career advice, job search strategies, and AI automation insights. Learn from industry professionals to advance your career faster."
+      );
+    }
+
+    // Add Blog structured data
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "name": "JobVance Career Blog",
+      "description": "Expert career advice and job search automation insights",
+      "url": "https://jobvance.io/blog",
+      "publisher": {
+        "@type": "Organization",
+        "name": "JobVance",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://jobvance.io/logo.png"
+        }
+      },
+      "blogPost": posts.map(post => ({
+        "@type": "BlogPosting",
+        "headline": post.title,
+        "url": `https://jobvance.io/blog/${post.slug}`,
+        "datePublished": post.date,
+        "author": {
+          "@type": "Person",
+          "name": post.author
+        }
+      }))
+    });
+    document.head.appendChild(script);
+
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
   }, [])
 
   const allTags = Array.from(new Set(posts.flatMap(post => post.tags)))
@@ -125,12 +78,6 @@ const Blog = () => {
       month: 'long',
       day: 'numeric'
     })
-  }
-
-  const getReadingTime = (content: string) => {
-    const wordsPerMinute = 200
-    const wordCount = content.split(' ').length
-    return Math.ceil(wordCount / wordsPerMinute)
   }
 
   if (loading) {
@@ -245,17 +192,19 @@ const Blog = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          {formatDate(filteredPosts[0].created_at)}
+                          {formatDate(filteredPosts[0].date)}
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {getReadingTime(filteredPosts[0].excerpt)} min read
-                        </div>
+                         <div className="flex items-center gap-1">
+                           <Clock className="w-4 h-4" />
+                           {filteredPosts[0].readTime} min read
+                         </div>
                       </div>
-                      <Button className="group">
-                        Read Full Article
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
+                       <Link to={`/blog/${filteredPosts[0].slug}`}>
+                         <Button className="group">
+                           Read Full Article
+                           <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                         </Button>
+                       </Link>
                     </CardContent>
                   </div>
                 </div>
@@ -280,8 +229,8 @@ const Blog = () => {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredPosts.slice(1).map((post) => (
-                  <Card key={post.id} className="hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                 {filteredPosts.slice(1).map((post) => (
+                   <Card key={post.slug} className="hover:shadow-lg transition-all duration-300 h-full flex flex-col">
                     <div className="bg-gradient-subtle h-48 flex items-center justify-center">
                       <div className="text-4xl font-bold text-primary/20">
                         {post.title.charAt(0)}
@@ -306,14 +255,16 @@ const Blog = () => {
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
                         <span>{post.author}</span>
                         <span>•</span>
-                        <span>{formatDate(post.created_at)}</span>
-                        <span>•</span>
-                        <span>{getReadingTime(post.excerpt)} min</span>
+                         <span>{formatDate(post.date)}</span>
+                         <span>•</span>
+                         <span>{post.readTime} min</span>
                       </div>
-                      <Button variant="outline" className="w-full group">
-                        Read More
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
+                       <Link to={`/blog/${post.slug}`}>
+                         <Button variant="outline" className="w-full group">
+                           Read More
+                           <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                         </Button>
+                       </Link>
                     </CardContent>
                   </Card>
                 ))}

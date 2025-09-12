@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,34 @@ import Footer from '@/components/layout/Footer'
 import SEOHead from '@/components/SEOHead'
 
 const Contact = () => {
+  useEffect(() => {
+    document.title = "Contact JobVance - AI Job Application Automation Support";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute(
+        "content",
+        "Get help with JobVance AI job application automation. Contact our support team for technical assistance, billing questions, or demo requests."
+      );
+    }
+
+    // Add ContactPage structured data
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      "name": "Contact JobVance",
+      "description": "Get help with JobVance AI job application automation",
+      "url": "https://jobvance.io/contact"
+    });
+    document.head.appendChild(script);
+
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
   const { toast } = useToast()
   const [formData, setFormData] = useState({
     name: '',
