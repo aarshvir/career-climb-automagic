@@ -3,14 +3,24 @@ import { useAuth } from "@/contexts/AuthContext";
 import jobvanceIcon from "@/assets/jobvance-icon.png";
 import { Link, useLocation } from "react-router-dom";
 import InterestFormDialog from "@/components/InterestFormDialog";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const Header = () => {
   const { user, signInWithGoogle, signOut, loading } = useAuth();
   const location = useLocation();
   const [showInterestForm, setShowInterestForm] = useState(false);
+  const previousUserRef = useRef(user);
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Auto-open dialog when user signs in
+  useEffect(() => {
+    if (!previousUserRef.current && user && !loading) {
+      // User just signed in (previous was null, now we have a user)
+      setShowInterestForm(true);
+    }
+    previousUserRef.current = user;
+  }, [user, loading]);
 
   const handleGetStarted = async () => {
     if (!user) {
