@@ -2,12 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Zap, Star, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import InterestFormDialog from "@/components/InterestFormDialog";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Pricing = () => {
   const { user, signInWithGoogle } = useAuth();
-  const [showInterestForm, setShowInterestForm] = useState(false);
+  const navigate = useNavigate();
   const plans = [
     {
       name: "Starter",
@@ -69,13 +68,14 @@ const Pricing = () => {
     if (!user) {
       try {
         await signInWithGoogle();
+        // Navigation will happen after auth state change
       } catch (error) {
         console.error('Sign in failed:', error);
       }
       return;
     }
     
-    setShowInterestForm(true);
+    navigate('/interest-form');
   };
 
   return (
@@ -165,11 +165,6 @@ const Pricing = () => {
             </div>
           </div>
         </div>
-
-        <InterestFormDialog 
-          open={showInterestForm} 
-          onOpenChange={setShowInterestForm} 
-        />
       </div>
     </section>
   );

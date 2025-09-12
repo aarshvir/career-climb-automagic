@@ -16,6 +16,7 @@ import PricingPage from "./pages/PricingPage";
 import FAQ from "./pages/FAQ";
 import BlogPost from "./pages/blog/BlogPost";
 import ThankYou from "./pages/ThankYou";
+import InterestForm from "./pages/InterestForm";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/thank-you" element={<ThankYou />} />
+              <Route path="/interest-form" element={<InterestForm />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

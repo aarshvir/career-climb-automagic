@@ -1,14 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import jobvanceIcon from "@/assets/jobvance-icon.png";
-import { Link, useLocation } from "react-router-dom";
-import InterestFormDialog from "@/components/InterestFormDialog";
-import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Header = () => {
   const { user, signInWithGoogle, signOut, loading } = useAuth();
   const location = useLocation();
-  const [showInterestForm, setShowInterestForm] = useState(false);
+  const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -16,26 +14,28 @@ const Header = () => {
     if (!user) {
       try {
         await signInWithGoogle();
+        // Navigation will happen after auth state change
       } catch (error) {
         console.error('Sign in failed:', error);
       }
       return;
     }
     
-    setShowInterestForm(true);
+    navigate('/interest-form');
   };
 
   const handleDashboard = async () => {
     if (!user) {
       try {
         await signInWithGoogle();
+        // Navigation will happen after auth state change
       } catch (error) {
         console.error('Sign in failed:', error);
       }
       return;
     }
     
-    setShowInterestForm(true);
+    navigate('/interest-form');
   };
 
   return (
@@ -106,11 +106,6 @@ const Header = () => {
           )}
         </div>
       </div>
-      
-      <InterestFormDialog 
-        open={showInterestForm} 
-        onOpenChange={setShowInterestForm} 
-      />
     </header>
   );
 };
