@@ -42,7 +42,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-          <img src={jobvanceIcon} alt="JobVance" className="h-8 w-8 mr-3" />
+          <img src={jobvanceIcon} alt="JobVance" className="h-9 w-9 mr-3" />
           <span className="text-2xl font-bold">
             <span className="text-foreground">Job</span>
             <span className="text-primary">Vance.io</span>
