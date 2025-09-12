@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import jobvanceIcon from "@/assets/jobvance-icon.png";
+import jobvanceHexagon from "@/assets/jobvance-hexagon.png";
 import { Link, useLocation } from "react-router-dom";
 import InterestFormDialog from "@/components/InterestFormDialog";
 import { useState } from "react";
@@ -44,7 +44,7 @@ const Header = () => {
         <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity group">
           <div className="relative">
             <img 
-              src={jobvanceIcon} 
+              src={jobvanceHexagon} 
               alt="JobVance Logo" 
               className="h-8 w-8 transition-transform group-hover:scale-105"
             />
