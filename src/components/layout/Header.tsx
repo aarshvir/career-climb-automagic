@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import jobvanceHexagon from "@/assets/jobvance-hexagon-transparent.png";
+import jobvanceLogo from "@/assets/jobvance-logo.png";
 import { Link, useLocation } from "react-router-dom";
 import InterestFormDialog from "@/components/InterestFormDialog";
 import { useState } from "react";
@@ -41,18 +41,12 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity group">
-          <div className="relative">
-            <img 
-              src={jobvanceHexagon} 
-              alt="JobVance Logo" 
-              className="h-8 w-8 transition-transform group-hover:scale-105"
-            />
-          </div>
-          <span className="font-display text-2xl font-bold tracking-tight">
-            <span className="text-foreground">Job</span>
-            <span className="text-primary">Vance</span>
-          </span>
+        <Link to="/" className="hover:opacity-80 transition-opacity group">
+          <img 
+            src={jobvanceLogo} 
+            alt="JobVance Logo" 
+            className="h-10 transition-transform group-hover:scale-105"
+          />
         </Link>
         
         <nav className="hidden md:flex items-center space-x-8">
