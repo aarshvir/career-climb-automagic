@@ -2,12 +2,41 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import logoImage from "@/assets/logo.png";
 import { Link, useLocation } from "react-router-dom";
+import InterestFormDialog from "@/components/InterestFormDialog";
+import { useState } from "react";
 
 const Header = () => {
   const { user, signInWithGoogle, signOut, loading } = useAuth();
   const location = useLocation();
+  const [showInterestForm, setShowInterestForm] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleGetStarted = async () => {
+    if (!user) {
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Sign in failed:', error);
+      }
+      return;
+    }
+    
+    setShowInterestForm(true);
+  };
+
+  const handleDashboard = async () => {
+    if (!user) {
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Sign in failed:', error);
+      }
+      return;
+    }
+    
+    setShowInterestForm(true);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -59,13 +88,11 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           {loading ? (
             <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
-          ) : user ? (
+           ) : user ? (
             <div className="flex items-center space-x-3">
-              <Link to="/dashboard">
-                <Button variant="ghost" size="sm">
-                  Dashboard
-                </Button>
-              </Link>
+              <Button variant="ghost" size="sm" onClick={handleDashboard}>
+                Dashboard
+              </Button>
               <Button variant="outline" size="sm" onClick={signOut}>
                 Sign Out
               </Button>
@@ -75,13 +102,18 @@ const Header = () => {
               <Button variant="ghost" size="sm" onClick={signInWithGoogle}>
                 Sign In
               </Button>
-              <Button variant="hero" size="sm" onClick={signInWithGoogle}>
+              <Button variant="hero" size="sm" onClick={handleGetStarted}>
                 Get Started
               </Button>
             </div>
           )}
         </div>
       </div>
+      
+      <InterestFormDialog 
+        open={showInterestForm} 
+        onOpenChange={setShowInterestForm} 
+      />
     </header>
   );
 };

@@ -2,17 +2,38 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowRight, Bot, Briefcase, Target } from "lucide-react";
+import InterestFormDialog from "@/components/InterestFormDialog";
+import { useState } from "react";
 
 const Hero = () => {
   const { user, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const [showInterestForm, setShowInterestForm] = useState(false);
 
-  const handleGetStarted = () => {
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      signInWithGoogle();
+  const handleGetStarted = async () => {
+    if (!user) {
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Sign in failed:', error);
+      }
+      return;
     }
+    
+    setShowInterestForm(true);
+  };
+
+  const handleWatchDemo = async () => {
+    if (!user) {
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Sign in failed:', error);
+      }
+      return;
+    }
+    
+    setShowInterestForm(true);
   };
   return (
     <section id="home" className="relative py-20 lg:py-32 overflow-hidden">
@@ -47,7 +68,7 @@ const Hero = () => {
               {user ? 'Go to Dashboard' : 'Start Your Job Hunt'}
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" size="xl">
+            <Button variant="outline" size="xl" onClick={handleWatchDemo}>
               Watch Demo
             </Button>
           </div>
@@ -66,11 +87,16 @@ const Hero = () => {
               <div className="text-3xl font-bold text-primary mb-2">5,000+</div>
               <div className="text-sm text-muted-foreground">Happy Job Seekers</div>
             </div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-  );
+
+        <InterestFormDialog 
+          open={showInterestForm} 
+          onOpenChange={setShowInterestForm} 
+        />
+      </section>
+    );
 };
 
 export default Hero;

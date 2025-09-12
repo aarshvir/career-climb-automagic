@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Zap, Star, Shield } from "lucide-react";
-import LemonSqueezyCheckout from "@/components/LemonSqueezyCheckout";
+import { useAuth } from "@/contexts/AuthContext";
+import InterestFormDialog from "@/components/InterestFormDialog";
+import { useState } from "react";
 
 const Pricing = () => {
+  const { user, signInWithGoogle } = useAuth();
+  const [showInterestForm, setShowInterestForm] = useState(false);
   const plans = [
     {
       name: "Starter",
@@ -19,12 +23,11 @@ const Pricing = () => {
         "Basic analytics"
       ],
       popular: false,
-      cta: "Start Free Trial",
-      variantId: "991795"
+      cta: "Get Started"
     },
     {
       name: "Professional",
-      price: "$100",
+      price: "$99",
       period: "per month",
       description: "Ideal for experienced professionals",
       features: [
@@ -38,8 +41,7 @@ const Pricing = () => {
         "Application tracking dashboard"
       ],
       popular: true,
-      cta: "Most Popular",
-      variantId: "991797"
+      cta: "Get Started"
     },
     {
       name: "Enterprise",
@@ -59,10 +61,22 @@ const Pricing = () => {
         "Salary negotiation guidance"
       ],
       popular: false,
-      cta: "Contact Sales",
-      variantId: "991798"
+      cta: "Get Started"
     }
   ];
+
+  const handlePlanClick = async () => {
+    if (!user) {
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Sign in failed:', error);
+      }
+      return;
+    }
+    
+    setShowInterestForm(true);
+  };
 
   return (
     <section id="pricing" className="py-20 lg:py-32">
@@ -112,13 +126,12 @@ const Pricing = () => {
               </CardHeader>
               
               <CardContent className="pt-4">
-                <LemonSqueezyCheckout
-                  variantId={plan.variantId}
-                  planName={plan.name}
+                <Button
+                  onClick={handlePlanClick}
                   className={`w-full mb-6 ${plan.popular ? "hero" : "default"}`}
                 >
                   {plan.cta}
-                </LemonSqueezyCheckout>
+                </Button>
                 
                 <ul className="space-y-3">
                   {plan.features.map((feature, featureIndex) => (
@@ -152,6 +165,11 @@ const Pricing = () => {
             </div>
           </div>
         </div>
+
+        <InterestFormDialog 
+          open={showInterestForm} 
+          onOpenChange={setShowInterestForm} 
+        />
       </div>
     </section>
   );

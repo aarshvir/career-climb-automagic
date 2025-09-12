@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      interest_forms: {
+        Row: {
+          app_expectations: string
+          career_objective: string
+          created_at: string
+          id: string
+          max_monthly_price: number
+          name: string
+          phone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_expectations: string
+          career_objective: string
+          created_at?: string
+          id?: string
+          max_monthly_price: number
+          name: string
+          phone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_expectations?: string
+          career_objective?: string
+          created_at?: string
+          id?: string
+          max_monthly_price?: number
+          name?: string
+          phone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_fetch_runs: {
         Row: {
           id: string
