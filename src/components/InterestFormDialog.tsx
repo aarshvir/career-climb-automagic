@@ -47,13 +47,13 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
 
   // Track form abandonment
   const handleOpenChange = async (newOpen: boolean) => {
-    if (!newOpen && hasInteracted && user) {
-      // User is closing the dialog and has interacted with the form
+    if (!newOpen && user && !formCompleted) {
+      // User is closing the dialog - always capture email regardless of interaction
       try {
         await supabase.from('interest_forms').insert({
           user_id: user.id,
           email: user.email || '',
-          name: 'Dropped off',
+          name: hasInteracted ? 'Dropped off after interaction' : 'Opened and closed without interaction',
           phone: '+99999999999',
           career_objective: formData.careerObjective || '',
           max_monthly_price: parseInt(formData.maxMonthlyPrice) || 0,
