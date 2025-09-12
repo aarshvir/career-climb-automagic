@@ -49,7 +49,7 @@ const Hero = () => {
           </div>
 
           {/* Main heading - SEO optimized H1 */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-6 animate-slide-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-slide-up">
             Stop Applying. Start Interviewing.{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
               Let Our AI Automate Your Job Search
