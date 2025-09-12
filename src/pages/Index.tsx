@@ -5,6 +5,8 @@ import Hero from "@/components/sections/Hero";
 import Features from "@/components/sections/Features";
 import Pricing from "@/components/sections/Pricing";
 import Testimonials from "@/components/sections/Testimonials";
+import CompanyLogos from "@/components/sections/CompanyLogos";
+import AIFeatures from "@/components/sections/AIFeatures";
 import SEOHead from "@/components/SEOHead";
 
 const Index = () => {
@@ -61,7 +63,9 @@ const Index = () => {
         <Header />
         <main role="main">
           <Hero />
+          <CompanyLogos />
           <Features />
+          <AIFeatures />
           <Testimonials />
           <Pricing />
         </main>
