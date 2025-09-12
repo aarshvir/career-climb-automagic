@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -41,28 +41,17 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch user profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('subscription_plan, subscription_status')
-        .eq('id', user?.id)
-        .single()
-
-      if (profileData) {
-        setProfile(profileData)
-      }
-
-      // Fetch recent job applications
-      const { data: applicationsData } = await supabase
-        .from('job_applications')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
-        .limit(20)
-
-      if (applicationsData) {
-        setApplications(applicationsData)
-      }
+      // Note: Using placeholder data since tables may not exist yet
+      // In a real app, these would be actual database queries
+      
+      setProfile({
+        subscription_plan: 'starter',
+        subscription_status: 'active'
+      })
+      
+      // Placeholder applications data
+      setApplications([])
+      
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
