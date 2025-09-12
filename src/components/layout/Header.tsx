@@ -41,12 +41,11 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="hover:opacity-80 transition-opacity group">
-          <img 
-            src={jobvanceLogo} 
-            alt="JobVance Logo" 
-            className="h-10 transition-transform group-hover:scale-105"
-          />
+        <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
+          <span className="text-2xl font-bold">
+            <span className="text-foreground">Job</span>
+            <span className="text-primary">Vance</span>
+          </span>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-8">
