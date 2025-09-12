@@ -39,7 +39,7 @@ const Blog = () => {
       author: 'Sarah Johnson',
       tags: ['Resume Tips', 'Career Advice', 'Interview Prep'],
       created_at: '2024-01-15T10:00:00Z',
-      seo_title: '5 Resume Mistakes That Cost You Job Interviews - JobAssist.ai',
+      seo_title: '5 Resume Mistakes That Cost You Job Interviews - JobVance.io',
       meta_description: 'Discover the top 5 resume mistakes that prevent job seekers from getting interviews and learn how to avoid them with expert tips.'
     },
     {
@@ -51,7 +51,7 @@ const Blog = () => {
       author: 'Alex Chen',
       tags: ['AI Technology', 'Job Search', 'Career Trends'],
       created_at: '2024-01-12T14:30:00Z',
-      seo_title: 'How AI is Revolutionizing Job Applications - JobAssist.ai',
+      seo_title: 'How AI is Revolutionizing Job Applications - JobVance.io',
       meta_description: 'Learn how AI technology is transforming job applications and helping job seekers find opportunities faster than ever before.'
     },
     {
@@ -63,7 +63,7 @@ const Blog = () => {
       author: 'Marcus Rodriguez',
       tags: ['LinkedIn', 'Networking', 'Job Search'],
       created_at: '2024-01-10T09:15:00Z',
-      seo_title: 'The Ultimate Guide to LinkedIn Job Searching - JobAssist.ai',
+      seo_title: 'The Ultimate Guide to LinkedIn Job Searching - JobVance.io',
       meta_description: 'Complete guide to finding jobs on LinkedIn with expert tips on optimizing your profile and networking effectively.'
     },
     {
@@ -75,7 +75,7 @@ const Blog = () => {
       author: 'Emily Davis',
       tags: ['Recruiter Insights', 'Hiring Trends', 'Career Advice'],
       created_at: '2024-01-08T16:45:00Z',
-      seo_title: 'What Recruiters Really Look for in 2024 - JobAssist.ai',
+      seo_title: 'What Recruiters Really Look for in 2024 - JobVance.io',
       meta_description: 'Discover what recruiters and hiring managers are looking for in job candidates in 2024 with insights from industry experts.'
     },
     {
@@ -87,7 +87,7 @@ const Blog = () => {
       author: 'David Wilson',
       tags: ['Salary Negotiation', 'Career Growth', 'Professional Development'],
       created_at: '2024-01-05T11:20:00Z',
-      seo_title: 'Salary Negotiation: A Complete Guide - JobAssist.ai',
+      seo_title: 'Salary Negotiation: A Complete Guide - JobVance.io',
       meta_description: 'Master salary negotiation with this comprehensive guide including tactics, timing, and scripts for better compensation.'
     },
     {
@@ -99,7 +99,7 @@ const Blog = () => {
       author: 'Lisa Thompson',
       tags: ['Remote Work', 'Interview Tips', 'Virtual Interviews'],
       created_at: '2024-01-03T13:10:00Z',
-      seo_title: 'Remote Work Interview Tips for 2024 - JobAssist.ai',
+      seo_title: 'Remote Work Interview Tips for 2024 - JobVance.io',
       meta_description: 'Ace your remote work interviews with proven tips for virtual interviews and landing remote positions.'
     }
   ]

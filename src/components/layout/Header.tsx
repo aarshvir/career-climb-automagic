@@ -15,11 +15,11 @@ const Header = () => {
         <Link to="/" className="flex items-center space-x-2">
           <img 
             src={logoImage} 
-            alt="JobAssist.ai" 
+            alt="JobVance.io" 
             className="h-10 w-10 rounded-lg"
           />
-          <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            JobAssist.ai
+          <span className="text-xl font-bold">
+            <span className="text-[hsl(210,100%,30%)]">Job</span><span className="text-[hsl(195,100%,50%)]">Vance.io</span>
           </span>
         </Link>
         

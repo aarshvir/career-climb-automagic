@@ -134,7 +134,7 @@ const About = () => {
                     By the time you manually apply, you're already competing with hundreds of others.
                   </p>
                   <p>
-                    JobAssist.ai changes this dynamic. Our AI works 24/7 to find, match, and 
+                    JobVance.io changes this dynamic. Our AI works 24/7 to find, match, and 
                     apply to the perfect roles for you, giving you a competitive edge in today's 
                     fast-paced job market.
                   </p>

@@ -47,9 +47,9 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email Support',
-      content: 'support@jobassist.ai',
+      content: 'support@jobvance.io',
       description: 'Get help with your account and technical questions',
-      action: 'mailto:support@jobassist.ai'
+      action: 'mailto:support@jobvance.io'
     },
     {
       icon: Phone,
@@ -89,7 +89,7 @@ const Contact = () => {
     },
     {
       question: 'What if I need help with my subscription?',
-      answer: 'Contact our billing team at support@jobassist.ai for all subscription-related questions.'
+      answer: 'Contact our billing team at support@jobvance.io for all subscription-related questions.'
     }
   ]
 
@@ -115,7 +115,7 @@ const Contact = () => {
               Contact JobVance - We're Here to Help
             </h1>
             <p className="text-xl text-white/90 leading-relaxed">
-              Have questions about JobAssist.ai? Our team is ready to assist you with any inquiries or support needs.
+              Have questions about JobVance.io? Our team is ready to assist you with any inquiries or support needs.
             </p>
           </div>
         </div>

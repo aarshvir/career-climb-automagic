@@ -12,11 +12,11 @@ const Footer = () => {
             <div className="flex items-center space-x-2 mb-4">
               <img 
                 src={logoImage} 
-                alt="JobAssist.ai" 
+                alt="JobVance.io" 
                 className="h-8 w-8 rounded-lg"
               />
-              <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                JobAssist.ai
+              <span className="text-lg font-bold">
+                <span className="text-[hsl(210,100%,30%)]">Job</span><span className="text-[hsl(195,100%,50%)]">Vance.io</span>
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
@@ -69,7 +69,7 @@ const Footer = () => {
             <div className="mt-6 space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center">
                 <Mail className="h-4 w-4 mr-2" />
-                support@jobassist.ai
+                support@jobvance.io
               </div>
               <div className="flex items-center">
                 <Phone className="h-4 w-4 mr-2" />
@@ -81,7 +81,7 @@ const Footer = () => {
 
         <div className="border-t border-border/50 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 JobAssist.ai. All rights reserved.
+            © 2024 JobVance.io. All rights reserved.
           </p>
           <div className="flex items-center space-x-4 mt-4 md:mt-0 text-sm text-muted-foreground">
             <span>🇺🇸 United States</span>
