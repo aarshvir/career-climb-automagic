@@ -31,16 +31,16 @@ const Header = () => {
             Features
           </Link>
           <Link 
-            to="/#pricing" 
-            className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/') ? 'text-primary' : ''}`}
+            to="/how-it-works" 
+            className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/how-it-works') ? 'text-primary' : ''}`}
           >
-            Pricing
+            How It Works
           </Link>
           <Link 
-            to="/about" 
-            className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/about') ? 'text-primary' : ''}`}
+            to="/pricing" 
+            className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/pricing') ? 'text-primary' : ''}`}
           >
-            About
+            Pricing
           </Link>
           <Link 
             to="/blog" 
@@ -49,10 +49,10 @@ const Header = () => {
             Blog
           </Link>
           <Link 
-            to="/contact" 
-            className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/contact') ? 'text-primary' : ''}`}
+            to="/faq" 
+            className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/faq') ? 'text-primary' : ''}`}
           >
-            Contact
+            FAQ
           </Link>
         </nav>
 

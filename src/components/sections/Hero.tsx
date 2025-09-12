@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ArrowRight, Bot, Briefcase, Target } from "lucide-react";
 
 const Hero = () => {
@@ -29,16 +29,16 @@ const Hero = () => {
 
           {/* Main heading - SEO optimized H1 */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-slide-up">
-            Land Your Dream Job with{" "}
+            Stop Applying. Start Interviewing.{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              AI Job Application Automation
+              Let Our AI Automate Your Job Search
             </span>
           </h1>
 
           {/* Subheading */}
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-up">
             Upload your resume, set your preferences, and let our AI apply to 20+ relevant jobs daily. 
-            Focus on interviews while we handle the applications.
+            Focus on interviews while we handle the applications. <Link to="/how-it-works" className="underline text-primary">Learn about how JobVance works</Link> or check our <Link to="/pricing" className="underline text-primary">pricing plans</Link>.
           </p>
 
           {/* CTA buttons */}

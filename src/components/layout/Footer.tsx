@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import logoImage from "@/assets/logo.png";
 import { Twitter, Linkedin, Mail, MapPin, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -39,10 +40,10 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="#features" className="hover:text-primary transition-colors">Features</a></li>
-              <li><a href="#pricing" className="hover:text-primary transition-colors">Pricing</a></li>
-              <li><a href="/dashboard" className="hover:text-primary transition-colors">Dashboard</a></li>
-              <li><a href="/integrations" className="hover:text-primary transition-colors">Integrations</a></li>
+              <li><Link to="/#features" className="hover:text-primary transition-colors">Features</Link></li>
+              <li><Link to="/how-it-works" className="hover:text-primary transition-colors">How It Works</Link></li>
+              <li><Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
+              <li><Link to="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
             </ul>
           </div>
 
@@ -50,10 +51,10 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="/about" className="hover:text-primary transition-colors">About Us</a></li>
-              <li><a href="/blog" className="hover:text-primary transition-colors">Blog</a></li>
-              <li><a href="/careers" className="hover:text-primary transition-colors">Careers</a></li>
-              <li><a href="/contact" className="hover:text-primary transition-colors">Contact</a></li>
+              <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link to="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
+              <li><Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
+              <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
             </ul>
           </div>
 
