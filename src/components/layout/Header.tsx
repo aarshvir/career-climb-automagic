@@ -45,7 +45,7 @@ const Header = () => {
           <img 
             src={jobvanceLogo} 
             alt="JobVance - AI Job Application Automation" 
-            className="h-80 w-auto"
+            className="h-48 w-auto"
           />
         </Link>
         
