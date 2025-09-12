@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import jobvanceHexagon from "@/assets/jobvance-hexagon.png";
+import jobvanceHexagon from "@/assets/jobvance-hexagon-transparent.png";
 import { Link, useLocation } from "react-router-dom";
 import InterestFormDialog from "@/components/InterestFormDialog";
 import { useState } from "react";
