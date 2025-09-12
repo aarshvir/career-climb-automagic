@@ -19,7 +19,7 @@ const Header = () => {
             className="h-10 w-10 rounded-lg"
           />
           <span className="text-xl font-bold">
-            <span className="text-[hsl(210,100%,30%)]">Job</span><span className="text-[hsl(195,100%,50%)]">Vance.io</span>
+            <span className="text-foreground">Job</span><span className="bg-gradient-primary bg-clip-text text-transparent">Vance.io</span>
           </span>
         </Link>
         
