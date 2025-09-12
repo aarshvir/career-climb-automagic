@@ -55,9 +55,9 @@ const Features = () => {
             Powerful Features
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Everything You Need to{" "}
+            AI-Powered Job Search Features to{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Land Your Dream Job
+              Accelerate Your Career
             </span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

@@ -27,11 +27,11 @@ const Hero = () => {
             AI-Powered Job Application Automation
           </div>
 
-          {/* Main heading */}
+          {/* Main heading - SEO optimized H1 */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-slide-up">
             Land Your Dream Job with{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              AI Automation
+              AI Job Application Automation
             </span>
           </h1>
 

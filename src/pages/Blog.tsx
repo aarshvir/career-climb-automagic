@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Calendar, Clock, ArrowRight, Search, User } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import SEOHead from '@/components/SEOHead'
 import { supabase } from '@/lib/supabase'
 
 interface BlogPost {
@@ -145,15 +146,22 @@ const Blog = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
+      <SEOHead 
+        title="Career Blog - Job Search Tips & AI Automation Insights | JobVance"
+        description="Expert career advice, job search strategies, and AI automation insights. Learn from industry professionals to advance your career faster."
+        keywords="career blog, job search tips, AI automation, career advice, resume tips, interview prep, job hunting strategies"
+        canonical="https://jobvance.io/blog"
+      />
+      <div className="min-h-screen bg-background">
+        <Header />
       
       {/* Hero Section */}
       <section className="py-20 bg-gradient-primary">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto text-white">
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Career Insights & Tips
+              Career Blog: Expert Job Search Tips & AI Insights
             </h1>
             <p className="text-xl text-white/90 leading-relaxed">
               Expert advice, industry insights, and proven strategies to accelerate your career growth
@@ -338,8 +346,9 @@ const Blog = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   )
 }
 

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Upload, Settings, BarChart3, Briefcase, Calendar, Download } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import SEOHead from '@/components/SEOHead'
 
 interface JobApplication {
   id: string
@@ -110,8 +111,16 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
+      <SEOHead 
+        title="Dashboard - JobVance AI Job Application Automation"
+        description="Manage your AI-powered job applications, track interview callbacks, and monitor your job search progress with JobVance dashboard."
+        keywords="job application dashboard, AI job search tracking, interview callbacks, job automation analytics"
+        canonical="https://jobvance.io/dashboard"
+        noindex={true}
+      />
+      <div className="min-h-screen bg-background">
+        <Header />
       <main className="container mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="mb-8">
@@ -327,8 +336,9 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </main>
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   )
 }
 

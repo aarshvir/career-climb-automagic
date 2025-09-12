@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Mail, Phone, MapPin, Clock, MessageCircle, Send, CheckCircle } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import SEOHead from '@/components/SEOHead'
 
 const Contact = () => {
   const { toast } = useToast()
@@ -93,8 +94,15 @@ const Contact = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
+      <SEOHead 
+        title="Contact JobVance - AI Job Application Automation Support"
+        description="Get help with JobVance AI job application automation. Contact our support team for technical assistance, billing questions, or demo requests."
+        keywords="JobVance contact, job automation support, AI job search help, technical support, customer service"
+        canonical="https://jobvance.io/contact"
+      />
+      <div className="min-h-screen bg-background">
+        <Header />
       
       {/* Hero Section */}
       <section className="py-20 bg-gradient-primary">
@@ -104,7 +112,7 @@ const Contact = () => {
               Contact Us
             </Badge>
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              We're Here to Help
+              Contact JobVance - We're Here to Help
             </h1>
             <p className="text-xl text-white/90 leading-relaxed">
               Have questions about JobAssist.ai? Our team is ready to assist you with any inquiries or support needs.
@@ -302,8 +310,9 @@ const Contact = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   )
 }
 

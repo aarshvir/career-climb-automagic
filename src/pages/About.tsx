@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle, Target, Users, Zap, ArrowRight } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import SEOHead from '@/components/SEOHead'
 
 const About = () => {
   const stats = [
@@ -58,8 +59,15 @@ const About = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
+      <SEOHead 
+        title="About JobVance - AI Job Application Automation Company"
+        description="Learn about JobVance's mission to revolutionize job searching with AI automation. Meet our team and discover how we help professionals find their dream jobs faster."
+        keywords="AI job search company, automated job applications, career services, job hunting technology, resume optimization AI"
+        canonical="https://jobvance.io/about"
+      />
+      <div className="min-h-screen bg-background">
+        <Header />
       
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-primary overflow-hidden">
@@ -69,7 +77,7 @@ const About = () => {
               Our Story
             </Badge>
             <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Revolutionizing Job Search with AI
+              About JobVance: Revolutionizing Job Search with AI
             </h1>
             <p className="text-xl text-white/90 mb-8 leading-relaxed">
               We're on a mission to eliminate the tedious parts of job hunting, 
@@ -229,8 +237,9 @@ const About = () => {
         </div>
       </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   )
 }
 

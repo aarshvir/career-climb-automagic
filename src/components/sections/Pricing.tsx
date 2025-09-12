@@ -73,9 +73,9 @@ const Pricing = () => {
             Simple Pricing
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Choose Your{" "}
+            Job Application Automation{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Success Plan
+              Pricing Plans
             </span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
