@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { usePageExitTracking } from "@/hooks/usePageExitTracking";
 
 interface InterestFormDialogProps {
   open: boolean;
@@ -22,7 +24,12 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
     appExpectations: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasCompletedForm, setHasCompletedForm] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  // Track page exits for incomplete forms
+  usePageExitTracking(hasCompletedForm);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,10 +62,8 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
         throw error;
       }
 
-      toast({
-        title: "Form submitted successfully!",
-        description: "Our team will get back to you soon.",
-      });
+      // Mark form as completed
+      setHasCompletedForm(true);
 
       // Reset form and close dialog
       setFormData({
@@ -69,6 +74,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
         appExpectations: ""
       });
       onOpenChange(false);
+      navigate('/thank-you');
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
@@ -80,6 +86,13 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       setIsSubmitting(false);
     }
   };
+
+  // Reset completion status when dialog opens
+  useEffect(() => {
+    if (open) {
+      setHasCompletedForm(false);
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
