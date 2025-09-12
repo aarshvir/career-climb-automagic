@@ -49,7 +49,7 @@ const Hero = () => {
           </div>
 
           {/* Main heading - SEO optimized H1 */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-slide-up">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-6 animate-slide-up">
             Stop Applying. Start Interviewing.{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
               Let Our AI Automate Your Job Search
@@ -57,9 +57,9 @@ const Hero = () => {
           </h1>
 
           {/* Subheading */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-up">
+          <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-up font-medium">
             Upload your resume, set your preferences, and let our AI apply to 20+ relevant jobs daily. 
-            Focus on interviews while we handle the applications. <Link to="/how-it-works" className="underline text-primary">Learn about how JobVance works</Link> or check our <Link to="/pricing" className="underline text-primary">pricing plans</Link>.
+            Focus on interviews while we handle the applications. <Link to="/how-it-works" className="underline text-primary hover:text-primary-glow transition-colors">Learn about how JobVance works</Link> or check our <Link to="/pricing" className="underline text-primary hover:text-primary-glow transition-colors">pricing plans</Link>.
           </p>
 
           {/* CTA buttons */}

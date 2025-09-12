@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import Hero from "@/components/sections/Hero";
 import Features from "@/components/sections/Features";
 import Pricing from "@/components/sections/Pricing";
+import Testimonials from "@/components/sections/Testimonials";
 import SEOHead from "@/components/SEOHead";
 
 const Index = () => {
@@ -61,6 +62,7 @@ const Index = () => {
         <main role="main">
           <Hero />
           <Features />
+          <Testimonials />
           <Pricing />
         </main>
         <Footer />
