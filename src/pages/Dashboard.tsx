@@ -10,6 +10,7 @@ import { Upload, Settings, BarChart3, Briefcase, Calendar, Download } from 'luci
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import SEOHead from '@/components/SEOHead'
+import InterestFormDialog from '@/components/InterestFormDialog'
 
 interface JobApplication {
   id: string
@@ -32,6 +33,7 @@ const Dashboard = () => {
   const [applications, setApplications] = useState<JobApplication[]>([])
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showInterestForm, setShowInterestForm] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -198,7 +200,7 @@ const Dashboard = () => {
                 {applications.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground mb-4">No applications yet</p>
-                    <Button>Start Job Automation</Button>
+                    <Button onClick={() => setShowInterestForm(true)}>Start Job Automation</Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -315,7 +317,7 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline">Upgrade Plan</Button>
+                  <Button variant="outline" onClick={() => setShowInterestForm(true)}>Upgrade Plan</Button>
                   <Button variant="destructive" onClick={signOut}>
                     Sign Out
                   </Button>
@@ -327,6 +329,11 @@ const Dashboard = () => {
       </main>
         <Footer />
       </div>
+      
+      <InterestFormDialog 
+        open={showInterestForm} 
+        onOpenChange={setShowInterestForm} 
+      />
     </>
   )
 }

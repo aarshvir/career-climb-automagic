@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -6,8 +6,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { HelpCircle, MessageSquare, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import InterestFormDialog from "@/components/InterestFormDialog";
 
 const FAQ = () => {
+  const { user, signInWithGoogle } = useAuth();
+  const [showInterestForm, setShowInterestForm] = useState(false);
+
+  const handleGetStarted = async () => {
+    if (!user) {
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Sign in failed:', error);
+      }
+      return;
+    }
+    
+    setShowInterestForm(true);
+  };
   const faqs = [
     {
       q: "How does AI job application automation work?",
@@ -221,9 +238,7 @@ const FAQ = () => {
                 Join thousands of professionals who've accelerated their careers with AI job application automation.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/pricing">
-                  <Button size="lg">Start Free Trial</Button>
-                </Link>
+                <Button size="lg" onClick={handleGetStarted}>Start Free Trial</Button>
                 <Link to="/how-it-works">
                   <Button variant="outline" size="lg">Learn How It Works</Button>
                 </Link>
@@ -233,6 +248,11 @@ const FAQ = () => {
         </main>
         <Footer />
       </div>
+      
+      <InterestFormDialog 
+        open={showInterestForm} 
+        onOpenChange={setShowInterestForm} 
+      />
     </>
   );
 };

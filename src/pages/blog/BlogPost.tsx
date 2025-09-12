@@ -1,5 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import InterestFormDialog from "@/components/InterestFormDialog";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { posts } from "./posts";
@@ -12,6 +14,21 @@ import NotFound from "@/pages/NotFound";
 const BlogPost = () => {
   const { slug } = useParams();
   const post = posts.find(p => p.slug === slug);
+  const { user, signInWithGoogle } = useAuth();
+  const [showInterestForm, setShowInterestForm] = useState(false);
+
+  const handleGetStarted = async () => {
+    if (!user) {
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Sign in failed:', error);
+      }
+      return;
+    }
+    
+    setShowInterestForm(true);
+  };
 
   useEffect(() => {
     if (post) {
@@ -177,9 +194,7 @@ const BlogPost = () => {
                     Stop spending hours on manual applications. Let JobVance AI handle the repetitive work while you focus on landing interviews.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Link to="/pricing">
-                      <Button>Start Free Trial</Button>
-                    </Link>
+                    <Button onClick={handleGetStarted}>Start Free Trial</Button>
                     <Link to="/how-it-works">
                       <Button variant="outline">Learn How It Works</Button>
                     </Link>
@@ -191,6 +206,11 @@ const BlogPost = () => {
         </main>
         <Footer />
       </div>
+      
+      <InterestFormDialog 
+        open={showInterestForm} 
+        onOpenChange={setShowInterestForm} 
+      />
     </>
   );
 };
