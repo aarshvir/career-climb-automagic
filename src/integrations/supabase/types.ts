@@ -19,6 +19,7 @@ export type Database = {
           app_expectations: string
           career_objective: string
           created_at: string
+          email: string
           id: string
           max_monthly_price: number
           name: string
@@ -30,6 +31,7 @@ export type Database = {
           app_expectations: string
           career_objective: string
           created_at?: string
+          email?: string
           id?: string
           max_monthly_price: number
           name: string
@@ -41,6 +43,7 @@ export type Database = {
           app_expectations?: string
           career_objective?: string
           created_at?: string
+          email?: string
           id?: string
           max_monthly_price?: number
           name?: string
