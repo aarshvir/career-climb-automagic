@@ -2,37 +2,38 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowRight, Bot, Briefcase, Target } from "lucide-react";
+import InterestFormDialog from "@/components/InterestFormDialog";
+import { useState } from "react";
 
 const Hero = () => {
   const { user, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const [showInterestForm, setShowInterestForm] = useState(false);
 
   const handleGetStarted = async () => {
     if (!user) {
       try {
         await signInWithGoogle();
-        // Navigation will happen after auth state change
       } catch (error) {
         console.error('Sign in failed:', error);
       }
       return;
     }
     
-    navigate('/interest-form');
+    setShowInterestForm(true);
   };
 
   const handleWatchDemo = async () => {
     if (!user) {
       try {
         await signInWithGoogle();
-        // Navigation will happen after auth state change
       } catch (error) {
         console.error('Sign in failed:', error);
       }
       return;
     }
     
-    navigate('/interest-form');
+    setShowInterestForm(true);
   };
   return (
     <section id="home" className="relative py-20 lg:py-32 overflow-hidden">
@@ -89,6 +90,11 @@ const Hero = () => {
             </div>
           </div>
         </div>
+
+        <InterestFormDialog 
+          open={showInterestForm} 
+          onOpenChange={setShowInterestForm} 
+        />
       </section>
     );
 };
