@@ -11,7 +11,7 @@ const Pricing = () => {
   const plans = [
     {
       name: "Starter",
-      price: "$29.99",
+      price: "$9.99",
       period: "per month",
       description: "Perfect for students and entry-level professionals",
       features: [
@@ -27,7 +27,7 @@ const Pricing = () => {
     },
     {
       name: "Professional",
-      price: "$99",
+      price: "$49",
       period: "per month",
       description: "Ideal for experienced professionals",
       features: [
@@ -44,8 +44,8 @@ const Pricing = () => {
       cta: "Get Started"
     },
     {
-      name: "Enterprise",
-      price: "$200",
+      name: "Elite",
+      price: "$99",
       period: "per month",
       description: "For executives and senior professionals",
       features: [
