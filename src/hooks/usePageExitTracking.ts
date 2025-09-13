@@ -6,24 +6,23 @@ export const usePageExitTracking = (hasCompletedForm: boolean) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       // Only track if user is authenticated but hasn't completed the form
       if (user && !hasCompletedForm) {
         try {
           // Use navigator.sendBeacon for reliable tracking during page unload
-          const data = {
+          const data = JSON.stringify({
             user_id: user.id,
+            email: user.email || '',
             name: 'user dropped from this page',
-            phone: '',
+            phone: '+99999999999',
             career_objective: '',
             max_monthly_price: 0,
             app_expectations: ''
-          };
+          });
 
-          // Use Supabase client to insert the exit tracking data
-          supabase
-            .from('interest_forms')
-            .insert(data);
+          // Use sendBeacon for reliable fire-and-forget during page unload
+          navigator.sendBeacon('/api/track-exit', data);
         } catch (error) {
           console.error('Error tracking page exit:', error);
         }

@@ -45,23 +45,25 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
     }));
   }, [user?.email]);
 
-  // Track form abandonment
-  const handleOpenChange = async (newOpen: boolean) => {
+  // Track form abandonment - optimized for performance
+  const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen && user && !formCompleted) {
-      // User is closing the dialog - always capture email regardless of interaction
-      try {
-        await supabase.from('interest_forms').insert({
-          user_id: user.id,
-          email: user.email || '',
-          name: hasInteracted ? 'Dropped off after interaction' : 'Opened and closed without interaction',
-          phone: '+99999999999',
-          career_objective: formData.careerObjective || '',
-          max_monthly_price: parseInt(formData.maxMonthlyPrice) || 0,
-          app_expectations: formData.appExpectations || ''
-        });
-      } catch (error) {
-        console.error('Error saving abandoned form:', error);
-      }
+      // Non-blocking form abandonment tracking
+      setTimeout(async () => {
+        try {
+          await supabase.from('interest_forms').insert({
+            user_id: user.id,
+            email: user.email || '',
+            name: hasInteracted ? 'Dropped off after interaction' : 'Opened and closed without interaction',
+            phone: '+99999999999',
+            career_objective: formData.careerObjective || '',
+            max_monthly_price: parseInt(formData.maxMonthlyPrice) || 0,
+            app_expectations: formData.appExpectations || ''
+          });
+        } catch (error) {
+          console.error('Error saving abandoned form:', error);
+        }
+      }, 0);
     }
     onOpenChange(newOpen);
   };
