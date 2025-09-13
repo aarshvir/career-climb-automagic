@@ -82,23 +82,8 @@ const Pricing = () => {
   };
 
   return (
-    <section id="pricing" className="py-20 lg:py-32">
+    <section id="pricing" className="py-4 lg:py-6">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary mb-4">
-            <Crown className="mr-2 h-4 w-4" />
-            Simple Pricing
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Job Application Automation{" "}
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Pricing Plans
-            </span>
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Start with our free trial and upgrade when you're ready to accelerate your job search.
-          </p>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (

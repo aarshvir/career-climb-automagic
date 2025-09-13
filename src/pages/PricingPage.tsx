@@ -97,25 +97,27 @@ const PricingPage = () => {
         <Header />
         <main role="main">
           {/* Hero Section */}
-          <section className="py-20 lg:py-32">
+          <section className="py-6 lg:py-8">
             <div className="container mx-auto px-4">
-              <div className="text-center max-w-4xl mx-auto mb-16">
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+              <div className="text-center max-w-3xl mx-auto mb-6">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
                   Pricing Plans for{" "}
                   <span className="bg-gradient-primary bg-clip-text text-transparent">
                     Automated Job Applications
                   </span>
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  Choose the perfect plan to accelerate your job search. All plans include our AI-powered application automation, resume optimization, and 7-day free trial.
+                <p className="text-base text-muted-foreground mb-4 max-w-xl mx-auto">
+                  Choose your plan and start applying to jobs automatically with AI.
                 </p>
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>7-day free trial</span>
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>Cancel anytime</span>
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                  <span>No setup fees</span>
+                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                    <span>7-day free trial</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                    <span>Cancel anytime</span>
+                  </div>
                 </div>
               </div>
             </div>
