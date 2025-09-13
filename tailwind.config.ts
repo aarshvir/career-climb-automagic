@@ -130,6 +130,14 @@ export default {
             transform: "translateX(-50%)",
           },
         },
+        "slide-left": {
+          "0%": {
+            transform: "translateX(100%)",
+          },
+          "100%": {
+            transform: "translateX(-100%)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -137,6 +145,7 @@ export default {
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "slide-up": "slide-up 0.6s ease-out",
         "scroll": "scroll 60s linear infinite",
+        "slide-left": "slide-left 20s linear infinite",
       },
     },
   },

@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import PromoStrip from "@/components/PromoStrip";
 
 const ThankYou = () => {
   return (
@@ -16,6 +17,7 @@ const ThankYou = () => {
         canonical="https://jobvance.io/thank-you"
       />
       <div className="min-h-screen bg-background">
+        <PromoStrip />
         <Header />
         
         <main className="container mx-auto px-4 py-20">

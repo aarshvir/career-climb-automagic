@@ -8,6 +8,7 @@ import Testimonials from "@/components/sections/Testimonials";
 import CompanyLogos from "@/components/sections/CompanyLogos";
 import AIFeatures from "@/components/sections/AIFeatures";
 import SEOHead from "@/components/SEOHead";
+import PromoStrip from "@/components/PromoStrip";
 
 const Index = () => {
   useEffect(() => {
@@ -60,6 +61,7 @@ const Index = () => {
         canonical="https://jobvance.io"
       />
       <div className="min-h-screen bg-background">
+        <PromoStrip />
         <Header />
         <main role="main">
           <Hero />

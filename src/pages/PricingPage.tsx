@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import Pricing from "@/components/sections/Pricing";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Star } from "lucide-react";
+import PromoStrip from "@/components/PromoStrip";
 
 const PricingPage = () => {
   useEffect(() => {
@@ -92,6 +93,7 @@ const PricingPage = () => {
   return (
     <>
       <div className="min-h-screen bg-background">
+        <PromoStrip />
         <Header />
         <main role="main">
           {/* Hero Section */}

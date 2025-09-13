@@ -126,6 +126,12 @@ const Pricing = () => {
               </CardHeader>
               
               <CardContent className="pt-4">
+                <div className="mb-4 p-3 bg-success/10 border border-success/20 rounded-lg">
+                  <p className="text-sm font-medium text-success text-center">
+                    Free 7 day trial; no credit card required
+                  </p>
+                </div>
+                
                 <Button
                   onClick={handlePlanClick}
                   className={`w-full mb-6 ${plan.popular ? "hero" : "default"}`}

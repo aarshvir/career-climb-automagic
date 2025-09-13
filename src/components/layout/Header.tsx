@@ -36,8 +36,8 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-          <img src={jobvanceIcon} alt="JobVance" className="h-9 w-9 mr-3" />
-          <span className="text-2xl font-bold">
+          <img src={jobvanceIcon} alt="JobVance" className="h-8 w-8 mr-2 md:mr-3" />
+          <span className="text-xl md:text-2xl font-bold">
             <span className="text-foreground">Job</span>
             <span className="text-primary">Vance.io</span>
           </span>
@@ -76,11 +76,11 @@ const Header = () => {
           </Link>
         </nav>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
           {loading ? (
             <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
            ) : user ? (
-            <div className="flex items-center space-x-3">
+             <div className="flex items-center space-x-2 md:space-x-3">
               <Button variant="ghost" size="sm" onClick={handleDashboard}>
                 Dashboard
               </Button>
@@ -89,7 +89,7 @@ const Header = () => {
               </Button>
             </div>
           ) : (
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3">
               <Button variant="ghost" size="sm" onClick={signInWithGoogle}>
                 Sign In
               </Button>

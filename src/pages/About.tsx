@@ -6,6 +6,7 @@ import { CheckCircle, Target, Users, Zap, ArrowRight } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import SEOHead from '@/components/SEOHead'
+import PromoStrip from '@/components/PromoStrip'
 
 const About = () => {
   useEffect(() => {
@@ -110,6 +111,7 @@ const About = () => {
         canonical="https://jobvance.io/about"
       />
       <div className="min-h-screen bg-background">
+        <PromoStrip />
         <Header />
       
       {/* Hero Section */}
