@@ -14,8 +14,8 @@ const Pricing = () => {
   const plans = [
     {
       name: "Starter",
-      originalPrice: "$19.99",
-      price: isPromoActive ? "$1.99" : "$19.99",
+      originalPrice: "$29.99",
+      price: isPromoActive ? "$1.99" : "$29.99",
       period: "per month",
       description: "Perfect for students and entry-level professionals",
       features: [
@@ -31,8 +31,8 @@ const Pricing = () => {
     },
     {
       name: "Professional",
-      originalPrice: "$49",
-      price: isPromoActive ? "$19.99" : "$49",
+      originalPrice: "$79",
+      price: isPromoActive ? "$19.99" : "$79",
       period: "per month",
       description: "Ideal for experienced professionals",
       features: [
@@ -98,6 +98,13 @@ const Pricing = () => {
               Pricing Plans
             </span>
           </h2>
+          
+          {!user && (
+            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary mb-4">
+              <Star className="mr-2 h-4 w-4" />
+              Sign in to unlock exclusive 3-minute flash offer!
+            </div>
+          )}
           
           {isPromoActive && user && (
             <div className="inline-flex items-center rounded-full border border-destructive/20 bg-destructive/5 px-4 py-2 text-sm font-medium text-destructive mb-4">
