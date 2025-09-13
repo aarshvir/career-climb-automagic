@@ -4,9 +4,11 @@ import jobvanceIcon from "@/assets/jobvance-icon.png";
 import { Link, useLocation } from "react-router-dom";
 import InterestFormDialog from "@/components/InterestFormDialog";
 import { useState, useEffect, useRef } from "react";
+import { useSignInFlow } from "@/hooks/useSignInFlow";
 
 const Header = () => {
   const { user, signInWithGoogle, signOut, loading } = useAuth();
+  const { handleSignInOrAction } = useSignInFlow();
   const location = useLocation();
   const [showInterestForm, setShowInterestForm] = useState(false);
   const previousUserRef = useRef(user);
@@ -22,30 +24,12 @@ const Header = () => {
     previousUserRef.current = user;
   }, [user, loading]);
 
-  const handleGetStarted = async () => {
-    if (!user) {
-      try {
-        await signInWithGoogle();
-      } catch (error) {
-        console.error('Sign in failed:', error);
-      }
-      return;
-    }
-    
-    setShowInterestForm(true);
+  const handleGetStarted = () => {
+    handleSignInOrAction(() => setShowInterestForm(true));
   };
 
-  const handleDashboard = async () => {
-    if (!user) {
-      try {
-        await signInWithGoogle();
-      } catch (error) {
-        console.error('Sign in failed:', error);
-      }
-      return;
-    }
-    
-    setShowInterestForm(true);
+  const handleDashboard = () => {
+    handleSignInOrAction(() => setShowInterestForm(true));
   };
 
   return (

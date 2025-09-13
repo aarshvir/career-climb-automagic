@@ -1,39 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
-import { ArrowRight, Bot, Briefcase, Target } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Bot } from "lucide-react";
 import InterestFormDialog from "@/components/InterestFormDialog";
 import { useState } from "react";
+import { useSignInFlow } from "@/hooks/useSignInFlow";
 
 const Hero = () => {
-  const { user, signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
+  const { handleSignInOrAction, user } = useSignInFlow();
   const [showInterestForm, setShowInterestForm] = useState(false);
 
-  const handleGetStarted = async () => {
-    if (!user) {
-      try {
-        await signInWithGoogle();
-      } catch (error) {
-        console.error('Sign in failed:', error);
-      }
-      return;
-    }
-    
-    setShowInterestForm(true);
+  const handleGetStarted = () => {
+    handleSignInOrAction(() => setShowInterestForm(true));
   };
 
-  const handleWatchDemo = async () => {
-    if (!user) {
-      try {
-        await signInWithGoogle();
-      } catch (error) {
-        console.error('Sign in failed:', error);
-      }
-      return;
-    }
-    
-    setShowInterestForm(true);
+  const handleWatchDemo = () => {
+    handleSignInOrAction(() => setShowInterestForm(true));
   };
   return (
     <section id="home" className="relative py-20 lg:py-32 overflow-hidden">

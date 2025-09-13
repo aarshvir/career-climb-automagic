@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/integrations/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -61,14 +61,14 @@ const Dashboard = () => {
     }
   }
 
-  const stats = {
+  const stats = useMemo(() => ({
     totalApplications: applications.length,
     pendingApplications: applications.filter(app => app.application_status === 'pending').length,
     callbacks: applications.filter(app => app.application_status === 'callback').length,
     averageMatchScore: applications.length > 0 
       ? Math.round(applications.reduce((sum, app) => sum + app.match_score, 0) / applications.length)
       : 0
-  }
+  }), [applications])
 
   const getStatusColor = (status: string) => {
     switch (status) {

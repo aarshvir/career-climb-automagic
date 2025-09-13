@@ -1,15 +1,29 @@
-import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { usePageExitTracking } from "@/hooks/usePageExitTracking";
-import { useAuth } from "@/contexts/AuthContext";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useState, useCallback } from "react";
+
+const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  phone: z.string().min(10, "Phone number must be at least 10 characters"),
+  career_objective: z.string().min(10, "Career objective must be at least 10 characters"),
+  max_monthly_price: z.string().min(1, "Please select a budget"),
+  app_expectations: z.string().min(10, "Please describe your expectations"),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface InterestFormDialogProps {
   open: boolean;
@@ -20,76 +34,48 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    email: user?.email || '',
-    phone: '',
-    careerObjective: '',
-    maxMonthlyPrice: '',
-    appExpectations: ''
-  });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [formCompleted, setFormCompleted] = useState(false);
+  const [hasCompleted, setHasCompleted] = useState(false);
+  
+  usePageExitTracking(hasCompleted);
 
-  // Use page exit tracking  
-  usePageExitTracking(formCompleted);
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      phone: "",
+      career_objective: "",
+      max_monthly_price: "",
+      app_expectations: "",
+    },
+  });
 
-  // Update email when user changes
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      email: user?.email || ''
-    }));
-  }, [user?.email]);
-
-  // Track form abandonment - optimized for performance
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen && user && !formCompleted) {
-      // Non-blocking form abandonment tracking
-      setTimeout(async () => {
-        try {
-          await supabase.from('interest_forms').insert({
-            user_id: user.id,
-            email: user.email || '',
-            name: hasInteracted ? 'Dropped off after interaction' : 'Opened and closed without interaction',
-            phone: '+99999999999',
-            career_objective: formData.careerObjective || '',
-            max_monthly_price: parseInt(formData.maxMonthlyPrice) || 0,
-            app_expectations: formData.appExpectations || ''
-          });
-        } catch (error) {
-          console.error('Error saving abandoned form:', error);
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    if (!newOpen && hasInteracted && !hasCompleted && user) {
+      // Track form abandonment
+      supabase.from('interest_forms').insert({
+        user_id: user.id,
+        email: user.email || '',
+        name: 'user dropped from dialog',
+        phone: '+99999999999',
+        career_objective: '',
+        max_monthly_price: 0,
+        app_expectations: ''
+      }).then(({ error }) => {
+        if (error) {
+          console.error('Error tracking abandonment:', error);
         }
-      }, 0);
+      });
     }
     onOpenChange(newOpen);
-  };
+  }, [hasInteracted, hasCompleted, user, onOpenChange]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setHasInteracted(true);
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Only require name and phone
-    if (!formData.name.trim() || !formData.phone.trim()) {
+  const onSubmit = useCallback(async (data: FormData) => {
+    if (!user?.email) {
       toast({
-        title: "Required fields missing",
-        description: "Please fill in your name and phone number.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to submit the form.",
+        title: "Error",
+        description: "You must be signed in to submit this form.",
         variant: "destructive",
       });
       return;
@@ -100,154 +86,157 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
     try {
       const { error } = await supabase.from('interest_forms').insert({
         user_id: user.id,
-        email: formData.email,
-        name: formData.name,
-        phone: formData.phone,
-        career_objective: formData.careerObjective || '',
-        max_monthly_price: parseInt(formData.maxMonthlyPrice) || 0,
-        app_expectations: formData.appExpectations || ''
+        email: user.email,
+        name: data.name,
+        phone: data.phone,
+        career_objective: data.career_objective,
+        max_monthly_price: parseInt(data.max_monthly_price),
+        app_expectations: data.app_expectations
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Mark form as completed
-      setFormCompleted(true);
-
+      setHasCompleted(true);
       toast({
-        title: "Form submitted successfully!",
-        description: "Thank you for your interest. We'll be in touch soon.",
+        title: "Thank you!",
+        description: "Your information has been submitted successfully. We'll be in touch soon!",
       });
 
-      // Reset form and close dialog
-      setFormData({
-        name: "",
-        email: user?.email || '',
-        phone: "",
-        careerObjective: "",
-        maxMonthlyPrice: "",
-        appExpectations: ""
-      });
-      setHasInteracted(false);
       onOpenChange(false);
       navigate('/thank-you');
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
-        title: "Submission failed",
-        description: "Please try again later.",
+        title: "Error",
+        description: "There was an error submitting your information. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [user, toast, navigate, onOpenChange]);
+
+  const handleInputInteraction = useCallback(() => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+    }
+  }, [hasInteracted]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">
-            Thanks for your interest!
-          </DialogTitle>
-          <p className="text-muted-foreground text-center">
-            Our team will get back to you. Please fill the form below.
-          </p>
+          <DialogTitle>Tell us about yourself</DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              disabled
-              className="bg-muted text-muted-foreground cursor-not-allowed"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name *</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      onFocus={handleInputInteraction}
+                      placeholder="Enter your full name" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="name">
-              Name <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="name"
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Your full name"
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number *</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      onFocus={handleInputInteraction}
+                      placeholder="Enter your phone number" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">
-              Phone Number <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              placeholder="Your phone number"
+            <FormField
+              control={form.control}
+              name="career_objective"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Career Objective *</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field} 
+                      onFocus={handleInputInteraction}
+                      placeholder="What type of job/role are you looking for?" 
+                      rows={3}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="career">
-              Career Objective <span className="text-sm text-muted-foreground">(optional)</span>
-            </Label>
-            <Textarea
-              id="career"
-              value={formData.careerObjective}
-              onChange={(e) => handleInputChange('careerObjective', e.target.value)}
-              placeholder="Tell us about your career goals and the type of roles you're seeking"
-              rows={3}
+            <FormField
+              control={form.control}
+              name="max_monthly_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>What's your maximum monthly budget? *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger onFocus={handleInputInteraction}>
+                        <SelectValue placeholder="Select your budget range" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="10">$9.99/month (Starter)</SelectItem>
+                      <SelectItem value="50">$49/month (Professional)</SelectItem>
+                      <SelectItem value="100">$99/month (Elite)</SelectItem>
+                      <SelectItem value="200">$200+/month (Custom)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="price">
-              Maximum Monthly Budget <span className="text-sm text-muted-foreground">(optional)</span>
-            </Label>
-            <Select
-              value={formData.maxMonthlyPrice}
-              onValueChange={(value) => handleInputChange('maxMonthlyPrice', value)}
+            <FormField
+              control={form.control}
+              name="app_expectations"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>What do you expect from this app? *</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field} 
+                      onFocus={handleInputInteraction}
+                      placeholder="Tell us what you hope to achieve with JobVance..." 
+                      rows={4}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitting}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select your budget range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="29">$29 - Starter Plan</SelectItem>
-                <SelectItem value="99">$99 - Professional Plan</SelectItem>
-                <SelectItem value="200">$200 - Enterprise Plan</SelectItem>
-                <SelectItem value="custom">Custom Budget</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="expectations">
-              App Expectations <span className="text-sm text-muted-foreground">(optional)</span>
-            </Label>
-            <Textarea
-              id="expectations"
-              value={formData.appExpectations}
-              onChange={(e) => handleInputChange('appExpectations', e.target.value)}
-              placeholder="What do you expect from JobVance? Any specific features or requirements?"
-              rows={3}
-            />
-          </div>
-
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Submit Form"}
-          </Button>
-        </form>
+              {isSubmitting ? "Submitting..." : "Submit"}
+            </Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
