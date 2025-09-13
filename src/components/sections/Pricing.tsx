@@ -1,21 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Crown, Zap, Star, Shield, Clock } from "lucide-react";
+import { Check, Crown, Zap, Star, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import InterestFormDialog from "@/components/InterestFormDialog";
 import { useState } from "react";
-import { usePromoTimer } from "@/hooks/usePromoTimer";
 
 const Pricing = () => {
   const { user, signInWithGoogle } = useAuth();
   const [showInterestForm, setShowInterestForm] = useState(false);
-  const { isPromoActive, formattedTime } = usePromoTimer();
   
   const plans = [
     {
       name: "Starter",
-      originalPrice: "$29.99",
-      price: isPromoActive ? "$1.99" : "$29.99",
+      originalPrice: "$19.99",
+      price: "$1.99",
       period: "per month",
       description: "Perfect for students and entry-level professionals",
       features: [
@@ -31,8 +29,8 @@ const Pricing = () => {
     },
     {
       name: "Professional",
-      originalPrice: "$79",
-      price: isPromoActive ? "$19.99" : "$79",
+      originalPrice: "$49",
+      price: "$19.99",
       period: "per month",
       description: "Ideal for experienced professionals",
       features: [
@@ -50,7 +48,6 @@ const Pricing = () => {
     },
     {
       name: "Elite",
-      originalPrice: "$99",
       price: "$99",
       period: "per month",
       description: "For executives and senior professionals",
@@ -98,20 +95,6 @@ const Pricing = () => {
               Pricing Plans
             </span>
           </h2>
-          
-          {!user && (
-            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary mb-4">
-              <Star className="mr-2 h-4 w-4" />
-              Sign in to unlock exclusive 3-minute flash offer!
-            </div>
-          )}
-          
-          {isPromoActive && user && (
-            <div className="inline-flex items-center rounded-full border border-destructive/20 bg-destructive/5 px-4 py-2 text-sm font-medium text-destructive mb-4">
-              <Clock className="mr-2 h-4 w-4" />
-              Limited Time Offer Expires in: {formattedTime}
-            </div>
-          )}
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Start with our free trial and upgrade when you're ready to accelerate your job search.
           </p>
@@ -139,14 +122,14 @@ const Pricing = () => {
               <CardHeader className="text-center pb-2">
                 <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                 <div className="mt-4">
-                  {isPromoActive && plan.originalPrice && plan.price !== plan.originalPrice && (
+                  {plan.originalPrice && (
                     <div className="text-lg text-muted-foreground line-through mb-1">
                       {plan.originalPrice}
                     </div>
                   )}
                   <span className="text-4xl font-bold">{plan.price}</span>
                   <span className="text-muted-foreground">/{plan.period}</span>
-                  {isPromoActive && plan.originalPrice && plan.price !== plan.originalPrice && (
+                  {plan.originalPrice && (
                     <div className="text-sm text-primary font-medium mt-2">
                       Use code <span className="font-bold">FORYOU</span> at checkout
                     </div>
