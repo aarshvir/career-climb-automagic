@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, useMemo } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
+import { useDNSConnectivity } from '@/hooks/useDNSConnectivity'
+import DNSErrorDialog from '@/components/DNSErrorDialog'
 
 interface AuthContextType {
   user: User | null
@@ -8,6 +10,8 @@ interface AuthContextType {
   loading: boolean
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
+  dnsError: boolean
+  retryConnection: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -24,6 +28,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showDNSDialog, setShowDNSDialog] = useState(false)
+  
+  const { isSupabaseReachable, dnsError, recheckConnectivity, isChecking } = useDNSConnectivity()
 
   useEffect(() => {
     // Get initial session
@@ -81,7 +88,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGoogle = async () => {
     try {
-      // Use absolute URL to avoid DNS resolution issues
+      // Check DNS connectivity before attempting auth
+      if (dnsError) {
+        setShowDNSDialog(true)
+        throw new Error('DNS_CONNECTIVITY_ISSUE')
+      }
+
+      // Use dynamic redirect URL for better compatibility
       const redirectUrl = 'https://jobvance.io/auth/callback'
       
       const { error } = await supabase.auth.signInWithOAuth({
@@ -96,12 +109,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       })
       if (error) {
         console.error('Error signing in with Google:', error)
+        
+        // Check if error might be DNS-related
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          setShowDNSDialog(true)
+        }
         throw error
       }
     } catch (error) {
       console.error('Sign in failed:', error)
+      
+      // Show DNS dialog for connectivity issues
+      if (error instanceof Error && 
+          (error.message.includes('DNS_CONNECTIVITY_ISSUE') || 
+           error.message.includes('fetch') || 
+           error.message.includes('NetworkError'))) {
+        setShowDNSDialog(true)
+      }
       throw error
     }
+  }
+
+  const retryConnection = () => {
+    recheckConnectivity()
+    setShowDNSDialog(false)
   }
 
   const signOut = async () => {
@@ -121,12 +152,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     loading,
     signInWithGoogle,
-    signOut
-  }), [user, session, loading])
+    signOut,
+    dnsError,
+    retryConnection
+  }), [user, session, loading, dnsError])
 
   return (
     <AuthContext.Provider value={value}>
       {children}
+      <DNSErrorDialog
+        open={showDNSDialog}
+        onClose={() => setShowDNSDialog(false)}
+        onRetry={retryConnection}
+        isRetrying={isChecking}
+      />
     </AuthContext.Provider>
   )
 }
