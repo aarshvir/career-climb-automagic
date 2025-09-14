@@ -6,33 +6,42 @@ export const usePageExitTracking = (hasCompletedForm: boolean) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    const handleBeforeUnload = async () => {
       // Only track if user is authenticated but hasn't completed the form
       if (user && !hasCompletedForm) {
         try {
-          // Use navigator.sendBeacon for reliable tracking during page unload
-          const data = JSON.stringify({
-            user_id: user.id,
-            email: user.email || '',
-            name: 'user dropped from this page',
-            phone: '+99999999999',
-            career_objective: '',
-            max_monthly_price: 0,
-            app_expectations: ''
-          });
-
-          // Use sendBeacon for reliable fire-and-forget during page unload
-          navigator.sendBeacon('/api/track-exit', data);
+          // Use Supabase to track page exit securely
+          // Only track minimal necessary data for analytics
+          await supabase
+            .from('interest_forms')
+            .insert({
+              user_id: user.id,
+              email: user.email || '',
+              name: 'Form abandoned',
+              phone: 'N/A',
+              career_objective: 'Form not completed',
+              max_monthly_price: 0,
+              app_expectations: 'Form abandoned before completion'
+            });
         } catch (error) {
-          console.error('Error tracking page exit:', error);
+          // Silently handle errors during page unload
+          console.warn('Page exit tracking failed:', error);
         }
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    // Note: Using beforeunload for tracking is unreliable
+    // Consider using visibility change or page focus events instead
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && user && !hasCompletedForm) {
+        handleBeforeUnload();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [user, hasCompletedForm]);
 };
