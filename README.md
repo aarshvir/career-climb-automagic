@@ -36,6 +36,10 @@ npm i
 npm run dev
 ```
 
+## Environment variables
+
+This project expects a Supabase publishable key to be available when building and running the app. Copy `.env.example` to `.env` and provide the key, or set the `VITE_SUPABASE_PUBLISHABLE_KEY` variable in your CI/CD environment.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
