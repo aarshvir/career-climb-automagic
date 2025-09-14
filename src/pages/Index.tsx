@@ -9,6 +9,7 @@ import CompanyLogos from "@/components/sections/CompanyLogos";
 import AIFeatures from "@/components/sections/AIFeatures";
 import SEOHead from "@/components/SEOHead";
 import PromoStrip from "@/components/PromoStrip";
+import AuthErrorHandler from "@/components/AuthErrorHandler";
 
 const Index = () => {
   useEffect(() => {
@@ -60,6 +61,7 @@ const Index = () => {
         keywords="AI job application automation, automated job search, resume optimization, job hunting automation, career advancement AI, job application bot"
         canonical="https://jobvance.io"
       />
+      <AuthErrorHandler />
       <div className="min-h-screen bg-background">
         <PromoStrip />
         <Header />
