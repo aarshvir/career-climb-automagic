@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { InterestFormProvider } from "@/contexts/InterestFormContext";
 import { HelmetProvider } from "react-helmet-async";
 
 // Regular imports instead of lazy loading to fix dynamic import issues
@@ -20,6 +21,7 @@ import HowItWorks from "./pages/HowItWorks";
 import PricingPage from "./pages/PricingPage";
 import ThankYou from "./pages/ThankYou";
 import AuthCallback from "./pages/AuthCallback";
+import AutoInterestForm from "./components/AutoInterestForm";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,7 +41,8 @@ const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
+        <InterestFormProvider>
+          <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter 
@@ -63,9 +66,11 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <AutoInterestForm />
           </BrowserRouter>
         </TooltipProvider>
-      </AuthProvider>
+      </InterestFormProvider>
+    </AuthProvider>
     </QueryClientProvider>
   </HelmetProvider>
 );

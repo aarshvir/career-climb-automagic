@@ -2,12 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Zap, Star, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import InterestFormDialog from "@/components/InterestFormDialog";
-import { useState } from "react";
+import { useInterestForm } from "@/contexts/InterestFormContext";
 
 const Pricing = () => {
   const { user, signInWithGoogle } = useAuth();
-  const [showInterestForm, setShowInterestForm] = useState(false);
+  const { setShowInterestForm } = useInterestForm();
   
   const plans = [
     {
@@ -169,11 +168,6 @@ const Pricing = () => {
             </div>
           </div>
         </div>
-
-        <InterestFormDialog 
-          open={showInterestForm} 
-          onOpenChange={setShowInterestForm} 
-        />
       </div>
     </section>
   );

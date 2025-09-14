@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Bot } from "lucide-react";
-import InterestFormDialog from "@/components/InterestFormDialog";
-import { useState } from "react";
+import { useInterestForm } from "@/contexts/InterestFormContext";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
 
 const Hero = () => {
   const { handleSignInOrAction, user } = useSignInFlow();
-  const [showInterestForm, setShowInterestForm] = useState(false);
+  const { setShowInterestForm } = useInterestForm();
 
   const handleGetStarted = () => {
     handleSignInOrAction(() => setShowInterestForm(true));
@@ -68,16 +67,11 @@ const Hero = () => {
               <div className="text-3xl font-bold text-primary mb-2">5,000+</div>
               <div className="text-sm text-muted-foreground">Happy Job Seekers</div>
             </div>
-            </div>
           </div>
         </div>
-
-        <InterestFormDialog 
-          open={showInterestForm} 
-          onOpenChange={setShowInterestForm} 
-        />
-      </section>
-    );
+      </div>
+    </section>
+  );
 };
 
 export default Hero;
