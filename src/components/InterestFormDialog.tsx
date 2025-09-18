@@ -99,11 +99,11 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       setHasCompleted(true);
       toast({
         title: "Thank you!",
-        description: "Your information has been submitted successfully. We'll be in touch soon!",
+        description: "Now let's choose the perfect plan for your job search.",
       });
 
       onOpenChange(false);
-      navigate('/thank-you');
+      navigate('/plan-selection');
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
