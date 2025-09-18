@@ -16,11 +16,11 @@ import * as z from "zod";
 import { useState, useCallback } from "react";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().min(10, "Phone number must be at least 10 characters"),
-  career_objective: z.string().min(10, "Career objective must be at least 10 characters"),
-  max_monthly_price: z.string().min(1, "Please select a budget"),
-  app_expectations: z.string().min(10, "Please describe your expectations"),
+  name: z.string().optional().default(""),
+  phone: z.string().optional().default(""),
+  career_objective: z.string().optional().default(""),
+  max_monthly_price: z.string().optional().default("10"),
+  app_expectations: z.string().optional().default(""),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -53,20 +53,30 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     if (!newOpen && hasInteracted && !hasCompleted && user) {
-      // Track form abandonment
-      supabase.from('interest_forms').insert({
-        user_id: user.id,
-        email: user.email || '',
-        name: 'user dropped from dialog',
-        phone: '+99999999999',
-        career_objective: '',
-        max_monthly_price: 0,
-        app_expectations: ''
-      }).then(({ error }) => {
-        if (error) {
-          console.error('Error tracking abandonment:', error);
-        }
-      });
+      // Only track abandonment if user doesn't already have a form entry
+      supabase
+        .from('interest_forms')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!data) {
+            // User doesn't have an entry yet, track abandonment
+            supabase.from('interest_forms').insert({
+              user_id: user.id,
+              email: user.email || '',
+              name: 'user dropped from dialog',
+              phone: '+99999999999',
+              career_objective: '',
+              max_monthly_price: 0,
+              app_expectations: ''
+            }).then(({ error }) => {
+              if (error) {
+                console.error('Error tracking abandonment:', error);
+              }
+            });
+          }
+        });
     }
     onOpenChange(newOpen);
   }, [hasInteracted, hasCompleted, user, onOpenChange]);
@@ -84,14 +94,17 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from('interest_forms').insert({
+      // Use upsert to prevent duplicate entries
+      const { error } = await supabase.from('interest_forms').upsert({
         user_id: user.id,
         email: user.email,
-        name: data.name,
-        phone: data.phone,
-        career_objective: data.career_objective,
-        max_monthly_price: parseInt(data.max_monthly_price),
-        app_expectations: data.app_expectations
+        name: data.name || '',
+        phone: data.phone || '',
+        career_objective: data.career_objective || '',
+        max_monthly_price: data.max_monthly_price ? parseInt(data.max_monthly_price) : 10,
+        app_expectations: data.app_expectations || ''
+      }, {
+        onConflict: 'user_id'
       });
 
       if (error) throw error;
@@ -135,7 +148,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name *</FormLabel>
+                  <FormLabel>Full Name</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
@@ -153,7 +166,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number *</FormLabel>
+                  <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
@@ -171,7 +184,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
               name="career_objective"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Career Objective *</FormLabel>
+                  <FormLabel>Career Objective</FormLabel>
                   <FormControl>
                     <Textarea 
                       {...field} 
@@ -190,7 +203,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
               name="max_monthly_price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>What's your maximum monthly budget? *</FormLabel>
+                  <FormLabel>What's your maximum monthly budget?</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger onFocus={handleInputInteraction}>
@@ -214,7 +227,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
               name="app_expectations"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>What do you expect from this app? *</FormLabel>
+                  <FormLabel>What do you expect from this app?</FormLabel>
                   <FormControl>
                     <Textarea 
                       {...field} 

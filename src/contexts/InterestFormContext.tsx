@@ -33,19 +33,33 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
   const checkExistingFormEntry = async () => {
     if (!user) return
 
+    console.log('Checking existing form entry for user:', user.id)
+
     try {
       const { data, error } = await supabase
         .from('interest_forms')
         .select('id')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code === 'PGRST116') {
+      console.log('Database query result:', { data, error })
+
+      if (error) {
+        console.error('Database error:', error)
+        // On error, don't show form to be safe
+        setHasFormEntry(true)
+        setHasShownFormForUser(true)
+        return
+      }
+
+      if (!data) {
         // No rows found - user hasn't filled form yet
+        console.log('No form entry found, showing form for new user')
         setHasFormEntry(false)
         showFormForNewUser()
-      } else if (data) {
+      } else {
         // User has already filled the form
+        console.log('Form entry exists, not showing form')
         setHasFormEntry(true)
         setHasShownFormForUser(true)
       }
