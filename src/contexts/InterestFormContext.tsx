@@ -32,17 +32,16 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
 
   const checkExistingFormEntry = async () => {
     if (!user) {
-      console.log('No user found, skipping form check')
+      console.log('🔍 No user found, skipping form check')
       return
     }
 
     console.log('🔍 Checking existing form entry for user:', user.id)
 
     try {
-      // With unique constraint, we can use maybeSingle() safely
       const { data, error } = await supabase
         .from('interest_forms')
-        .select('*')
+        .select('id, name')
         .eq('user_id', user.id)
         .maybeSingle()
 
@@ -62,22 +61,17 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
         console.log('✅ No form entry found, will show form for new user')
         setHasFormEntry(false)
         showFormForNewUser()
+      } else if (data.name && !['user dropped from dialog', 'Form abandoned', 'Form not completed'].includes(data.name)) {
+        // User has a real entry (not abandonment)
+        console.log('✅ Real form entry exists, NOT showing form')
+        setHasFormEntry(true)
+        setHasShownFormForUser(true)
+        setShowInterestForm(false)
       } else {
-        // Check if it's a real entry or just abandonment tracking
-        const isRealEntry = data.name && 
-                           data.name !== 'user dropped from dialog' && 
-                           data.name !== 'Form abandoned'
-        
-        if (isRealEntry) {
-          console.log('✅ Real form entry exists, NOT showing form')
-          setHasFormEntry(true)
-          setHasShownFormForUser(true)
-          setShowInterestForm(false)
-        } else {
-          console.log('✅ Only abandonment entry exists, will show form for user')
-          setHasFormEntry(false)
-          showFormForNewUser()
-        }
+        // User only has abandonment entry - treat as new user
+        console.log('✅ Only abandonment entry found, will show form for user')
+        setHasFormEntry(false)
+        showFormForNewUser()
       }
     } catch (error) {
       console.error('❌ Error checking form entry:', error)

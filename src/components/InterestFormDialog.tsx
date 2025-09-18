@@ -53,22 +53,22 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     if (!newOpen && hasInteracted && !hasCompleted && user) {
-      // Only track abandonment if user doesn't already have a form entry
-      console.log('🚪 Dialog closing, checking for abandonment tracking...');
+      console.log('📊 Tracking potential form abandonment');
+      // Only track abandonment if user doesn't already have a real entry
       supabase
         .from('interest_forms')
-        .select('id')
+        .select('id, name')
         .eq('user_id', user.id)
         .maybeSingle()
         .then(({ data, error }) => {
           if (error) {
-            console.error('❌ Error checking existing entry:', error);
+            console.error('❌ Error checking for existing entry:', error);
             return;
           }
           
-          if (!data) {
-            console.log('📝 Tracking form abandonment');
-            // User doesn't have an entry yet, track abandonment using upsert
+          if (!data || ['user dropped from dialog', 'Form abandoned', 'Form not completed'].includes(data.name || '')) {
+            // User doesn't have a real entry yet, update or create abandonment record
+            console.log('📊 Creating/updating abandonment record');
             supabase.from('interest_forms').upsert({
               user_id: user.id,
               email: user.email || '',
@@ -82,12 +82,10 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
             }).then(({ error }) => {
               if (error) {
                 console.error('❌ Error tracking abandonment:', error);
-              } else {
-                console.log('✅ Abandonment tracked');
               }
             });
           } else {
-            console.log('✅ User already has entry, skipping abandonment tracking');
+            console.log('📊 User has real entry, not tracking abandonment');
           }
         });
     }
@@ -107,10 +105,21 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
     setIsSubmitting(true);
 
     try {
-      console.log('📝 Submitting form data:', data);
+      console.log('📝 Submitting form for user:', user.id);
       
-      // Now we can use upsert properly with the unique constraint
-      const { error } = await supabase.from('interest_forms').upsert({
+      // Check if user already has an entry
+      const { data: existingEntry, error: checkError } = await supabase
+        .from('interest_forms')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('❌ Error checking existing entry:', checkError);
+        throw checkError;
+      }
+
+      const formData = {
         user_id: user.id,
         email: user.email,
         name: data.name || '',
@@ -118,18 +127,34 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
         career_objective: data.career_objective || '',
         max_monthly_price: data.max_monthly_price ? parseInt(data.max_monthly_price) : 10,
         app_expectations: data.app_expectations || ''
-      }, {
-        onConflict: 'user_id'
-      });
+      };
+
+      let error;
+      
+      if (existingEntry) {
+        console.log('📝 Updating existing entry');
+        // Update existing entry
+        const result = await supabase
+          .from('interest_forms')
+          .update(formData)
+          .eq('user_id', user.id);
+        error = result.error;
+      } else {
+        console.log('📝 Creating new entry');
+        // Insert new entry
+        const result = await supabase
+          .from('interest_forms')
+          .insert(formData);
+        error = result.error;
+      }
 
       if (error) {
-        console.error('❌ Upsert error:', error);
+        console.error('❌ Database operation error:', error);
         throw error;
       }
 
       console.log('✅ Form submitted successfully');
       setHasCompleted(true);
-      
       toast({
         title: "Thank you!",
         description: "Now let's choose the perfect plan for your job search.",
@@ -140,7 +165,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
     } catch (error) {
       console.error('❌ Error submitting form:', error);
       toast({
-        title: "Error", 
+        title: "Error",
         description: "There was an error submitting your information. Please try again.",
         variant: "destructive",
       });
