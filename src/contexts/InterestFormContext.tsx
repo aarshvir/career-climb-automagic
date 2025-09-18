@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/integrations/supabase/client'
 
 interface InterestFormContextType {
   showInterestForm: boolean
@@ -20,33 +21,77 @@ export const useInterestForm = () => {
 export const InterestFormProvider = ({ children }: { children: React.ReactNode }) => {
   const [showInterestForm, setShowInterestForm] = useState(false)
   const [hasShownFormForUser, setHasShownFormForUser] = useState(false)
+  const [hasFormEntry, setHasFormEntry] = useState<boolean | null>(null)
   const { user, loading } = useAuth()
 
   useEffect(() => {
-    // Automatically show interest form for newly signed-in users
-    if (user && !loading && !hasShownFormForUser) {
-      // Check if this is a new session (user just signed in)
+    if (user && !loading) {
+      checkExistingFormEntry()
+    }
+  }, [user, loading])
+
+  const checkExistingFormEntry = async () => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase
+        .from('interest_forms')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+
+      if (error && error.code === 'PGRST116') {
+        // No rows found - user hasn't filled form yet
+        setHasFormEntry(false)
+        showFormForNewUser()
+      } else if (data) {
+        // User has already filled the form
+        setHasFormEntry(true)
+        setHasShownFormForUser(true)
+      }
+    } catch (error) {
+      console.error('Error checking form entry:', error)
+      // On error, don't show form to be safe
+      setHasFormEntry(true)
+      setHasShownFormForUser(true)
+    }
+  }
+
+  const showFormForNewUser = () => {
+    if (!hasShownFormForUser) {
+      // Check localStorage for recent session to avoid showing immediately again
       const lastUserId = localStorage.getItem('last_user_id')
-      
-      if (!lastUserId || lastUserId !== user.id) {
-        // New user session - show the interest form
+      const lastFormShown = localStorage.getItem('form_shown_timestamp')
+      const now = Date.now()
+      const oneHour = 60 * 60 * 1000 // 1 hour in milliseconds
+
+      // Only show if it's a truly new session OR more than 1 hour has passed
+      if (!lastUserId || lastUserId !== user?.id || 
+          !lastFormShown || (now - parseInt(lastFormShown)) > oneHour) {
+        
         setTimeout(() => {
           setShowInterestForm(true)
           setHasShownFormForUser(true)
-          localStorage.setItem('last_user_id', user.id)
+          if (user) {
+            localStorage.setItem('last_user_id', user.id)
+            localStorage.setItem('form_shown_timestamp', now.toString())
+          }
         }, 500) // Small delay to ensure smooth UX
       } else {
-        // Existing session - mark as already shown
         setHasShownFormForUser(true)
       }
     }
-    
+  }
+
+  useEffect(() => {
     // Reset state when user signs out
     if (!user && !loading) {
       setHasShownFormForUser(false)
+      setHasFormEntry(null)
       localStorage.removeItem('last_user_id')
+      localStorage.removeItem('form_shown_timestamp')
     }
-  }, [user, loading, hasShownFormForUser])
+  }, [user, loading])
 
   return (
     <InterestFormContext.Provider value={{
