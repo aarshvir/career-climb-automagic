@@ -37,36 +37,47 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
     }
 
     console.log('🔍 Checking existing form entry for user:', user.id)
-    console.log('🔍 User email:', user.email)
 
     try {
+      // With unique constraint, we can use maybeSingle() safely
       const { data, error } = await supabase
         .from('interest_forms')
         .select('*')
         .eq('user_id', user.id)
+        .maybeSingle()
 
-      console.log('🔍 Database query result:', { data, error, dataLength: data?.length })
+      console.log('🔍 Database query result:', { data, error })
 
       if (error) {
         console.error('❌ Database error:', error)
         // On error, don't show form to be safe
         setHasFormEntry(true)
         setHasShownFormForUser(true)
+        setShowInterestForm(false)
         return
       }
 
-      if (!data || data.length === 0) {
-        // No rows found - user hasn't filled form yet
+      if (!data) {
+        // No entry found - user hasn't filled form yet
         console.log('✅ No form entry found, will show form for new user')
         setHasFormEntry(false)
         showFormForNewUser()
       } else {
-        // User has already filled the form
-        console.log('✅ Form entry exists, NOT showing form. Found entries:', data.length)
-        setHasFormEntry(true)
-        setHasShownFormForUser(true)
-        // Force close any existing form
-        setShowInterestForm(false)
+        // Check if it's a real entry or just abandonment tracking
+        const isRealEntry = data.name && 
+                           data.name !== 'user dropped from dialog' && 
+                           data.name !== 'Form abandoned'
+        
+        if (isRealEntry) {
+          console.log('✅ Real form entry exists, NOT showing form')
+          setHasFormEntry(true)
+          setHasShownFormForUser(true)
+          setShowInterestForm(false)
+        } else {
+          console.log('✅ Only abandonment entry exists, will show form for user')
+          setHasFormEntry(false)
+          showFormForNewUser()
+        }
       }
     } catch (error) {
       console.error('❌ Error checking form entry:', error)

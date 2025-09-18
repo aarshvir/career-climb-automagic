@@ -54,15 +54,22 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     if (!newOpen && hasInteracted && !hasCompleted && user) {
       // Only track abandonment if user doesn't already have a form entry
+      console.log('🚪 Dialog closing, checking for abandonment tracking...');
       supabase
         .from('interest_forms')
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle()
-        .then(({ data }) => {
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('❌ Error checking existing entry:', error);
+            return;
+          }
+          
           if (!data) {
-            // User doesn't have an entry yet, track abandonment
-            supabase.from('interest_forms').insert({
+            console.log('📝 Tracking form abandonment');
+            // User doesn't have an entry yet, track abandonment using upsert
+            supabase.from('interest_forms').upsert({
               user_id: user.id,
               email: user.email || '',
               name: 'user dropped from dialog',
@@ -70,11 +77,17 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
               career_objective: '',
               max_monthly_price: 0,
               app_expectations: ''
+            }, {
+              onConflict: 'user_id'
             }).then(({ error }) => {
               if (error) {
-                console.error('Error tracking abandonment:', error);
+                console.error('❌ Error tracking abandonment:', error);
+              } else {
+                console.log('✅ Abandonment tracked');
               }
             });
+          } else {
+            console.log('✅ User already has entry, skipping abandonment tracking');
           }
         });
     }
@@ -94,7 +107,9 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
     setIsSubmitting(true);
 
     try {
-      // Use upsert to prevent duplicate entries
+      console.log('📝 Submitting form data:', data);
+      
+      // Now we can use upsert properly with the unique constraint
       const { error } = await supabase.from('interest_forms').upsert({
         user_id: user.id,
         email: user.email,
@@ -107,9 +122,14 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
         onConflict: 'user_id'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Upsert error:', error);
+        throw error;
+      }
 
+      console.log('✅ Form submitted successfully');
       setHasCompleted(true);
+      
       toast({
         title: "Thank you!",
         description: "Now let's choose the perfect plan for your job search.",
@@ -118,9 +138,9 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       onOpenChange(false);
       navigate('/plan-selection');
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('❌ Error submitting form:', error);
       toast({
-        title: "Error",
+        title: "Error", 
         description: "There was an error submitting your information. Please try again.",
         variant: "destructive",
       });
