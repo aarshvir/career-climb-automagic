@@ -16,6 +16,7 @@ import FAQ from "./pages/FAQ";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/blog/BlogPost";
 import Dashboard from "./pages/Dashboard";
+import PlanSelection from "./pages/PlanSelection";
 import NotFound from "./pages/NotFound";
 import HowItWorks from "./pages/HowItWorks";
 import PricingPage from "./pages/PricingPage";
@@ -54,6 +55,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/plan-selection" element={<PlanSelection />} />
               <Route path="/about" element={<About />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/pricing" element={<PricingPage />} />
