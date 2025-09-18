@@ -10,18 +10,16 @@ const Pricing = () => {
   
   const plans = [
     {
-      name: "Starter",
-      originalPrice: "$19.99",
-      price: "$1.99",
+      name: "Free",
+      price: "$0",
       period: "per month",
-      description: "Perfect for students and entry-level professionals",
+      description: "Perfect for getting started",
       features: [
-        "1 resume variant",
-        "10 job applications per day",
-        "Basic location targeting",
-        "3 job title preferences",
-        "Email support",
-        "Basic analytics"
+        "2 job applications per day",
+        "1 CV variant",
+        "1 job preference set",
+        "Basic job matching",
+        "Email support"
       ],
       popular: false,
       cta: "Get Started"
@@ -29,18 +27,16 @@ const Pricing = () => {
     {
       name: "Professional",
       originalPrice: "$49",
-      price: "$19.99",
+      price: "$29",
       period: "per month",
-      description: "Ideal for experienced professionals",
+      description: "For serious job seekers",
       features: [
-        "3 resume variants",
         "20 job applications per day",
-        "Advanced location targeting",
-        "5 job title preferences",
-        "Priority support",
-        "Advanced analytics",
-        "Interview preparation tips",
-        "Application tracking dashboard"
+        "3 CV variants",
+        "2 job preference sets",
+        "ATS score optimization",
+        "Custom CV generation",
+        "Priority support"
       ],
       popular: true,
       cta: "Get Started"
@@ -49,18 +45,15 @@ const Pricing = () => {
       name: "Elite",
       price: "$99",
       period: "per month",
-      description: "For executives and senior professionals",
+      description: "Maximum job search power",
       features: [
-        "5 resume variants",
-        "50 job applications per day",
-        "Global location targeting",
-        "Unlimited job title preferences",
-        "24/7 priority support",
-        "Executive analytics suite",
-        "Personal job coach",
-        "Custom application templates",
-        "LinkedIn optimization",
-        "Salary negotiation guidance"
+        "100 job applications per day",
+        "5 CV variants",
+        "3 job preference sets",
+        "Advanced ATS optimization",
+        "AI-powered cover letters",
+        "Interview preparation",
+        "Dedicated support"
       ],
       popular: false,
       cta: "Get Started"

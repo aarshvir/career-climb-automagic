@@ -65,9 +65,14 @@ const Dashboard = () => {
         .from('interest_forms')
         .select('id')
         .eq('user_id', user?.id)
-        .single()
+        .maybeSingle()
 
-      if (interestError && interestError.code === 'PGRST116') {
+      if (interestError) {
+        console.error('Error checking interest form:', interestError)
+        // Continue to check profile even if there's an error
+      }
+
+      if (!interestData) {
         // User hasn't filled the interest form yet - let the form show
         setLoading(false)
         return
@@ -78,7 +83,7 @@ const Dashboard = () => {
         .from('profiles')
         .select('plan, subscription_status')
         .eq('id', user?.id)
-        .single()
+        .maybeSingle()
 
       if (error) {
         console.error('Error fetching profile:', error)
@@ -87,7 +92,7 @@ const Dashboard = () => {
         return
       }
 
-      if (!data?.plan) {
+      if (!data || !data.plan) {
         navigate('/plan-selection')
         return
       }
