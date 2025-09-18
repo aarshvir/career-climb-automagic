@@ -31,47 +31,55 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
   }, [user, loading])
 
   const checkExistingFormEntry = async () => {
-    if (!user) return
+    if (!user) {
+      console.log('No user found, skipping form check')
+      return
+    }
 
-    console.log('Checking existing form entry for user:', user.id)
+    console.log('🔍 Checking existing form entry for user:', user.id)
+    console.log('🔍 User email:', user.email)
 
     try {
       const { data, error } = await supabase
         .from('interest_forms')
-        .select('id')
+        .select('*')
         .eq('user_id', user.id)
-        .maybeSingle()
 
-      console.log('Database query result:', { data, error })
+      console.log('🔍 Database query result:', { data, error, dataLength: data?.length })
 
       if (error) {
-        console.error('Database error:', error)
+        console.error('❌ Database error:', error)
         // On error, don't show form to be safe
         setHasFormEntry(true)
         setHasShownFormForUser(true)
         return
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
         // No rows found - user hasn't filled form yet
-        console.log('No form entry found, showing form for new user')
+        console.log('✅ No form entry found, will show form for new user')
         setHasFormEntry(false)
         showFormForNewUser()
       } else {
         // User has already filled the form
-        console.log('Form entry exists, not showing form')
+        console.log('✅ Form entry exists, NOT showing form. Found entries:', data.length)
         setHasFormEntry(true)
         setHasShownFormForUser(true)
+        // Force close any existing form
+        setShowInterestForm(false)
       }
     } catch (error) {
-      console.error('Error checking form entry:', error)
+      console.error('❌ Error checking form entry:', error)
       // On error, don't show form to be safe
       setHasFormEntry(true)
       setHasShownFormForUser(true)
+      setShowInterestForm(false)
     }
   }
 
   const showFormForNewUser = () => {
+    console.log('🎯 showFormForNewUser called. hasShownFormForUser:', hasShownFormForUser)
+    
     if (!hasShownFormForUser) {
       // Check localStorage for recent session to avoid showing immediately again
       const lastUserId = localStorage.getItem('last_user_id')
@@ -79,11 +87,15 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
       const now = Date.now()
       const oneHour = 60 * 60 * 1000 // 1 hour in milliseconds
 
+      console.log('🎯 localStorage check:', { lastUserId, currentUserId: user?.id, lastFormShown })
+
       // Only show if it's a truly new session OR more than 1 hour has passed
       if (!lastUserId || lastUserId !== user?.id || 
           !lastFormShown || (now - parseInt(lastFormShown)) > oneHour) {
         
+        console.log('🎯 Will show form after timeout')
         setTimeout(() => {
+          console.log('🎯 Showing form now!')
           setShowInterestForm(true)
           setHasShownFormForUser(true)
           if (user) {
@@ -92,8 +104,11 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
           }
         }, 500) // Small delay to ensure smooth UX
       } else {
+        console.log('🎯 Not showing form due to localStorage check')
         setHasShownFormForUser(true)
       }
+    } else {
+      console.log('🎯 Not showing form - already shown for this user')
     }
   }
 
