@@ -1,0 +1,175 @@
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Briefcase } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+
+interface JobPreferencesDialogProps {
+  open: boolean;
+  onSuccess: () => void;
+}
+
+const SENIORITY_LEVELS = [
+  "Internship",
+  "Entry level",
+  "Associate",
+  "Mid-Senior level",
+  "Director",
+  "Executive"
+];
+
+const JOB_TYPES = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Temporary",
+  "Volunteer",
+  "Internship"
+];
+
+export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogProps) => {
+  const [preferences, setPreferences] = useState({
+    location: "",
+    job_title: "",
+    seniority_level: "",
+    job_type: ""
+  });
+  const [saving, setSaving] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    // Validate required fields
+    if (!preferences.location || !preferences.job_title || !preferences.seniority_level || !preferences.job_type) {
+      toast({
+        title: "All fields required",
+        description: "Please fill in all job preference fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('preferences')
+        .upsert({
+          user_id: user.id,
+          location: preferences.location,
+          job_title: preferences.job_title,
+          seniority_level: preferences.seniority_level,
+          job_type: preferences.job_type,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Preferences saved",
+        description: "Your job preferences have been saved successfully.",
+      });
+
+      onSuccess();
+    } catch (error) {
+      console.error('Save failed:', error);
+      toast({
+        title: "Save failed",
+        description: "There was an error saving your preferences. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5" />
+            Job Preferences
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Tell us about your job preferences to help us find the best matches for you.
+          </p>
+          
+          <div className="space-y-2">
+            <Label htmlFor="location">Preferred Location</Label>
+            <Input
+              id="location"
+              placeholder="e.g., New York, Remote, Hybrid"
+              value={preferences.location}
+              onChange={(e) => setPreferences({ ...preferences, location: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job-title">Job Title</Label>
+            <Input
+              id="job-title"
+              placeholder="e.g., Software Engineer, Product Manager"
+              value={preferences.job_title}
+              onChange={(e) => setPreferences({ ...preferences, job_title: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="seniority">Seniority Level</Label>
+            <Select
+              value={preferences.seniority_level}
+              onValueChange={(value) => setPreferences({ ...preferences, seniority_level: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select seniority level" />
+              </SelectTrigger>
+              <SelectContent>
+                {SENIORITY_LEVELS.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {level}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job-type">Job Type</Label>
+            <Select
+              value={preferences.job_type}
+              onValueChange={(value) => setPreferences({ ...preferences, job_type: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select job type" />
+              </SelectTrigger>
+              <SelectContent>
+                {JOB_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full"
+          >
+            {saving ? "Saving..." : "Save Preferences"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};

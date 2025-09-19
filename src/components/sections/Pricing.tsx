@@ -1,10 +1,37 @@
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Zap, Star, Shield } from "lucide-react";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Pricing = () => {
   const { handlePrimaryAction } = useSignInFlow();
+  const { user } = useAuth();
+  const location = useLocation();
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const isUpgrade = location.search.includes('upgrade=true');
+
+  useEffect(() => {
+    if (user && isUpgrade) {
+      fetchCurrentPlan();
+    }
+  }, [user, isUpgrade]);
+
+  const fetchCurrentPlan = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user?.id)
+        .single();
+      setCurrentPlan(data?.plan?.toLowerCase() || 'free');
+    } catch (error) {
+      console.error('Error fetching current plan:', error);
+    }
+  };
   
   const plans = [
     {
@@ -62,8 +89,15 @@ const Pricing = () => {
     }
   ];
 
-  const handlePlanClick = () => {
+  const handlePlanClick = (planName: string) => {
+    if (isUpgrade && currentPlan === planName.toLowerCase()) {
+      return; // Do nothing for current plan
+    }
     handlePrimaryAction();
+  };
+
+  const isCurrentPlan = (planName: string) => {
+    return isUpgrade && currentPlan === planName.toLowerCase();
   };
 
   return (
@@ -75,12 +109,22 @@ const Pricing = () => {
             <Card 
               key={index} 
               className={`relative ${
-                plan.popular 
-                  ? 'border-primary shadow-glow bg-gradient-card scale-105' 
-                  : 'bg-gradient-card shadow-card hover:shadow-premium'
+                isCurrentPlan(plan.name)
+                  ? 'border-muted bg-muted/20 opacity-75'
+                  : plan.popular 
+                    ? 'border-primary shadow-glow bg-gradient-card scale-105' 
+                    : 'bg-gradient-card shadow-card hover:shadow-premium'
               } transition-all duration-300`}
             >
-              {plan.popular && (
+              {isCurrentPlan(plan.name) && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-muted text-muted-foreground px-4 py-1 rounded-full text-sm font-medium flex items-center">
+                    <Check className="w-4 h-4 mr-1" />
+                    Current Plan
+                  </div>
+                </div>
+              )}
+              {!isCurrentPlan(plan.name) && plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <div className="bg-gradient-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium flex items-center">
                     <Star className="w-4 h-4 mr-1" />
@@ -109,10 +153,11 @@ const Pricing = () => {
                 </div>
                 
                 <Button
-                  onClick={handlePlanClick}
+                  onClick={() => handlePlanClick(plan.name)}
+                  disabled={isCurrentPlan(plan.name)}
                   className={`w-full mb-6 ${plan.popular ? "hero" : "default"}`}
                 >
-                  {plan.cta}
+                  {isCurrentPlan(plan.name) ? "Current Plan" : plan.cta}
                 </Button>
                 
                 <div className="mb-4">

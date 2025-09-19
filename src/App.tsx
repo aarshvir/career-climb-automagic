@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { InterestFormProvider } from "@/contexts/InterestFormContext";
+import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { HelmetProvider } from "react-helmet-async";
 
 // Regular imports instead of lazy loading to fix dynamic import issues
@@ -24,6 +25,9 @@ import ThankYou from "./pages/ThankYou";
 import AuthCallback from "./pages/AuthCallback";
 import AutoInterestForm from "./components/AutoInterestForm";
 import OnboardingRedirector from "./components/OnboardingRedirector";
+import { ResumeUploadDialog } from "./components/onboarding/ResumeUploadDialog";
+import { JobPreferencesDialog } from "./components/onboarding/JobPreferencesDialog";
+import { useOnboarding } from "./contexts/OnboardingContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,40 +43,60 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppContent = () => {
+  const { showResumeDialog, showPreferencesDialog, completeStep } = useOnboarding();
+
+  return (
+    <>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/plan-selection" element={<PlanSelection />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <OnboardingRedirector />
+        <AutoInterestForm />
+        <ResumeUploadDialog 
+          open={showResumeDialog} 
+          onSuccess={() => completeStep('resume')} 
+        />
+        <JobPreferencesDialog 
+          open={showPreferencesDialog} 
+          onSuccess={() => completeStep('preferences')} 
+        />
+      </BrowserRouter>
+    </>
+  );
+};
+
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <InterestFormProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter
-              future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-              }}
-            >
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/plan-selection" element={<PlanSelection />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/how-it-works" element={<HowItWorks />} />
-                <Route path="/pricing" element={<PricingPage />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/thank-you" element={<ThankYou />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <OnboardingRedirector />
-              <AutoInterestForm />
-            </BrowserRouter>
-          </TooltipProvider>
+          <OnboardingProvider>
+            <TooltipProvider>
+              <AppContent />
+            </TooltipProvider>
+          </OnboardingProvider>
         </InterestFormProvider>
       </AuthProvider>
     </QueryClientProvider>

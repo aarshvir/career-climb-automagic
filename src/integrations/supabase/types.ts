@@ -151,6 +151,10 @@ export type Database = {
         Row: {
           cities: string | null
           created_at: string | null
+          job_title: string | null
+          job_type: string | null
+          location: string | null
+          seniority_level: string | null
           titles: string | null
           updated_at: string | null
           user_id: string
@@ -158,6 +162,10 @@ export type Database = {
         Insert: {
           cities?: string | null
           created_at?: string | null
+          job_title?: string | null
+          job_type?: string | null
+          location?: string | null
+          seniority_level?: string | null
           titles?: string | null
           updated_at?: string | null
           user_id: string
@@ -165,6 +173,10 @@ export type Database = {
         Update: {
           cities?: string | null
           created_at?: string | null
+          job_title?: string | null
+          job_type?: string | null
+          location?: string | null
+          seniority_level?: string | null
           titles?: string | null
           updated_at?: string | null
           user_id?: string
