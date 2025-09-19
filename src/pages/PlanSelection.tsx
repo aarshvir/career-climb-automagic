@@ -101,6 +101,8 @@ const PlanSelection = () => {
           selected_plan: planId,
           status: 'completed',
           selection_completed_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
         })
 
       if (planSelectionError) throw planSelectionError
