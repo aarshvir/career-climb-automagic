@@ -41,30 +41,8 @@ export const useSignInFlow = () => {
 
       if (profileError) throw profileError;
 
-      // Check plan_selections as fallback if profile doesn't exist or has no plan
-      if (!profile?.plan || profile.plan === 'free') {
-        const { data: planSelection } = await supabase
-          .from('plan_selections')
-          .select('selected_plan, status')
-          .eq('user_id', user.id)
-          .eq('status', 'completed')
-          .maybeSingle();
-
-        if (planSelection?.selected_plan && planSelection.selected_plan !== 'free') {
-          // Sync profile with plan selection
-          await supabase
-            .from('profiles')
-            .upsert({ 
-              id: user.id, 
-              email: user.email, 
-              plan: planSelection.selected_plan 
-            }, {
-              onConflict: 'id'
-            });
-          navigate('/dashboard');
-        } else {
-          navigate('/plan-selection');
-        }
+      if (!profile?.plan) {
+        navigate('/plan-selection');
       } else {
         navigate('/dashboard');
       }
