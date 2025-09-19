@@ -1,0 +1,71 @@
+name: Deploy testcodex (auto-detect build dir)
+on:
+  push:
+    branches: [testcodex]
+
+permissions:
+  pages: write
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install
+        run: npm ci || npm install
+
+      - name: Build (Next/Gatsby/Vite/CRA auto)
+        id: b
+        shell: bash
+        run: |
+          # Try common build scripts
+          if npm run | grep -q " build"; then
+            npm run build || true
+          fi
+          # Next.js static export if present
+          if npm run | grep -q " export"; then
+            npm run export || true
+          fi
+
+          # Auto-detect build output
+          OUT=""
+          [ -d out ] && OUT="out"
+          [ -d build ] && OUT="build"
+          [ -d dist ] && OUT="dist"
+          [ -d public ] && OUT="public"
+          [ -d .output/public ] && OUT=".output/public"
+          [ -d .next ] && OUT=".next"   # SSR builds (for previewing static assets only)
+
+          if [ -z "$OUT" ]; then
+            echo "Could not find build folder. Create one of: out, build, dist, public, .output/public"
+            exit 1
+          fi
+
+          echo "BUILD_DIR=$OUT" >> $GITHUB_OUTPUT
+          echo "Detected BUILD_DIR=$OUT"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.b.outputs.BUILD_DIR }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
