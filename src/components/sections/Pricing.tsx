@@ -21,12 +21,16 @@ const Pricing = () => {
         "Basic job matching",
         "Email support"
       ],
+      limitations: [
+        "Limited job visibility (5 visible, 15 teaser)",
+        "No ATS optimization",
+        "No custom CV generation"
+      ],
       popular: false,
-      cta: "Get Started"
+      cta: "Choose Free"
     },
     {
-      name: "Professional",
-      originalPrice: "$49",
+      name: "Pro",
       price: "$29",
       period: "per month",
       description: "For serious job seekers",
@@ -39,7 +43,7 @@ const Pricing = () => {
         "Priority support"
       ],
       popular: true,
-      cta: "Get Started"
+      cta: "Choose Pro"
     },
     {
       name: "Elite",
@@ -56,7 +60,7 @@ const Pricing = () => {
         "Dedicated support"
       ],
       popular: false,
-      cta: "Get Started"
+      cta: "Choose Elite"
     }
   ];
 
@@ -99,18 +103,8 @@ const Pricing = () => {
               <CardHeader className="text-center pb-2">
                 <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
                 <div className="mt-4">
-                  {plan.originalPrice && (
-                    <div className="text-lg text-muted-foreground line-through mb-1">
-                      {plan.originalPrice}
-                    </div>
-                  )}
                   <span className="text-4xl font-bold">{plan.price}</span>
                   <span className="text-muted-foreground">/{plan.period}</span>
-                  {plan.originalPrice && (
-                    <div className="text-sm text-primary font-medium mt-2">
-                      Use code <span className="font-bold">FORYOU</span> at checkout
-                    </div>
-                  )}
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
               </CardHeader>
@@ -129,14 +123,31 @@ const Pricing = () => {
                   {plan.cta}
                 </Button>
                 
-                <ul className="space-y-3">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center">
-                      <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-success mb-2">✓ Included</h4>
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center">
+                        <Check className="h-4 w-4 text-success mr-3 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {plan.limitations && (
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Limitations</h4>
+                    <ul className="space-y-2">
+                      {plan.limitations.map((limitation, limitationIndex) => (
+                        <li key={limitationIndex} className="flex items-start">
+                          <span className="text-muted-foreground mr-2 mt-0.5">•</span>
+                          <span className="text-sm text-muted-foreground">{limitation}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
