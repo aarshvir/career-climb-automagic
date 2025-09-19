@@ -39,42 +39,48 @@ const queryClient = new QueryClient({
   },
 });
 
+const basename =
+  import.meta.env.BASE_URL === "/"
+    ? undefined
+    : import.meta.env.BASE_URL.replace(/\/+$/, "");
+
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <InterestFormProvider>
           <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter 
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true
-            }}
-          >
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/plan-selection" element={<PlanSelection />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/thank-you" element={<ThankYou />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <OnboardingRedirector />
-          <AutoInterestForm />
-          </BrowserRouter>
-        </TooltipProvider>
-      </InterestFormProvider>
-    </AuthProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter
+              basename={basename}
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
+            >
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/plan-selection" element={<PlanSelection />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/thank-you" element={<ThankYou />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <OnboardingRedirector />
+              <AutoInterestForm />
+            </BrowserRouter>
+          </TooltipProvider>
+        </InterestFormProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </HelmetProvider>
 );
