@@ -1,4 +1,5 @@
-name: Deploy testcodex (auto-detect build dir)
+name: Deploy testcodex (Vite + Pages)
+
 on:
   push:
     branches: [testcodex]
@@ -15,50 +16,23 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # ✅ tells vite.config.ts to use the Pages base
+      GITHUB_PAGES: "true"
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install
-        run: npm ci || npm install
-
-      - name: Build (Next/Gatsby/Vite/CRA auto)
-        id: b
-        shell: bash
-        run: |
-          # Try common build scripts
-          if npm run | grep -q " build"; then
-            npm run build || true
-          fi
-          # Next.js static export if present
-          if npm run | grep -q " export"; then
-            npm run export || true
-          fi
-
-          # Auto-detect build output
-          OUT=""
-          [ -d out ] && OUT="out"
-          [ -d build ] && OUT="build"
-          [ -d dist ] && OUT="dist"
-          [ -d public ] && OUT="public"
-          [ -d .output/public ] && OUT=".output/public"
-          [ -d .next ] && OUT=".next"   # SSR builds (for previewing static assets only)
-
-          if [ -z "$OUT" ]; then
-            echo "Could not find build folder. Create one of: out, build, dist, public, .output/public"
-            exit 1
-          fi
-
-          echo "BUILD_DIR=$OUT" >> $GITHUB_OUTPUT
-          echo "Detected BUILD_DIR=$OUT"
-
+      - run: npm ci || npm install
+      - run: npm run build
+      # SPA fallback so client-side routes work on Pages
+      - name: SPA fallback
+        run: cp dist/index.html dist/404.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ steps.b.outputs.BUILD_DIR }}
+          path: dist
 
   deploy:
     needs: build
