@@ -112,7 +112,10 @@ const Pricing = () => {
               <CardContent className="pt-4">
                 <div className="mb-4 p-3 bg-success/10 border border-success/20 rounded-lg">
                   <p className="text-sm font-medium text-success text-center">
-                    Free 7 day trial; no credit card required
+                    {plan.name === 'Free' 
+                      ? 'Free 7 day trial; no credit card required'
+                      : 'Free 3 day trial; no credit card required'
+                    }
                   </p>
                 </div>
                 
@@ -155,7 +158,7 @@ const Pricing = () => {
 
         <div className="text-center mt-12">
           <p className="text-muted-foreground mb-4">
-            All plans include a 7-day free trial. No credit card required.
+            Free plan includes 7-day trial, paid plans include 3-day trial. No credit card required.
           </p>
           <div className="flex items-center justify-center space-x-8 text-sm text-muted-foreground">
             <div className="flex items-center">
