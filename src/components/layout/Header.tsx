@@ -2,25 +2,21 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import jobvanceIcon from "@/assets/jobvance-icon.png";
 import { Link, useLocation } from "react-router-dom";
-import { useInterestForm } from "@/contexts/InterestFormContext";
-import { useState, useEffect, useRef } from "react";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
 
 const Header = () => {
   const { user, signInWithGoogle, signOut, loading } = useAuth();
-  const { handleSignInOrAction } = useSignInFlow();
-  const { setShowInterestForm } = useInterestForm();
+  const { handlePrimaryAction } = useSignInFlow();
   const location = useLocation();
-  const previousUserRef = useRef(user);
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleGetStarted = () => {
-    handleSignInOrAction(() => setShowInterestForm(true));
+    handlePrimaryAction();
   };
 
   const handleDashboard = () => {
-    handleSignInOrAction(() => setShowInterestForm(true));
+    handlePrimaryAction();
   };
 
   return (

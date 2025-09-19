@@ -23,6 +23,7 @@ import PricingPage from "./pages/PricingPage";
 import ThankYou from "./pages/ThankYou";
 import AuthCallback from "./pages/AuthCallback";
 import AutoInterestForm from "./components/AutoInterestForm";
+import OnboardingRedirector from "./components/OnboardingRedirector";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,9 +67,10 @@ const App = () => (
               <Route path="/thank-you" element={<ThankYou />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <AutoInterestForm />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <OnboardingRedirector />
+          <AutoInterestForm />
           </BrowserRouter>
         </TooltipProvider>
       </InterestFormProvider>

@@ -1,12 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Zap, Star, Shield } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useInterestForm } from "@/contexts/InterestFormContext";
+import { useSignInFlow } from "@/hooks/useSignInFlow";
 
 const Pricing = () => {
-  const { user, signInWithGoogle } = useAuth();
-  const { setShowInterestForm } = useInterestForm();
+  const { handlePrimaryAction } = useSignInFlow();
   
   const plans = [
     {
@@ -64,17 +62,8 @@ const Pricing = () => {
     }
   ];
 
-  const handlePlanClick = async () => {
-    if (!user) {
-      try {
-        await signInWithGoogle();
-      } catch (error) {
-        console.error('Sign in failed:', error);
-      }
-      return;
-    }
-    
-    setShowInterestForm(true);
+  const handlePlanClick = () => {
+    handlePrimaryAction();
   };
 
   return (

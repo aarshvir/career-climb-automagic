@@ -1,19 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Bot } from "lucide-react";
-import { useInterestForm } from "@/contexts/InterestFormContext";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
 
 const Hero = () => {
-  const { handleSignInOrAction, user } = useSignInFlow();
-  const { setShowInterestForm } = useInterestForm();
+  const { handlePrimaryAction, user } = useSignInFlow();
 
   const handleGetStarted = () => {
-    handleSignInOrAction(() => setShowInterestForm(true));
+    handlePrimaryAction();
   };
 
   const handleWatchDemo = () => {
-    handleSignInOrAction(() => setShowInterestForm(true));
+    handlePrimaryAction();
   };
   return (
     <section id="home" className="relative py-20 lg:py-32 overflow-hidden">
