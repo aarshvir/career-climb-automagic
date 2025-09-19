@@ -117,6 +117,36 @@ export type Database = {
           },
         ]
       }
+      plan_selections: {
+        Row: {
+          created_at: string
+          id: string
+          selected_plan: string
+          selection_completed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          selected_plan: string
+          selection_completed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          selected_plan?: string
+          selection_completed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       preferences: {
         Row: {
           cities: string | null

@@ -93,21 +93,33 @@ const PlanSelection = () => {
     setSelectedPlan(planId);
 
     try {
-      // Update user profile with selected plan
-      const { error } = await supabase
+      // Insert into plan_selections table
+      const { error: planSelectionError } = await supabase
+        .from('plan_selections')
+        .upsert({
+          user_id: user.id,
+          selected_plan: planId,
+          status: 'completed',
+          selection_completed_at: new Date().toISOString()
+        })
+
+      if (planSelectionError) throw planSelectionError
+
+      // Also update the profiles table for backward compatibility
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ plan: planId })
-        .eq('id', user.id);
+        .eq('id', user.id)
 
-      if (error) throw error;
+      if (profileError) throw profileError
 
       toast({
         title: "Plan selected successfully!",
         description: `Welcome to ${plans.find(p => p.id === planId)?.name} plan.`
-      });
+      })
 
       // Navigate to dashboard
-      navigate('/dashboard');
+      navigate('/dashboard')
     } catch (error) {
       console.error('Error selecting plan:', error);
       toast({

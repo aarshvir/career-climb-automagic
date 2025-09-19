@@ -78,7 +78,26 @@ const Dashboard = () => {
         return
       }
 
-      // Check user profile and plan
+      // Check if user has completed plan selection
+      const { data: planSelectionData, error: planSelectionError } = await supabase
+        .from('plan_selections')
+        .select('id, status')
+        .eq('user_id', user?.id)
+        .eq('status', 'completed')
+        .maybeSingle()
+
+      if (planSelectionError) {
+        console.error('Error checking plan selection:', planSelectionError)
+        // Continue to check profile for backward compatibility
+      }
+
+      if (!planSelectionData) {
+        // User hasn't completed plan selection yet
+        navigate('/plan-selection')
+        return
+      }
+
+      // Optional: Also check profiles for backward compatibility
       const { data, error } = await supabase
         .from('profiles')
         .select('plan, subscription_status')
