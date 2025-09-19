@@ -65,22 +65,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Separate function for profile creation to avoid auth deadlock
   const createUserProfile = async (user: User) => {
     try {
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single()
-
-      if (!existingProfile) {
-        await supabase.from('profiles').insert({
-          id: user.id,
-          email: user.email!,
-          full_name: user.user_metadata.full_name || user.user_metadata.name,
-          avatar_url: user.user_metadata.avatar_url,
-          subscription_plan: 'starter',
-          subscription_status: 'inactive'
-        })
-      }
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email!,
+        plan: 'free'
+      }, {
+        onConflict: 'id'
+      })
     } catch (error) {
       console.warn('Error creating user profile:', error)
     }

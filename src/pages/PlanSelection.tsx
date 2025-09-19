@@ -105,11 +105,16 @@ const PlanSelection = () => {
 
       if (planSelectionError) throw planSelectionError
 
-      // Also update the profiles table for backward compatibility
+      // Upsert the profiles table to ensure record exists
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ plan: planId })
-        .eq('id', user.id)
+        .upsert({ 
+          id: user.id, 
+          email: user.email!, 
+          plan: planId 
+        }, {
+          onConflict: 'id'
+        })
 
       if (profileError) throw profileError
 

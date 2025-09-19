@@ -44,8 +44,32 @@ const OnboardingRedirector = () => {
           return;
         }
 
+        // Check plan_selections as fallback if profile doesn't exist or has no plan
         if (!profile?.plan || profile.plan === 'free') {
-          navigate('/plan-selection', { replace: true });
+          const { data: planSelection } = await supabase
+            .from('plan_selections')
+            .select('selected_plan, status')
+            .eq('user_id', user.id)
+            .eq('status', 'completed')
+            .maybeSingle();
+
+          if (planSelection?.selected_plan && planSelection.selected_plan !== 'free') {
+            // Sync profile with plan selection
+            await supabase
+              .from('profiles')
+              .upsert({ 
+                id: user.id, 
+                email: user.email, 
+                plan: planSelection.selected_plan 
+              }, {
+                onConflict: 'id'
+              });
+            if (pathname === '/' || location.search.includes('auth=success')) {
+              navigate('/dashboard', { replace: true });
+            }
+          } else {
+            navigate('/plan-selection', { replace: true });
+          }
         } else if (pathname === '/' || location.search.includes('auth=success')) {
           navigate('/dashboard', { replace: true });
         }
