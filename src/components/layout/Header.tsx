@@ -5,15 +5,13 @@ import { Link, useLocation } from "react-router-dom";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
 import { Loader2 } from "lucide-react";
 import { AuthStatusIndicator } from "@/components/AuthStatusIndicator";
-import { AuthDebugPanel } from "@/components/AuthDebugPanel";
+
 
 const Header = () => {
   const { user, signInWithGoogle, signOut, loading, isRetrying, environment } = useAuth();
   const { handlePrimaryAction } = useSignInFlow();
   const location = useLocation();
   
-  // Show debug panel in development or lovable environment
-  const showDebugPanel = environment === 'development' || environment === 'lovable';
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -110,7 +108,7 @@ const Header = () => {
           )}
         </div>
       </div>
-      <AuthDebugPanel show={showDebugPanel} />
+      
     </header>
   );
 };
