@@ -1,128 +1,186 @@
-const MIME_TYPE_BY_EXTENSION = {
-  pdf: "application/pdf",
-  doc: "application/msword",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-} as const;
+import { createContext, useContext, useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/integrations/supabase/client'
 
-export type AllowedResumeExtension = keyof typeof MIME_TYPE_BY_EXTENSION;
+type InterestFormEntry = {
+  id: string
+  name: string | null
+  max_monthly_price: number | null
+  career_objective: string | null
+  app_expectations: string | null
+  phone: string | null
+}
 
-const EXTENSION_BY_MIME = Object.entries(MIME_TYPE_BY_EXTENSION).reduce(
-  (acc, [extension, mime]) => {
-    acc[mime] = extension as AllowedResumeExtension;
-    return acc;
-  },
-  {} as Record<string, AllowedResumeExtension>
-);
+const ABANDONMENT_NAMES = new Set([
+  'user dropped from dialog',
+  'form abandoned',
+  'form not completed'
+])
 
-export const RESUME_BUCKET = "jobassist" as const;
-export const RESUME_STORAGE_PREFIX = "resumes" as const;
-
-export const ALLOWED_RESUME_EXTENSIONS = Object.keys(
-  MIME_TYPE_BY_EXTENSION
-) as AllowedResumeExtension[];
-
-export const ALLOWED_RESUME_MIME_TYPES = Object.values(MIME_TYPE_BY_EXTENSION);
-
-const slugify = (value: string) => {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "")
-    .slice(0, 40);
-};
-
-const removeExtension = (fileName: string) => {
-  const parts = fileName.split(".");
-  if (parts.length <= 1) {
-    return fileName;
+const isAbandonmentEntry = (name: string | null | undefined) => {
+  if (!name) {
+    return false
   }
-  parts.pop();
-  return parts.join(".");
-};
+  return ABANDONMENT_NAMES.has(name.trim().toLowerCase())
+}
 
-const resolveExtensionFromMime = (
-  mime: string | undefined
-): AllowedResumeExtension | undefined => {
-  if (!mime) {
-    return undefined;
-  }
-  return EXTENSION_BY_MIME[mime];
-};
+const hasMeaningfulValue = (value: string | null | undefined) => {
+  return Boolean(value && value.trim().length > 0)
+}
 
-const coerceToAllowedExtension = (
-  extension: string | undefined
-): AllowedResumeExtension | undefined => {
-  if (!extension) {
-    return undefined;
+const hasCompletedForm = (entry: InterestFormEntry | null) => {
+  if (!entry) {
+    return false
   }
-  const lower = extension.toLowerCase();
-  return (ALLOWED_RESUME_EXTENSIONS as string[]).includes(lower)
-    ? (lower as AllowedResumeExtension)
-    : undefined;
-};
 
-export const getResumeFileExtension = (
-  file: File
-): AllowedResumeExtension | undefined => {
-  const nameExtension = coerceToAllowedExtension(file.name.split(".").pop());
-  if (nameExtension) {
-    return nameExtension;
+  if (entry.max_monthly_price && entry.max_monthly_price > 0) {
+    // Real submissions always include a positive budget value
+    if (!isAbandonmentEntry(entry.name)) {
+      return true
+    }
   }
-  return resolveExtensionFromMime(file.type);
-};
 
-export const getPreferredResumeMimeType = (file: File): string | undefined => {
-  const extension = getResumeFileExtension(file);
-  if (extension) {
-    return MIME_TYPE_BY_EXTENSION[extension];
+  if (hasMeaningfulValue(entry.name) && !isAbandonmentEntry(entry.name)) {
+    return true
   }
-  if (file.type && ALLOWED_RESUME_MIME_TYPES.includes(file.type)) {
-    return file.type;
-  }
-  return undefined;
-};
 
-export const isValidResumeFile = (file: File): boolean => {
-  const extension = getResumeFileExtension(file);
-  if (extension) {
-    return true;
+  if (hasMeaningfulValue(entry.career_objective) || hasMeaningfulValue(entry.app_expectations) || hasMeaningfulValue(entry.phone)) {
+    return true
   }
-  if (file.type) {
-    return ALLOWED_RESUME_MIME_TYPES.includes(file.type);
-  }
-  return false;
-};
 
-export const normalizeResumeFile = (file: File): File => {
-  const preferredType = getPreferredResumeMimeType(file);
-  if (preferredType && file.type !== preferredType) {
-    return new File([file], file.name, {
-      type: preferredType,
-      lastModified: file.lastModified,
-    });
-  }
-  return file;
-};
+  return false
+}
 
-export const buildResumeStoragePath = (userId: string, file: File): string => {
-  const extension =
-    getResumeFileExtension(file) ?? resolveExtensionFromMime(file.type) ?? "pdf";
-  const baseName = slugify(removeExtension(file.name)) || "resume";
-  const timestamp = Date.now();
-  return `${RESUME_STORAGE_PREFIX}/${userId}/${timestamp}-${baseName}.${extension}`;
-};
+interface InterestFormContextType {
+  showInterestForm: boolean
+  setShowInterestForm: (show: boolean) => void
+  hasShownFormForUser: boolean
+}
 
-export const getResumeDisplayName = (filePath: string): string => {
-  const lastSegment = filePath.split("/").pop();
-  if (!lastSegment) {
-    return "Resume";
+const InterestFormContext = createContext<InterestFormContextType | undefined>(undefined)
+
+export const useInterestForm = () => {
+  const context = useContext(InterestFormContext)
+  if (context === undefined) {
+    throw new Error('useInterestForm must be used within an InterestFormProvider')
   }
-  const [withoutExtension] = lastSegment.split(".");
-  const nameWithoutPrefix = withoutExtension.replace(/^[0-9]+-/, "");
-  const spaced = nameWithoutPrefix.replace(/-/g, " ");
-  return spaced
-    .split(" ")
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ") || "Resume";
-};
+  return context
+}
+
+export const InterestFormProvider = ({ children }: { children: React.ReactNode }) => {
+  const [showInterestForm, setShowInterestForm] = useState(false)
+  the const [hasShownFormForUser, setHasShownFormForUser] = useState(false)
+  const [hasFormEntry, setHasFormEntry] = useState<boolean | null>(null)
+  const { user, loading } = useAuth()
+
+  useEffect(() => {
+    if (user && !loading) {
+      checkExistingFormEntry()
+    }
+  }, [user, loading])
+
+  const checkExistingFormEntry = async () => {
+    if (!user) {
+      console.log('🔍 No user found, skipping form check')
+      return
+    }
+
+    console.log('🔍 Checking existing form entry for user:', user.id)
+
+    try {
+      const { data, error } = await supabase
+        .from('interest_forms')
+        .select('id, name, max_monthly_price, career_objective, app_expectations, phone')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      console.log('🔍 Database query result:', { data, error })
+
+      if (error) {
+        console.error('❌ Database error:', error)
+        // On error, don't show form to be safe
+        setHasFormEntry(true)
+        setHasShownFormForUser(true)
+        setShowInterestForm(false)
+        return
+      }
+
+      if (!data) {
+        // No entry found - user hasn't filled form yet
+        console.log('✅ No form entry found, will show form for new user')
+        setHasFormEntry(false)
+        showFormForNewUser()
+      } else if (hasCompletedForm(data as InterestFormEntry)) {
+        console.log('✅ Real form entry exists, NOT showing form')
+        setHasFormEntry(true)
+        setHasShownFormForUser(true)
+        setShowInterestForm(false)
+      } else {
+        console.log('✅ Only abandonment entry found, will show form for user')
+        setHasFormEntry(false)
+        showFormForNewUser()
+      }
+    } catch (error) {
+      console.error('❌ Error checking form entry:', error)
+      // On error, don't show form to be safe
+      setHasFormEntry(true)
+      setHasShownFormForUser(true)
+      setShowInterestForm(false)
+    }
+  }
+
+  const showFormForNewUser = () => {
+    console.log('🎯 showFormForNewUser called. hasShownFormForUser:', hasShownFormForUser)
+
+    if (!hasShownFormForUser) {
+      // Check localStorage for recent session to avoid showing immediately again
+      const lastUserId = localStorage.getItem('last_user_id')
+      const lastFormShown = localStorage.getItem('form_shown_timestamp')
+      const now = Date.now()
+      const oneHour = 60 * 60 * 1000 // 1 hour in milliseconds
+
+      console.log('🎯 localStorage check:', { lastUserId, currentUserId: user?.id, lastFormShown })
+
+      // Only show if it's a truly new session OR more than 1 hour has passed
+      if (!lastUserId || lastUserId !== user?.id ||
+          !lastFormShown || (now - parseInt(lastFormShown)) > oneHour) {
+
+        console.log('🎯 Will show form after timeout')
+        setTimeout(() => {
+          console.log('🎯 Showing form now!')
+          setShowInterestForm(true)
+          setHasShownFormForUser(true)
+          if (user) {
+            localStorage.setItem('last_user_id', user.id)
+            localStorage.setItem('form_shown_timestamp', now.toString())
+          }
+        }, 500) // Small delay to ensure smooth UX
+      } else {
+        console.log('🎯 Not showing form due to localStorage check')
+        setHasShownFormForUser(true)
+      }
+    } else {
+      console.log('🎯 Not showing form - already shown for this user')
+    }
+  }
+
+  useEffect(() => {
+    // Reset state when user signs out
+    if (!user && !loading) {
+      setHasShownFormForUser(false)
+      setHasFormEntry(null)
+      localStorage.removeItem('last_user_id')
+      localStorage.removeItem('form_shown_timestamp')
+    }
+  }, [user, loading])
+
+  return (
+    <InterestFormContext.Provider value={{
+      showInterestForm,
+      setShowInterestForm,
+      hasShownFormForUser
+    }}>
+      {children}
+    </InterestFormContext.Provider>
+  )
+}

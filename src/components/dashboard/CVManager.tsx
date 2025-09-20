@@ -91,12 +91,14 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
       const fileName = buildResumeStoragePath(user.id, normalizedFile);
 
       const { error: uploadError } = await supabase.storage
-        .from(RESUME_BUCKET)
-        .upload(fileName, normalizedFile, {
-          cacheControl: "3600",
-          contentType: normalizedFile.type,
-          upsert: false,
-        });
+  .from(RESUME_BUCKET)
+  .upload(fileName, normalizedFile, {
+    cacheControl: "3600",
+    contentType: normalizedFile.type,
+    upsert: false,
+  });
+        .upload(fileName, normalizedFile);
+main
 
       if (uploadError) throw uploadError;
 

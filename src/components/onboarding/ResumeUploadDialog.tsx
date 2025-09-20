@@ -98,12 +98,12 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
             Upload Your Resume
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Please upload your resume to continue. We'll use this to help match you with relevant job opportunities.
           </p>
-          
+
           <div className="space-y-2">
             <Label htmlFor="resume-upload">Choose File</Label>
             <Input
