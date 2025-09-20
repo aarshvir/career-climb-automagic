@@ -78,6 +78,23 @@ const isMissingResumeMetadataError = (error: PostgrestError | null) => {
   ) || message.includes("column") && message.includes("does not exist");
 };
 
+const isMissingResumesTableError = (error: PostgrestError | null) => {
+  if (!error) {
+    return false;
+  }
+
+  if (error.code === "42P01") {
+    return true;
+  }
+
+  const message = error.message?.toLowerCase() ?? "";
+  return message.includes("relation") && message.includes("resumes") && message.includes("does not exist");
+};
+
+const shouldIgnoreResumePersistenceError = (error: PostgrestError | null) => {
+  return isMissingResumeMetadataError(error) || isMissingResumesTableError(error);
+};
+
 interface SaveResumeRecordOptions {
   userId: string;
   filePath: string;
@@ -86,8 +103,20 @@ interface SaveResumeRecordOptions {
   mimeType: string;
 }
 
+export interface ResumeRecord {
+  id: string;
+  file_path: string;
+  created_at: string;
+  file_name?: string | null;
+  file_size?: number | null;
+  mime_type?: string | null;
+}
+
 interface SaveResumeRecordResult {
+  data: ResumeRecord[] | null;
   error: PostgrestError | null;
+  ignoredError?: PostgrestError | null;
+  fallbackApplied?: "minimal" | "skipped";
 }
 
 export const saveResumeRecord = async ({
@@ -105,22 +134,81 @@ export const saveResumeRecord = async ({
     mime_type: mimeType,
   };
 
-  const { error } = await supabase.from("resumes").insert(metadataPayload);
+  let { data, error } = await supabase
+    .from("resumes")
+    .insert(metadataPayload)
+    .select();
 
-  if (!error) {
-    return { error: null };
+  if (isMissingResumesTableError(error)) {
+    console.warn("Resumes table missing, skipping metadata insert", error);
+    return { data: null, error: null, ignoredError: error, fallbackApplied: "skipped" };
   }
 
-  if (!isMissingResumeMetadataError(error)) {
-    return { error };
+  if (isMissingResumeMetadataError(error)) {
+    console.warn("Resume metadata columns missing, falling back to minimal record", error);
+    ({ data, error } = await supabase
+      .from("resumes")
+      .insert({
+        user_id: userId,
+        file_path: filePath,
+      })
+      .select());
+
+    if (shouldIgnoreResumePersistenceError(error)) {
+      console.warn(
+        "Minimal resume record insert failed, continuing without database metadata",
+        error,
+      );
+      return { data: null, error: null, ignoredError: error, fallbackApplied: "skipped" };
+    }
+
+    if (!error) {
+      return { data: data as ResumeRecord[] | null, error: null, fallbackApplied: "minimal" };
+    }
   }
 
-  console.warn("Resume metadata columns missing, falling back to minimal record", error);
+  return { data: data as ResumeRecord[] | null, error };
+};
 
-  const { error: fallbackError } = await supabase.from("resumes").insert({
-    user_id: userId,
-    file_path: filePath,
-  });
+export const shouldFallbackToStorageListing = (error: PostgrestError | null) => {
+  return shouldIgnoreResumePersistenceError(error);
+};
 
-  return { error: fallbackError };
+export const listResumesFromStorage = async (
+  userId: string,
+): Promise<{ data: ResumeRecord[] | null; error: Error | null }> => {
+  const { data, error } = await supabase.storage
+    .from(RESUME_BUCKET)
+    .list(userId, {
+      limit: 100,
+      offset: 0,
+      sortBy: { column: "created_at", order: "desc" },
+    });
+
+  if (error) {
+    return { data: null, error };
+  }
+
+  const records = (data ?? [])
+    .filter((item) => item && typeof item.name === "string" && !item.name.endsWith("/"))
+    .map((item) => {
+      const metadata = (item as { metadata?: Record<string, unknown> }).metadata ?? {};
+      const size = typeof metadata.size === "number" ? metadata.size : null;
+      const mimetype = typeof metadata.mimetype === "string" ? metadata.mimetype : null;
+
+      return {
+        id: `storage:${(item as { id?: string }).id ?? item.name}`,
+        file_path: `${userId}/${item.name}`,
+        file_name: item.name,
+        file_size: size,
+        mime_type: mimetype,
+        created_at:
+          item.created_at ??
+          item.updated_at ??
+          item.last_accessed_at ??
+          new Date().toISOString(),
+      } satisfies ResumeRecord;
+    });
+
+  return { data: records, error: null };
 };
