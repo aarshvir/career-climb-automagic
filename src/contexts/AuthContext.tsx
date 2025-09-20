@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Use dynamic redirect URL for better compatibility
-      const redirectUrl = 'https://jobvance.io/auth/callback'
+      const redirectUrl = `${window.location.origin}/auth/callback`
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
