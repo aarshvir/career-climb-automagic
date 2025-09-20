@@ -11,6 +11,7 @@ import {
   buildResumeStoragePath,
   isValidResumeFile,
   normalizeResumeFile,
+  saveResumeRecord,
 } from "@/lib/resume-storage";
 
 interface Resume {
@@ -90,17 +91,21 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
 
       const { error: uploadError } = await supabase.storage
         .from(RESUME_BUCKET)
-        .upload(fileName, normalizedFile);
+        .upload(fileName, normalizedFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 
-      // Save record to database
-      const { error: dbError } = await supabase
-        .from('resumes')
-        .insert({
-          user_id: user.id,
-          file_path: fileName
-        });
+      // Save record to database with graceful fallback for legacy schemas
+      const { error: dbError } = await saveResumeRecord({
+        userId: user.id,
+        filePath: fileName,
+        originalFileName: file.name,
+        fileSize: file.size,
+        mimeType: normalizedFile.type || file.type || 'application/octet-stream',
+      });
 
       if (dbError) throw dbError;
 
