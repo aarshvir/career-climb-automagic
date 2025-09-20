@@ -10,14 +10,12 @@ import {
   RESUME_BUCKET,
   buildResumeStoragePath,
   isValidResumeFile,
+  listResumesFromStorage,
   normalizeResumeFile,
+  saveResumeRecord,
+  shouldFallbackToStorageListing,
 } from "@/lib/resume-storage";
-
-interface Resume {
-  id: string;
-  file_path: string;
-  created_at: string;
-}
+import type { ResumeRecord } from "@/lib/resume-storage";
 
 interface CVManagerProps {
   userPlan: string;
@@ -26,7 +24,7 @@ interface CVManagerProps {
 export const CVManager = ({ userPlan }: CVManagerProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [resumes, setResumes] = useState<ResumeRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   const getPlanLimits = (plan: string) => {
@@ -44,17 +42,44 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
   }, [user]);
 
   const fetchResumes = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('resumes')
-        .select('*')
-        .eq('user_id', user?.id)
+        .select('id, file_path, created_at, file_name, file_size, mime_type')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setResumes(data || []);
+      if (error) {
+        if (shouldFallbackToStorageListing(error)) {
+          console.warn('Falling back to storage listing for resumes', error);
+          const { data: storageData, error: storageError } = await listResumesFromStorage(user.id);
+          if (storageError) {
+            throw storageError;
+          }
+          setResumes(storageData ?? []);
+          return;
+        }
+
+        throw error;
+      }
+
+      setResumes((data as ResumeRecord[]) || []);
     } catch (error) {
       console.error('Error fetching resumes:', error);
+
+      if (user?.id) {
+        const { data: storageData, error: storageError } = await listResumesFromStorage(user.id);
+        if (storageError) {
+          console.error('Storage fallback failed:', storageError);
+        } else if (storageData) {
+          setResumes(storageData);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -90,17 +115,25 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
 
       const { error: uploadError } = await supabase.storage
         .from(RESUME_BUCKET)
-        .upload(fileName, normalizedFile);
+        .upload(fileName, normalizedFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 
-      // Save record to database
-      const { error: dbError } = await supabase
-        .from('resumes')
-        .insert({
-          user_id: user.id,
-          file_path: fileName
-        });
+      // Save record to database with graceful fallback for legacy schemas
+      const { error: dbError, ignoredError } = await saveResumeRecord({
+        userId: user.id,
+        filePath: fileName,
+        originalFileName: file.name,
+        fileSize: file.size,
+        mimeType: normalizedFile.type || file.type || 'application/octet-stream',
+      });
+
+      if (ignoredError) {
+        console.warn('Resume metadata not persisted due to legacy schema', ignoredError);
+      }
 
       if (dbError) throw dbError;
 
@@ -120,8 +153,12 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     }
   };
 
-  const getFileName = (filePath: string) => {
-    return filePath.split('/').pop()?.split('.')[0] || 'Resume';
+  const getFileName = (resume: ResumeRecord) => {
+    if (resume.file_name) {
+      return resume.file_name.split('.')[0] || resume.file_name;
+    }
+
+    return resume.file_path.split('/').pop()?.split('.')[0] || 'Resume';
   };
 
   const formatDate = (dateString: string) => {
@@ -181,7 +218,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
                 <div className="flex items-center gap-3">
                   <FileText className="w-4 h-4 text-primary" />
                   <div>
-                    <p className="font-medium text-sm">{getFileName(resume.file_path)}</p>
+                    <p className="font-medium text-sm">{getFileName(resume)}</p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" />
                       {formatDate(resume.created_at)}
