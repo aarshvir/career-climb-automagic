@@ -3,11 +3,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import jobvanceIcon from "@/assets/jobvance-icon.png";
 import { Link, useLocation } from "react-router-dom";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
+import { Loader2 } from "lucide-react";
+import { AuthStatusIndicator } from "@/components/AuthStatusIndicator";
+import { AuthDebugPanel } from "@/components/AuthDebugPanel";
 
 const Header = () => {
-  const { user, signInWithGoogle, signOut, loading } = useAuth();
+  const { user, signInWithGoogle, signOut, loading, isRetrying, environment } = useAuth();
   const { handlePrimaryAction } = useSignInFlow();
   const location = useLocation();
+  
+  // Show debug panel in development or lovable environment
+  const showDebugPanel = environment === 'development' || environment === 'lovable';
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -64,10 +70,16 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center space-x-2 md:space-x-4">
-          {loading ? (
-            <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+          {loading || isRetrying ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm text-muted-foreground">
+                {isRetrying ? 'Retrying...' : 'Loading...'}
+              </span>
+            </div>
            ) : user ? (
              <div className="flex items-center space-x-2 md:space-x-3">
+              <AuthStatusIndicator />
               <Button variant="ghost" size="sm" onClick={handleDashboard}>
                 Dashboard
               </Button>
@@ -77,16 +89,28 @@ const Header = () => {
             </div>
           ) : (
             <div className="flex items-center space-x-2 md:space-x-3">
-              <Button variant="ghost" size="sm" onClick={signInWithGoogle}>
+              <AuthStatusIndicator />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={signInWithGoogle}
+                disabled={isRetrying}
+              >
                 Sign In
               </Button>
-              <Button variant="hero" size="sm" onClick={handleGetStarted}>
+              <Button 
+                variant="hero" 
+                size="sm" 
+                onClick={handleGetStarted}
+                disabled={isRetrying}
+              >
                 Get Started
               </Button>
             </div>
           )}
         </div>
       </div>
+      <AuthDebugPanel show={showDebugPanel} />
     </header>
   );
 };

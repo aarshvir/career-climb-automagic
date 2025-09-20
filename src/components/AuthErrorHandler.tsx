@@ -26,6 +26,12 @@ const AuthErrorHandler = () => {
         case 'dns_error':
           errorMessage = 'Connection issue detected. Please check your internet connection or try using a different DNS (like 8.8.8.8).'
           break
+        case 'popup_blocked':
+          errorMessage = 'Sign-in popup was blocked. Please allow popups for this site and try again.'
+          break
+        case 'iframe_restriction':
+          errorMessage = 'Authentication restricted in preview mode. Try opening in a new tab for full functionality.'
+          break
       }
 
       toast({

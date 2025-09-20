@@ -8,7 +8,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { ExternalLink, RefreshCw } from "lucide-react"
+import { ExternalLink, RefreshCw, AlertTriangle } from "lucide-react"
 
 interface DNSErrorDialogProps {
   open: boolean
@@ -23,25 +23,22 @@ const DNSErrorDialog = ({ open, onClose, onRetry, isRetrying }: DNSErrorDialogPr
       <AlertDialogContent className="max-w-lg">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            <span className="text-destructive">⚠️</span>
-            Connection Issue Detected
+            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            Authentication Issue Detected
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-3">
             <p>
-              We're unable to connect to our authentication service. This is likely due to DNS resolution issues with your internet provider.
+              We're having trouble with the sign-in process. This might be due to:
             </p>
-            
-            <div className="bg-muted p-3 rounded-md">
-              <p className="font-semibold text-sm mb-2">Quick fixes to try:</p>
-              <ul className="text-sm space-y-1 list-disc list-inside">
-                <li>Switch to a public DNS like Cloudflare (1.1.1.1) or Google (8.8.8.8)</li>
-                <li>Try using a different network (mobile hotspot)</li>
-                <li>Wait a few minutes and try again</li>
-              </ul>
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              This is a known issue affecting some internet providers' DNS resolution of certain domains.
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li>Popup blocking by your browser</li>
+              <li>Iframe restrictions in preview mode</li>
+              <li>DNS resolution issues</li>
+              <li>Network connectivity problems</li>
+              <li>Browser security settings</li>
+            </ul>
+            <p className="text-sm font-medium">
+              Try allowing popups for this site, or switch to a public DNS like Google (8.8.8.8) if the issue persists.
             </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
