@@ -7,6 +7,12 @@ import { Upload, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import {
+  RESUME_BUCKET,
+  buildResumeStoragePath,
+  isValidResumeFile,
+  normalizeResumeFile,
+} from "@/lib/resume-storage";
 
 interface ResumeUploadDialogProps {
   open: boolean;
@@ -22,8 +28,7 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      if (validTypes.includes(selectedFile.type)) {
+      if (isValidResumeFile(selectedFile)) {
         setFile(selectedFile);
       } else {
         toast({
@@ -40,12 +45,12 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const normalizedFile = normalizeResumeFile(file);
+      const fileName = buildResumeStoragePath(user.id, normalizedFile);
 
       const { error: uploadError } = await supabase.storage
-        .from('jobassist')
-        .upload(fileName, file);
+        .from(RESUME_BUCKET)
+        .upload(fileName, normalizedFile);
 
       if (uploadError) throw uploadError;
 
