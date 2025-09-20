@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   RESUME_BUCKET,
   buildResumeStoragePath,
+  getResumeDisplayName,
   isValidResumeFile,
   normalizeResumeFile,
 } from "@/lib/resume-storage";
@@ -61,7 +62,8 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const input = event.target;
+    const file = input.files?.[0];
     if (!file || !user) return;
 
     if (!isValidResumeFile(file)) {
@@ -89,8 +91,14 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
       const fileName = buildResumeStoragePath(user.id, normalizedFile);
 
       const { error: uploadError } = await supabase.storage
-        .from(RESUME_BUCKET)
+  .from(RESUME_BUCKET)
+  .upload(fileName, normalizedFile, {
+    cacheControl: "3600",
+    contentType: normalizedFile.type,
+    upsert: false,
+  });
         .upload(fileName, normalizedFile);
+main
 
       if (uploadError) throw uploadError;
 
@@ -117,12 +125,13 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         description: "There was an error uploading your resume. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      // Reset the input so selecting the same file again triggers onChange
+      input.value = "";
     }
   };
 
-  const getFileName = (filePath: string) => {
-    return filePath.split('/').pop()?.split('.')[0] || 'Resume';
-  };
+  const getFileName = (filePath: string) => getResumeDisplayName(filePath);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

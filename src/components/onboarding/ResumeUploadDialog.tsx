@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ interface ResumeUploadDialogProps {
 export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -29,7 +30,7 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       if (isValidResumeFile(selectedFile)) {
-        setFile(selectedFile);
+        setFile(normalizeResumeFile(selectedFile));
       } else {
         toast({
           title: "Invalid file type",
@@ -45,12 +46,15 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
 
     setUploading(true);
     try {
-      const normalizedFile = normalizeResumeFile(file);
-      const fileName = buildResumeStoragePath(user.id, normalizedFile);
+      const fileName = buildResumeStoragePath(user.id, file);
 
       const { error: uploadError } = await supabase.storage
         .from(RESUME_BUCKET)
-        .upload(fileName, normalizedFile);
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          contentType: file.type,
+          upsert: false,
+        });
 
       if (uploadError) throw uploadError;
 
@@ -68,6 +72,10 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         description: "Your resume has been uploaded and saved.",
       });
 
+      setFile(null);
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
       onSuccess();
     } catch (error) {
       console.error('Upload failed:', error);
@@ -90,12 +98,12 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
             Upload Your Resume
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Please upload your resume to continue. We'll use this to help match you with relevant job opportunities.
           </p>
-          
+
           <div className="space-y-2">
             <Label htmlFor="resume-upload">Choose File</Label>
             <Input
@@ -104,6 +112,7 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
               accept=".pdf,.doc,.docx"
               onChange={handleFileSelect}
               disabled={uploading}
+              ref={inputRef}
             />
             {file && (
               <p className="text-sm text-muted-foreground">
