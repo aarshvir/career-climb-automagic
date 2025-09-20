@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { EXIT_TRACKING_ABANDONMENT_PLACEHOLDER } from '@/lib/interestForm';
 
 export const usePageExitTracking = (hasCompletedForm: boolean) => {
   const { user } = useAuth();
@@ -17,11 +18,7 @@ export const usePageExitTracking = (hasCompletedForm: boolean) => {
             .insert({
               user_id: user.id,
               email: user.email || '',
-              name: 'Form abandoned',
-              phone: 'N/A',
-              career_objective: 'Form not completed',
-              max_monthly_price: 0,
-              app_expectations: 'Form abandoned before completion'
+              ...EXIT_TRACKING_ABANDONMENT_PLACEHOLDER
             });
         } catch (error) {
           // Silently handle errors during page unload

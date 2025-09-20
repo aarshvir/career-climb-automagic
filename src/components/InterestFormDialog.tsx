@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState, useCallback } from "react";
+import { DIALOG_ABANDONMENT_PLACEHOLDER, hasCompletedForm } from "@/lib/interestForm";
 
 const formSchema = z.object({
   name: z.string().optional().default(""),
@@ -57,7 +58,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       // Only track abandonment if user doesn't already have a real entry
       supabase
         .from('interest_forms')
-        .select('id, name')
+        .select('id, name, phone, career_objective, max_monthly_price, app_expectations')
         .eq('user_id', user.id)
         .maybeSingle()
         .then(({ data, error }) => {
@@ -65,18 +66,14 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
             console.error('❌ Error checking for existing entry:', error);
             return;
           }
-          
-          if (!data || ['user dropped from dialog', 'Form abandoned', 'Form not completed'].includes(data.name || '')) {
+
+          if (!data || !hasCompletedForm(data)) {
             // User doesn't have a real entry yet, update or create abandonment record
             console.log('📊 Creating/updating abandonment record');
             supabase.from('interest_forms').upsert({
               user_id: user.id,
               email: user.email || '',
-              name: 'user dropped from dialog',
-              phone: '+99999999999',
-              career_objective: '',
-              max_monthly_price: 0,
-              app_expectations: ''
+              ...DIALOG_ABANDONMENT_PLACEHOLDER
             }, {
               onConflict: 'user_id'
             }).then(({ error }) => {
