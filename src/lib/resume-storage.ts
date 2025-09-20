@@ -11,6 +11,10 @@ export type AllowedResumeExtension = keyof typeof MIME_TYPE_BY_EXTENSION;
 export const ALLOWED_RESUME_EXTENSIONS = Object.keys(MIME_TYPE_BY_EXTENSION) as AllowedResumeExtension[];
 export const ALLOWED_RESUME_MIME_TYPES = Object.values(MIME_TYPE_BY_EXTENSION);
 
+const isAllowedMimeType = (mimeType: string): mimeType is typeof ALLOWED_RESUME_MIME_TYPES[number] => {
+  return (ALLOWED_RESUME_MIME_TYPES as string[]).includes(mimeType);
+};
+
 export const getResumeFileExtension = (file: File): AllowedResumeExtension | undefined => {
   const parts = file.name.split(".");
   if (parts.length < 2) {
@@ -28,7 +32,7 @@ export const getPreferredResumeMimeType = (file: File): string | undefined => {
   if (extension) {
     return MIME_TYPE_BY_EXTENSION[extension];
   }
-  if (file.type && ALLOWED_RESUME_MIME_TYPES.includes(file.type)) {
+  if (file.type && isAllowedMimeType(file.type)) {
     return file.type;
   }
   return undefined;
@@ -39,7 +43,7 @@ export const isValidResumeFile = (file: File): boolean => {
   if (extension) {
     return true;
   }
-  return file.type ? ALLOWED_RESUME_MIME_TYPES.includes(file.type) : false;
+  return file.type ? isAllowedMimeType(file.type) : false;
 };
 
 export const normalizeResumeFile = (file: File): File => {
