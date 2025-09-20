@@ -56,5 +56,5 @@ export const normalizeResumeFile = (file: File): File => {
 
 export const buildResumeStoragePath = (userId: string, file: File): string => {
   const extension = getResumeFileExtension(file) ?? "pdf";
-  return `resumes/${userId}/${Date.now()}.${extension}`;
+  return `${userId}/${Date.now()}.${extension}`;
 };

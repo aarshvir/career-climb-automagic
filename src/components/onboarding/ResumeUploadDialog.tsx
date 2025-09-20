@@ -52,8 +52,18 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
-        userId: user.id
+        userId: user.id,
+        userEmail: user.email,
+        session: !!supabase.auth.getSession()
       });
+
+      // Check current session
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      console.log('Current session:', { sessionData, sessionError });
+      
+      if (!sessionData.session) {
+        throw new Error('No active session found');
+      }
 
       const normalizedFile = normalizeResumeFile(file);
       const fileName = buildResumeStoragePath(user.id, normalizedFile);
@@ -102,6 +112,9 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         .insert({
           user_id: user.id,
           file_path: fileName,
+          file_name: file.name,
+          file_size: file.size,
+          mime_type: normalizedFile.type,
         })
         .select();
 
