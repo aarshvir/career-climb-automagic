@@ -12,6 +12,7 @@ import {
   buildResumeStoragePath,
   isValidResumeFile,
   normalizeResumeFile,
+  saveResumeRecord,
 } from "@/lib/resume-storage";
 
 interface ResumeUploadDialogProps {
@@ -107,18 +108,15 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
       console.log('File uploaded successfully, saving to database...');
 
       // Save to database
-      const { data: dbData, error: dbError } = await supabase
-        .from('resumes')
-        .insert({
-          user_id: user.id,
-          file_path: fileName,
-          file_name: file.name,
-          file_size: file.size,
-          mime_type: normalizedFile.type,
-        })
-        .select();
+      const { error: dbError } = await saveResumeRecord({
+        userId: user.id,
+        filePath: fileName,
+        originalFileName: file.name,
+        fileSize: file.size,
+        mimeType: normalizedFile.type || file.type || "application/octet-stream",
+      });
 
-      console.log('Database insert result:', { dbData, dbError });
+      console.log('Database insert result:', { dbError });
 
       if (dbError) {
         console.error('Database error details:', dbError);
@@ -133,26 +131,35 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
       });
 
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const uploadError = error as Partial<{
+        message: string;
+        statusCode: number;
+        details: string;
+        hint: string;
+        code: string;
+      }>;
+
       console.error('Upload failed with error:', {
         error,
-        message: error?.message,
-        statusCode: error?.statusCode,
-        details: error?.details,
-        hint: error?.hint,
-        code: error?.code
+        message: uploadError?.message,
+        statusCode: uploadError?.statusCode,
+        details: uploadError?.details,
+        hint: uploadError?.hint,
+        code: uploadError?.code
       });
-      
+
       let errorMessage = "There was an error uploading your resume. Please try again.";
-      
-      if (error?.message?.includes('new row violates row-level security policy')) {
+      const message = typeof uploadError?.message === 'string' ? uploadError.message : '';
+
+      if (message.includes('new row violates row-level security policy')) {
         errorMessage = "Permission denied. Please ensure you're logged in and try again.";
-      } else if (error?.message?.includes('bucket')) {
+      } else if (message.includes('bucket')) {
         errorMessage = "Storage configuration error. Please contact support.";
-      } else if (error?.statusCode === 413) {
+      } else if (uploadError?.statusCode === 413) {
         errorMessage = "File too large. Please upload a smaller file.";
       }
-      
+
       toast({
         title: "Upload failed",
         description: errorMessage,

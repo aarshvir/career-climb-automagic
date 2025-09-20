@@ -1,3 +1,7 @@
+import type { PostgrestError } from "@supabase/supabase-js";
+
+import { supabase } from "@/integrations/supabase/client";
+
 const MIME_TYPE_BY_EXTENSION = {
   pdf: "application/pdf",
   doc: "application/msword",
@@ -57,4 +61,66 @@ export const normalizeResumeFile = (file: File): File => {
 export const buildResumeStoragePath = (userId: string, file: File): string => {
   const extension = getResumeFileExtension(file) ?? "pdf";
   return `${userId}/${Date.now()}.${extension}`;
+};
+
+const isMissingResumeMetadataError = (error: PostgrestError | null) => {
+  if (!error) {
+    return false;
+  }
+
+  if (error.code === "42703") {
+    return true;
+  }
+
+  const message = error.message?.toLowerCase() ?? "";
+  return (
+    message.includes("file_name") && message.includes("does not exist")
+  ) || message.includes("column") && message.includes("does not exist");
+};
+
+interface SaveResumeRecordOptions {
+  userId: string;
+  filePath: string;
+  originalFileName: string;
+  fileSize: number;
+  mimeType: string;
+}
+
+interface SaveResumeRecordResult {
+  error: PostgrestError | null;
+}
+
+export const saveResumeRecord = async ({
+  userId,
+  filePath,
+  originalFileName,
+  fileSize,
+  mimeType,
+}: SaveResumeRecordOptions): Promise<SaveResumeRecordResult> => {
+  const metadataPayload = {
+    user_id: userId,
+    file_path: filePath,
+    file_name: originalFileName,
+    file_size: fileSize,
+    mime_type: mimeType,
+  };
+
+  const { error } = await supabase.from("resumes").insert(metadataPayload);
+
+  if (!error) {
+    return { error: null };
+  }
+
+  if (!isMissingResumeMetadataError(error)) {
+    return { error };
+  }
+
+  console.warn("Resume metadata columns missing, falling back to minimal record", error);
+
+  const { error: fallbackError } = await supabase.from("resumes").insert({
+    user_id: userId,
+    file_path: filePath,
+  });
+
+  return { error: fallbackError };
 };
