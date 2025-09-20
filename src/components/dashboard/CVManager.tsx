@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Upload, Plus, ExternalLink, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  RESUME_BUCKET,
+  buildResumeStoragePath,
+  isValidResumeFile,
+  normalizeResumeFile,
+} from "@/lib/resume-storage";
 
 interface Resume {
   id: string;
@@ -58,6 +64,15 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
+    if (!isValidResumeFile(file)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PDF, DOC, or DOCX file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const maxResumes = getPlanLimits(userPlan);
     if (resumes.length >= maxResumes) {
       toast({
@@ -70,12 +85,12 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
 
     try {
       // Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
+      const normalizedFile = normalizeResumeFile(file);
+      const fileName = buildResumeStoragePath(user.id, normalizedFile);
+
       const { error: uploadError } = await supabase.storage
-        .from('jobassist')
-        .upload(`resumes/${fileName}`, file);
+        .from(RESUME_BUCKET)
+        .upload(fileName, normalizedFile);
 
       if (uploadError) throw uploadError;
 
@@ -84,7 +99,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         .from('resumes')
         .insert({
           user_id: user.id,
-          file_path: `resumes/${fileName}`
+          file_path: fileName
         });
 
       if (dbError) throw dbError;

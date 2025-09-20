@@ -30,6 +30,19 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
     }
   }, [user, loading])
 
+  const ABANDONMENT_NAMES = new Set([
+    'user dropped from dialog',
+    'form abandoned',
+    'form not completed'
+  ])
+
+  const isAbandonmentEntry = (name: string | null | undefined) => {
+    if (!name) {
+      return false
+    }
+    return ABANDONMENT_NAMES.has(name.trim().toLowerCase())
+  }
+
   const checkExistingFormEntry = async () => {
     if (!user) {
       console.log('🔍 No user found, skipping form check')
@@ -61,7 +74,7 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
         console.log('✅ No form entry found, will show form for new user')
         setHasFormEntry(false)
         showFormForNewUser()
-      } else if (data.name && !['user dropped from dialog', 'Form abandoned', 'Form not completed'].includes(data.name)) {
+      } else if (!isAbandonmentEntry(data.name)) {
         // User has a real entry (not abandonment)
         console.log('✅ Real form entry exists, NOT showing form')
         setHasFormEntry(true)
