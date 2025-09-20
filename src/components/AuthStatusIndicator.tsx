@@ -36,14 +36,6 @@ export const AuthStatusIndicator = () => {
     );
   }
 
-  if (inIframe && environment === 'lovable') {
-    return (
-      <Badge variant="outline" className="gap-2">
-        <AlertCircle className="h-3 w-3" />
-        Iframe mode - popup auth
-      </Badge>
-    );
-  }
 
   return (
     <Badge variant="outline" className="gap-2">
