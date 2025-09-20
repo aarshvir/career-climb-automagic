@@ -41,39 +41,108 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
   };
 
   const handleUpload = async () => {
-    if (!file || !user) return;
+    if (!file || !user) {
+      console.error('Upload failed: Missing file or user', { file: !!file, user: !!user });
+      return;
+    }
 
     setUploading(true);
     try {
+      console.log('Starting upload process...', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        userId: user.id
+      });
+
       const normalizedFile = normalizeResumeFile(file);
       const fileName = buildResumeStoragePath(user.id, normalizedFile);
+      
+      console.log('Normalized file details:', {
+        originalType: file.type,
+        normalizedType: normalizedFile.type,
+        fileName: fileName,
+        bucketName: RESUME_BUCKET
+      });
 
-      const { error: uploadError } = await supabase.storage
+      // Test bucket access first
+      const { data: buckets, error: bucketListError } = await supabase.storage.listBuckets();
+      console.log('Available buckets:', buckets, 'Error:', bucketListError);
+
+      // Check if user can access the bucket
+      const { data: bucketFiles, error: bucketAccessError } = await supabase.storage
         .from(RESUME_BUCKET)
-        .upload(fileName, normalizedFile);
+        .list();
+      console.log('Bucket access test:', { bucketFiles, bucketAccessError });
 
-      if (uploadError) throw uploadError;
+      // Attempt upload
+      console.log('Attempting file upload...');
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from(RESUME_BUCKET)
+        .upload(fileName, normalizedFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
-      const { error: dbError } = await supabase
+      console.log('Upload result:', { uploadData, uploadError });
+
+      if (uploadError) {
+        console.error('Upload error details:', {
+          message: uploadError.message,
+          error: uploadError
+        });
+        throw uploadError;
+      }
+
+      console.log('File uploaded successfully, saving to database...');
+
+      // Save to database
+      const { data: dbData, error: dbError } = await supabase
         .from('resumes')
         .insert({
           user_id: user.id,
           file_path: fileName,
-        });
+        })
+        .select();
 
-      if (dbError) throw dbError;
+      console.log('Database insert result:', { dbData, dbError });
 
+      if (dbError) {
+        console.error('Database error details:', dbError);
+        throw dbError;
+      }
+
+      console.log('Resume upload completed successfully');
+      
       toast({
         title: "Resume uploaded successfully",
         description: "Your resume has been uploaded and saved.",
       });
 
       onSuccess();
-    } catch (error) {
-      console.error('Upload failed:', error);
+    } catch (error: any) {
+      console.error('Upload failed with error:', {
+        error,
+        message: error?.message,
+        statusCode: error?.statusCode,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      });
+      
+      let errorMessage = "There was an error uploading your resume. Please try again.";
+      
+      if (error?.message?.includes('new row violates row-level security policy')) {
+        errorMessage = "Permission denied. Please ensure you're logged in and try again.";
+      } else if (error?.message?.includes('bucket')) {
+        errorMessage = "Storage configuration error. Please contact support.";
+      } else if (error?.statusCode === 413) {
+        errorMessage = "File too large. Please upload a smaller file.";
+      }
+      
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your resume. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
