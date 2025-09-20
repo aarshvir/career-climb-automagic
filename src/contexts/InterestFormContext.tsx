@@ -2,6 +2,55 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/integrations/supabase/client'
 
+type InterestFormEntry = {
+  id: string
+  name: string | null
+  max_monthly_price: number | null
+  career_objective: string | null
+  app_expectations: string | null
+  phone: string | null
+}
+
+const ABANDONMENT_NAMES = new Set([
+  'user dropped from dialog',
+  'form abandoned',
+  'form not completed'
+])
+
+const isAbandonmentEntry = (name: string | null | undefined) => {
+  if (!name) {
+    return false
+  }
+  return ABANDONMENT_NAMES.has(name.trim().toLowerCase())
+}
+
+const hasMeaningfulValue = (value: string | null | undefined) => {
+  return Boolean(value && value.trim().length > 0)
+}
+
+const hasCompletedForm = (entry: InterestFormEntry | null) => {
+  if (!entry) {
+    return false
+  }
+
+  if (entry.max_monthly_price && entry.max_monthly_price > 0) {
+    // Real submissions always include a positive budget value
+    if (!isAbandonmentEntry(entry.name)) {
+      return true
+    }
+  }
+
+  if (hasMeaningfulValue(entry.name) && !isAbandonmentEntry(entry.name)) {
+    return true
+  }
+
+  if (hasMeaningfulValue(entry.career_objective) || hasMeaningfulValue(entry.app_expectations) || hasMeaningfulValue(entry.phone)) {
+    return true
+  }
+
+  return false
+}
+
 interface InterestFormContextType {
   showInterestForm: boolean
   setShowInterestForm: (show: boolean) => void
@@ -41,7 +90,7 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
     try {
       const { data, error } = await supabase
         .from('interest_forms')
-        .select('id, name')
+        .select('id, name, max_monthly_price, career_objective, app_expectations, phone')
         .eq('user_id', user.id)
         .maybeSingle()
 
@@ -61,14 +110,12 @@ export const InterestFormProvider = ({ children }: { children: React.ReactNode }
         console.log('✅ No form entry found, will show form for new user')
         setHasFormEntry(false)
         showFormForNewUser()
-      } else if (data.name && !['user dropped from dialog', 'Form abandoned', 'Form not completed'].includes(data.name)) {
-        // User has a real entry (not abandonment)
+      } else if (hasCompletedForm(data as InterestFormEntry)) {
         console.log('✅ Real form entry exists, NOT showing form')
         setHasFormEntry(true)
         setHasShownFormForUser(true)
         setShowInterestForm(false)
       } else {
-        // User only has abandonment entry - treat as new user
         console.log('✅ Only abandonment entry found, will show form for user')
         setHasFormEntry(false)
         showFormForNewUser()

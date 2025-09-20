@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Upload, Plus, ExternalLink, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  RESUME_BUCKET,
+  buildResumeStoragePath,
+  getResumeDisplayName,
+  isValidResumeFile,
+  normalizeResumeFile,
+} from "@/lib/resume-storage";
 
 interface Resume {
   id: string;
@@ -55,8 +62,18 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const input = event.target;
+    const file = input.files?.[0];
     if (!file || !user) return;
+
+    if (!isValidResumeFile(file)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PDF, DOC, or DOCX file.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const maxResumes = getPlanLimits(userPlan);
     if (resumes.length >= maxResumes) {
@@ -70,12 +87,16 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
 
     try {
       // Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
+      const normalizedFile = normalizeResumeFile(file);
+      const fileName = buildResumeStoragePath(user.id, normalizedFile);
+
       const { error: uploadError } = await supabase.storage
-        .from('jobassist')
-        .upload(`resumes/${fileName}`, file);
+        .from(RESUME_BUCKET)
+        .upload(fileName, normalizedFile, {
+          cacheControl: "3600",
+          contentType: normalizedFile.type,
+          upsert: false,
+        });
 
       if (uploadError) throw uploadError;
 
@@ -84,7 +105,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         .from('resumes')
         .insert({
           user_id: user.id,
-          file_path: `resumes/${fileName}`
+          file_path: fileName
         });
 
       if (dbError) throw dbError;
@@ -102,12 +123,13 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         description: "There was an error uploading your resume. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      // Reset the input so selecting the same file again triggers onChange
+      input.value = "";
     }
   };
 
-  const getFileName = (filePath: string) => {
-    return filePath.split('/').pop()?.split('.')[0] || 'Resume';
-  };
+  const getFileName = (filePath: string) => getResumeDisplayName(filePath);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

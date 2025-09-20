@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,12 @@ import { Upload, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import {
+  RESUME_BUCKET,
+  buildResumeStoragePath,
+  isValidResumeFile,
+  normalizeResumeFile,
+} from "@/lib/resume-storage";
 
 interface ResumeUploadDialogProps {
   open: boolean;
@@ -16,15 +22,15 @@ interface ResumeUploadDialogProps {
 export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      if (validTypes.includes(selectedFile.type)) {
-        setFile(selectedFile);
+      if (isValidResumeFile(selectedFile)) {
+        setFile(normalizeResumeFile(selectedFile));
       } else {
         toast({
           title: "Invalid file type",
@@ -40,12 +46,15 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = buildResumeStoragePath(user.id, file);
 
       const { error: uploadError } = await supabase.storage
-        .from('jobassist')
-        .upload(fileName, file);
+        .from(RESUME_BUCKET)
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          contentType: file.type,
+          upsert: false,
+        });
 
       if (uploadError) throw uploadError;
 
@@ -63,6 +72,10 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         description: "Your resume has been uploaded and saved.",
       });
 
+      setFile(null);
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
       onSuccess();
     } catch (error) {
       console.error('Upload failed:', error);
@@ -99,6 +112,7 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
               accept=".pdf,.doc,.docx"
               onChange={handleFileSelect}
               disabled={uploading}
+              ref={inputRef}
             />
             {file && (
               <p className="text-sm text-muted-foreground">

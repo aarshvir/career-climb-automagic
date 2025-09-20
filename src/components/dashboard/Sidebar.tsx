@@ -26,12 +26,19 @@ interface UserProfile {
   subscription_status?: string;
 }
 
+interface UserPreferences {
+  location: string | null;
+  job_title: string | null;
+  seniority_level: string | null;
+  job_type: string | null;
+}
+
 export const Sidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [preferences, setPreferences] = useState<any>(null);
+  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -57,7 +64,7 @@ export const Sidebar = () => {
         .eq('user_id', user?.id)
         .maybeSingle();
 
-      setPreferences(preferencesData);
+      setPreferences(preferencesData ?? null);
     } catch (error) {
       console.error('Error fetching profile:', error);
       // Default to free plan if error
