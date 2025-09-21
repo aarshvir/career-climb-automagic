@@ -12,16 +12,15 @@ export const PremiumHeader = () => {
   return (
     <header className="floating-header border-b border-border/10">
       <div className="content-wrapper py-0">
-        <div className="h-20 flex items-center justify-between">
-          <div className="flex items-center gap-6">
+        <div className="h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <SidebarTrigger className="lg:hidden interactive-element" />
-            
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search jobs, companies, or keywords..."
-                  className="w-80 pl-10 bg-muted/30 border-border/30 focus:bg-background/80 focus:border-primary/30 transition-all duration-200"
+                  placeholder="Search jobs, companies..."
+                  className="w-72 pl-10 bg-muted/30 border-border/30 focus:bg-background/80 focus:border-primary/30 transition-all duration-200"
                 />
               </div>
               <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">

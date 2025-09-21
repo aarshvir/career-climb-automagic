@@ -84,23 +84,23 @@ export const PremiumSidebar = () => {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border/10 bg-card/30 backdrop-blur-sm">
-      <SidebarHeader className="border-b border-border/10 p-6">
+      <SidebarHeader className="border-b border-border/10 p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-primary-foreground font-bold text-lg">J</span>
+          <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center shadow-md">
+            <span className="text-primary-foreground font-bold text-sm">J</span>
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-display font-semibold text-foreground">JobVance</span>
-              <span className="text-xs text-muted-foreground">AI-Powered Job Search</span>
+              <span className="text-base font-semibold text-foreground">JobVance</span>
+              <span className="text-xs text-muted-foreground">AI Job Search</span>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-4 space-y-6">
+      <SidebarContent className="p-3 space-y-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
             Main Navigation
           </SidebarGroupLabel>
           <SidebarMenu className="space-y-1">
@@ -112,20 +112,20 @@ export const PremiumSidebar = () => {
                     asChild 
                     isActive={isActive}
                     className={cn(
-                      "w-full justify-start gap-3 py-3 px-3 rounded-xl transition-all duration-200 group",
+                      "w-full justify-start gap-3 py-2.5 px-3 rounded-lg transition-all duration-200 group",
                       isActive 
                         ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
                         : "hover:bg-muted/50 hover:translate-x-1"
                     )}
                   >
                     <Link to={item.url} className="flex items-center gap-3">
-                      <item.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", isActive && "text-primary-foreground")} />
+                      <item.icon className={cn("h-4 w-4 transition-transform group-hover:scale-105", isActive && "text-primary-foreground")} />
                       {!isCollapsed && (
                         <>
                           <span className="font-medium">{item.title}</span>
                           {item.badge && (
                             <span className={cn(
-                              "ml-auto text-xs px-2 py-1 rounded-lg font-medium",
+                              "ml-auto text-xs px-2 py-0.5 rounded-md font-medium",
                               isActive 
                                 ? "bg-primary-foreground/20 text-primary-foreground" 
                                 : "bg-primary/10 text-primary"

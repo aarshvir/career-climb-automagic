@@ -53,18 +53,18 @@ export const SearchAndFilters = ({ searchQuery, onSearchChange }: SearchAndFilte
               placeholder="Describe your ideal job or search by keywords..." 
               value={localQuery}
               onChange={(e) => setLocalQuery(e.target.value)}
-              className="pl-12 pr-4 py-3 text-base bg-background/50 backdrop-blur-sm border-border/50 focus:bg-background/80 transition-all duration-300"
+              className="pl-12 pr-20 py-2.5 text-sm bg-background/50 backdrop-blur-sm border-border/50 focus:bg-background/80 transition-all duration-300"
             />
             <Button 
               type="submit"
               size="sm" 
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-primary hover:opacity-90 px-3 py-1.5"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-gradient-primary hover:opacity-90 px-3 py-1.5 text-xs"
             >
               <Zap className="h-3 w-3 mr-1" />
               AI Search
             </Button>
           </div>
-          <Button variant="outline" className="px-6 py-3 border-border/50 hover:bg-accent/50 backdrop-blur-sm">
+          <Button variant="outline" className="px-4 py-2.5 border-border/50 hover:bg-accent/50 backdrop-blur-sm text-sm">
             <Filter className="h-4 w-4 mr-2" />
             Advanced
           </Button>

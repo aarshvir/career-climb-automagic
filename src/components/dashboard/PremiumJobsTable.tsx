@@ -232,15 +232,15 @@ export const PremiumJobsTable = ({ userPlan, searchQuery }: PremiumJobsTableProp
                 >
                   <TableCell className="py-4">
                     <div className="space-y-2">
-                      <div className="font-medium text-sm group-hover:text-primary transition-colors">
+                      <div className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
                         {job.job_title}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="outline" className="text-xs">
                           {job.job_type}
                         </Badge>
                         <Badge variant={job.application_status === 'applied' ? 'default' : 'secondary'} className="text-xs">
-                          {job.application_status}
+                          {job.application_status === 'applied' ? 'Applied' : 'Not Applied'}
                         </Badge>
                       </div>
                     </div>
@@ -254,21 +254,21 @@ export const PremiumJobsTable = ({ userPlan, searchQuery }: PremiumJobsTableProp
                           <Building2 className="h-3 w-3" />
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-medium text-sm">{job.company_name}</span>
+                      <span className="font-medium text-sm truncate max-w-[120px]">{job.company_name}</span>
                     </div>
                   </TableCell>
                   
                   <TableCell>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      {job.location}
+                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate max-w-[100px]">{job.location}</span>
                     </div>
                   </TableCell>
                   
                   <TableCell>
                     <div className="flex items-center gap-1 text-sm">
-                      <DollarSign className="h-3 w-3 text-success" />
-                      {formatSalary(job.salary_range)}
+                      <DollarSign className="h-3 w-3 text-success flex-shrink-0" />
+                      <span className="truncate max-w-[120px]">{formatSalary(job.salary_range)}</span>
                     </div>
                   </TableCell>
                   
