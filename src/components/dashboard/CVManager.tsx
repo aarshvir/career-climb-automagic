@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
 import { FileText, Upload, Plus, ExternalLink, Clock } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   RESUME_BUCKET,
   buildResumeStoragePath,
@@ -29,9 +30,12 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
 
   const getPlanLimits = (plan: string) => {
     switch (plan) {
-      case 'elite': return 5;
-      case 'pro': return 3;
-      default: return 1;
+      case "elite":
+        return 5;
+      case "pro":
+        return 3;
+      default:
+        return 1;
     }
   };
 
@@ -39,6 +43,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     if (user) {
       fetchResumes();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchResumes = async () => {
@@ -49,14 +54,14 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
 
     try {
       const { data, error } = await supabase
-        .from('resumes')
-        .select('id, file_path, created_at, file_name, file_size, mime_type')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .from("resumes")
+        .select("id, file_path, created_at, file_name, file_size, mime_type")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) {
         if (shouldFallbackToStorageListing(error)) {
-          console.warn('Falling back to storage listing for resumes', error);
+          console.warn("Falling back to storage listing for resumes", error);
           const { data: storageData, error: storageError } = await listResumesFromStorage(user.id);
           if (storageError) {
             throw storageError;
@@ -70,12 +75,12 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
 
       setResumes((data as ResumeRecord[]) || []);
     } catch (error) {
-      console.error('Error fetching resumes:', error);
+      console.error("Error fetching resumes:", error);
 
       if (user?.id) {
         const { data: storageData, error: storageError } = await listResumesFromStorage(user.id);
         if (storageError) {
-          console.error('Storage fallback failed:', storageError);
+          console.error("Storage fallback failed:", storageError);
         } else if (storageData) {
           setResumes(storageData);
         }
@@ -103,7 +108,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
       toast({
         title: "Resume limit reached",
         description: `Your ${userPlan} plan allows up to ${maxResumes} resume(s). Please upgrade to add more.`,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -113,58 +118,63 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
       const normalizedFile = normalizeResumeFile(file);
       const fileName = buildResumeStoragePath(user.id, normalizedFile);
 
-      const { error: uploadError } = await supabase.storage
-        .from(RESUME_BUCKET)
-        .upload(fileName, normalizedFile, {
-          cacheControl: '3600',
-          upsert: true
-        });
+      const { error: uploadError } = await supabase.storage.from(RESUME_BUCKET).upload(fileName, normalizedFile, {
+        cacheControl: "3600",
+        upsert: true,
+      });
 
       if (uploadError) throw uploadError;
 
       // Save record to database with graceful fallback for legacy schemas
-      const { error: dbError, ignoredError } = await saveResumeRecord({
+      const { data: recordData, error: dbError, ignoredError, fallbackApplied } = await saveResumeRecord({
         userId: user.id,
         filePath: fileName,
         originalFileName: file.name,
         fileSize: file.size,
-        mimeType: normalizedFile.type || file.type || 'application/octet-stream',
+        mimeType: normalizedFile.type || file.type || "application/octet-stream",
       });
 
-      if (ignoredError) {
-        console.warn('Resume metadata not persisted due to legacy schema', ignoredError);
-      }
+      console.log("Database insert result:", { recordData, dbError, ignoredError, fallbackApplied });
 
       if (dbError) throw dbError;
 
+      if (ignoredError) {
+        console.warn(
+          "Database metadata was ignored due to missing columns:",
+          ignoredError,
+          "fallback applied:",
+          fallbackApplied,
+        );
+      }
+
       toast({
         title: "Resume uploaded successfully",
-        description: "Your resume has been uploaded and is ready to use."
+        description: "Your resume has been uploaded and is ready to use.",
       });
 
       fetchResumes();
     } catch (error) {
-      console.error('Error uploading resume:', error);
+      console.error("Error uploading resume:", error);
       toast({
         title: "Upload failed",
         description: "There was an error uploading your resume. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const getFileName = (resume: ResumeRecord) => {
     if (resume.file_name) {
-      return resume.file_name.split('.')[0] || resume.file_name;
+      return resume.file_name.split(".")[0] || resume.file_name;
     }
 
-    return resume.file_path.split('/').pop()?.split('.')[0] || 'Resume';
+    return resume.file_path.split("/").pop()?.split(".")[0] || "Resume";
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -247,27 +257,18 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               disabled={resumes.length >= maxResumes}
             />
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full"
-              disabled={resumes.length >= maxResumes}
-            >
+            <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= maxResumes}>
               <Upload className="w-4 h-4 mr-2" />
               Upload
             </Button>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            disabled={resumes.length >= maxResumes}
-          >
+          <Button variant="outline" size="sm" disabled={resumes.length >= maxResumes}>
             <Plus className="w-4 h-4 mr-2" />
             Create
           </Button>
         </div>
 
-        {resumes.length >= maxResumes && userPlan === 'free' && (
+        {resumes.length >= maxResumes && userPlan === "free" && (
           <div className="p-3 bg-muted rounded-lg">
             <p className="text-sm text-center">
               <span className="font-medium">Resume limit reached.</span>

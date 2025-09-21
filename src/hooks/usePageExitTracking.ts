@@ -22,7 +22,9 @@ export const usePageExitTracking = (hasCompletedForm: boolean) => {
             });
         } catch (error) {
           // Silently handle errors during page unload
-          console.warn('Page exit tracking failed:', error);
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Page exit tracking failed:', error);
+          }
         }
       }
     };
