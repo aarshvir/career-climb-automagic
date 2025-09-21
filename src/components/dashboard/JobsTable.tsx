@@ -1,269 +1,318 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ExternalLink, Eye, Zap, FileText, Building, MapPin } from "lucide-react";
-import { JobDetailsDrawer } from "./JobDetailsDrawer";
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { ExternalLink, Eye, FileText, Mail, Download, Crown } from 'lucide-react';
+import { JobDetailsDrawer } from './JobDetailsDrawer';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { useToast } from '@/hooks/use-toast';
 
+// Updated interface to match new database schema
 interface JobMatch {
   id: string;
-  company: string;
-  sector: string;
-  jobTitle: string;
-  jdSnippet: string;
-  atsScore: number;
-  cvUrl?: string;
-  jobUrl: string;
-  appliedStatus?: 'applied' | 'pending' | 'reviewing';
+  job_title: string;
+  company_name: string;
+  job_description?: string;
+  salary_range?: string;
+  location?: string;
+  job_url?: string;
+  resume_match_score: number;
+  ats_score: number;
+  compatibility_score: number;
+  optimized_resume_url?: string;
+  cover_letter_url?: string;
+  email_draft_url?: string;
+  application_status: string;
+  scraped_date: string;
 }
 
 interface JobsTableProps {
-  jobs: JobMatch[];
   userPlan: string;
   searchQuery: string;
 }
 
-export const JobsTable = ({ jobs, userPlan, searchQuery }: JobsTableProps) => {
+export function JobsTable({ userPlan, searchQuery }: JobsTableProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const planLimits = usePlanLimits(userPlan);
+  const [jobs, setJobs] = useState<JobMatch[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<JobMatch | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetchJobs();
+    }
+  }, [user]);
+
+  const fetchJobs = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('job_applications')
+        .select(`
+          *,
+          daily_job_batches!inner(
+            batch_date,
+            status
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('resume_match_score', { ascending: false });
+
+      if (error) throw error;
+      setJobs(data || []);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch job applications",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter jobs based on search query
-  const filteredJobs = jobs.filter(job => 
-    job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.sector.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredJobs = jobs.filter(job =>
+    job.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.job_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.job_description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Plan-based gating logic
   const getVisibleJobs = () => {
-    switch (userPlan) {
-      case 'elite':
-        return filteredJobs; // Show all
-      case 'pro':
-        return filteredJobs.slice(0, 25); // Show first 25
-      default:
-        return filteredJobs.slice(0, 5); // Show first 5 for free
-    }
+    return filteredJobs.slice(0, planLimits.dailyJobApplications);
   };
 
   const getGatedJobs = () => {
-    switch (userPlan) {
-      case 'elite':
-        return []; // No gating
-      case 'pro':
-        return filteredJobs.slice(25, 35); // Show 10 gated
-      default:
-        return filteredJobs.slice(5, 15); // Show 10 gated
+    return filteredJobs.slice(planLimits.dailyJobApplications);
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600 bg-green-50';
+    if (score >= 60) return 'text-yellow-600 bg-yellow-50';
+    return 'text-red-600 bg-red-50';
+  };
+
+  const downloadDocument = async (url: string, filename: string) => {
+    try {
+      // In a real implementation, you'd download from Supabase storage
+      // For now, we'll just show a toast
+      toast({
+        title: "Download Started",
+        description: `Downloading ${filename}...`,
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download document",
+        variant: "destructive",
+      });
     }
   };
 
-  const visibleJobs = getVisibleJobs();
-  const gatedJobs = getGatedJobs();
-
-  const handleJobView = (job: JobMatch) => {
+  const openJobDetails = (job: JobMatch) => {
     setSelectedJob(job);
-    setDrawerOpen(true);
+    setIsDrawerOpen(true);
   };
 
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'applied': return 'bg-success/10 text-success';
-      case 'pending': return 'bg-accent/10 text-accent';
-      case 'reviewing': return 'bg-primary/10 text-primary';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded mb-4"></div>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-16 bg-muted rounded mb-2"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-  const truncateText = (text: string, wordLimit: number = 10) => {
-    const words = text.split(' ');
-    if (words.length <= wordLimit) return text;
-    return words.slice(0, wordLimit).join(' ') + '...';
-  };
-
-  const UpgradeButton = ({ size = "sm" }: { size?: "sm" | "default" }) => (
-    <Button 
-      size={size}
-      className="bg-gradient-primary hover:opacity-90"
-    >
-      Upgrade
-    </Button>
-  );
+  if (filteredJobs.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">No job matches found. Try adjusting your search or fetch new jobs.</p>
+      </div>
+    );
+  }
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Job Matches</CardTitle>
-            <Badge variant="outline">
-              {visibleJobs.length + gatedJobs.length} jobs found
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Sector</TableHead>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Job Description</TableHead>
-                  <TableHead>ATS Score</TableHead>
-                  <TableHead>Optimize ATS</TableHead>
-                  <TableHead>Optimized CV</TableHead>
-                  <TableHead>CV Link</TableHead>
-                  <TableHead>Job Link</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {/* Visible Jobs */}
-                {visibleJobs.map((job) => (
-                  <TableRow key={job.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Building className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-medium">{job.company}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{job.sector}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{job.jobTitle}</p>
-                        {job.appliedStatus && (
-                          <Badge className={getStatusColor(job.appliedStatus)}>
-                            {job.appliedStatus}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                          {truncateText(job.jdSnippet)}
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleJobView(job)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="text-lg font-bold">{job.atsScore}%</div>
-                        <div className={`w-2 h-2 rounded-full ${
-                          job.atsScore >= 80 ? 'bg-success' : 
-                          job.atsScore >= 60 ? 'bg-accent' : 'bg-destructive'
-                        }`} />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {userPlan === 'free' ? (
-                        <UpgradeButton />
-                      ) : (
-                        <Button size="sm" variant="outline">
-                          <Zap className="w-4 h-4 mr-1" />
-                          Optimize
-                        </Button>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {userPlan === 'free' ? (
-                        <UpgradeButton />
-                      ) : (
-                        <Button size="sm" variant="outline">
-                          <FileText className="w-4 h-4 mr-1" />
-                          Generate
-                        </Button>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {job.cvUrl ? (
-                        <Button size="sm" variant="ghost">
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="ghost" asChild>
-                        <a href={job.jobUrl} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="w-4 h-4" />
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Company</TableHead>
+              <TableHead>Job Title</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Match Score</TableHead>
+              <TableHead>ATS Score</TableHead>
+              <TableHead>Documents</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {getVisibleJobs().map((job) => (
+              <TableRow key={job.id} className="hover:bg-muted/50">
+                <TableCell>
+                  <div className="font-medium">{job.company_name}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="font-medium">{job.job_title}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm text-muted-foreground">{job.location}</div>
+                </TableCell>
+                <TableCell>
+                  <Badge 
+                    variant="outline" 
+                    className={`font-medium ${getScoreColor(job.resume_match_score)}`}
+                  >
+                    {job.resume_match_score}%
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge 
+                    variant="outline" 
+                    className={`font-medium ${getScoreColor(job.ats_score)}`}
+                  >
+                    {job.ats_score}%
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    {job.optimized_resume_url && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => downloadDocument(job.optimized_resume_url!, 'resume.pdf')}
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {job.cover_letter_url && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => downloadDocument(job.cover_letter_url!, 'cover-letter.pdf')}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {job.email_draft_url && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => downloadDocument(job.email_draft_url!, 'email-draft.txt')}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {job.application_status.replace('_', ' ')}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openJobDetails(job)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    {job.job_url && (
+                      <Button size="sm" variant="outline" asChild>
+                        <a href={job.job_url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4" />
                         </a>
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
 
-                {/* Gated Jobs (Greyed Out) */}
-                {gatedJobs.map((job) => (
-                  <TableRow key={`gated-${job.id}`} className="opacity-40">
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Building className="w-4 h-4 text-muted-foreground" />
-                        <span>Hidden</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-muted-foreground">—</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-muted-foreground">—</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-muted-foreground">Upgrade to view</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-muted-foreground">—</span>
-                    </TableCell>
-                    <TableCell>
-                      <UpgradeButton />
-                    </TableCell>
-                    <TableCell>
-                      <UpgradeButton />
-                    </TableCell>
-                    <TableCell>
-                      <UpgradeButton />
-                    </TableCell>
-                    <TableCell>
-                      <UpgradeButton />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            {/* Gated Jobs (Blurred) */}
+            {getGatedJobs().map((job, index) => (
+              <TableRow key={`gated-${index}`} className="opacity-50 blur-sm pointer-events-none">
+                <TableCell>
+                  <div className="font-medium">Premium Company</div>
+                </TableCell>
+                <TableCell>
+                  <div className="font-medium">Premium Position</div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm text-muted-foreground">Premium Location</div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">--</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">--</Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="outline" disabled>
+                      <Crown className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">Upgrade Required</Badge>
+                </TableCell>
+                <TableCell>
+                  <Button size="sm" variant="outline" disabled>
+                    <Crown className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        {/* Upgrade Prompt */}
+        {!planLimits.isElite && getGatedJobs().length > 0 && (
+          <div className="text-center py-8 border-t bg-gradient-to-r from-primary/10 to-secondary/10 rounded-b-lg">
+            <Crown className="h-12 w-12 mx-auto mb-3 text-primary" />
+            <h3 className="text-lg font-semibold mb-2">Unlock More Opportunities</h3>
+            <p className="text-muted-foreground mb-4">
+              {getGatedJobs().length} more job matches available with {planLimits.isPro ? 'Elite' : 'Pro/Elite'} plan
+            </p>
+            <Button 
+              onClick={() => window.location.href = '/pricing?upgrade=true'}
+              className="bg-gradient-to-r from-primary to-secondary hover:opacity-90"
+            >
+              <Crown className="h-4 w-4 mr-2" />
+              Upgrade Now
+            </Button>
           </div>
-
-          {/* Upgrade Prompt for Free Users */}
-          {userPlan === 'free' && filteredJobs.length > 5 && (
-            <div className="mt-6 p-6 bg-gradient-card rounded-lg border text-center">
-              <h3 className="text-lg font-semibold mb-2">
-                {filteredJobs.length - 5} more jobs available
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Upgrade to see all job matches and unlock powerful features like ATS optimization and custom CV generation.
-              </p>
-              <Button className="bg-gradient-primary hover:opacity-90">
-                Upgrade Now
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       <JobDetailsDrawer
         job={selectedJob}
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
         userPlan={userPlan}
       />
     </>
   );
-};
+}

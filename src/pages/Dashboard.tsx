@@ -7,22 +7,13 @@ import { JobsTable } from "@/components/dashboard/JobsTable"
 import { KPICards } from "@/components/dashboard/KPICards"
 import { SearchAndFilters } from "@/components/dashboard/SearchAndFilters"
 import { ExportButton } from "@/components/dashboard/ExportButton"
+import { ResumeVariantManager } from "@/components/dashboard/ResumeVariantManager"
+import { JobFetchTrigger } from "@/components/dashboard/JobFetchTrigger"
+import { Sidebar } from "@/components/dashboard/Sidebar"
 import { useToast } from "@/hooks/use-toast"
 import SEOHead from "@/components/SEOHead"
 
 // Data interfaces
-interface JobMatch {
-  id: string
-  company: string
-  sector: string
-  jobTitle: string
-  jdSnippet: string
-  atsScore: number
-  cvUrl?: string
-  jobUrl: string
-  appliedStatus?: 'applied' | 'pending' | 'reviewing'
-}
-
 interface UserProfile {
   plan: string
   subscription_status?: string
@@ -47,7 +38,6 @@ const Dashboard = () => {
     pendingReview: 0,
     customResumes: 0
   })
-  const [jobMatches, setJobMatches] = useState<JobMatch[]>([])
   const [timeRange, setTimeRange] = useState('7d')
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
@@ -134,73 +124,6 @@ const Dashboard = () => {
         customResumes: userPlan === 'free' ? 0 : userPlan === 'pro' ? 5 : 15
       }
       setStats(mockStats)
-
-      // Load job matches with plan-based gating
-      const allMatches: JobMatch[] = [
-        {
-          id: '1',
-          company: 'TechCorp',
-          sector: 'Technology',
-          jobTitle: 'Senior Frontend Developer',
-          jdSnippet: 'We are looking for an experienced Frontend Developer...',
-          atsScore: 92,
-          jobUrl: '#',
-          cvUrl: '#'
-        },
-        {
-          id: '2',
-          company: 'StartupXYZ', 
-          sector: 'Fintech',
-          jobTitle: 'React Developer',
-          jdSnippet: 'Join our growing team as a React Developer...',
-          atsScore: 88,
-          jobUrl: '#'
-        },
-        {
-          id: '3',
-          company: 'BigTech Solutions',
-          sector: 'Technology',
-          jobTitle: 'Full Stack Engineer',
-          jdSnippet: 'Looking for a versatile Full Stack Engineer...',
-          atsScore: 85,
-          jobUrl: '#',
-          appliedStatus: 'applied'
-        },
-        {
-          id: '4',
-          company: 'InnovateNow',
-          sector: 'Healthcare',
-          jobTitle: 'JavaScript Developer',
-          jdSnippet: 'We need a skilled JavaScript Developer...',
-          atsScore: 82,
-          jobUrl: '#'
-        },
-        {
-          id: '5',
-          company: 'WebFlow Systems',
-          sector: 'E-commerce',
-          jobTitle: 'Frontend Engineer',
-          jdSnippet: 'Frontend Engineer position available...',
-          atsScore: 78,
-          jobUrl: '#',
-          appliedStatus: 'pending'
-        }
-      ]
-
-      // Add more placeholder jobs to demonstrate gating
-      for (let i = 6; i <= 20; i++) {
-        allMatches.push({
-          id: i.toString(),
-          company: `Company ${i}`,
-          sector: 'Various',
-          jobTitle: `Developer Role ${i}`,
-          jdSnippet: `Job description for position ${i}...`,
-          atsScore: Math.floor(Math.random() * 40) + 60,
-          jobUrl: '#'
-        })
-      }
-
-      setJobMatches(allMatches)
     } catch (error) {
       console.error('Error loading dashboard data:', error)
       toast({
@@ -257,18 +180,25 @@ const Dashboard = () => {
             userPlan={profile?.plan || 'free'}
           />
 
-          {/* Search and Filters */}
-          <SearchAndFilters 
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-
-          {/* Jobs Table */}
-          <JobsTable 
-            jobs={jobMatches}
-            userPlan={profile?.plan || 'free'}
-            searchQuery={searchQuery}
-          />
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-3 space-y-6">
+              <SearchAndFilters 
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
+              <JobsTable 
+                userPlan={profile?.plan || 'free'}
+                searchQuery={searchQuery}
+              />
+            </div>
+            
+            <div className="lg:col-span-1 space-y-6">
+              <JobFetchTrigger userPlan={profile?.plan || 'free'} />
+              <ResumeVariantManager userPlan={profile?.plan || 'free'} />
+              <Sidebar />
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     </>

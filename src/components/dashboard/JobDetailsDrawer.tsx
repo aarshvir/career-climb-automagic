@@ -7,14 +7,20 @@ import { Building, MapPin, DollarSign, Clock, ExternalLink, Bookmark, FileText, 
 
 interface JobMatch {
   id: string;
-  company: string;
-  sector: string;
-  jobTitle: string;
-  jdSnippet: string;
-  atsScore: number;
-  cvUrl?: string;
-  jobUrl: string;
-  appliedStatus?: 'applied' | 'pending' | 'reviewing';
+  job_title: string;
+  company_name: string;
+  job_description?: string;
+  salary_range?: string;
+  location?: string;
+  job_url?: string;
+  resume_match_score: number;
+  ats_score: number;
+  compatibility_score: number;
+  optimized_resume_url?: string;
+  cover_letter_url?: string;
+  email_draft_url?: string;
+  application_status: string;
+  scraped_date: string;
 }
 
 interface JobDetailsDrawerProps {
@@ -32,7 +38,7 @@ export const JobDetailsDrawer = ({ job, open, onOpenChange, userPlan }: JobDetai
   // Mock full job description (in real app, this would be fetched on demand)
   const fullJobDescription = `
 About the Role:
-${job.jdSnippet}
+${job.job_description || 'Full job description will be loaded here...'}
 
 We are seeking a talented and motivated individual to join our growing team. This position offers excellent opportunities for career growth and professional development.
 
@@ -98,13 +104,10 @@ What We Offer:
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Building className="w-4 h-4" />
                 <span>{job.company}</span>
-                <Badge variant="outline">{job.sector}</Badge>
-              </div>
-              {job.appliedStatus && (
-                <Badge className={getStatusColor(job.appliedStatus)}>
-                  {job.appliedStatus}
-                </Badge>
-              )}
+          </div>
+          <Badge variant="outline">
+            {job.application_status.replace('_', ' ')}
+          </Badge>
             </div>
           </SheetTitle>
         </SheetHeader>
@@ -163,7 +166,7 @@ What We Offer:
                 Save
               </Button>
               <Button variant="outline" className="flex-1" asChild>
-                <a href={job.jobUrl} target="_blank" rel="noopener noreferrer">
+                <a href={job.job_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Apply
                 </a>

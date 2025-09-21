@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_job_batches: {
+        Row: {
+          batch_date: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          make_com_webhook_url: string | null
+          status: string
+          total_jobs_scraped: number | null
+          triggered_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_date?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          make_com_webhook_url?: string | null
+          status?: string
+          total_jobs_scraped?: number | null
+          triggered_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_date?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          make_com_webhook_url?: string | null
+          status?: string
+          total_jobs_scraped?: number | null
+          triggered_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      generated_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          file_name: string
+          file_path: string
+          generation_status: string | null
+          id: string
+          job_application_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          file_name: string
+          file_path: string
+          generation_status?: string | null
+          id?: string
+          job_application_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          generation_status?: string | null
+          id?: string
+          job_application_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_documents_job_application_id_fkey"
+            columns: ["job_application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interest_forms: {
         Row: {
           app_expectations: string
@@ -52,6 +138,86 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      job_applications: {
+        Row: {
+          application_deadline: string | null
+          application_status: string | null
+          ats_score: number | null
+          batch_id: string | null
+          company_name: string
+          compatibility_score: number | null
+          cover_letter_url: string | null
+          created_at: string
+          email_draft_url: string | null
+          id: string
+          job_description: string | null
+          job_title: string
+          job_url: string | null
+          location: string | null
+          make_com_processed_at: string | null
+          optimized_resume_url: string | null
+          resume_match_score: number | null
+          salary_range: string | null
+          scraped_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_deadline?: string | null
+          application_status?: string | null
+          ats_score?: number | null
+          batch_id?: string | null
+          company_name: string
+          compatibility_score?: number | null
+          cover_letter_url?: string | null
+          created_at?: string
+          email_draft_url?: string | null
+          id?: string
+          job_description?: string | null
+          job_title: string
+          job_url?: string | null
+          location?: string | null
+          make_com_processed_at?: string | null
+          optimized_resume_url?: string | null
+          resume_match_score?: number | null
+          salary_range?: string | null
+          scraped_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_deadline?: string | null
+          application_status?: string | null
+          ats_score?: number | null
+          batch_id?: string | null
+          company_name?: string
+          compatibility_score?: number | null
+          cover_letter_url?: string | null
+          created_at?: string
+          email_draft_url?: string | null
+          id?: string
+          job_description?: string | null
+          job_title?: string
+          job_url?: string | null
+          location?: string | null
+          make_com_processed_at?: string | null
+          optimized_resume_url?: string | null
+          resume_match_score?: number | null
+          salary_range?: string | null
+          scraped_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "daily_job_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       job_fetch_runs: {
         Row: {
@@ -224,6 +390,45 @@ export type Database = {
         }
         Relationships: []
       }
+      resume_variants: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          is_primary: boolean | null
+          mime_type: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_primary?: boolean | null
+          mime_type?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_primary?: boolean | null
+          mime_type?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       resumes: {
         Row: {
           created_at: string | null
@@ -232,7 +437,6 @@ export type Database = {
           file_size: number | null
           id: string
           mime_type: string | null
-          updated_at: string | null
           user_id: string | null
         }
         Insert: {
@@ -242,8 +446,7 @@ export type Database = {
           file_size?: number | null
           id?: string
           mime_type?: string | null
-          updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -252,7 +455,6 @@ export type Database = {
           file_size?: number | null
           id?: string
           mime_type?: string | null
-          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [
