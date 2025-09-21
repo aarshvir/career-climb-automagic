@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
-import { redirectAfterAuth } from '@/utils/env'
 
 const AuthCallback = () => {
   const navigate = useNavigate()
@@ -29,8 +28,9 @@ const AuthCallback = () => {
         }
 
         if (data.session) {
-          console.log('Auth callback success:', data.session.user?.email)
-          redirectAfterAuth()
+          console.log('Auth callback success:', data.session.user?.email);
+          // Successfully authenticated, redirect to home
+          navigate('/?auth=success')
         } else {
           console.warn('Auth callback: No session found');
           // No session found, redirect with error

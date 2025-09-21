@@ -8,8 +8,6 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "test": "npm run build-tests && node build-tests/tests/plan-gating.test.js",
-    "build-tests": "tsc -p tsconfig.build-tests.json",
     "preview": "vite preview",
     "setup-db": "node scripts/supabase-manager.js",
     "setup-db:ps1": "powershell -ExecutionPolicy Bypass -File setup-database.ps1",

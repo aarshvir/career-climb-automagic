@@ -1,74 +1,61 @@
-import { useMemo } from "react";
-import { Bell, Settings, Search } from "lucide-react";
+import { Bell, Settings, User, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Badge } from "@/components/ui/badge";
-import { PlanName, getPlanLabel } from "@/utils/plans";
-import { isDevEnv } from "@/utils/env";
 
-interface PremiumHeaderProps {
-  plan?: PlanName;
-}
-
-export const PremiumHeader = ({ plan = "free" }: PremiumHeaderProps) => {
+export const PremiumHeader = () => {
   const { user } = useAuth();
-
-  const environmentLabel = useMemo(() => {
-    if (typeof window === "undefined") return "Production";
-    if (isDevEnv()) {
-      return window.location.hostname.includes("lovable") ? "Preview" : "Dev";
-    }
-    return "Live";
-  }, []);
 
   return (
     <header className="floating-header border-b border-border/10">
       <div className="content-wrapper py-0">
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <SidebarTrigger className="lg:hidden interactive-element" />
-            <div className="hidden items-center gap-3 lg:flex">
+            <div className="hidden lg:flex items-center gap-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search jobs, companies..."
-                  className="w-72 rounded-full bg-muted/30 pl-10 text-sm focus:bg-background/80"
+                  className="w-72 pl-10 bg-muted/30 border-border/30 focus:bg-background/80 focus:border-primary/30 transition-all duration-200"
                 />
               </div>
-              <Badge variant="secondary" className="rounded-full">⌘K</Badge>
+              <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+                ⌘K
+              </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="rounded-full text-xs font-medium">
-              {environmentLabel}
-            </Badge>
-            <Button variant="ghost" size="icon" className="relative interactive-element" aria-label="Notifications">
+          
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="relative interactive-element">
               <Bell className="h-5 w-5" />
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-from)] text-[10px] text-white">
+              <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary rounded-full text-xs flex items-center justify-center text-primary-foreground font-medium animate-pulse-glow">
                 3
               </span>
             </Button>
-            <Button variant="ghost" size="icon" className="interactive-element" aria-label="Settings">
+            
+            <Button variant="ghost" size="icon" className="interactive-element">
               <Settings className="h-5 w-5" />
             </Button>
-            <Separator orientation="vertical" className="mx-2 hidden h-6 lg:flex" />
+            
+            <Separator orientation="vertical" className="h-6 mx-2" />
+            
             <div className="flex items-center gap-3">
-              <div className="hidden text-right text-sm lg:block">
-                <p className="font-semibold leading-none text-foreground">{user?.email?.split("@")[0] || "User"}</p>
-                <p className="text-xs text-muted-foreground">{getPlanLabel(plan)} plan</p>
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold leading-none text-foreground">
+                  {user?.email?.split('@')[0] || 'User'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Premium Plan
+                </p>
               </div>
-              <Badge variant="secondary" className="hidden rounded-full text-xs font-medium lg:flex">
-                {getPlanLabel(plan)}
-              </Badge>
-              <Avatar className="h-9 w-9">
+              <Avatar className="h-9 w-9 ring-2 ring-border/20 hover:ring-primary/20 transition-all duration-200">
                 <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="bg-gradient-to-br from-[var(--brand-from)]/20 to-[var(--brand-to)]/20 text-[var(--brand-from)] font-semibold">
-                  {(user?.email?.charAt(0) || "U").toUpperCase()}
+                <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+                  {(user?.email?.charAt(0) || 'U').toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </div>

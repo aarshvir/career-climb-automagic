@@ -3,85 +3,99 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Download, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { PlanName, canUseFeature, gatedFeatureCopy } from "@/utils/plans";
-import { useMutation } from "@tanstack/react-query";
-import { DashboardApiError, exportApplications } from "@/lib/dashboard-api";
-import { trackEvent } from "@/utils/analytics";
 
 interface ExportButtonProps {
-  plan: PlanName;
+  userPlan: string;
 }
 
-export const ExportButton = ({ plan }: ExportButtonProps) => {
+export const ExportButton = ({ userPlan }: ExportButtonProps) => {
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
 
-  const exportMutation = useMutation<{ url: string }, DashboardApiError, void>({
-    mutationFn: () => exportApplications(plan),
-    onSuccess: (payload) => {
-      const link = document.createElement("a");
-      link.href = payload.url;
-      link.download = "jobvance-applications.csv";
-      link.click();
-      link.remove();
-      toast({
-        title: "Export ready",
-        description: "Your CSV download has started.",
-      });
-      trackEvent("export_click", { gated: false });
-    },
-    onError: (error) => {
-      if (error?.code === "UPGRADE_REQUIRED") {
-        setOpen(true);
-        trackEvent("export_click", { gated: true });
-      } else {
-        toast({
-          title: "Export failed",
-          description: "We couldn't export your data right now.",
-          variant: "destructive",
-        });
-      }
-    },
-  });
-
-  const handleExport = () => {
-    if (!canUseFeature(plan, "export")) {
-      setOpen(true);
-      trackEvent("export_click", { gated: true });
+  const handleExport = async () => {
+    if (userPlan === 'free') {
+      setShowUpgradeModal(true);
       return;
     }
-    exportMutation.mutate();
+
+    setExporting(true);
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // In real app, this would generate and download a CSV file
+      const csvContent = "data:text/csv;charset=utf-8,Company,Job Title,Applied Date,Status\nTechCorp,Senior Developer,2024-01-15,Interview\n";
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "job_applications.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Export successful",
+        description: "Your job applications have been exported to CSV."
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "There was an error exporting your data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
     <>
-      <Button variant="outline" onClick={handleExport} disabled={exportMutation.isPending} className="rounded-full">
-        <Download className="mr-2 h-4 w-4" aria-hidden />
-        {exportMutation.isPending ? "Exporting…" : "Export CSV"}
+      <Button
+        variant="outline"
+        onClick={handleExport}
+        disabled={exporting}
+      >
+        <Download className="w-4 h-4 mr-2" />
+        {exporting ? "Exporting..." : "Export"}
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="rounded-2xl">
+
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Crown className="h-5 w-5 text-[var(--brand-from)]" />
-              {gatedFeatureCopy.export.title}
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-accent" />
+              Pro Feature
             </DialogTitle>
-            <DialogDescription>{gatedFeatureCopy.export.description}</DialogDescription>
+            <DialogDescription>
+              Exporting your job applications data is available for Pro and Elite subscribers.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 text-sm text-muted-foreground">
-            <p>Pro includes:</p>
-            <ul className="space-y-1 pl-4">
-              <li>• CSV export of your pipeline</li>
-              <li>• 20 applications per day automation</li>
-              <li>• ATS optimization and optimized CVs</li>
-              <li>• Analytics deep dive dashboard</li>
-            </ul>
-          </div>
-          <div className="flex gap-2">
-            <Button className="flex-1 rounded-full bg-[var(--brand-from)] text-white">Upgrade to Pro</Button>
-            <Button variant="outline" className="flex-1 rounded-full" onClick={() => setOpen(false)}>
-              Maybe later
-            </Button>
+          <div className="space-y-4">
+            <div className="bg-gradient-card p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">With Pro, you can:</h4>
+              <ul className="text-sm space-y-1 text-muted-foreground">
+                <li>• Export all job applications to CSV</li>
+                <li>• Download detailed ATS reports</li>
+                <li>• Access advanced analytics</li>
+                <li>• Generate custom reports</li>
+              </ul>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                className="flex-1 bg-gradient-primary hover:opacity-90"
+                onClick={() => setShowUpgradeModal(false)}
+              >
+                Upgrade Now
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setShowUpgradeModal(false)}
+              >
+                Maybe Later
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

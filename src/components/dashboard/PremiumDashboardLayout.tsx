@@ -5,14 +5,12 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { PremiumHeader } from "./PremiumHeader";
 import { PremiumSidebar } from "./PremiumSidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlanName } from "@/utils/plans";
 
 interface PremiumDashboardLayoutProps {
   children: ReactNode;
-  plan?: PlanName;
 }
 
-export const PremiumDashboardLayout = ({ children, plan }: PremiumDashboardLayoutProps) => {
+export const PremiumDashboardLayout = ({ children }: PremiumDashboardLayoutProps) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -60,10 +58,10 @@ export const PremiumDashboardLayout = ({ children, plan }: PremiumDashboardLayou
         </div>
         
         <PremiumSidebar />
-
+        
         <div className="flex-1 flex flex-col min-h-screen">
-          <PremiumHeader plan={plan} />
-
+          <PremiumHeader />
+          
           <main className="flex-1 overflow-auto">
             <div className="content-wrapper min-h-full">
               <div className="animate-fade-in-up">

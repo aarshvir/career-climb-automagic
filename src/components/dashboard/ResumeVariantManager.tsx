@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, Trash2, Star, Plus, Crown } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { usePlanLimits } from "@/hooks/usePlanLimits";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Upload, FileText, Trash2, Star, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { useToast } from '@/hooks/use-toast';
 
 interface ResumeVariant {
   id: string;
@@ -41,15 +41,15 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
 
     try {
       const { data, error } = await supabase
-        .from("resume_variants")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .from('resume_variants')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setResumeVariants(data || []);
     } catch (error) {
-      console.error("Error fetching resume variants:", error);
+      console.error('Error fetching resume variants:', error);
       toast({
         title: "Error",
         description: "Failed to fetch resume variants",
@@ -64,10 +64,10 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    if (resumeVariants.length >= planLimits.resumeLimit) {
+    if (resumeVariants.length >= planLimits.resumeVariants) {
       toast({
-        title: "Upload limit reached",
-        description: `Your ${planLimits.plan} plan allows ${planLimits.resumeLimit} resume variant${planLimits.resumeLimit > 1 ? "s" : ""}. Upgrade to add more.`,
+        title: "Upload Limit Reached",
+        description: `Your ${userPlan} plan allows ${planLimits.resumeVariants} resume variant${planLimits.resumeVariants > 1 ? 's' : ''}. Please upgrade to upload more.`,
         variant: "destructive",
       });
       return;
@@ -75,59 +75,75 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
 
     setUploading(true);
     try {
-      const fileExt = file.name.split(".").pop();
+      const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
+      
+      // Upload file to storage
       const { error: uploadError } = await supabase.storage
-        .from("jobassist")
+        .from('jobassist')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
+      // Save to database
       const { error: dbError } = await supabase
-        .from("resume_variants")
+        .from('resume_variants')
         .insert([
           {
             user_id: user.id,
-            name: file.name.replace(/\.[^/.]+$/, ""),
+            name: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
             file_path: fileName,
             file_name: file.name,
             mime_type: file.type,
             file_size: file.size,
-            is_primary: resumeVariants.length === 0,
-          },
+            is_primary: resumeVariants.length === 0, // First upload is primary
+          }
         ]);
 
       if (dbError) throw dbError;
 
       toast({
-        title: "Resume added",
-        description: "Your variant is ready to use in applications.",
+        title: "Success",
+        description: "Resume variant uploaded successfully",
       });
 
       fetchResumeVariants();
     } catch (error) {
-      console.error("Error uploading resume:", error);
+      console.error('Error uploading resume:', error);
       toast({
-        title: "Upload failed",
+        title: "Upload Failed",
         description: "Failed to upload resume variant",
         variant: "destructive",
       });
     } finally {
       setUploading(false);
-      event.target.value = "";
     }
   };
 
   const setPrimary = async (id: string) => {
     try {
-      await supabase.from("resume_variants").update({ is_primary: false }).eq("user_id", user?.id);
-      const { error } = await supabase.from("resume_variants").update({ is_primary: true }).eq("id", id);
+      // Remove primary from all resumes
+      await supabase
+        .from('resume_variants')
+        .update({ is_primary: false })
+        .eq('user_id', user?.id);
+
+      // Set new primary
+      const { error } = await supabase
+        .from('resume_variants')
+        .update({ is_primary: true })
+        .eq('id', id);
+
       if (error) throw error;
-      toast({ title: "Primary resume updated" });
+
+      toast({
+        title: "Success",
+        description: "Primary resume updated",
+      });
+
       fetchResumeVariants();
     } catch (error) {
-      console.error("Error setting primary resume:", error);
+      console.error('Error setting primary resume:', error);
       toast({
         title: "Error",
         description: "Failed to update primary resume",
@@ -138,13 +154,27 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
 
   const deleteVariant = async (id: string, filePath: string) => {
     try {
-      await supabase.storage.from("jobassist").remove([filePath]);
-      const { error } = await supabase.from("resume_variants").delete().eq("id", id);
+      // Delete from storage
+      await supabase.storage
+        .from('jobassist')
+        .remove([filePath]);
+
+      // Delete from database
+      const { error } = await supabase
+        .from('resume_variants')
+        .delete()
+        .eq('id', id);
+
       if (error) throw error;
-      toast({ title: "Resume removed" });
+
+      toast({
+        title: "Success",
+        description: "Resume variant deleted",
+      });
+
       fetchResumeVariants();
     } catch (error) {
-      console.error("Error deleting resume variant:", error);
+      console.error('Error deleting resume variant:', error);
       toast({
         title: "Error",
         description: "Failed to delete resume variant",
@@ -153,141 +183,131 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
     }
   };
 
-  const atLimit = resumeVariants.length >= planLimits.resumeLimit;
-
   if (loading) {
     return (
-      <Card className="rounded-2xl shadow-sm">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" /> Resume Variants
+            <FileText className="h-5 w-5" />
+            Resume Variants
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="h-12 animate-pulse rounded-xl bg-muted/40" />
-          <div className="h-12 animate-pulse rounded-xl bg-muted/40" />
+        <CardContent>
+          <div className="animate-pulse space-y-2">
+            <div className="h-4 bg-muted rounded"></div>
+            <div className="h-4 bg-muted rounded"></div>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="rounded-2xl shadow-sm">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between text-base font-semibold">
-          <span className="flex items-center gap-2">
-            <FileText className="h-5 w-5" /> Resume Variants
-          </span>
-          <Badge variant="outline" className="rounded-full text-xs">
-            {resumeVariants.length}/{planLimits.resumeLimit}
+        <CardTitle className="flex items-center gap-2">
+          <FileText className="h-5 w-5" />
+          Resume Variants
+          <Badge variant="outline">
+            {resumeVariants.length}/{planLimits.resumeVariants}
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {resumeVariants.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-muted/30 p-6 text-center">
-            <Upload className="h-10 w-10 text-muted-foreground" />
-            <div className="space-y-1 text-sm text-muted-foreground">
-              <p>Upload your primary resume to unlock personalized tailoring.</p>
-              <p className="text-xs">Supports PDF, DOC, and DOCX.</p>
-            </div>
-            <label className="w-full">
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx"
-                className="hidden"
-                onChange={handleFileUpload}
-                disabled={uploading}
-              />
-              <Button className="w-full rounded-full" disabled={uploading}>
-                {uploading ? "Uploading…" : "Upload resume"}
-              </Button>
-            </label>
+          <div className="text-center py-8 text-muted-foreground">
+            <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No resume variants uploaded yet</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {resumeVariants.slice(0, 3).map((variant) => (
+          <div className="space-y-2">
+            {resumeVariants.map((variant) => (
               <div
                 key={variant.id}
-                className="flex items-center justify-between rounded-xl border p-4 shadow-sm"
+                className="flex items-center justify-between p-3 border rounded-lg"
               >
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    {variant.name}
-                    {variant.is_primary && (
-                      <Badge variant="secondary" className="flex items-center gap-1 rounded-full text-[10px]">
-                        <Star className="h-3 w-3" /> Primary
-                      </Badge>
-                    )}
+                <div className="flex items-center gap-3">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <div>
+                    <div className="font-medium flex items-center gap-2">
+                      {variant.name}
+                      {variant.is_primary && (
+                        <Badge variant="default" className="text-xs">
+                          <Star className="h-3 w-3 mr-1" />
+                          Primary
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {(variant.file_size / 1024 / 1024).toFixed(2)} MB
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {(variant.file_size / 1024 / 1024).toFixed(2)} MB · Uploaded {new Date(variant.created_at).toLocaleDateString()}
-                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   {!variant.is_primary && (
-                    <Button variant="outline" size="sm" className="rounded-full" onClick={() => setPrimary(variant.id)}>
-                      Make primary
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setPrimary(variant.id)}
+                    >
+                      Set Primary
                     </Button>
                   )}
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
+                    size="sm"
+                    variant="outline"
                     onClick={() => deleteVariant(variant.id, variant.file_path)}
-                    aria-label="Delete resume"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             ))}
-            {resumeVariants.length > 3 && (
-              <p className="text-xs text-muted-foreground">Showing most recent 3 of {resumeVariants.length} resumes.</p>
-            )}
           </div>
         )}
 
-        <div className="space-y-3">
-          <label className="block">
+        {resumeVariants.length < planLimits.resumeVariants && (
+          <div>
             <input
               type="file"
               accept=".pdf,.doc,.docx"
-              className="hidden"
               onChange={handleFileUpload}
-              disabled={uploading || atLimit}
+              className="hidden"
+              id="resume-upload"
+              disabled={uploading}
             />
-            <Button
-              className="w-full rounded-full"
-              variant="outline"
-              disabled={uploading || atLimit}
-            >
-              {uploading ? (
-                "Uploading…"
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <Plus className="h-4 w-4" /> Add variant
+            <label htmlFor="resume-upload">
+              <Button
+                className="w-full"
+                variant="outline"
+                disabled={uploading}
+                asChild
+              >
+                <span>
+                  {uploading ? (
+                    "Uploading..."
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Resume Variant
+                    </>
+                  )}
                 </span>
-              )}
-            </Button>
-          </label>
-          {atLimit && (
-            <div className="rounded-xl border border-dashed bg-muted/40 p-4 text-center text-xs text-muted-foreground">
-              <p className="mb-2 font-medium text-foreground">Resume limit reached</p>
-              <p className="mb-3">Upgrade for additional slots and automatic archiving suggestions.</p>
-              <Button size="sm" className="rounded-full bg-[var(--brand-from)] text-white">
-                <Crown className="mr-1 h-4 w-4" /> Upgrade plan
               </Button>
-            </div>
-          )}
-          <p className="text-xs text-muted-foreground">
-            {planLimits.plan === "free"
-              ? "Free plan stores one resume. Upgrading unlocks tailored variants per job."
-              : planLimits.plan === "pro"
-              ? "Pro stores up to three resumes—perfect for targeting different roles."
-              : "Elite stores ten variants with concierge review."}
-          </p>
-        </div>
+            </label>
+          </div>
+        )}
+
+        {resumeVariants.length >= planLimits.resumeVariants && (
+          <div className="text-center p-4 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground mb-2">
+              Resume limit reached ({planLimits.resumeVariants})
+            </p>
+            <Button size="sm" variant="outline">
+              Upgrade Plan
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
