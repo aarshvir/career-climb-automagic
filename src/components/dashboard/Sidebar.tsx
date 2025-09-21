@@ -46,6 +46,16 @@ export const Sidebar = () => {
     }
   }, [user]);
 
+  // Listen for upgrade success and refresh profile
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('upgrade') === 'success' && user) {
+      fetchProfile();
+      // Clean up URL
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, [user]);
+
   const fetchProfile = async () => {
     try {
       const { data: profileData, error: profileError } = await supabase

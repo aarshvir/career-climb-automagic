@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Zap, Star, Shield } from "lucide-react";
@@ -11,6 +11,7 @@ const Pricing = () => {
   const { handlePrimaryAction } = useSignInFlow();
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const isUpgrade = location.search.includes('upgrade=true');
 
@@ -89,11 +90,31 @@ const Pricing = () => {
     }
   ];
 
-  const handlePlanClick = (planName: string) => {
+  const handlePlanClick = async (planName: string) => {
     if (isUpgrade && currentPlan === planName.toLowerCase()) {
       return; // Do nothing for current plan
     }
-    handlePrimaryAction();
+    
+    if (isUpgrade && user) {
+      // Handle plan upgrade directly
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ plan: planName.toLowerCase() })
+          .eq('id', user.id);
+          
+        if (error) throw error;
+        
+        // Navigate back to dashboard with success
+        navigate('/dashboard?upgrade=success');
+      } catch (error) {
+        console.error('Failed to update plan:', error);
+        // Handle error - could show toast here
+      }
+    } else {
+      // Regular onboarding flow
+      handlePrimaryAction();
+    }
   };
 
   const isCurrentPlan = (planName: string) => {
