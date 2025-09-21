@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2019",
+    "outDir": "build-tests",
+    "moduleResolution": "node",
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "tests/plan-gating.test.ts",
+    "src/utils/plans.ts",
+    "src/lib/dashboard-api.ts"
+  ]
+}

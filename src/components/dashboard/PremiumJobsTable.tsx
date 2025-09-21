@@ -1,369 +1,360 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { 
-  MapPin, 
-  Clock, 
-  ExternalLink, 
-  Eye, 
-  Bookmark,
-  Zap,
-  Building2,
-  DollarSign,
-  Briefcase
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface JobMatch {
-  id: string;
-  job_title: string;
-  company_name: string;
-  location: string;
-  salary_range: string;
-  posted_date: string;
-  ats_score: number;
-  job_url: string;
-  application_status: string;
-  job_type: string;
-}
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Eye,
+  FileText,
+  Sparkles,
+  Bookmark,
+  BookmarkCheck,
+  ArrowUpRight,
+  Filter,
+  LayoutList,
+  RefreshCcw,
+  Lock,
+} from "lucide-react";
+import { DashboardJob } from "@/lib/dashboard-api";
+import { PlanName, PLAN_LIMITS, canUseFeature } from "@/utils/plans";
 
 interface PremiumJobsTableProps {
-  userPlan: string;
-  searchQuery: string;
+  plan: PlanName;
+  jobs: DashboardJob[];
+  totalJobs: number;
+  isLoading: boolean;
+  isError: boolean;
+  onRetry: () => void;
+  onViewJob: (jobId: string) => void;
+  onOptimize: (job: DashboardJob) => void;
+  onGenerateCv: (job: DashboardJob) => void;
+  onUpgrade: () => void;
+  filtersApplied: number;
+  onResetFilters: () => void;
 }
 
-export const PremiumJobsTable = ({ userPlan, searchQuery }: PremiumJobsTableProps) => {
-  const { user } = useAuth();
-  const [jobs, setJobs] = useState<JobMatch[]>([]);
-  const [loading, setLoading] = useState(true);
+const STATUS_VARIANTS: Record<DashboardJob["status"], string> = {
+  not_applied: "outline",
+  applied: "secondary",
+  interview: "default",
+  offer: "success",
+};
+
+const statusLabel = (status: DashboardJob["status"]) => {
+  switch (status) {
+    case "applied":
+      return "Applied";
+    case "interview":
+      return "Interview";
+    case "offer":
+      return "Offer";
+    default:
+      return "Not applied";
+  }
+};
+
+export const PremiumJobsTable = ({
+  plan,
+  jobs,
+  totalJobs,
+  isLoading,
+  isError,
+  onRetry,
+  onViewJob,
+  onOptimize,
+  onGenerateCv,
+  onUpgrade,
+  filtersApplied,
+  onResetFilters,
+}: PremiumJobsTableProps) => {
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    if (user) {
-      fetchJobs();
-    }
-  }, [user, searchQuery]);
+  const visibleRows = PLAN_LIMITS[plan].visibleRows;
 
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      // For now, we'll use mock data since job_matches table doesn't exist yet
-      const mockJobs: JobMatch[] = [
-        {
-          id: '1',
-          job_title: 'Senior Software Engineer',
-          company_name: 'TechCorp',
-          location: 'San Francisco, CA',
-          salary_range: '$120,000 - $180,000',
-          posted_date: new Date().toISOString(),
-          ats_score: 85,
-          job_url: 'https://example.com',
-          application_status: 'not_applied',
-          job_type: 'Full-time'
-        },
-        {
-          id: '2',
-          job_title: 'Product Manager',
-          company_name: 'StartupXYZ',
-          location: 'Remote',
-          salary_range: '$100,000 - $150,000',
-          posted_date: new Date(Date.now() - 86400000).toISOString(),
-          ats_score: 72,
-          job_url: 'https://example.com',
-          application_status: 'applied',
-          job_type: 'Full-time'
-        },
-        {
-          id: '3',
-          job_title: 'Frontend Developer',
-          company_name: 'DesignStudio',
-          location: 'New York, NY',
-          salary_range: '$90,000 - $130,000',
-          posted_date: new Date(Date.now() - 172800000).toISOString(),
-          ats_score: 91,
-          job_url: 'https://example.com',
-          application_status: 'not_applied',
-          job_type: 'Contract'
-        }
-      ];
-
-      // Filter by search query if provided
-      let filteredJobs = mockJobs;
-      if (searchQuery) {
-        filteredJobs = mockJobs.filter(job => 
-          job.job_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.company_name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setJobs(filteredJobs);
-    } catch (error) {
-      console.error('Error:', error);
-      setJobs([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-success";
-    if (score >= 60) return "text-primary";
-    if (score >= 40) return "text-accent";
-    return "text-muted-foreground";
-  };
-
-  const getScoreBadgeVariant = (score: number) => {
-    if (score >= 80) return "default";
-    if (score >= 60) return "secondary";
-    return "outline";
-  };
-
-  const toggleSaveJob = (jobId: string) => {
-    setSavedJobs(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(jobId)) {
-        newSet.delete(jobId);
+  const handleBookmark = (jobId: string) => {
+    setSavedJobs((prev) => {
+      const next = new Set(prev);
+      if (next.has(jobId)) {
+        next.delete(jobId);
       } else {
-        newSet.add(jobId);
+        next.add(jobId);
       }
-      return newSet;
+      return next;
     });
   };
 
-  const formatSalary = (salary: string) => {
-    if (!salary || salary === 'Not specified') return '—';
-    return salary;
-  };
+  const empty = !isLoading && jobs.length === 0;
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
-    return `${Math.ceil(diffDays / 30)} months ago`;
-  };
-
-  if (loading) {
-    return (
-      <Card className="border-border/50 backdrop-blur-sm bg-gradient-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5" />
-            Job Opportunities
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex items-center space-x-4 p-4 rounded-lg border border-border/50">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2 flex-1">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-3 w-1/4" />
-              </div>
-              <Skeleton className="h-6 w-16" />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const shouldBlurContent = userPlan === 'free' && jobs.length > 3;
+  const headerLabel = useMemo(() => {
+    if (isLoading) return "Loading opportunities";
+    if (empty) return "No jobs match";
+    return `Job opportunities (${jobs.length} of ${totalJobs})`;
+  }, [isLoading, empty, jobs.length, totalJobs]);
 
   return (
-    <Card className="border-border/50 backdrop-blur-sm bg-gradient-card overflow-hidden">
-      <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-background/30">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-primary" />
-            Job Opportunities
-            <Badge variant="secondary" className="ml-2">
-              {jobs.length} matches
-            </Badge>
-          </CardTitle>
-          
-          {userPlan === 'free' && (
-            <Button className="bg-gradient-primary hover:opacity-90" size="sm">
-              <Zap className="h-3 w-3 mr-2" />
-              Upgrade for more
+    <Card className="overflow-hidden rounded-2xl shadow-sm">
+      <CardHeader className="space-y-3 border-b bg-muted/40">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <CardTitle className="text-lg font-semibold">{headerLabel}</CardTitle>
+          <div className="flex flex-wrap items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-full" onClick={onResetFilters}>
+                  <RefreshCcw className="mr-2 h-4 w-4" aria-hidden />
+                  Reset filters
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Clear search and preference filters</TooltipContent>
+            </Tooltip>
+            <Button variant="outline" size="sm" className="rounded-full">
+              <Filter className="mr-2 h-4 w-4" aria-hidden />
+              Columns
             </Button>
-          )}
+            <Button variant="outline" size="sm" className="rounded-full">
+              <LayoutList className="mr-2 h-4 w-4" aria-hidden />
+              Density
+            </Button>
+            <Badge variant="secondary" className="rounded-full">
+              {filtersApplied} filters
+            </Badge>
+          </div>
         </div>
+        <p className="text-sm text-muted-foreground">
+          {plan === "free"
+            ? "Free plan shows the top 2 matches. Upgrade to reveal the full list and enable automation features."
+            : plan === "pro"
+            ? "Pro unlocks 20 visible matches per fetch with 30 more preview rows."
+            : "Elite members see the top 50 matches with priority updates."}
+        </p>
       </CardHeader>
-      
-      <CardContent className="p-0 relative">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border/50 bg-muted/30">
-                <TableHead className="w-[300px]">Position</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Salary</TableHead>
-                <TableHead>Match Score</TableHead>
-                <TableHead>Posted</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {jobs.slice(0, userPlan === 'free' ? 3 : jobs.length).map((job, index) => (
-                <TableRow 
-                  key={job.id} 
-                  className={`border-border/50 hover:bg-accent/30 transition-all duration-200 group ${
-                    shouldBlurContent && index >= 2 ? 'blur-sm' : ''
-                  }`}
-                >
-                  <TableCell className="py-4">
-                    <div className="space-y-2">
-                      <div className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
-                        {job.job_title}
-                      </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="outline" className="text-xs">
-                          {job.job_type}
-                        </Badge>
-                        <Badge variant={job.application_status === 'applied' ? 'default' : 'secondary'} className="text-xs">
-                          {job.application_status === 'applied' ? 'Applied' : 'Not Applied'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8 border border-border/50">
-                        <AvatarImage src="" alt={job.company_name} />
-                        <AvatarFallback className="text-xs bg-gradient-primary text-primary-foreground">
-                          <Building2 className="h-3 w-3" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-sm truncate max-w-[120px]">{job.company_name}</span>
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate max-w-[100px]">{job.location}</span>
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-sm">
-                      <DollarSign className="h-3 w-3 text-success flex-shrink-0" />
-                      <span className="truncate max-w-[120px]">{formatSalary(job.salary_range)}</span>
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Progress value={job.ats_score} className="h-2 w-16" />
-                      <Badge 
-                        variant={getScoreBadgeVariant(job.ats_score)}
-                        className={`text-xs font-mono ${getScoreColor(job.ats_score)}`}
-                      >
-                        {job.ats_score}%
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {formatDate(job.posted_date)}
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell className="text-right">
-                    <div className="flex items-center gap-1 justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleSaveJob(job.id)}
-                        className="h-8 w-8 p-0 hover:bg-accent/50"
-                      >
-                        <Bookmark 
-                          className={`h-3 w-3 ${
-                            savedJobs.has(job.id) ? 'fill-primary text-primary' : 'text-muted-foreground'
-                          }`}
-                        />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 hover:bg-accent/50"
-                      >
-                        <Eye className="h-3 w-3" />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="h-8 w-8 p-0 hover:bg-accent/50"
-                      >
-                        <a href={job.job_url} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        
-        {/* Free plan upgrade overlay */}
-        {shouldBlurContent && (
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent flex items-end justify-center pb-8">
-            <div className="text-center space-y-4 max-w-md">
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg">Unlock More Opportunities</h3>
-                <p className="text-sm text-muted-foreground">
-                  Upgrade to see all {jobs.length} job matches and get unlimited access to premium features.
-                </p>
-              </div>
-              <Button className="bg-gradient-primary hover:opacity-90 shadow-premium">
-                <Zap className="h-4 w-4 mr-2" />
-                Upgrade to Premium
-              </Button>
-            </div>
+      <CardContent className="p-0">
+        {isLoading ? (
+          <div className="space-y-2 p-6">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-16 w-full rounded-xl" />
+            ))}
           </div>
-        )}
-        
-        {/* Empty state */}
-        {jobs.length === 0 && (
-          <div className="text-center py-12 space-y-4">
-            <Briefcase className="h-12 w-12 text-muted-foreground mx-auto opacity-50" />
+        ) : isError ? (
+          <div className="flex flex-col items-center gap-3 py-12 text-center">
+            <Lock className="h-8 w-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">We couldn\'t load jobs right now.</p>
+            <Button onClick={onRetry}>Retry</Button>
+          </div>
+        ) : empty ? (
+          <div className="flex flex-col items-center gap-3 py-12 text-center">
+            <Sparkles className="h-8 w-8 text-muted-foreground" />
             <div>
-              <h3 className="font-medium text-lg">No job matches found</h3>
-              <p className="text-sm text-muted-foreground">
-                {searchQuery 
-                  ? `No jobs found matching "${searchQuery}". Try adjusting your search terms.`
-                  : "Start by setting up your job preferences to see personalized recommendations."
-                }
-              </p>
+              <p className="text-base font-medium text-foreground">No jobs match your filters</p>
+              <p className="text-sm text-muted-foreground">Try widening your filters or adjusting your preferences.</p>
             </div>
+            <Button variant="outline" onClick={onResetFilters}>
+              Reset filters
+            </Button>
           </div>
+        ) : (
+          <ScrollArea className="h-full">
+            <Table className="min-w-full">
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="w-[260px]">Position</TableHead>
+                  <TableHead>Company</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Salary</TableHead>
+                  <TableHead>Match</TableHead>
+                  <TableHead>ATS Score</TableHead>
+                  <TableHead>JD Preview</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {jobs.map((job, index) => {
+                  const gated = index >= visibleRows;
+                  const maskedClass = gated ? "opacity-30 pointer-events-none select-none" : "";
+                  return (
+                    <TableRow
+                      key={job.id}
+                      className="cursor-pointer transition-colors hover:bg-muted/30"
+                      onDoubleClick={() => !gated && onViewJob(job.id)}
+                    >
+                      <TableCell>
+                        <div className={`flex flex-col gap-1 ${maskedClass}`}>
+                          <span className="font-medium text-sm text-foreground">{job.title}</span>
+                          <div className="flex flex-wrap gap-1">
+                            <Badge variant="outline" className="rounded-full text-xs">
+                              {job.remoteType}
+                            </Badge>
+                            <Badge variant="outline" className="rounded-full text-xs">
+                              {job.employmentType}
+                            </Badge>
+                            <Badge variant="secondary" className="rounded-full text-xs">
+                              {job.jobBoard}
+                            </Badge>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className={`flex flex-col ${maskedClass}`}>
+                          <span className="text-sm font-medium">{job.company.name}</span>
+                          <span className="text-xs text-muted-foreground">{job.company.industry}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-sm text-muted-foreground ${maskedClass}`}>{job.location}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-sm font-medium ${maskedClass}`}>
+                          {job.salary.min && job.salary.max
+                            ? `$${Math.round(job.salary.min / 1000)}k - $${Math.round(job.salary.max / 1000)}k`
+                            : job.salary.min
+                            ? `$${Math.round(job.salary.min / 1000)}k`
+                            : "—"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className={`flex flex-col ${maskedClass}`}>
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
+                              <div
+                                className="h-full rounded-full bg-[var(--brand-from)]"
+                                style={{ width: `${job.matchScore}%` }}
+                              />
+                            </div>
+                            <span className="text-xs font-medium">{job.matchScore}%</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {job.matchedSkills.slice(0, 3).join(", ")}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className={`flex flex-col ${maskedClass}`}>
+                          <span className="text-sm font-medium">{job.atsScore}%</span>
+                          <span className="text-xs text-muted-foreground">Estimated alignment</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className={`line-clamp-2 text-sm text-muted-foreground ${maskedClass}`}>{job.descriptionPreview}</p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={STATUS_VARIANTS[job.status]} className={maskedClass}>
+                          {statusLabel(job.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {gated ? (
+                          <Button size="sm" className="rounded-full" onClick={onUpgrade}>
+                            Upgrade
+                          </Button>
+                        ) : (
+                          <div className="flex items-center justify-end gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleBookmark(job.id)}
+                                  aria-label={savedJobs.has(job.id) ? "Remove bookmark" : "Save job"}
+                                >
+                                  {savedJobs.has(job.id) ? (
+                                    <BookmarkCheck className="h-4 w-4" />
+                                  ) : (
+                                    <Bookmark className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Save job</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => onViewJob(job.id)}
+                                  aria-label="View job details"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Open job drawer</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() =>
+                                    canUseFeature(plan, "optimizeATS") ? onOptimize(job) : onUpgrade()
+                                  }
+                                  aria-label={canUseFeature(plan, "optimizeATS") ? "Optimize ATS" : "Upgrade for ATS"}
+                                >
+                                  <Sparkles className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {canUseFeature(plan, "optimizeATS")
+                                  ? "Optimize ATS score"
+                                  : "Pro unlocks ATS optimization"}
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() =>
+                                    canUseFeature(plan, "optimizedCV") ? onGenerateCv(job) : onUpgrade()
+                                  }
+                                  aria-label={canUseFeature(plan, "optimizedCV") ? "Generate optimized CV" : "Upgrade for optimized CV"}
+                                >
+                                  <FileText className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {canUseFeature(plan, "optimizedCV")
+                                  ? "Generate tailored resume"
+                                  : "Upgrade to generate optimized CVs"}
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  asChild
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  aria-label="Open original job"
+                                >
+                                  <a href={job.jobUrl} target="_blank" rel="noopener noreferrer">
+                                    <ArrowUpRight className="h-4 w-4" />
+                                  </a>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Open job posting</TooltipContent>
+                            </Tooltip>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         )}
       </CardContent>
     </Card>
