@@ -139,7 +139,7 @@ const Dashboard = () => {
     queryFn: () => fetchDashboardData({ plan, range, query: searchQuery, filters }),
     enabled: !profileLoading && Boolean(user),
     staleTime: 60_000,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   const preferencesQuery = useQuery({
@@ -248,7 +248,9 @@ const Dashboard = () => {
                 filters={filters}
                 onFiltersChange={setFilters}
                 preferences={preferencesQuery.data}
-                onPreferencesSave={(updates) => updatePreferencesMutation.mutateAsync(updates)}
+                onPreferencesSave={async (updates) => {
+                  await updatePreferencesMutation.mutateAsync(updates);
+                }}
                 preferencesSaving={updatePreferencesMutation.isPending}
               />
               <PremiumJobsTable

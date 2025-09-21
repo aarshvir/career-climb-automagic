@@ -43,11 +43,11 @@ interface PremiumJobsTableProps {
   onResetFilters: () => void;
 }
 
-const STATUS_VARIANTS: Record<DashboardJob["status"], string> = {
+const STATUS_VARIANTS: Record<DashboardJob["status"], "default" | "destructive" | "outline" | "secondary"> = {
   not_applied: "outline",
   applied: "secondary",
   interview: "default",
-  offer: "success",
+  offer: "default",
 };
 
 const statusLabel = (status: DashboardJob["status"]) => {

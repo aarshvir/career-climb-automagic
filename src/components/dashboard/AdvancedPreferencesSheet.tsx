@@ -128,7 +128,7 @@ export const AdvancedPreferencesSheet = ({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent position="right" size="xl" className="px-0">
+      <SheetContent side="right" className="w-[600px] px-0">
         <SheetHeader className="px-6 pb-4">
           <SheetTitle>Job preferences</SheetTitle>
           <SheetDescription>
@@ -230,7 +230,7 @@ export const AdvancedPreferencesSheet = ({
                     placeholder="Min"
                     value={localPrefs?.salaryRange.min ?? ""}
                     onChange={(event) =>
-                      debouncedSave({ salaryRange: { ...(localPrefs?.salaryRange || {}), min: Number(event.target.value) || undefined } })
+                      debouncedSave({ salaryRange: { currency: localPrefs?.salaryRange?.currency || "USD", ...(localPrefs?.salaryRange || {}), min: Number(event.target.value) || undefined } })
                     }
                   />
                   <span className="text-muted-foreground">–</span>
@@ -240,7 +240,7 @@ export const AdvancedPreferencesSheet = ({
                     placeholder="Max"
                     value={localPrefs?.salaryRange.max ?? ""}
                     onChange={(event) =>
-                      debouncedSave({ salaryRange: { ...(localPrefs?.salaryRange || {}), max: Number(event.target.value) || undefined } })
+                      debouncedSave({ salaryRange: { currency: localPrefs?.salaryRange?.currency || "USD", ...(localPrefs?.salaryRange || {}), max: Number(event.target.value) || undefined } })
                     }
                   />
                 </div>
