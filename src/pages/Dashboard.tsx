@@ -1,214 +1,289 @@
-import React, { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { useAuth } from "@/contexts/AuthContext"
-import { supabase } from "@/integrations/supabase/client"
-import { PremiumDashboardLayout } from "@/components/dashboard/PremiumDashboardLayout"
-import { PremiumJobsTable } from "@/components/dashboard/PremiumJobsTable"
-import { PremiumKPICards } from "@/components/dashboard/PremiumKPICards"
-import { SearchAndFilters } from "@/components/dashboard/SearchAndFilters"
-import { ExportButton } from "@/components/dashboard/ExportButton"
-import { ResumeVariantManager } from "@/components/dashboard/ResumeVariantManager"
-import { JobFetchTrigger } from "@/components/dashboard/JobFetchTrigger"
-import { useToast } from "@/hooks/use-toast"
-import SEOHead from "@/components/SEOHead"
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { PremiumDashboardLayout } from "@/components/dashboard/PremiumDashboardLayout";
+import { PremiumJobsTable } from "@/components/dashboard/PremiumJobsTable";
+import { PremiumKPICards } from "@/components/dashboard/PremiumKPICards";
+import { SearchAndFilters } from "@/components/dashboard/SearchAndFilters";
+import { ExportButton } from "@/components/dashboard/ExportButton";
+import { ResumeVariantManager } from "@/components/dashboard/ResumeVariantManager";
+import { JobFetchTrigger } from "@/components/dashboard/JobFetchTrigger";
+import { JobDetailsDrawer } from "@/components/dashboard/JobDetailsDrawer";
+import { useToast } from "@/hooks/use-toast";
+import SEOHead from "@/components/SEOHead";
+import {
+  DashboardApiError,
+  DashboardFilters,
+  DashboardRange,
+  DashboardResponse,
+  JobFetchState,
+  fetchDashboardData,
+  triggerJobFetch,
+  fetchPreferences,
+  updatePreferences,
+} from "@/lib/dashboard-api";
+import { normalizePlanName, PlanName } from "@/utils/plans";
+import { trackEvent } from "@/utils/analytics";
 
-// Data interfaces
 interface UserProfile {
-  plan: string
-  subscription_status?: string
+  plan: string;
+  subscription_status?: string;
 }
 
-interface DashboardStats {
-  totalSearched: number
-  totalApplied: number
-  pendingReview: number
-  customResumes: number
-}
+const filterCount = (filters: DashboardFilters) => {
+  let total = 0;
+  if (filters.remote) total += 1;
+  if (filters.recent) total += 1;
+  if (filters.visaSponsorship !== undefined) total += 1;
+  if (filters.salaryThreshold) total += 1;
+  total += filters.employmentTypes?.length ?? 0;
+  total += filters.seniorityLevels?.length ?? 0;
+  total += filters.locations?.length ?? 0;
+  return total;
+};
 
 const Dashboard = () => {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const { toast } = useToast()
-  
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [stats, setStats] = useState<DashboardStats>({
-    totalSearched: 0,
-    totalApplied: 0,
-    pendingReview: 0,
-    customResumes: 0
-  })
-  const [timeRange, setTimeRange] = useState('7d')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(true)
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [plan, setPlan] = useState<PlanName>("free");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<DashboardFilters>({});
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const initialRangeParam = (searchParams.get("range") as DashboardRange) || "7d";
+  const [range, setRange] = useState<DashboardRange>(initialRangeParam);
+
+  const jobTableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user) {
-      checkUserProfile()
+    if (!user) return;
+    const checkProfile = async () => {
+      try {
+        const { data: interestData, error: interestError } = await supabase
+          .from("interest_forms")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (interestError) {
+          console.error("Error checking interest form:", interestError);
+        }
+
+        if (!interestData) {
+          setProfileLoading(false);
+          return;
+        }
+
+        const { data: planSelectionData, error: planSelectionError } = await supabase
+          .from("plan_selections")
+          .select("id, status")
+          .eq("user_id", user.id)
+          .eq("status", "completed")
+          .maybeSingle();
+
+        if (planSelectionError) {
+          console.error("Error checking plan selection:", planSelectionError);
+        }
+
+        if (!planSelectionData) {
+          navigate("/plan-selection");
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("plan, subscription_status")
+          .eq("id", user.id)
+          .maybeSingle<UserProfile>();
+
+        if (error || !data?.plan) {
+          navigate("/plan-selection");
+          return;
+        }
+
+        const normalized = normalizePlanName(data.plan);
+        setPlan(normalized);
+      } catch (error) {
+        console.error("Error checking profile:", error);
+        navigate("/plan-selection");
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    checkProfile();
+  }, [navigate, user]);
+
+  useEffect(() => {
+    if (plan) {
+      trackEvent("dashboard_view", { range, plan });
     }
-  }, [user])
+  }, [plan, range]);
 
-  const checkUserProfile = async () => {
-    try {
-      // First check if user has filled the interest form
-      const { data: interestData, error: interestError } = await supabase
-        .from('interest_forms')
-        .select('id')
-        .eq('user_id', user?.id)
-        .maybeSingle()
+  useEffect(() => {
+    setSearchParams({ range });
+  }, [range, setSearchParams]);
 
-      if (interestError) {
-        console.error('Error checking interest form:', interestError)
-        // Continue to check profile even if there's an error
-      }
+  const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
 
-      if (!interestData) {
-        // User hasn't filled the interest form yet - let the form show
-        setLoading(false)
-        return
-      }
+  const dashboardQuery = useQuery<DashboardResponse>({
+    queryKey: ["dashboard", plan, range, searchQuery, filtersKey],
+    queryFn: () => fetchDashboardData({ plan, range, query: searchQuery, filters }),
+    enabled: !profileLoading && Boolean(user),
+    staleTime: 60_000,
+    keepPreviousData: true,
+  });
 
-      // Check if user has completed plan selection
-      const { data: planSelectionData, error: planSelectionError } = await supabase
-        .from('plan_selections')
-        .select('id, status')
-        .eq('user_id', user?.id)
-        .eq('status', 'completed')
-        .maybeSingle()
+  const preferencesQuery = useQuery({
+    queryKey: ["job-preferences"],
+    queryFn: fetchPreferences,
+    enabled: Boolean(user),
+  });
 
-      if (planSelectionError) {
-        console.error('Error checking plan selection:', planSelectionError)
-        // Continue to check profile for backward compatibility
-      }
+  const updatePreferencesMutation = useMutation({
+    mutationFn: updatePreferences,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["job-preferences"], data);
+    },
+  });
 
-      if (!planSelectionData) {
-        // User hasn't completed plan selection yet
-        navigate('/plan-selection')
-        return
-      }
+  const jobFetchMutation = useMutation<JobFetchState, DashboardApiError, void>({
+    mutationFn: () => triggerJobFetch(plan),
+    onSuccess: (state) => {
+      queryClient.setQueryData<DashboardResponse | undefined>(
+        ["dashboard", plan, range, searchQuery, filtersKey],
+        (current) => (current ? { ...current, jobFetch: state } : current),
+      );
+      dashboardQuery.refetch();
+    },
+  });
 
-      // Optional: Also check profiles for backward compatibility
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('plan, subscription_status')
-        .eq('id', user?.id)
-        .maybeSingle()
+  const handleTriggerFetch = async () => {
+    const result = await jobFetchMutation.mutateAsync();
+    return result;
+  };
 
-      if (error) {
-        console.error('Error fetching profile:', error)
-        // If no profile or no plan, redirect to plan selection
-        navigate('/plan-selection')
-        return
-      }
+  const handleViewJob = (jobId: string) => {
+    setSelectedJobId(jobId);
+    setDrawerOpen(true);
+  };
 
-      if (!data || !data.plan) {
-        navigate('/plan-selection')
-        return
-      }
+  const promptUpgrade = () => {
+    toast({
+      title: "Upgrade required",
+      description: "Unlock this feature on the Pro plan.",
+    });
+    trackEvent("upgrade_modal_show", { source: "dashboard" });
+  };
 
-      setProfile(data)
-      await loadDashboardData(data.plan)
-    } catch (error) {
-      console.error('Error checking profile:', error)
-      navigate('/plan-selection')
-    }
-  }
+  const dashboardData = dashboardQuery.data;
+  const filtersApplied = filterCount(filters);
+  const userName = user?.email?.split("@")[0] ?? "there";
 
-  const loadDashboardData = async (userPlan: string) => {
-    try {
-      // Load stats based on plan
-      const mockStats = {
-        totalSearched: userPlan === 'free' ? 50 : userPlan === 'pro' ? 200 : 500,
-        totalApplied: userPlan === 'free' ? 8 : userPlan === 'pro' ? 35 : 85,
-        pendingReview: userPlan === 'free' ? 3 : userPlan === 'pro' ? 12 : 28,
-        customResumes: userPlan === 'free' ? 0 : userPlan === 'pro' ? 5 : 15
-      }
-      setStats(mockStats)
-    } catch (error) {
-      console.error('Error loading dashboard data:', error)
-      toast({
-        title: "Error",
-        description: "Failed to load dashboard data. Please refresh the page.",
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loading) {
+  if (profileLoading) {
     return (
-      <>
-        <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
-        <PremiumDashboardLayout>
-          <div className="space-y-6">
-            <div className="animate-pulse">
-              <div className="h-8 bg-muted rounded w-48 mb-2"></div>
-              <div className="h-4 bg-muted rounded w-72"></div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 bg-muted rounded animate-pulse"></div>
-              ))}
-            </div>
-            <div className="h-96 bg-muted rounded animate-pulse"></div>
+      <PremiumDashboardLayout plan={plan}>
+        <div className="space-y-6">
+          <div className="h-8 w-40 animate-pulse rounded-lg bg-muted" />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-32 animate-pulse rounded-2xl bg-muted/50" />
+            ))}
           </div>
-        </PremiumDashboardLayout>
-      </>
-    )
+          <div className="h-96 animate-pulse rounded-2xl bg-muted/50" />
+        </div>
+      </PremiumDashboardLayout>
+    );
   }
 
   return (
     <>
       <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
-      <PremiumDashboardLayout>
+      <PremiumDashboardLayout plan={plan}>
         <div className="space-y-8">
-          {/* Hero Section */}
-          <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div className="space-y-2">
-                <h1 className="text-4xl font-display font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                  Welcome back!
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                  Your AI-powered job search command center
-                </p>
+          <section className="space-y-6">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-semibold text-foreground">Welcome back, {userName}</h1>
+              <p className="text-sm text-muted-foreground">
+                Track discoveries, tailor resumes, and keep your applications on pace.
+              </p>
+            </div>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex-1">
+                <JobFetchTrigger
+                  plan={plan}
+                  jobFetch={dashboardData?.jobFetch}
+                  onTrigger={handleTriggerFetch}
+                  onViewNewJobs={() => {
+                    jobTableRef.current?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                />
               </div>
-              <div className="flex items-center gap-4">
-                <JobFetchTrigger userPlan={profile?.plan || 'free'} />
-                <ExportButton userPlan={profile?.plan || 'free'} />
+              <div className="flex items-center gap-3">
+                <ExportButton plan={plan} />
               </div>
             </div>
-
-            {/* Premium KPI Cards */}
-            <PremiumKPICards 
-              stats={stats} 
-              timeRange={timeRange} 
-              onTimeRangeChange={setTimeRange}
-              userPlan={profile?.plan || 'free'}
+            <PremiumKPICards
+              kpis={dashboardData?.kpis}
+              range={range}
+              onRangeChange={setRange}
+              plan={plan}
+              onUpgrade={promptUpgrade}
             />
-          </div>
+          </section>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-            <div className="xl:col-span-3 space-y-8">
-              <SearchAndFilters 
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
+          <section className="grid gap-8 xl:grid-cols-4">
+            <div className="xl:col-span-3 space-y-6" ref={jobTableRef}>
+              <SearchAndFilters
+                query={searchQuery}
+                onQueryChange={setSearchQuery}
+                filters={filters}
+                onFiltersChange={setFilters}
+                preferences={preferencesQuery.data}
+                onPreferencesSave={(updates) => updatePreferencesMutation.mutateAsync(updates)}
+                preferencesSaving={updatePreferencesMutation.isPending}
               />
-              <PremiumJobsTable 
-                userPlan={profile?.plan || 'free'}
-                searchQuery={searchQuery}
+              <PremiumJobsTable
+                plan={plan}
+                jobs={dashboardData?.jobs ?? []}
+                totalJobs={dashboardData?.totalJobs ?? 0}
+                isLoading={dashboardQuery.isLoading}
+                isError={dashboardQuery.isError}
+                onRetry={() => dashboardQuery.refetch()}
+                onViewJob={handleViewJob}
+                onOptimize={(job) => handleViewJob(job.id)}
+                onGenerateCv={(job) => handleViewJob(job.id)}
+                onUpgrade={promptUpgrade}
+                filtersApplied={filtersApplied}
+                onResetFilters={() => {
+                  setFilters({});
+                  setSearchQuery("");
+                }}
               />
             </div>
-            
-            <div className="xl:col-span-1 space-y-6">
-              <ResumeVariantManager userPlan={profile?.plan || 'free'} />
+            <div className="space-y-6">
+              <ResumeVariantManager userPlan={plan} />
             </div>
-          </div>
+          </section>
         </div>
+        <JobDetailsDrawer
+          jobId={selectedJobId}
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          plan={plan}
+          onUpgrade={promptUpgrade}
+        />
       </PremiumDashboardLayout>
     </>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
