@@ -29,6 +29,7 @@ import { ResumeUploadDialog } from "./components/onboarding/ResumeUploadDialog";
 import { JobPreferencesDialog } from "./components/onboarding/JobPreferencesDialog";
 import { useOnboarding } from "./contexts/OnboardingContext";
 
+// Create query client with proper React context
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -87,20 +88,24 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <InterestFormProvider>
-          <OnboardingProvider>
-            <TooltipProvider>
-              <AppContent />
-            </TooltipProvider>
-          </OnboardingProvider>
-        </InterestFormProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
-);
+const App: React.FC = () => {
+  return (
+    <React.StrictMode>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <InterestFormProvider>
+              <OnboardingProvider>
+                <TooltipProvider>
+                  <AppContent />
+                </TooltipProvider>
+              </OnboardingProvider>
+            </InterestFormProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;
