@@ -108,7 +108,7 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
       console.log('File uploaded successfully, saving to database...');
 
       // Save to database
-      const { error: dbError } = await saveResumeRecord({
+      const { data: recordData, error: dbError, ignoredError, fallbackApplied } = await saveResumeRecord({
         userId: user.id,
         filePath: fileName,
         originalFileName: file.name,
@@ -116,11 +116,15 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         mimeType: normalizedFile.type || file.type || "application/octet-stream",
       });
 
-      console.log('Database insert result:', { dbError });
+      console.log('Database insert result:', { recordData, dbError, ignoredError, fallbackApplied });
 
       if (dbError) {
         console.error('Database error details:', dbError);
         throw dbError;
+      }
+
+      if (ignoredError) {
+        console.warn('Database metadata was ignored due to missing columns:', ignoredError, 'fallback applied:', fallbackApplied);
       }
 
       console.log('Resume upload completed successfully');
