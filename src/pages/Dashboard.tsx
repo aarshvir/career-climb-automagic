@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { supabase } from "@/integrations/supabase/client"
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
-import { JobsTable } from "@/components/dashboard/JobsTable"
-import { KPICards } from "@/components/dashboard/KPICards"
+import { PremiumDashboardLayout } from "@/components/dashboard/PremiumDashboardLayout"
+import { PremiumJobsTable } from "@/components/dashboard/PremiumJobsTable"
+import { PremiumKPICards } from "@/components/dashboard/PremiumKPICards"
 import { SearchAndFilters } from "@/components/dashboard/SearchAndFilters"
 import { ExportButton } from "@/components/dashboard/ExportButton"
 import { ResumeVariantManager } from "@/components/dashboard/ResumeVariantManager"
 import { JobFetchTrigger } from "@/components/dashboard/JobFetchTrigger"
-import { Sidebar } from "@/components/dashboard/Sidebar"
 import { useToast } from "@/hooks/use-toast"
 import SEOHead from "@/components/SEOHead"
 
@@ -140,7 +139,7 @@ const Dashboard = () => {
     return (
       <>
         <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
-        <DashboardLayout>
+        <PremiumDashboardLayout>
           <div className="space-y-6">
             <div className="animate-pulse">
               <div className="h-8 bg-muted rounded w-48 mb-2"></div>
@@ -153,7 +152,7 @@ const Dashboard = () => {
             </div>
             <div className="h-96 bg-muted rounded animate-pulse"></div>
           </div>
-        </DashboardLayout>
+        </PremiumDashboardLayout>
       </>
     )
   }
@@ -161,46 +160,53 @@ const Dashboard = () => {
   return (
     <>
       <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
-      <DashboardLayout>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back! Here's your job search overview</p>
+      <PremiumDashboardLayout>
+        <div className="space-y-8">
+          {/* Hero Section */}
+          <div className="space-y-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="space-y-2">
+                <h1 className="text-4xl font-display font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  Welcome back!
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                  Your AI-powered job search command center
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <JobFetchTrigger userPlan={profile?.plan || 'free'} />
+                <ExportButton userPlan={profile?.plan || 'free'} />
+              </div>
             </div>
-            <ExportButton userPlan={profile?.plan || 'free'} />
+
+            {/* Premium KPI Cards */}
+            <PremiumKPICards 
+              stats={stats} 
+              timeRange={timeRange} 
+              onTimeRangeChange={setTimeRange}
+              userPlan={profile?.plan || 'free'}
+            />
           </div>
 
-          {/* KPI Cards */}
-          <KPICards 
-            stats={stats} 
-            timeRange={timeRange} 
-            onTimeRangeChange={setTimeRange}
-            userPlan={profile?.plan || 'free'}
-          />
-
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3 space-y-6">
+          {/* Main Content */}
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+            <div className="xl:col-span-3 space-y-8">
               <SearchAndFilters 
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
               />
-              <JobsTable 
+              <PremiumJobsTable 
                 userPlan={profile?.plan || 'free'}
                 searchQuery={searchQuery}
               />
             </div>
             
-            <div className="lg:col-span-1 space-y-6">
-              <JobFetchTrigger userPlan={profile?.plan || 'free'} />
+            <div className="xl:col-span-1 space-y-6">
               <ResumeVariantManager userPlan={profile?.plan || 'free'} />
-              <Sidebar />
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </PremiumDashboardLayout>
     </>
   )
 }
