@@ -232,6 +232,7 @@ export type Database = {
           file_size: number | null
           id: string
           mime_type: string | null
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
@@ -241,7 +242,8 @@ export type Database = {
           file_size?: number | null
           id?: string
           mime_type?: string | null
-          user_id?: string | null
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -250,6 +252,7 @@ export type Database = {
           file_size?: number | null
           id?: string
           mime_type?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [

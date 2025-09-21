@@ -43,70 +43,75 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
 
   const handleUpload = async () => {
     if (!file || !user) {
-      console.error('Upload failed: Missing file or user', { file: !!file, user: !!user });
+      console.error("Upload failed: Missing file or user", { file: !!file, user: !!user });
       return;
     }
 
     setUploading(true);
     try {
-      console.log('Starting upload process...', {
+      console.log("Starting upload process...", {
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
         userId: user.id,
         userEmail: user.email,
-        session: !!supabase.auth.getSession()
+        session: !!supabase.auth.getSession(),
       });
 
       // Check current session
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      console.log('Current session:', { sessionData, sessionError });
-      
+      console.log("Current session:", { sessionData, sessionError });
+
       if (!sessionData.session) {
-        throw new Error('No active session found');
+        throw new Error("No active session found");
       }
 
       const normalizedFile = normalizeResumeFile(file);
       const fileName = buildResumeStoragePath(user.id, normalizedFile);
-      
-      console.log('Normalized file details:', {
+
+      console.log("Normalized file details:", {
         originalType: file.type,
         normalizedType: normalizedFile.type,
         fileName: fileName,
-        bucketName: RESUME_BUCKET
+        bucketName: RESUME_BUCKET,
       });
 
       // Test bucket access first
       const { data: buckets, error: bucketListError } = await supabase.storage.listBuckets();
-      console.log('Available buckets:', buckets, 'Error:', bucketListError);
+      console.log("Available buckets:", buckets, "Error:", bucketListError);
 
       // Check if user can access the bucket
-      const { data: bucketFiles, error: bucketAccessError } = await supabase.storage
-        .from(RESUME_BUCKET)
-        .list();
-      console.log('Bucket access test:', { bucketFiles, bucketAccessError });
+      const { data: bucketFiles, error: bucketAccessError } = await supabase.storage.from(RESUME_BUCKET).list();
+      console.log("Bucket access test:", { bucketFiles, bucketAccessError });
 
       // Attempt upload
-      console.log('Attempting file upload...');
+      console.log("Attempting file upload...");
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from(RESUME_BUCKET)
         .upload(fileName, normalizedFile, {
-          cacheControl: '3600',
-          upsert: true
+          cacheControl: "3600",
+          upsert: true,
         });
 
-      console.log('Upload result:', { uploadData, uploadError });
+      console.log("Upload result:", { uploadData, uploadError });
 
       if (uploadError) {
-        console.error('Upload error details:', {
+        console.error("Upload error details:", {
           message: uploadError.message,
-          error: uploadError
+          error: uploadError,
         });
         throw uploadError;
       }
 
+      console.log("File uploaded successfully, saving to database...");
+
       // Save to database
-      const { data: recordData, error: dbError, ignoredError, fallbackApplied } = await saveResumeRecord({
+      const {
+        data: recordData,
+        error: dbError,
+        ignoredError,
+        fallbackApplied,
+      } = await saveResumeRecord({
         userId: user.id,
         filePath: fileName,
         originalFileName: file.name,
@@ -114,15 +119,29 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         mimeType: normalizedFile.type || file.type || "application/octet-stream",
       });
 
+      console.log("Database insert result:", {
+        recordData,
+        dbError,
+        ignoredError,
+        fallbackApplied,
+      });
+
       if (dbError) {
-        console.error('Resume database error:', dbError);
+        console.error("Database error details:", dbError);
         throw dbError;
       }
 
-      if (ignoredError && process.env.NODE_ENV === 'development') {
-        console.warn('Database metadata was ignored due to missing columns:', ignoredError);
+      if (ignoredError) {
+        console.warn(
+          "Database metadata was ignored due to missing columns:",
+          ignoredError,
+          "fallback applied:",
+          fallbackApplied,
+        );
       }
-      
+
+      console.log("Resume upload completed successfully");
+
       toast({
         title: "Resume uploaded successfully",
         description: "Your resume has been uploaded and saved.",
@@ -138,21 +157,21 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         code: string;
       }>;
 
-      console.error('Upload failed with error:', {
+      console.error("Upload failed with error:", {
         error,
         message: uploadError?.message,
         statusCode: uploadError?.statusCode,
         details: uploadError?.details,
         hint: uploadError?.hint,
-        code: uploadError?.code
+        code: uploadError?.code,
       });
 
       let errorMessage = "There was an error uploading your resume. Please try again.";
-      const message = typeof uploadError?.message === 'string' ? uploadError.message : '';
+      const message = typeof uploadError?.message === "string" ? uploadError.message : "";
 
-      if (message.includes('new row violates row-level security policy')) {
+      if (message.includes("new row violates row-level security policy")) {
         errorMessage = "Permission denied. Please ensure you're logged in and try again.";
-      } else if (message.includes('bucket')) {
+      } else if (message.includes("bucket")) {
         errorMessage = "Storage configuration error. Please contact support.";
       } else if (uploadError?.statusCode === 413) {
         errorMessage = "File too large. Please upload a smaller file.";
@@ -177,12 +196,12 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
             Upload Your Resume
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Please upload your resume to continue. We'll use this to help match you with relevant job opportunities.
           </p>
-          
+
           <div className="space-y-2">
             <Label htmlFor="resume-upload">Choose File</Label>
             <Input
@@ -192,18 +211,10 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
               onChange={handleFileSelect}
               disabled={uploading}
             />
-            {file && (
-              <p className="text-sm text-muted-foreground">
-                Selected: {file.name}
-              </p>
-            )}
+            {file && <p className="text-sm text-muted-foreground">Selected: {file.name}</p>}
           </div>
 
-          <Button
-            onClick={handleUpload}
-            disabled={!file || uploading}
-            className="w-full"
-          >
+          <Button onClick={handleUpload} disabled={!file || uploading} className="w-full">
             <Upload className="mr-2 h-4 w-4" />
             {uploading ? "Uploading..." : "Upload Resume"}
           </Button>
