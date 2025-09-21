@@ -36,7 +36,9 @@ export const useAuthRetry = () => {
         return;
       } catch (error) {
         const errorObj = error as Error;
-        console.warn(`Auth attempt ${attempt} failed:`, errorObj);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`Auth attempt ${attempt} failed:`, errorObj);
+        }
         
         setRetryState(prev => ({
           ...prev,
