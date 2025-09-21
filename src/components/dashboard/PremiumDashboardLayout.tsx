@@ -15,20 +15,28 @@ export const PremiumDashboardLayout = ({ children }: PremiumDashboardLayoutProps
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-card-elevated to-primary-soft">
+      <div className="min-h-screen bg-background">
+        {/* Ambient Background */}
+        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-gradient-to-r from-primary/8 via-primary/4 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-l from-success/6 via-success/3 to-transparent rounded-full blur-3xl"></div>
+        </div>
+        
         <div className="flex items-center justify-center min-h-screen">
-          <div className="space-y-6 w-full max-w-lg mx-auto p-8">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-primary animate-pulse-glow" />
-              <Skeleton className="h-8 w-48 mx-auto" />
-              <Skeleton className="h-4 w-64 mx-auto" />
+          <div className="section-container">
+            <div className="space-y-8 w-full max-w-4xl mx-auto">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-primary animate-pulse-glow" />
+                <Skeleton className="h-8 w-48 mx-auto" />
+                <Skeleton className="h-4 w-64 mx-auto" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-32 rounded-xl bg-card/50 animate-pulse shimmer" />
+                ))}
+              </div>
+              <div className="h-80 rounded-xl bg-card/50 animate-pulse shimmer" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-28 rounded-xl bg-gradient-premium-card animate-pulse" />
-              ))}
-            </div>
-            <div className="h-64 rounded-xl bg-gradient-premium-card animate-pulse" />
           </div>
         </div>
       </div>
@@ -40,20 +48,23 @@ export const PremiumDashboardLayout = ({ children }: PremiumDashboardLayoutProps
   }
 
   return (
-    <SidebarProvider defaultOpen>
-      <div className="min-h-screen bg-gradient-to-br from-background via-card-elevated to-primary-soft w-full relative overflow-hidden">
-        {/* Ambient Background Effects */}
-        <div className="absolute inset-0 bg-gradient-hero opacity-[0.02] pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-primary opacity-[0.03] rounded-full blur-3xl pointer-events-none" />
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen flex w-full bg-background">
+        {/* Ambient Background */}
+        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-gradient-to-r from-primary/8 via-primary/4 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-l from-success/6 via-success/3 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-radial from-primary/3 via-transparent to-transparent rounded-full blur-3xl"></div>
+        </div>
         
-        {/* Floating Header */}
-        <PremiumHeader />
+        <PremiumSidebar />
         
-        <div className="flex w-full relative">
-          <PremiumSidebar />
-          <main className="flex-1 transition-all duration-500 ease-out min-h-screen">
-            <div className="container mx-auto px-6 lg:px-8 py-8 max-w-7xl">
-              <div className="animate-in">
+        <div className="flex-1 flex flex-col min-h-screen">
+          <PremiumHeader />
+          
+          <main className="flex-1 overflow-auto">
+            <div className="content-wrapper min-h-full">
+              <div className="animate-fade-in-up">
                 {children}
               </div>
             </div>

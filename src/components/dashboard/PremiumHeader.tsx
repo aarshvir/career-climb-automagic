@@ -1,8 +1,8 @@
-import { Bell, Search, Settings, User } from "lucide-react";
+import { Bell, Settings, User, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -10,62 +10,53 @@ export const PremiumHeader = () => {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 floating-header">
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4">
-          {/* Left Section */}
+    <header className="floating-header border-b border-border/10">
+      <div className="content-wrapper py-0">
+        <div className="h-20 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <SidebarTrigger className="lg:hidden hover-lift p-2 rounded-lg hover:bg-primary-soft/50 transition-snappy" />
+            <SidebarTrigger className="lg:hidden interactive-element" />
             
-            {/* Premium Search */}
-            <div className="relative hidden md:block">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search jobs, companies, skills..." 
-                className="pl-12 pr-4 w-[400px] glass-morphism border-border-elevated/50 focus:border-primary/50 focus:ring-primary/20 text-sm transition-premium"
-              />
+            <div className="hidden lg:flex items-center gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search jobs, companies, or keywords..."
+                  className="w-80 pl-10 bg-muted/30 border-border/30 focus:bg-background/80 focus:border-primary/30 transition-all duration-200"
+                />
+              </div>
+              <div className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+                ⌘K
+              </div>
             </div>
           </div>
-
-          {/* Right Section */}
-          <div className="flex items-center gap-3">
-            {/* Action Buttons */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="relative hover-lift p-2.5 rounded-lg hover:bg-primary-soft/50 transition-snappy group"
-            >
-              <Bell className="h-4 w-4 group-hover:text-primary transition-colors" />
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-gradient-warning border-0 animate-bounce-gentle"
-              >
+          
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="relative interactive-element">
+              <Bell className="h-5 w-5" />
+              <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary rounded-full text-xs flex items-center justify-center text-primary-foreground font-medium animate-pulse-glow">
                 3
-              </Badge>
+              </span>
             </Button>
             
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="hover-lift p-2.5 rounded-lg hover:bg-primary-soft/50 transition-snappy group"
-            >
-              <Settings className="h-4 w-4 group-hover:text-primary transition-colors" />
+            <Button variant="ghost" size="icon" className="interactive-element">
+              <Settings className="h-5 w-5" />
             </Button>
-
-            {/* User Profile */}
-            <div className="flex items-center gap-4 pl-4 border-l border-border-elevated/50">
+            
+            <Separator orientation="vertical" className="h-6 mx-2" />
+            
+            <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-display">
-                  {user?.email?.split('@')[0]}
+                <p className="text-sm font-semibold leading-none text-foreground">
+                  {user?.email?.split('@')[0] || 'User'}
                 </p>
-                <p className="text-xs text-muted-foreground font-medium">
-                  Premium User
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Premium Plan
                 </p>
               </div>
-              <Avatar className="h-9 w-9 ring-2 ring-primary/30 hover-lift transition-premium cursor-pointer">
-                <AvatarImage src="" alt={user?.email || ''} />
-                <AvatarFallback className="bg-gradient-primary text-primary-foreground font-medium">
-                  <User className="h-4 w-4" />
+              <Avatar className="h-9 w-9 ring-2 ring-border/20 hover:ring-primary/20 transition-all duration-200">
+                <AvatarImage src="/placeholder.svg" />
+                <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+                  {(user?.email?.charAt(0) || 'U').toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </div>

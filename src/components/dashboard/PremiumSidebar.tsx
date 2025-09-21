@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSidebar } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -10,7 +12,8 @@ import {
   Zap,
   Target,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  Sparkles
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,12 +26,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { CVManager } from "./CVManager";
+import { Link } from "react-router-dom";
 
 const navigationItems = [
   {
@@ -76,141 +77,130 @@ const navigationItems = [
 ];
 
 export const PremiumSidebar = () => {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const { state, isMobile } = useSidebar();
+  const isCollapsed = state === "collapsed";
   const location = useLocation();
   const navigate = useNavigate();
-  const [userPlan] = useState("pro"); // TODO: Get from context
-
-  const isActive = (url: string) => location.pathname === url;
-
-  const handleUpgrade = () => {
-    navigate("/pricing");
-  };
 
   return (
-    <Sidebar className="border-r border-border/50 bg-gradient-to-b from-background to-background/50 backdrop-blur-xl">
-      <SidebarHeader className="border-b border-border/50 p-6">
+    <Sidebar collapsible="icon" className="border-r border-border/10 bg-card/30 backdrop-blur-sm">
+      <SidebarHeader className="border-b border-border/10 p-6">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-            <Zap className="h-4 w-4 text-primary-foreground" />
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-primary-foreground font-bold text-lg">J</span>
           </div>
-          {!collapsed && (
-            <div>
-              <h2 className="font-display font-semibold text-lg">JobVance</h2>
-              <p className="text-xs text-muted-foreground">AI Job Search</p>
+          {!isCollapsed && (
+            <div className="flex flex-col">
+              <span className="text-lg font-display font-semibold text-foreground">JobVance</span>
+              <span className="text-xs text-muted-foreground">AI-Powered Job Search</span>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-4">
+      <SidebarContent className="p-4 space-y-6">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground px-3 py-2">
+          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Main Navigation
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    onClick={() => navigate(item.url)}
-                    className={`group relative w-full justify-start px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                      isActive(item.url)
-                        ? "bg-gradient-primary text-primary-foreground shadow-premium"
-                        : "hover:bg-accent/50 hover:shadow-card"
-                    }`}
-                  >
-                    <item.icon className={`h-4 w-4 ${collapsed ? 'mx-auto' : 'mr-3'} transition-colors`} />
-                    {!collapsed && (
-                      <>
-                        <span className="font-medium">{item.title}</span>
-                        {item.badge && (
-                          <Badge 
-                            variant={isActive(item.url) ? "secondary" : "outline"} 
-                            className="ml-auto text-xs h-5"
-                          >
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </>
+          <SidebarMenu className="space-y-1">
+            {navigationItems.map((item, index) => {
+              const isActive = location.pathname === item.url
+              return (
+                <SidebarMenuItem key={index}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive}
+                    className={cn(
+                      "w-full justify-start gap-3 py-3 px-3 rounded-xl transition-all duration-200 group",
+                      isActive 
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
+                        : "hover:bg-muted/50 hover:translate-x-1"
                     )}
+                  >
+                    <Link to={item.url} className="flex items-center gap-3">
+                      <item.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", isActive && "text-primary-foreground")} />
+                      {!isCollapsed && (
+                        <>
+                          <span className="font-medium">{item.title}</span>
+                          {item.badge && (
+                            <span className={cn(
+                              "ml-auto text-xs px-2 py-1 rounded-lg font-medium",
+                              isActive 
+                                ? "bg-primary-foreground/20 text-primary-foreground" 
+                                : "bg-primary/10 text-primary"
+                            )}>
+                              {item.badge}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+              )
+            })}
+          </SidebarMenu>
         </SidebarGroup>
 
-        {!collapsed && (
-          <>
-            <SidebarGroup className="mt-6">
-              <SidebarGroupLabel className="text-xs font-medium text-muted-foreground px-3 py-2">
-                Quick Actions
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <div className="space-y-3 px-3">
-                  <CVManager userPlan={userPlan} />
-                </div>
-              </SidebarGroupContent>
-            </SidebarGroup>
+        {!isCollapsed && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+              Quick Actions
+            </SidebarGroupLabel>
+            <div className="space-y-4">
+              <CVManager userPlan="premium" />
+            </div>
+          </SidebarGroup>
+        )}
 
-            <SidebarGroup className="mt-6">
-              <SidebarGroupLabel className="text-xs font-medium text-muted-foreground px-3 py-2">
-                Usage & Plan
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-accent/5 border border-border/50 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Crown className="h-4 w-4 text-primary" />
-                    <span className="font-medium text-sm capitalize">{userPlan} Plan</span>
+        {!isCollapsed && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+              Your Plan
+            </SidebarGroupLabel>
+            <div className="space-y-4">
+              <div className="premium-card p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-foreground">Premium Plan</span>
+                  <Crown className="h-5 w-5 text-warning" />
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-medium text-muted-foreground">Job Applications</span>
+                      <span className="text-xs font-semibold text-foreground">150/200</span>
+                    </div>
+                    <div className="w-full bg-muted/50 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-primary to-primary-hover h-2 rounded-full transition-all duration-500" style={{ width: '75%' }}></div>
+                    </div>
                   </div>
                   
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span>AI Searches</span>
-                        <span>85/100</span>
-                      </div>
-                      <Progress value={85} className="h-2" />
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-medium text-muted-foreground">AI Resumes</span>
+                      <span className="text-xs font-semibold text-foreground">12/20</span>
                     </div>
-                    
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span>Applications</span>
-                        <span>23/50</span>
-                      </div>
-                      <Progress value={46} className="h-2" />
+                    <div className="w-full bg-muted/50 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-success to-info h-2 rounded-full transition-all duration-500" style={{ width: '60%' }}></div>
                     </div>
                   </div>
-
-                  {userPlan === 'free' && (
-                    <Button 
-                      onClick={handleUpgrade}
-                      className="w-full mt-4 bg-gradient-primary hover:opacity-90 text-sm h-8"
-                    >
-                      <Crown className="h-3 w-3 mr-2" />
-                      Upgrade Plan
-                    </Button>
-                  )}
                 </div>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
+              </div>
+            </div>
+          </SidebarGroup>
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border/50 p-4">
-        {!collapsed && (
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-left hover:bg-accent/50"
-            onClick={() => navigate("/settings")}
-          >
-            <Settings className="h-4 w-4 mr-3" />
-            Settings
-          </Button>
-        )}
+      <SidebarFooter className="border-t border-border/10 p-4">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start gap-3 py-3 px-3 rounded-xl hover:bg-muted/50 transition-all duration-200 group"
+          onClick={() => navigate('/settings')}
+        >
+          <Settings className="h-5 w-5 group-hover:scale-110 transition-transform" />
+          {!isCollapsed && <span className="font-medium">Settings</span>}
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
