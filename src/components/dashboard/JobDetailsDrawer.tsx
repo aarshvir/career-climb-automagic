@@ -100,10 +100,10 @@ What We Offer:
         <SheetHeader className="pb-4">
           <SheetTitle className="text-left">
             <div className="space-y-2">
-              <h2 className="text-xl font-bold">{job.jobTitle}</h2>
+              <h2 className="text-xl font-bold">{job.job_title}</h2>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Building className="w-4 h-4" />
-                <span>{job.company}</span>
+                <span>{job.company_name}</span>
           </div>
           <Badge variant="outline">
             {job.application_status.replace('_', ' ')}
@@ -116,7 +116,7 @@ What We Offer:
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center p-3 bg-muted rounded-lg">
-              <div className="text-2xl font-bold">{job.atsScore}%</div>
+              <div className="text-2xl font-bold">{job.ats_score}%</div>
               <div className="text-sm text-muted-foreground">ATS Match</div>
             </div>
             <div className="text-center p-3 bg-muted rounded-lg">
