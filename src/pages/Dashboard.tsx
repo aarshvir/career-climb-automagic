@@ -8,7 +8,8 @@ import { PremiumKPICards } from "@/components/dashboard/PremiumKPICards"
 import { SearchAndFilters } from "@/components/dashboard/SearchAndFilters"
 import { ExportButton } from "@/components/dashboard/ExportButton"
 import { ResumeVariantManager } from "@/components/dashboard/ResumeVariantManager"
-import { JobFetchTrigger } from "@/components/dashboard/JobFetchTrigger"
+import { DailyJobFetchCard } from "@/components/dashboard/DailyJobFetchCard"
+import { QuickActions } from "@/components/dashboard/QuickActions"
 import { useToast } from "@/hooks/use-toast"
 import SEOHead from "@/components/SEOHead"
 
@@ -115,12 +116,12 @@ const Dashboard = () => {
 
   const loadDashboardData = async (userPlan: string) => {
     try {
-      // Load stats based on plan
+      // Load stats based on plan with more realistic data
       const mockStats = {
-        totalSearched: userPlan === 'free' ? 50 : userPlan === 'pro' ? 200 : 500,
-        totalApplied: userPlan === 'free' ? 8 : userPlan === 'pro' ? 35 : 85,
-        pendingReview: userPlan === 'free' ? 3 : userPlan === 'pro' ? 12 : 28,
-        customResumes: userPlan === 'free' ? 0 : userPlan === 'pro' ? 5 : 15
+        totalSearched: userPlan === 'free' ? 47 : userPlan === 'pro' ? 183 : 492,
+        totalApplied: userPlan === 'free' ? 6 : userPlan === 'pro' ? 28 : 73,
+        pendingReview: userPlan === 'free' ? 2 : userPlan === 'pro' ? 9 : 24,
+        customResumes: userPlan === 'free' ? 0 : userPlan === 'pro' ? 3 : 8
       }
       setStats(mockStats)
     } catch (error) {
@@ -133,6 +134,20 @@ const Dashboard = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleFetchJobs = async (): Promise<number> => {
+    // Simulate job fetching
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    const foundJobs = Math.floor(Math.random() * 15) + 5; // 5-20 jobs
+    
+    // Update stats
+    setStats(prev => ({
+      ...prev,
+      totalSearched: prev.totalSearched + foundJobs
+    }));
+    
+    return foundJobs;
   }
 
   if (loading) {
@@ -163,21 +178,26 @@ const Dashboard = () => {
       <PremiumDashboardLayout>
         <div className="space-y-8">
           {/* Hero Section */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="space-y-2">
-                <h1 className="text-4xl font-display font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-foreground/70 bg-clip-text text-transparent leading-tight">
                   Welcome back!
                 </h1>
                 <p className="text-lg text-muted-foreground">
                   Your AI-powered job search command center
                 </p>
               </div>
-              <div className="flex items-center gap-4">
-                <JobFetchTrigger userPlan={profile?.plan || 'free'} />
+              <div className="flex items-center gap-3">
                 <ExportButton userPlan={profile?.plan || 'free'} />
               </div>
             </div>
+
+            {/* Daily Job Fetch Card */}
+            <DailyJobFetchCard 
+              userPlan={profile?.plan || 'free'}
+              onFetchJobs={handleFetchJobs}
+            />
 
             {/* Premium KPI Cards */}
             <PremiumKPICards 
@@ -203,6 +223,7 @@ const Dashboard = () => {
             
             <div className="xl:col-span-1 space-y-6">
               <ResumeVariantManager userPlan={profile?.plan || 'free'} />
+              <QuickActions userPlan={profile?.plan || 'free'} />
             </div>
           </div>
         </div>
