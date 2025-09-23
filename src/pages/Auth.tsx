@@ -198,7 +198,7 @@ const Auth: React.FC = () => {
             title: 'Account created successfully!',
             description: 'Welcome to JobVance! You are now signed in.',
           })
-          // Navigate will happen automatically via useEffect when user state changes
+          // Don't navigate immediately - let the auth state change handle it
         }
       } else {
         const { error } = await signInWithEmail(email, password)

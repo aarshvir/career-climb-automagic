@@ -202,30 +202,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUpWithEmail = async (email: string, password: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`
+      setLoading(true);
       
       const { data, error } = await supabase.auth.signUp({
         email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl
-        }
-      })
+        password
+      });
       
       if (error) {
-        console.error('Email sign up error:', error)
-        return { error: error.message }
+        console.error('Signup error:', error);
+        return { error: error.message };
       }
       
-      // Check if user is immediately confirmed (email confirmation disabled)
+      // Check if user was created and session established
       if (data.user && data.session) {
-        console.log('User signed up and logged in immediately')
+        console.log('Signup successful with immediate session:', data);
+        // Session will be automatically set by onAuthStateChange
+        return { error: undefined };
+      } else if (data.user && !data.session) {
+        console.log('User created but needs email confirmation');
+        return { error: 'Please check your email to confirm your account before signing in.' };
       }
       
-      return {}
+      return { error: undefined };
     } catch (error: any) {
-      console.error('Sign up failed:', error)
-      return { error: error.message || 'Sign up failed' }
+      console.error('Signup exception:', error);
+      return { error: 'An unexpected error occurred during signup' };
+    } finally {
+      setLoading(false);
     }
   }
 

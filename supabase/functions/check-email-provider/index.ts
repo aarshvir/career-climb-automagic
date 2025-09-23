@@ -40,7 +40,8 @@ Deno.serve(async (req) => {
 
     // Query auth.identities to check what providers exist for this email
     const { data: identities, error } = await supabaseAdmin
-      .from('auth.identities')
+      .schema('auth')
+      .from('identities')
       .select('provider')
       .eq('email', email.toLowerCase())
 
