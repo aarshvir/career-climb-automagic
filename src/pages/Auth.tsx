@@ -95,7 +95,7 @@ const Auth: React.FC = () => {
     signInWithGoogle, 
     signInWithEmail, 
     signUpWithEmail, 
-    checkEmailExists 
+    checkEmailProvider 
   } = useAuth()
 
   const [mode, setMode] = useState<'email-entry' | 'sign-in' | 'sign-up'>('email-entry')
@@ -107,6 +107,7 @@ const Auth: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [emailChecking, setEmailChecking] = useState(false)
+  const [passwordsMatch, setPasswordsMatch] = useState(true)
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -147,8 +148,23 @@ const Auth: React.FC = () => {
     setEmailChecking(true)
 
     try {
-      const exists = await checkEmailExists(email)
-      setMode(exists ? 'sign-in' : 'sign-up')
+      const result = await checkEmailProvider(email)
+      
+      if (result.shouldUseGoogle) {
+        setError('Account exists with Google login. Please use "Continue with Google" to sign in.')
+        setEmailChecking(false)
+        return
+      }
+      
+      if (result.exists && result.hasEmailProvider) {
+        setMode('sign-in')
+      } else if (result.exists && !result.hasEmailProvider) {
+        setError('This email is associated with a social login. Please use the appropriate sign-in method.')
+        setEmailChecking(false)
+        return
+      } else {
+        setMode('sign-up')
+      }
     } catch (error) {
       setError('Unable to verify email. Please try again.')
     } finally {
@@ -165,10 +181,12 @@ const Auth: React.FC = () => {
       if (mode === 'sign-up') {
         if (password !== confirmPassword) {
           setError('Passwords do not match')
+          setLoading(false)
           return
         }
         if (password.length < 8) {
           setError('Password must be at least 8 characters long')
+          setLoading(false)
           return
         }
 
@@ -177,17 +195,21 @@ const Auth: React.FC = () => {
           setError(error)
         } else {
           toast({
-            title: 'Account created!',
-            description: 'Please check your email to verify your account.',
+            title: 'Account created successfully!',
+            description: 'Welcome to JobVance! You are now signed in.',
           })
-          navigate('/dashboard')
+          // Navigate will happen automatically via useEffect when user state changes
         }
       } else {
         const { error } = await signInWithEmail(email, password)
         if (error) {
           setError(error)
         } else {
-          navigate('/dashboard')
+          toast({
+            title: 'Welcome back!',
+            description: 'You have been signed in successfully.',
+          })
+          // Navigate will happen automatically via useEffect when user state changes
         }
       }
     } catch (error: any) {
@@ -370,15 +392,21 @@ const Auth: React.FC = () => {
                       <Label htmlFor="confirmPassword">Confirm Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="confirmPassword"
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          placeholder="Confirm your password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="pl-10 pr-10"
-                          required
-                        />
+                         <Input
+                           id="confirmPassword"
+                           type={showConfirmPassword ? 'text' : 'password'}
+                           placeholder="Confirm your password"
+                           value={confirmPassword}
+                           onChange={(e) => {
+                             setConfirmPassword(e.target.value)
+                             setPasswordsMatch(e.target.value === password)
+                           }}
+                           className={cn(
+                             "pl-10 pr-10",
+                             confirmPassword && !passwordsMatch && "border-destructive focus-visible:ring-destructive"
+                           )}
+                           required
+                         />
                         <Button
                           type="button"
                           variant="ghost"
@@ -391,10 +419,13 @@ const Auth: React.FC = () => {
                           ) : (
                             <Eye className="w-4 h-4" />
                           )}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                         </Button>
+                       </div>
+                       {confirmPassword && !passwordsMatch && (
+                         <p className="text-xs text-destructive mt-1">Passwords do not match</p>
+                       )}
+                     </div>
+                   )}
 
                   {error && (
                     <Alert variant="destructive">
@@ -402,11 +433,11 @@ const Auth: React.FC = () => {
                     </Alert>
                   )}
 
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-primary" 
-                    disabled={loading}
-                  >
+                   <Button 
+                     type="submit" 
+                     className="w-full bg-gradient-primary" 
+                     disabled={loading || (mode === 'sign-up' && (!passwordsMatch || password.length < 8))}
+                   >
                     {loading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />

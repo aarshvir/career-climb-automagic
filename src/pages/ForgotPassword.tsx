@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { resetPassword, checkEmailExists } = useAuth()
+  const { resetPassword, checkEmailProvider } = useAuth()
 
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -35,11 +35,17 @@ const ForgotPassword: React.FC = () => {
     setLoading(true)
 
     try {
-      // First check if email exists
-      const emailExists = await checkEmailExists(email)
+      // First check if email exists and what providers it has
+      const result = await checkEmailProvider(email)
       
-      if (!emailExists) {
+      if (!result.exists) {
         setError('No account found with that email address')
+        setLoading(false)
+        return
+      }
+      
+      if (!result.hasEmailProvider) {
+        setError('This email is associated with social login (Google). Password reset is not available for social accounts.')
         setLoading(false)
         return
       }

@@ -15,7 +15,14 @@ interface AuthContextType {
   signUpWithEmail: (email: string, password: string) => Promise<{error?: string}>
   resetPassword: (email: string) => Promise<{error?: string}>
   updatePassword: (password: string) => Promise<{error?: string}>
-  checkEmailExists: (email: string) => Promise<boolean>
+  checkEmailProvider: (email: string) => Promise<{
+    exists: boolean
+    providers: string[]
+    hasEmailProvider: boolean
+    hasGoogleProvider: boolean
+    canSignIn: boolean
+    shouldUseGoogle: boolean
+  }>
   signOut: () => Promise<void>
   dnsError: boolean
   retryConnection: () => void
@@ -197,7 +204,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const redirectUrl = `${window.location.origin}/`
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -208,6 +215,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error('Email sign up error:', error)
         return { error: error.message }
+      }
+      
+      // Check if user is immediately confirmed (email confirmation disabled)
+      if (data.user && data.session) {
+        console.log('User signed up and logged in immediately')
       }
       
       return {}
@@ -255,21 +267,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  const checkEmailExists = async (email: string): Promise<boolean> => {
+  const checkEmailProvider = async (email: string) => {
     try {
-      // This is a simple check - in production you might want a dedicated endpoint
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password: 'dummy-password-to-check-existence'
+      const response = await supabase.functions.invoke('check-email-provider', {
+        body: { email }
       })
       
-      // If we get "Invalid login credentials", the email exists but password is wrong
-      // If we get "Email not confirmed", the email exists but isn't confirmed
-      // If we get other errors, assume email doesn't exist
-      return error?.message === 'Invalid login credentials' || 
-             error?.message === 'Email not confirmed'
-    } catch {
-      return false
+      if (response.error) {
+        console.error('Error checking email provider:', response.error)
+        // Fallback to basic existence check
+        return {
+          exists: false,
+          providers: [],
+          hasEmailProvider: false,
+          hasGoogleProvider: false,
+          canSignIn: false,
+          shouldUseGoogle: false
+        }
+      }
+      
+      return response.data
+    } catch (error) {
+      console.error('Failed to check email provider:', error)
+      // Fallback
+      return {
+        exists: false,
+        providers: [],
+        hasEmailProvider: false,
+        hasGoogleProvider: false,
+        canSignIn: false,
+        shouldUseGoogle: false
+      }
     }
   }
 
@@ -294,7 +322,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUpWithEmail,
     resetPassword,
     updatePassword,
-    checkEmailExists,
+    checkEmailProvider,
     signOut,
     dnsError,
     retryConnection,
