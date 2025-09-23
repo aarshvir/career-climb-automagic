@@ -3,14 +3,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import jobvanceIcon from "@/assets/jobvance-icon.png";
 import { Link, useLocation } from "react-router-dom";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
+import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { AuthStatusIndicator } from "@/components/AuthStatusIndicator";
 
 
 const Header = () => {
-  const { user, signInWithGoogle, signOut, loading, isRetrying, environment } = useAuth();
+  const { user, signOut, loading, isRetrying, environment } = useAuth();
   const { handlePrimaryAction } = useSignInFlow();
   const location = useLocation();
+  const navigate = useNavigate();
   
 
   const isActive = (path: string) => location.pathname === path;
@@ -91,7 +93,7 @@ const Header = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={signInWithGoogle}
+                onClick={() => navigate('/auth')}
                 disabled={isRetrying}
               >
                 Sign In
@@ -99,7 +101,7 @@ const Header = () => {
               <Button 
                 variant="hero" 
                 size="sm" 
-                onClick={handleGetStarted}
+                onClick={() => navigate('/auth')}
                 disabled={isRetrying}
               >
                 Get Started

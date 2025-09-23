@@ -23,6 +23,9 @@ import HowItWorks from "./pages/HowItWorks";
 import PricingPage from "./pages/PricingPage";
 import ThankYou from "./pages/ThankYou";
 import AuthCallback from "./pages/AuthCallback";
+import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import AutoInterestForm from "./components/AutoInterestForm";
 import OnboardingRedirector from "./components/OnboardingRedirector";
 import { ResumeUploadDialog } from "./components/onboarding/ResumeUploadDialog";
@@ -69,6 +72,9 @@ const AppContent = () => {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/reset" element={<ResetPassword />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

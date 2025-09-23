@@ -11,6 +11,11 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   signInWithGoogle: () => Promise<void>
+  signInWithEmail: (email: string, password: string) => Promise<{error?: string}>
+  signUpWithEmail: (email: string, password: string) => Promise<{error?: string}>
+  resetPassword: (email: string) => Promise<{error?: string}>
+  updatePassword: (password: string) => Promise<{error?: string}>
+  checkEmailExists: (email: string) => Promise<boolean>
   signOut: () => Promise<void>
   dnsError: boolean
   retryConnection: () => void
@@ -169,6 +174,105 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setShowDNSDialog(false)
   }
 
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) {
+        console.error('Email sign in error:', error)
+        return { error: error.message }
+      }
+      
+      return {}
+    } catch (error: any) {
+      console.error('Sign in failed:', error)
+      return { error: error.message || 'Sign in failed' }
+    }
+  }
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/`
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      })
+      
+      if (error) {
+        console.error('Email sign up error:', error)
+        return { error: error.message }
+      }
+      
+      return {}
+    } catch (error: any) {
+      console.error('Sign up failed:', error)
+      return { error: error.message || 'Sign up failed' }
+    }
+  }
+
+  const resetPassword = async (email: string) => {
+    try {
+      const redirectUrl = `${window.location.origin}/auth/reset`
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl
+      })
+      
+      if (error) {
+        console.error('Password reset error:', error)
+        return { error: error.message }
+      }
+      
+      return {}
+    } catch (error: any) {
+      console.error('Password reset failed:', error)
+      return { error: error.message || 'Password reset failed' }
+    }
+  }
+
+  const updatePassword = async (password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password
+      })
+      
+      if (error) {
+        console.error('Password update error:', error)
+        return { error: error.message }
+      }
+      
+      return {}
+    } catch (error: any) {
+      console.error('Password update failed:', error)
+      return { error: error.message || 'Password update failed' }
+    }
+  }
+
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    try {
+      // This is a simple check - in production you might want a dedicated endpoint
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'dummy-password-to-check-existence'
+      })
+      
+      // If we get "Invalid login credentials", the email exists but password is wrong
+      // If we get "Email not confirmed", the email exists but isn't confirmed
+      // If we get other errors, assume email doesn't exist
+      return error?.message === 'Invalid login credentials' || 
+             error?.message === 'Email not confirmed'
+    } catch {
+      return false
+    }
+  }
+
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut()
@@ -186,6 +290,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     loading,
     signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
+    updatePassword,
+    checkEmailExists,
     signOut,
     dnsError,
     retryConnection,
