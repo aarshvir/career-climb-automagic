@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { 
+  Home,
   LayoutDashboard, 
   Briefcase, 
   FileText, 
@@ -15,6 +16,7 @@ import {
   MessageSquare,
   Sparkles
 } from "lucide-react";
+import jobvanceIcon from "@/assets/jobvance-icon.png";
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +34,12 @@ import { CVManager } from "./CVManager";
 import { Link } from "react-router-dom";
 
 const navigationItems = [
+  {
+    title: "Home",
+    icon: Home,
+    url: "/",
+    badge: null,
+  },
   {
     title: "Dashboard",
     icon: LayoutDashboard,
@@ -85,17 +93,15 @@ export const PremiumSidebar = () => {
   return (
     <Sidebar collapsible="icon" className="border-r border-border/10 bg-card/30 backdrop-blur-sm">
       <SidebarHeader className="border-b border-border/10 p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center shadow-md">
-            <span className="text-primary-foreground font-bold text-sm">J</span>
-          </div>
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <img src={jobvanceIcon} alt="JobVance" className="h-8 w-8" />
           {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="text-base font-semibold text-foreground">JobVance</span>
-              <span className="text-xs text-muted-foreground">AI Job Search</span>
-            </div>
+            <span className="text-xl font-bold">
+              <span className="text-foreground">Job</span>
+              <span className="text-primary">Vance.io</span>
+            </span>
           )}
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="p-3 space-y-4">

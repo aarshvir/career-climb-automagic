@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, Trash2, Star, Plus } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Upload, FileText, Trash2, Star, Plus, Download, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
@@ -183,6 +184,51 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
     }
   };
 
+  const downloadVariant = async (filePath: string, fileName: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('jobassist')
+        .download(filePath);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download resume",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const viewVariant = async (filePath: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('jobassist')
+        .createSignedUrl(filePath, 60); // 1 minute expiry
+
+      if (error) throw error;
+
+      window.open(data.signedUrl, '_blank');
+    } catch (error) {
+      console.error('Error viewing resume:', error);
+      toast({
+        title: "Error",
+        description: "Failed to view resume",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -244,6 +290,22 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => viewVariant(variant.file_path)}
+                    title="View resume"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => downloadVariant(variant.file_path, variant.file_name)}
+                    title="Download resume"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
                   {!variant.is_primary && (
                     <Button
                       size="sm"
@@ -253,13 +315,34 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
                       Set Primary
                     </Button>
                   )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => deleteVariant(variant.id, variant.file_path)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Resume</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{variant.name}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteVariant(variant.id, variant.file_path)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             ))}
@@ -267,7 +350,7 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
         )}
 
         {resumeVariants.length < planLimits.resumeVariants && (
-          <div>
+          <div className="border-2 border-dashed border-border/50 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
             <input
               type="file"
               accept=".pdf,.doc,.docx"
@@ -276,24 +359,32 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
               id="resume-upload"
               disabled={uploading}
             />
-            <label htmlFor="resume-upload">
-              <Button
-                className="w-full"
-                variant="outline"
-                disabled={uploading}
-                asChild
-              >
-                <span>
+            <label htmlFor="resume-upload" className="cursor-pointer">
+              <div className="space-y-3">
+                <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">
+                    {uploading ? "Uploading..." : "Upload Resume"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PDF, DOC, DOCX up to 10MB
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  disabled={uploading}
+                  className="pointer-events-none"
+                >
                   {uploading ? (
                     "Uploading..."
                   ) : (
                     <>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Resume Variant
+                      Choose File
                     </>
                   )}
-                </span>
-              </Button>
+                </Button>
+              </div>
             </label>
           </div>
         )}
