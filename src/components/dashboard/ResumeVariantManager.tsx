@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,13 +31,7 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchResumeVariants();
-    }
-  }, [user]);
-
-  const fetchResumeVariants = async () => {
+  const fetchResumeVariants = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -59,7 +53,18 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, user]);
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      setResumeVariants([]);
+      return;
+    }
+
+    setLoading(true);
+    fetchResumeVariants();
+  }, [fetchResumeVariants, user]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -87,7 +92,7 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
       if (uploadError) throw uploadError;
 
       // Save to database
-      const { error: dbError } = await supabase
+      const { data: insertedVariant, error: dbError } = await supabase
         .from('resume_variants')
         .insert([
           {
@@ -99,7 +104,9 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
             file_size: file.size,
             is_primary: resumeVariants.length === 0, // First upload is primary
           }
-        ]);
+        ])
+        .select()
+        .single();
 
       if (dbError) throw dbError;
 
@@ -108,7 +115,9 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
         description: "Resume variant uploaded successfully",
       });
 
-      fetchResumeVariants();
+      if (insertedVariant) {
+        setResumeVariants((prev) => [insertedVariant, ...prev]);
+      }
     } catch (error) {
       console.error('Error uploading resume:', error);
       toast({
@@ -142,7 +151,12 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
         description: "Primary resume updated",
       });
 
-      fetchResumeVariants();
+      setResumeVariants((prev) =>
+        prev.map((variant) => ({
+          ...variant,
+          is_primary: variant.id === id,
+        }))
+      );
     } catch (error) {
       console.error('Error setting primary resume:', error);
       toast({
@@ -173,7 +187,7 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
         description: "Resume variant deleted",
       });
 
-      fetchResumeVariants();
+      setResumeVariants((prev) => prev.filter((variant) => variant.id !== id));
     } catch (error) {
       console.error('Error deleting resume variant:', error);
       toast({

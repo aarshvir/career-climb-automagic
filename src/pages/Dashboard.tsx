@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { supabase } from "@/integrations/supabase/client"
@@ -26,6 +26,27 @@ interface DashboardStats {
   customResumes: number
 }
 
+const planStatsByPlan: Record<string, DashboardStats> = {
+  free: {
+    totalSearched: 47,
+    totalApplied: 6,
+    pendingReview: 2,
+    customResumes: 0,
+  },
+  pro: {
+    totalSearched: 183,
+    totalApplied: 28,
+    pendingReview: 9,
+    customResumes: 3,
+  },
+  elite: {
+    totalSearched: 492,
+    totalApplied: 73,
+    pendingReview: 24,
+    customResumes: 8,
+  },
+}
+
 const Dashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -42,13 +63,19 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (user) {
-      checkUserProfile()
-    }
-  }, [user])
+  const loadDashboardData = useCallback((userPlan: string) => {
+    const key = userPlan?.toLowerCase() || "free"
+    const planStats = planStatsByPlan[key] || planStatsByPlan.free
 
-  const checkUserProfile = async () => {
+    setStats(planStats)
+    setLoading(false)
+  }, [])
+
+  const checkUserProfile = useCallback(async () => {
+    if (!user) {
+      return
+    }
+
     try {
       // First check if user has filled the interest form
       const { data: interestData, error: interestError } = await supabase
@@ -68,73 +95,71 @@ const Dashboard = () => {
         return
       }
 
-      // Check if user has completed plan selection
-      const { data: planSelectionData, error: planSelectionError } = await supabase
-        .from('plan_selections')
-        .select('id, status')
-        .eq('user_id', user?.id)
-        .eq('status', 'completed')
-        .maybeSingle()
+      const [planSelectionResult, profileResult] = await Promise.all([
+        supabase
+          .from('plan_selections')
+          .select('id, status')
+          .eq('user_id', user.id)
+          .eq('status', 'completed')
+          .maybeSingle(),
+        supabase
+          .from('profiles')
+          .select('plan, subscription_status')
+          .eq('id', user.id)
+          .maybeSingle(),
+      ])
+
+      const { data: planSelectionData, error: planSelectionError } = planSelectionResult
+      const { data: profileData, error: profileError } = profileResult
 
       if (planSelectionError) {
         console.error('Error checking plan selection:', planSelectionError)
-        // Continue to check profile for backward compatibility
       }
 
       if (!planSelectionData) {
         // User hasn't completed plan selection yet
+        setLoading(false)
         navigate('/plan-selection')
         return
       }
 
-      // Optional: Also check profiles for backward compatibility
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('plan, subscription_status')
-        .eq('id', user?.id)
-        .maybeSingle()
-
-      if (error) {
-        console.error('Error fetching profile:', error)
-        // If no profile or no plan, redirect to plan selection
+      if (profileError) {
+        console.error('Error fetching profile:', profileError)
+        toast({
+          title: "Error",
+          description: "Failed to load your profile. Please refresh the page.",
+          variant: "destructive",
+        })
+        setLoading(false)
         navigate('/plan-selection')
         return
       }
 
-      if (!data || !data.plan) {
+      if (!profileData || !profileData.plan) {
+        setLoading(false)
         navigate('/plan-selection')
         return
       }
 
-      setProfile(data)
-      await loadDashboardData(data.plan)
+      setProfile(profileData)
+      loadDashboardData(profileData.plan)
     } catch (error) {
       console.error('Error checking profile:', error)
-      navigate('/plan-selection')
-    }
-  }
-
-  const loadDashboardData = async (userPlan: string) => {
-    try {
-      // Load stats based on plan with more realistic data
-      const mockStats = {
-        totalSearched: userPlan === 'free' ? 47 : userPlan === 'pro' ? 183 : 492,
-        totalApplied: userPlan === 'free' ? 6 : userPlan === 'pro' ? 28 : 73,
-        pendingReview: userPlan === 'free' ? 2 : userPlan === 'pro' ? 9 : 24,
-        customResumes: userPlan === 'free' ? 0 : userPlan === 'pro' ? 3 : 8
-      }
-      setStats(mockStats)
-    } catch (error) {
-      console.error('Error loading dashboard data:', error)
       toast({
         title: "Error",
         description: "Failed to load dashboard data. Please refresh the page.",
-        variant: "destructive"
+        variant: "destructive",
       })
-    } finally {
+      navigate('/plan-selection')
       setLoading(false)
     }
-  }
+  }, [loadDashboardData, navigate, toast, user])
+
+  useEffect(() => {
+    if (user) {
+      checkUserProfile()
+    }
+  }, [checkUserProfile, user])
 
   const handleFetchJobs = async (): Promise<number> => {
     // Simulate job fetching

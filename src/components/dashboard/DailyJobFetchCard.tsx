@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,23 @@ import {
 import { cn } from "@/lib/utils";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 
+const getNextMidnightTimestamp = () => {
+  const now = new Date();
+  const nextMidnight = new Date(now);
+  nextMidnight.setDate(now.getDate() + 1);
+  nextMidnight.setHours(0, 0, 0, 0);
+  return nextMidnight.getTime();
+};
+
+const formatDuration = (milliseconds: number) => {
+  const safeMs = Math.max(milliseconds, 0);
+  const totalMinutes = Math.ceil(safeMs / (1000 * 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${hours}h ${minutes}m`;
+};
+
 interface DailyJobFetchCardProps {
   userPlan: string;
   onFetchJobs: () => Promise<number>;
@@ -28,67 +45,93 @@ export const DailyJobFetchCard = ({ userPlan, onFetchJobs }: DailyJobFetchCardPr
   const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
   const [timeUntilReset, setTimeUntilReset] = useState<string>('');
   const [jobsFound, setJobsFound] = useState(0);
-  
+
   const planLimits = usePlanLimits(userPlan);
   const dailyLimit = planLimits.dailyJobApplications; // Using this as fetch limit for now
+  const storageKeyRef = useRef<string>('');
+  const nextResetRef = useRef<number>(getNextMidnightTimestamp());
 
-  useEffect(() => {
-    // Load from localStorage
-    const today = new Date().toDateString();
-    const storedData = localStorage.getItem(`jobfetch_${today}`);
-    if (storedData) {
-      const parsed = JSON.parse(storedData);
-      setFetchCount(parsed.count);
-      setLastFetchTime(new Date(parsed.lastFetch));
+  const resolveStorageKey = useCallback(() => {
+    const nextKey = `jobfetch_${new Date().toDateString()}`;
+    const currentKey = storageKeyRef.current;
+
+    if (currentKey && currentKey !== nextKey) {
+      localStorage.removeItem(currentKey);
     }
 
-    // Set up countdown timer
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
+    storageKeyRef.current = nextKey;
+    return nextKey;
   }, []);
 
-  const updateCountdown = () => {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    
-    const diff = tomorrow.getTime() - now.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    setTimeUntilReset(`${hours}h ${minutes}m`);
-  };
+  const updateCountdown = useCallback(() => {
+    const msRemaining = Math.max(nextResetRef.current - Date.now(), 0);
+    const formatted = formatDuration(msRemaining);
 
-  const handleFetchJobs = async () => {
+    setTimeUntilReset((prev) => (prev === formatted ? prev : formatted));
+
+    if (msRemaining === 0) {
+      nextResetRef.current = getNextMidnightTimestamp();
+      resolveStorageKey();
+      setFetchCount(0);
+      setFetchState('idle');
+      setJobsFound(0);
+      setLastFetchTime(null);
+    }
+  }, [resolveStorageKey]);
+
+  useEffect(() => {
+    const storageKey = resolveStorageKey();
+    const storedData = localStorage.getItem(storageKey);
+
+    if (storedData) {
+      try {
+        const parsed = JSON.parse(storedData);
+        if (typeof parsed.count === 'number') {
+          setFetchCount(parsed.count);
+        }
+        if (parsed.lastFetch) {
+          setLastFetchTime(new Date(parsed.lastFetch));
+        }
+      } catch {
+        localStorage.removeItem(storageKey);
+      }
+    }
+
+    updateCountdown();
+    const interval = window.setInterval(updateCountdown, 60_000);
+    return () => window.clearInterval(interval);
+  }, [resolveStorageKey, updateCountdown]);
+
+  const handleFetchJobs = useCallback(async () => {
     if (fetchCount >= dailyLimit) return;
 
     setFetchState('loading');
-    
+
     try {
       const foundJobs = await onFetchJobs();
+      const now = new Date();
+      const storageKey = resolveStorageKey();
+
       setJobsFound(foundJobs);
-      setFetchState('success');
-      
-      const newCount = fetchCount + 1;
-      setFetchCount(newCount);
-      setLastFetchTime(new Date());
-      
-      // Store in localStorage
-      const today = new Date().toDateString();
-      localStorage.setItem(`jobfetch_${today}`, JSON.stringify({
-        count: newCount,
-        lastFetch: new Date().toISOString()
-      }));
-      
-      if (newCount >= dailyLimit) {
-        setFetchState('exhausted');
-      }
+      setLastFetchTime(now);
+
+      let updatedCount = 0;
+      setFetchCount((prev) => {
+        updatedCount = prev + 1;
+        localStorage.setItem(storageKey, JSON.stringify({
+          count: updatedCount,
+          lastFetch: now.toISOString(),
+        }));
+
+        return updatedCount;
+      });
+
+      setFetchState(updatedCount >= dailyLimit ? 'exhausted' : 'success');
     } catch (error) {
       setFetchState('idle');
       console.error('Fetch jobs error:', error);
     }
-  };
+  }, [dailyLimit, fetchCount, onFetchJobs, resolveStorageKey]);
 
   const getButtonContent = () => {
     switch (fetchState) {
@@ -135,7 +178,7 @@ export const DailyJobFetchCard = ({ userPlan, onFetchJobs }: DailyJobFetchCardPr
   };
 
   const isButtonDisabled = fetchState === 'loading' || fetchState === 'exhausted';
-  const remainingFetches = dailyLimit - fetchCount;
+  const remainingFetches = useMemo(() => Math.max(dailyLimit - fetchCount, 0), [dailyLimit, fetchCount]);
 
   return (
     <Card className="premium-card border-0 bg-gradient-to-br from-primary/5 via-card to-accent/5 backdrop-blur-sm overflow-hidden relative">
