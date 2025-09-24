@@ -74,7 +74,10 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
 
     setSaving(true);
     try {
-      const { error } = await supabase
+      console.log('Saving preferences:', preferences);
+      console.log('User ID:', user.id);
+      
+      const { data, error } = await supabase
         .from('preferences')
         .upsert({
           user_id: user.id,
@@ -88,7 +91,12 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           onConflict: 'user_id'
         });
 
-      if (error) throw error;
+      console.log('Save result:', { data, error });
+      
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
 
       toast({
         title: "Preferences saved",
