@@ -92,8 +92,17 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
 
       if (batchError) throw batchError;
 
-      // TODO: Make webhook call to Make.com here
-      // This will be implemented when you provide the webhook details
+      // Call the Supabase Edge Function to trigger the Make.com webhook
+      const { error: functionError } = await supabase.functions.invoke('trigger-make-run', {
+        body: { batchId: batch.id },
+      });
+
+      if (functionError) {
+        // Handle error, maybe revert the batch creation or set its status to 'failed'
+        console.error('Error invoking Supabase function:', functionError);
+        throw functionError;
+      }
+      
       console.log('Job fetch triggered for batch:', batch.id);
 
       toast({

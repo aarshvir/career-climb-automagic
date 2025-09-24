@@ -1,101 +1,109 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.44.4";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
   try {
-    // This client uses the user's login token to securely access the database.
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: req.headers.get("Authorization")! } } }
     );
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) throw new Error("User not found. Please log in.");
-
-    // 1. Get user's profile and preferences
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('subscription_plan')
-      .eq('id', user.id)
-      .single();
-
-    const { data: preferences, error: prefError } = await supabaseClient
-      .from('job_preferences')
-      .select('job_title_keywords, location, experience_levels, job_types')
-      .eq('user_id', user.id)
-      .single();
-
-    if (profileError || prefError) throw new Error("Could not find user profile or preferences.");
-
-    // 2. Fetch the Geo ID from our new 'locations' table
-    const cleanedLocation = preferences.location.trim().toLowerCase();
-    const { data: locationData, error: locationError } = await supabaseClient
-        .from('locations')
-        .select('geo_id')
-        .ilike('name', cleanedLocation) // Case-insensitive search
-        .single();
-    
-    if (locationError || !locationData) {
-        throw new Error(`Location "${preferences.location}" is not supported yet.`);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-    const geoId = locationData.geo_id;
 
-    // 3. Build the LinkedIn URL automatically
-    const keywords = encodeURIComponent(preferences.job_title_keywords.join(' '));
-    const linkedInUrl = `https://www.linkedin.com/jobs/search/?keywords=${keywords}&geoId=${geoId}&f_TPR=r86400&sortBy=R`;
+    const { batchId } = await req.json();
+    if (!batchId) {
+      return new Response(JSON.stringify({ error: "batchId is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // 4. Determine job count based on plan
-    const jobCount = profile.subscription_plan === 'premium' ? 100 : 50;
-      
-    // 5. Get user's resumes
-    const { data: resumes, error: resumeError } = await supabaseClient
-      .from('resumes')
-      .select('storage_path')
-      .eq('user_id', user.id);
-
-    if (resumeError || !resumes || resumes.length === 0) throw new Error("No resumes found.");
-
-    const resumeLinks = resumes.map(r => {
-        const { data } = supabaseClient.storage.from('resumes').getPublicUrl(r.storage_path);
-        return data.publicUrl;
-    });
-
-    // 6. Create the job run
-    const { data: jobRun, error: runError } = await supabaseClient
-      .from('job_runs')
-      .insert({
-        user_id: user.id,
-        apify_search_url: linkedInUrl,
-        resume_links: resumeLinks,
-        run_status: 'running'
-      })
-      .select('id')
+    const { data: preferences, error: preferencesError } = await supabase
+      .from("preferences")
+      .select("*")
+      .eq("user_id", user.id)
       .single();
 
-    if (runError) throw new Error("Could not start a new job run.");
-    
-    // 7. Trigger Make.com with all the dynamic user data
-    const makeWebhookUrl = Deno.env.get('MAKE_WEBHOOK_URL')!;
-    await fetch(makeWebhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        runId: jobRun.id,
-        userId: user.id,
-        apifyUrl: linkedInUrl,
-        jobCount: jobCount,
-        resumes: resumeLinks
-      })
+    if (preferencesError || !preferences) {
+      console.error("Error fetching preferences:", preferencesError);
+      return new Response(JSON.stringify({ error: "Failed to fetch user preferences" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const makeWebhookUrl = Deno.env.get("MAKE_WEBHOOK_URL");
+    if (!makeWebhookUrl) {
+        console.error("MAKE_WEBHOOK_URL is not set in environment variables.");
+        // Update batch status to 'failed'
+        await supabase
+          .from('daily_job_batches')
+          .update({ status: 'failed', error_message: 'Webhook URL not configured' })
+          .eq('id', batchId);
+        return new Response(JSON.stringify({ error: "Webhook URL not configured" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+    }
+
+    const payload = {
+      userId: user.id,
+      email: user.email,
+      batchId: batchId,
+      preferences: {
+        location: preferences.location,
+        job_title: preferences.job_title,
+        seniority_level: preferences.seniority_level,
+        job_type: preferences.job_type,
+        job_posting_type: preferences.job_posting_type,
+        job_posting_date: preferences.job_posting_date,
+        cities: preferences.cities ? preferences.cities.split(',').map(s => s.trim()) : [],
+        titles: preferences.titles ? preferences.titles.split(',').map(s => s.trim()) : [],
+      },
+    };
+
+    const webhookResponse = await fetch(makeWebhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
 
-    return new Response(JSON.stringify({ message: "Automation started!", runId: jobRun.id }), {
-        headers: { "Content-Type": "application/json" }, status: 200
+    if (!webhookResponse.ok) {
+      const errorBody = await webhookResponse.text();
+      throw new Error(`Webhook failed with status ${webhookResponse.status}: ${errorBody}`);
+    }
+
+    // Optionally, update the batch status to 'processing'
+    await supabase
+        .from('daily_job_batches')
+        .update({ status: 'processing' })
+        .eq('id', batchId);
+
+    return new Response(JSON.stringify({ success: true, message: "Webhook triggered successfully." }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   } catch (error) {
+    console.error("Error processing request:", error);
     return new Response(JSON.stringify({ error: error.message }), {
-        headers: { "Content-Type": "application/json" }, status: 500
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

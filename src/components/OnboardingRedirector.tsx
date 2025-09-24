@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
@@ -6,9 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 const OnboardingRedirector = () => {
   const { user, loading } = useAuth();
+  const { openResumeDialog, openPreferencesDialog } = useOnboarding();
   const navigate = useNavigate();
   const location = useLocation();
-  const { openResumeDialog, openPreferencesDialog } = useOnboarding();
+  const isActive = useRef(true);
 
   useEffect(() => {
     if (loading || !user) {
@@ -20,8 +21,6 @@ const OnboardingRedirector = () => {
       return;
     }
 
-    let isActive = true;
-
     const checkOnboarding = async () => {
       try {
         const { data: formEntry, error: formError } = await supabase
@@ -31,7 +30,7 @@ const OnboardingRedirector = () => {
           .maybeSingle();
 
         if (formError) throw formError;
-        if (!isActive || !formEntry) {
+        if (!isActive.current || !formEntry) {
           return;
         }
 
@@ -42,7 +41,7 @@ const OnboardingRedirector = () => {
           .maybeSingle();
 
         if (profileError) throw profileError;
-        if (!isActive) {
+        if (!isActive.current) {
           return;
         }
 
@@ -80,12 +79,13 @@ const OnboardingRedirector = () => {
       }
     };
 
-    checkOnboarding();
+    const timeoutId = setTimeout(checkOnboarding, 500); // Add a small delay
 
     return () => {
-      isActive = false;
+      clearTimeout(timeoutId);
+      isActive.current = false;
     };
-  }, [user, loading, location.pathname, location.search, navigate]);
+  }, [user, loading, location.pathname, location.search, navigate, openResumeDialog, openPreferencesDialog]);
 
   return null;
 };

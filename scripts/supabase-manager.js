@@ -6,9 +6,11 @@
  * without requiring manual Supabase dashboard access
  */
 
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
+import https from 'https';
+import { exec } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
 
 class SupabaseManager {
   constructor() {
@@ -213,52 +215,27 @@ const predefinedTables = {
 
 async function main() {
   const manager = new SupabaseManager();
-  
-  console.log('🚀 Starting Supabase Database Setup...\n');
-  
-  try {
-    // Create all predefined tables
-    for (const [tableName, schema] of Object.entries(predefinedTables)) {
-      await manager.createTable(tableName, schema);
-      
-      // Enable RLS
-      await manager.enableRLS(tableName);
-      
-      // Create common indexes
-      if (tableName === 'jobApplications') {
-        await manager.createIndex(tableName, 'user_id');
-        await manager.createIndex(tableName, 'status');
-        await manager.createIndex(tableName, 'application_date');
-      } else if (tableName === 'userPreferences') {
-        await manager.createIndex(tableName, 'user_id');
-      } else if (tableName === 'jobListings') {
-        await manager.createIndex(tableName, 'is_active');
-        await manager.createIndex(tableName, 'posted_date');
-      } else if (tableName === 'applicationAnalytics') {
-        await manager.createIndex(tableName, 'user_id');
-        await manager.createIndex(tableName, 'date');
-      }
-      
-      console.log(''); // Empty line for readability
-    }
-    
-    console.log('🎉 Database setup completed successfully!');
-    console.log('\n📊 Created tables:');
-    console.log('   • job_applications - Track job applications');
-    console.log('   • user_preferences - Store user job preferences');
-    console.log('   • job_listings - Store job postings');
-    console.log('   • application_analytics - Track application metrics');
-    
-  } catch (error) {
-    console.error('💥 Database setup failed:', error);
-    process.exit(1);
+  const args = process.argv.slice(2);
+
+  if (args.length === 0) {
+    console.log("Usage: node scripts/supabase-manager.js [migrate|seed|reset]");
+    return;
+  }
+
+  const command = args[0];
+  switch (command) {
+    case "migrate":
+      await manager.runMigrations();
+      break;
+    case "seed":
+      console.log("Seed functionality not yet implemented.");
+      break;
+    case "reset":
+      console.log("Reset functionality not yet implemented.");
+      break;
+    default:
+      console.log(`Unknown command: ${command}`);
   }
 }
 
-// Export for use in other scripts
-module.exports = { SupabaseManager, predefinedTables };
-
-// Run if called directly
-if (require.main === module) {
-  main();
-}
+main().catch(console.error);
