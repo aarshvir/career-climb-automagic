@@ -9,6 +9,7 @@ import { InterestFormProvider } from "@/contexts/InterestFormContext";
 import { OnboardingProvider, useOnboarding } from "@/contexts/OnboardingContext";
 import { HelmetProvider } from "react-helmet-async";
 import PageLoadingSpinner from "@/components/layout/PageLoadingSpinner";
+import Header from "@/components/layout/Header";
 
 const Index = lazy(() => import("./pages/Index"));
 const About = lazy(() => import("./pages/About"));
@@ -67,6 +68,7 @@ const AppContent = () => {
           v7_relativeSplatPath: true,
         }}
       >
+        <Header />
         <Suspense fallback={<PageLoadingSpinner />}>
           <Routes>
             <Route path="/" element={<Index />} />

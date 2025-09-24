@@ -45,6 +45,12 @@ const Header = () => {
         
         <nav className="hidden md:flex items-center space-x-8">
           <Link 
+            to="/" 
+            className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/') ? 'text-primary' : ''}`}
+          >
+            Home
+          </Link>
+          <Link 
             to="/#features" 
             className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/') ? 'text-primary' : ''}`}
           >
@@ -74,6 +80,14 @@ const Header = () => {
           >
             FAQ
           </Link>
+          {user && (
+            <Link 
+              to="/dashboard" 
+              className={`text-sm font-medium hover:text-primary transition-colors ${isActive('/dashboard') ? 'text-primary' : ''}`}
+            >
+              Dashboard
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center space-x-2 md:space-x-4">
@@ -85,42 +99,57 @@ const Header = () => {
               </span>
             </div>
            ) : user ? (
-             <DropdownMenu>
-               <DropdownMenuTrigger asChild>
-                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                   <Avatar className="h-8 w-8">
-                     <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || "User"} />
-                     <AvatarFallback>
-                       {user.email ? user.email.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
-                     </AvatarFallback>
-                   </Avatar>
-                 </Button>
-               </DropdownMenuTrigger>
-               <DropdownMenuContent className="w-56" align="end" forceMount>
-                 <div className="flex items-center justify-start gap-2 p-2">
-                   <div className="flex flex-col space-y-1 leading-none">
-                     <p className="font-medium">{user.email}</p>
-                     <p className="w-[200px] truncate text-sm text-muted-foreground">
-                       {user.user_metadata?.full_name || "User"}
-                     </p>
-                   </div>
-                 </div>
-                 <DropdownMenuSeparator />
-                 <DropdownMenuItem onClick={handleDashboard}>
+             <div className="flex items-center space-x-2">
+               {/* Show "Go to Dashboard" button on non-dashboard pages */}
+               {location.pathname !== '/dashboard' && (
+                 <Button 
+                   variant="default" 
+                   size="sm" 
+                   onClick={handleDashboard}
+                   className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                 >
                    <BarChart3 className="mr-2 h-4 w-4" />
-                   <span>Dashboard</span>
-                 </DropdownMenuItem>
-                 <DropdownMenuItem>
-                   <Settings className="mr-2 h-4 w-4" />
-                   <span>Settings</span>
-                 </DropdownMenuItem>
-                 <DropdownMenuSeparator />
-                 <DropdownMenuItem onClick={signOut}>
-                   <LogOut className="mr-2 h-4 w-4" />
-                   <span>Sign out</span>
-                 </DropdownMenuItem>
-               </DropdownMenuContent>
-             </DropdownMenu>
+                   Go to Dashboard
+                 </Button>
+               )}
+               
+               <DropdownMenu>
+                 <DropdownMenuTrigger asChild>
+                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                     <Avatar className="h-8 w-8">
+                       <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || "User"} />
+                       <AvatarFallback>
+                         {user.email ? user.email.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
+                       </AvatarFallback>
+                     </Avatar>
+                   </Button>
+                 </DropdownMenuTrigger>
+                 <DropdownMenuContent className="w-56" align="end" forceMount>
+                   <div className="flex items-center justify-start gap-2 p-2">
+                     <div className="flex flex-col space-y-1 leading-none">
+                       <p className="font-medium">{user.email}</p>
+                       <p className="w-[200px] truncate text-sm text-muted-foreground">
+                         {user.user_metadata?.full_name || "User"}
+                       </p>
+                     </div>
+                   </div>
+                   <DropdownMenuSeparator />
+                   <DropdownMenuItem onClick={handleDashboard}>
+                     <BarChart3 className="mr-2 h-4 w-4" />
+                     <span>Dashboard</span>
+                   </DropdownMenuItem>
+                   <DropdownMenuItem>
+                     <Settings className="mr-2 h-4 w-4" />
+                     <span>Settings</span>
+                   </DropdownMenuItem>
+                   <DropdownMenuSeparator />
+                   <DropdownMenuItem onClick={signOut}>
+                     <LogOut className="mr-2 h-4 w-4" />
+                     <span>Sign out</span>
+                   </DropdownMenuItem>
+                 </DropdownMenuContent>
+               </DropdownMenu>
+             </div>
           ) : (
             <div className="flex items-center space-x-2">
               <Button 

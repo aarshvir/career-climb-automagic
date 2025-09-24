@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/sections/Hero";
 import Features from "@/components/sections/Features";
@@ -24,7 +23,6 @@ const Index = () => {
       <AuthErrorHandler />
       <div className="min-h-screen bg-background">
         <PromoStrip />
-        <Header />
         <main role="main">
           <Hero />
           <CompanyLogos />

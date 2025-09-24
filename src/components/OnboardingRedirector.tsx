@@ -48,10 +48,8 @@ const OnboardingRedirector = () => {
 
         if (!profile?.plan) {
           navigate("/plan-selection", { replace: true });
-        } else if (
-          pathname === "/" ||
-          location.search.includes("auth=success")
-        ) {
+        } else if (location.search.includes("auth=success")) {
+          // Only redirect to dashboard if coming from auth success, not from homepage
           // Check for resume and preferences before allowing dashboard access
           const { data: resumes } = await supabase
             .from('resumes')
