@@ -4,8 +4,15 @@ import jobvanceIcon from "@/assets/jobvance-icon.png";
 import { Link, useLocation } from "react-router-dom";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import { AuthStatusIndicator } from "@/components/AuthStatusIndicator";
+import { Loader2, User, LogOut, Settings, BarChart3 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 const Header = () => {
@@ -78,18 +85,44 @@ const Header = () => {
               </span>
             </div>
            ) : user ? (
-             <div className="flex items-center space-x-2 md:space-x-3">
-              <AuthStatusIndicator />
-              <Button variant="ghost" size="sm" onClick={handleDashboard}>
-                Dashboard
-              </Button>
-              <Button variant="outline" size="sm" onClick={signOut}>
-                Sign Out
-              </Button>
-            </div>
+             <DropdownMenu>
+               <DropdownMenuTrigger asChild>
+                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                   <Avatar className="h-8 w-8">
+                     <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || "User"} />
+                     <AvatarFallback>
+                       {user.email ? user.email.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
+                     </AvatarFallback>
+                   </Avatar>
+                 </Button>
+               </DropdownMenuTrigger>
+               <DropdownMenuContent className="w-56" align="end" forceMount>
+                 <div className="flex items-center justify-start gap-2 p-2">
+                   <div className="flex flex-col space-y-1 leading-none">
+                     <p className="font-medium">{user.email}</p>
+                     <p className="w-[200px] truncate text-sm text-muted-foreground">
+                       {user.user_metadata?.full_name || "User"}
+                     </p>
+                   </div>
+                 </div>
+                 <DropdownMenuSeparator />
+                 <DropdownMenuItem onClick={handleDashboard}>
+                   <BarChart3 className="mr-2 h-4 w-4" />
+                   <span>Dashboard</span>
+                 </DropdownMenuItem>
+                 <DropdownMenuItem>
+                   <Settings className="mr-2 h-4 w-4" />
+                   <span>Settings</span>
+                 </DropdownMenuItem>
+                 <DropdownMenuSeparator />
+                 <DropdownMenuItem onClick={signOut}>
+                   <LogOut className="mr-2 h-4 w-4" />
+                   <span>Sign out</span>
+                 </DropdownMenuItem>
+               </DropdownMenuContent>
+             </DropdownMenu>
           ) : (
-            <div className="flex items-center space-x-2 md:space-x-3">
-              <AuthStatusIndicator />
+            <div className="flex items-center space-x-2">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -99,7 +132,7 @@ const Header = () => {
                 Sign In
               </Button>
               <Button 
-                variant="hero" 
+                variant="default" 
                 size="sm" 
                 onClick={() => navigate('/auth')}
                 disabled={isRetrying}
