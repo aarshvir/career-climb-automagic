@@ -26,9 +26,9 @@ serve(async (req) => {
       });
     }
 
-    const { batchId } = await req.json();
-    if (!batchId) {
-      return new Response(JSON.stringify({ error: "batchId is required" }), {
+    const { runId } = await req.json();
+    if (!runId) {
+      return new Response(JSON.stringify({ error: "runId is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -48,6 +48,17 @@ serve(async (req) => {
       });
     }
 
+    // Build the LinkedIn search URL from preferences
+    const keywords = encodeURIComponent(preferences.job_title || "");
+    const locationName = encodeURIComponent(preferences.location || "");
+    const linkedInUrl = `https://www.linkedin.com/jobs/search/?keywords=${keywords}&location=${locationName}&f_TPR=r86400&sortBy=R`;
+
+    // Update the job run with the search URL
+    await supabase
+      .from('job_runs')
+      .update({ apify_search_url: linkedInUrl })
+      .eq('id', runId);
+
     const makeWebhookUrl = Deno.env.get("MAKE_WEBHOOK_URL");
     if (!makeWebhookUrl) {
         console.error("MAKE_WEBHOOK_URL is not set in environment variables.");
@@ -65,7 +76,8 @@ serve(async (req) => {
     const payload = {
       userId: user.id,
       email: user.email,
-      batchId: batchId,
+      runId: runId,
+      searchUrl: linkedInUrl,
       preferences: {
         location: preferences.location,
         job_title: preferences.job_title,
@@ -73,8 +85,6 @@ serve(async (req) => {
         job_type: preferences.job_type,
         job_posting_type: preferences.job_posting_type,
         job_posting_date: preferences.job_posting_date,
-        cities: preferences.cities ? preferences.cities.split(',').map(s => s.trim()) : [],
-        titles: preferences.titles ? preferences.titles.split(',').map(s => s.trim()) : [],
       },
     };
 
@@ -91,9 +101,9 @@ serve(async (req) => {
 
     // Optionally, update the batch status to 'processing'
     await supabase
-        .from('daily_job_batches')
-        .update({ status: 'processing' })
-        .eq('id', batchId);
+        .from('job_runs')
+        .update({ run_status: 'processing' })
+        .eq('id', runId);
 
     return new Response(JSON.stringify({ success: true, message: "Webhook triggered successfully." }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -25,92 +25,42 @@ interface JobFetchTriggerProps {
 export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [todaysBatch, setTodaysBatch] = useState<JobBatch | null>(null);
-  const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      fetchTodaysBatch();
-    }
-  }, [user]);
-
-  const fetchTodaysBatch = async () => {
-    if (!user) return;
-
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('daily_job_batches')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('batch_date', today)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      setTodaysBatch(data || null);
-    } catch (error) {
-      console.error('Error fetching today\'s batch:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const triggerJobFetch = async () => {
     if (!user) return;
 
     setTriggering(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
-      
-      // Check if already triggered today
-      if (todaysBatch) {
-        toast({
-          title: "Already Triggered",
-          description: "You've already triggered job fetching for today.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Create new batch record
-      const { data: batch, error: batchError } = await supabase
-        .from('daily_job_batches')
-        .insert([
-          {
-            user_id: user.id,
-            batch_date: today,
-            status: 'pending',
-            triggered_at: new Date().toISOString(),
-          }
-        ])
+      // Create a new job run record
+      const { data: jobRun, error: runError } = await supabase
+        .from('job_runs')
+        .insert({ user_id: user.id, run_status: 'pending' })
         .select()
         .single();
 
-      if (batchError) throw batchError;
+      if (runError) throw runError;
 
       // Call the Supabase Edge Function to trigger the Make.com webhook
       const { error: functionError } = await supabase.functions.invoke('trigger-make-run', {
-        body: { batchId: batch.id },
+        body: { runId: jobRun.id },
       });
 
       if (functionError) {
-        // Handle error, maybe revert the batch creation or set its status to 'failed'
-        console.error('Error invoking Supabase function:', functionError);
+        await supabase
+          .from('job_runs')
+          .update({ run_status: 'failed' })
+          .eq('id', jobRun.id);
         throw functionError;
       }
       
-      console.log('Job fetch triggered for batch:', batch.id);
+      console.log('Job fetch triggered for run:', jobRun.id);
 
       toast({
         title: "Job Fetch Triggered",
         description: "Your daily job search has been initiated. Results will appear shortly.",
       });
 
-      setTodaysBatch(batch);
     } catch (error) {
       console.error('Error triggering job fetch:', error);
       toast({
@@ -252,7 +202,7 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
               </p>
               <Button 
                 onClick={triggerJobFetch}
-                disabled={triggering}
+                disabled={triggering || userPlan === 'free'}
                 className="w-full"
               >
                 {triggering ? (
