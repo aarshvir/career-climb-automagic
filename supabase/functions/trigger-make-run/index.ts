@@ -4,8 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // This is the main function that runs when your website calls it.
 serve(async (req) => {
   try {
-    // Create a client to interact with your Supabase database.
-    // It automatically uses the user's login information from the request.
+    // This client uses the user's login token to securely access the database.
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -37,8 +36,11 @@ serve(async (req) => {
         throw new Error("No resumes found. Please upload at least one resume.");
     }
 
-    // Get just the URLs from the resume data.
-    const resumeLinks = resumes.map(r => r.storage_path);
+    // Get just the public URLs for the resumes.
+    const resumeLinks = resumes.map(r => {
+        const { data } = supabaseClient.storage.from('resumes').getPublicUrl(r.storage_path);
+        return data.publicUrl;
+    });
 
     // Create a new entry in the 'job_runs' table to track this automation.
     const { data: jobRun, error: runError } = await supabaseClient
@@ -46,8 +48,8 @@ serve(async (req) => {
       .insert({
         user_id: user.id,
         apify_search_url: preferences.linkedin_job_search_url,
-        resume_links: resumeLinks,
-        run_status: 'running' // Set status to 'running' immediately
+        resume_links: resumeLinks, // Storing the public URLs now
+        run_status: 'running'
       })
       .select('id')
       .single();
@@ -59,16 +61,21 @@ serve(async (req) => {
     
     // Securely call your Make.com webhook with all the necessary data.
     const makeWebhookUrl = Deno.env.get('MAKE_WEBHOOK_URL')!;
-    await fetch(makeWebhookUrl, {
+    const response = await fetch(makeWebhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        runId: jobRun.id, // The ID of the new row we just created
-        userId: user.id, // The ID of the user
+        runId: jobRun.id,
+        userId: user.id,
         apifyUrl: preferences.linkedin_job_search_url,
         resumes: resumeLinks
       })
     });
+    
+    // Check if Make.com accepted the request
+    if (!response.ok) {
+        throw new Error(`Make.com webhook failed with status: ${response.statusText}`);
+    }
 
     // Send a success message back to your website.
     return new Response(JSON.stringify({ message: "Automation started!", runId: jobRun.id }), {
