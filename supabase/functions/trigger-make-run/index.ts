@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// This is the main function that runs when your website calls it.
 serve(async (req) => {
   try {
     // This client uses the user's login token to securely access the database.
@@ -11,83 +10,92 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
 
-    // Get the currently logged-in user's details.
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) throw new Error("User not found. Please log in.");
 
-    // Fetch the user's saved job preferences from the 'job_preferences' table.
+    // 1. Get user's profile and preferences
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('subscription_plan')
+      .eq('id', user.id)
+      .single();
+
     const { data: preferences, error: prefError } = await supabaseClient
       .from('job_preferences')
-      .select('linkedin_job_search_url')
+      .select('job_title_keywords, location, experience_levels, job_types')
       .eq('user_id', user.id)
       .single();
 
-    // Fetch all of the user's resumes from the 'resumes' table.
+    if (profileError || prefError) throw new Error("Could not find user profile or preferences.");
+
+    // 2. Fetch the Geo ID from our new 'locations' table
+    const cleanedLocation = preferences.location.trim().toLowerCase();
+    const { data: locationData, error: locationError } = await supabaseClient
+        .from('locations')
+        .select('geo_id')
+        .ilike('name', cleanedLocation) // Case-insensitive search
+        .single();
+    
+    if (locationError || !locationData) {
+        throw new Error(`Location "${preferences.location}" is not supported yet.`);
+    }
+    const geoId = locationData.geo_id;
+
+    // 3. Build the LinkedIn URL automatically
+    const keywords = encodeURIComponent(preferences.job_title_keywords.join(' '));
+    const linkedInUrl = `https://www.linkedin.com/jobs/search/?keywords=${keywords}&geoId=${geoId}&f_TPR=r86400&sortBy=R`;
+
+    // 4. Determine job count based on plan
+    const jobCount = profile.subscription_plan === 'premium' ? 100 : 50;
+      
+    // 5. Get user's resumes
     const { data: resumes, error: resumeError } = await supabaseClient
       .from('resumes')
       .select('storage_path')
       .eq('user_id', user.id);
 
-    if (prefError || resumeError) {
-      console.error('DB Error:', prefError || resumeError);
-      throw new Error("Could not get your saved job preferences or resumes.");
-    }
-    if (!resumes || resumes.length === 0) {
-        throw new Error("No resumes found. Please upload at least one resume.");
-    }
+    if (resumeError || !resumes || resumes.length === 0) throw new Error("No resumes found.");
 
-    // Get just the public URLs for the resumes.
     const resumeLinks = resumes.map(r => {
         const { data } = supabaseClient.storage.from('resumes').getPublicUrl(r.storage_path);
         return data.publicUrl;
     });
 
-    // Create a new entry in the 'job_runs' table to track this automation.
+    // 6. Create the job run
     const { data: jobRun, error: runError } = await supabaseClient
       .from('job_runs')
       .insert({
         user_id: user.id,
-        apify_search_url: preferences.linkedin_job_search_url,
-        resume_links: resumeLinks, // Storing the public URLs now
+        apify_search_url: linkedInUrl,
+        resume_links: resumeLinks,
         run_status: 'running'
       })
       .select('id')
       .single();
 
-    if (runError) {
-        console.error('Insert Error:', runError);
-        throw new Error("Could not start a new job run.");
-    }
+    if (runError) throw new Error("Could not start a new job run.");
     
-    // Securely call your Make.com webhook with all the necessary data.
+    // 7. Trigger Make.com with all the dynamic user data
     const makeWebhookUrl = Deno.env.get('MAKE_WEBHOOK_URL')!;
-    const response = await fetch(makeWebhookUrl, {
+    await fetch(makeWebhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         runId: jobRun.id,
         userId: user.id,
-        apifyUrl: preferences.linkedin_job_search_url,
+        apifyUrl: linkedInUrl,
+        jobCount: jobCount,
         resumes: resumeLinks
       })
     });
-    
-    // Check if Make.com accepted the request
-    if (!response.ok) {
-        throw new Error(`Make.com webhook failed with status: ${response.statusText}`);
-    }
 
-    // Send a success message back to your website.
     return new Response(JSON.stringify({ message: "Automation started!", runId: jobRun.id }), {
-        headers: { "Content-Type": "application/json" },
-        status: 200
+        headers: { "Content-Type": "application/json" }, status: 200
     });
 
   } catch (error) {
-    // If anything goes wrong, send back a clear error message.
     return new Response(JSON.stringify({ error: error.message }), {
-        headers: { "Content-Type": "application/json" },
-        status: 500
+        headers: { "Content-Type": "application/json" }, status: 500
     });
   }
 });
