@@ -5,52 +5,11 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle, Target, Users, Zap, ArrowRight } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import SEOHead from '@/components/SEOHead'
+import { SeoHead } from '@/components/SEOHead'
 import PromoStrip from '@/components/PromoStrip'
+import organizationData from '../../../public/jsonld/organization.json';
 
 const About = () => {
-  useEffect(() => {
-    document.title = "About JobVance - AI Job Application Automation Company";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute(
-        "content",
-        "Learn about JobVance's mission to revolutionize job searching with AI automation. Meet our team and discover how we help professionals find their dream jobs faster."
-      );
-    }
-
-    // Add Organization structured data
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "JobVance",
-      "description": "AI-powered job application automation platform",
-      "url": "https://jobvance.io",
-      "logo": "https://jobvance.io/logo.png",
-      "foundingDate": "2023",
-      "founder": [
-        {
-          "@type": "Person",
-          "name": "Alex Chen"
-        }
-      ],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "telephone": "+1-555-123-4567",
-        "contactType": "customer service",
-        "email": "support@jobvance.io"
-      }
-    });
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, []);
   const stats = [
     { number: '50,000+', label: 'Job Applications Sent' },
     { number: '85%', label: 'Interview Success Rate' },
@@ -104,11 +63,11 @@ const About = () => {
 
   return (
     <>
-      <SEOHead 
+      <SeoHead
         title="About JobVance - AI Job Application Automation Company"
         description="Learn about JobVance's mission to revolutionize job searching with AI automation. Meet our team and discover how we help professionals find their dream jobs faster."
-        keywords="AI job search company, automated job applications, career services, job hunting technology, resume optimization AI"
-        canonical="https://jobvance.io/about"
+        canonicalPath="/about"
+        structuredData={organizationData}
       />
       <div className="min-h-screen bg-background">
         <PromoStrip />

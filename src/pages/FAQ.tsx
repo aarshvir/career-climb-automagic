@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -8,6 +8,7 @@ import { HelpCircle, MessageSquare, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import InterestFormDialog from "@/components/InterestFormDialog";
+import { SeoHead, faqJsonLd, buildWebPageJsonLd } from "@/components/SEOHead";
 
 const FAQ = () => {
   const { user, signInWithGoogle } = useAuth();
@@ -88,42 +89,21 @@ const FAQ = () => {
     }
   ];
 
-  useEffect(() => {
-    document.title = "Frequently Asked Questions - AI Job Application Automation | JobVance.io";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute(
-        "content",
-        "Get answers to common questions about JobVance AI job application automation. Learn how our service works, pricing, security, and success rates."
-      );
-    }
-
-    // Add FAQ structured data
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": faqs.map(faq => ({
-        "@type": "Question",
-        "name": faq.q,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": faq.a
-        }
-      }))
-    });
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, []);
+  const faqStructuredData = faqJsonLd(faqs.map(faq => ({ question: faq.q, answer: faq.a })));
+  const webPageStructuredData = buildWebPageJsonLd({
+    name: "Frequently Asked Questions",
+    description: "Get answers to common questions about JobVance AI job application automation.",
+    canonicalUrl: "https://jobvance.io/faq"
+  });
 
   return (
     <>
+      <SeoHead
+        title="Frequently Asked Questions - AI Job Application Automation | JobVance.io"
+        description="Get answers to common questions about JobVance AI job application automation. Learn how our service works, pricing, security, and success rates."
+        canonicalPath="/faq"
+        structuredData={[webPageStructuredData, faqStructuredData]}
+      />
       <div className="min-h-screen bg-background">
         <Header />
         <main role="main">

@@ -1,71 +1,14 @@
-import { useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Pricing from "@/components/sections/Pricing";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Star } from "lucide-react";
 import PromoStrip from "@/components/PromoStrip";
+import { SeoHead, jobvanceProductJsonLd, buildWebPageJsonLd } from "@/components/SEOHead";
+import pricingFaqData from '../../../public/jsonld/pricing-faq.json';
+import organizationData from '../../../public/jsonld/organization.json';
 
 const PricingPage = () => {
-  useEffect(() => {
-    document.title = "Pricing Plans for Automated Job Applications | JobVance.io";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute(
-        "content",
-        "Compare JobVance pricing plans for automated job applications. Choose from Starter ($29), Professional ($79), or Elite ($149) plans. 7-day free trial included."
-      );
-    }
-
-    // Add structured data for pricing
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Product",
-      "name": "JobVance AI Job Application Automation",
-      "description": "AI-powered job application automation service with multiple pricing tiers",
-      "offers": [
-        {
-          "@type": "Offer",
-          "name": "Starter Plan",
-          "price": "29",
-          "priceCurrency": "USD",
-          "priceValidUntil": "2025-12-31",
-          "availability": "https://schema.org/InStock"
-        },
-        {
-          "@type": "Offer", 
-          "name": "Professional Plan",
-          "price": "79",
-          "priceCurrency": "USD", 
-          "priceValidUntil": "2025-12-31",
-          "availability": "https://schema.org/InStock"
-        },
-        {
-          "@type": "Offer",
-          "name": "Elite Plan", 
-          "price": "149",
-          "priceCurrency": "USD",
-          "priceValidUntil": "2025-12-31", 
-          "availability": "https://schema.org/InStock"
-        }
-      ],
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "5000"
-      }
-    });
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, []);
-
   const testimonials = [
     {
       name: "Sarah Chen",
@@ -90,8 +33,20 @@ const PricingPage = () => {
     }
   ];
 
+  const webPageStructuredData = buildWebPageJsonLd({
+    name: "Pricing Plans",
+    description: "Compare JobVance pricing plans for automated job applications.",
+    canonicalUrl: "https://jobvance.io/pricing"
+  });
+
   return (
     <>
+      <SeoHead
+        title="Pricing Plans for Automated Job Applications | JobVance.io"
+        description="Compare JobVance pricing plans for automated job applications. Choose from Starter ($29), Professional ($79), or Elite ($149) plans. 7-day free trial included."
+        canonicalPath="/pricing"
+        structuredData={[organizationData, webPageStructuredData, jobvanceProductJsonLd, pricingFaqData]}
+      />
       <div className="min-h-screen bg-background">
         <PromoStrip />
         <Header />

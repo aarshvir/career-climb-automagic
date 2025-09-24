@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Calendar, Clock, ArrowRight, Search, User } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import SEOHead from '@/components/SEOHead'
+import { SeoHead, buildWebPageJsonLd } from '@/components/SEOHead'
 import { posts } from './blog/posts'
 import { Link } from 'react-router-dom'
+import organizationData from '../../../public/jsonld/organization.json';
 
 
 const Blog = () => {
@@ -16,61 +17,48 @@ const Blog = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
-  useEffect(() => {
-    document.title = "JobVance Blog | Job Search Automation Tips";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute(
-        "content",
-        "Expert career advice, job search strategies, and AI automation insights. Learn from industry professionals to advance your career faster."
-      );
-    }
-
-    // Add Blog structured data
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Blog",
-      "name": "JobVance Career Blog",
-      "description": "Expert career advice and job search automation insights",
-      "url": "https://jobvance.io/blog",
-      "publisher": {
-        "@type": "Organization",
-        "name": "JobVance",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://jobvance.io/logo.png"
-        }
-      },
-      "blogPost": posts.map(post => ({
-        "@type": "BlogPosting",
-        "headline": post.title,
-        "url": `https://jobvance.io/blog/${post.slug}`,
-        "datePublished": post.date,
-        "author": {
-          "@type": "Person",
-          "name": post.author
-        }
-      }))
-    });
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, [])
-
   const allTags = Array.from(new Set(posts.flatMap(post => post.tags)))
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+                          post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesTag = !selectedTag || post.tags.includes(selectedTag)
     return matchesSearch && matchesTag
   })
+
+  const blogStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "JobVance Career Blog",
+    "description": "Expert career advice and job search automation insights",
+    "url": "https://jobvance.io/blog",
+    "publisher": {
+      "@type": "Organization",
+      "name": "JobVance",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://jobvance.io/logo.png"
+      }
+    },
+    "blogPost": posts.map(post => ({
+      "@type": "BlogPosting",
+      "headline": post.title,
+      "url": `https://jobvance.io/blog/${post.slug}`,
+      "datePublished": post.date,
+      "author": {
+        "@type": "Person",
+        "name": post.author
+      },
+      "image": `https://jobvance.io/images/blog/${post.slug}.png`
+    }))
+  };
+
+  const webPageStructuredData = buildWebPageJsonLd({
+    name: "Career Blog",
+    description: "Expert career advice, job search strategies, and AI automation insights.",
+    canonicalUrl: "https://jobvance.io/blog"
+  });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -94,11 +82,11 @@ const Blog = () => {
 
   return (
     <>
-      <SEOHead 
+      <SeoHead 
         title="Career Blog - Job Search Tips & AI Automation Insights | JobVance"
         description="Expert career advice, job search strategies, and AI automation insights. Learn from industry professionals to advance your career faster."
-        keywords="career blog, job search tips, AI automation, career advice, resume tips, interview prep, job hunting strategies"
-        canonical="https://jobvance.io/blog"
+        canonicalPath="/blog"
+        structuredData={[organizationData, webPageStructuredData, blogStructuredData]}
       />
       <div className="min-h-screen bg-background">
         <Header />

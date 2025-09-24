@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,58 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowRight, Upload, Bot, Target, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import PromoStrip from "@/components/PromoStrip";
+import { SeoHead, buildWebPageJsonLd } from "@/components/SEOHead";
+import organizationData from '../../../public/jsonld/organization.json';
 
 const HowItWorks = () => {
-  useEffect(() => {
-    document.title = "How JobVance Automates Your Job Search with AI | JobVance.io";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute(
-        "content",
-        "Learn how JobVance's AI automation works: upload your resume, set preferences, and let our AI apply to 20+ jobs daily. See the 4-step process."
-      );
-    }
-
-    // Add structured data for HowTo
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "HowTo",
-      "name": "How to Automate Your Job Search with AI",
-      "description": "Step-by-step guide to automating job applications using JobVance AI",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Upload Your Resume",
-          "text": "Upload your existing resume and let our AI analyze your skills and experience"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Set Job Preferences",
-          "text": "Define your ideal job criteria including role, location, salary, and company size"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "AI Applies Daily",
-          "text": "Our AI searches and applies to 20+ relevant jobs every day with optimized applications"
-        },
-        {
-          "@type": "HowToStep", 
-          "name": "Track & Interview",
-          "text": "Monitor applications in your dashboard and focus on preparing for interviews"
-        }
-      ]
-    });
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, []);
-
   const steps = [
     {
       icon: Upload,
@@ -85,8 +36,33 @@ const HowItWorks = () => {
     }
   ];
 
+  const howToStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Automate Your Job Search with AI",
+    "description": "Step-by-step guide to automating job applications using JobVance AI",
+    "step": steps.map((step, index) => ({
+      "@type": "HowToStep",
+      "name": step.title,
+      "text": step.description,
+      "position": index + 1
+    }))
+  };
+
+  const webPageStructuredData = buildWebPageJsonLd({
+    name: "How JobVance Works",
+    description: "Learn how JobVance's AI automation works: upload your resume, set preferences, and let our AI apply to 20+ jobs daily.",
+    canonicalUrl: "https://jobvance.io/how-it-works"
+  });
+
   return (
     <>
+      <SeoHead
+        title="How JobVance Automates Your Job Search with AI | JobVance.io"
+        description="Learn how JobVance's AI automation works: upload your resume, set preferences, and let our AI apply to 20+ jobs daily. See the 4-step process."
+        canonicalPath="/how-it-works"
+        structuredData={[organizationData, webPageStructuredData, howToStructuredData]}
+      />
       <div className="min-h-screen bg-background">
         <PromoStrip />
         <Header />
