@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useMemo } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
 import { useDNSConnectivity } from '@/hooks/useDNSConnectivity'
@@ -31,6 +31,24 @@ interface AuthContextType {
   inIframe: boolean
 }
 
+type EmailProviderCheckResult = {
+  exists: boolean
+  providers: string[]
+  hasEmailProvider: boolean
+  hasGoogleProvider: boolean
+  canSignIn: boolean
+  shouldUseGoogle: boolean
+}
+
+const DEFAULT_PROVIDER_CHECK: EmailProviderCheckResult = {
+  exists: false,
+  providers: [],
+  hasEmailProvider: false,
+  hasGoogleProvider: false,
+  canSignIn: false,
+  shouldUseGoogle: false
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const useAuth = () => {
@@ -47,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true)
   const [showDNSDialog, setShowDNSDialog] = useState(false)
   
-  const { isSupabaseReachable, dnsError, recheckConnectivity, isChecking } = useDNSConnectivity()
+  const { dnsError, recheckConnectivity, isChecking } = useDNSConnectivity()
   const { executeWithRetry, isRetrying } = useAuthRetry()
   
   // Environment detection
@@ -60,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
-    }).catch((error) => {
+    }).catch((error: unknown) => {
       console.warn('Supabase connection failed:', error)
       setLoading(false)
     })
@@ -94,12 +112,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }, {
         onConflict: 'id'
       })
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('Error creating user profile:', error)
     }
   }
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     const attemptSignIn = async () => {
       console.log('Starting Google Sign-In process...', {
         environment,
@@ -158,9 +176,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         inIframe ? 2 : 3, // Fewer retries in iframe environment
         'Google Sign-In failed. This might be due to popup blocking or iframe restrictions.'
       )
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Final sign in failure:', error)
-      
+
       // Show appropriate error dialog based on error type
       if (error instanceof Error) {
         if (error.message.includes('POPUP_BLOCKED')) {
@@ -174,36 +192,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       throw error
     }
-  }
+  }, [dnsError, environment, executeWithRetry, inIframe])
 
-  const retryConnection = () => {
+  const retryConnection = useCallback(() => {
     recheckConnectivity()
     setShowDNSDialog(false)
-  }
+  }, [recheckConnectivity])
 
-  const signInWithEmail = async (email: string, password: string) => {
+  const signInWithEmail = useCallback(async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      
+
       if (error) {
         console.error('Email sign in error:', error)
         return { error: error.message }
       }
-      
-      return {}
-    } catch (error: any) {
-      console.error('Sign in failed:', error)
-      return { error: error.message || 'Sign in failed' }
-    }
-  }
 
-  const signUpWithEmail = async (email: string, password: string) => {
+      return {}
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Sign in failed'
+      console.error('Sign in failed:', error)
+      return { error: message }
+    }
+  }, [])
+
+  const signUpWithEmail = useCallback(async (email: string, password: string) => {
     try {
       setLoading(true);
-      
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password
@@ -225,35 +244,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       return { error: undefined };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup exception:', error);
       return { error: 'An unexpected error occurred during signup' };
     } finally {
       setLoading(false);
     }
-  }
+  }, [])
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = useCallback(async (email: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/auth/reset`
-      
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://jobvance.io'
+      const redirectUrl = `${origin}/auth/reset`
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl
       })
-      
+
       if (error) {
         console.error('Password reset error:', error)
         return { error: error.message }
       }
-      
-      return {}
-    } catch (error: any) {
-      console.error('Password reset failed:', error)
-      return { error: error.message || 'Password reset failed' }
-    }
-  }
 
-  const updatePassword = async (password: string) => {
+      return {}
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Password reset failed'
+      console.error('Password reset failed:', error)
+      return { error: message }
+    }
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
     try {
       const { error } = await supabase.auth.updateUser({
         password
@@ -263,59 +284,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error('Password update error:', error)
         return { error: error.message }
       }
-      
-      return {}
-    } catch (error: any) {
-      console.error('Password update failed:', error)
-      return { error: error.message || 'Password update failed' }
-    }
-  }
 
-  const checkEmailProvider = async (email: string) => {
+      return {}
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Password update failed'
+      console.error('Password update failed:', error)
+      return { error: message }
+    }
+  }, [])
+
+  const checkEmailProvider = useCallback(async (email: string) => {
     try {
-      const response = await supabase.functions.invoke('check-email-provider', {
+      const { data, error } = await supabase.functions.invoke<EmailProviderCheckResult>('check-email-provider', {
         body: { email }
       })
-      
-      if (response.error) {
-        console.error('Error checking email provider:', response.error)
-        // Fallback to basic existence check
-        return {
-          exists: false,
-          providers: [],
-          hasEmailProvider: false,
-          hasGoogleProvider: false,
-          canSignIn: false,
-          shouldUseGoogle: false
-        }
-      }
-      
-      return response.data
-    } catch (error) {
-      console.error('Failed to check email provider:', error)
-      // Fallback
-      return {
-        exists: false,
-        providers: [],
-        hasEmailProvider: false,
-        hasGoogleProvider: false,
-        canSignIn: false,
-        shouldUseGoogle: false
-      }
-    }
-  }
 
-  const signOut = async () => {
+      if (error) {
+        console.error('Error checking email provider:', error)
+        return DEFAULT_PROVIDER_CHECK
+      }
+
+      return data ?? DEFAULT_PROVIDER_CHECK
+    } catch (error: unknown) {
+      console.error('Failed to check email provider:', error)
+      return DEFAULT_PROVIDER_CHECK
+    }
+  }, [])
+
+  const signOut = useCallback(async () => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('Error signing out:', error)
         throw error
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('Sign out failed:', error)
     }
-  }
+  }, [])
 
   const value = useMemo(() => ({
     user,
@@ -333,7 +339,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isRetrying,
     environment,
     inIframe
-  }), [user, session, loading, dnsError, isRetrying, environment, inIframe])
+  }), [
+    user,
+    session,
+    loading,
+    signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
+    updatePassword,
+    checkEmailProvider,
+    signOut,
+    dnsError,
+    retryConnection,
+    isRetrying,
+    environment,
+    inIframe
+  ])
 
   return (
     <AuthContext.Provider value={value}>

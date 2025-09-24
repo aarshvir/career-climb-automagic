@@ -9,6 +9,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  return fallback
+}
+
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -62,8 +70,8 @@ const ForgotPassword: React.FC = () => {
           description: 'Check your inbox for password reset instructions.',
         })
       }
-    } catch (error: any) {
-      setError(error.message || 'Failed to send reset email')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Failed to send reset email'))
     } finally {
       setLoading(false)
     }
@@ -192,4 +200,4 @@ const ForgotPassword: React.FC = () => {
   )
 }
 
-export default ForgotPassword
+export default ForgotPassword;
