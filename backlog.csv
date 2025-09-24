@@ -1,0 +1,13 @@
+Issue,Evidence/URL,Severity,Fix,Effort
+Missing robots.txt and XML sitemap,https://jobvance.io,P0,Create production-ready robots.txt and XML sitemap and deploy via CDN,S
+Canonical tags absent on core pages,https://jobvance.io,P0,Use SeoHead component to inject canonical tags across routes,S
+Structured data missing for organization/product pages,https://jobvance.io,P0,Implement JSON-LD for Organization WebSite WebPage SoftwareApplication and FAQ,S
+Thin meta descriptions and social cards,https://jobvance.io,P0,Adopt unified SEO head component with Open Graph and Twitter data,S
+Unoptimized hero imagery impacting LCP,https://jobvance.io,P1,Deliver responsive WebP hero with preload and explicit dimensions,M
+No systematic keyword architecture,https://jobvance.io,P1,Ship keyword-map and restructure navigation/site tree,M
+Lack of internal linking and content depth,https://jobvance.io/blog,P0,Publish pillar and cluster content plan with internal links,L
+Missing analytics + conversion tracking events,https://jobvance.io,P1,Implement GA4 GSC server events and define dashboards,M
+Slow render due to non-optimized font loading,https://jobvance.io,P1,Preconnect to Google Fonts and self-host critical fonts,S
+No accessibility/system guardrails,https://jobvance.io,P1,Adopt accessibility checklist WCAG 2.2 AA and add regression tests,M
+No backlink/PR engine,https://jobvance.io,P1,Launch white-hat backlink outreach plan with assets,M
+Core Web Vitals risk (INP/CLS),https://jobvance.io,P0,Implement hydration splitting script defer and layout stability plan,M
