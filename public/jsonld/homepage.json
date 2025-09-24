@@ -1,0 +1,20 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Automate Your Job Search with Jobvance",
+  "url": "https://jobvance.io/",
+  "description": "Jobvance automates job discovery, resume customization, and AI-assisted outreach so candidates land interviews faster.",
+  "isPartOf": {
+    "@type": "WebSite",
+    "url": "https://jobvance.io",
+    "name": "Jobvance"
+  },
+  "about": {
+    "@type": "Thing",
+    "name": "Automated job applications"
+  },
+  "primaryImageOfPage": {
+    "@type": "ImageObject",
+    "url": "https://jobvance.io/images/hero-jobvance.webp"
+  }
+}
