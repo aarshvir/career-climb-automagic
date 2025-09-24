@@ -84,6 +84,8 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           job_type: preferences.job_type,
           job_posting_type: preferences.job_posting_type,
           job_posting_date: preferences.job_posting_date,
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;

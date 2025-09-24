@@ -92,6 +92,8 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
           job_posting_type: preferences.job_posting_type,
           job_posting_date: preferences.job_posting_date,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
