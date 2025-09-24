@@ -68,21 +68,18 @@ Write-Host "🔨 Setting up database tables..." -ForegroundColor Cyan
 Write-Host ""
 
 try {
-    node scripts/supabase-manager.js
-    Write-Host ""
-    Write-Host "🎉 Database setup completed successfully!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "📊 Your database now includes:" -ForegroundColor Cyan
-    Write-Host "   • job_applications - Track job applications" -ForegroundColor White
-    Write-Host "   • user_preferences - Store user job preferences" -ForegroundColor White
-    Write-Host "   • job_listings - Store job postings" -ForegroundColor White
-    Write-Host "   • application_analytics - Track application metrics" -ForegroundColor White
-    Write-Host ""
-    Write-Host "🌐 You can now use your application with the new database schema!" -ForegroundColor Green
-} catch {
-    Write-Host "❌ Database setup failed: $($_.Exception.Message)" -ForegroundColor Red
+    # Run the Node.js script to perform the setup
+    node "scripts/supabase-manager.js" "migrate"
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "🔴 Database setup failed during script execution." -ForegroundColor Red
+        exit 1
+    }
+    
+    Write-Host "✅ Database setup complete! Your Supabase database is ready to use." -ForegroundColor Green
+}
+catch {
+    Write-Host "🔴 An error occurred during database setup:" -ForegroundColor Red
+    Write-Host $_.Exception.Message -ForegroundColor Red
     exit 1
 }
-
-Write-Host ""
-Write-Host "✨ Setup complete! Your Supabase database is ready to use." -ForegroundColor Green

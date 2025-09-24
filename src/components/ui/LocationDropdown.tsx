@@ -11,8 +11,7 @@ interface LocationDropdownProps {
 
 interface Location {
   name: string;
-  is_remote: boolean;
-  country: string;
+  geo_id: string;
 }
 
 export function LocationDropdown({ 
@@ -30,7 +29,7 @@ export function LocationDropdown({
         // Fetches all rows from the 'locations' table
         const { data, error } = await supabase
           .from('locations')
-          .select('name, is_remote, country')
+          .select('name, geo_id')
           .order('name', { ascending: true }); // Alphabetical order
 
         if (error) {
@@ -68,11 +67,8 @@ export function LocationDropdown({
       </SelectTrigger>
       <SelectContent>
         {locations.map((location) => (
-          <SelectItem key={location.name} value={location.name}>
+          <SelectItem key={location.geo_id} value={location.name}>
             {location.name}
-            {location.is_remote && (
-              <span className="ml-2 text-xs text-muted-foreground">🌐</span>
-            )}
           </SelectItem>
         ))}
       </SelectContent>
