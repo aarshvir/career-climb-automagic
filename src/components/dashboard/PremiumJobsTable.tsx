@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,6 @@ import {
   Filter,
   MoreHorizontal
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
@@ -51,6 +50,118 @@ interface JobMatch {
   scraped_date?: string;
 }
 
+const BASE_JOBS: ReadonlyArray<JobMatch> = [
+  {
+    id: '1',
+    job_title: 'Senior Software Engineer',
+    company_name: 'TechCorp',
+    location: 'San Francisco, CA',
+    salary_range: '$120,000 - $180,000',
+    posted_date: new Date().toISOString(),
+    ats_score: 85,
+    job_url: 'https://example.com',
+    application_status: 'not_applied',
+    job_type: 'Full-time',
+  },
+  {
+    id: '2',
+    job_title: 'Product Manager',
+    company_name: 'StartupXYZ',
+    location: 'Remote',
+    salary_range: '$100,000 - $150,000',
+    posted_date: new Date(Date.now() - 86400000).toISOString(),
+    ats_score: 72,
+    job_url: 'https://example.com',
+    application_status: 'applied',
+    job_type: 'Full-time',
+  },
+  {
+    id: '3',
+    job_title: 'Frontend Developer',
+    company_name: 'DesignStudio',
+    location: 'New York, NY',
+    salary_range: '$90,000 - $130,000',
+    posted_date: new Date(Date.now() - 172800000).toISOString(),
+    ats_score: 91,
+    job_url: 'https://example.com',
+    application_status: 'not_applied',
+    job_type: 'Contract',
+  },
+  {
+    id: '4',
+    job_title: 'DevOps Engineer',
+    company_name: 'CloudFirst',
+    location: 'Austin, TX',
+    salary_range: '$110,000 - $160,000',
+    posted_date: new Date(Date.now() - 259200000).toISOString(),
+    ats_score: 78,
+    job_url: 'https://example.com',
+    application_status: 'not_applied',
+    job_type: 'Full-time',
+  },
+  {
+    id: '5',
+    job_title: 'Full Stack Developer',
+    company_name: 'InnovateLab',
+    location: 'Remote',
+    salary_range: '$95,000 - $140,000',
+    posted_date: new Date(Date.now() - 345600000).toISOString(),
+    ats_score: 88,
+    job_url: 'https://example.com',
+    application_status: 'not_applied',
+    job_type: 'Full-time',
+  },
+  ...Array.from({ length: 15 }, (_, i) => {
+    const index = i + 6
+    const today = Date.now()
+    const atsScore = 60 + ((i * 7) % 35)
+
+    return {
+      id: `${index}`,
+      job_title: `Software Engineer ${index - 5}`,
+      company_name: `Company ${index - 5}`,
+      location: i % 2 === 0 ? 'Remote' : 'New York, NY',
+      salary_range: `$${80 + i * 5},000 - $${120 + i * 8},000`,
+      posted_date: new Date(today - (index * 86400000)).toISOString(),
+      ats_score: atsScore,
+      job_url: 'https://example.com',
+      application_status: 'not_applied',
+      job_type: 'Full-time',
+    }
+  }),
+]
+
+const planVisibleRows: Record<string, number> = {
+  free: 2,
+  pro: 20,
+  elite: 50,
+}
+
+const filterJobsByQuery = (jobs: ReadonlyArray<JobMatch>, query: string): ReadonlyArray<JobMatch> => {
+  if (!query) {
+    return jobs
+  }
+
+  const lowerQuery = query.toLowerCase()
+  return jobs.filter((job) =>
+    job.job_title.toLowerCase().includes(lowerQuery) ||
+    job.company_name.toLowerCase().includes(lowerQuery)
+  )
+}
+
+const areJobListsEqual = (a: ReadonlyArray<JobMatch>, b: ReadonlyArray<JobMatch>) => {
+  if (a === b) return true
+  if (a.length !== b.length) return false
+
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i].id !== b[i].id) {
+      return false
+    }
+  }
+
+  return true
+}
+
 interface PremiumJobsTableProps {
   userPlan: string;
   searchQuery: string;
@@ -59,115 +170,30 @@ interface PremiumJobsTableProps {
 export const PremiumJobsTable = ({ userPlan, searchQuery }: PremiumJobsTableProps) => {
   const { user } = useAuth();
   const planLimits = usePlanLimits(userPlan);
-  const [jobs, setJobs] = useState<JobMatch[]>([]);
+  const [jobs, setJobs] = useState<ReadonlyArray<JobMatch>>(BASE_JOBS);
   const [loading, setLoading] = useState(true);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [selectedJob, setSelectedJob] = useState<JobMatch | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const lastQueryRef = useRef<string>("")
+
   useEffect(() => {
-    if (user) {
-      fetchJobs();
+    if (!user) {
+      return
     }
-  }, [user, searchQuery]);
 
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      // Enhanced mock data with more realistic job postings
-      const mockJobs: JobMatch[] = [
-        {
-          id: '1',
-          job_title: 'Senior Software Engineer',
-          company_name: 'TechCorp',
-          location: 'San Francisco, CA',
-          salary_range: '$120,000 - $180,000',
-          posted_date: new Date().toISOString(),
-          ats_score: 85,
-          job_url: 'https://example.com',
-          application_status: 'not_applied',
-          job_type: 'Full-time'
-        },
-        {
-          id: '2',
-          job_title: 'Product Manager',
-          company_name: 'StartupXYZ',
-          location: 'Remote',
-          salary_range: '$100,000 - $150,000',
-          posted_date: new Date(Date.now() - 86400000).toISOString(),
-          ats_score: 72,
-          job_url: 'https://example.com',
-          application_status: 'applied',
-          job_type: 'Full-time'
-        },
-        {
-          id: '3',
-          job_title: 'Frontend Developer',
-          company_name: 'DesignStudio',
-          location: 'New York, NY',
-          salary_range: '$90,000 - $130,000',
-          posted_date: new Date(Date.now() - 172800000).toISOString(),
-          ats_score: 91,
-          job_url: 'https://example.com',
-          application_status: 'not_applied',
-          job_type: 'Contract'
-        },
-        {
-          id: '4',
-          job_title: 'DevOps Engineer',
-          company_name: 'CloudFirst',
-          location: 'Austin, TX',
-          salary_range: '$110,000 - $160,000',
-          posted_date: new Date(Date.now() - 259200000).toISOString(),
-          ats_score: 78,
-          job_url: 'https://example.com',
-          application_status: 'not_applied',
-          job_type: 'Full-time'
-        },
-        {
-          id: '5',
-          job_title: 'Full Stack Developer',
-          company_name: 'InnovateLab',
-          location: 'Remote',
-          salary_range: '$95,000 - $140,000',
-          posted_date: new Date(Date.now() - 345600000).toISOString(),
-          ats_score: 88,
-          job_url: 'https://example.com',
-          application_status: 'not_applied',
-          job_type: 'Full-time'
-        },
-        // Add more jobs for testing plan limits
-        ...Array.from({ length: 15 }, (_, i) => ({
-          id: `${i + 6}`,
-          job_title: `Software Engineer ${i + 1}`,
-          company_name: `Company ${i + 1}`,
-          location: i % 2 === 0 ? 'Remote' : 'New York, NY',
-          salary_range: `$${80 + i * 5},000 - $${120 + i * 8},000`,
-          posted_date: new Date(Date.now() - (i + 1) * 86400000).toISOString(),
-          ats_score: 60 + Math.floor(Math.random() * 40),
-          job_url: 'https://example.com',
-          application_status: 'not_applied',
-          job_type: 'Full-time'
-        }))
-      ];
-
-      // Filter by search query if provided
-      let filteredJobs = mockJobs;
-      if (searchQuery) {
-        filteredJobs = mockJobs.filter(job => 
-          job.job_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.company_name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setJobs(filteredJobs);
-    } catch (error) {
-      console.error('Error:', error);
-      setJobs([]);
-    } finally {
-      setLoading(false);
+    const trimmedQuery = searchQuery.trim()
+    if (trimmedQuery === lastQueryRef.current && !loading) {
+      return
     }
-  };
+
+    lastQueryRef.current = trimmedQuery
+    const filtered = filterJobsByQuery(BASE_JOBS, trimmedQuery)
+
+    setJobs((prev) => (areJobListsEqual(prev, filtered) ? prev : filtered))
+    setLoading(false)
+  }, [loading, searchQuery, user])
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-success";
@@ -204,12 +230,20 @@ export const PremiumJobsTable = ({ userPlan, searchQuery }: PremiumJobsTableProp
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return '1 day ago';
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
     return `${Math.ceil(diffDays / 30)} months ago`;
   };
+
+  const visibleRows = useMemo(() => {
+    const normalizedPlan = userPlan?.toLowerCase() || 'free'
+    const fallbackCount = planLimits.resumeVariants * 10 || 2
+
+    return planVisibleRows[normalizedPlan] ?? fallbackCount
+  }, [planLimits.resumeVariants, userPlan])
+  const shouldShowMaskedRows = jobs.length > visibleRows;
 
   if (loading) {
     return (
@@ -235,10 +269,6 @@ export const PremiumJobsTable = ({ userPlan, searchQuery }: PremiumJobsTableProp
       </Card>
     );
   }
-
-  // Plan-aware row visibility
-  const visibleRows = planLimits.resumeVariants === 1 ? 2 : (planLimits.resumeVariants === 3 ? 20 : 50);
-  const shouldShowMaskedRows = jobs.length > visibleRows;
 
   const handleRowClick = (job: JobMatch) => {
     setSelectedJob(job);
