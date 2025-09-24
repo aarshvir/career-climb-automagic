@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { LocationDropdown } from "@/components/ui/LocationDropdown";
 import { MapPin, Briefcase, Settings, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -156,10 +157,24 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
         {!isEditing ? (
           // Display Mode
           <div className="space-y-4">
+            {/* Primary Location */}
+            {preferences.location && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <Label className="text-sm font-medium">Primary Location</Label>
+                </div>
+                <Badge variant="default" className="text-xs">
+                  {preferences.location}
+                </Badge>
+              </div>
+            )}
+
+            {/* Additional Locations */}
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-4 h-4 text-primary" />
-                <Label className="text-sm font-medium">Locations</Label>
+                <Label className="text-sm font-medium">Additional Locations</Label>
                 <Badge variant="outline" className="ml-auto text-xs">
                   {citiesArray.length}/{limits.cities}
                 </Badge>
@@ -178,7 +193,7 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No locations set</p>
+                <p className="text-sm text-muted-foreground">No additional locations set</p>
               )}
             </div>
 
@@ -248,10 +263,26 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
         ) : (
           // Edit Mode
           <div className="space-y-4">
+            {/* Single Location Preference */}
+            <div>
+              <Label htmlFor="location" className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                Primary Location
+              </Label>
+              <LocationDropdown
+                value={preferences.location || ''}
+                onValueChange={(value) => setPreferences(prev => ({ ...prev, location: value }))}
+                placeholder="Select your primary location"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Your main preferred location for job searches
+              </p>
+            </div>
+
             <div>
               <Label htmlFor="cities" className="flex items-center gap-2 mb-2">
                 <MapPin className="w-4 h-4 text-primary" />
-                Preferred Locations
+                Additional Locations
                 <Badge variant="outline" className="ml-auto text-xs">
                   Max {limits.cities}
                 </Badge>

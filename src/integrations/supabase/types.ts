@@ -520,6 +520,39 @@ export type Database = {
           },
         ]
       }
+      locations: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          is_remote: boolean | null
+          name: string
+          state_province: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          is_remote?: boolean | null
+          name: string
+          state_province?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          is_remote?: boolean | null
+          name?: string
+          state_province?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

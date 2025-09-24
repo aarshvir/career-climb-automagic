@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LocationDropdown } from "@/components/ui/LocationDropdown";
 import { Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,11 +123,10 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           
           <div className="space-y-2">
             <Label htmlFor="location">Preferred Location</Label>
-            <Input
-              id="location"
-              placeholder="e.g., New York, Remote, Hybrid"
+            <LocationDropdown
               value={preferences.location}
-              onChange={(e) => setPreferences({ ...preferences, location: e.target.value })}
+              onValueChange={(value) => setPreferences({ ...preferences, location: value })}
+              placeholder="Select your preferred location"
             />
           </div>
 
