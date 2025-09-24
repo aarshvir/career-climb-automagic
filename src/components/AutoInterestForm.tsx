@@ -12,4 +12,4 @@ const AutoInterestForm = () => {
   )
 }
 
-export default AutoInterestForm
+export default AutoInterestForm;

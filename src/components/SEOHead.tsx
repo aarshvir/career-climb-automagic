@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 
 interface SEOHeadProps {
   title?: string;
@@ -9,7 +10,7 @@ interface SEOHeadProps {
   noindex?: boolean;
 }
 
-const SEOHead = ({ 
+const SEOHead = ({
   title = "JobVance - AI-Powered Job Application Automation",
   description = "Land your dream job with AI automation. JobVance applies to 20+ relevant jobs daily with optimized resumes. 85% interview success rate.",
   keywords = "job application automation, AI job search, resume optimization, job hunting, career advancement",
@@ -17,8 +18,9 @@ const SEOHead = ({
   ogImage = "https://jobvance.io/og-image.jpg",
   noindex = false
 }: SEOHeadProps) => {
+  const location = useLocation();
   const fullTitle = title.includes("JobVance") ? title : `${title} | JobVance`;
-  const currentUrl = canonical || `https://jobvance.io${window.location.pathname}`;
+  const currentUrl = canonical || `https://jobvance.io${location.pathname}`;
 
   return (
     <Helmet>

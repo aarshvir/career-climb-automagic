@@ -10,6 +10,14 @@ import { Loader2, Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  return fallback
+}
+
 interface PasswordStrengthProps {
   password: string
 }
@@ -140,8 +148,8 @@ const ResetPassword: React.FC = () => {
         })
         navigate('/dashboard')
       }
-    } catch (error: any) {
-      setError(error.message || 'Failed to update password')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Failed to update password'))
     } finally {
       setLoading(false)
     }
@@ -254,4 +262,4 @@ const ResetPassword: React.FC = () => {
   )
 }
 
-export default ResetPassword
+export default ResetPassword;

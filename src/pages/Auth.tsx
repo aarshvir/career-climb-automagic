@@ -11,6 +11,14 @@ import { Loader2, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-r
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  return fallback
+}
+
 interface PasswordStrengthProps {
   password: string
 }
@@ -212,8 +220,8 @@ const Auth: React.FC = () => {
           // Navigate will happen automatically via useEffect when user state changes
         }
       }
-    } catch (error: any) {
-      setError(error.message || 'Authentication failed')
+    } catch (error: unknown) {
+      setError(getErrorMessage(error, 'Authentication failed'))
     } finally {
       setLoading(false)
     }
@@ -222,10 +230,10 @@ const Auth: React.FC = () => {
   const handleGoogleAuth = async () => {
     try {
       await signInWithGoogle()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Sign in failed',
-        description: error.message || 'Unable to sign in with Google',
+        description: getErrorMessage(error, 'Unable to sign in with Google'),
         variant: 'destructive',
       })
     }
@@ -514,4 +522,4 @@ const Auth: React.FC = () => {
   )
 }
 
-export default Auth
+export default Auth;
