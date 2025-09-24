@@ -1,0 +1,11 @@
+# Robots.txt for jobvance.io generated via SEO automation plan
+User-agent: *
+Allow: /
+
+# Block noisy internal search parameters
+Disallow: /search?
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/export
+
+Sitemap: https://jobvance.io/sitemap.xml
