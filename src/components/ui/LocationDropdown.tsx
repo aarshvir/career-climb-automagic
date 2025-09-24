@@ -22,10 +22,12 @@ export function LocationDropdown({
 }: LocationDropdownProps) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function getLocations() {
       try {
+        console.log('Fetching locations from Supabase...');
         // Fetches all rows from the 'locations' table
         const { data, error } = await supabase
           .from('locations')
@@ -34,14 +36,17 @@ export function LocationDropdown({
 
         if (error) {
           console.error('Error fetching locations:', error);
+          setError(`Failed to load locations: ${error.message}`);
           return;
         }
 
+        console.log('Locations fetched:', data);
         if (data) {
           setLocations(data);
         }
       } catch (error) {
         console.error('Error fetching locations:', error);
+        setError('Failed to load locations');
       } finally {
         setLoading(false);
       }
@@ -55,6 +60,26 @@ export function LocationDropdown({
       <Select disabled>
         <SelectTrigger className={className}>
           <SelectValue placeholder="Loading locations..." />
+        </SelectTrigger>
+      </Select>
+    );
+  }
+
+  if (error) {
+    return (
+      <Select disabled>
+        <SelectTrigger className={className}>
+          <SelectValue placeholder={error} />
+        </SelectTrigger>
+      </Select>
+    );
+  }
+
+  if (locations.length === 0) {
+    return (
+      <Select disabled>
+        <SelectTrigger className={className}>
+          <SelectValue placeholder="No locations available" />
         </SelectTrigger>
       </Select>
     );
