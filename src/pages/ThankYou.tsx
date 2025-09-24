@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import SEOHead from "@/components/SEOHead";
+import { SeoHead } from "@/components/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PromoStrip from "@/components/PromoStrip";
@@ -10,11 +10,10 @@ import PromoStrip from "@/components/PromoStrip";
 const ThankYou = () => {
   return (
     <>
-      <SEOHead 
+      <SeoHead 
         title="Thank You - JobVance"
         description="Thank you for your interest in JobVance. Our team will get back to you soon."
-        keywords="thank you, job automation, ai job application"
-        canonical="https://jobvance.io/thank-you"
+        canonicalPath="/thank-you"
       />
       <div className="min-h-screen bg-background">
         <PromoStrip />

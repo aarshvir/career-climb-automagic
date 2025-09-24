@@ -6,7 +6,7 @@ import { ArrowRight, Upload, Bot, Target, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import PromoStrip from "@/components/PromoStrip";
 import { SeoHead, buildWebPageJsonLd } from "@/components/SEOHead";
-import organizationData from '../../../public/jsonld/organization.json';
+import organizationData from '../../public/jsonld/organization.json';
 
 const HowItWorks = () => {
   const steps = [

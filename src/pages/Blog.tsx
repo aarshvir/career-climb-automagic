@@ -9,7 +9,7 @@ import Footer from '@/components/layout/Footer'
 import { SeoHead, buildWebPageJsonLd } from '@/components/SEOHead'
 import { posts } from './blog/posts'
 import { Link } from 'react-router-dom'
-import organizationData from '../../../public/jsonld/organization.json';
+import organizationData from '../../public/jsonld/organization.json';
 
 
 const Blog = () => {

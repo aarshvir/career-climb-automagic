@@ -7,7 +7,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { SeoHead } from '@/components/SEOHead'
 import PromoStrip from '@/components/PromoStrip'
-import organizationData from '../../../public/jsonld/organization.json';
+import organizationData from '../../public/jsonld/organization.json';
 
 const About = () => {
   const stats = [

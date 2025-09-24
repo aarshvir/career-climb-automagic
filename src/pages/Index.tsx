@@ -10,7 +10,7 @@ import AIFeatures from "@/components/sections/AIFeatures";
 import { SeoHead } from "@/components/SEOHead";
 import PromoStrip from "@/components/PromoStrip";
 import AuthErrorHandler from "@/components/AuthErrorHandler";
-import homepageData from "../../../public/jsonld/homepage.json";
+import homepageData from "../../public/jsonld/homepage.json";
 
 const Index = () => {
   return (

@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle, Star } from "lucide-react";
 import PromoStrip from "@/components/PromoStrip";
 import { SeoHead, jobvanceProductJsonLd, buildWebPageJsonLd } from "@/components/SEOHead";
-import pricingFaqData from '../../../public/jsonld/pricing-faq.json';
-import organizationData from '../../../public/jsonld/organization.json';
+import pricingFaqData from '../../public/jsonld/pricing-faq.json';
+import organizationData from '../../public/jsonld/organization.json';
 
 const PricingPage = () => {
   const testimonials = [
