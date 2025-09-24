@@ -12,6 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 interface Preferences {
   cities: string;
   titles: string;
+  location?: string;
+  job_title?: string;
+  seniority_level?: string;
+  job_type?: string;
+  job_posting_type?: string;
+  job_posting_date?: string;
 }
 
 interface JobPreferencesProps {
@@ -21,7 +27,16 @@ interface JobPreferencesProps {
 export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [preferences, setPreferences] = useState<Preferences>({ cities: '', titles: '' });
+  const [preferences, setPreferences] = useState<Preferences>({ 
+    cities: '', 
+    titles: '',
+    location: '',
+    job_title: '',
+    seniority_level: '',
+    job_type: '',
+    job_posting_type: 'All jobs',
+    job_posting_date: 'Last week'
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -44,7 +59,7 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
     try {
       const { data, error } = await supabase
         .from('preferences')
-        .select('cities, titles')
+        .select('cities, titles, location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
         .eq('user_id', user?.id)
         .single();
 
@@ -69,6 +84,12 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
           user_id: user.id,
           cities: preferences.cities,
           titles: preferences.titles,
+          location: preferences.location,
+          job_title: preferences.job_title,
+          seniority_level: preferences.seniority_level,
+          job_type: preferences.job_type,
+          job_posting_type: preferences.job_posting_type,
+          job_posting_date: preferences.job_posting_date,
           updated_at: new Date().toISOString()
         });
 
@@ -186,6 +207,31 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
                 <p className="text-sm text-muted-foreground">No job titles set</p>
               )}
             </div>
+
+            {/* Additional Job Preferences */}
+            {preferences.job_posting_type && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Settings className="w-4 h-4 text-primary" />
+                  <Label className="text-sm font-medium">Job Posting Type</Label>
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  {preferences.job_posting_type}
+                </Badge>
+              </div>
+            )}
+
+            {preferences.job_posting_date && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Settings className="w-4 h-4 text-primary" />
+                  <Label className="text-sm font-medium">Job Posting Date</Label>
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  {preferences.job_posting_date}
+                </Badge>
+              </div>
+            )}
 
             {(citiesArray.length === 0 || titlesArray.length === 0) && (
               <div className="p-3 bg-muted rounded-lg">

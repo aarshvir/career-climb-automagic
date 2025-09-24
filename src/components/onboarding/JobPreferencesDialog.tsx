@@ -32,12 +32,27 @@ const JOB_TYPES = [
   "Internship"
 ];
 
+const JOB_POSTING_TYPES = [
+  "Easy apply",
+  "All jobs"
+];
+
+const JOB_POSTING_DATES = [
+  "Last 24 hours",
+  "Last 3 days",
+  "Last week",
+  "Last month",
+  "Any time"
+];
+
 export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogProps) => {
   const [preferences, setPreferences] = useState({
     location: "",
     job_title: "",
     seniority_level: "",
-    job_type: ""
+    job_type: "",
+    job_posting_type: "All jobs",
+    job_posting_date: "Last week"
   });
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
@@ -47,7 +62,7 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
     if (!user) return;
 
     // Validate required fields
-    if (!preferences.location || !preferences.job_title || !preferences.seniority_level || !preferences.job_type) {
+    if (!preferences.location || !preferences.job_title || !preferences.seniority_level || !preferences.job_type || !preferences.job_posting_type || !preferences.job_posting_date) {
       toast({
         title: "All fields required",
         description: "Please fill in all job preference fields.",
@@ -66,6 +81,8 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           job_title: preferences.job_title,
           seniority_level: preferences.seniority_level,
           job_type: preferences.job_type,
+          job_posting_type: preferences.job_posting_type,
+          job_posting_date: preferences.job_posting_date,
         });
 
       if (error) throw error;
@@ -155,6 +172,44 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
                 {JOB_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job-posting-type">Job Posting Type</Label>
+            <Select
+              value={preferences.job_posting_type}
+              onValueChange={(value) => setPreferences({ ...preferences, job_posting_type: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select posting type" />
+              </SelectTrigger>
+              <SelectContent>
+                {JOB_POSTING_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job-posting-date">Job Posting Date</Label>
+            <Select
+              value={preferences.job_posting_date}
+              onValueChange={(value) => setPreferences({ ...preferences, job_posting_date: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select posting date" />
+              </SelectTrigger>
+              <SelectContent>
+                {JOB_POSTING_DATES.map((date) => (
+                  <SelectItem key={date} value={date}>
+                    {date}
                   </SelectItem>
                 ))}
               </SelectContent>

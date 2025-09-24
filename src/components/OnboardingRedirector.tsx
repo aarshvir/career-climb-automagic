@@ -64,11 +64,11 @@ const OnboardingRedirector = () => {
 
           const { data: preferences } = await supabase
             .from('preferences')
-            .select('location, job_title, seniority_level, job_type')
+            .select('location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
             .eq('user_id', user.id)
             .maybeSingle();
 
-          if (!preferences || !preferences.location || !preferences.job_title || !preferences.seniority_level || !preferences.job_type) {
+          if (!preferences || !preferences.location || !preferences.job_title || !preferences.seniority_level || !preferences.job_type || !preferences.job_posting_type || !preferences.job_posting_date) {
             openPreferencesDialog();
             return;
           }

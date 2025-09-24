@@ -317,6 +317,8 @@ export type Database = {
         Row: {
           cities: string | null
           created_at: string | null
+          job_posting_date: string | null
+          job_posting_type: string | null
           job_title: string | null
           job_type: string | null
           location: string | null
@@ -328,6 +330,8 @@ export type Database = {
         Insert: {
           cities?: string | null
           created_at?: string | null
+          job_posting_date?: string | null
+          job_posting_type?: string | null
           job_title?: string | null
           job_type?: string | null
           location?: string | null
@@ -339,6 +343,8 @@ export type Database = {
         Update: {
           cities?: string | null
           created_at?: string | null
+          job_posting_date?: string | null
+          job_posting_type?: string | null
           job_title?: string | null
           job_type?: string | null
           location?: string | null
