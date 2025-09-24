@@ -1,5 +1,7 @@
-import Head from "next/head";
-import { useRouter } from "next/router";
+/* eslint-disable react-refresh/only-export-components */
+import { useMemo } from "react";
+import { Helmet } from "react-helmet-async";
+import { useLocation } from "react-router-dom";
 
 const SITE_URL = "https://jobvance.io";
 const SITE_NAME = "Jobvance";
@@ -50,12 +52,15 @@ export function SeoHead({
   locale = "en_US",
   twitterHandle = "@jobvance"
 }: SeoHeadProps) {
-  const router = useRouter();
-  const canonical = buildCanonicalUrl(canonicalPath ?? router.asPath ?? "/");
+  const location = useLocation();
+  const canonical = useMemo(
+    () => buildCanonicalUrl(canonicalPath ?? location?.pathname ?? "/"),
+    [canonicalPath, location?.pathname]
+  );
   const robots = noindex ? "noindex, nofollow" : "index, follow";
 
   return (
-    <Head>
+    <Helmet prioritizeSeoTags>
       <title>{title}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonical} />
@@ -78,7 +83,7 @@ export function SeoHead({
       <link rel="dns-prefetch" href="https://www.google-analytics.com" />
       <link rel="preload" as="image" href="/images/hero-jobvance.webp" />
       {renderJsonLd(structuredData)}
-    </Head>
+    </Helmet>
   );
 }
 
