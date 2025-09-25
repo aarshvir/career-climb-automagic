@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Check, Zap, Crown, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { usePlan } from "@/contexts/PlanContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/SEOHead";
@@ -17,6 +18,7 @@ const PlanSelection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { refreshProfile } = usePlan();
 
   const plans = [
     {
@@ -98,9 +100,8 @@ const PlanSelection = () => {
         .from('plan_selections')
         .upsert({
           user_id: user.id,
-          selected_plan: planId,
-          status: 'completed',
-          selection_completed_at: new Date().toISOString()
+          plan: planId,
+          status: 'completed'
         }, {
           onConflict: 'user_id'
         })
@@ -111,8 +112,7 @@ const PlanSelection = () => {
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({ 
-          id: user.id, 
-          email: user.email!, 
+          id: user.id,
           plan: planId 
         }, {
           onConflict: 'id'
@@ -120,10 +120,15 @@ const PlanSelection = () => {
 
       if (profileError) throw profileError
 
+      // Refresh the plan context to pick up the new plan
+      await refreshProfile();
+
       toast({
         title: "Plan selected successfully!",
         description: `Welcome to ${plans.find(p => p.id === planId)?.name} plan.`
       })
+
+      console.log(`✅ Plan selection completed: ${planId}`);
 
       // Navigate to dashboard
       navigate('/dashboard')

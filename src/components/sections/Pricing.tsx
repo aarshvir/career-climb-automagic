@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Zap, Star, Shield } from "lucide-react";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlan } from "@/contexts/PlanContext";
 import { supabase } from "@/integrations/supabase/client";
 
 const Pricing = () => {
   const { handlePrimaryAction } = useSignInFlow();
   const { user } = useAuth();
+  const { refreshProfile } = usePlan();
   const location = useLocation();
   const navigate = useNavigate();
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
@@ -104,6 +106,11 @@ const Pricing = () => {
           .eq('id', user.id);
           
         if (error) throw error;
+
+        // Refresh the plan context to pick up the new plan
+        await refreshProfile();
+        
+        console.log(`✅ Plan upgrade completed: ${planName.toLowerCase()}`);
         
         // Navigate back to dashboard with success
         navigate('/dashboard?upgrade=success');

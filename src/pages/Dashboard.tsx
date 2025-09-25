@@ -96,58 +96,18 @@ const Dashboard = () => {
     try {
       console.log('🔍 Checking user profile and onboarding status...');
       
-      // Always check plan selection first - this is required for dashboard access
-      const [planSelectionResult, profileResult] = await Promise.all([
-        supabase
-          .from('plan_selections')
-          .select('id, status')
-          .eq('user_id', user.id)
-          .eq('status', 'completed')
-          .maybeSingle(),
-        supabase
-          .from('profiles')
-          .select('plan, subscription_status')
-          .eq('id', user.id)
-          .maybeSingle(),
-      ])
-
-      const { data: planSelectionData, error: planSelectionError } = planSelectionResult
-      const { data: profileData, error: profileError } = profileResult
-
-      if (planSelectionError) {
-        console.error('Error checking plan selection:', planSelectionError)
-      }
-
-      if (!planSelectionData) {
-        console.log('❌ User hasn\'t completed plan selection, redirecting...');
+      // Check if user has a plan via PlanContext (simpler and more reliable)
+      if (!profile || !profile.plan) {
+        console.log('❌ No plan found, redirecting to plan selection...');
         setLoading(false)
         navigate('/plan-selection')
         return
       }
 
-      if (profileError) {
-        console.error('Error fetching profile:', profileError)
-        toast({
-          title: "Error",
-          description: "Failed to load your profile. Please refresh the page.",
-          variant: "destructive",
-        })
-        setLoading(false)
-        navigate('/plan-selection')
-        return
-      }
-
-      if (!profileData || !profileData.plan) {
-        console.log('❌ Profile data incomplete, redirecting to plan selection...');
-        setLoading(false)
-        navigate('/plan-selection')
-        return
-      }
-
-      console.log('✅ Plan and profile check passed, setting up dashboard...');
-      // Set dashboard as viewable since plan/profile requirements are met
+      console.log('✅ Plan found via PlanContext:', profile.plan);
+      // Set dashboard as viewable since plan exists
       setCanViewDashboard(true)
-      loadDashboardData(profileData.plan)
+      loadDashboardData(profile.plan)
 
       // Now check optional onboarding items and show dialogs if needed
       console.log('🔍 Checking optional onboarding items...');
