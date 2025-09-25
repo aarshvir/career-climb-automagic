@@ -211,21 +211,26 @@ const Dashboard = () => {
       throw new Error('User not authenticated')
     }
 
-    const { data: jobRun, error: runError } = await supabase
-      .from('job_runs')
-      .insert({ user_id: user.id, run_status: 'pending' })
-      .select()
-      .single()
+    let jobRunId: string | null = null;
+    
+    try {
+      const { data: jobRun, error: runError } = await supabase
+        .from('job_runs')
+        .insert({ user_id: user.id, run_status: 'pending' })
+        .select()
+        .single()
 
-    if (runError || !jobRun) {
-      console.error('Error creating job run:', runError)
-      toast({
-        title: 'Unable to start job fetch',
-        description: 'Please try again in a moment.',
-        variant: 'destructive',
-      })
-      throw runError || new Error('Job run creation failed')
-    }
+      if (runError || !jobRun) {
+        console.error('Error creating job run:', runError)
+        toast({
+          title: 'Unable to start job fetch',
+          description: 'Please try again in a moment.',
+          variant: 'destructive',
+        })
+        throw runError || new Error('Job run creation failed')
+      }
+      
+      jobRunId = jobRun.id;
 
     const { data: preferencesData, error: preferencesError } = await supabase
       .from('preferences')
@@ -235,6 +240,16 @@ const Dashboard = () => {
 
     if (preferencesError || !preferencesData) {
       console.error('Error loading preferences for job fetch:', preferencesError)
+      
+      // Mark job run as failed before throwing
+      await supabase
+        .from('job_runs')
+        .update({ 
+          run_status: 'failed', 
+          error_message: 'Missing job preferences' 
+        })
+        .eq('id', jobRunId)
+      
       toast({
         title: 'Missing job preferences',
         description: 'Update your preferences before fetching new jobs.',
@@ -253,6 +268,16 @@ const Dashboard = () => {
 
     if (resumeError || !resumeRecord?.file_path) {
       console.error('Error loading resume for job fetch:', resumeError)
+      
+      // Mark job run as failed before throwing
+      await supabase
+        .from('job_runs')
+        .update({ 
+          run_status: 'failed', 
+          error_message: 'Missing resume' 
+        })
+        .eq('id', jobRunId)
+      
       toast({
         title: 'Resume required',
         description: 'Upload your CV to enable automated job fetching.',
@@ -267,6 +292,16 @@ const Dashboard = () => {
 
     if (signedUrlError || !signedUrlData?.signedUrl) {
       console.error('Error creating signed CV url:', signedUrlError)
+      
+      // Mark job run as failed before throwing
+      await supabase
+        .from('job_runs')
+        .update({ 
+          run_status: 'failed', 
+          error_message: 'Unable to create CV download link' 
+        })
+        .eq('id', jobRunId)
+      
       toast({
         title: 'Resume download failed',
         description: 'We could not access your CV. Please re-upload and try again.',
@@ -277,7 +312,7 @@ const Dashboard = () => {
 
     const { error: functionError } = await supabase.functions.invoke('trigger-make-run', {
       body: {
-        runId: jobRun.id,
+        runId: jobRunId,
         jobPreferences: preferencesData,
         cvUrl: signedUrlData.signedUrl,
       },
@@ -288,7 +323,7 @@ const Dashboard = () => {
       await supabase
         .from('job_runs')
         .update({ run_status: 'failed', error_message: functionError.message })
-        .eq('id', jobRun.id)
+        .eq('id', jobRunId)
 
       toast({
         title: 'Job fetch failed',
@@ -297,6 +332,28 @@ const Dashboard = () => {
       })
       throw functionError
     }
+
+    return 20 // Placeholder job count
+    } catch (error) {
+      // Catch-all error handler: ensure job_run is marked as failed
+      if (jobRunId) {
+        try {
+          await supabase
+            .from('job_runs')
+            .update({ 
+              run_status: 'failed', 
+              error_message: error instanceof Error ? error.message : 'Unexpected error during job fetch' 
+            })
+            .eq('id', jobRunId)
+        } catch (updateError) {
+          console.error('Failed to update job_run status:', updateError)
+        }
+      }
+      
+      // Re-throw the original error
+      throw error
+    }
+  }
 
     const foundJobs = Math.floor(Math.random() * 15) + 5
 
