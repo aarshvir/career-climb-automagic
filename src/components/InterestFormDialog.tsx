@@ -70,7 +70,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
           if (!data || !hasCompletedForm(data)) {
             // User doesn't have a real entry yet, update or create abandonment record
             console.log('📊 Creating/updating abandonment record');
-            (supabase as any).from('interest_forms').upsert({
+            supabase.from('interest_forms').upsert({
               user_id: user.id,
               email: user.email || '',
               ...DIALOG_ABANDONMENT_PLACEHOLDER
@@ -105,7 +105,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       console.log('📝 Submitting form for user:', user.id);
       
       // Check if user already has an entry
-      const { data: existingEntry, error: checkError } = await (supabase as any)
+      const { data: existingEntry, error: checkError } = await supabase
         .from('interest_forms')
         .select('id')
         .eq('user_id', user.id)
@@ -131,7 +131,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       if (existingEntry) {
         console.log('📝 Updating existing entry');
         // Update existing entry
-        const result = await (supabase as any)
+        const result = await supabase
           .from('interest_forms')
           .update(formData)
           .eq('user_id', user.id);
@@ -139,7 +139,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       } else {
         console.log('📝 Creating new entry');
         // Insert new entry
-        const result = await (supabase as any)
+        const result = await supabase
           .from('interest_forms')
           .insert(formData);
         error = result.error;

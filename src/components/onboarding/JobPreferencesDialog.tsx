@@ -74,88 +74,21 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
 
     setSaving(true);
     try {
-      console.log('🚀 Starting save operation...');
-      console.log('💾 Saving preferences:', preferences);
-      console.log('👤 User ID:', user.id);
-      console.log('🔍 User object:', user);
-      
-      // First, try to check if preferences table exists and what columns it has
-      console.log('🔍 Checking table structure...');
-      
-      const preferencesData = {
+      const { error } = await supabase
+        .from('preferences')
+        .upsert({
           user_id: user.id,
           location: preferences.location,
           job_title: preferences.job_title,
           seniority_level: preferences.seniority_level,
           job_type: preferences.job_type,
-        job_posting_type: preferences.job_posting_type,
-        job_posting_date: preferences.job_posting_date,
-      };
-      
-      console.log('📤 Data to be saved:', preferencesData);
-      
-      // Try multiple save strategies
-      let saveResult;
-      
-      // Strategy 1: Try upsert with onConflict
-      try {
-        console.log('🎯 Strategy 1: Upsert with onConflict');
-        saveResult = await (supabase as any)
-          .from('preferences')
-          .upsert(preferencesData, {
-            onConflict: 'user_id'
-          });
-        console.log('✅ Strategy 1 result:', saveResult);
-      } catch (error1) {
-        console.log('❌ Strategy 1 failed:', error1);
-        
-        // Strategy 2: Try simple insert
-        try {
-          console.log('🎯 Strategy 2: Simple insert');
-          saveResult = await (supabase as any)
-            .from('preferences')
-            .insert(preferencesData);
-          console.log('✅ Strategy 2 result:', saveResult);
-        } catch (error2) {
-          console.log('❌ Strategy 2 failed:', error2);
-          
-          // Strategy 3: Try update if exists, insert if not
-          console.log('🎯 Strategy 3: Update or insert');
-          const { data: existingData, error: selectError } = await (supabase as any)
-            .from('preferences')
-            .select('id')
-            .eq('user_id', user.id)
-            .maybeSingle();
-            
-          console.log('🔍 Existing data check:', { existingData, selectError });
-          
-          if (existingData) {
-            console.log('🔄 Updating existing preferences');
-            saveResult = await (supabase as any)
-              .from('preferences')
-              .update(preferencesData)
-              .eq('user_id', user.id);
-          } else {
-            console.log('➕ Inserting new preferences');
-            saveResult = await (supabase as any)
-              .from('preferences')
-              .insert(preferencesData);
-          }
-          console.log('✅ Strategy 3 result:', saveResult);
-        }
-      }
-      
-      const { data, error } = saveResult;
-      console.log('📊 Final save result:', { data, error });
-      
-      if (error) {
-        console.error('❌ Supabase error details:', JSON.stringify(error, null, 2));
-        console.error('❌ Error code:', error.code);
-        console.error('❌ Error message:', error.message);
-        console.error('❌ Error hint:', error.hint);
-        console.error('❌ Error details:', error.details);
-        throw error;
-      }
+          job_posting_type: preferences.job_posting_type,
+          job_posting_date: preferences.job_posting_date,
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) throw error;
 
       toast({
         title: "Preferences saved",
@@ -163,36 +96,11 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
       });
 
       onSuccess();
-    } catch (error: any) {
-      console.error('💥 Save operation failed:', error);
-      
-      let errorMessage = "There was an error saving your preferences. Please try again.";
-      
-      if (error?.message) {
-        errorMessage = `Save failed: ${error.message}`;
-      }
-      
-      if (error?.code === 'PGRST116') {
-        errorMessage = "Database table not found. Please contact support.";
-      }
-      
-      if (error?.code === '42P01') {
-        errorMessage = "Database table missing. Please contact support.";
-      }
-      
-      if (error?.message?.includes('permission')) {
-        errorMessage = "Permission denied. Please try signing out and back in.";
-      }
-      
-      if (error?.message?.includes('RLS')) {
-        errorMessage = "Database security issue. Please contact support.";
-      }
-      
-      console.error('🔴 Final error message shown to user:', errorMessage);
-      
+    } catch (error) {
+      console.error('Save failed:', error);
       toast({
         title: "Save failed",
-        description: errorMessage,
+        description: "There was an error saving your preferences. Please try again.",
         variant: "destructive",
       });
     } finally {

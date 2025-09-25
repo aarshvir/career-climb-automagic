@@ -26,33 +26,6 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [triggering, setTriggering] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [todaysBatch, setTodaysBatch] = useState<JobBatch | null>(null);
-
-  useEffect(() => {
-    const fetchTodaysBatch = async () => {
-      if (!user) return;
-      
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        const { data, error } = await supabase
-          .from('daily_job_batches')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('batch_date', today)
-          .maybeSingle();
-
-        if (error) throw error;
-        setTodaysBatch(data);
-      } catch (error) {
-        console.error('Error fetching today\'s batch:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTodaysBatch();
-  }, [user]);
 
   const triggerJobFetch = async () => {
     if (!user) return;
@@ -60,7 +33,7 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
     setTriggering(true);
     try {
       // Create a new job run record
-      const { data: jobRun, error: runError } = await (supabase as any)
+      const { data: jobRun, error: runError } = await supabase
         .from('job_runs')
         .insert({ user_id: user.id, run_status: 'pending' })
         .select()
@@ -74,7 +47,7 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
       });
 
       if (functionError) {
-        await (supabase as any)
+        await supabase
           .from('job_runs')
           .update({ run_status: 'failed' })
           .eq('id', jobRun.id);

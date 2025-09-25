@@ -62,11 +62,11 @@ serve(async (req) => {
     const makeWebhookUrl = Deno.env.get("MAKE_WEBHOOK_URL");
     if (!makeWebhookUrl) {
         console.error("MAKE_WEBHOOK_URL is not set in environment variables.");
-        // Update run status to 'failed'
+        // Update batch status to 'failed'
         await supabase
-          .from('job_runs')
-          .update({ run_status: 'failed' })
-          .eq('id', runId);
+          .from('daily_job_batches')
+          .update({ status: 'failed', error_message: 'Webhook URL not configured' })
+          .eq('id', batchId);
         return new Response(JSON.stringify({ error: "Webhook URL not configured" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -111,7 +111,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("Error processing request:", error);
-    return new Response(JSON.stringify({ error: (error as Error).message || 'Unknown error' }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

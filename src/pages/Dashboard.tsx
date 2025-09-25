@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
-import { useOnboarding } from "@/contexts/OnboardingContext"
 import { supabase } from "@/integrations/supabase/client"
 import { PremiumDashboardLayout } from "@/components/dashboard/PremiumDashboardLayout"
 import { PremiumJobsTable } from "@/components/dashboard/PremiumJobsTable"
@@ -50,7 +49,6 @@ const planStatsByPlan: Record<string, DashboardStats> = {
 
 const Dashboard = () => {
   const { user } = useAuth()
-  const { openResumeDialog, openPreferencesDialog } = useOnboarding()
   const navigate = useNavigate()
   const { toast } = useToast()
   
@@ -64,7 +62,6 @@ const Dashboard = () => {
   const [timeRange, setTimeRange] = useState('7d')
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
-  const [onboardingChecked, setOnboardingChecked] = useState(false)
 
   const loadDashboardData = useCallback((userPlan: string) => {
     const key = userPlan?.toLowerCase() || "free"
@@ -73,58 +70,6 @@ const Dashboard = () => {
     setStats(planStats)
     setLoading(false)
   }, [])
-
-  const checkOnboardingRequirements = useCallback(async () => {
-    if (!user || onboardingChecked) {
-      return
-    }
-
-    console.log('🔍 Checking onboarding requirements for dashboard...')
-
-    try {
-      // Check for resume first
-      const { data: resumes, error: resumeError } = await supabase
-        .from('resumes')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1)
-
-      if (resumeError) {
-        console.error('Error checking resumes:', resumeError)
-      }
-
-      if (!resumes || resumes.length === 0) {
-        console.log('📄 No resume found, opening resume dialog')
-        openResumeDialog()
-        setOnboardingChecked(true)
-        return
-      }
-
-      // Check for preferences
-      const { data: preferences, error: preferencesError } = await supabase
-        .from('preferences')
-        .select('location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (preferencesError) {
-        console.error('Error checking preferences:', preferencesError)
-      }
-
-      if (!preferences || !preferences.location || !preferences.job_title || !preferences.seniority_level || !preferences.job_type || !preferences.job_posting_type || !preferences.job_posting_date) {
-        console.log('⚙️ Incomplete preferences, opening preferences dialog')
-        openPreferencesDialog()
-        setOnboardingChecked(true)
-        return
-      }
-
-      console.log('✅ Onboarding requirements met')
-      setOnboardingChecked(true)
-    } catch (error) {
-      console.error('Error checking onboarding requirements:', error)
-      setOnboardingChecked(true)
-    }
-  }, [user, onboardingChecked, openResumeDialog, openPreferencesDialog])
 
   const checkUserProfile = useCallback(async () => {
     if (!user) {
@@ -145,9 +90,7 @@ const Dashboard = () => {
       }
 
       if (!interestData) {
-        // User hasn't filled the interest form yet - check onboarding requirements
-        console.log('📝 No interest form found, checking onboarding requirements')
-        await checkOnboardingRequirements()
+        // User hasn't filled the interest form yet - let the form show
         setLoading(false)
         return
       }
@@ -217,13 +160,6 @@ const Dashboard = () => {
       checkUserProfile()
     }
   }, [checkUserProfile, user])
-
-  // Also check onboarding requirements when user changes
-  useEffect(() => {
-    if (user && !loading) {
-      checkOnboardingRequirements()
-    }
-  }, [user, loading, checkOnboardingRequirements])
 
   const handleFetchJobs = async (): Promise<number> => {
     // Simulate job fetching

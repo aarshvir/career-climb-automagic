@@ -147,33 +147,6 @@ class SupabaseManager {
       throw error;
     }
   }
-
-  async runMigrations() {
-    console.log('🚀 Starting database migrations...');
-    
-    const migrationsDir = path.join(process.cwd(), 'supabase', 'migrations');
-    
-    if (!fs.existsSync(migrationsDir)) {
-      console.log('📁 No migrations directory found, skipping migrations');
-      return;
-    }
-
-    const migrationFiles = fs.readdirSync(migrationsDir)
-      .filter(file => file.endsWith('.sql'))
-      .sort();
-
-    if (migrationFiles.length === 0) {
-      console.log('📄 No migration files found');
-      return;
-    }
-
-    for (const file of migrationFiles) {
-      const filePath = path.join(migrationsDir, file);
-      await this.runMigrationFile(filePath);
-    }
-
-    console.log('✅ All migrations completed successfully!');
-  }
 }
 
 // Example usage and predefined table schemas
