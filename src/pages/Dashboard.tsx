@@ -355,16 +355,6 @@ const Dashboard = () => {
     }
   }
 
-    const foundJobs = Math.floor(Math.random() * 15) + 5
-
-    setStats(prev => ({
-      ...prev,
-      totalSearched: prev.totalSearched + foundJobs
-    }))
-
-    return foundJobs
-  }
-
   const effectivePlan = normalizePlan(profile?.plan)
 
   if (loading) {
