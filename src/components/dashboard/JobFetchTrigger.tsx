@@ -60,7 +60,7 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
     setTriggering(true);
     try {
       // Create a new job run record
-      const { data: jobRun, error: runError } = await supabase
+      const { data: jobRun, error: runError } = await (supabase as any)
         .from('job_runs')
         .insert({ user_id: user.id, run_status: 'pending' })
         .select()
@@ -70,18 +70,18 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
 
       // Call the Supabase Edge Function to trigger the Make.com webhook
       const { error: functionError } = await supabase.functions.invoke('trigger-make-run', {
-        body: { runId: jobRun!.id },
+        body: { runId: jobRun.id },
       });
 
       if (functionError) {
-        await supabase
+        await (supabase as any)
           .from('job_runs')
           .update({ run_status: 'failed' })
-          .eq('id', jobRun!.id);
+          .eq('id', jobRun.id);
         throw functionError;
       }
       
-      console.log('Job fetch triggered for run:', jobRun!.id);
+      console.log('Job fetch triggered for run:', jobRun.id);
 
       toast({
         title: "Job Fetch Triggered",

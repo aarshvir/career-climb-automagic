@@ -45,7 +45,7 @@ const OnboardingRedirector = () => {
           return;
         }
 
-        if (!profile || !profile.plan) {
+        if (!profile || !(profile as any).plan) {
           navigate("/plan-selection", { replace: true });
         } else if (location.search.includes("auth=success")) {
           // Only redirect to dashboard if coming from auth success, not from homepage
@@ -67,7 +67,7 @@ const OnboardingRedirector = () => {
             .eq('user_id', user.id)
             .maybeSingle();
 
-          if (!preferences || !preferences.location || !preferences.job_title || !preferences.seniority_level || !preferences.job_type || !preferences.job_posting_type || !preferences.job_posting_date) {
+          if (!preferences || !(preferences as any).location || !(preferences as any).job_title || !(preferences as any).seniority_level || !(preferences as any).job_type || !(preferences as any).job_posting_type || !(preferences as any).job_posting_date) {
             openPreferencesDialog();
             return;
           }

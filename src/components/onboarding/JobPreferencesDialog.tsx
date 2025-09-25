@@ -100,7 +100,7 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
       // Strategy 1: Try upsert with onConflict
       try {
         console.log('🎯 Strategy 1: Upsert with onConflict');
-        saveResult = await supabase
+        saveResult = await (supabase as any)
           .from('preferences')
           .upsert(preferencesData, {
             onConflict: 'user_id'
@@ -112,7 +112,7 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
         // Strategy 2: Try simple insert
         try {
           console.log('🎯 Strategy 2: Simple insert');
-          saveResult = await supabase
+          saveResult = await (supabase as any)
             .from('preferences')
             .insert(preferencesData);
           console.log('✅ Strategy 2 result:', saveResult);
@@ -121,7 +121,7 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           
           // Strategy 3: Try update if exists, insert if not
           console.log('🎯 Strategy 3: Update or insert');
-          const { data: existingData, error: selectError } = await supabase
+          const { data: existingData, error: selectError } = await (supabase as any)
             .from('preferences')
             .select('id')
             .eq('user_id', user.id)
@@ -131,13 +131,13 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           
           if (existingData) {
             console.log('🔄 Updating existing preferences');
-            saveResult = await supabase
+            saveResult = await (supabase as any)
               .from('preferences')
               .update(preferencesData)
               .eq('user_id', user.id);
           } else {
             console.log('➕ Inserting new preferences');
-            saveResult = await supabase
+            saveResult = await (supabase as any)
               .from('preferences')
               .insert(preferencesData);
           }
