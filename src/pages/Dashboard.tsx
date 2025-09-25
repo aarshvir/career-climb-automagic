@@ -106,11 +106,9 @@ const Dashboard = () => {
       }
 
       if (!interestData || !hasCompletedForm(interestData)) {
-        setProfile(null)
-        setCanViewDashboard(false)
+        console.log('Interest form incomplete, opening dialog');
         openInterestDialog()
-        setLoading(false)
-        return
+        // Continue to check other requirements but show dashboard
       }
 
       const { data: cvData, error: cvError } = await supabase
@@ -124,11 +122,9 @@ const Dashboard = () => {
       }
 
       if (!cvData || cvData.length === 0) {
-        setProfile(null)
-        setCanViewDashboard(false)
+        console.log('Resume missing, opening dialog');
         openResumeDialog()
-        setLoading(false)
-        return
+        // Continue to check other requirements but show dashboard
       }
 
       const { data: preferencesData, error: preferencesError } = await supabase
@@ -152,11 +148,9 @@ const Dashboard = () => {
       )
 
       if (!hasValidPreferences) {
-        setProfile(null)
-        setCanViewDashboard(false)
+        console.log('Job preferences incomplete, opening dialog');
         openPreferencesDialog()
-        setLoading(false)
-        return
+        // Continue to check other requirements but show dashboard
       }
 
       const [planSelectionResult, profileResult] = await Promise.all([
@@ -182,8 +176,6 @@ const Dashboard = () => {
 
       if (!planSelectionData) {
         // User hasn't completed plan selection yet
-        setProfile(null)
-        setCanViewDashboard(false)
         setLoading(false)
         navigate('/plan-selection')
         return
@@ -204,8 +196,6 @@ const Dashboard = () => {
       }
 
       if (!profileData || !profileData.plan) {
-        setProfile(null)
-        setCanViewDashboard(false)
         setLoading(false)
         navigate('/plan-selection')
         return
@@ -216,20 +206,30 @@ const Dashboard = () => {
       loadDashboardData(profileData.plan)
     } catch (error) {
       console.error('Error checking profile:', error)
+      
+      // Set a minimal fallback profile so user can see dashboard
+      const fallbackProfile = { plan: 'free', subscription_status: null };
+      setProfile(fallbackProfile)
+      setCanViewDashboard(true)
+      loadDashboardData(fallbackProfile.plan)
+      
       toast({
-        title: "Error",
-        description: "Failed to load dashboard data. Please refresh the page.",
+        title: "Warning",
+        description: "Some profile data couldn't be loaded, using default settings.",
         variant: "destructive",
       })
-      navigate('/plan-selection')
-      setCanViewDashboard(false)
-      setLoading(false)
     }
   }, [loadDashboardData, navigate, toast, user, openInterestDialog, openPreferencesDialog, openResumeDialog])
 
   useEffect(() => {
     if (user) {
       checkUserProfile()
+    } else {
+      // Set fallback for non-authenticated users
+      const fallbackProfile = { plan: 'free', subscription_status: null };
+      setProfile(fallbackProfile)
+      setCanViewDashboard(false) // Don't show dashboard if not logged in
+      setLoading(false)
     }
   }, [checkUserProfile, user, lastCompletedStep])
 
@@ -359,15 +359,16 @@ const Dashboard = () => {
     )
   }
 
-  if (!canViewDashboard) {
+  // Show different content based on authentication status
+  if (!canViewDashboard && !user) {
     return (
       <>
         <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
         <PremiumDashboardLayout userPlan={profile?.plan ?? effectivePlan}>
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">Finish setting up your account</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Welcome to JobVance</h2>
             <p className="max-w-md text-sm text-muted-foreground">
-              Complete the onboarding steps so we can personalize your JobVance experience.
+              Please sign in to access your personalized job search dashboard.
             </p>
           </div>
         </PremiumDashboardLayout>
