@@ -1,16 +1,20 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { useInterestForm } from '@/contexts/InterestFormContext';
 
-type OnboardingStep = 'resume' | 'preferences' | 'complete';
+type OnboardingStep = 'interest' | 'resume' | 'preferences' | 'complete';
 
 interface OnboardingContextType {
   currentStep: OnboardingStep | null;
   setCurrentStep: (step: OnboardingStep | null) => void;
+  showInterestDialog: boolean;
   showResumeDialog: boolean;
   showPreferencesDialog: boolean;
+  openInterestDialog: () => void;
   openResumeDialog: () => void;
   openPreferencesDialog: () => void;
   closeDialogs: () => void;
   completeStep: (step: OnboardingStep) => void;
+  lastCompletedStep: OnboardingStep | null;
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
@@ -28,50 +32,69 @@ interface OnboardingProviderProps {
 }
 
 export const OnboardingProvider = ({ children }: OnboardingProviderProps) => {
+  const { showInterestForm, setShowInterestForm } = useInterestForm();
   const [currentStep, setCurrentStep] = useState<OnboardingStep | null>(null);
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [showPreferencesDialog, setShowPreferencesDialog] = useState(false);
+  const [lastCompletedStep, setLastCompletedStep] = useState<OnboardingStep | null>(null);
+
+  const openInterestDialog = useCallback(() => {
+    setCurrentStep('interest');
+    setShowInterestForm(true);
+    setShowResumeDialog(false);
+    setShowPreferencesDialog(false);
+  }, [setShowInterestForm]);
 
   const openResumeDialog = useCallback(() => {
     setCurrentStep('resume');
+    setShowInterestForm(false);
     setShowResumeDialog(true);
     setShowPreferencesDialog(false);
-  }, []);
+  }, [setShowInterestForm]);
 
   const openPreferencesDialog = useCallback(() => {
     setCurrentStep('preferences');
+    setShowInterestForm(false);
     setShowResumeDialog(false);
     setShowPreferencesDialog(true);
-  }, []);
+  }, [setShowInterestForm]);
 
   const closeDialogs = useCallback(() => {
+    setShowInterestForm(false);
     setShowResumeDialog(false);
     setShowPreferencesDialog(false);
     setCurrentStep(null);
-  }, []);
+  }, [setShowInterestForm]);
 
   const completeStep = useCallback((step: OnboardingStep) => {
-    if (step === 'resume') {
+    setLastCompletedStep(step);
+
+    if (step === 'interest') {
+      setShowInterestForm(false);
+      setTimeout(() => openResumeDialog(), 100);
+    } else if (step === 'resume') {
       setShowResumeDialog(false);
-      // Move to preferences step
       setTimeout(() => openPreferencesDialog(), 100);
     } else if (step === 'preferences') {
       setShowPreferencesDialog(false);
       setCurrentStep('complete');
     }
-  }, [openPreferencesDialog]);
+  }, [openPreferencesDialog, openResumeDialog, setShowInterestForm]);
 
   return (
     <OnboardingContext.Provider
       value={{
         currentStep,
         setCurrentStep,
+        showInterestDialog: showInterestForm,
         showResumeDialog,
         showPreferencesDialog,
+        openInterestDialog,
         openResumeDialog,
         openPreferencesDialog,
         closeDialogs,
         completeStep,
+        lastCompletedStep,
       }}
     >
       {children}

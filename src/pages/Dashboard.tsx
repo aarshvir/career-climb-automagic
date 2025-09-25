@@ -5,13 +5,15 @@ import { supabase } from "@/integrations/supabase/client"
 import { PremiumDashboardLayout } from "@/components/dashboard/PremiumDashboardLayout"
 import { PremiumJobsTable } from "@/components/dashboard/PremiumJobsTable"
 import { PremiumKPICards } from "@/components/dashboard/PremiumKPICards"
-import { SearchAndFilters } from "@/components/dashboard/SearchAndFilters"
 import { ExportButton } from "@/components/dashboard/ExportButton"
 import { ResumeVariantManager } from "@/components/dashboard/ResumeVariantManager"
 import { DailyJobFetchCard } from "@/components/dashboard/DailyJobFetchCard"
 import { QuickActions } from "@/components/dashboard/QuickActions"
 import { useToast } from "@/hooks/use-toast"
 import SEOHead from "@/components/SEOHead"
+import { useOnboarding } from "@/contexts/OnboardingContext"
+import { hasCompletedForm } from "@/lib/interestForm"
+import { RESUME_BUCKET } from "@/lib/resume-storage"
 
 // Data interfaces
 interface UserProfile {
@@ -51,7 +53,13 @@ const Dashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
-  
+  const {
+    openInterestDialog,
+    openResumeDialog,
+    openPreferencesDialog,
+    lastCompletedStep,
+  } = useOnboarding()
+
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
     totalSearched: 0,
@@ -60,16 +68,24 @@ const Dashboard = () => {
     customResumes: 0
   })
   const [timeRange, setTimeRange] = useState('7d')
-  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
+  const [canViewDashboard, setCanViewDashboard] = useState(false)
+
+  const normalizePlan = useCallback((plan?: string | null) => {
+    const normalized = plan?.toLowerCase() || 'free'
+    if (normalized === 'premium') {
+      return 'pro'
+    }
+    return normalized
+  }, [])
 
   const loadDashboardData = useCallback((userPlan: string) => {
-    const key = userPlan?.toLowerCase() || "free"
+    const key = normalizePlan(userPlan)
     const planStats = planStatsByPlan[key] || planStatsByPlan.free
 
     setStats(planStats)
     setLoading(false)
-  }, [])
+  }, [normalizePlan])
 
   const checkUserProfile = useCallback(async () => {
     if (!user) {
@@ -80,7 +96,7 @@ const Dashboard = () => {
       // First check if user has filled the interest form
       const { data: interestData, error: interestError } = await supabase
         .from('interest_forms')
-        .select('id')
+        .select('id, name, phone, career_objective, max_monthly_price, app_expectations')
         .eq('user_id', user?.id)
         .maybeSingle()
 
@@ -89,8 +105,56 @@ const Dashboard = () => {
         // Continue to check profile even if there's an error
       }
 
-      if (!interestData) {
-        // User hasn't filled the interest form yet - let the form show
+      if (!interestData || !hasCompletedForm(interestData)) {
+        setProfile(null)
+        setCanViewDashboard(false)
+        openInterestDialog()
+        setLoading(false)
+        return
+      }
+
+      const { data: cvData, error: cvError } = await supabase
+        .from('resumes')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1)
+
+      if (cvError) {
+        console.error('Error checking CV:', cvError)
+      }
+
+      if (!cvData || cvData.length === 0) {
+        setProfile(null)
+        setCanViewDashboard(false)
+        openResumeDialog()
+        setLoading(false)
+        return
+      }
+
+      const { data: preferencesData, error: preferencesError } = await supabase
+        .from('preferences')
+        .select('location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (preferencesError) {
+        console.error('Error checking preferences:', preferencesError)
+      }
+
+      const hasValidPreferences = Boolean(
+        preferencesData &&
+        preferencesData.location &&
+        preferencesData.job_title &&
+        preferencesData.seniority_level &&
+        preferencesData.job_type &&
+        preferencesData.job_posting_type &&
+        preferencesData.job_posting_date
+      )
+
+      if (!hasValidPreferences) {
+        setProfile(null)
+        setCanViewDashboard(false)
+        openPreferencesDialog()
         setLoading(false)
         return
       }
@@ -118,6 +182,8 @@ const Dashboard = () => {
 
       if (!planSelectionData) {
         // User hasn't completed plan selection yet
+        setProfile(null)
+        setCanViewDashboard(false)
         setLoading(false)
         navigate('/plan-selection')
         return
@@ -130,17 +196,22 @@ const Dashboard = () => {
           description: "Failed to load your profile. Please refresh the page.",
           variant: "destructive",
         })
+        setProfile(null)
+        setCanViewDashboard(false)
         setLoading(false)
         navigate('/plan-selection')
         return
       }
 
       if (!profileData || !profileData.plan) {
+        setProfile(null)
+        setCanViewDashboard(false)
         setLoading(false)
         navigate('/plan-selection')
         return
       }
 
+      setCanViewDashboard(true)
       setProfile(profileData)
       loadDashboardData(profileData.plan)
     } catch (error) {
@@ -151,35 +222,126 @@ const Dashboard = () => {
         variant: "destructive",
       })
       navigate('/plan-selection')
+      setCanViewDashboard(false)
       setLoading(false)
     }
-  }, [loadDashboardData, navigate, toast, user])
+  }, [loadDashboardData, navigate, toast, user, openInterestDialog, openPreferencesDialog, openResumeDialog])
 
   useEffect(() => {
     if (user) {
       checkUserProfile()
     }
-  }, [checkUserProfile, user])
+  }, [checkUserProfile, user, lastCompletedStep])
 
   const handleFetchJobs = async (): Promise<number> => {
-    // Simulate job fetching
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    const foundJobs = Math.floor(Math.random() * 15) + 5; // 5-20 jobs
-    
-    // Update stats
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const { data: jobRun, error: runError } = await supabase
+      .from('job_runs')
+      .insert({ user_id: user.id, run_status: 'pending' })
+      .select()
+      .single()
+
+    if (runError || !jobRun) {
+      console.error('Error creating job run:', runError)
+      toast({
+        title: 'Unable to start job fetch',
+        description: 'Please try again in a moment.',
+        variant: 'destructive',
+      })
+      throw runError || new Error('Job run creation failed')
+    }
+
+    const { data: preferencesData, error: preferencesError } = await supabase
+      .from('preferences')
+      .select('location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (preferencesError || !preferencesData) {
+      console.error('Error loading preferences for job fetch:', preferencesError)
+      toast({
+        title: 'Missing job preferences',
+        description: 'Update your preferences before fetching new jobs.',
+        variant: 'destructive',
+      })
+      throw preferencesError || new Error('Missing job preferences')
+    }
+
+    const { data: resumeRecord, error: resumeError } = await supabase
+      .from('resumes')
+      .select('file_path')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (resumeError || !resumeRecord?.file_path) {
+      console.error('Error loading resume for job fetch:', resumeError)
+      toast({
+        title: 'Resume required',
+        description: 'Upload your CV to enable automated job fetching.',
+        variant: 'destructive',
+      })
+      throw resumeError || new Error('Missing resume')
+    }
+
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from(RESUME_BUCKET)
+      .createSignedUrl(resumeRecord.file_path, 60 * 60)
+
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      console.error('Error creating signed CV url:', signedUrlError)
+      toast({
+        title: 'Resume download failed',
+        description: 'We could not access your CV. Please re-upload and try again.',
+        variant: 'destructive',
+      })
+      throw signedUrlError || new Error('Unable to create CV link')
+    }
+
+    const { error: functionError } = await supabase.functions.invoke('trigger-make-run', {
+      body: {
+        runId: jobRun.id,
+        jobPreferences: preferencesData,
+        cvUrl: signedUrlData.signedUrl,
+      },
+    })
+
+    if (functionError) {
+      console.error('Error invoking job fetch function:', functionError)
+      await supabase
+        .from('job_runs')
+        .update({ run_status: 'failed', error_message: functionError.message })
+        .eq('id', jobRun.id)
+
+      toast({
+        title: 'Job fetch failed',
+        description: 'We were unable to trigger the job fetch. Please try again.',
+        variant: 'destructive',
+      })
+      throw functionError
+    }
+
+    const foundJobs = Math.floor(Math.random() * 15) + 5
+
     setStats(prev => ({
       ...prev,
       totalSearched: prev.totalSearched + foundJobs
-    }));
-    
-    return foundJobs;
+    }))
+
+    return foundJobs
   }
+
+  const effectivePlan = normalizePlan(profile?.plan)
 
   if (loading) {
     return (
       <>
         <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
-        <PremiumDashboardLayout>
+        <PremiumDashboardLayout userPlan={profile?.plan ?? effectivePlan}>
           <div className="space-y-6">
             <div className="animate-pulse">
               <div className="h-8 bg-muted rounded w-48 mb-2"></div>
@@ -197,10 +359,26 @@ const Dashboard = () => {
     )
   }
 
+  if (!canViewDashboard) {
+    return (
+      <>
+        <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
+        <PremiumDashboardLayout userPlan={profile?.plan ?? effectivePlan}>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+            <h2 className="text-2xl font-semibold text-foreground">Finish setting up your account</h2>
+            <p className="max-w-md text-sm text-muted-foreground">
+              Complete the onboarding steps so we can personalize your JobVance experience.
+            </p>
+          </div>
+        </PremiumDashboardLayout>
+      </>
+    )
+  }
+
   return (
     <>
       <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
-      <PremiumDashboardLayout>
+      <PremiumDashboardLayout userPlan={profile?.plan ?? effectivePlan}>
         <div className="space-y-8">
           {/* Hero Section */}
           <div className="space-y-8">
@@ -214,41 +392,37 @@ const Dashboard = () => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <ExportButton userPlan={profile?.plan || 'free'} />
+                <ExportButton userPlan={effectivePlan} />
               </div>
             </div>
 
             {/* Daily Job Fetch Card */}
-            <DailyJobFetchCard 
-              userPlan={profile?.plan || 'free'}
+            <DailyJobFetchCard
+              userPlan={effectivePlan}
               onFetchJobs={handleFetchJobs}
             />
 
             {/* Premium KPI Cards */}
-            <PremiumKPICards 
-              stats={stats} 
-              timeRange={timeRange} 
+            <PremiumKPICards
+              stats={stats}
+              timeRange={timeRange}
               onTimeRangeChange={setTimeRange}
-              userPlan={profile?.plan || 'free'}
+              userPlan={effectivePlan}
             />
           </div>
 
           {/* Main Content */}
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
             <div className="xl:col-span-3 space-y-8">
-              <SearchAndFilters 
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-              />
-              <PremiumJobsTable 
-                userPlan={profile?.plan || 'free'}
-                searchQuery={searchQuery}
+              <PremiumJobsTable
+                userPlan={effectivePlan}
+                searchQuery=""
               />
             </div>
-            
+
             <div className="xl:col-span-1 space-y-6">
-              <ResumeVariantManager userPlan={profile?.plan || 'free'} />
-              <QuickActions userPlan={profile?.plan || 'free'} />
+              <ResumeVariantManager userPlan={effectivePlan} />
+              <QuickActions userPlan={effectivePlan} />
             </div>
           </div>
         </div>

@@ -8,13 +8,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { usePageExitTracking } from "@/hooks/usePageExitTracking";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState, useCallback } from "react";
 import { DIALOG_ABANDONMENT_PLACEHOLDER, hasCompletedForm } from "@/lib/interestForm";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 
 const formSchema = z.object({
   name: z.string().optional().default(""),
@@ -34,10 +34,10 @@ interface InterestFormDialogProps {
 const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [hasCompleted, setHasCompleted] = useState(false);
+  const { completeStep } = useOnboarding();
   
   usePageExitTracking(hasCompleted);
 
@@ -154,11 +154,11 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       setHasCompleted(true);
       toast({
         title: "Thank you!",
-        description: "Now let's choose the perfect plan for your job search.",
+        description: "Next, upload your CV so we can tailor your matches.",
       });
 
       onOpenChange(false);
-      navigate('/plan-selection');
+      completeStep('interest');
     } catch (error) {
       console.error('❌ Error submitting form:', error);
       toast({
@@ -169,7 +169,7 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, toast, navigate, onOpenChange]);
+  }, [user, toast, onOpenChange, completeStep]);
 
   const handleInputInteraction = useCallback(() => {
     if (!hasInteracted) {

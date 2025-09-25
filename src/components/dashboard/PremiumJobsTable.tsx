@@ -245,6 +245,19 @@ export const PremiumJobsTable = ({ userPlan, searchQuery }: PremiumJobsTableProp
   }, [planLimits.resumeVariants, userPlan])
   const shouldShowMaskedRows = jobs.length > visibleRows;
 
+  const planLabel = useMemo(() => {
+    const normalized = userPlan?.toLowerCase() || 'free';
+    switch (normalized) {
+      case 'elite':
+        return 'Elite';
+      case 'pro':
+      case 'premium':
+        return 'Pro';
+      default:
+        return 'Free';
+    }
+  }, [userPlan])
+
   if (loading) {
     return (
       <Card className="border-border/50 backdrop-blur-sm bg-gradient-card">
@@ -293,7 +306,7 @@ export const PremiumJobsTable = ({ userPlan, searchQuery }: PremiumJobsTableProp
                   Job Opportunities
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {jobs.length} matches found • {visibleRows} visible on {userPlan} plan
+                  {jobs.length} matches found • {visibleRows} visible on {planLabel} plan
                 </p>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import jobvanceIcon from "@/assets/jobvance-icon.png";
@@ -13,20 +14,79 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 
 
 const Header = () => {
-  const { user, signOut, loading, isRetrying, environment } = useAuth();
+  const { user, signOut, loading, isRetrying } = useAuth();
   const { handlePrimaryAction } = useSignInFlow();
   const location = useLocation();
   const navigate = useNavigate();
-  
+
+  const [plan, setPlan] = useState<string | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!user) {
+      setPlan(null);
+      setSubscriptionStatus(null);
+      return;
+    }
+
+    const loadProfile = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('plan, subscription_status')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (error) {
+        console.error('Error loading profile for header:', error);
+        return;
+      }
+
+      setPlan(data?.plan ?? null);
+      setSubscriptionStatus(data?.subscription_status ?? null);
+    };
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
+  const planLabel = useMemo(() => {
+    const normalized = plan?.toLowerCase();
+    switch (normalized) {
+      case 'elite':
+        return 'Elite Plan';
+      case 'pro':
+      case 'premium':
+        return 'Pro Plan';
+      case 'free':
+      default:
+        return 'Free Plan';
+    }
+  }, [plan]);
+
+  const subscriptionLabel = useMemo(() => {
+    if (!subscriptionStatus) return null;
+    const normalized = subscriptionStatus.toLowerCase();
+    if (normalized === 'active') return 'Active';
+    if (normalized === 'trialing') return 'Trial';
+    if (normalized === 'canceled') return 'Canceled';
+    return subscriptionStatus;
+  }, [subscriptionStatus]);
+
 
   const isActive = (path: string) => location.pathname === path;
-
-  const handleGetStarted = () => {
-    handlePrimaryAction();
-  };
 
   const handleDashboard = () => {
     handlePrimaryAction();
@@ -99,10 +159,10 @@ const Header = () => {
               </span>
             </div>
            ) : user ? (
-             <div className="flex items-center space-x-2">
+             <div className="flex items-center space-x-3">
                {/* Show "Go to Dashboard" button on non-dashboard pages */}
                {location.pathname !== '/dashboard' && (
-                 <Button 
+                 <Button
                    variant="default" 
                    size="sm" 
                    onClick={handleDashboard}
@@ -113,10 +173,18 @@ const Header = () => {
                  </Button>
                )}
                
+               <div className="hidden md:flex flex-col items-end text-right mr-1">
+                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Plan</span>
+                 <span className="text-sm font-semibold text-foreground">
+                   {planLabel}
+                   {subscriptionLabel ? ` • ${subscriptionLabel}` : ''}
+                 </span>
+               </div>
+
                <DropdownMenu>
                  <DropdownMenuTrigger asChild>
-                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                     <Avatar className="h-8 w-8">
+                   <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                     <Avatar className="h-9 w-9">
                        <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || "User"} />
                        <AvatarFallback>
                          {user.email ? user.email.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
@@ -124,13 +192,17 @@ const Header = () => {
                      </Avatar>
                    </Button>
                  </DropdownMenuTrigger>
-                 <DropdownMenuContent className="w-56" align="end" forceMount>
-                   <div className="flex items-center justify-start gap-2 p-2">
+                 <DropdownMenuContent className="w-60" align="end" forceMount>
+                   <div className="flex items-start justify-between gap-2 p-3">
                      <div className="flex flex-col space-y-1 leading-none">
                        <p className="font-medium">{user.email}</p>
                        <p className="w-[200px] truncate text-sm text-muted-foreground">
                          {user.user_metadata?.full_name || "User"}
                        </p>
+                     </div>
+                     <div className="text-right text-xs text-muted-foreground">
+                       <p className="font-semibold text-foreground">{planLabel}</p>
+                       {subscriptionLabel && <p>{subscriptionLabel} subscription</p>}
                      </div>
                    </div>
                    <DropdownMenuSeparator />
