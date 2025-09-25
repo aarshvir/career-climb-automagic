@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,36 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const loadExistingPreferences = async () => {
+      if (!open || !user) {
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('preferences')
+        .select('location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading job preferences:', error);
+        return;
+      }
+
+      if (data) {
+        setPreferences((prev) => ({
+          ...prev,
+          ...Object.fromEntries(
+            Object.entries(data).map(([key, value]) => [key, value ?? ''])
+          )
+        }));
+      }
+    };
+
+    loadExistingPreferences();
+  }, [open, user]);
 
   const handleSave = async () => {
     if (!user) return;

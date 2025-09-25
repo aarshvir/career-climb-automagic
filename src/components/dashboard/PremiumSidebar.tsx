@@ -1,20 +1,18 @@
-import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { 
+import {
   Home,
-  LayoutDashboard, 
-  Briefcase, 
-  FileText, 
-  BarChart3, 
-  Settings, 
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+  BarChart3,
+  Settings,
   Crown,
   Zap,
   Target,
   Calendar,
-  MessageSquare,
-  Sparkles
+  MessageSquare
 } from "lucide-react";
 import jobvanceIcon from "@/assets/jobvance-icon.png";
 import {
@@ -32,6 +30,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { CVManager } from "./CVManager";
 import { Link } from "react-router-dom";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+
+interface PremiumSidebarProps {
+  userPlan?: string | null;
+}
+
+const formatPlanName = (plan?: string | null) => {
+  const normalized = plan?.toLowerCase() || 'free';
+  switch (normalized) {
+    case 'elite':
+      return 'Elite Plan';
+    case 'pro':
+    case 'premium':
+      return 'Pro Plan';
+    default:
+      return 'Free Plan';
+  }
+};
 
 const navigationItems = [
   {
@@ -84,11 +100,14 @@ const navigationItems = [
   },
 ];
 
-export const PremiumSidebar = () => {
-  const { state, isMobile } = useSidebar();
+export const PremiumSidebar = ({ userPlan }: PremiumSidebarProps) => {
+  const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const location = useLocation();
   const navigate = useNavigate();
+  const normalizedPlanRaw = (userPlan ?? 'free').toLowerCase();
+  const normalizedPlan = normalizedPlanRaw === 'premium' ? 'pro' : normalizedPlanRaw;
+  const planLimits = usePlanLimits(normalizedPlan);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border/10 bg-card/30 backdrop-blur-sm">
@@ -155,7 +174,7 @@ export const PremiumSidebar = () => {
               Quick Actions
             </SidebarGroupLabel>
             <div className="space-y-4">
-              <CVManager userPlan="premium" />
+              <CVManager userPlan={normalizedPlan} />
             </div>
           </SidebarGroup>
         )}
@@ -168,30 +187,29 @@ export const PremiumSidebar = () => {
             <div className="space-y-4">
               <div className="premium-card p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-foreground">Premium Plan</span>
+                  <span className="text-sm font-semibold text-foreground">{formatPlanName(userPlan)}</span>
                   <Crown className="h-5 w-5 text-warning" />
                 </div>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-medium text-muted-foreground">Job Applications</span>
-                      <span className="text-xs font-semibold text-foreground">150/200</span>
-                    </div>
-                    <div className="w-full bg-muted/50 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-primary to-primary-hover h-2 rounded-full transition-all duration-500" style={{ width: '75%' }}></div>
-                    </div>
+                <div className="space-y-3 text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between">
+                    <span>Daily job fetches</span>
+                    <span className="font-semibold text-foreground">{planLimits.dailyJobApplications}</span>
                   </div>
-                  
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-medium text-muted-foreground">AI Resumes</span>
-                      <span className="text-xs font-semibold text-foreground">12/20</span>
-                    </div>
-                    <div className="w-full bg-muted/50 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-success to-info h-2 rounded-full transition-all duration-500" style={{ width: '60%' }}></div>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span>CV uploads</span>
+                    <span className="font-semibold text-foreground">{planLimits.resumeVariants}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Plan tier</span>
+                    <span className="font-semibold text-foreground capitalize">{normalizedPlan}</span>
                   </div>
                 </div>
+                {normalizedPlan === 'free' && (
+                  <Button size="sm" className="w-full mt-4 bg-gradient-primary hover:opacity-90" onClick={() => navigate('/pricing')}>
+                    <Zap className="h-3 w-3 mr-2" />
+                    Upgrade Plan
+                  </Button>
+                )}
               </div>
             </div>
           </SidebarGroup>

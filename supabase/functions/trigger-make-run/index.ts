@@ -26,47 +26,21 @@ serve(async (req) => {
       });
     }
 
-    const { runId } = await req.json();
-    if (!runId) {
-      return new Response(JSON.stringify({ error: "runId is required" }), {
+    const { runId, jobPreferences, cvUrl } = await req.json();
+    if (!runId || !jobPreferences || !cvUrl) {
+      return new Response(JSON.stringify({ error: "runId, jobPreferences, and cvUrl are required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data: preferences, error: preferencesError } = await supabase
-      .from("preferences")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-
-    if (preferencesError || !preferences) {
-      console.error("Error fetching preferences:", preferencesError);
-      return new Response(JSON.stringify({ error: "Failed to fetch user preferences" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Build the LinkedIn search URL from preferences
-    const keywords = encodeURIComponent(preferences.job_title || "");
-    const locationName = encodeURIComponent(preferences.location || "");
-    const linkedInUrl = `https://www.linkedin.com/jobs/search/?keywords=${keywords}&location=${locationName}&f_TPR=r86400&sortBy=R`;
-
-    // Update the job run with the search URL
-    await supabase
-      .from('job_runs')
-      .update({ apify_search_url: linkedInUrl })
-      .eq('id', runId);
-
     const makeWebhookUrl = Deno.env.get("MAKE_WEBHOOK_URL");
     if (!makeWebhookUrl) {
         console.error("MAKE_WEBHOOK_URL is not set in environment variables.");
-        // Update batch status to 'failed'
         await supabase
-          .from('daily_job_batches')
-          .update({ status: 'failed', error_message: 'Webhook URL not configured' })
-          .eq('id', batchId);
+          .from('job_runs')
+          .update({ run_status: 'failed', error_message: 'Webhook URL not configured' })
+          .eq('id', runId);
         return new Response(JSON.stringify({ error: "Webhook URL not configured" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -77,15 +51,8 @@ serve(async (req) => {
       userId: user.id,
       email: user.email,
       runId: runId,
-      searchUrl: linkedInUrl,
-      preferences: {
-        location: preferences.location,
-        job_title: preferences.job_title,
-        seniority_level: preferences.seniority_level,
-        job_type: preferences.job_type,
-        job_posting_type: preferences.job_posting_type,
-        job_posting_date: preferences.job_posting_date,
-      },
+      jobPreferences,
+      cvUrl,
     };
 
     const webhookResponse = await fetch(makeWebhookUrl, {
@@ -99,7 +66,6 @@ serve(async (req) => {
       throw new Error(`Webhook failed with status ${webhookResponse.status}: ${errorBody}`);
     }
 
-    // Optionally, update the batch status to 'processing'
     await supabase
         .from('job_runs')
         .update({ run_status: 'processing' })
