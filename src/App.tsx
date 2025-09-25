@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { PlanProvider } from "@/contexts/PlanContext";
 import { InterestFormProvider } from "@/contexts/InterestFormContext";
 import { OnboardingProvider, useOnboarding } from "@/contexts/OnboardingContext";
 import { HelmetProvider } from "react-helmet-async";
@@ -119,17 +120,19 @@ const App: React.FC = () => {
     <React.StrictMode>
       <ErrorBoundary>
         <HelmetProvider>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <InterestFormProvider>
-                <OnboardingProvider>
-                  <TooltipProvider>
-                    <AppContent />
-                  </TooltipProvider>
-                </OnboardingProvider>
-              </InterestFormProvider>
-            </AuthProvider>
-          </QueryClientProvider>
+              <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                  <PlanProvider>
+                    <InterestFormProvider>
+                      <OnboardingProvider>
+                        <TooltipProvider>
+                          <AppContent />
+                        </TooltipProvider>
+                      </OnboardingProvider>
+                    </InterestFormProvider>
+                  </PlanProvider>
+                </AuthProvider>
+              </QueryClientProvider>
         </HelmetProvider>
       </ErrorBoundary>
     </React.StrictMode>

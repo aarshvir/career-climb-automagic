@@ -212,56 +212,82 @@ export type Database = {
           run_status?: string;
         };
       };
-      jobs: {
-        Row: {
-          id: string;
-          job_run_id: string | null;
-          user_id: string | null;
-          created_at: string;
-          title: string | null;
-          company_name: string | null;
-          location: string | null;
-          description: string | null;
-          linkedin_url: string | null;
-          posted_at_text: string | null;
-          match_score: number | null;
-          recommended_resume_url: string | null;
-          generated_resume_json: Json | null;
-          status: string;
-        };
-        Insert: {
-          id?: string;
-          job_run_id?: string | null;
-          user_id?: string | null;
-          created_at?: string;
-          title?: string | null;
-          company_name?: string | null;
-          location?: string | null;
-          description?: string | null;
-          linkedin_url?: string | null;
-          posted_at_text?: string | null;
-          match_score?: number | null;
-          recommended_resume_url?: string | null;
-          generated_resume_json?: Json | null;
-          status?: string;
-        };
-        Update: {
-          id?: string;
-          job_run_id?: string | null;
-          user_id?: string | null;
-          created_at?: string;
-          title?: string | null;
-          company_name?: string | null;
-          location?: string | null;
-          description?: string | null;
-          linkedin_url?: string | null;
-          posted_at_text?: string | null;
-          match_score?: number | null;
-          recommended_resume_url?: string | null;
-          generated_resume_json?: Json | null;
-          status?: string;
-        };
-      };
+          jobs: {
+            Row: {
+              id: string;
+              job_run_id: string | null;
+              user_id: string | null;
+              created_at: string;
+              title: string | null;
+              company_name: string | null;
+              location: string | null;
+              description: string | null;
+              linkedin_url: string | null;
+              posted_at_text: string | null;
+              match_score: number | null;
+              recommended_resume_url: string | null;
+              generated_resume_json: Json | null;
+              status: string;
+            };
+            Insert: {
+              id?: string;
+              job_run_id?: string | null;
+              user_id?: string | null;
+              created_at?: string;
+              title?: string | null;
+              company_name?: string | null;
+              location?: string | null;
+              description?: string | null;
+              linkedin_url?: string | null;
+              posted_at_text?: string | null;
+              match_score?: number | null;
+              recommended_resume_url?: string | null;
+              generated_resume_json?: Json | null;
+              status?: string;
+            };
+            Update: {
+              id?: string;
+              job_run_id?: string | null;
+              user_id?: string | null;
+              created_at?: string;
+              title?: string | null;
+              company_name?: string | null;
+              location?: string | null;
+              description?: string | null;
+              linkedin_url?: string | null;
+              posted_at_text?: string | null;
+              match_score?: number | null;
+              recommended_resume_url?: string | null;
+              generated_resume_json?: Json | null;
+              status?: string;
+            };
+          };
+          daily_usage: {
+            Row: {
+              id: string;
+              user_id: string;
+              fetch_date: string;
+              fetch_count: number;
+              created_at: string;
+              updated_at: string;
+            };
+            Insert: {
+              id?: string;
+              user_id: string;
+              fetch_date?: string;
+              fetch_count?: number;
+              created_at?: string;
+              updated_at?: string;
+            };
+            Update: {
+              id?: string;
+              user_id?: string;
+              fetch_date?: string;
+              fetch_count?: number;
+              created_at?: string;
+              updated_at?: string;
+            };
+          };
     };
     Views: {
       [_ in never]: never

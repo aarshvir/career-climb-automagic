@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
   Target, 
   Zap, 
@@ -13,7 +12,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { usePlan } from "@/contexts/PlanContext";
 
 const getNextMidnightTimestamp = () => {
   const now = new Date();
@@ -33,105 +32,50 @@ const formatDuration = (milliseconds: number) => {
 };
 
 interface DailyJobFetchCardProps {
-  userPlan: string;
   onFetchJobs: () => Promise<number>;
 }
 
 type FetchState = 'idle' | 'loading' | 'success' | 'exhausted';
 
-export const DailyJobFetchCard = ({ userPlan, onFetchJobs }: DailyJobFetchCardProps) => {
+export const DailyJobFetchCard = ({ onFetchJobs }: DailyJobFetchCardProps) => {
   const [fetchState, setFetchState] = useState<FetchState>('idle');
-  const [fetchCount, setFetchCount] = useState(0);
-  const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
-  const [timeUntilReset, setTimeUntilReset] = useState<string>('');
   const [jobsFound, setJobsFound] = useState(0);
+  
+  const { 
+    profile, 
+    planLimits, 
+    dailyFetchCount, 
+    canFetchToday, 
+    incrementFetchCount,
+    loading: planLoading 
+  } = usePlan();
 
-  const planLimits = usePlanLimits(userPlan);
-  const dailyLimit = planLimits.dailyJobApplications; // Using this as fetch limit for now
-  const storageKeyRef = useRef<string>('');
-  const nextResetRef = useRef<number>(getNextMidnightTimestamp());
+  const userPlan = profile?.plan || 'free';
+  const dailyLimit = planLimits.dailyJobApplications;
 
-  const resolveStorageKey = useCallback(() => {
-    const nextKey = `jobfetch_${new Date().toDateString()}`;
-    const currentKey = storageKeyRef.current;
-
-    if (currentKey && currentKey !== nextKey) {
-      localStorage.removeItem(currentKey);
-    }
-
-    storageKeyRef.current = nextKey;
-    return nextKey;
-  }, []);
-
-  const updateCountdown = useCallback(() => {
-    const msRemaining = Math.max(nextResetRef.current - Date.now(), 0);
-    const formatted = formatDuration(msRemaining);
-
-    setTimeUntilReset((prev) => (prev === formatted ? prev : formatted));
-
-    if (msRemaining === 0) {
-      nextResetRef.current = getNextMidnightTimestamp();
-      resolveStorageKey();
-      setFetchCount(0);
-      setFetchState('idle');
-      setJobsFound(0);
-      setLastFetchTime(null);
-    }
-  }, [resolveStorageKey]);
-
-  useEffect(() => {
-    const storageKey = resolveStorageKey();
-    const storedData = localStorage.getItem(storageKey);
-
-    if (storedData) {
-      try {
-        const parsed = JSON.parse(storedData);
-        if (typeof parsed.count === 'number') {
-          setFetchCount(parsed.count);
-        }
-        if (parsed.lastFetch) {
-          setLastFetchTime(new Date(parsed.lastFetch));
-        }
-      } catch {
-        localStorage.removeItem(storageKey);
-      }
-    }
-
-    updateCountdown();
-    const interval = window.setInterval(updateCountdown, 60_000);
-    return () => window.clearInterval(interval);
-  }, [resolveStorageKey, updateCountdown]);
-
-  const handleFetchJobs = useCallback(async () => {
-    if (fetchCount >= dailyLimit) return;
+  const handleFetchJobs = async () => {
+    if (!canFetchToday || planLoading) return;
 
     setFetchState('loading');
 
     try {
+      console.log('🚀 Starting job fetch...');
       const foundJobs = await onFetchJobs();
-      const now = new Date();
-      const storageKey = resolveStorageKey();
-
+      
+      // Increment the database count
+      await incrementFetchCount();
+      
       setJobsFound(foundJobs);
-      setLastFetchTime(now);
-
-      let updatedCount = 0;
-      setFetchCount((prev) => {
-        updatedCount = prev + 1;
-        localStorage.setItem(storageKey, JSON.stringify({
-          count: updatedCount,
-          lastFetch: now.toISOString(),
-        }));
-
-        return updatedCount;
-      });
-
-      setFetchState(updatedCount >= dailyLimit ? 'exhausted' : 'success');
+      setFetchState(dailyFetchCount + 1 >= dailyLimit ? 'exhausted' : 'success');
+      
+      console.log('✅ Job fetch completed:', foundJobs, 'jobs found');
+      
     } catch (error) {
+      console.error('❌ Fetch jobs error:', error);
       setFetchState('idle');
-      console.error('Fetch jobs error:', error);
+      throw error; // Re-throw so parent components can handle
     }
-  }, [dailyLimit, fetchCount, onFetchJobs, resolveStorageKey]);
+  };
 
   const getButtonContent = () => {
     switch (fetchState) {
@@ -153,7 +97,7 @@ export const DailyJobFetchCard = ({ userPlan, onFetchJobs }: DailyJobFetchCardPr
         return (
           <>
             <Clock className="h-4 w-4 mr-2" />
-            Available in {timeUntilReset}
+            Daily Limit Reached
           </>
         );
       default:
@@ -177,8 +121,8 @@ export const DailyJobFetchCard = ({ userPlan, onFetchJobs }: DailyJobFetchCardPr
     }
   };
 
-  const isButtonDisabled = fetchState === 'loading' || fetchState === 'exhausted';
-  const remainingFetches = useMemo(() => Math.max(dailyLimit - fetchCount, 0), [dailyLimit, fetchCount]);
+  const isButtonDisabled = fetchState === 'loading' || fetchState === 'exhausted' || !canFetchToday || planLoading;
+  const remainingFetches = Math.max(dailyLimit - dailyFetchCount, 0);
 
   return (
     <Card className="premium-card border-0 bg-gradient-to-br from-primary/5 via-card to-accent/5 backdrop-blur-sm overflow-hidden relative">
@@ -225,13 +169,13 @@ export const DailyJobFetchCard = ({ userPlan, onFetchJobs }: DailyJobFetchCardPr
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground font-medium">Daily Usage</span>
             <span className="text-foreground font-semibold">
-              {fetchCount}/{dailyLimit} fetches
+              {dailyFetchCount}/{dailyLimit} fetches
             </span>
           </div>
           <div className="w-full bg-muted/50 rounded-full h-2 overflow-hidden">
             <div 
               className="h-2 bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-700 ease-out"
-              style={{ width: `${(fetchCount / dailyLimit) * 100}%` }}
+              style={{ width: `${(dailyFetchCount / dailyLimit) * 100}%` }}
             />
           </div>
         </div>
@@ -267,12 +211,8 @@ export const DailyJobFetchCard = ({ userPlan, onFetchJobs }: DailyJobFetchCardPr
         {/* Status information */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
-            {lastFetchTime && (
-              <>
-                <Clock className="h-3 w-3" />
-                Last fetch: {lastFetchTime.toLocaleTimeString()}
-              </>
-            )}
+            <Clock className="h-3 w-3" />
+            {profile ? `${userPlan.toUpperCase()} Plan` : 'Loading...'}
           </div>
           <div className="flex items-center gap-1">
             {userPlan === 'free' ? (
@@ -288,7 +228,7 @@ export const DailyJobFetchCard = ({ userPlan, onFetchJobs }: DailyJobFetchCardPr
         </div>
 
         {/* Upgrade prompt for free users */}
-        {userPlan === 'free' && fetchCount >= dailyLimit && (
+        {userPlan === 'free' && dailyFetchCount >= dailyLimit && (
           <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
             <div className="text-center space-y-2">
               <p className="text-sm font-medium text-foreground">

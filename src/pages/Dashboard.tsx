@@ -9,6 +9,7 @@ import { ExportButton } from "@/components/dashboard/ExportButton"
 import { ResumeVariantManager } from "@/components/dashboard/ResumeVariantManager"
 import { DailyJobFetchCard } from "@/components/dashboard/DailyJobFetchCard"
 import { QuickActions } from "@/components/dashboard/QuickActions"
+import { usePlan } from "@/contexts/PlanContext"
 import { useToast } from "@/hooks/use-toast"
 import SEOHead from "@/components/SEOHead"
 import { useOnboarding } from "@/contexts/OnboardingContext"
@@ -53,6 +54,7 @@ const Dashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { profile, loading: planLoading } = usePlan()
   const {
     openInterestDialog,
     openResumeDialog,
@@ -60,7 +62,6 @@ const Dashboard = () => {
     lastCompletedStep,
   } = useOnboarding()
 
-  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
     totalSearched: 0,
     totalApplied: 0,
@@ -146,7 +147,6 @@ const Dashboard = () => {
       console.log('✅ Plan and profile check passed, setting up dashboard...');
       // Set dashboard as viewable since plan/profile requirements are met
       setCanViewDashboard(true)
-      setProfile(profileData)
       loadDashboardData(profileData.plan)
 
       // Now check optional onboarding items and show dialogs if needed
@@ -224,11 +224,9 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error checking profile:', error)
       
-      // Set a minimal fallback profile so user can see dashboard
-      const fallbackProfile = { plan: 'free', subscription_status: null };
-      setProfile(fallbackProfile)
+      // Set minimal state to allow dashboard viewing
       setCanViewDashboard(true)
-      loadDashboardData(fallbackProfile.plan)
+      loadDashboardData('free')
       
       toast({
         title: "Warning",
@@ -243,8 +241,6 @@ const Dashboard = () => {
       checkUserProfile()
     } else {
       // Set fallback for non-authenticated users
-      const fallbackProfile = { plan: 'free', subscription_status: null };
-      setProfile(fallbackProfile)
       setCanViewDashboard(false) // Don't show dashboard if not logged in
       setLoading(false)
     }
@@ -416,7 +412,6 @@ const Dashboard = () => {
 
             {/* Daily Job Fetch Card */}
             <DailyJobFetchCard
-              userPlan={effectivePlan}
               onFetchJobs={handleFetchJobs}
             />
 

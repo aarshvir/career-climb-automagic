@@ -225,7 +225,7 @@ async function main() {
   const command = args[0];
   switch (command) {
     case "migrate":
-      await manager.runMigrations();
+      await manager.runMigrationFile('./supabase/migrations/20250122000000_create_daily_usage_table.sql');
       break;
     case "seed":
       console.log("Seed functionality not yet implemented.");
