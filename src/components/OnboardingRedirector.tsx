@@ -17,7 +17,7 @@ const OnboardingRedirector = () => {
     }
 
     const pathname = location.pathname;
-    if (pathname === "/plan-selection" || pathname === "/dashboard") {
+    if (pathname === "/plan-selection") {
       return;
     }
 
