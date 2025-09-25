@@ -26,6 +26,33 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [triggering, setTriggering] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [todaysBatch, setTodaysBatch] = useState<JobBatch | null>(null);
+
+  useEffect(() => {
+    const fetchTodaysBatch = async () => {
+      if (!user) return;
+      
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const { data, error } = await supabase
+          .from('daily_job_batches')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('batch_date', today)
+          .maybeSingle();
+
+        if (error) throw error;
+        setTodaysBatch(data);
+      } catch (error) {
+        console.error('Error fetching today\'s batch:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTodaysBatch();
+  }, [user]);
 
   const triggerJobFetch = async () => {
     if (!user) return;
@@ -43,18 +70,18 @@ export function JobFetchTrigger({ userPlan }: JobFetchTriggerProps) {
 
       // Call the Supabase Edge Function to trigger the Make.com webhook
       const { error: functionError } = await supabase.functions.invoke('trigger-make-run', {
-        body: { runId: jobRun.id },
+        body: { runId: jobRun!.id },
       });
 
       if (functionError) {
         await supabase
           .from('job_runs')
           .update({ run_status: 'failed' })
-          .eq('id', jobRun.id);
+          .eq('id', jobRun!.id);
         throw functionError;
       }
       
-      console.log('Job fetch triggered for run:', jobRun.id);
+      console.log('Job fetch triggered for run:', jobRun!.id);
 
       toast({
         title: "Job Fetch Triggered",

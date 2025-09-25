@@ -45,7 +45,7 @@ const OnboardingRedirector = () => {
           return;
         }
 
-        if (!profile?.plan) {
+        if (!profile || !profile.plan) {
           navigate("/plan-selection", { replace: true });
         } else if (location.search.includes("auth=success")) {
           // Only redirect to dashboard if coming from auth success, not from homepage
