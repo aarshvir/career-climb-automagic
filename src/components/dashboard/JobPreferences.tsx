@@ -58,14 +58,14 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
 
   const fetchPreferences = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('preferences')
         .select('cities, titles, location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
         .eq('user_id', user?.id)
         .single();
 
       if (data) {
-        setPreferences(data);
+        setPreferences(data as any);
       }
     } catch (error) {
       console.error('Error fetching preferences:', error);
@@ -79,7 +79,7 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
     
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('preferences')
         .upsert({
           user_id: user.id,

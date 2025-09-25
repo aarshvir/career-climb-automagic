@@ -133,13 +133,13 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
   const setPrimary = async (id: string) => {
     try {
       // Remove primary from all resumes
-      await supabase
+      await (supabase as any)
         .from('resume_variants')
         .update({ is_primary: false })
         .eq('user_id', user?.id);
 
       // Set new primary
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('resume_variants')
         .update({ is_primary: true })
         .eq('id', id);
