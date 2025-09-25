@@ -7,302 +7,603 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
+      daily_job_batches: {
+        Row: {
+          batch_date: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          make_com_webhook_url: string | null
+          status: string
+          total_jobs_scraped: number | null
+          triggered_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_date?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          make_com_webhook_url?: string | null
+          status?: string
+          total_jobs_scraped?: number | null
+          triggered_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_date?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          make_com_webhook_url?: string | null
+          status?: string
+          total_jobs_scraped?: number | null
+          triggered_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      generated_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          file_name: string
+          file_path: string
+          generation_status: string | null
+          id: string
+          job_application_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          file_name: string
+          file_path: string
+          generation_status?: string | null
+          id?: string
+          job_application_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          generation_status?: string | null
+          id?: string
+          job_application_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_documents_job_application_id_fkey"
+            columns: ["job_application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interest_forms: {
         Row: {
-          id: string;
-          user_id: string;
-          email: string;
-          name: string | null;
-          phone: string | null;
-          career_objective: string | null;
-          max_monthly_price: number | null;
-          app_expectations: string | null;
-          created_at: string;
-          updated_at: string;
-        };
+          app_expectations: string
+          career_objective: string
+          created_at: string
+          email: string
+          id: string
+          max_monthly_price: number
+          name: string
+          phone: string
+          updated_at: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          email: string;
-          name?: string | null;
-          phone?: string | null;
-          career_objective?: string | null;
-          max_monthly_price?: number | null;
-          app_expectations?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          app_expectations: string
+          career_objective: string
+          created_at?: string
+          email?: string
+          id?: string
+          max_monthly_price: number
+          name: string
+          phone: string
+          updated_at?: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          user_id?: string;
-          email?: string;
-          name?: string | null;
-          phone?: string | null;
-          career_objective?: string | null;
-          max_monthly_price?: number | null;
-          app_expectations?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      profiles: {
+          app_expectations?: string
+          career_objective?: string
+          created_at?: string
+          email?: string
+          id?: string
+          max_monthly_price?: number
+          name?: string
+          phone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      job_applications: {
         Row: {
-          id: string;
-          plan: string | null;
-          subscription_status: string | null;
-          created_at: string;
-          updated_at: string;
-        };
+          application_deadline: string | null
+          application_status: string | null
+          ats_score: number | null
+          batch_id: string | null
+          company_name: string
+          compatibility_score: number | null
+          cover_letter_url: string | null
+          created_at: string
+          email_draft_url: string | null
+          id: string
+          job_description: string | null
+          job_title: string
+          job_url: string | null
+          location: string | null
+          make_com_processed_at: string | null
+          optimized_resume_url: string | null
+          resume_match_score: number | null
+          salary_range: string | null
+          scraped_date: string
+          updated_at: string
+          user_id: string
+        }
         Insert: {
-          id: string;
-          plan?: string | null;
-          subscription_status?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          application_deadline?: string | null
+          application_status?: string | null
+          ats_score?: number | null
+          batch_id?: string | null
+          company_name: string
+          compatibility_score?: number | null
+          cover_letter_url?: string | null
+          created_at?: string
+          email_draft_url?: string | null
+          id?: string
+          job_description?: string | null
+          job_title: string
+          job_url?: string | null
+          location?: string | null
+          make_com_processed_at?: string | null
+          optimized_resume_url?: string | null
+          resume_match_score?: number | null
+          salary_range?: string | null
+          scraped_date?: string
+          updated_at?: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          plan?: string | null;
-          subscription_status?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      resumes: {
+          application_deadline?: string | null
+          application_status?: string | null
+          ats_score?: number | null
+          batch_id?: string | null
+          company_name?: string
+          compatibility_score?: number | null
+          cover_letter_url?: string | null
+          created_at?: string
+          email_draft_url?: string | null
+          id?: string
+          job_description?: string | null
+          job_title?: string
+          job_url?: string | null
+          location?: string | null
+          make_com_processed_at?: string | null
+          optimized_resume_url?: string | null
+          resume_match_score?: number | null
+          salary_range?: string | null
+          scraped_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "daily_job_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_fetch_runs: {
         Row: {
-          id: string;
-          user_id: string;
-          file_path: string;
-          original_filename: string;
-          file_size: number;
-          mime_type: string;
-          created_at: string;
-          updated_at: string;
-        };
+          id: string
+          ran_at: string | null
+          user_id: string | null
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          file_path: string;
-          original_filename: string;
-          file_size: number;
-          mime_type: string;
-          created_at?: string;
-          updated_at?: string;
-        };
+          id?: string
+          ran_at?: string | null
+          user_id?: string | null
+        }
         Update: {
-          id?: string;
-          user_id?: string;
-          file_path?: string;
-          original_filename?: string;
-          file_size?: number;
-          mime_type?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      plan_selections: {
-        Row: {
-          id: string;
-          user_id: string;
-          plan: string;
-          status: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          plan: string;
-          status?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          plan?: string;
-          status?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      locations: {
-        Row: {
-          id: string;
-          name: string;
-          geo_id: string;
-          country: string | null;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          geo_id: string;
-          country?: string | null;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          geo_id?: string;
-          country?: string | null;
-        };
-      };
-      preferences: {
-        Row: {
-          id: string;
-          user_id: string;
-          location: string | null;
-          job_title: string | null;
-          seniority_level: string | null;
-          job_type: string | null;
-          job_posting_type: string | null;
-          job_posting_date: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          location?: string | null;
-          job_title?: string | null;
-          seniority_level?: string | null;
-          job_type?: string | null;
-          job_posting_type?: string | null;
-          job_posting_date?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          location?: string | null;
-          job_title?: string | null;
-          seniority_level?: string | null;
-          job_type?: string | null;
-          job_posting_type?: string | null;
-          job_posting_date?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
+          id?: string
+          ran_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_fetch_runs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_runs: {
         Row: {
-          id: string;
-          user_id: string;
-          created_at: string;
-          apify_search_url: string | null;
-          resume_links: Json | null;
-          run_status: string;
-        };
+          apify_search_url: string | null
+          created_at: string
+          id: string
+          resume_links: Json | null
+          run_status: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          created_at?: string;
-          apify_search_url?: string | null;
-          resume_links?: Json | null;
-          run_status?: string;
-        };
+          apify_search_url?: string | null
+          created_at?: string
+          id?: string
+          resume_links?: Json | null
+          run_status?: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          user_id?: string;
-          created_at?: string;
-          apify_search_url?: string | null;
-          resume_links?: Json | null;
-          run_status?: string;
-        };
-      };
-          jobs: {
-            Row: {
-              id: string;
-              job_run_id: string | null;
-              user_id: string | null;
-              created_at: string;
-              title: string | null;
-              company_name: string | null;
-              location: string | null;
-              description: string | null;
-              linkedin_url: string | null;
-              posted_at_text: string | null;
-              match_score: number | null;
-              recommended_resume_url: string | null;
-              generated_resume_json: Json | null;
-              status: string;
-            };
-            Insert: {
-              id?: string;
-              job_run_id?: string | null;
-              user_id?: string | null;
-              created_at?: string;
-              title?: string | null;
-              company_name?: string | null;
-              location?: string | null;
-              description?: string | null;
-              linkedin_url?: string | null;
-              posted_at_text?: string | null;
-              match_score?: number | null;
-              recommended_resume_url?: string | null;
-              generated_resume_json?: Json | null;
-              status?: string;
-            };
-            Update: {
-              id?: string;
-              job_run_id?: string | null;
-              user_id?: string | null;
-              created_at?: string;
-              title?: string | null;
-              company_name?: string | null;
-              location?: string | null;
-              description?: string | null;
-              linkedin_url?: string | null;
-              posted_at_text?: string | null;
-              match_score?: number | null;
-              recommended_resume_url?: string | null;
-              generated_resume_json?: Json | null;
-              status?: string;
-            };
-          };
-          daily_usage: {
-            Row: {
-              id: string;
-              user_id: string;
-              fetch_date: string;
-              fetch_count: number;
-              created_at: string;
-              updated_at: string;
-            };
-            Insert: {
-              id?: string;
-              user_id: string;
-              fetch_date?: string;
-              fetch_count?: number;
-              created_at?: string;
-              updated_at?: string;
-            };
-            Update: {
-              id?: string;
-              user_id?: string;
-              fetch_date?: string;
-              fetch_count?: number;
-              created_at?: string;
-              updated_at?: string;
-            };
-          };
-    };
+          apify_search_url?: string | null
+          created_at?: string
+          id?: string
+          resume_links?: Json | null
+          run_status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          description: string | null
+          generated_resume_json: Json | null
+          id: string
+          job_run_id: string | null
+          linkedin_url: string | null
+          location: string | null
+          match_score: number | null
+          posted_at_text: string | null
+          recommended_resume_url: string | null
+          status: string
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          description?: string | null
+          generated_resume_json?: Json | null
+          id?: string
+          job_run_id?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          match_score?: number | null
+          posted_at_text?: string | null
+          recommended_resume_url?: string | null
+          status?: string
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          description?: string | null
+          generated_resume_json?: Json | null
+          id?: string
+          job_run_id?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          match_score?: number | null
+          posted_at_text?: string | null
+          recommended_resume_url?: string | null
+          status?: string
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_job_run_id_fkey"
+            columns: ["job_run_id"]
+            isOneToOne: false
+            referencedRelation: "job_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      locations: {
+        Row: {
+          country: string | null
+          geo_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          country?: string | null
+          geo_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          country?: string | null
+          geo_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      plan_selections: {
+        Row: {
+          created_at: string
+          id: string
+          selected_plan: string
+          selection_completed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          selected_plan: string
+          selection_completed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          selected_plan?: string
+          selection_completed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      preferences: {
+        Row: {
+          cities: string | null
+          created_at: string | null
+          job_posting_date: string | null
+          job_posting_type: string | null
+          job_title: string | null
+          job_type: string | null
+          location: string | null
+          seniority_level: string | null
+          titles: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cities?: string | null
+          created_at?: string | null
+          job_posting_date?: string | null
+          job_posting_type?: string | null
+          job_title?: string | null
+          job_type?: string | null
+          location?: string | null
+          seniority_level?: string | null
+          titles?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cities?: string | null
+          created_at?: string | null
+          job_posting_date?: string | null
+          job_posting_type?: string | null
+          job_title?: string | null
+          job_type?: string | null
+          location?: string | null
+          seniority_level?: string | null
+          titles?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          current_period_end: string | null
+          email: string | null
+          id: string
+          plan: string | null
+          price_id: string | null
+          stripe_customer_id: string | null
+          subscription_status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_period_end?: string | null
+          email?: string | null
+          id: string
+          plan?: string | null
+          price_id?: string | null
+          stripe_customer_id?: string | null
+          subscription_status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_period_end?: string | null
+          email?: string | null
+          id?: string
+          plan?: string | null
+          price_id?: string | null
+          stripe_customer_id?: string | null
+          subscription_status?: string | null
+        }
+        Relationships: []
+      }
+      resume_variants: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          is_primary: boolean | null
+          mime_type: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_primary?: boolean | null
+          mime_type?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_primary?: boolean | null
+          mime_type?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          created_at: string | null
+          file_name: string | null
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name?: string | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resumes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          lemon_squeezy_id: string
+          plan_name: string
+          price: number
+          status: string
+          updated_at: string
+          user_email: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          lemon_squeezy_id: string
+          plan_name: string
+          price: number
+          status: string
+          updated_at?: string
+          user_email: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          lemon_squeezy_id?: string
+          plan_name?: string
+          price?: number
+          status?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
     Views: {
       [_ in never]: never
-    };
+    }
     Functions: {
       [_ in never]: never
-    };
+    }
     Enums: {
       [_ in never]: never
-    };
+    }
     CompositeTypes: {
       [_ in never]: never
-    };
-  };
-};
+    }
+  }
+}
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
