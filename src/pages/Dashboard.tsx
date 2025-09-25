@@ -93,66 +93,9 @@ const Dashboard = () => {
     }
 
     try {
-      // First check if user has filled the interest form
-      const { data: interestData, error: interestError } = await supabase
-        .from('interest_forms')
-        .select('id, name, phone, career_objective, max_monthly_price, app_expectations')
-        .eq('user_id', user?.id)
-        .maybeSingle()
-
-      if (interestError) {
-        console.error('Error checking interest form:', interestError)
-        // Continue to check profile even if there's an error
-      }
-
-      if (!interestData || !hasCompletedForm(interestData)) {
-        console.log('Interest form incomplete, opening dialog');
-        openInterestDialog()
-        // Continue to check other requirements but show dashboard
-      }
-
-      const { data: cvData, error: cvError } = await supabase
-        .from('resumes')
-        .select('id')
-        .eq('user_id', user.id)
-        .limit(1)
-
-      if (cvError) {
-        console.error('Error checking CV:', cvError)
-      }
-
-      if (!cvData || cvData.length === 0) {
-        console.log('Resume missing, opening dialog');
-        openResumeDialog()
-        // Continue to check other requirements but show dashboard
-      }
-
-      const { data: preferencesData, error: preferencesError } = await supabase
-        .from('preferences')
-        .select('location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (preferencesError) {
-        console.error('Error checking preferences:', preferencesError)
-      }
-
-      const hasValidPreferences = Boolean(
-        preferencesData &&
-        preferencesData.location &&
-        preferencesData.job_title &&
-        preferencesData.seniority_level &&
-        preferencesData.job_type &&
-        preferencesData.job_posting_type &&
-        preferencesData.job_posting_date
-      )
-
-      if (!hasValidPreferences) {
-        console.log('Job preferences incomplete, opening dialog');
-        openPreferencesDialog()
-        // Continue to check other requirements but show dashboard
-      }
-
+      console.log('🔍 Checking user profile and onboarding status...');
+      
+      // Always check plan selection first - this is required for dashboard access
       const [planSelectionResult, profileResult] = await Promise.all([
         supabase
           .from('plan_selections')
@@ -175,7 +118,7 @@ const Dashboard = () => {
       }
 
       if (!planSelectionData) {
-        // User hasn't completed plan selection yet
+        console.log('❌ User hasn\'t completed plan selection, redirecting...');
         setLoading(false)
         navigate('/plan-selection')
         return
@@ -188,22 +131,96 @@ const Dashboard = () => {
           description: "Failed to load your profile. Please refresh the page.",
           variant: "destructive",
         })
-        setProfile(null)
-        setCanViewDashboard(false)
         setLoading(false)
         navigate('/plan-selection')
         return
       }
 
       if (!profileData || !profileData.plan) {
+        console.log('❌ Profile data incomplete, redirecting to plan selection...');
         setLoading(false)
         navigate('/plan-selection')
         return
       }
 
+      console.log('✅ Plan and profile check passed, setting up dashboard...');
+      // Set dashboard as viewable since plan/profile requirements are met
       setCanViewDashboard(true)
       setProfile(profileData)
       loadDashboardData(profileData.plan)
+
+      // Now check optional onboarding items and show dialogs if needed
+      console.log('🔍 Checking optional onboarding items...');
+
+      // Check interest form (optional - show dialog if incomplete)
+      try {
+        const { data: interestData, error: interestError } = await supabase
+          .from('interest_forms')
+          .select('id, name, phone, career_objective, max_monthly_price, app_expectations')
+          .eq('user_id', user?.id)
+          .maybeSingle()
+
+        if (interestError) {
+          console.error('Error checking interest form:', interestError)
+        } else if (!interestData || !hasCompletedForm(interestData)) {
+          console.log('📝 Interest form incomplete, will show dialog if needed');
+          // Don't auto-open this dialog on dashboard - only if user hasn't seen it
+        }
+      } catch (error) {
+        console.error('Interest form check failed:', error);
+      }
+
+      // Check resume (optional - show dialog if missing)
+      try {
+        const { data: cvData, error: cvError } = await supabase
+          .from('resumes')
+          .select('id')
+          .eq('user_id', user.id)
+          .limit(1)
+
+        if (cvError) {
+          console.error('Error checking CV:', cvError)
+        } else if (!cvData || cvData.length === 0) {
+          console.log('📄 Resume missing, opening dialog');
+          openResumeDialog()
+        } else {
+          console.log('✅ Resume found');
+        }
+      } catch (error) {
+        console.error('Resume check failed:', error);
+      }
+
+      // Check job preferences (optional - show dialog if incomplete)
+      try {
+        const { data: preferencesData, error: preferencesError } = await supabase
+          .from('preferences')
+          .select('location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        if (preferencesError) {
+          console.error('Error checking preferences:', preferencesError)
+        } else {
+          const hasValidPreferences = Boolean(
+            preferencesData &&
+            preferencesData.location &&
+            preferencesData.job_title &&
+            preferencesData.seniority_level &&
+            preferencesData.job_type &&
+            preferencesData.job_posting_type &&
+            preferencesData.job_posting_date
+          )
+
+          if (!hasValidPreferences) {
+            console.log('⚙️ Job preferences incomplete, opening dialog');
+            openPreferencesDialog()
+          } else {
+            console.log('✅ Job preferences complete');
+          }
+        }
+      } catch (error) {
+        console.error('Preferences check failed:', error);
+      }
     } catch (error) {
       console.error('Error checking profile:', error)
       
