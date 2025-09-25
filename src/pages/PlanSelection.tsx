@@ -100,7 +100,7 @@ const PlanSelection = () => {
         .from('plan_selections')
         .upsert({
           user_id: user.id,
-          plan: planId,
+          selected_plan: planId,
           status: 'completed'
         }, {
           onConflict: 'user_id'

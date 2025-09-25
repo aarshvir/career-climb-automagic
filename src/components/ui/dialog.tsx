@@ -42,10 +42,10 @@ const DialogContent = React.forwardRef<
         className
       )}
       style={{
-        position: 'fixed !important',
-        left: '50% !important',
-        top: '50% !important',
-        transform: 'translate(-50%, -50%) !important',
+        position: 'fixed' as const,
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
         zIndex: 9999
       }}
       {...props}

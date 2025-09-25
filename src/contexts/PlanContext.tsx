@@ -48,10 +48,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
   
   const planLimits = usePlanLimits(profile?.plan);
 
-  const today = new Date().toDateString();
-  const canFetchToday = dailyFetchCount < planLimits.dailyJobApplications;
-
-  const fetchProfile = useCallback(async () => {
+  const refreshProfile = useCallback(async () => {
     if (!user) {
       setProfile(null);
       setLoading(false);
@@ -59,87 +56,84 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     }
 
     try {
+      setLoading(true);
       console.log('🔄 PlanContext: Fetching profile for user', user.id);
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('plan, subscription_status')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ PlanContext: Error fetching profile:', error);
+        
+        // Create a default profile if none exists
+        if (error.code === 'PGRST116') {
+          console.log('📝 PlanContext: Creating default profile...');
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert({ id: user.id, plan: 'free', email: user.email })
+            .select('plan, subscription_status')
+            .single();
 
-      const userProfile: UserProfile = {
-        plan: data?.plan || 'free',
-        subscription_status: data?.subscription_status || null,
-      };
+          if (insertError) {
+            throw insertError;
+          }
+          
+          setProfile({ plan: newProfile.plan || 'free', subscription_status: newProfile.subscription_status });
+        } else {
+          throw error;
+        }
+      } else {
+        const userProfile: UserProfile = {
+          plan: data?.plan || 'free',
+          subscription_status: data?.subscription_status || null,
+        };
 
-      console.log('✅ PlanContext: Profile fetched successfully', userProfile);
-      setProfile(userProfile);
+        console.log('✅ PlanContext: Profile fetched successfully', userProfile);
+        setProfile(userProfile);
+      }
+
       setError(null);
 
-      // Fetch daily usage - fallback to localStorage since table doesn't exist yet
-      try {
-        const { data: usageData, error: usageError } = await supabase
-          .from('daily_usage')
-          .select('fetch_count, fetch_date')
-          .eq('user_id', user.id)
-          .eq('fetch_date', today)
-          .maybeSingle();
-
-        if (usageError && usageError.code !== 'PGRST116') { // PGRST116 = no rows returned
-          console.warn('Daily usage table not found, falling back to localStorage');
-          // Fallback to localStorage
-          const storageKey = `daily_usage_${user.id}_${today}`;
-          const storedData = localStorage.getItem(storageKey);
-          if (storedData) {
-            const parsed = JSON.parse(storedData);
-            setDailyFetchCount(parsed.fetchCount || 0);
-            setLastFetchDate(parsed.fetchDate || null);
-          }
-        } else if (usageData) {
-          setDailyFetchCount(usageData.fetch_count || 0);
-          setLastFetchDate(usageData.fetch_date);
-          console.log('📊 Daily usage loaded from database:', usageData);
-        } else {
-          // No usage record for today, reset to 0
+      // Use localStorage for daily usage tracking
+      const today = new Date().toISOString().split('T')[0];
+      const storageKey = `daily_usage_${user.id}_${today}`;
+      const storedData = localStorage.getItem(storageKey);
+      
+      if (storedData) {
+        try {
+          const parsed = JSON.parse(storedData);
+          setDailyFetchCount(parsed.fetchCount || 0);
+          setLastFetchDate(parsed.fetchDate || null);
+        } catch (parseError) {
+          console.error('Error parsing stored usage data:', parseError);
           setDailyFetchCount(0);
           setLastFetchDate(null);
         }
-      } catch (error) {
-        console.warn('Database unavailable, using localStorage fallback');
-        const storageKey = `daily_usage_${user.id}_${today}`;
-        const storedData = localStorage.getItem(storageKey);
-        if (storedData) {
-          try {
-            const parsed = JSON.parse(storedData);
-            setDailyFetchCount(parsed.fetchCount || 0);
-            setLastFetchDate(parsed.fetchDate || null);
-          } catch {
-            setDailyFetchCount(0);
-            setLastFetchDate(null);
-          }
-        } else {
-          setDailyFetchCount(0);
-          setLastFetchDate(null);
-        }
+      } else {
+        setDailyFetchCount(0);
+        setLastFetchDate(null);
       }
 
     } catch (error) {
-      console.error('❌ PlanContext: Error fetching profile:', error);
-      setError(error instanceof Error ? error.message : 'Failed to fetch profile');
-      
-      // Fallback to free plan
+      console.error('❌ PlanContext: Failed to fetch profile:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load profile');
+      // Set fallback profile to prevent blocking the app
       setProfile({ plan: 'free', subscription_status: null });
     } finally {
       setLoading(false);
     }
-  }, [user, today]);
+  }, [user]);
 
-  const refreshProfile = useCallback(async () => {
-    setLoading(true);
-    await fetchProfile();
-  }, [fetchProfile]);
+  // Load profile when user changes
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
+  const today = new Date().toISOString().split('T')[0];
+  const canFetchToday = dailyFetchCount < planLimits.dailyJobApplications;
 
   const incrementFetchCount = useCallback(async () => {
     if (!user || !profile) return;
@@ -147,58 +141,38 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     try {
       const newCount = dailyFetchCount + 1;
       
-      // Try database first, fallback to localStorage
-      try {
-        const { error } = await supabase
-          .from('daily_usage')
-          .upsert({
-            user_id: user.id,
-            fetch_date: today,
-            fetch_count: newCount,
-            updated_at: new Date().toISOString(),
-          }, {
-            onConflict: 'user_id,fetch_date'
-          });
-
-        if (error) throw error;
-        console.log('📈 Fetch count incremented in database:', newCount);
-      } catch (dbError) {
-        console.warn('Database unavailable, using localStorage fallback');
-        // Fallback to localStorage
-        const storageKey = `daily_usage_${user.id}_${today}`;
-        localStorage.setItem(storageKey, JSON.stringify({
-          fetchCount: newCount,
-          fetchDate: today
-        }));
-        console.log('📈 Fetch count incremented in localStorage:', newCount);
-      }
-
-      // Update local state
+      // Use localStorage for daily usage tracking
+      console.warn('Using localStorage for daily usage tracking');
+      
+      // Store in localStorage
+      const storageKey = `daily_usage_${user.id}_${today}`;
+      const usageData = {
+        fetchCount: newCount,
+        fetchDate: today,
+        lastUpdated: new Date().toISOString(),
+      };
+      
+      localStorage.setItem(storageKey, JSON.stringify(usageData));
+      
       setDailyFetchCount(newCount);
       setLastFetchDate(today);
       
+      console.log('📈 Fetch count incremented (localStorage):', newCount);
     } catch (error) {
-      console.error('❌ Error incrementing fetch count:', error);
-      throw error;
+      console.error('Error incrementing fetch count:', error);
     }
   }, [user, profile, dailyFetchCount, today]);
 
   const resetDailyCount = useCallback(() => {
-    if (lastFetchDate !== today) {
-      setDailyFetchCount(0);
-      setLastFetchDate(null);
-      console.log('🔄 Daily count reset for new day');
-    }
-  }, [lastFetchDate, today]);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
-  // Reset daily count if it's a new day
-  useEffect(() => {
-    resetDailyCount();
-  }, [resetDailyCount]);
+    if (!user) return;
+    
+    const storageKey = `daily_usage_${user.id}_${today}`;
+    localStorage.removeItem(storageKey);
+    setDailyFetchCount(0);
+    setLastFetchDate(null);
+    
+    console.log('🔄 Daily count reset');
+  }, [user, today]);
 
   const value: PlanContextType = {
     profile,
