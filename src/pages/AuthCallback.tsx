@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/lib/logger'
+import { validateSession } from '@/lib/security'
 
 const AuthCallback = () => {
   const navigate = useNavigate()
@@ -8,36 +10,30 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        console.log('Auth callback processing...', {
-          url: window.location.href,
-          hash: window.location.hash,
-          search: window.location.search
-        });
+        logger.debug('Auth callback processing');
 
         // Wait a bit for potential session to be established
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         const { data, error } = await supabase.auth.getSession()
         
-        console.log('Auth callback session check:', { data, error });
-        
         if (error) {
-          console.error('Auth callback error:', error)
+          logger.error('Auth callback error', error)
           navigate('/?error=auth_failed')
           return
         }
 
-        if (data.session) {
-          console.log('Auth callback success:', data.session.user?.email);
+        if (data.session && validateSession(data.session)) {
+          logger.info('Auth callback success')
           // Successfully authenticated, redirect to home
           navigate('/?auth=success')
         } else {
-          console.warn('Auth callback: No session found');
+          logger.warn('Auth callback: Invalid or no session found')
           // No session found, redirect with error
           navigate('/?error=no_session')
         }
       } catch (error) {
-        console.error('Auth callback failed:', error)
+        logger.error('Auth callback failed', error)
         navigate('/?error=callback_failed')
       }
     }
