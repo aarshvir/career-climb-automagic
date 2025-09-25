@@ -90,10 +90,10 @@ const PlanSelection = () => {
       });
       return;
     }
-
+  
     setLoading(true);
     setSelectedPlan(planId);
-
+  
     try {
       // Insert into plan_selections table
       const { error: planSelectionError } = await supabase
@@ -104,39 +104,54 @@ const PlanSelection = () => {
           status: 'completed'
         }, {
           onConflict: 'user_id'
-        })
-
-      if (planSelectionError) throw planSelectionError
-
+        });
+  
+      if (planSelectionError) {
+        console.error("Plan selection upsert failed:", planSelectionError);
+        toast({
+          title: "Error",
+          description: "Failed to update plan_selections. " + planSelectionError.message,
+          variant: "destructive"
+        });
+        return;
+      }
+  
       // Upsert the profiles table to ensure record exists
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({ 
+        .upsert({
           id: user.id,
-          plan: planId 
+          plan: planId
         }, {
           onConflict: 'id'
-        })
-
-      if (profileError) throw profileError
-
+        });
+  
+      if (profileError) {
+        console.error("Profile upsert failed:", profileError);
+        toast({
+          title: "Error",
+          description: "Failed to update profile. " + profileError.message,
+          variant: "destructive"
+        });
+        return;
+      }
+  
       // Refresh the plan context to pick up the new plan
       await refreshProfile();
-
+  
       toast({
         title: "Plan selected successfully!",
         description: `Welcome to ${plans.find(p => p.id === planId)?.name} plan.`
-      })
-
-      console.log(`✅ Plan selection completed: ${planId}`);
-
-      // Navigate to dashboard
-      navigate('/dashboard')
+      });
+  
+      // Force a hard reload to guarantee fresh context
+      window.location.href = "/dashboard";
+      // If the plan is still not updated after reload, check Supabase RLS and DB for issues.
     } catch (error) {
       console.error('Error selecting plan:', error);
       toast({
         title: "Error",
-        description: "Failed to select plan. Please try again.",
+        description: "Failed to select plan. " + (error instanceof Error ? error.message : ""),
         variant: "destructive"
       });
     } finally {
