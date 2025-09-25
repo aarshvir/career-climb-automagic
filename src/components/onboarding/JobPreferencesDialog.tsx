@@ -9,6 +9,7 @@ import { Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage, logError } from "@/lib/errorUtils";
 
 interface JobPreferencesDialogProps {
   open: boolean;
@@ -62,11 +63,20 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
   const handleSave = async () => {
     if (!user) return;
 
-    // Validate required fields
-    if (!preferences.location || !preferences.job_title || !preferences.seniority_level || !preferences.job_type || !preferences.job_posting_type || !preferences.job_posting_date) {
+    // Validate required fields with specific error messages
+    const validationErrors = [];
+    
+    if (!preferences.location) validationErrors.push("Preferred location");
+    if (!preferences.job_title) validationErrors.push("Job title");
+    if (!preferences.seniority_level) validationErrors.push("Seniority level");
+    if (!preferences.job_type) validationErrors.push("Job type");
+    if (!preferences.job_posting_type) validationErrors.push("Job posting type");
+    if (!preferences.job_posting_date) validationErrors.push("Job posting date");
+
+    if (validationErrors.length > 0) {
       toast({
-        title: "All fields required",
-        description: "Please fill in all job preference fields.",
+        title: "Missing required fields",
+        description: `Please fill in: ${validationErrors.join(", ")}`,
         variant: "destructive",
       });
       return;
@@ -96,11 +106,17 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
       });
 
       onSuccess();
-    } catch (error) {
-      console.error('Save failed:', error);
+    } catch (error: unknown) {
+      logError('Job preferences save failed', error);
+      
+      const errorMessage = getErrorMessage(
+        error,
+        "There was an error saving your preferences. Please try again."
+      );
+      
       toast({
         title: "Save failed",
-        description: "There was an error saving your preferences. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

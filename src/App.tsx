@@ -10,6 +10,7 @@ import { OnboardingProvider, useOnboarding } from "@/contexts/OnboardingContext"
 import { HelmetProvider } from "react-helmet-async";
 import PageLoadingSpinner from "@/components/layout/PageLoadingSpinner";
 import Header from "@/components/layout/Header";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const Index = lazy(() => import("./pages/Index"));
 const About = lazy(() => import("./pages/About"));
@@ -116,19 +117,21 @@ const AppContent = () => {
 const App: React.FC = () => {
   return (
     <React.StrictMode>
-      <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <InterestFormProvider>
-              <OnboardingProvider>
-                <TooltipProvider>
-                  <AppContent />
-                </TooltipProvider>
-              </OnboardingProvider>
-            </InterestFormProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </HelmetProvider>
+      <ErrorBoundary>
+        <HelmetProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <InterestFormProvider>
+                <OnboardingProvider>
+                  <TooltipProvider>
+                    <AppContent />
+                  </TooltipProvider>
+                </OnboardingProvider>
+              </InterestFormProvider>
+            </AuthProvider>
+          </QueryClientProvider>
+        </HelmetProvider>
+      </ErrorBoundary>
     </React.StrictMode>
   );
 };

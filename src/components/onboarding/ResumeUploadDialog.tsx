@@ -14,6 +14,7 @@ import {
   normalizeResumeFile,
   saveResumeRecord,
 } from "@/lib/resume-storage";
+import { getErrorMessage, logError } from "@/lib/errorUtils";
 
 interface ResumeUploadDialogProps {
   open: boolean;
@@ -149,33 +150,12 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
 
       onSuccess();
     } catch (error: unknown) {
-      const uploadError = error as Partial<{
-        message: string;
-        statusCode: number;
-        details: string;
-        hint: string;
-        code: string;
-      }>;
-
-      console.error("Upload failed with error:", {
-        error,
-        message: uploadError?.message,
-        statusCode: uploadError?.statusCode,
-        details: uploadError?.details,
-        hint: uploadError?.hint,
-        code: uploadError?.code,
-      });
-
-      let errorMessage = "There was an error uploading your resume. Please try again.";
-      const message = typeof uploadError?.message === "string" ? uploadError.message : "";
-
-      if (message.includes("new row violates row-level security policy")) {
-        errorMessage = "Permission denied. Please ensure you're logged in and try again.";
-      } else if (message.includes("bucket")) {
-        errorMessage = "Storage configuration error. Please contact support.";
-      } else if (uploadError?.statusCode === 413) {
-        errorMessage = "File too large. Please upload a smaller file.";
-      }
+      logError("Resume upload failed", error);
+      
+      const errorMessage = getErrorMessage(
+        error, 
+        "There was an error uploading your resume. Please try again."
+      );
 
       toast({
         title: "Upload failed",

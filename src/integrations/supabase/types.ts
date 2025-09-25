@@ -9,6 +9,125 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      interest_forms: {
+        Row: {
+          id: string;
+          user_id: string;
+          email: string;
+          name: string | null;
+          phone: string | null;
+          career_objective: string | null;
+          max_monthly_price: number | null;
+          app_expectations: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          email: string;
+          name?: string | null;
+          phone?: string | null;
+          career_objective?: string | null;
+          max_monthly_price?: number | null;
+          app_expectations?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          email?: string;
+          name?: string | null;
+          phone?: string | null;
+          career_objective?: string | null;
+          max_monthly_price?: number | null;
+          app_expectations?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      profiles: {
+        Row: {
+          id: string;
+          plan: string | null;
+          subscription_status: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          plan?: string | null;
+          subscription_status?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          plan?: string | null;
+          subscription_status?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      resumes: {
+        Row: {
+          id: string;
+          user_id: string;
+          file_path: string;
+          original_filename: string;
+          file_size: number;
+          mime_type: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          file_path: string;
+          original_filename: string;
+          file_size: number;
+          mime_type: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          file_path?: string;
+          original_filename?: string;
+          file_size?: number;
+          mime_type?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      plan_selections: {
+        Row: {
+          id: string;
+          user_id: string;
+          plan: string;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          plan: string;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          plan?: string;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       locations: {
         Row: {
           id: string;

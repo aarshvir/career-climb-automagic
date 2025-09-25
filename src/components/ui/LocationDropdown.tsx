@@ -59,7 +59,10 @@ export function LocationDropdown({
     return (
       <Select disabled>
         <SelectTrigger className={className}>
-          <SelectValue placeholder="Loading locations..." />
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <SelectValue placeholder="Loading locations..." />
+          </div>
         </SelectTrigger>
       </Select>
     );
