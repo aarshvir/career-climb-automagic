@@ -333,7 +333,14 @@ const Dashboard = () => {
       throw functionError
     }
 
-    return 20 // Placeholder job count
+    const foundJobs = Math.floor(Math.random() * 15) + 5
+
+    setStats(prev => ({
+      ...prev,
+      totalSearched: prev.totalSearched + foundJobs
+    }))
+
+    return foundJobs
     } catch (error) {
       // Catch-all error handler: ensure job_run is marked as failed
       if (jobRunId) {
@@ -353,16 +360,6 @@ const Dashboard = () => {
       // Re-throw the original error
       throw error
     }
-  }
-
-    const foundJobs = Math.floor(Math.random() * 15) + 5
-
-    setStats(prev => ({
-      ...prev,
-      totalSearched: prev.totalSearched + foundJobs
-    }))
-
-    return foundJobs
   }
 
   const effectivePlan = normalizePlan(profile?.plan)
@@ -442,7 +439,7 @@ const Dashboard = () => {
           </div>
 
           {/* Main Content */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
             <div className="xl:col-span-3 space-y-8">
               <PremiumJobsTable
                 userPlan={effectivePlan}
