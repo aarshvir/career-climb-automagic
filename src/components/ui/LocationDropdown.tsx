@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 interface LocationDropdownProps {
   value?: string;
@@ -89,11 +90,11 @@ export function LocationDropdown({
   }
 
   return (
-    <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={className}>
+    <Select value={value || ""} onValueChange={onValueChange}>
+      <SelectTrigger className={cn("w-full", className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-[60]">
         {locations.map((location) => (
           <SelectItem key={location.geo_id} value={location.name}>
             {location.name}

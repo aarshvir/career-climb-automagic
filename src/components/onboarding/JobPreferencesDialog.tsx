@@ -191,13 +191,13 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           <div className="space-y-2">
             <Label htmlFor="seniority">Seniority Level</Label>
             <Select
-              value={preferences.seniority_level}
+              value={preferences.seniority_level || ""}
               onValueChange={(value) => setPreferences({ ...preferences, seniority_level: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select seniority level" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[60]">
                 {SENIORITY_LEVELS.map((level) => (
                   <SelectItem key={level} value={level}>
                     {level}
@@ -210,13 +210,13 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           <div className="space-y-2">
             <Label htmlFor="job-type">Job Type</Label>
             <Select
-              value={preferences.job_type}
+              value={preferences.job_type || ""}
               onValueChange={(value) => setPreferences({ ...preferences, job_type: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select job type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[60]">
                 {JOB_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
@@ -229,13 +229,13 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           <div className="space-y-2">
             <Label htmlFor="job-posting-type">Job Posting Type</Label>
             <Select
-              value={preferences.job_posting_type}
+              value={preferences.job_posting_type || ""}
               onValueChange={(value) => setPreferences({ ...preferences, job_posting_type: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select posting type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[60]">
                 {JOB_POSTING_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
@@ -248,13 +248,13 @@ export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogPr
           <div className="space-y-2">
             <Label htmlFor="job-posting-date">Job Posting Date</Label>
             <Select
-              value={preferences.job_posting_date}
+              value={preferences.job_posting_date || ""}
               onValueChange={(value) => setPreferences({ ...preferences, job_posting_date: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select posting date" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[60]">
                 {JOB_POSTING_DATES.map((date) => (
                   <SelectItem key={date} value={date}>
                     {date}
