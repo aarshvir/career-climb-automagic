@@ -210,7 +210,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {resumes.length === 0 ? (
           <div className="text-center py-6 space-y-4">
             <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
@@ -224,18 +224,20 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         ) : (
           <div className="space-y-3">
             {resumes.slice(0, 3).map((resume) => (
-              <div key={resume.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-4 h-4 text-primary" />
-                  <div>
-                    <p className="font-medium text-sm">{getFileName(resume)}</p>
+              <div key={resume.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm truncate pr-2" title={getFileName(resume)}>
+                      {getFileName(resume)}
+                    </p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      {formatDate(resume.created_at)}
+                      <Clock className="w-3 h-3 flex-shrink-0" />
+                      <span>{formatDate(resume.created_at)}</span>
                     </div>
                   </div>
                 </div>
-                <Button size="sm" variant="ghost">
+                <Button size="sm" variant="ghost" className="flex-shrink-0">
                   <ExternalLink className="w-4 h-4" />
                 </Button>
               </div>
@@ -248,8 +250,8 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
           </div>
         )}
 
-        <div className="flex gap-2">
-          <div className="relative flex-1">
+        <div className="space-y-2">
+          <div className="relative">
             <input
               type="file"
               accept=".pdf,.doc,.docx"
@@ -259,24 +261,26 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
             />
             <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= maxResumes}>
               <Upload className="w-4 h-4 mr-2" />
-              Upload
+              Upload Resume
             </Button>
           </div>
-          <Button variant="outline" size="sm" disabled={resumes.length >= maxResumes}>
+          <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= maxResumes}>
             <Plus className="w-4 h-4 mr-2" />
-            Create
+            Create New
           </Button>
         </div>
 
         {resumes.length >= maxResumes && userPlan === "free" && (
-          <div className="p-3 bg-muted rounded-lg">
-            <p className="text-sm text-center">
-              <span className="font-medium">Resume limit reached.</span>
-              <br />
-              <Button variant="link" size="sm" className="p-0 h-auto">
-                Upgrade to add more
+          <div className="p-4 bg-muted/50 rounded-lg border border-muted">
+            <div className="text-center space-y-2">
+              <p className="text-sm font-medium">Resume limit reached</p>
+              <p className="text-xs text-muted-foreground">
+                Upgrade your plan to upload more resumes
+              </p>
+              <Button variant="link" size="sm" className="p-0 h-auto text-primary">
+                Upgrade Plan →
               </Button>
-            </p>
+            </div>
           </div>
         )}
       </CardContent>
