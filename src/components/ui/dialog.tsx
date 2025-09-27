@@ -42,14 +42,6 @@ const DialogContent = React.forwardRef<
         "mx-auto my-auto",
         className
       )}
-      style={{
-        position: 'fixed',
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%) !important',
-        zIndex: 9999,
-        margin: 'auto'
-      }}
       {...props}
     >
       {children}
