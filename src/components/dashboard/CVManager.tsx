@@ -106,16 +106,25 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     }
 
     try {
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage with mobile-friendly retry logic
       const normalizedFile = normalizeResumeFile(file);
       const fileName = buildResumeStoragePath(user.id, normalizedFile);
 
-      const { error: uploadError } = await supabase.storage.from(RESUME_BUCKET).upload(fileName, normalizedFile, {
-        cacheControl: "3600",
-        upsert: true,
+      console.log('Uploading file:', {
+        name: normalizedFile.name,
+        size: normalizedFile.size,
+        type: normalizedFile.type,
+        path: fileName,
+        isMobile: /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|samsung/i.test(navigator.userAgent),
       });
 
-      if (uploadError) throw uploadError;
+      // Use retry logic for mobile-friendly upload
+      const { uploadFileWithRetry } = await import('@/utils/uploadUtils');
+      const uploadResult = await uploadFileWithRetry(normalizedFile, fileName, RESUME_BUCKET);
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload failed');
+      }
 
       // Save record to database with graceful fallback for legacy schemas
       const { data: recordData, error: dbError, ignoredError, fallbackApplied } = await saveResumeRecord({

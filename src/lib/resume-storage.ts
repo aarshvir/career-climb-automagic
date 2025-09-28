@@ -126,6 +126,15 @@ export const saveResumeRecord = async ({
   fileSize,
   mimeType,
 }: SaveResumeRecordOptions): Promise<SaveResumeRecordResult> => {
+  // For mobile devices, validate session before proceeding
+  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|samsung/i.test(navigator.userAgent);
+  if (isMobile) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('Session expired. Please refresh the page and try again.');
+    }
+  }
+
   const metadataPayload = {
     user_id: userId,
     file_path: filePath,

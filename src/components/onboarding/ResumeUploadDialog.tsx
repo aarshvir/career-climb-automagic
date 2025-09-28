@@ -1,20 +1,17 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Upload, FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Upload, FileText, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import {
-  RESUME_BUCKET,
-  buildResumeStoragePath,
-  isValidResumeFile,
   normalizeResumeFile,
+  buildResumeStoragePath,
   saveResumeRecord,
+  RESUME_BUCKET,
+  isValidResumeFile,
 } from "@/lib/resume-storage";
-import { getErrorMessage, logError } from "@/lib/errorUtils";
 
 interface ResumeUploadDialogProps {
   open: boolean;
@@ -25,10 +22,9 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
     if (selectedFile) {
       if (isValidResumeFile(selectedFile)) {
         setFile(selectedFile);
@@ -85,52 +81,29 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
       const { data: bucketFiles, error: bucketAccessError } = await supabase.storage.from(RESUME_BUCKET).list();
       console.log("Bucket access test:", { bucketFiles, bucketAccessError });
 
-      // Attempt upload
+      // Attempt upload with mobile-friendly retry logic
       console.log("Attempting file upload...");
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from(RESUME_BUCKET)
-        .upload(fileName, normalizedFile, {
-          cacheControl: "3600",
-          upsert: true,
-        });
+      const { uploadFileWithRetry } = await import('@/utils/uploadUtils');
+      const uploadResult = await uploadFileWithRetry(normalizedFile, fileName, RESUME_BUCKET);
 
-      console.log("Upload result:", { uploadData, uploadError });
+      console.log("Upload result:", uploadResult);
 
-      if (uploadError) {
-        console.error("Upload error details:", {
-          message: uploadError.message,
-          error: uploadError,
-        });
-        throw uploadError;
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload failed');
       }
 
-      console.log("File uploaded successfully, saving to database...");
-
-      // Save to database
-      const {
-        data: recordData,
-        error: dbError,
-        ignoredError,
-        fallbackApplied,
-      } = await saveResumeRecord({
+      // Save record to database with graceful fallback for legacy schemas
+      const { data: recordData, error: dbError, ignoredError, fallbackApplied } = await saveResumeRecord({
         userId: user.id,
-        filePath: fileName,
+        filePath: uploadResult.data!.path,
         originalFileName: file.name,
         fileSize: file.size,
         mimeType: normalizedFile.type || file.type || "application/octet-stream",
       });
 
-      console.log("Database insert result:", {
-        recordData,
-        dbError,
-        ignoredError,
-        fallbackApplied,
-      });
+      console.log("Database insert result:", { recordData, dbError, ignoredError, fallbackApplied });
 
-      if (dbError) {
-        console.error("Database error details:", dbError);
-        throw dbError;
-      }
+      if (dbError) throw dbError;
 
       if (ignoredError) {
         console.warn(
@@ -141,22 +114,15 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         );
       }
 
-      console.log("Resume upload completed successfully");
-
       toast({
         title: "Resume uploaded successfully",
-        description: "Your resume has been uploaded and saved.",
+        description: "Your resume has been uploaded and is ready to use.",
       });
 
       onSuccess();
-    } catch (error: unknown) {
-      logError("Resume upload failed", error);
-      
-      const errorMessage = getErrorMessage(
-        error, 
-        "There was an error uploading your resume. Please try again."
-      );
-
+    } catch (error) {
+      console.error("Error uploading resume:", error);
+      const errorMessage = error instanceof Error ? error.message : "There was an error uploading your resume. Please try again.";
       toast({
         title: "Upload failed",
         description: errorMessage,
@@ -171,34 +137,71 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Upload Your Resume
-          </DialogTitle>
+          <DialogTitle>Upload Your Resume</DialogTitle>
+          <DialogDescription>
+            Upload a PDF, DOC, or DOCX file to get started with your personalized job search.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Please upload your resume to continue. We'll use this to help match you with relevant job opportunities.
-          </p>
-
-          <div className="space-y-2">
-            <Label htmlFor="resume-upload">Choose File</Label>
-            <Input
-              id="resume-upload"
+          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+            <input
               type="file"
               accept=".pdf,.doc,.docx"
               onChange={handleFileSelect}
+              className="hidden"
+              id="resume-upload"
               disabled={uploading}
             />
-            {file && <p className="text-sm text-muted-foreground">Selected: {file.name}</p>}
+            <label
+              htmlFor="resume-upload"
+              className="cursor-pointer flex flex-col items-center gap-2"
+            >
+              <Upload className="h-8 w-8 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Click to select your resume
+              </span>
+            </label>
           </div>
 
-          <Button onClick={handleUpload} disabled={!file || uploading} className="w-full">
-            <Upload className="mr-2 h-4 w-4" />
-            {uploading ? "Uploading..." : "Upload Resume"}
-          </Button>
+          {file && (
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">{file.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {Math.round(file.size / 1024)} KB
+                </p>
+              </div>
+              {!uploading && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFile(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
+
+        <DialogFooter>
+          <Button
+            onClick={handleUpload}
+            disabled={!file || uploading}
+            className="w-full"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              "Upload Resume"
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
