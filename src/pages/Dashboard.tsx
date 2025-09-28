@@ -3,12 +3,9 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { supabase } from "@/integrations/supabase/client"
 import { PremiumDashboardLayout } from "@/components/dashboard/PremiumDashboardLayout"
-import { PremiumJobsTable } from "@/components/dashboard/PremiumJobsTable"
-import { PremiumKPICards } from "@/components/dashboard/PremiumKPICards"
+import { ModernDashboard } from "@/components/dashboard/ModernDashboard"
+import { ModernSidebar } from "@/components/dashboard/ModernSidebar"
 import { ExportButton } from "@/components/dashboard/ExportButton"
-import { ResumeVariantManager } from "@/components/dashboard/ResumeVariantManager"
-import { DailyJobFetchCard } from "@/components/dashboard/DailyJobFetchCard"
-import { QuickActions } from "@/components/dashboard/QuickActions"
 import { usePlan } from "@/contexts/PlanContext"
 import { useToast } from "@/hooks/use-toast"
 import SEOHead from "@/components/SEOHead"
@@ -403,83 +400,11 @@ const Dashboard = () => {
     <>
       <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
       <PremiumDashboardLayout userPlan={profile?.plan ?? effectivePlan}>
-        <div className="space-y-6">
-          {/* Modern Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold text-foreground">
-                Dashboard
-              </h1>
-              <p className="text-muted-foreground">
-                Manage your job search and track applications
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <ExportButton userPlan={effectivePlan} />
-            </div>
-          </div>
-
-          {/* Streamlined Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-card border rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Jobs Searched</p>
-                  <p className="text-2xl font-bold">{stats.totalSearched}</p>
-                </div>
-                <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Briefcase className="h-4 w-4 text-primary" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Applications</p>
-                  <p className="text-2xl font-bold">{stats.totalApplied}</p>
-                </div>
-                <div className="h-8 w-8 bg-success/10 rounded-lg flex items-center justify-center">
-                  <Target className="h-4 w-4 text-success" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold">{stats.pendingReview}</p>
-                </div>
-                <div className="h-8 w-8 bg-warning/10 rounded-lg flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-warning" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-card border rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Resumes</p>
-                  <p className="text-2xl font-bold">{stats.customResumes}</p>
-                </div>
-                <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-primary" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Daily Job Fetch Card */}
-          <DailyJobFetchCard
-            onFetchJobs={handleFetchJobs}
-          />
-
-          {/* Main Content - Full Width Job Table */}
-          <div className="space-y-8">
-            <PremiumJobsTable
-              userPlan={effectivePlan}
-              searchQuery=""
-            />
-          </div>
-        </div>
+        <ModernDashboard
+          stats={stats}
+          userPlan={effectivePlan}
+          onFetchJobs={handleFetchJobs}
+        />
       </PremiumDashboardLayout>
     </>
   )

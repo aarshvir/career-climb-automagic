@@ -7,6 +7,7 @@ import { useSignInFlow } from "@/hooks/useSignInFlow";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlan } from "@/contexts/PlanContext";
 import { supabase } from "@/integrations/supabase/client";
+import { planManager } from "@/utils/planManager";
 
 const Pricing = () => {
   const { handlePrimaryAction } = useSignInFlow();
@@ -102,29 +103,17 @@ const Pricing = () => {
     }
     
     if (user) {
-      // Handle plan upgrade directly (always for authenticated users)
-      console.log('💾 Updating plan in database...'); // Debug
+      // Handle plan upgrade using PlanManager
+      console.log('💾 Updating plan using PlanManager...'); // Debug
       try {
-        const { error } = await supabase
-          .from('profiles')
-          .update({ plan: planName.toLowerCase() })
-          .eq('id', user.id);
-          
-        if (error) {
-          console.error('❌ Database error:', error); // Debug
-          throw error;
-        }
-
-        console.log('✅ Database update successful'); // Debug
-
+        // Use PlanManager for robust plan updates
+        await planManager.updatePlan(user.id, planName.toLowerCase());
+        
+        console.log('✅ PlanManager update successful'); // Debug
+        
         // Refresh the plan context to pick up the new plan
         console.log('🔄 Refreshing plan context...'); // Debug
         await refreshProfile();
-        
-        // Trigger plan upgrade event for other components
-        window.dispatchEvent(new CustomEvent('planUpgraded', { 
-          detail: { newPlan: planName.toLowerCase() } 
-        }));
         
         console.log(`✅ Plan upgrade completed: ${planName.toLowerCase()}`); // Debug
         

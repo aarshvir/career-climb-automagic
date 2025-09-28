@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { PlanLimits, usePlanLimits } from '@/hooks/usePlanLimits';
+import { planManager } from '@/utils/planManager';
 
 interface UserProfile {
   plan: string;
@@ -59,45 +60,18 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
       setLoading(true);
       console.log('🔄 PlanContext: Fetching profile for user', user.id);
 
-      // Add cache-busting to ensure fresh data
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('plan, subscription_status')
-        .eq('id', user.id)
-        .maybeSingle();
+      // Use PlanManager for robust plan handling
+      const planData = await planManager.fetchPlan(user.id);
+      
+      const userProfile: UserProfile = {
+        plan: planData.plan,
+        subscription_status: planData.subscription_status,
+      };
 
-      if (error) {
-        console.error('❌ PlanContext: Error fetching profile:', error);
-        
-        // Create a default profile if none exists
-        if (error.code === 'PGRST116') {
-          console.log('📝 PlanContext: Creating default profile...');
-          const { data: newProfile, error: insertError } = await supabase
-            .from('profiles')
-            .insert({ id: user.id, plan: 'free', email: user.email })
-            .select('plan, subscription_status')
-            .single();
-
-          if (insertError) {
-            throw insertError;
-          }
-          
-          setProfile({ plan: newProfile.plan || 'free', subscription_status: newProfile.subscription_status });
-        } else {
-          throw error;
-        }
-      } else {
-        const userProfile: UserProfile = {
-          plan: data?.plan || 'free',
-          subscription_status: data?.subscription_status || null,
-        };
-
-        console.log('✅ PlanContext: Profile fetched successfully', userProfile);
-        
-        // Force re-render by creating a new object even if data hasn't changed
-        setProfile({ ...userProfile });
-      }
-
+      console.log('✅ PlanContext: Profile fetched successfully', userProfile);
+      
+      // Update profile state
+      setProfile(userProfile);
       setError(null);
 
       // Use localStorage for daily usage tracking
@@ -123,8 +97,17 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     } catch (error) {
       console.error('❌ PlanContext: Failed to fetch profile:', error);
       setError(error instanceof Error ? error.message : 'Failed to load profile');
-      // Set fallback profile to prevent blocking the app
-      setProfile({ plan: 'free', subscription_status: null });
+      
+      // Try to load from cache as fallback
+      const cachedPlan = planManager.loadPlan(user.id);
+      if (cachedPlan) {
+        setProfile({
+          plan: cachedPlan.plan,
+          subscription_status: cachedPlan.subscription_status,
+        });
+      } else {
+        setProfile({ plan: 'free', subscription_status: null });
+      }
     } finally {
       setLoading(false);
     }
@@ -135,11 +118,36 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     refreshProfile();
   }, [refreshProfile]);
 
+  // Subscribe to PlanManager changes
+  useEffect(() => {
+    if (!user) return;
+    
+    const unsubscribe = planManager.subscribe(() => {
+      console.log('🔄 PlanContext: PlanManager notified of changes, refreshing...');
+      refreshProfile();
+    });
+    
+    return unsubscribe;
+  }, [user, refreshProfile]);
+
   // Listen for plan upgrade events from other components
   useEffect(() => {
-    const handlePlanUpgrade = () => {
+    let isRefreshing = false;
+    
+    const handlePlanUpgrade = async () => {
+      if (isRefreshing) {
+        console.log('🔄 PlanContext: Already refreshing, skipping duplicate event');
+        return;
+      }
+      
+      isRefreshing = true;
       console.log('🔄 PlanContext: Received plan upgrade event, refreshing...');
-      refreshProfile();
+      
+      try {
+        await refreshProfile();
+      } finally {
+        isRefreshing = false;
+      }
     };
 
     // Listen for custom plan upgrade events

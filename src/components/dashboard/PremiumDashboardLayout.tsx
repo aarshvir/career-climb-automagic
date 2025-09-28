@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { PremiumSidebar } from "./PremiumSidebar";
+import { ModernSidebar } from "./ModernSidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface PremiumDashboardLayoutProps {
@@ -57,7 +57,7 @@ export const PremiumDashboardLayout = ({ children, userPlan }: PremiumDashboardL
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-radial from-primary/3 via-transparent to-transparent rounded-full blur-3xl"></div>
         </div>
         
-        <PremiumSidebar userPlan={userPlan} />
+        <ModernSidebar userPlan={userPlan} />
 
         <div className="flex-1 flex flex-col min-h-screen">
           <main className="flex-1 overflow-auto pt-20 lg:pt-24">
