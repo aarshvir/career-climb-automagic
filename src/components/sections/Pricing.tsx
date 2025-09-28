@@ -93,21 +93,31 @@ const Pricing = () => {
   ];
 
   const handlePlanClick = async (planName: string) => {
+    console.log('🔄 Plan click started:', { planName, isUpgrade, user: !!user, currentPlan }); // Debug
+    
     if (isUpgrade && currentPlan === planName.toLowerCase()) {
+      console.log('⏭️ Same plan selected, skipping'); // Debug
       return; // Do nothing for current plan
     }
     
     if (user) {
       // Handle plan upgrade directly (always for authenticated users)
+      console.log('💾 Updating plan in database...'); // Debug
       try {
         const { error } = await supabase
           .from('profiles')
           .update({ plan: planName.toLowerCase() })
           .eq('id', user.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Database error:', error); // Debug
+          throw error;
+        }
+
+        console.log('✅ Database update successful'); // Debug
 
         // Refresh the plan context to pick up the new plan
+        console.log('🔄 Refreshing plan context...'); // Debug
         await refreshProfile();
         
         // Trigger plan upgrade event for other components
@@ -115,16 +125,17 @@ const Pricing = () => {
           detail: { newPlan: planName.toLowerCase() } 
         }));
         
-        console.log(`Plan upgraded to: ${planName.toLowerCase()}`);
+        console.log(`✅ Plan upgrade completed: ${planName.toLowerCase()}`); // Debug
         
         // Navigate back to dashboard with success
         navigate('/dashboard?upgrade=success');
       } catch (error) {
-        console.error('Failed to update plan:', error);
-        // Handle error - could show toast here
+        console.error('❌ Failed to update plan:', error); // Debug
+        alert(`Failed to update plan: ${error.message}`); // Show error to user
       }
     } else {
       // Regular onboarding flow for non-authenticated users
+      console.log('👤 No user, using onboarding flow'); // Debug
       handlePrimaryAction();
     }
   };
