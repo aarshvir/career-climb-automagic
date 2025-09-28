@@ -97,8 +97,8 @@ const Pricing = () => {
       return; // Do nothing for current plan
     }
     
-    if (isUpgrade && user) {
-      // Handle plan upgrade directly
+    if (user) {
+      // Handle plan upgrade directly (always for authenticated users)
       try {
         const { error } = await supabase
           .from('profiles')
@@ -115,7 +115,7 @@ const Pricing = () => {
           detail: { newPlan: planName.toLowerCase() } 
         }));
         
-        console.log(`✅ Plan upgrade completed: ${planName.toLowerCase()}`);
+        console.log(`Plan upgraded to: ${planName.toLowerCase()}`);
         
         // Navigate back to dashboard with success
         navigate('/dashboard?upgrade=success');
@@ -124,7 +124,7 @@ const Pricing = () => {
         // Handle error - could show toast here
       }
     } else {
-      // Regular onboarding flow
+      // Regular onboarding flow for non-authenticated users
       handlePrimaryAction();
     }
   };

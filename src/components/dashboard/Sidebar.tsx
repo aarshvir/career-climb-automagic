@@ -109,6 +109,10 @@ export const Sidebar = () => {
 
   const normalizedPlan = normalizePlan(profile?.plan);
   const PlanIcon = getPlanIcon(normalizedPlan);
+  
+  // Debug logging
+  console.log('📋 Sidebar: Current profile:', profile);
+  console.log('📋 Sidebar: Normalized plan:', normalizedPlan);
 
   return (
     <aside className="w-80 bg-card border-r border-border p-6 space-y-6">
