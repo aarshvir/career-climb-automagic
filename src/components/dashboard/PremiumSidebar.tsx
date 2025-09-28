@@ -162,8 +162,25 @@ export const PremiumSidebar = ({ userPlan }: PremiumSidebarProps) => {
             <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Quick Actions
             </SidebarGroupLabel>
-            <div className="space-y-4">
-              <CVManager userPlan={normalizedPlan} />
+            <div className="space-y-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full justify-start gap-2 text-xs"
+                onClick={() => navigate('/resumes')}
+              >
+                <FileText className="h-3 w-3" />
+                Manage Resumes
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full justify-start gap-2 text-xs"
+                onClick={() => navigate('/preferences')}
+              >
+                <Target className="h-3 w-3" />
+                Job Preferences
+              </Button>
             </div>
           </SidebarGroup>
         )}

@@ -16,6 +16,7 @@ import { useOnboarding } from "@/contexts/OnboardingContext"
 import { hasCompletedForm } from "@/lib/interestForm"
 import { RESUME_BUCKET } from "@/lib/resume-storage"
 import { normalizePlan } from "@/utils/planUtils"
+import { Briefcase, Target, Clock, FileText } from "lucide-react"
 
 // Data interfaces
 interface UserProfile {
@@ -402,50 +403,81 @@ const Dashboard = () => {
     <>
       <SEOHead title="Dashboard - JobVance" description="Manage your job search from your personalized dashboard" />
       <PremiumDashboardLayout userPlan={profile?.plan ?? effectivePlan}>
-        <div className="space-y-8">
-          {/* Hero Section */}
-          <div className="space-y-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div className="space-y-2">
-                <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-foreground/70 bg-clip-text text-transparent leading-tight">
-                  Welcome back!
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                  Your AI-powered job search command center
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <ExportButton userPlan={effectivePlan} />
-              </div>
+        <div className="space-y-6">
+          {/* Modern Header */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-bold text-foreground">
+                Dashboard
+              </h1>
+              <p className="text-muted-foreground">
+                Manage your job search and track applications
+              </p>
             </div>
-
-            {/* Daily Job Fetch Card */}
-            <DailyJobFetchCard
-              onFetchJobs={handleFetchJobs}
-            />
-
-            {/* Premium KPI Cards */}
-            <PremiumKPICards
-              stats={stats}
-              timeRange={timeRange}
-              onTimeRangeChange={setTimeRange}
-              userPlan={effectivePlan}
-            />
+            <div className="flex items-center gap-3">
+              <ExportButton userPlan={effectivePlan} />
+            </div>
           </div>
 
-          {/* Main Content */}
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-            <div className="xl:col-span-3 space-y-8">
-              <PremiumJobsTable
-                userPlan={effectivePlan}
-                searchQuery=""
-              />
+          {/* Streamlined Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-card border rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Jobs Searched</p>
+                  <p className="text-2xl font-bold">{stats.totalSearched}</p>
+                </div>
+                <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Briefcase className="h-4 w-4 text-primary" />
+                </div>
+              </div>
             </div>
+            <div className="bg-card border rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Applications</p>
+                  <p className="text-2xl font-bold">{stats.totalApplied}</p>
+                </div>
+                <div className="h-8 w-8 bg-success/10 rounded-lg flex items-center justify-center">
+                  <Target className="h-4 w-4 text-success" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-card border rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="text-2xl font-bold">{stats.pendingReview}</p>
+                </div>
+                <div className="h-8 w-8 bg-warning/10 rounded-lg flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-warning" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-card border rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Resumes</p>
+                  <p className="text-2xl font-bold">{stats.customResumes}</p>
+                </div>
+                <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+            </div>
+          </div>
 
-            <div className="xl:col-span-1 space-y-6">
-              <ResumeVariantManager userPlan={effectivePlan} />
-              <QuickActions userPlan={effectivePlan} />
-            </div>
+          {/* Daily Job Fetch Card */}
+          <DailyJobFetchCard
+            onFetchJobs={handleFetchJobs}
+          />
+
+          {/* Main Content - Full Width Job Table */}
+          <div className="space-y-8">
+            <PremiumJobsTable
+              userPlan={effectivePlan}
+              searchQuery=""
+            />
           </div>
         </div>
       </PremiumDashboardLayout>
