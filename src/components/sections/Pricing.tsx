@@ -110,6 +110,11 @@ const Pricing = () => {
         // Refresh the plan context to pick up the new plan
         await refreshProfile();
         
+        // Trigger plan upgrade event for other components
+        window.dispatchEvent(new CustomEvent('planUpgraded', { 
+          detail: { newPlan: planName.toLowerCase() } 
+        }));
+        
         console.log(`✅ Plan upgrade completed: ${planName.toLowerCase()}`);
         
         // Navigate back to dashboard with success

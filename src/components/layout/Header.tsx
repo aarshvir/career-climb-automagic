@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlan } from "@/contexts/PlanContext";
 import jobvanceIcon from "@/assets/jobvance-icon.png";
 import { Link, useLocation } from "react-router-dom";
 import { useSignInFlow } from "@/hooks/useSignInFlow";
@@ -14,76 +15,35 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { supabase } from "@/integrations/supabase/client";
+import { normalizePlan, getPlanDisplayName } from "@/utils/planUtils";
 
 
 const Header = () => {
   const { user, signOut, loading, isRetrying } = useAuth();
+  const { profile, refreshProfile } = usePlan();
   const { handlePrimaryAction } = useSignInFlow();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [plan, setPlan] = useState<string | null>(null);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
-
+  // Listen for upgrade success and refresh profile
   useEffect(() => {
-    let isMounted = true;
-
-    if (!user) {
-      setPlan(null);
-      setSubscriptionStatus(null);
-      return;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('upgrade') === 'success' && user) {
+      refreshProfile();
     }
+  }, [user, refreshProfile]);
 
-    const loadProfile = async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('plan, subscription_status')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (error) {
-        console.error('Error loading profile for header:', error);
-        return;
-      }
-
-      setPlan(data?.plan ?? null);
-      setSubscriptionStatus(data?.subscription_status ?? null);
-    };
-
-    loadProfile();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user]);
-
-  const planLabel = useMemo(() => {
-    const normalized = plan?.toLowerCase();
-    switch (normalized) {
-      case 'elite':
-        return 'Elite Plan';
-      case 'pro':
-      case 'premium':
-        return 'Pro Plan';
-      case 'free':
-      default:
-        return 'Free Plan';
-    }
-  }, [plan]);
+  const normalizedPlan = normalizePlan(profile?.plan);
+  const planLabel = getPlanDisplayName(profile?.plan);
 
   const subscriptionLabel = useMemo(() => {
-    if (!subscriptionStatus) return null;
-    const normalized = subscriptionStatus.toLowerCase();
+    if (!profile?.subscription_status) return null;
+    const normalized = profile.subscription_status.toLowerCase();
     if (normalized === 'active') return 'Active';
     if (normalized === 'trialing') return 'Trial';
     if (normalized === 'canceled') return 'Canceled';
-    return subscriptionStatus;
-  }, [subscriptionStatus]);
+    return profile.subscription_status;
+  }, [profile?.subscription_status]);
 
 
   const isActive = (path: string) => location.pathname === path;

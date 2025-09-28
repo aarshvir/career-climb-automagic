@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { FileText, Upload, Plus, ExternalLink, Clock } from "lucide-react";
+import { FileText, Upload, Plus, ExternalLink, Clock, Trash2, Eye, Download } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizePlan } from "@/utils/planUtils";
+import { useNavigate } from "react-router-dom";
 import {
   RESUME_BUCKET,
   buildResumeStoragePath,
@@ -27,6 +29,7 @@ interface CVManagerProps {
 export const CVManager = ({ userPlan }: CVManagerProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [resumes, setResumes] = useState<ResumeRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const normalizedPlan = normalizePlan(userPlan);
@@ -164,6 +167,78 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     }
   };
 
+  const handleViewResume = async (resume: ResumeRecord) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from(RESUME_BUCKET)
+        .createSignedUrl(resume.file_path, 300); // 5 minutes
+
+      if (error) throw error;
+      
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error viewing resume:', error);
+      toast({
+        title: "View failed",
+        description: "Unable to open resume. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteResume = async (resume: ResumeRecord) => {
+    try {
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from(RESUME_BUCKET)
+        .remove([resume.file_path]);
+
+      if (storageError) throw storageError;
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('resumes')
+        .delete()
+        .eq('id', resume.id);
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Resume deleted",
+        description: "Resume has been permanently deleted.",
+      });
+
+      // Refresh the list
+      fetchResumes();
+    } catch (error) {
+      console.error('Error deleting resume:', error);
+      toast({
+        title: "Delete failed",
+        description: "Unable to delete resume. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpgradePlan = () => {
+    navigate('/pricing?upgrade=true');
+  };
+
+  const handleCreateNew = () => {
+    // This could open a resume builder or redirect to a create page
+    toast({
+      title: "Feature coming soon",
+      description: "Resume builder will be available in the next update.",
+    });
+  };
+
+  const handleViewAll = () => {
+    // This could navigate to a full resumes page
+    navigate('/resumes');
+  };
+
   const getFileName = (resume: ResumeRecord) => {
     if (resume.file_name) {
       return resume.file_name.split(".")[0] || resume.file_name;
@@ -236,13 +311,55 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
                     </div>
                   </div>
                 </div>
-                <Button size="sm" variant="ghost" className="flex-shrink-0">
-                  <ExternalLink className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="flex-shrink-0"
+                    onClick={() => handleViewResume(resume)}
+                    title="View resume"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="flex-shrink-0 hover:text-destructive"
+                        title="Delete resume"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Resume</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{getFileName(resume)}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => handleDeleteResume(resume)}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
             ))}
             {resumes.length > 3 && (
-              <Button variant="ghost" size="sm" className="w-full">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="w-full"
+                onClick={handleViewAll}
+              >
                 View all ({resumes.length})
               </Button>
             )}
@@ -263,7 +380,13 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
               Upload Resume
             </Button>
           </div>
-          <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= planLimits.resumeVariants}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full" 
+            disabled={resumes.length >= planLimits.resumeVariants}
+            onClick={handleCreateNew}
+          >
             <Plus className="w-4 h-4 mr-2" />
             Create New
           </Button>
@@ -276,7 +399,12 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
               <p className="text-xs text-muted-foreground">
                 Upgrade your plan to upload more resumes
               </p>
-              <Button variant="link" size="sm" className="p-0 h-auto text-primary">
+              <Button 
+                variant="link" 
+                size="sm" 
+                className="p-0 h-auto text-primary"
+                onClick={handleUpgradePlan}
+              >
                 Upgrade Plan →
               </Button>
             </div>

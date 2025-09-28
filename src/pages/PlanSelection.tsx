@@ -138,7 +138,12 @@ const PlanSelection = () => {
   
       // Refresh the plan context to pick up the new plan
       await refreshProfile();
-  
+
+      // Trigger plan upgrade event for other components
+      window.dispatchEvent(new CustomEvent('planUpgraded', { 
+        detail: { newPlan: planId } 
+      }));
+
       toast({
         title: "Plan selected successfully!",
         description: `Welcome to ${plans.find(p => p.id === planId)?.name} plan.`

@@ -59,6 +59,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
       setLoading(true);
       console.log('🔄 PlanContext: Fetching profile for user', user.id);
 
+      // Add cache-busting to ensure fresh data
       const { data, error } = await supabase
         .from('profiles')
         .select('plan, subscription_status')
@@ -92,7 +93,9 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
         };
 
         console.log('✅ PlanContext: Profile fetched successfully', userProfile);
-        setProfile(userProfile);
+        
+        // Force re-render by creating a new object even if data hasn't changed
+        setProfile({ ...userProfile });
       }
 
       setError(null);
@@ -130,6 +133,21 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
   // Load profile when user changes
   useEffect(() => {
     refreshProfile();
+  }, [refreshProfile]);
+
+  // Listen for plan upgrade events from other components
+  useEffect(() => {
+    const handlePlanUpgrade = () => {
+      console.log('🔄 PlanContext: Received plan upgrade event, refreshing...');
+      refreshProfile();
+    };
+
+    // Listen for custom plan upgrade events
+    window.addEventListener('planUpgraded', handlePlanUpgrade);
+    
+    return () => {
+      window.removeEventListener('planUpgraded', handlePlanUpgrade);
+    };
   }, [refreshProfile]);
 
   const today = new Date().toISOString().split('T')[0];

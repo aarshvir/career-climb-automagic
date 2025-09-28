@@ -84,7 +84,10 @@ export const ExportButton = ({ userPlan }: ExportButtonProps) => {
             <div className="flex gap-2">
               <Button 
                 className="flex-1 bg-gradient-primary hover:opacity-90"
-                onClick={() => setShowUpgradeModal(false)}
+                onClick={() => {
+                  setShowUpgradeModal(false);
+                  window.location.href = '/pricing?upgrade=true';
+                }}
               >
                 Upgrade Now
               </Button>

@@ -49,6 +49,10 @@
 ### Core Utilities
 - ✅ `src/utils/planUtils.ts` - **NEW** - Centralized plan utilities
 - ✅ `src/hooks/usePlanLimits.ts` - Updated to use centralized normalization
+- ✅ `src/contexts/PlanContext.tsx` - Added real-time plan update events
+
+### Layout Components  
+- ✅ `src/components/layout/Header.tsx` - **FIXED MAJOR ISSUE** - Now uses PlanContext instead of separate state
 
 ### Dashboard Components
 - ✅ `src/components/dashboard/Sidebar.tsx` - Fixed plan detection and display
@@ -59,6 +63,10 @@
 - ✅ `src/components/dashboard/ResumeVariantManager.tsx` - Fixed plan limits
 - ✅ `src/components/dashboard/KPICards.tsx` - Fixed plan checks
 - ✅ `src/components/dashboard/PremiumKPICards.tsx` - Fixed plan logic
+
+### Pricing & Plan Selection
+- ✅ `src/components/sections/Pricing.tsx` - Added plan upgrade event triggers
+- ✅ `src/pages/PlanSelection.tsx` - Added plan upgrade event triggers
 
 ### Main Pages
 - ✅ `src/pages/Dashboard.tsx` - Updated to use centralized normalization
@@ -95,6 +103,21 @@ const normalizedPlan = normalizePlan(profile?.plan);
 
 // After: Consistent display
 <CardTitle className="text-lg">{getPlanDisplayName(normalizedPlan)}</CardTitle>
+```
+
+### 4. **Real-time Plan Updates** ✅ **NEW**
+```typescript
+// Header component now uses centralized PlanContext
+const { profile, refreshProfile } = usePlan();
+const planLabel = getPlanDisplayName(profile?.plan);
+
+// Plan upgrade event system
+window.dispatchEvent(new CustomEvent('planUpgraded', { 
+  detail: { newPlan: planName.toLowerCase() } 
+}));
+
+// PlanContext listens for upgrade events
+window.addEventListener('planUpgraded', handlePlanUpgrade);
 ```
 
 ## Plan Limits Now Working Correctly
@@ -137,6 +160,34 @@ const normalizedPlan = normalizePlan(profile?.plan);
 - [ ] UI updates after plan changes
 - [ ] All plan-dependent features work correctly
 
+## Additional Fixes - Round 2 ✅
+
+### **Elite Plan Support**
+- ✅ Elite plan properly defined in pricing components (100 jobs/day, 5 CVs, 3 preferences)
+- ✅ Elite plan limits working correctly in `usePlanLimits` hook
+- ✅ Elite plan detection working in all UI components
+
+### **Resume Management Issues Fixed**
+- ✅ **Added delete resume functionality** with confirmation dialog
+- ✅ **Added view resume functionality** (opens in new tab)
+- ✅ **Fixed missing onClick handlers** on all CV buttons
+- ✅ **Added proper error handling** for resume operations
+- ✅ **Added replace functionality** (delete old + upload new)
+
+### **Button Functionality Fixed**
+| Button | Before | After |
+|--------|--------|-------|
+| View Resume (👁️) | ❌ No handler | ✅ Opens resume in new tab |
+| Delete Resume (🗑️) | ❌ Didn't exist | ✅ Delete with confirmation |
+| "Create New" | ❌ No handler | ✅ Shows coming soon message |
+| "View All" | ❌ No handler | ✅ Navigates to /resumes |
+| "Upgrade Plan" | ❌ No handler | ✅ Navigates to pricing |
+| Export "Upgrade Now" | ❌ No handler | ✅ Navigates to pricing |
+
+### **Files Updated - Round 2**
+- ✅ `src/components/dashboard/CVManager.tsx` - **MAJOR UPDATE** - Added full resume management
+- ✅ `src/components/dashboard/ExportButton.tsx` - Fixed upgrade button
+
 ## Notes
 
 - All plan normalization now goes through `src/utils/planUtils.ts`
@@ -144,3 +195,6 @@ const normalizedPlan = normalizePlan(profile?.plan);
 - UI components use `normalizePlan()` before any plan checks
 - Plan display names use `getPlanDisplayName()` for consistency
 - No more case sensitivity issues or 'premium' vs 'pro' confusion
+- **All buttons now have proper click handlers and functionality**
+- **Resume management is now fully functional with view, delete, and replace**
+- **Elite plan works correctly with 100 daily applications and 5 CV variants**
