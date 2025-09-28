@@ -94,6 +94,7 @@ const Pricing = () => {
 
   const handlePlanClick = async (planName: string) => {
     console.log('🔄 Plan click started:', { planName, isUpgrade, user: !!user, currentPlan }); // Debug
+    console.log('👤 User details:', user); // Debug user object
     
     if (isUpgrade && currentPlan === planName.toLowerCase()) {
       console.log('⏭️ Same plan selected, skipping'); // Debug
