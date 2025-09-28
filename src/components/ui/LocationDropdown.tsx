@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LocationDropdownProps {
@@ -24,16 +27,17 @@ export function LocationDropdown({
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function getLocations() {
       try {
         console.log('Fetching locations from Supabase...');
-        // Fetches all rows from the 'locations' table
         const { data, error } = await supabase
           .from('locations')
           .select('name, geo_id')
-          .order('name', { ascending: true }); // Alphabetical order
+          .order('name', { ascending: true });
 
         if (error) {
           console.error('Error fetching locations:', error);
@@ -56,51 +60,108 @@ export function LocationDropdown({
     getLocations();
   }, []);
 
+  // Filter locations based on search query
+  const filteredLocations = locations.filter(location =>
+    location.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSelect = (locationName: string) => {
+    onValueChange(locationName);
+    setOpen(false);
+    setSearchQuery('');
+  };
+
   if (loading) {
     return (
-      <Select disabled>
-        <SelectTrigger className={className}>
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <SelectValue placeholder="Loading locations..." />
-          </div>
-        </SelectTrigger>
-      </Select>
+      <Button
+        variant="outline"
+        role="combobox"
+        disabled
+        className={cn("w-full justify-between", className)}
+      >
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <span>Loading locations...</span>
+        </div>
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
     );
   }
 
   if (error) {
     return (
-      <Select disabled>
-        <SelectTrigger className={className}>
-          <SelectValue placeholder={error} />
-        </SelectTrigger>
-      </Select>
+      <Button
+        variant="outline"
+        role="combobox"
+        disabled
+        className={cn("w-full justify-between", className)}
+      >
+        <span className="text-muted-foreground">{error}</span>
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
     );
   }
 
   if (locations.length === 0) {
     return (
-      <Select disabled>
-        <SelectTrigger className={className}>
-          <SelectValue placeholder="No locations available" />
-        </SelectTrigger>
-      </Select>
+      <Button
+        variant="outline"
+        role="combobox"
+        disabled
+        className={cn("w-full justify-between", className)}
+      >
+        <span className="text-muted-foreground">No locations available</span>
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      </Button>
     );
   }
 
   return (
-    <Select value={value || ""} onValueChange={onValueChange}>
-      <SelectTrigger className={cn("w-full", className)}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent className="z-[60]">
-        {locations.map((location) => (
-          <SelectItem key={location.geo_id} value={location.name}>
-            {location.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn("w-full justify-between", className)}
+        >
+          {value ? (
+            locations.find((location) => location.name === value)?.name
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" align="start">
+        <Command>
+          <CommandInput 
+            placeholder="Search locations..." 
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+          />
+          <CommandList>
+            <CommandEmpty>No location found.</CommandEmpty>
+            <CommandGroup>
+              {filteredLocations.map((location) => (
+                <CommandItem
+                  key={location.geo_id}
+                  value={location.name}
+                  onSelect={() => handleSelect(location.name)}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === location.name ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {location.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
