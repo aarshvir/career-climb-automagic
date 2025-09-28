@@ -31,23 +31,13 @@ import { Button } from "@/components/ui/button";
 import { CVManager } from "./CVManager";
 import { Link } from "react-router-dom";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { normalizePlan, getPlanDisplayName } from "@/utils/planUtils";
 
 interface PremiumSidebarProps {
   userPlan?: string | null;
 }
 
-const formatPlanName = (plan?: string | null) => {
-  const normalized = plan?.toLowerCase() || 'free';
-  switch (normalized) {
-    case 'elite':
-      return 'Elite Plan';
-    case 'pro':
-    case 'premium':
-      return 'Pro Plan';
-    default:
-      return 'Free Plan';
-  }
-};
+// Removed formatPlanName - using getPlanDisplayName from utils instead
 
 const navigationItems = [
   {
@@ -105,8 +95,7 @@ export const PremiumSidebar = ({ userPlan }: PremiumSidebarProps) => {
   const isCollapsed = state === "collapsed";
   const location = useLocation();
   const navigate = useNavigate();
-  const normalizedPlanRaw = (userPlan ?? 'free').toLowerCase();
-  const normalizedPlan = normalizedPlanRaw === 'premium' ? 'pro' : normalizedPlanRaw;
+  const normalizedPlan = normalizePlan(userPlan);
   const planLimits = usePlanLimits(normalizedPlan);
 
   return (
@@ -187,7 +176,7 @@ export const PremiumSidebar = ({ userPlan }: PremiumSidebarProps) => {
             <div className="space-y-4">
               <div className="premium-card p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-foreground">{formatPlanName(userPlan)}</span>
+                  <span className="text-sm font-semibold text-foreground">{getPlanDisplayName(userPlan)}</span>
                   <Crown className="h-5 w-5 text-warning" />
                 </div>
                 <div className="space-y-3 text-xs text-muted-foreground">

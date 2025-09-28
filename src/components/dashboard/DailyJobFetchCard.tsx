@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePlan } from "@/contexts/PlanContext";
+import { normalizePlan } from "@/utils/planUtils";
 
 const getNextMidnightTimestamp = () => {
   const now = new Date();
@@ -50,7 +51,7 @@ export const DailyJobFetchCard = ({ onFetchJobs }: DailyJobFetchCardProps) => {
     loading: planLoading 
   } = usePlan();
 
-  const userPlan = profile?.plan || 'free';
+  const userPlan = normalizePlan(profile?.plan);
   const dailyLimit = planLimits.dailyJobApplications;
 
   const handleFetchJobs = async () => {

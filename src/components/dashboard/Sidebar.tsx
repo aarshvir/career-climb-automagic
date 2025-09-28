@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlan } from "@/contexts/PlanContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { CVManager } from "./CVManager";
 import { JobPreferences } from "./JobPreferences";
+import { normalizePlan, getPlanDisplayName } from "@/utils/planUtils";
 
 interface UserProfile {
   plan: string;
@@ -35,14 +37,14 @@ interface UserPreferences {
 
 export const Sidebar = () => {
   const { user } = useAuth();
+  const { profile, refreshProfile } = usePlan();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
+      fetchPreferences();
     }
   }, [user]);
 
@@ -50,23 +52,14 @@ export const Sidebar = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('upgrade') === 'success' && user) {
-      fetchProfile();
+      refreshProfile();
       // Clean up URL
       window.history.replaceState({}, '', '/dashboard');
     }
-  }, [user]);
+  }, [user, refreshProfile]);
 
-  const fetchProfile = async () => {
+  const fetchPreferences = async () => {
     try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('plan, subscription_status')
-        .eq('id', user?.id)
-        .single();
-
-      if (profileError) throw profileError;
-      setProfile(profileData);
-
       // Fetch user preferences
       const { data: preferencesData } = await supabase
         .from('preferences')
@@ -76,9 +69,7 @@ export const Sidebar = () => {
 
       setPreferences(preferencesData ?? null);
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      // Default to free plan if error
-      setProfile({ plan: 'free' });
+      console.error('Error fetching preferences:', error);
     } finally {
       setLoading(false);
     }
@@ -116,7 +107,8 @@ export const Sidebar = () => {
     );
   }
 
-  const PlanIcon = getPlanIcon(profile?.plan || 'free');
+  const normalizedPlan = normalizePlan(profile?.plan);
+  const PlanIcon = getPlanIcon(normalizedPlan);
 
   return (
     <aside className="w-80 bg-card border-r border-border p-6 space-y-6">
@@ -124,11 +116,11 @@ export const Sidebar = () => {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full ${getPlanColor(profile?.plan || 'free')} flex items-center justify-center`}>
+            <div className={`w-10 h-10 rounded-full ${getPlanColor(normalizedPlan)} flex items-center justify-center`}>
               <PlanIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <CardTitle className="text-lg capitalize">{profile?.plan || 'free'} Plan</CardTitle>
+              <CardTitle className="text-lg">{getPlanDisplayName(normalizedPlan)}</CardTitle>
               {profile?.subscription_status && (
                 <Badge variant="outline" className="text-xs">
                   {profile.subscription_status}
@@ -138,7 +130,7 @@ export const Sidebar = () => {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          {profile?.plan === 'free' && (
+          {normalizedPlan === 'free' && (
             <Button 
               className="w-full bg-gradient-primary hover:opacity-90" 
               size="sm"
@@ -147,7 +139,7 @@ export const Sidebar = () => {
               Upgrade Plan
             </Button>
           )}
-          {profile?.plan !== 'free' && (
+          {normalizedPlan !== 'free' && (
             <div className="space-y-2">
               <div className="text-sm text-muted-foreground flex items-center gap-2">
                 <Clock className="w-4 h-4" />
@@ -167,7 +159,7 @@ export const Sidebar = () => {
       </Card>
 
       {/* CV Manager */}
-      <CVManager userPlan={profile?.plan || 'free'} />
+      <CVManager userPlan={normalizedPlan} />
 
       <Separator />
 

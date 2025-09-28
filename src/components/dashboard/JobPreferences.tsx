@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { LocationDropdown } from "@/components/ui/LocationDropdown";
 import { MapPin, Briefcase, Settings, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { normalizePlan } from "@/utils/planUtils";
 
 interface Preferences {
   cities: string;
@@ -41,9 +43,11 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const planLimits = usePlanLimits(userPlan);
 
-  const getPlanLimits = (plan: string) => {
-    switch (plan) {
+  const getJobPreferenceLimits = (plan: string) => {
+    const normalizedPlan = normalizePlan(plan);
+    switch (normalizedPlan) {
       case 'elite': return { cities: 3, titles: 3 };
       case 'pro': return { cities: 2, titles: 2 };
       default: return { cities: 1, titles: 1 };
@@ -115,7 +119,8 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
     }
   };
 
-  const limits = getPlanLimits(userPlan);
+  const limits = getJobPreferenceLimits(userPlan);
+  const normalizedUserPlan = normalizePlan(userPlan);
   const citiesArray = preferences.cities ? preferences.cities.split(',').map(c => c.trim()).filter(c => c) : [];
   const titlesArray = preferences.titles ? preferences.titles.split(',').map(t => t.trim()).filter(t => t) : [];
 
@@ -188,7 +193,7 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
                       {city}
                     </Badge>
                   ))}
-                  {citiesArray.length > limits.cities && userPlan === 'free' && (
+                  {citiesArray.length > limits.cities && normalizedUserPlan === 'free' && (
                     <Badge variant="outline" className="text-xs">
                       +{citiesArray.length - limits.cities} more
                     </Badge>
@@ -214,7 +219,7 @@ export const JobPreferences = ({ userPlan }: JobPreferencesProps) => {
                       {title}
                     </Badge>
                   ))}
-                  {titlesArray.length > limits.titles && userPlan === 'free' && (
+                  {titlesArray.length > limits.titles && normalizedUserPlan === 'free' && (
                     <Badge variant="outline" className="text-xs">
                       +{titlesArray.length - limits.titles} more
                     </Badge>

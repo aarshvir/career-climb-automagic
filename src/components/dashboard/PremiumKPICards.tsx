@@ -14,6 +14,7 @@ import {
   Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { normalizePlan } from "@/utils/planUtils";
 
 interface DashboardStats {
   totalSearched: number;
@@ -30,6 +31,7 @@ interface PremiumKPICardsProps {
 }
 
 export const PremiumKPICards = ({ stats, timeRange, onTimeRangeChange, userPlan }: PremiumKPICardsProps) => {
+  const normalizedPlan = normalizePlan(userPlan);
   const timeRanges = [
     { label: 'Today', value: '24h', icon: Activity },
     { label: '7 Days', value: '7d', icon: TrendingUp },
@@ -68,8 +70,8 @@ export const PremiumKPICards = ({ stats, timeRange, onTimeRangeChange, userPlan 
       value: stats.customResumes,
       icon: Award,
       trend: 25,
-      progress: userPlan === 'free' ? 0 : 45,
-      locked: userPlan === 'free',
+      progress: normalizedPlan === 'free' ? 0 : 45,
+      locked: normalizedPlan === 'free',
     },
   ];
 

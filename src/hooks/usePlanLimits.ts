@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { normalizePlan } from '@/utils/planUtils';
 
 export interface PlanLimits {
   resumeVariants: number;
@@ -10,13 +11,13 @@ export interface PlanLimits {
 
 export const usePlanLimits = (plan: string | null | undefined): PlanLimits => {
   return useMemo(() => {
-    const planType = plan?.toLowerCase() || 'free';
+    const planType = normalizePlan(plan);
     
     switch (planType) {
       case 'elite':
         return {
-          resumeVariants: 10,
-          dailyJobApplications: 50,
+          resumeVariants: 5,
+          dailyJobApplications: 100,
           isElite: true,
           isPro: false,
           isFree: false,

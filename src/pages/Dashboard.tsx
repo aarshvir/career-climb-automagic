@@ -15,6 +15,7 @@ import SEOHead from "@/components/SEOHead"
 import { useOnboarding } from "@/contexts/OnboardingContext"
 import { hasCompletedForm } from "@/lib/interestForm"
 import { RESUME_BUCKET } from "@/lib/resume-storage"
+import { normalizePlan } from "@/utils/planUtils"
 
 // Data interfaces
 interface UserProfile {
@@ -72,13 +73,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [canViewDashboard, setCanViewDashboard] = useState(false)
 
-  const normalizePlan = useCallback((plan?: string | null) => {
-    const normalized = plan?.toLowerCase() || 'free'
-    if (normalized === 'premium') {
-      return 'pro'
-    }
-    return normalized
-  }, [])
+  // Using centralized normalizePlan from utils
 
   const loadDashboardData = useCallback((userPlan: string) => {
     const key = normalizePlan(userPlan)

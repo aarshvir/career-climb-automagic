@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Briefcase, Eye, FileText, Clock } from "lucide-react";
+import { normalizePlan } from "@/utils/planUtils";
 
 interface DashboardStats {
   totalSearched: number;
@@ -18,6 +19,7 @@ interface KPICardsProps {
 }
 
 export const KPICards = ({ stats, timeRange, onTimeRangeChange, userPlan }: KPICardsProps) => {
+  const normalizedPlan = normalizePlan(userPlan);
   const timeRanges = [
     { label: '24h', value: '24h' },
     { label: '7d', value: '7d' },
@@ -91,7 +93,7 @@ export const KPICards = ({ stats, timeRange, onTimeRangeChange, userPlan }: KPIC
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {userPlan === 'free' ? (
+            {normalizedPlan === 'free' ? (
               <div>
                 <div className="text-2xl font-bold">—</div>
                 <Button 

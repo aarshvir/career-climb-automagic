@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useToast } from '@/hooks/use-toast';
+import { normalizePlan } from '@/utils/planUtils';
 
 interface ResumeVariant {
   id: string;
@@ -26,7 +27,8 @@ interface ResumeVariantManagerProps {
 export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const planLimits = usePlanLimits(userPlan);
+  const normalizedPlan = normalizePlan(userPlan);
+  const planLimits = usePlanLimits(normalizedPlan);
   const [resumeVariants, setResumeVariants] = useState<ResumeVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -73,7 +75,7 @@ export function ResumeVariantManager({ userPlan }: ResumeVariantManagerProps) {
     if (resumeVariants.length >= planLimits.resumeVariants) {
       toast({
         title: "Upload Limit Reached",
-        description: `Your ${userPlan} plan allows ${planLimits.resumeVariants} resume variant${planLimits.resumeVariants > 1 ? 's' : ''}. Please upgrade to upload more.`,
+        description: `Your ${normalizedPlan} plan allows ${planLimits.resumeVariants} resume variant${planLimits.resumeVariants > 1 ? 's' : ''}. Please upgrade to upload more.`,
         variant: "destructive",
       });
       return;

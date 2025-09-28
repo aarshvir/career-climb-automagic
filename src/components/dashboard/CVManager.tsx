@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizePlan } from "@/utils/planUtils";
 import {
   RESUME_BUCKET,
   buildResumeStoragePath,
@@ -27,17 +29,8 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
   const { toast } = useToast();
   const [resumes, setResumes] = useState<ResumeRecord[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const getPlanLimits = (plan: string) => {
-    switch (plan) {
-      case "elite":
-        return 5;
-      case "pro":
-        return 3;
-      default:
-        return 1;
-    }
-  };
+  const normalizedPlan = normalizePlan(userPlan);
+  const planLimits = usePlanLimits(normalizedPlan);
 
   useEffect(() => {
     if (user) {
@@ -103,11 +96,10 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
       return;
     }
 
-    const maxResumes = getPlanLimits(userPlan);
-    if (resumes.length >= maxResumes) {
+    if (resumes.length >= planLimits.resumeVariants) {
       toast({
         title: "Resume limit reached",
-        description: `Your ${userPlan} plan allows up to ${maxResumes} resume(s). Please upgrade to add more.`,
+        description: `Your ${normalizedPlan} plan allows up to ${planLimits.resumeVariants} resume(s). Please upgrade to add more.`,
         variant: "destructive",
       });
       return;
@@ -197,8 +189,6 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     );
   }
 
-  const maxResumes = getPlanLimits(userPlan);
-
   return (
     <Card>
       <CardHeader>
@@ -206,7 +196,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
           <FileText className="w-5 h-5" />
           CVs & Resumes
           <Badge variant="outline" className="ml-auto">
-            {resumes.length}/{maxResumes}
+            {resumes.length}/{planLimits.resumeVariants}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -257,20 +247,20 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
               accept=".pdf,.doc,.docx"
               onChange={handleFileUpload}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              disabled={resumes.length >= maxResumes}
+              disabled={resumes.length >= planLimits.resumeVariants}
             />
-            <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= maxResumes}>
+            <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= planLimits.resumeVariants}>
               <Upload className="w-4 h-4 mr-2" />
               Upload Resume
             </Button>
           </div>
-          <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= maxResumes}>
+          <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= planLimits.resumeVariants}>
             <Plus className="w-4 h-4 mr-2" />
             Create New
           </Button>
         </div>
 
-        {resumes.length >= maxResumes && userPlan === "free" && (
+        {resumes.length >= planLimits.resumeVariants && normalizedPlan === "free" && (
           <div className="p-4 bg-muted/50 rounded-lg border border-muted">
             <div className="text-center space-y-2">
               <p className="text-sm font-medium">Resume limit reached</p>
