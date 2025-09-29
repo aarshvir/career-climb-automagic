@@ -61,7 +61,7 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
       
       // Get total count first
       const { count: totalCount } = await supabase
-        .from('job_listings')
+        .from('job_applications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
 
@@ -70,7 +70,7 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
 
       // Fetch jobs for current page
       const { data, error } = await supabase
-        .from('job_listings')
+        .from('job_applications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -83,7 +83,21 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
         setTotalJobs(280); // Mock total
         setTotalPages(14); // 280 / 20 = 14 pages
       } else {
-        setJobs(data || []);
+        // Transform database data to match Job interface
+        const transformedJobs = (data || []).map((job: any): Job => ({
+          id: job.id,
+          title: job.job_title || 'Software Engineer',
+          company: job.company_name || 'Company',
+          location: job.location || 'Remote',
+          salary: job.salary_range || undefined,
+          matchScore: job.resume_match_score || 75,
+          status: job.application_status === 'applied' ? 'Applied' as const : 'Not Applied' as const,
+          type: 'Full-time',
+          postedDate: job.created_at || new Date().toISOString(),
+          description: job.job_description || undefined,
+          requirements: []
+        }));
+        setJobs(transformedJobs);
       }
     } catch (error) {
       console.error('Error fetching jobs:', error);

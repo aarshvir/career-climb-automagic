@@ -54,7 +54,7 @@ export const uploadFileWithRetry = async (
       }
 
       console.log(`Upload successful on attempt ${attempt}:`, data);
-      return { success: true, data };
+      return { success: true, data: data as { path: string } };
 
     } catch (error) {
       lastError = error;

@@ -112,10 +112,10 @@ export class PlanManager {
       console.error('❌ PlanManager: Failed to fetch plan:', error);
       
       // Try to get from localStorage as fallback
-      const cached = localStorage.getItem(`plan_${userId}`);
-      if (cached) {
+      const localStorageData = localStorage.getItem(`plan_${userId}`);
+      if (localStorageData) {
         try {
-          const planData = JSON.parse(cached);
+          const planData = JSON.parse(localStorageData);
           console.log('🔄 PlanManager: Using cached plan data', planData);
           return planData;
         } catch (parseError) {
@@ -124,17 +124,17 @@ export class PlanManager {
       }
       
       // Only return default plan if we truly have no cached data
-      const cached = this.cache.get(userId);
-      if (cached) {
-        console.log('🔄 PlanManager: Using cached plan data as fallback:', cached);
-        return cached;
+      const memoryCache = this.cache.get(userId);
+      if (memoryCache) {
+        console.log('🔄 PlanManager: Using cached plan data as fallback:', memoryCache);
+        return memoryCache;
       }
       
       // Check localStorage as final fallback
-      const stored = localStorage.getItem(`plan_${userId}`);
-      if (stored) {
+      const storedData = localStorage.getItem(`plan_${userId}`);
+      if (storedData) {
         try {
-          const planData = JSON.parse(stored);
+          const planData = JSON.parse(storedData);
           console.log('🔄 PlanManager: Using localStorage plan data as fallback:', planData);
           this.cache.set(userId, planData);
           return planData;
