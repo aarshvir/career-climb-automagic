@@ -159,12 +159,31 @@ export const Sidebar = () => {
       </Card>
 
       {/* CV Manager */}
-      <CVManager userPlan={normalizedPlan} />
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Resume Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <CVManager userPlan={normalizedPlan} />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={() => navigate('/resume-management')}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Manage Resumes
+          </Button>
+        </CardContent>
+      </Card>
 
       <Separator />
 
       {/* Job Preferences Display */}
-      {preferences && (
+      {(
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -173,31 +192,48 @@ export const Sidebar = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">Location</div>
-              <Badge variant="secondary" className="text-xs">
-                <MapPin className="w-3 h-3 mr-1" />
-                {preferences.location}
-              </Badge>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">Job Title</div>
-              <Badge variant="secondary" className="text-xs">
-                {preferences.job_title}
-              </Badge>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">Level</div>
-              <Badge variant="secondary" className="text-xs">
-                {preferences.seniority_level}
-              </Badge>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">Type</div>
-              <Badge variant="secondary" className="text-xs">
-                {preferences.job_type}
-              </Badge>
-            </div>
+            {preferences ? (
+              <>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground mb-1">Location</div>
+                  <Badge variant="secondary" className="text-xs">
+                    <MapPin className="w-3 h-3 mr-1" />
+                    {preferences.location}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground mb-1">Job Title</div>
+                  <Badge variant="secondary" className="text-xs">
+                    {preferences.job_title}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground mb-1">Level</div>
+                  <Badge variant="secondary" className="text-xs">
+                    {preferences.seniority_level}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground mb-1">Type</div>
+                  <Badge variant="secondary" className="text-xs">
+                    {preferences.job_type}
+                  </Badge>
+                </div>
+              </>
+            ) : (
+              <div className="text-sm text-muted-foreground">
+                No preferences set yet
+              </div>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+              onClick={() => navigate('/job-preferences')}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Manage Preferences
+            </Button>
           </CardContent>
         </Card>
       )}

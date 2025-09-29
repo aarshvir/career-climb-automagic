@@ -98,14 +98,18 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
       console.error('❌ PlanContext: Failed to fetch profile:', error);
       setError(error instanceof Error ? error.message : 'Failed to load profile');
       
-      // Try to load from cache as fallback
+      // Try to load from cache as fallback - don't reset to free if we have cached data
       const cachedPlan = planManager.loadPlan(user.id);
       if (cachedPlan) {
+        console.log('🔄 PlanContext: Using cached plan data as fallback:', cachedPlan);
         setProfile({
           plan: cachedPlan.plan,
           subscription_status: cachedPlan.subscription_status,
         });
+        setError(null); // Clear error since we have cached data
       } else {
+        // Only set to free if we truly have no cached data
+        console.log('⚠️ PlanContext: No cached data available, using free plan as fallback');
         setProfile({ plan: 'free', subscription_status: null });
       }
     } finally {
@@ -130,9 +134,10 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     return unsubscribe;
   }, [user, refreshProfile]);
 
-  // Listen for plan upgrade events from other components
+  // Listen for plan upgrade events from other components with debouncing
   useEffect(() => {
     let isRefreshing = false;
+    let refreshTimeout: NodeJS.Timeout | null = null;
     
     const handlePlanUpgrade = async () => {
       if (isRefreshing) {
@@ -140,14 +145,22 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
         return;
       }
       
-      isRefreshing = true;
-      console.log('🔄 PlanContext: Received plan upgrade event, refreshing...');
-      
-      try {
-        await refreshProfile();
-      } finally {
-        isRefreshing = false;
+      // Clear any pending refresh
+      if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
       }
+      
+      // Debounce the refresh to avoid too frequent updates
+      refreshTimeout = setTimeout(async () => {
+        isRefreshing = true;
+        console.log('🔄 PlanContext: Received plan upgrade event, refreshing...');
+        
+        try {
+          await refreshProfile();
+        } finally {
+          isRefreshing = false;
+        }
+      }, 1000); // 1 second debounce
     };
 
     // Listen for custom plan upgrade events
@@ -155,6 +168,9 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     
     return () => {
       window.removeEventListener('planUpgraded', handlePlanUpgrade);
+      if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
+      }
     };
   }, [refreshProfile]);
 

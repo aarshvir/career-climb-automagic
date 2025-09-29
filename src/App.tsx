@@ -31,6 +31,8 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const AutoInterestForm = lazy(() => import("./components/AutoInterestForm"));
 const OnboardingRedirector = lazy(() => import("./components/OnboardingRedirector"));
+const ResumeManagement = lazy(() => import("./pages/ResumeManagement"));
+const JobPreferencesPage = lazy(() => import("./pages/JobPreferences"));
 const ResumeUploadDialog = lazy(() =>
   import("./components/onboarding/ResumeUploadDialog").then((module) => ({
     default: module.ResumeUploadDialog,
@@ -88,6 +90,8 @@ const AppContent = () => {
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/reset" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/resume-management" element={<ResumeManagement />} />
+            <Route path="/job-preferences" element={<JobPreferencesPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

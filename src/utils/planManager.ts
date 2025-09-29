@@ -123,7 +123,28 @@ export class PlanManager {
         }
       }
       
-      // Return default plan
+      // Only return default plan if we truly have no cached data
+      const cached = this.cache.get(userId);
+      if (cached) {
+        console.log('🔄 PlanManager: Using cached plan data as fallback:', cached);
+        return cached;
+      }
+      
+      // Check localStorage as final fallback
+      const stored = localStorage.getItem(`plan_${userId}`);
+      if (stored) {
+        try {
+          const planData = JSON.parse(stored);
+          console.log('🔄 PlanManager: Using localStorage plan data as fallback:', planData);
+          this.cache.set(userId, planData);
+          return planData;
+        } catch (parseError) {
+          console.error('❌ PlanManager: Failed to parse stored plan data:', parseError);
+        }
+      }
+      
+      // Only return default plan if we truly have no data anywhere
+      console.log('⚠️ PlanManager: No cached or stored data available, using free plan as final fallback');
       const defaultPlan: PlanData = {
         plan: 'free',
         subscription_status: null,
