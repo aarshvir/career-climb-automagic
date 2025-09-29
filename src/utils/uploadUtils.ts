@@ -46,7 +46,8 @@ export const uploadFileWithRetry = async (
         setTimeout(() => reject(new Error('Upload timeout')), uploadTimeout)
       );
 
-      const { data, error } = await Promise.race([uploadPromise, timeoutPromise]) as any;
+      const result = await Promise.race([uploadPromise, timeoutPromise]);
+      const { data, error } = result as { data: unknown; error: unknown };
 
       if (error) {
         throw error;

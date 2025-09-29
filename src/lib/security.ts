@@ -137,15 +137,17 @@ export const generateCSRFToken = (): string => {
 };
 
 // Session validation
-export const validateSession = (session: any): boolean => {
+export const validateSession = (session: unknown): boolean => {
   if (!session || typeof session !== 'object') return false;
-  if (!session.access_token || typeof session.access_token !== 'string') return false;
-  if (!session.expires_at || typeof session.expires_at !== 'number') return false;
+  
+  const sessionObj = session as Record<string, unknown>;
+  if (!sessionObj.access_token || typeof sessionObj.access_token !== 'string') return false;
+  if (!sessionObj.expires_at || typeof sessionObj.expires_at !== 'number') return false;
   
   // Check if session is expired
   const now = Math.floor(Date.now() / 1000);
-  if (session.expires_at < now) {
-    logger.warn('Session expired', { expires_at: session.expires_at, now });
+  if (sessionObj.expires_at < now) {
+    logger.warn('Session expired', { expires_at: sessionObj.expires_at, now });
     return false;
   }
   

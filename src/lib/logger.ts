@@ -6,18 +6,18 @@
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LogContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class Logger {
   private isDevelopment = import.meta.env.DEV;
   private isDebugEnabled = import.meta.env.VITE_DEBUG === 'true';
 
-  private sanitize(data: any): any {
+  private sanitize(data: unknown): unknown {
     if (typeof data !== 'object' || data === null) return data;
     
     const sensitive = ['password', 'token', 'key', 'secret', 'authorization', 'cookie'];
-    const sanitized = { ...data };
+    const sanitized = { ...(data as Record<string, unknown>) };
     
     Object.keys(sanitized).forEach(key => {
       const lowerKey = key.toLowerCase();
