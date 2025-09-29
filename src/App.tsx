@@ -12,6 +12,7 @@ import { HelmetProvider } from "react-helmet-async";
 import PageLoadingSpinner from "@/components/layout/PageLoadingSpinner";
 import Header from "@/components/layout/Header";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { SecurityProvider } from "@/components/SecurityProvider";
 
 const Index = lazy(() => import("./pages/Index"));
 const About = lazy(() => import("./pages/About"));
@@ -122,23 +123,25 @@ const AppContent = () => {
 const App: React.FC = () => {
   return (
     <React.StrictMode>
-      <ErrorBoundary>
-        <HelmetProvider>
-              <QueryClientProvider client={queryClient}>
-                <AuthProvider>
-                  <PlanProvider>
-                    <InterestFormProvider>
-                      <OnboardingProvider>
-                        <TooltipProvider>
-                          <AppContent />
-                        </TooltipProvider>
-                      </OnboardingProvider>
-                    </InterestFormProvider>
-                  </PlanProvider>
-                </AuthProvider>
-              </QueryClientProvider>
-        </HelmetProvider>
-      </ErrorBoundary>
+      <SecurityProvider>
+        <ErrorBoundary>
+          <HelmetProvider>
+                <QueryClientProvider client={queryClient}>
+                  <AuthProvider>
+                    <PlanProvider>
+                      <InterestFormProvider>
+                        <OnboardingProvider>
+                          <TooltipProvider>
+                            <AppContent />
+                          </TooltipProvider>
+                        </OnboardingProvider>
+                      </InterestFormProvider>
+                    </PlanProvider>
+                  </AuthProvider>
+                </QueryClientProvider>
+          </HelmetProvider>
+        </ErrorBoundary>
+      </SecurityProvider>
     </React.StrictMode>
   );
 };

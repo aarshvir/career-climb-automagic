@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { isValidEmail, authRateLimiter } from '@/lib/security'
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof Error && error.message) {
@@ -27,15 +28,16 @@ const ForgotPassword: React.FC = () => {
   const [error, setError] = useState('')
   const [emailSent, setEmailSent] = useState(false)
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!validateEmail(email)) {
+    if (!isValidEmail(email)) {
       setError('Please enter a valid email address')
+      return
+    }
+
+    // Rate limiting
+    if (!authRateLimiter.check(email)) {
+      setError('Too many reset attempts. Please try again later.')
       return
     }
 

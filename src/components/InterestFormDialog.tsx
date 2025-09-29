@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePageExitTracking } from "@/hooks/usePageExitTracking";
 import { useForm } from "react-hook-form";
+import { sanitizeInput, isValidEmail } from "@/lib/security";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState, useCallback } from "react";
@@ -99,6 +100,16 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
       return;
     }
 
+    // Validate email format
+    if (!isValidEmail(user.email)) {
+      toast({
+        title: "Error",
+        description: "Invalid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -116,14 +127,15 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
         throw checkError;
       }
 
+      // Sanitize all user inputs
       const formData = {
         user_id: user.id,
         email: user.email,
-        name: data.name || '',
-        phone: data.phone || '',
-        career_objective: data.career_objective || '',
+        name: sanitizeInput(data.name || ''),
+        phone: sanitizeInput(data.phone || ''),
+        career_objective: sanitizeInput(data.career_objective || ''),
         max_monthly_price: data.max_monthly_price ? parseInt(data.max_monthly_price) : 10,
-        app_expectations: data.app_expectations || ''
+        app_expectations: sanitizeInput(data.app_expectations || '')
       };
 
       let error;

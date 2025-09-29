@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security'
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof Error && error.message) {
@@ -140,15 +141,16 @@ const Auth: React.FC = () => {
     }
   }, [searchParams, toast])
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!validateEmail(email)) {
+    if (!isValidEmail(email)) {
       setError('Please enter a valid email address')
+      return
+    }
+
+    // Rate limiting
+    if (!authRateLimiter.check(email)) {
+      setError('Too many attempts. Please try again later.')
       return
     }
 
@@ -192,8 +194,11 @@ const Auth: React.FC = () => {
           setLoading(false)
           return
         }
-        if (password.length < 8) {
-          setError('Password must be at least 8 characters long')
+
+        // Password strength validation for signup
+        const passwordValidation = validatePassword(password)
+        if (!passwordValidation.valid) {
+          setError(`Password requirements: ${passwordValidation.errors.join(', ')}`)
           setLoading(false)
           return
         }
