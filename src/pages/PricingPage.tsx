@@ -1,4 +1,3 @@
-import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Pricing from "@/components/sections/Pricing";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,7 +48,6 @@ const PricingPage = () => {
       />
       <div className="min-h-screen bg-background">
         <PromoStrip />
-        <Header />
         <main role="main">
           {/* Hero Section */}
           <section className="py-6 lg:py-8">
