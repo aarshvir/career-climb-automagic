@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Zap, Crown, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePlan } from "@/contexts/PlanContext";
+import { planManager } from "@/utils/planManager";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/SEOHead";
@@ -95,7 +96,9 @@ const PlanSelection = () => {
     setSelectedPlan(planId);
   
     try {
-      // Insert into plan_selections table
+      console.log('🔄 Starting plan selection for:', planId, 'User ID:', user.id);
+      
+      // Step 1: Record plan selection
       const { error: planSelectionError } = await supabase
         .from('plan_selections')
         .upsert({
@@ -107,53 +110,65 @@ const PlanSelection = () => {
         });
   
       if (planSelectionError) {
-        console.error("Plan selection upsert failed:", planSelectionError);
+        console.error("❌ Plan selection upsert failed:", planSelectionError);
         toast({
           title: "Error",
-          description: "Failed to update plan_selections. " + planSelectionError.message,
+          description: "Failed to update plan selection. " + planSelectionError.message,
           variant: "destructive"
         });
         return;
       }
+      
+      console.log('✅ Plan selection recorded');
   
-      // Upsert the profiles table to ensure record exists
-      const { error: profileError } = await supabase
+      // Step 2: Update profile plan using PlanManager for proper cache handling
+      try {
+        await planManager.updatePlan(user.id, planId);
+        console.log('✅ Profile plan updated via PlanManager');
+      } catch (planUpdateError) {
+        console.error("❌ PlanManager update failed:", planUpdateError);
+        toast({
+          title: "Error",
+          description: "Failed to update profile plan. " + (planUpdateError instanceof Error ? planUpdateError.message : ""),
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Step 3: Validate the update by fetching from database
+      const { data: verifyData, error: verifyError } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
-          plan: planId
-        }, {
-          onConflict: 'id'
-        });
-  
-      if (profileError) {
-        console.error("Profile upsert failed:", profileError);
+        .select('plan')
+        .eq('id', user.id)
+        .single();
+      
+      if (verifyError) {
+        console.error("❌ Failed to verify plan update:", verifyError);
+      } else if (verifyData?.plan !== planId) {
+        console.error("❌ Plan verification failed. Expected:", planId, "Got:", verifyData?.plan);
         toast({
-          title: "Error",
-          description: "Failed to update profile. " + profileError.message,
+          title: "Warning",
+          description: "Plan update may not have completed correctly. Please refresh the page.",
           variant: "destructive"
         });
         return;
+      } else {
+        console.log('✅ Plan verified in database:', verifyData.plan);
       }
   
-      // Refresh the plan context to pick up the new plan
+      // Step 4: Refresh the plan context
       await refreshProfile();
-
-      // Trigger plan upgrade event for other components
-      window.dispatchEvent(new CustomEvent('planUpgraded', { 
-        detail: { newPlan: planId } 
-      }));
+      console.log('✅ Plan context refreshed');
 
       toast({
         title: "Plan selected successfully!",
         description: `Welcome to ${plans.find(p => p.id === planId)?.name} plan.`
       });
   
-      // Force a hard reload to guarantee fresh context
-      window.location.href = "/dashboard";
-      // If the plan is still not updated after reload, check Supabase RLS and DB for issues.
+      // Navigate to dashboard
+      navigate("/dashboard");
     } catch (error) {
-      console.error('Error selecting plan:', error);
+      console.error('❌ Unexpected error selecting plan:', error);
       toast({
         title: "Error",
         description: "Failed to select plan. " + (error instanceof Error ? error.message : ""),

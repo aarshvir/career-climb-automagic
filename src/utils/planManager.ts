@@ -43,21 +43,33 @@ export class PlanManager {
     try {
       console.log('🔄 PlanManager: Updating plan to', newPlan, 'for user', userId);
       
-      // Update database
-      const { error } = await supabase
+      // Clear any stale cache first
+      this.cache.delete(userId);
+      localStorage.removeItem(`plan_${userId}`);
+      
+      // Update database with upsert to handle both insert and update
+      const { data, error } = await supabase
         .from('profiles')
-        .update({ plan: newPlan })
-        .eq('id', userId);
+        .upsert({ 
+          id: userId,
+          plan: newPlan 
+        }, {
+          onConflict: 'id'
+        })
+        .select('plan, subscription_status')
+        .single();
 
       if (error) {
-        console.error('❌ PlanManager: Database update failed:', error);
+        console.error('❌ PlanManager: Database upsert failed:', error);
         throw error;
       }
 
-      // Update cache immediately
+      console.log('✅ PlanManager: Database updated, returned data:', data);
+
+      // Update cache with fresh data from database
       const planData: PlanData = {
-        plan: newPlan,
-        subscription_status: this.cache.get(userId)?.subscription_status || null,
+        plan: data?.plan || newPlan,
+        subscription_status: data?.subscription_status || null,
         lastUpdated: Date.now()
       };
       
@@ -66,7 +78,7 @@ export class PlanManager {
       // Store in localStorage for persistence
       localStorage.setItem(`plan_${userId}`, JSON.stringify(planData));
       
-      console.log('✅ PlanManager: Plan updated successfully');
+      console.log('✅ PlanManager: Plan updated successfully, new plan:', planData.plan);
       
       // Notify all subscribers
       this.notify();
