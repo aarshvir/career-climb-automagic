@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { PlanLimits, usePlanLimits } from '@/hooks/usePlanLimits';
 import { planManager } from '@/utils/planManager';
+import { logger } from '@/lib/logger';
 
 interface UserProfile {
   plan: string;
@@ -58,7 +59,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
 
     try {
       setLoading(true);
-      console.log('🔄 PlanContext: Fetching profile for user', user.id);
+      logger.debug('PlanContext: Fetching profile for user', { userId: user.id });
 
       // Use PlanManager for robust plan handling
       const planData = await planManager.fetchPlan(user.id);
@@ -68,7 +69,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
         subscription_status: planData.subscription_status,
       };
 
-      console.log('✅ PlanContext: Profile fetched successfully', userProfile);
+      logger.info('PlanContext: Profile fetched successfully', userProfile);
       
       // Update profile state
       setProfile(userProfile);
@@ -85,7 +86,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
           setDailyFetchCount(parsed.fetchCount || 0);
           setLastFetchDate(parsed.fetchDate || null);
         } catch (parseError) {
-          console.error('Error parsing stored usage data:', parseError);
+          logger.error('Error parsing stored usage data', parseError);
           setDailyFetchCount(0);
           setLastFetchDate(null);
         }
@@ -95,13 +96,13 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
       }
 
     } catch (error) {
-      console.error('❌ PlanContext: Failed to fetch profile:', error);
+      logger.error('PlanContext: Failed to fetch profile', error);
       setError(error instanceof Error ? error.message : 'Failed to load profile');
       
       // Try to load from cache as fallback - don't reset to free if we have cached data
       const cachedPlan = planManager.loadPlan(user.id);
       if (cachedPlan) {
-        console.log('🔄 PlanContext: Using cached plan data as fallback:', cachedPlan);
+        logger.info('PlanContext: Using cached plan data as fallback', cachedPlan);
         setProfile({
           plan: cachedPlan.plan,
           subscription_status: cachedPlan.subscription_status,
@@ -109,7 +110,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
         setError(null); // Clear error since we have cached data
       } else {
         // Only set to free if we truly have no cached data
-        console.log('⚠️ PlanContext: No cached data available, using free plan as fallback');
+        logger.warn('PlanContext: No cached data available, using free plan as fallback');
         setProfile({ plan: 'free', subscription_status: null });
       }
     } finally {
@@ -127,7 +128,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     if (!user) return;
     
     const unsubscribe = planManager.subscribe(() => {
-      console.log('🔄 PlanContext: PlanManager notified of changes, refreshing...');
+      logger.debug('PlanContext: PlanManager notified of changes, refreshing');
       refreshProfile();
     });
     
@@ -141,7 +142,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     
     const handlePlanUpgrade = async () => {
       if (isRefreshing) {
-        console.log('🔄 PlanContext: Already refreshing, skipping duplicate event');
+        logger.debug('PlanContext: Already refreshing, skipping duplicate event');
         return;
       }
       
@@ -153,7 +154,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
       // Debounce the refresh to avoid too frequent updates
       refreshTimeout = setTimeout(async () => {
         isRefreshing = true;
-        console.log('🔄 PlanContext: Received plan upgrade event, refreshing...');
+        logger.debug('PlanContext: Received plan upgrade event, refreshing');
         
         try {
           await refreshProfile();
@@ -184,7 +185,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
       const newCount = dailyFetchCount + 1;
       
       // Use localStorage for daily usage tracking
-      console.warn('Using localStorage for daily usage tracking');
+      logger.warn('Using localStorage for daily usage tracking');
       
       // Store in localStorage
       const storageKey = `daily_usage_${user.id}_${today}`;
@@ -199,9 +200,9 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
       setDailyFetchCount(newCount);
       setLastFetchDate(today);
       
-      console.log('📈 Fetch count incremented (localStorage):', newCount);
+      logger.debug('Fetch count incremented (localStorage)', { count: newCount });
     } catch (error) {
-      console.error('Error incrementing fetch count:', error);
+      logger.error('Error incrementing fetch count', error);
     }
   }, [user, profile, dailyFetchCount, today]);
 
@@ -213,7 +214,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
     setDailyFetchCount(0);
     setLastFetchDate(null);
     
-    console.log('🔄 Daily count reset');
+    logger.debug('Daily count reset');
   }, [user, today]);
 
   const value: PlanContextType = {

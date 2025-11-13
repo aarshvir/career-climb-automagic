@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export interface PlanData {
   plan: string;
@@ -10,6 +11,8 @@ export class PlanManager {
   private static instance: PlanManager;
   private cache: Map<string, PlanData> = new Map();
   private refreshCallbacks: Set<() => void> = new Set();
+  private updateInProgress: Set<string> = new Set();
+  private fetchInProgress: Map<string, Promise<PlanData>> = new Map();
 
   private constructor() {}
 
@@ -38,21 +41,35 @@ export class PlanManager {
     return this.cache.get(userId) || null;
   }
 
-  // Update plan in database and cache
+  // Update plan in database and cache with mutex lock
   async updatePlan(userId: string, newPlan: string): Promise<void> {
+    // Prevent concurrent updates for same user
+    if (this.updateInProgress.has(userId)) {
+      logger.warn('Plan update already in progress for user', { userId });
+      // Wait for existing update to complete
+      let attempts = 0;
+      while (this.updateInProgress.has(userId) && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      return;
+    }
+
+    this.updateInProgress.add(userId);
+
     try {
-      console.log('🔄 PlanManager: Updating plan to', newPlan, 'for user', userId);
-      
+      logger.debug('PlanManager: Updating plan', { userId, newPlan });
+
       // Clear any stale cache first
       this.cache.delete(userId);
       localStorage.removeItem(`plan_${userId}`);
-      
+
       // Update database with upsert to handle both insert and update
       const { data, error } = await supabase
         .from('profiles')
-        .upsert({ 
+        .upsert({
           id: userId,
-          plan: newPlan 
+          plan: newPlan
         }, {
           onConflict: 'id'
         })
@@ -60,11 +77,11 @@ export class PlanManager {
         .single();
 
       if (error) {
-        console.error('❌ PlanManager: Database upsert failed:', error);
+        logger.error('PlanManager: Database upsert failed', error);
         throw error;
       }
 
-      console.log('✅ PlanManager: Database updated, returned data:', data);
+      logger.debug('PlanManager: Database updated', { data });
 
       // Update cache with fresh data from database
       const planData: PlanData = {
@@ -72,28 +89,49 @@ export class PlanManager {
         subscription_status: data?.subscription_status || null,
         lastUpdated: Date.now()
       };
-      
+
       this.cache.set(userId, planData);
-      
+
       // Store in localStorage for persistence
       localStorage.setItem(`plan_${userId}`, JSON.stringify(planData));
-      
-      console.log('✅ PlanManager: Plan updated successfully, new plan:', planData.plan);
-      
-      // Notify all subscribers
+
+      logger.info('PlanManager: Plan updated successfully', { plan: planData.plan });
+
+      // Notify all subscribers ONCE after successful update
       this.notify();
-      
+
     } catch (error) {
-      console.error('❌ PlanManager: Failed to update plan:', error);
+      logger.error('PlanManager: Failed to update plan', error);
       throw error;
+    } finally {
+      this.updateInProgress.delete(userId);
     }
   }
 
-  // Fetch plan from database
+  // Fetch plan from database with deduplication
   async fetchPlan(userId: string): Promise<PlanData> {
+    // Reuse existing fetch promise if one is in progress
+    if (this.fetchInProgress.has(userId)) {
+      logger.debug('PlanManager: Reusing in-progress fetch for user', { userId });
+      return this.fetchInProgress.get(userId)!;
+    }
+
+    // Create the promise and store it before fetching
+    const fetchPromise = this._performFetch(userId);
+    this.fetchInProgress.set(userId, fetchPromise);
+
     try {
-      console.log('🔄 PlanManager: Fetching plan for user', userId);
-      
+      const result = await fetchPromise;
+      return result;
+    } finally {
+      this.fetchInProgress.delete(userId);
+    }
+  }
+
+  private async _performFetch(userId: string): Promise<PlanData> {
+    try {
+      logger.debug('PlanManager: Fetching plan for user', { userId });
+
       const { data, error } = await supabase
         .from('profiles')
         .select('plan, subscription_status')
@@ -101,7 +139,7 @@ export class PlanManager {
         .maybeSingle();
 
       if (error) {
-        console.error('❌ PlanManager: Error fetching plan:', error);
+        logger.error('PlanManager: Error fetching plan', error);
         throw error;
       }
 
@@ -113,56 +151,44 @@ export class PlanManager {
 
       // Update cache
       this.cache.set(userId, planData);
-      
+
       // Store in localStorage for persistence
       localStorage.setItem(`plan_${userId}`, JSON.stringify(planData));
-      
-      console.log('✅ PlanManager: Plan fetched successfully', planData);
+
+      logger.info('PlanManager: Plan fetched successfully', { plan: planData.plan });
       return planData;
-      
+
     } catch (error) {
-      console.error('❌ PlanManager: Failed to fetch plan:', error);
-      
-      // Try to get from localStorage as fallback
-      const localStorageData = localStorage.getItem(`plan_${userId}`);
-      if (localStorageData) {
-        try {
-          const planData = JSON.parse(localStorageData);
-          console.log('🔄 PlanManager: Using cached plan data', planData);
-          return planData;
-        } catch (parseError) {
-          console.error('❌ PlanManager: Failed to parse cached data:', parseError);
-        }
-      }
-      
-      // Only return default plan if we truly have no cached data
+      logger.error('PlanManager: Failed to fetch plan', error);
+
+      // Try to get from cache first
       const memoryCache = this.cache.get(userId);
       if (memoryCache) {
-        console.log('🔄 PlanManager: Using cached plan data as fallback:', memoryCache);
+        logger.info('PlanManager: Using memory cache as fallback', memoryCache);
         return memoryCache;
       }
-      
-      // Check localStorage as final fallback
+
+      // Try localStorage as secondary fallback
       const storedData = localStorage.getItem(`plan_${userId}`);
       if (storedData) {
         try {
           const planData = JSON.parse(storedData);
-          console.log('🔄 PlanManager: Using localStorage plan data as fallback:', planData);
+          logger.info('PlanManager: Using localStorage as fallback', planData);
           this.cache.set(userId, planData);
           return planData;
         } catch (parseError) {
-          console.error('❌ PlanManager: Failed to parse stored plan data:', parseError);
+          logger.error('PlanManager: Failed to parse stored plan data', parseError);
         }
       }
-      
-      // Only return default plan if we truly have no data anywhere
-      console.log('⚠️ PlanManager: No cached or stored data available, using free plan as final fallback');
+
+      // Only return default plan if we have no data
+      logger.warn('PlanManager: No cached data, using free plan as fallback');
       const defaultPlan: PlanData = {
         plan: 'free',
         subscription_status: null,
         lastUpdated: Date.now()
       };
-      
+
       this.cache.set(userId, defaultPlan);
       return defaultPlan;
     }
@@ -184,7 +210,7 @@ export class PlanManager {
         this.cache.set(userId, planData);
         return planData;
       } catch (error) {
-        console.error('❌ PlanManager: Failed to parse stored plan data:', error);
+        logger.error('PlanManager: Failed to parse stored plan data', error);
       }
     }
 

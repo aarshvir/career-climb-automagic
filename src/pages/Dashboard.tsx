@@ -13,6 +13,7 @@ import { useOnboarding } from "@/contexts/OnboardingContext"
 import { hasCompletedForm } from "@/lib/interestForm"
 import { RESUME_BUCKET } from "@/lib/resume-storage"
 import { normalizePlan } from "@/utils/planUtils"
+import { logger } from "@/lib/logger"
 import { Briefcase, Target, Clock, FileText } from "lucide-react"
 
 // Data interfaces
