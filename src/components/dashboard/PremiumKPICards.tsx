@@ -94,13 +94,13 @@ export const PremiumKPICards = ({ stats, timeRange, onTimeRangeChange, userPlan 
                 key={range.value}
                 onClick={() => onTimeRangeChange(range.value)}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 interactive-element",
+                  "flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 interactive-element min-h-[44px]",
                   timeRange === range.value
                     ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
-                <range.icon className="h-3.5 w-3.5" />
+                <range.icon className="h-3.5 w-3.5 shrink-0" />
                 <span className="whitespace-nowrap">{range.label}</span>
               </button>
             ))}
@@ -109,7 +109,7 @@ export const PremiumKPICards = ({ stats, timeRange, onTimeRangeChange, userPlan 
       </div>
 
       {/* Enhanced KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiData.map((kpi, index) => (
           <Card key={index} className={cn(
             "premium-card-interactive relative overflow-hidden border-0 shadow-md hover:shadow-lg",

@@ -191,21 +191,25 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
   return (
     <Card className="border-0 shadow-sm bg-white">
       <CardHeader className="border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+          <div className="min-w-0">
             <CardTitle className="text-xl font-semibold text-gray-900">
               Job Opportunities
             </CardTitle>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 mt-1 truncate">
               {totalJobs} matches found • Showing {jobs.length} jobs (Page {currentPage} of {totalPages})
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="outline" size="sm" className="min-h-[44px]">
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <Button size="sm" onClick={onFetchJobs} className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              size="sm"
+              onClick={onFetchJobs}
+              className="bg-blue-600 hover:bg-blue-700 min-h-[44px]"
+            >
               <Zap className="h-4 w-4 mr-2" />
               Fetch Jobs
             </Button>
@@ -214,8 +218,8 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[700px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -286,12 +290,13 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
                     {getStatusBadge(job.status)}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleJobAction(job.id, 'bookmark')}
-                        className="h-8 w-8 p-0"
+                        className="h-11 w-11 p-0"
+                        aria-label="Bookmark job"
                       >
                         <Bookmark className="h-4 w-4" />
                       </Button>
@@ -299,7 +304,8 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleJobAction(job.id, 'view')}
-                        className="h-8 w-8 p-0"
+                        className="h-11 w-11 p-0"
+                        aria-label="View job"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -307,7 +313,8 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleJobAction(job.id, 'apply')}
-                        className="h-8 w-8 p-0"
+                        className="h-11 w-11 p-0"
+                        aria-label="Apply to job"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
@@ -321,32 +328,35 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="text-sm text-gray-700">
-                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalJobs)} of {totalJobs} results
+                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to{" "}
+                {Math.min(currentPage * ITEMS_PER_PAGE, totalJobs)} of {totalJobs} results
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
+                  className="min-h-[44px]"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Previous
                 </Button>
-                
+
                 <div className="flex items-center gap-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    const pageNum =
+                      Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
                     return (
                       <Button
                         key={pageNum}
                         variant={currentPage === pageNum ? "default" : "outline"}
                         size="sm"
                         onClick={() => handlePageChange(pageNum)}
-                        className="h-8 w-8 p-0"
+                        className="h-11 w-11 p-0"
                       >
                         {pageNum}
                       </Button>
@@ -359,6 +369,7 @@ export const JobListingsTable: React.FC<JobListingsTableProps> = ({
                   size="sm"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
+                  className="min-h-[44px]"
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
