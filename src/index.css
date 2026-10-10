@@ -88,6 +88,7 @@
   .jv-mobile-panel > a[aria-current="page"] { color: #2850df; font-weight: 650; }
   .jv-mobile-account { padding-top: 12px; border-top: 1px solid hsl(var(--border)); display: flex; flex-wrap: wrap; gap: 10px; }
   .jv-footer-top, .jv-footer-bottom { flex-direction: column; } .jv-footer-inner { padding: 32px 20px 24px; }
+  .jv-footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; }
   .jv-footer-links a { min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
