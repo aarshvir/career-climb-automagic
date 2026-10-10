@@ -11,4 +11,6 @@ const results = await Promise.all(['get-entitlement','tailor-cv','create-checkou
 }));
 const rejectedOrigin = await fetch(endpoint+'get-entitlement',{method:'OPTIONS',headers:{Origin:'https://untrusted.example','Access-Control-Request-Method':'POST'}});
 assert.equal(rejectedOrigin.headers.get('Access-Control-Allow-Origin'),null,'Unapproved origins must not receive browser access');
-console.log(JSON.stringify({results,unapprovedOriginDenied:true},null,2));
+const localPreflight = await fetch(endpoint+'get-entitlement',{method:'OPTIONS',headers:{Origin:'http://localhost:8080','Access-Control-Request-Method':'POST'}});
+assert.equal(localPreflight.headers.get('Access-Control-Allow-Origin'),'http://localhost:8080');
+console.log(JSON.stringify({results,unapprovedOriginDenied:true,approvedLocalCallbackReady:true},null,2));
