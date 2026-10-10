@@ -209,7 +209,7 @@ const Dashboard = () => {
     
     try {
       const { data: jobRun, error: runError } = await supabase
-        .from('job_runs')
+        .from('job_runs' as any)
         .insert({ user_id: user.id, run_status: 'pending' })
         .select()
         .single()
@@ -237,7 +237,7 @@ const Dashboard = () => {
       
       // Mark job run as failed before throwing
       await supabase
-        .from('job_runs')
+        .from('job_runs' as any)
         .update({ 
           run_status: 'failed', 
           error_message: 'Missing job preferences' 
@@ -265,7 +265,7 @@ const Dashboard = () => {
       
       // Mark job run as failed before throwing
       await supabase
-        .from('job_runs')
+        .from('job_runs' as any)
         .update({ 
           run_status: 'failed', 
           error_message: 'Missing resume' 
@@ -289,7 +289,7 @@ const Dashboard = () => {
       
       // Mark job run as failed before throwing
       await supabase
-        .from('job_runs')
+        .from('job_runs' as any)
         .update({ 
           run_status: 'failed', 
           error_message: 'Unable to create CV download link' 
@@ -315,7 +315,7 @@ const Dashboard = () => {
     if (functionError) {
       console.error('Error invoking job fetch function:', functionError)
       await supabase
-        .from('job_runs')
+        .from('job_runs' as any)
         .update({ run_status: 'failed', error_message: functionError.message })
         .eq('id', jobRunId)
 
@@ -340,7 +340,7 @@ const Dashboard = () => {
       if (jobRunId) {
         try {
           await supabase
-            .from('job_runs')
+            .from('job_runs' as any)
             .update({ 
               run_status: 'failed', 
               error_message: error instanceof Error ? error.message : 'Unexpected error during job fetch' 

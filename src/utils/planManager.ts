@@ -173,7 +173,7 @@ export class PlanManager {
       if (storedData) {
         try {
           const planData = JSON.parse(storedData);
-          logger.info('PlanManager: Using localStorage as fallback', planData);
+          logger.info('PlanManager: Using localStorage as fallback', { ...planData });
           this.cache.set(userId, planData);
           return planData;
         } catch (parseError) {
