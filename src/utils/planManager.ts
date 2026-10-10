@@ -164,7 +164,7 @@ export class PlanManager {
       // Try to get from cache first
       const memoryCache = this.cache.get(userId);
       if (memoryCache) {
-        logger.info('PlanManager: Using memory cache as fallback', memoryCache);
+        logger.info('PlanManager: Using memory cache as fallback', { ...memoryCache });
         return memoryCache;
       }
 

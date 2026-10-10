@@ -1,55 +1,44 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/integrations/supabase/client'
-import { logger } from '@/lib/logger'
-import { validateSession } from '@/lib/security'
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { readAuthSession } from '@/utils/authSession';
+import { configurationError } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
 
 const AuthCallback = () => {
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(configurationError);
   useEffect(() => {
-    const handleAuthCallback = async () => {
-      try {
-        logger.debug('Auth callback processing');
-
-        // Wait a bit for potential session to be established
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const { data, error } = await supabase.auth.getSession()
-        
-        if (error) {
-          logger.error('Auth callback error', error)
-          navigate('/?error=auth_failed')
-          return
-        }
-
-        if (data.session && validateSession(data.session)) {
-          logger.info('Auth callback success')
-          // Successfully authenticated, redirect to home
-          navigate('/?auth=success')
-        } else {
-          logger.warn('Auth callback: Invalid or no session found')
-          // No session found, redirect with error
-          navigate('/?error=no_session')
-        }
-      } catch (error) {
-        logger.error('Auth callback failed', error)
-        navigate('/?error=callback_failed')
-      }
+    let active = true;
+    if (configurationError) return;
+    const params = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    if (params.has('error') || hash.has('error')) {
+      setError('Sign-in was cancelled or the email link expired. Please start again.');
+      window.history.replaceState(null, '', window.location.pathname);
+      return;
     }
-
-    handleAuthCallback()
-  }, [navigate])
+    void readAuthSession().then(session => {
+      if (!active) return;
+      if (!session) { setError('This sign-in link is invalid or expired. Please start again.'); return; }
+      navigate('/dashboard', { replace: true });
+    }).catch(() => {
+      if (active) setError('We could not complete sign-in. Please request a new link or try signing in again.');
+    }).finally(() => {
+      if (active && window.location.pathname === '/auth/callback') window.history.replaceState(null, '', window.location.pathname);
+    });
+    return () => { active = false; };
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-        <h2 className="text-xl font-semibold text-foreground">Completing sign in...</h2>
-        <p className="text-muted-foreground mt-2">Please wait while we complete your authentication.</p>
+    <main className="min-h-[70vh] flex items-center justify-center p-4">
+      <div className="max-w-md text-center space-y-4">
+        {error ? (
+          <><h1 className="text-xl font-semibold">Sign-in could not be completed</h1><p role="alert">{error}</p><Button onClick={() => navigate('/auth', { replace: true })}>Back to sign in</Button></>
+        ) : (
+          <><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" aria-hidden="true" /><h1 className="text-xl font-semibold" role="status">Completing sign-in...</h1></>
+        )}
       </div>
-    </div>
-  )
-}
-
-export default AuthCallback
+    </main>
+  );
+};
+export default AuthCallback;

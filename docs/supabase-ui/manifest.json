@@ -1,0 +1,154 @@
+{
+    "externalImport":  "https://esm.sh/@supabase/supabase-js@2.57.4",
+    "bundles":  [
+                    {
+                        "function":  "tailor-cv",
+                        "sha256":  "30c46c5bac3d034db97d4f4c0ae900cc3b804a2f83962f972ca6d86a8a3ed53d",
+                        "artifact":  "docs/supabase-ui/tailor-cv.js",
+                        "sources":  [
+                                        {
+                                            "sha256":  "288716065dc70cb2f7ff851ad826d180631da04af5c94bf120758fc304d1e608",
+                                            "path":  "supabase/functions/tailor-cv/index.ts"
+                                        },
+                                        {
+                                            "sha256":  "8c282396b8489124029c5c38e4a5487e661e886c78ec3dee82d4d2af664e0242",
+                                            "path":  "supabase/functions/_shared/core.ts"
+                                        },
+                                        {
+                                            "sha256":  "fd11dc857c394f26f59116f124778cf2350c166e4f0c1f2b5ecd8c9c22fcf2b6",
+                                            "path":  "supabase/functions/_shared/runtime.ts"
+                                        }
+                                    ]
+                    },
+                    {
+                        "function":  "get-entitlement",
+                        "sha256":  "31a8d9a89d61894f2098bbc13e3f2ee3be39d509d27334793636ab358ba68b67",
+                        "artifact":  "docs/supabase-ui/get-entitlement.js",
+                        "sources":  [
+                                        {
+                                            "sha256":  "9ecb0869c4ef9745796d3ec61eeab3160008d080ccf1f877fd6db4eb5101d61b",
+                                            "path":  "supabase/functions/get-entitlement/index.ts"
+                                        },
+                                        {
+                                            "sha256":  "8c282396b8489124029c5c38e4a5487e661e886c78ec3dee82d4d2af664e0242",
+                                            "path":  "supabase/functions/_shared/core.ts"
+                                        },
+                                        {
+                                            "sha256":  "fd11dc857c394f26f59116f124778cf2350c166e4f0c1f2b5ecd8c9c22fcf2b6",
+                                            "path":  "supabase/functions/_shared/runtime.ts"
+                                        }
+                                    ]
+                    },
+                    {
+                        "function":  "create-checkout",
+                        "sha256":  "13090f8720a3600289b2e1c6781e89232efd0b25871180f2ef423fb552724147",
+                        "artifact":  "docs/supabase-ui/create-checkout.js",
+                        "sources":  [
+                                        {
+                                            "sha256":  "a7ba673b3248574d0f14074ee98a9d532552953bc39c657c958ca6cc3b26cab0",
+                                            "path":  "supabase/functions/create-checkout/index.ts"
+                                        },
+                                        {
+                                            "sha256":  "8c282396b8489124029c5c38e4a5487e661e886c78ec3dee82d4d2af664e0242",
+                                            "path":  "supabase/functions/_shared/core.ts"
+                                        },
+                                        {
+                                            "sha256":  "fd11dc857c394f26f59116f124778cf2350c166e4f0c1f2b5ecd8c9c22fcf2b6",
+                                            "path":  "supabase/functions/_shared/runtime.ts"
+                                        },
+                                        {
+                                            "sha256":  "07b83bb37b2776c58015bb96d7172164c8c00b43bfcf221eef6db4445b4b02c7",
+                                            "path":  "supabase/functions/_shared/paddle.ts"
+                                        }
+                                    ]
+                    },
+                    {
+                        "function":  "paddle-webhook",
+                        "sha256":  "d68c31d707f9938228e8f4c9e628d7eb1f3ccc18c8a26a36f5bc93cbdeaa604a",
+                        "artifact":  "docs/supabase-ui/paddle-webhook.js",
+                        "sources":  [
+                                        {
+                                            "sha256":  "38e379219466ff2faca5f79c44fa77ecd8e8414bd9a9a2c0d5f87775f1983b9c",
+                                            "path":  "supabase/functions/paddle-webhook/index.ts"
+                                        },
+                                        {
+                                            "sha256":  "8c282396b8489124029c5c38e4a5487e661e886c78ec3dee82d4d2af664e0242",
+                                            "path":  "supabase/functions/_shared/core.ts"
+                                        },
+                                        {
+                                            "sha256":  "fd11dc857c394f26f59116f124778cf2350c166e4f0c1f2b5ecd8c9c22fcf2b6",
+                                            "path":  "supabase/functions/_shared/runtime.ts"
+                                        },
+                                        {
+                                            "sha256":  "07b83bb37b2776c58015bb96d7172164c8c00b43bfcf221eef6db4445b4b02c7",
+                                            "path":  "supabase/functions/_shared/paddle.ts"
+                                        }
+                                    ]
+                    },
+                    {
+                        "function":  "stripe-webhook",
+                        "sha256":  "cacb8b1638717d59b55325d58382c5f8ea3c95b0f8330973e59ea8508464a881",
+                        "artifact":  "docs/supabase-ui/stripe-webhook.js",
+                        "sources":  [
+                                        {
+                                            "sha256":  "4a2e610441a0ae64e7e8cb79bf516f087a7cd4a70f7f54960f445f628ee94795",
+                                            "path":  "supabase/functions/stripe-webhook/index.ts"
+                                        },
+                                        {
+                                            "sha256":  "8c282396b8489124029c5c38e4a5487e661e886c78ec3dee82d4d2af664e0242",
+                                            "path":  "supabase/functions/_shared/core.ts"
+                                        },
+                                        {
+                                            "sha256":  "fd11dc857c394f26f59116f124778cf2350c166e4f0c1f2b5ecd8c9c22fcf2b6",
+                                            "path":  "supabase/functions/_shared/runtime.ts"
+                                        }
+                                    ]
+                    },
+                    {
+                        "function":  "trigger-make-run",
+                        "sha256":  "1aff3ce94831fea7335b402dcc23693ec26c199824a1e6f50ce4d7b60465a85a",
+                        "artifact":  "docs/supabase-ui/trigger-make-run.js",
+                        "sources":  [
+                                        {
+                                            "sha256":  "b11157651442def8e09ff0748b683ce6f4f4490f4b19260b44bb3969ab031b27",
+                                            "path":  "supabase/functions/trigger-make-run/index.ts"
+                                        },
+                                        {
+                                            "sha256":  "873c2dd9e8e454de83c3c6201180cb3fe50f5b2bcc540001a41dc3c2136d0d29",
+                                            "path":  "supabase/functions/retired-response.ts"
+                                        }
+                                    ]
+                    },
+                    {
+                        "function":  "check-email-provider",
+                        "sha256":  "64ea64a8e4386517ae9d8bb3a63b647b30890e22f454c831b27f425ede47d7e8",
+                        "artifact":  "docs/supabase-ui/check-email-provider.js",
+                        "sources":  [
+                                        {
+                                            "sha256":  "b11157651442def8e09ff0748b683ce6f4f4490f4b19260b44bb3969ab031b27",
+                                            "path":  "supabase/functions/check-email-provider/index.ts"
+                                        },
+                                        {
+                                            "sha256":  "873c2dd9e8e454de83c3c6201180cb3fe50f5b2bcc540001a41dc3c2136d0d29",
+                                            "path":  "supabase/functions/retired-response.ts"
+                                        }
+                                    ]
+                    },
+                    {
+                        "function":  "lemon-squeezy-webhook",
+                        "sha256":  "211ce2eab9860024d32e5cde450181d61767a6fe490c41ad30594ed8d74ce6ad",
+                        "artifact":  "docs/supabase-ui/lemon-squeezy-webhook.js",
+                        "sources":  [
+                                        {
+                                            "sha256":  "a4b7dc250fbc8ba95b437d059e0d5cfb740c884e010638cacd225f7bd9410d53",
+                                            "path":  "supabase/functions/lemon-squeezy-webhook/index.ts"
+                                        },
+                                        {
+                                            "sha256":  "873c2dd9e8e454de83c3c6201180cb3fe50f5b2bcc540001a41dc3c2136d0d29",
+                                            "path":  "supabase/functions/retired-response.ts"
+                                        }
+                                    ]
+                    }
+                ],
+    "generator":  "deno@2.9.6 bundle --platform=deno"
+}
