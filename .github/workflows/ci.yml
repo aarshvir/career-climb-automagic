@@ -34,5 +34,8 @@ jobs:
     - name: Run build
       run: npm run build
 
+    - name: Verify hosting responses
+      run: node scripts/check-host-worker.mjs
+
     - name: Security audit
       run: npm audit --audit-level=moderate

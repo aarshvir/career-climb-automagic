@@ -1,5 +1,7 @@
 # Jobvance repair verification — 10 October 2026
 
+**Current publication:** https://jobvance-io.clear-moon-9685.chatgpt.site, independently hosted on Cloudflare through Sites. Source is merged into GitHub main and retained locally in `jobvance-independent`. Lovable synchronization has been disconnected. Jobvance.io DNS cutover is awaiting Hostinger access. The deployed backend has additionally passed 13 actual API checks using two private synthetic accounts. These new results supersede the earlier preparation-state notes below; see `INDEPENDENT-HOSTING.md` and `HOSTED-API-VERIFICATION.md` for current details.
+
 ## Applied and verified
 
 - Repair source is on `codex/jobvance-real-mvp`, with draft pull request #23. The latest Lovable changes have been integrated. The generated preview-storage file's CI lint error was corrected.
@@ -17,7 +19,7 @@ The account sign-in flow is awaiting the owner's completion in the local browser
 
 Retirement of `trigger-make-run`, `check-email-provider` and `lemon-squeezy-webhook` is awaiting explicit owner approval after automatic approval review rejected the final live replacement. The old automation source was saved privately outside the repository, and its replacement is staged in the dashboard. The other two dashboard source panes currently do not expose downloadable source; do not claim exact backups for those deployed versions. The reviewed retirement sources perform no external work and return 410. These legacy remote endpoints have not yet been replaced. Local disabled entries alone do not retire a deployed endpoint.
 
-After authenticated hosted verification and approved retirement, publish the tested free beta through the existing Lovable project, inspect Jobvance.io, and update this record with the actual released commit and results. Keep commercial checkout disabled. The existing Vercel copy has a successful preview deployment; it is not the host serving Jobvance.io.
+The owner subsequently requested independent publication. Use the independent hosting workflow and verified source, then complete Hostinger DNS cutover and inspect Jobvance.io. Keep commercial checkout disabled. The existing Vercel copy is a development mirror, and the original Lovable publication remains only until the authoritative domain records are switched.
 
 ## Reproduction and limits
 

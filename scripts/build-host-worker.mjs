@@ -1,0 +1,111 @@
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { extname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { gzipSync } from 'node:zlib';
+
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const dist = join(root, 'dist');
+const maxCompressedBytes = 3 * 1024 * 1024;
+const manifest = JSON.parse(await readFile(join(root, '.openai/hosting.json'), 'utf8'));
+if (typeof manifest.project_id !== 'string' || !manifest.project_id) throw new Error('The existing Site project ID is required.');
+if ('static' in manifest) throw new Error('Worker publication requires static to be omitted from .openai/hosting.json.');
+const hosting = JSON.parse(await readFile(join(root, 'vercel.json'), 'utf8'));
+const rules = hosting.headers.find(rule => rule.source === '/(.*)')?.headers;
+if (!Array.isArray(rules)) throw new Error('The existing security response headers are required.');
+const security = Object.fromEntries(rules.map(({ key, value }) => [key, value]));
+for (const name of ['Content-Security-Policy', 'X-Frame-Options', 'X-Content-Type-Options', 'Referrer-Policy']) {
+  if (!security[name]) throw new Error(`Missing security response header: ${name}`);
+}
+new Headers(security); // Reject invalid response-header definitions before publishing.
+
+const mime = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.xml': 'application/xml; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif', '.webp': 'image/webp', '.avif': 'image/avif', '.ico': 'image/x-icon',
+  '.ttf': 'font/ttf', '.otf': 'font/otf', '.woff': 'font/woff', '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.pdf': 'application/pdf',
+};
+const privateRoots = new Set(['server', 'src', 'scripts', 'docs', 'supabase', 'node_modules', 'api', 'functions']);
+const assets = {};
+const assetRoots = new Set();
+let totalAssetBytes = 0;
+async function collect(directory, prefix = '') {
+  const entries = (await readdir(directory, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name, 'en'));
+  for (const entry of entries) {
+    if (entry.name.startsWith('.') || entry.name.endsWith('.map')) continue;
+    if (!prefix && privateRoots.has(entry.name.toLowerCase())) continue;
+    if (entry.isSymbolicLink()) throw new Error('Symbolic links are not permitted in the public build output.');
+    const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) { await collect(join(directory, entry.name), relative); continue; }
+    if (!entry.isFile()) throw new Error('Unexpected file type in the public build output.');
+    const bytes = await readFile(join(directory, entry.name));
+    const path = `/${relative}`;
+    if (prefix) assetRoots.add(relative.split('/')[0]);
+    const immutable = path.startsWith('/assets/') && /-[a-z\d_-]{8,}\.[a-z\d]+$/i.test(path);
+    assets[path] = [mime[extname(entry.name).toLowerCase()] ?? 'application/octet-stream',
+      `"${createHash('sha256').update(bytes).digest('hex')}"`, bytes.length, immutable, bytes.toString('base64')];
+    totalAssetBytes += bytes.length;
+  }
+}
+await collect(dist);
+if (!assets['/index.html']) throw new Error('Run the frontend build before packaging its Worker.');
+
+// Generated Worker has no imports, dependencies, filesystem access or bindings.
+// Binary decoding is lazy and shared within an isolate, never performed for the entire map per request.
+const worker = `const SECURITY=${JSON.stringify(security)};
+const ASSETS=${JSON.stringify(assets)};
+const PRIVATE_ROOTS=new Set(${JSON.stringify([...privateRoots])});
+const ASSET_ROOTS=new Set(${JSON.stringify([...assetRoots])});
+const decoded=new Map();
+function reply(request,status,message,extra={}){
+  const headers=new Headers(SECURITY);
+  headers.set('Content-Type','text/plain; charset=utf-8');
+  headers.set('Cache-Control','no-store');
+  for(const [name,value] of Object.entries(extra))headers.set(name,value);
+  headers.set('Content-Length',String(new TextEncoder().encode(message).length));
+  return new Response(request.method==='HEAD'?null:message,{status,headers});
+}
+function publicPath(request){
+  const pathname=new URL(request.url).pathname;
+  if(/%2f|%5c/i.test(pathname))return null;
+  let path;try{path=decodeURIComponent(pathname);}catch{return null;}
+  if(/[\\\\%\\x00-\\x1f\\x7f]/.test(path))return null;
+  const segments=path.split('/');
+  if(segments.some(segment=>segment.startsWith('.')))return null;
+  if(PRIVATE_ROOTS.has((segments[1]||'').toLowerCase()))return null;
+  return path;
+}
+function bytesFor(path,asset){
+  let bytes=decoded.get(path);
+  if(!bytes){const binary=atob(asset[4]);bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);decoded.set(path,bytes);}
+  return bytes;
+}
+export default {fetch(request){
+  if(request.method!=='GET'&&request.method!=='HEAD')return reply(request,405,'Method not allowed.',{Allow:'GET, HEAD'});
+  const path=publicPath(request);
+  if(path===null)return reply(request,404,'Not found.');
+  let served=path,asset=ASSETS[path];
+  if(!asset){
+    const segments=path.split('/');
+    if(ASSET_ROOTS.has(segments[1])||segments.some(segment=>segment.includes('.')))return reply(request,404,'Not found.');
+    served='/index.html';asset=ASSETS[served];
+  }
+  const headers=new Headers(SECURITY);
+  headers.set('Content-Type',asset[0]);
+  headers.set('ETag',asset[1]);
+  headers.set('Cache-Control',served.endsWith('.html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');
+  const condition=request.headers.get('If-None-Match');
+  if(condition&&condition.split(',').some(tag=>tag.trim()==='*'||tag.trim().replace(/^W\\//,'')===asset[1]))return new Response(null,{status:304,headers});
+  headers.set('Content-Length',String(asset[2]));
+  return new Response(request.method==='HEAD'?null:bytesFor(served,asset),{status:200,headers});
+}};
+`;
+const workerBytes = Buffer.byteLength(worker);
+const compressedBytes = gzipSync(worker, { level: 9 }).length;
+if (compressedBytes >= maxCompressedBytes) throw new Error(`Worker exceeds the 3 MiB compressed script limit (${compressedBytes} bytes).`);
+await mkdir(join(dist, 'server'), { recursive: true });
+await mkdir(join(dist, '.openai'), { recursive: true });
+await writeFile(join(dist, 'server/index.js'), worker);
+await writeFile(join(dist, '.openai/hosting.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+console.log(JSON.stringify({ assets: Object.keys(assets).length, staticBytes: totalAssetBytes, workerBytes, compressedBytes, compressedLimitBytes: maxCompressedBytes }));

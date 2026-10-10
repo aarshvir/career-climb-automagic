@@ -101,7 +101,7 @@ Keep `JOBVANCE_BILLING_ENABLED=false` for this beta. Existing disabled/retired a
 
 1. Choose a static host and connect the intended source repository/branch, or upload the validated `dist/` artifact.
 2. Configure the two public Supabase variables in that host's **build** environment. Run `npm ci` and `npm run build`; publish `dist/`.
-3. Serve existing assets directly and route application paths such as `/dashboard`, `/auth/callback` and `/auth/reset` to `index.html`. Reproduce the response-header protections in `vercel.json` on the chosen host; that file is an example, not a Vercel dependency.
+3. Serve existing assets directly and route application paths such as `/dashboard`, `/auth/callback` and `/auth/reset` to `index.html`. The build also generates the standalone Cloudflare Worker in `dist/server/index.js`, embedding the frontend and enforcing the reviewed response headers in `vercel.json`. This configuration file is reused as a portable policy, without a Vercel runtime dependency. `node scripts/check-host-worker.mjs` verifies the built Worker. Other static hosts can serve the frontend output with equivalent routing and headers.
 4. Add the exact new origin to Supabase's allowed origins and auth redirects. Test the independent preview before changing DNS.
 5. Connect `jobvance.io` through the host's custom-domain flow, then update the required records in Hostinger. Confirm HTTPS, asset delivery and direct refreshes of nested routes.
 6. Verify two synthetic accounts, signup/confirmation, recovery, upload, one free pack, approval, all export formats, tracking and reload. Keep live purchases disabled.
@@ -114,3 +114,5 @@ The frontend deployment, backend deployment and DNS cutover are separate changes
 - [Auth repair and redirect requirements](docs/AUTH-REPAIR.md)
 - [Backend deployment and verification limits](docs/MVP-BACKEND-DEPLOYMENT.md)
 - [Release status](docs/MVP-RELEASE-STATUS.md)
+- [Independent hosting and domain cutover](docs/INDEPENDENT-HOSTING.md)
+- [Actual hosted API checks](docs/HOSTED-API-VERIFICATION.md)
