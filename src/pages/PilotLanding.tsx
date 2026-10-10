@@ -74,7 +74,7 @@ export default function PilotLanding() {
             <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950"><p className="font-semibold">Strategy</p><p className="mt-1 text-sm text-muted-foreground">Choices & analysis</p></div>
             <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-800 dark:bg-violet-950"><p className="font-semibold">Transformation</p><p className="mt-1 text-sm text-muted-foreground">Planning & rollout</p></div>
           </div>
-          <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-muted-foreground"><ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-primary" />The emphasis changes. Contribution and result status stay grounded in the source.</p>
+          <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-muted-foreground"><ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-primary" />The emphasis changes for each role. What the person did, and whether the result was projected or achieved, stays clear.</p>
           <p className="mt-4 text-xs text-muted-foreground">Illustration using fictional facts. No customer results or live vacancies.</p>
         </div>
       </section>

@@ -44,7 +44,7 @@ export interface EvidenceReport {
 
 const METHOD_VERSION = 'english-literal-evidence-v1';
 const MAX_REQUIREMENTS = 40;
-const SCOPE = 'English wording comparison of user-provided text. Passages are not verified facts, qualification decisions, an ATS score or a prediction of hiring outcomes.';
+const SCOPE = 'This is an English wording check of user-provided text. The claims are not verified. Read the job requirements yourself; this check does not decide whether you qualify or predict an interview.';
 type Span = { start: number; end: number };
 type Line = Span & { text: string; line: number; newline: string };
 type Section = 'experience' | 'skills' | 'education' | 'credentials' | 'other';
@@ -297,14 +297,14 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     const anchors = matches.filter(term => !actions.includes(term) || TECH.has(term) || CREDENTIAL.has(term));
     return { passage, matches, anchors, full: terms.length > 0 && matches.length === terms.length };
   }).filter(match => match.anchors.length > 0).sort((a, b) => Number(b.full) - Number(a.full) || b.anchors.length - a.anchors.length || b.matches.length - a.matches.length || a.passage.start - b.passage.start);
-  const base: EvidenceRequirement = { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: related.slice(0, 3).map(item => publicPassage(item.passage)), explanation: '', question: `What passage or accurate additional detail, if any, supports this vacancy wording: “${vacancyQuote}”?`, matchedTerms: [...new Set(related.flatMap(item => item.matches))] };
+  const base: EvidenceRequirement = { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: related.slice(0, 3).map(item => publicPassage(item.passage)), explanation: '', question: `Is there something your CV should show here? Add a specific example or qualification only if it is accurate.`, matchedTerms: [...new Set(related.flatMap(item => item.matches))] };
   if (!recognized || ambiguous) {
-    base.explanation = UNSUPPORTED_SCRIPT.test(vacancyQuote) ? 'This passage includes a script outside this English comparison. Review the original wording manually.' : numericConstraint ? 'A non-duration quantity or numeric constraint needs manual interpretation. Its value has not been discarded or inferred from another fact.' : ambiguous ? 'Alternatives, equivalence or a negative requirement need manual interpretation. Related wording is not a verdict.' : 'This requirement is outside the recognized comparison rules. It is retained verbatim for manual review.';
+    base.explanation = UNSUPPORTED_SCRIPT.test(vacancyQuote) ? 'This part is not in English. Read it yourself against your CV.' : numericConstraint ? 'This requirement includes a number that needs checking, such as team size or budget. Compare it with your actual experience; the check has not assumed a match.' : ambiguous ? 'The employer gives alternatives or conditions here. Check what they mean before deciding whether your experience fits.' : 'The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.';
     return base;
   }
   if (!related.length) {
     base.status = 'missing';
-    base.explanation = 'No passage containing a specific requested concept was found in the supplied CV. This does not establish that the experience is absent.';
+    base.explanation = 'Your CV does not show a clear example of this yet. You may still have the experience; add it only if you can explain your contribution.';
     return base;
   }
   const uncertain = (passage: Passage) => passage.negative || passage.pending || (credentials.length > 0 && CREDENTIAL_STUDY.test(passage.cvQuote));
@@ -313,7 +313,7 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     base.evidence = related.filter(item => uncertain(item.passage)).slice(0, 2).map(item => publicPassage(item.passage));
     const positive = related.find(item => !uncertain(item.passage));
     if (positive && base.evidence.length < 3) base.evidence.push(publicPassage(positive.passage));
-    base.explanation = 'Related wording is negated, in progress, expired or otherwise uncertain. Check the exact passages; no direct evidence label is assigned.';
+    base.explanation = 'The wording needs a closer look. It may describe something unfinished, expired or not held. Check the current position before using it.';
     return base;
   }
   const direct = related.find(({ passage, full }) => {
@@ -334,10 +334,10 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
   if (direct) {
     base.status = 'direct';
     base.evidence = [publicPassage(direct.passage)];
-    base.explanation = requestedDuration ? 'One passage contains the requested concepts and an explicit duration at the requested minimum. Dates were not converted into experience, and the assertion is not independently verified.' : credentials.length ? 'One passage explicitly states the requested credential wording. Completion, validity and equivalence are not independently verified.' : task ? 'One action passage contains all recognized requested concepts. This is a wording comparison, not proof of responsibility or proficiency.' : 'The named skill wording appears in an explicit skills or experience passage. A skills list does not demonstrate its use or proficiency.';
+    base.explanation = requestedDuration ? 'This example mentions the work and the amount of experience requested. Check the dates and scope yourself. The check has not added up years from your employment history.' : credentials.length ? 'Your CV names the qualification. Check that it is complete, current and accepted for this role.' : task ? 'This example mentions the work the employer asks for. Check that it describes your own contribution and the right level of responsibility.' : 'You mention this skill. If the role asks how you used it, a concrete example will help.';
   } else {
     base.status = 'partial';
-    base.explanation = requestedDuration ? 'Related wording was found, but the requested duration and context are not explicitly supported together. No duration was inferred from employment dates.' : actions.includes('lead') && related.some(item => item.passage.weakened) ? 'Related wording describes assistance or support. It is not promoted into a claim of leading or owning the work.' : task && related.every(item => item.passage.sourceKind !== 'action') ? 'Related wording appears without a demonstrated action passage, such as in a skills list. Review it before adding a claim.' : credentials.length ? 'Related wording does not explicitly establish every requested credential, subject or validity qualifier. Review the original assertion.' : 'Related wording supports only part of the requested concepts or action. Separate passages are not combined into an invented claim.';
+    base.explanation = requestedDuration ? 'You mention related work, but the amount of relevant experience is unclear. Check the roles and dates; the check has not assumed a total.' : actions.includes('lead') && related.some(item => item.passage.weakened) ? 'Your CV says you supported the work. Keep that distinction. If you led a part of it, explain which part.' : task && related.every(item => item.passage.sourceKind !== 'action') ? 'The skill appears in your CV, but the work is not clear. Add a real example if you have one.' : credentials.length ? 'Your CV mentions something related, but the subject, level or current status may differ. Check the exact qualification.' : 'Your CV covers part of this requirement. Read what is missing and add an example only if it is true.';
   }
   return base;
 }
@@ -352,11 +352,11 @@ export function analyzeCvEvidence(cvText: string, jobDescription: string): Evide
   const warnings: string[] = [];
   if (!cvText.trim()) warnings.push('No CV text was supplied; no CV evidence can be found.');
   if (!jobDescription.trim()) warnings.push('No vacancy text was supplied; paste its requirements and responsibilities.');
-  if (UNSUPPORTED_SCRIPT.test(cvText) || UNSUPPORTED_SCRIPT.test(jobDescription)) warnings.push('This method supports English comparison only. Other scripts remain visible and need manual review.');
-  const unparsedNotes = ['All input assertions remain user-provided and unverified. Literal matches do not establish eligibility, qualifications or hiring outcomes.'];
-  if (parsed.overflow) unparsedNotes.push(`The comparison is limited to ${MAX_REQUIREMENTS} clauses. ${parsed.overflow} additional clause${parsed.overflow === 1 ? '' : 's'} remain verbatim in omittedSections for manual review.`);
-  if (requirements.some(item => item.status === 'review')) unparsedNotes.push('Unrecognized or ambiguous clauses are retained as Needs manual review; they have not been treated as fulfilled requirements.');
-  if (parsed.omitted.length) unparsedNotes.push('Section headings, clearly non-requirement sections and any overflow are preserved verbatim in omittedSections.');
+  if (UNSUPPORTED_SCRIPT.test(cvText) || UNSUPPORTED_SCRIPT.test(jobDescription)) warnings.push('This check compares English text. Read any other languages yourself; they have not been marked as a match.');
+  const unparsedNotes = ['The check uses what you provide. It cannot verify your career history, confirm that you qualify or promise a response from an employer.'];
+  if (parsed.overflow) unparsedNotes.push(`The check covers the first ${MAX_REQUIREMENTS} requirements. Read the ${parsed.overflow} additional clause${parsed.overflow === 1 ? '' : 's'} below as well.`);
+  if (requirements.some(item => item.status === 'review')) unparsedNotes.push('Some requirements need your judgment. You will see their original wording, without an assumed match.');
+  if (parsed.omitted.length) unparsedNotes.push('The remaining job description is shown below, including headings and sections outside the check.');
   return { methodVersion: METHOD_VERSION, scope: SCOPE, requirements, unparsedNotes, summary, omittedSections: parsed.omitted.map(span => ({ ...span, vacancyQuote: jobDescription.slice(span.start, span.end) })), warnings };
 }
 

@@ -30,23 +30,23 @@ const titles: Record<Kind, string> = {
   notfound: "Page not found",
 };
 const steps = [
-  "Choose the target role and, optionally, the employer.",
-  "Read a PDF, DOCX or TXT CV on your device, or paste its text. Correct it and remove confidential information.",
-  "Paste one real vacancy, including its responsibilities and requirements.",
-  "Compare the vacancy passages with actual CV wording and review the unresolved conditions.",
-  "Edit your CV and add only truthful examples you have the right to use. Recheck the revised text.",
-  "Approve and download PDF, DOCX or TXT for free. Optionally sign in to save privately and add the vacancy to your tracker.",
+  "Start with the role you want. Add the employer if you know it.",
+  "Add your CV as a PDF, Word or text file, or paste it. Check the extracted text and remove anything private.",
+  "Paste one job description, including the responsibilities and requirements.",
+  "Read the job requirement beside the relevant part of your CV. Look closely at the gaps.",
+  "Make your edits. Add an example only if it is yours to share, then check the revised CV.",
+  "Approve your CV and download it for free. Sign in if you want to save it privately or track the application.",
 ];
 const faqs = [
-  ["Can I check my CV without signing up?", "Yes. The six-step check runs on your device and includes free approved PDF, DOCX and TXT downloads. Choose account saving only if you want to retain the reviewed texts privately. It does not use a workspace pack credit."],
-  ["Does a finding mean I meet a requirement?", "No. The check shows actual wording and explains uncertainty. Direct wording is not proof of qualification, a verified achievement, an ATS score or an employer decision. Review every condition yourself."],
+  ["Can I check my CV without signing up?", "Yes. Check your CV and download the version you approve, all for free. Sign in only if you want to save it privately. This check uses no pack credits."],
+  ["Does a finding mean I meet a requirement?", "No. Matching words are a starting point. Read the requirement and the CV example yourself; the check cannot confirm your qualifications or predict what an employer will decide."],
   [
     "Does Jobvance apply for me?",
     "You submit on the employer’s site. The tracker records the progress you report. Opening a link does not count as a submission.",
   ],
   [
     "What does tailoring change?",
-    "It prioritizes relevant wording already in your CV, preserves factual text and highlights vocabulary for your review. You can edit and approve the final version.",
+    "It brings relevant experience forward without inventing achievements. You read the result, make your edits and approve it before downloading.",
   ],
   [
     "Can I download my documents?",
@@ -69,12 +69,12 @@ const features = [
   {
     icon: FileText,
     title: "Use your actual experience",
-    text: "Upload a readable CV and correct its text before saving.",
+    text: "Bring your CV. Check the text so the details stay yours.",
   },
   {
     icon: CheckCircle2,
     title: "Review before downloading",
-    text: "Check the relevant ordering and wording against your facts, then approve your version.",
+    text: "Read the changes, make your edits and approve the version you want to send.",
   },
   {
     icon: FolderOpen,
@@ -105,9 +105,9 @@ export default function ProductPage({ kind }: { kind: Kind }) {
               Prepare a CV you can stand behind.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              Bring your experience and a target vacancy. Review relevant
-              changes, download the version you approve, and keep your
-              applications organized.
+              Have a job in mind? Bring your CV and the job description.
+              See which parts of your experience come through, work through the gaps,
+              and download a version you are ready to send.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button asChild size="lg">
@@ -121,7 +121,7 @@ export default function ProductPage({ kind }: { kind: Kind }) {
               </Button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              No account or card needed for the check and downloads. You stay in control of every fact.
+              Free to check and download. No account or card needed.
             </p>
             <p className="mt-5 text-sm text-muted-foreground">
               Considering strategy and transformation roles?{" "}
@@ -242,10 +242,9 @@ export default function ProductPage({ kind }: { kind: Kind }) {
           )}
           {kind === "about" && (
             <p className="max-w-3xl leading-7 text-muted-foreground">
-              Jobvance helps job seekers prepare factual, reviewable CV versions
-              for specific vacancies and keep their applications organized.
-              Public examples are illustrative; hiring outcomes are not
-              guaranteed.
+              Jobvance helps you prepare a CV for a job you want and keep track
+              of what you send. You bring the experience and make the final call
+              on the wording. Examples on this site are fictional; employer decisions are theirs.
             </p>
           )}
           {kind === "contact" && (
