@@ -10,7 +10,7 @@ This repository contains the frontend, backend functions, additive database migr
 
 The frontend is a portable static application. Supabase remains its authentication, database and private-storage backend; changing the frontend host does not migrate or delete existing accounts and files.
 
-**Migration status — 10 October 2026:** the source is being prepared for independent publication. A new frontend deployment and custom-domain cutover are not yet confirmed. Native Sites and Cloudflare are hosting candidates; the domain is managed at Hostinger and the DNS change awaits owner access. See [release status](docs/MVP-RELEASE-STATUS.md) for current verification, rather than treating a local build as a live deployment.
+**Migration status â€” 10 October 2026:** the source is being prepared for independent publication. A new frontend deployment and custom-domain cutover are not yet confirmed. Native Sites and Cloudflare are hosting candidates; the domain is managed at Hostinger and the DNS change awaits owner access. See [release status](docs/MVP-RELEASE-STATUS.md) for current verification, rather than treating a local build as a live deployment.
 
 ## Stack
 
@@ -114,4 +114,3 @@ The frontend deployment, backend deployment and DNS cutover are separate changes
 - [Auth repair and redirect requirements](docs/AUTH-REPAIR.md)
 - [Backend deployment and verification limits](docs/MVP-BACKEND-DEPLOYMENT.md)
 - [Release status](docs/MVP-RELEASE-STATUS.md)
-

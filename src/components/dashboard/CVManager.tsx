@@ -198,7 +198,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         .createSignedUrl(resume.file_path, 300);
 
       if (error) throw error;
-      
+
       if (data?.signedUrl) {
         window.open(data.signedUrl, '_blank');
       }
@@ -307,7 +307,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
           className="hidden"
           disabled={!canUpload || uploading}
         />
-        
+
         <div className="text-center space-y-4">
           <div className={cn(
             "w-16 h-16 mx-auto rounded-full flex items-center justify-center transition-colors",
@@ -318,13 +318,13 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
               dragActive && canUpload ? "text-primary" : "text-muted-foreground"
             )} />
           </div>
-          
+
           <div>
             <p className="text-lg font-semibold text-foreground mb-1">
               {uploading ? "Uploading..." : "Drop your resume here"}
             </p>
             <p className="text-sm text-muted-foreground">
-              or click to browse • PDF, DOC, DOCX • Max 10MB
+              or click to browse â€¢ PDF, DOC, DOCX â€¢ Max 10MB
             </p>
           </div>
 
@@ -349,7 +349,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
                 }}
                 className="h-auto p-0"
               >
-                Upgrade for more →
+                Upgrade for more â†’
               </Button>
             )}
           </div>
