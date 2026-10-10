@@ -122,6 +122,13 @@ export default function ProductPage({ kind }: { kind: Kind }) {
               No card needed for your first pack. You stay in control of every
               fact.
             </p>
+            <p className="mt-5 text-sm text-muted-foreground">
+              Considering strategy and transformation roles?{" "}
+              <Link to="/pilot" className="font-medium text-primary underline">
+                Explore the free guided pilot and fictional demo
+              </Link>
+              .
+            </p>
           </section>
           <section
             aria-label="What you can do"

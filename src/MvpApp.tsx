@@ -15,6 +15,7 @@ const Auth = lazy(() => import("@/pages/Auth")),
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
   ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const Workspace = lazy(() => import("@/pages/Workspace"));
+const PilotLanding = lazy(() => import("@/pages/PilotLanding"));
 const client = new QueryClient({
   defaultOptions: { queries: { staleTime: 20000, retry: 1 } },
 });
@@ -50,6 +51,7 @@ export default function MvpApp() {
                 >
                   <Routes>
                     <Route path="/" element={<ProductPage kind="home" />} />
+                    <Route path="/pilot" element={<PilotLanding />} />
                     <Route
                       path="/pricing"
                       element={<ProductPage kind="pricing" />}

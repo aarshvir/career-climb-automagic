@@ -6,6 +6,7 @@ export default function MvpFooter() {
         <p>© {new Date().getFullYear()} Jobvance</p>
         <nav aria-label="Footer navigation" className="flex flex-wrap gap-4">
           {[
+            ["/pilot", "Free pilot"],
             ["/help", "Help"],
             ["/contact", "Contact"],
             ["/privacy", "Privacy"],

@@ -27,6 +27,12 @@ export default function MvpHeader() {
             How it works
           </Link>
           <Link
+            to="/pilot"
+            className="min-h-11 content-center font-medium text-primary hover:underline"
+          >
+            Free pilot
+          </Link>
+          <Link
             to="/pricing"
             className="min-h-11 content-center hover:underline"
           >
