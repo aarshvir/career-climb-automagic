@@ -1,0 +1,24 @@
+# Jobvance repair verification — 10 October 2026
+
+## Applied and verified
+
+- Repair source is on `codex/jobvance-real-mvp`, with draft pull request #23. The latest Lovable changes have been integrated. The generated preview-storage file's CI lint error was corrected.
+- Lovable is connected to the repair branch and renders the repaired public interface. Desktop and 393-pixel mobile preview were inspected. Production publication on Jobvance.io has not been performed.
+- The existing Supabase project `gvftdfriujrkpptdueyb` reports Healthy after restoration. Read-only compatibility checks found 27 accounts, a private legacy `jobassist` bucket and an existing privileged signup trigger. Existing records were preserved.
+- Migration `20261010000000_grounded_application_mvp` was applied transactionally and recorded in `supabase_migrations.schema_migrations`. Verification found nine new tables, a private `cv-documents` bucket capped at 5,242,880 bytes, all 27 existing accounts intact, and no browser permission to update the profile plan.
+- `get-entitlement`, `tailor-cv` and `create-checkout` are deployed through the dashboard. They authenticate inside the handler with `auth.getUser`. Public black-box verification confirms all three return 401/UNAUTHORIZED without a session and do not permit an unapproved origin.
+- Exact approved browser origins are Jobvance.io, the published Lovable app and the local verification apps. The sign-in handoff now uses `http://localhost:8080/auth`, whose OAuth callback was already approved in this project; its backend origin was explicitly verified. The earlier port 5177 preview can render the app but is not an approved OAuth callback. The default authentication site URL was corrected from the obsolete local development address to `https://jobvance.io`, an already approved destination. Email and Google providers are enabled; their actual account flows still require verification.
+- `JOBVANCE_BILLING_ENABLED=false`, provider Paddle and mode test were explicitly saved. No merchant keys, public Paddle token, commercial-review flags or seller-approval flags were installed. No real payment was taken and no signed sandbox transaction was performed.
+- 155 automated Vitest checks pass. Additional native checks pass for 13 actual source handlers and 16 generated handler/retirement scenarios using intercepted requests. Type checks, production build and GitHub CI pass; lint has zero errors and 17 legacy warnings. npm audit reports zero vulnerabilities.
+
+## Pending human actions and integration verification
+
+The account sign-in flow is awaiting the owner's completion in the local browser. Automatic approval review rejected initiating Google sign-in without approval for that specific account. No account credentials were entered or extracted. Hosted authenticated upload, free-pack creation, exports, tracking persistence, two-account isolation and email/signup delivery must still be verified; mock/fixture tests are not evidence those hosted flows have passed.
+
+Retirement of `trigger-make-run`, `check-email-provider` and `lemon-squeezy-webhook` is awaiting explicit owner approval after automatic approval review rejected the final live replacement. The old automation source was saved privately outside the repository, and its replacement is staged in the dashboard. The other two dashboard source panes currently do not expose downloadable source; do not claim exact backups for those deployed versions. The reviewed retirement sources perform no external work and return 410. These legacy remote endpoints have not yet been replaced. Local disabled entries alone do not retire a deployed endpoint.
+
+After authenticated hosted verification and approved retirement, publish the tested free beta through the existing Lovable project, inspect Jobvance.io, and update this record with the actual released commit and results. Keep commercial checkout disabled. The existing Vercel copy has a successful preview deployment; it is not the host serving Jobvance.io.
+
+## Reproduction and limits
+
+`node scripts/verify-deployed-public.mjs` performs the public endpoint checks without credentials or user sessions. Local tests exercise actual document parsing/export and PostgreSQL policies/transactions in PGlite, but PGlite is not a multi-session load test. Tailoring compares English vocabulary and prioritizes existing bullet blocks; it does not invent evidence or perform an external AI rewrite. Some unsupported PDF glyphs produce a clear error; DOCX/TXT retain the text. Paid-mode handling remains prepared source rather than merchant approval or a live payment verification.

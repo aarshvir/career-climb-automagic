@@ -21,7 +21,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { resetPassword, checkEmailProvider } = useAuth()
+  const { resetPassword, configurationError } = useAuth()
 
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -45,22 +45,7 @@ const ForgotPassword: React.FC = () => {
     setLoading(true)
 
     try {
-      // First check if email exists and what providers it has
-      const result = await checkEmailProvider(email)
-      
-      if (!result.exists) {
-        setError('No account found with that email address')
-        setLoading(false)
-        return
-      }
-      
-      if (!result.hasEmailProvider) {
-        setError('This email is associated with social login (Google). Password reset is not available for social accounts.')
-        setLoading(false)
-        return
-      }
-
-      // Send reset email
+      // The same response is shown regardless of whether an account exists.
       const { error } = await resetPassword(email)
       
       if (error) {
@@ -68,8 +53,8 @@ const ForgotPassword: React.FC = () => {
       } else {
         setEmailSent(true)
         toast({
-          title: 'Reset email sent',
-          description: 'Check your inbox for password reset instructions.',
+          title: 'Check your email',
+          description: 'If a password account exists, reset instructions will be sent.',
         })
       }
     } catch (error: unknown) {
@@ -89,7 +74,7 @@ const ForgotPassword: React.FC = () => {
             </div>
             <h1 className="text-2xl font-bold">Check your email</h1>
             <p className="text-muted-foreground">
-              We've sent password reset instructions to{' '}
+              If a password account exists, reset instructions will be sent to{' '}
               <span className="font-medium">{email}</span>
             </p>
           </div>
@@ -140,7 +125,7 @@ const ForgotPassword: React.FC = () => {
           <CardHeader className="text-center space-y-1">
             <CardTitle className="text-xl">Forgot Password</CardTitle>
             <CardDescription>
-              We'll check if your email is registered and send reset instructions
+              If you use email and password, we'll send reset instructions
             </CardDescription>
           </CardHeader>
 
@@ -162,21 +147,21 @@ const ForgotPassword: React.FC = () => {
                 </div>
               </div>
 
-              {error && (
+              {(configurationError || error) && (
                 <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{configurationError || error}</AlertDescription>
                 </Alert>
               )}
 
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-primary" 
-                disabled={loading || !email}
+                disabled={loading || !email || !!configurationError}
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Checking email...
+                    Sending instructions...
                   </>
                 ) : (
                   'Send Reset Instructions'

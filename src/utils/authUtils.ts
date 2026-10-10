@@ -1,82 +1,36 @@
-// Authentication utility functions for iframe and environment detection
-
 export const isInIframe = (): boolean => {
-  try {
-    return window.self !== window.top;
-  } catch (e) {
-    return true; // If we can't access window.top, we're likely in an iframe
-  }
+  if (typeof window === 'undefined') return false;
+  try { return window.self !== window.top; } catch { return true; }
 };
 
-export const isLovableEnvironment = (): boolean => {
-  return window.location.hostname.includes('lovable') || 
-         window.location.hostname.includes('lovableproject.com');
-};
-
-export const getEnvironmentType = (): 'lovable' | 'production' | 'development' => {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'development';
-  }
-  if (isLovableEnvironment()) {
-    return 'lovable';
-  }
+export const getEnvironmentType = (): 'production' | 'development' => {
+  if (typeof window === 'undefined' || ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) return 'development';
   return 'production';
 };
 
-export const supportsPopups = (): boolean => {
+// Compatibility for the development panel; checking support must not open a popup.
+export const supportsPopups = (): boolean => typeof window !== 'undefined' && typeof window.open === 'function';
+
+export const getOptimalAuthRedirectUrl = (): string => `${window.location.origin}/auth/callback`;
+
+export const getGoogleOAuthOptions = () => ({
+  redirectTo: getOptimalAuthRedirectUrl(),
+  queryParams: { prompt: 'select_account' },
+});
+
+export const clearUserAuthCache = (userId: string | undefined) => {
+  if (!userId || typeof window === 'undefined') return;
   try {
-    const popup = window.open('', '_blank', 'width=1,height=1');
-    if (popup) {
-      popup.close();
-      return true;
+    const storage = window.localStorage;
+    const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index));
+    for (const key of keys) {
+      if (key === `plan_${userId}` || key?.startsWith(`daily_usage_${userId}_`)) storage.removeItem(key);
     }
-    return false;
-  } catch (e) {
-    return false;
+    if (storage.getItem('last_user_id') === userId) {
+      storage.removeItem('last_user_id');
+      storage.removeItem('form_shown_timestamp');
+    }
+  } catch {
+    // Storage restrictions do not prevent the SDK from signing the user out.
   }
-};
-
-export const getOptimalAuthRedirectUrl = (): string => {
-  const environment = getEnvironmentType();
-  const origin = window.location.origin;
-  
-  switch (environment) {
-    case 'lovable':
-      // For Lovable environment, use the current origin
-      return `${origin}/auth/callback`;
-    case 'development':
-      return 'http://localhost:3000/auth/callback';
-    case 'production':
-    default:
-      return `${origin}/auth/callback`;
-  }
-};
-
-export const getGoogleOAuthOptions = () => {
-  const isIframe = isInIframe();
-  const environment = getEnvironmentType();
-  const redirectUrl = getOptimalAuthRedirectUrl();
-  
-  console.log('Auth Environment Detection:', {
-    isIframe,
-    environment,
-    redirectUrl,
-    hostname: window.location.hostname,
-    origin: window.location.origin
-  });
-
-  return {
-    redirectTo: redirectUrl,
-    queryParams: {
-      access_type: 'offline',
-      prompt: 'select_account', // Changed from 'consent' to be less aggressive
-      ...(isIframe && { display: 'popup' }) // Add popup display for iframes
-    },
-    // Add popup-specific options for iframe environments
-    ...(isIframe && {
-      options: {
-        skipBrowserRedirect: false, // Let Supabase handle the redirect
-      }
-    })
-  };
 };

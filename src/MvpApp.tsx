@@ -1,0 +1,144 @@
+import { Suspense, lazy } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HelmetProvider } from "react-helmet-async";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import ProductPage from "@/pages/ProductPage";
+const Auth = lazy(() => import("@/pages/Auth")),
+  AuthCallback = lazy(() => import("@/pages/AuthCallback"));
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
+  ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const Workspace = lazy(() => import("@/pages/Workspace"));
+const client = new QueryClient({
+  defaultOptions: { queries: { staleTime: 20000, retry: 1 } },
+});
+function ProtectedWorkspace() {
+  const { user, loading } = useAuth();
+  if (loading)
+    return (
+      <p className="p-8" role="status">
+        Loading your account…
+      </p>
+    );
+  return user ? (
+    <Workspace key={user.id} />
+  ) : (
+    <Navigate to="/auth?next=%2Fdashboard" replace />
+  );
+}
+export default function MvpApp() {
+  return (
+    <ErrorBoundary>
+      <HelmetProvider>
+        <QueryClientProvider client={client}>
+          <AuthProvider>
+            <TooltipProvider>
+              <BrowserRouter>
+                <Header />
+                <Suspense
+                  fallback={
+                    <p className="p-8" role="status">
+                      Loading…
+                    </p>
+                  }
+                >
+                  <Routes>
+                    <Route path="/" element={<ProductPage kind="home" />} />
+                    <Route
+                      path="/pricing"
+                      element={<ProductPage kind="pricing" />}
+                    />
+                    <Route
+                      path="/how-it-works"
+                      element={<ProductPage kind="how" />}
+                    />
+                    <Route path="/faq" element={<ProductPage kind="faq" />} />
+                    <Route
+                      path="/about"
+                      element={<ProductPage kind="about" />}
+                    />
+                    <Route
+                      path="/contact"
+                      element={<ProductPage kind="contact" />}
+                    />
+                    <Route
+                      path="/privacy"
+                      element={<ProductPage kind="privacy" />}
+                    />
+                    <Route
+                      path="/terms"
+                      element={<ProductPage kind="terms" />}
+                    />
+                    <Route
+                      path="/refund"
+                      element={<ProductPage kind="refund" />}
+                    />
+                    <Route path="/help" element={<ProductPage kind="help" />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route
+                      path="/auth/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route path="/auth/reset" element={<ResetPassword />} />
+                    <Route path="/dashboard" element={<ProtectedWorkspace />} />
+                    <Route
+                      path="/resume-management"
+                      element={<Navigate to="/dashboard?tab=cv" replace />}
+                    />
+                    <Route
+                      path="/resumes"
+                      element={<Navigate to="/dashboard?tab=cv" replace />}
+                    />
+                    <Route
+                      path="/applications"
+                      element={<Navigate to="/dashboard?tab=tracker" replace />}
+                    />
+                    <Route
+                      path="/jobs"
+                      element={<Navigate to="/dashboard?tab=tailor" replace />}
+                    />
+                    <Route
+                      path="/job-preferences"
+                      element={<Navigate to="/dashboard?tab=tailor" replace />}
+                    />
+                    <Route
+                      path="/preferences"
+                      element={<Navigate to="/dashboard?tab=tailor" replace />}
+                    />
+                    <Route
+                      path="/settings"
+                      element={<Navigate to="/dashboard?tab=billing" replace />}
+                    />
+                    <Route
+                      path="/plan-selection"
+                      element={<Navigate to="/pricing" replace />}
+                    />
+                    <Route
+                      path="/thank-you"
+                      element={<Navigate to="/dashboard?tab=billing" replace />}
+                    />
+                    <Route
+                      path="/blog/*"
+                      element={<Navigate to="/help" replace />}
+                    />
+                    <Route path="*" element={<ProductPage kind="notfound" />} />
+                  </Routes>
+                </Suspense>
+                <Footer />
+              </BrowserRouter>
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
+  );
+}
