@@ -1,8 +1,8 @@
 # Reviewed deployment requirements for the application-pack MVP
 
-This implementation is prepared and tested locally. It has not been applied to the production database, deployed as edge functions, or used to make a real payment. Production release requires the staged checks below. Preserve existing CV objects, accounts and legacy jobs.
+This document describes the deployment procedure and test limits. The current applied changes and remaining checks are recorded in `MVP-RELEASE-STATUS.md`. The additive database repair and free-beta handlers have now been deployed; production frontend publication and authenticated hosted verification remain pending. No real or processor-sandbox payment has been performed. Preserve existing CV objects, accounts and legacy jobs.
 
-The current owner has no registered entity and has not completed seller licensing/eligibility or payment-provider approval. **Live billing remains disabled.** Paddle is the selected default adapter, with Stripe retained as an optional adapter. Individual seller onboarding and local permission to trade are separate checks; this implementation does not establish either approval or provide a workaround for them. The founder must resolve the appropriate seller permission and actual Paddle merchant approval before enabling live payments.
+**Live billing remains disabled for the free beta.** Paddle is the selected default adapter, with Stripe retained as an optional adapter. Individual seller onboarding and local permission to trade are separate checks; this implementation does not establish either approval or provide a workaround for them. The operator must verify the appropriate seller permission and actual Paddle merchant approval before enabling live payments.
 
 ## Delivered behavior
 
