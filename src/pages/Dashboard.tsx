@@ -209,7 +209,7 @@ const Dashboard = () => {
     
     try {
       const { data: jobRun, error: runError } = await supabase
-        .from('job_runs' as any)
+        .from('job_runs')
         .insert({ user_id: user.id, run_status: 'pending' })
         .select()
         .single()
