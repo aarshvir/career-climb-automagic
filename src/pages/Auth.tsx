@@ -9,10 +9,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
 
-const Auth = () => {
+const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, loading: authLoading, authError, configurationError, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+  const { user, loading: authLoading, authError, configurationError, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth();
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>(searchParams.get('mode') === 'signup' ? 'sign-up' : 'sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,10 +21,11 @@ const Auth = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [confirmationSent, setConfirmationSent] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
-    if (user && !authLoading) navigate('/dashboard', { replace: true });
-  }, [user, authLoading, navigate]);
+    if (user && !authLoading && !embedded) navigate(searchParams.get('next') === '/check' ? '/check' : '/dashboard', { replace: true });
+  }, [user, authLoading, navigate, embedded, searchParams]);
 
   useEffect(() => {
     if (searchParams.get('error')) setError('Sign-in could not be completed. Please try again or request a new email link.');
@@ -62,6 +63,7 @@ const Auth = () => {
 
   const handleGoogle = async () => {
     if (busy || configurationError) return;
+    if (onBeforeGoogle && !onBeforeGoogle()) return;
     setError('');
     setBusy(true);
     try { await signInWithGoogle(); }
@@ -77,6 +79,15 @@ const Auth = () => {
     setConfirmPassword('');
   };
 
+  const handleForgot = async () => {
+    if (!embedded) { navigate('/auth/forgot-password'); return; }
+    if (!isValidEmail(email.trim())) { setError('Enter your email above, then request a reset link. Your CV check stays open.'); return; }
+    setBusy(true); setError('');
+    try { const result = await resetPassword(email); if (result.error) setError(result.error); else setResetSent(true); }
+    catch { setError('We could not request a reset link. Your CV check stays open.'); }
+    finally { setBusy(false); }
+  };
+
   if (authLoading) return (
     <div className="min-h-[70vh] flex items-center justify-center" role="status">
       <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" /><span className="sr-only">Checking sign-in...</span>
@@ -85,8 +96,9 @@ const Auth = () => {
 
   const visibleError = configurationError || error || authError;
 
+  const Container = embedded ? 'section' : 'main';
   return (
-    <main className="min-h-[75vh] flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4">
+    <Container aria-label={embedded ? 'Save with your account' : undefined} className={embedded ? 'flex justify-center' : 'min-h-[75vh] flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4'}>
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your JobVance account' : 'Sign in to JobVance'}</CardTitle>
@@ -96,6 +108,7 @@ const Auth = () => {
         </CardHeader>
         <CardContent className="space-y-5">
           {visibleError && <Alert variant="destructive" role="alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
+          {resetSent && <p role="status" className="text-sm">If this email has an account, reset instructions were requested. Open the link in a separate tab, then sign in here to keep this CV check open.</p>}
           {confirmationSent ? (
             <div className="space-y-4">
               <p role="status">If this address can be registered, confirmation instructions will be sent to <strong>{email.trim()}</strong>. Check your spam folder and open the link in this browser.</p>
@@ -131,7 +144,7 @@ const Auth = () => {
                   {busy ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Please wait...</> : mode === 'sign-up' ? 'Create account' : 'Sign in'}
                 </Button>
               </form>
-              {mode === 'sign-in' && <Button type="button" variant="link" className="w-full" onClick={() => navigate('/auth/forgot-password')} disabled={busy}>Forgot your password?</Button>}
+              {mode === 'sign-in' && <Button type="button" variant="link" className="w-full" onClick={handleForgot} disabled={busy || !!configurationError}>Forgot your password?</Button>}
               <div className="text-center text-sm">
                 {mode === 'sign-up' ? 'Already have an account?' : 'New to JobVance?'}{' '}
                 <Button type="button" variant="link" className="p-0 h-auto" onClick={changeMode} disabled={busy}>
@@ -142,7 +155,7 @@ const Auth = () => {
           )}
         </CardContent>
       </Card>
-    </main>
+    </Container>
   );
 };
 

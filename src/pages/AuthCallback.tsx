@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { readAuthSession } from '@/utils/authSession';
 import { configurationError } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { checkAuthReturnAvailable, takeCheckAuthReturn } from '@/lib/check-draft';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(configurationError);
+  const [returnToCheck] = useState(checkAuthReturnAvailable);
   useEffect(() => {
     let active = true;
     if (configurationError) return;
@@ -20,7 +22,7 @@ const AuthCallback = () => {
     void readAuthSession().then(session => {
       if (!active) return;
       if (!session) { setError('This sign-in link is invalid or expired. Please start again.'); return; }
-      navigate('/dashboard', { replace: true });
+      navigate(takeCheckAuthReturn(), { replace: true });
     }).catch(() => {
       if (active) setError('We could not complete sign-in. Please request a new link or try signing in again.');
     }).finally(() => {
@@ -33,7 +35,7 @@ const AuthCallback = () => {
     <main className="min-h-[70vh] flex items-center justify-center p-4">
       <div className="max-w-md text-center space-y-4">
         {error ? (
-          <><h1 className="text-xl font-semibold">Sign-in could not be completed</h1><p role="alert">{error}</p><Button onClick={() => navigate('/auth', { replace: true })}>Back to sign in</Button></>
+          <><h1 className="text-xl font-semibold">Sign-in could not be completed</h1><p role="alert">{error}</p>{returnToCheck && <Button onClick={() => navigate('/check', { replace: true })}>Return to your CV check</Button>}<Button variant={returnToCheck ? 'outline' : 'default'} onClick={() => navigate('/auth', { replace: true })}>Back to sign in</Button></>
         ) : (
           <><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" aria-hidden="true" /><h1 className="text-xl font-semibold" role="status">Completing sign-in...</h1></>
         )}

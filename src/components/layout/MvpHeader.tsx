@@ -20,6 +20,7 @@ export default function MvpHeader() {
           aria-label="Main navigation"
           className="flex flex-wrap items-center gap-3 text-sm"
         >
+          <Link to="/check" className="min-h-11 content-center font-medium text-primary hover:underline">Free CV check</Link>
           <Link
             to="/how-it-works"
             className="min-h-11 content-center hover:underline"

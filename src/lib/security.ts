@@ -103,7 +103,7 @@ class RateLimiter {
     }
 
     if (entry.count >= this.maxRequests) {
-      logger.warn('Rate limit exceeded', { key });
+      logger.warn('Rate limit exceeded');
       return false;
     }
 

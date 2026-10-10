@@ -32,12 +32,17 @@ function approvedText(pack: ApplicationPack): string {
 
 /** Builds the reviewed CV itself; job scores and missing skills are not added as candidate facts. */
 export async function createPackBlob(pack: ApplicationPack, format: DocumentFormat): Promise<Blob> {
-  const text = approvedText(pack);
+  return createReviewedCvBlob(approvedText(pack), format, pack.job_title);
+}
+
+/** Shared renderer for text that its caller has explicitly reviewed and approved. */
+export async function createReviewedCvBlob(reviewedText: string, format: DocumentFormat, title: string): Promise<Blob> {
+  const text = validateCvText(reviewedText);
   if (format === "txt") return new Blob([text], { type: "text/plain;charset=utf-8" });
   if (format === "docx") {
     const { Document, Paragraph, TextRun, Packer } = await import("docx");
     const doc = new Document({
-      title: `Reviewed CV - ${pack.job_title}`,
+      title: `Reviewed CV - ${title}`,
       styles: { default: { document: { run: { font: "Arial", size: 22 }, paragraph: { spacing: { after: 100, line: 276 } } } } },
       sections: [{
         properties: { page: { margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 } } },
@@ -78,7 +83,7 @@ export async function createPackBlob(pack: ApplicationPack, format: DocumentForm
       y += lineHeight;
     }
   }
-  pdf.setProperties({ title: `Reviewed CV - ${pack.job_title}`, creator: "Jobvance" });
+  pdf.setProperties({ title: `Reviewed CV - ${title}`, creator: "Jobvance" });
   return new Blob([pdf.output("arraybuffer")], { type: "application/pdf" });
 }
 

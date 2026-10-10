@@ -30,14 +30,16 @@ const titles: Record<Kind, string> = {
   notfound: "Page not found",
 };
 const steps = [
-  "Create your account and confirm your email if prompted.",
-  "Upload a PDF, DOCX or TXT CV. Correct the extracted text and save it.",
-  "Choose the CV, enter a role, and paste the real job description.",
-  "Review the prioritized wording. Verify all facts and approve it.",
-  "Download the approved PDF, DOCX or TXT. Submit on the employer’s site.",
-  "Save the vacancy in Applications. Record your status, notes and follow-up date.",
+  "Choose the target role and, optionally, the employer.",
+  "Read a PDF, DOCX or TXT CV on your device, or paste its text. Correct it and remove confidential information.",
+  "Paste one real vacancy, including its responsibilities and requirements.",
+  "Compare the vacancy passages with actual CV wording and review the unresolved conditions.",
+  "Edit your CV and add only truthful examples you have the right to use. Recheck the revised text.",
+  "Approve and download PDF, DOCX or TXT for free. Optionally sign in to save privately and add the vacancy to your tracker.",
 ];
 const faqs = [
+  ["Can I check my CV without signing up?", "Yes. The six-step check runs on your device and includes free approved PDF, DOCX and TXT downloads. Choose account saving only if you want to retain the reviewed texts privately. It does not use a workspace pack credit."],
+  ["Does a finding mean I meet a requirement?", "No. The check shows actual wording and explains uncertainty. Direct wording is not proof of qualification, a verified achievement, an ATS score or an employer decision. Review every condition yourself."],
   [
     "Does Jobvance apply for me?",
     "You submit on the employer’s site. The tracker records the progress you report. Opening a link does not count as a submission.",
@@ -109,8 +111,8 @@ export default function ProductPage({ kind }: { kind: Kind }) {
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button asChild size="lg">
-                <Link to={start}>
-                  Start with one free pack{" "}
+                  <Link to="/check">
+                  Check my CV for free{" "}
                   <ArrowRight size={17} className="ml-2" />
                 </Link>
               </Button>
@@ -119,8 +121,7 @@ export default function ProductPage({ kind }: { kind: Kind }) {
               </Button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              No card needed for your first pack. You stay in control of every
-              fact.
+              No account or card needed for the check and downloads. You stay in control of every fact.
             </p>
             <p className="mt-5 text-sm text-muted-foreground">
               Considering strategy and transformation roles?{" "}
@@ -186,14 +187,13 @@ export default function ProductPage({ kind }: { kind: Kind }) {
             <div className="grid max-w-4xl gap-6 md:grid-cols-2">
               <Card>
                 <CardContent className="space-y-4 p-6">
-                  <h2 className="text-xl font-semibold">Try one pack</h2>
+                  <h2 className="text-xl font-semibold">Check, review & download</h2>
                   <p className="text-3xl font-semibold">Free</p>
                   <p>
-                    One application pack to try the complete review and download
-                    workflow. Private CV storage and tracking are included.
+                    The six-step CV check and approved downloads are free. Optional private account saving does not use a pack credit. The existing workspace also includes one free preparation pack per account.
                   </p>
                   <Button asChild>
-                    <Link to={start}>Start your first pack</Link>
+                    <Link to="/check">Start your free check</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -221,14 +221,14 @@ export default function ProductPage({ kind }: { kind: Kind }) {
             </div>
           )}
           {(kind === "how" || kind === "help") && (
-            <ol className="max-w-3xl space-y-5">
+            <div className="max-w-3xl space-y-6"><Button asChild><Link to="/check">Start a free CV check</Link></Button><ol className="space-y-5">
               {steps.map((s, i) => (
                 <li key={s} className="rounded-lg border p-4">
                   <strong className="mr-3 text-primary">{i + 1}.</strong>
                   {s}
                 </li>
               ))}
-            </ol>
+            </ol><p className="text-sm leading-6 text-muted-foreground">The existing <Link to={start} className="underline">workspace</Link> remains available for saved CV files, preparation packs and tracking. You submit separately on the employer’s site.</p></div>
           )}
           {kind === "faq" && (
             <div className="max-w-3xl space-y-4">
@@ -270,6 +270,9 @@ export default function ProductPage({ kind }: { kind: Kind }) {
           )}
           {kind === "privacy" && (
             <div className="max-w-3xl space-y-4 leading-7">
+              <p>The free CV check reads your file and compares CV/vacancy text on your device. It does not upload the original file or transmit check content during analysis or guest downloads. Unsaved work is held in memory and is cleared when the page closes or refreshes. It does not send check data to advertising tools.</p>
+              <p>If you explicitly choose account saving, the role, company, vacancy, reviewed source CV and approved final CV texts are stored privately in your existing Supabase account. The exact save payload is shown before saving. Saved free checks can be deleted in the check page; deletion does not remove files you already downloaded.</p>
+              <p>Google sign-in can retain an unsaved check in this browser tab only after specific consent. A retained draft is eligible for restoration for 30 minutes and cleared on return or when you clear the check; closing the tab also removes tab storage. An expired draft is discarded when next read. This temporary storage is accessible to someone using the same browser tab. Email sign-in can keep the check in memory without this handoff.</p>
               <p>
                 Your account, uploaded CV, extracted text, application documents
                 and tracker entries are processed to provide this service.
@@ -303,6 +306,7 @@ export default function ProductPage({ kind }: { kind: Kind }) {
           )}
           {kind === "terms" && (
             <div className="max-w-3xl space-y-4 leading-7">
+              <p>The six-step check and its reviewed downloads are free and do not use preparation-pack credits. Evidence findings are comparisons of supplied English text. They do not verify qualifications, establish eligibility or predict screening results.</p>
               <p>
                 Provide information you have the right to use. Check and approve
                 the wording before downloading or submitting. Do not invent
