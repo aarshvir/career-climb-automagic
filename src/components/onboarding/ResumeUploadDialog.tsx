@@ -21,6 +21,7 @@ interface ResumeUploadDialogProps {
 export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const { user } = useAuth();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,6 +29,35 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
     if (selectedFile) {
       if (isValidResumeFile(selectedFile)) {
         setFile(selectedFile);
+      } else {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a PDF, DOC, or DOCX file.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (isValidResumeFile(droppedFile)) {
+        setFile(droppedFile);
       } else {
         toast({
           title: "Invalid file type",
@@ -144,7 +174,17 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
+              dragActive
+                ? "border-primary bg-primary/5"
+                : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+            }`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+          >
             <input
               type="file"
               accept=".pdf,.doc,.docx"
@@ -155,12 +195,23 @@ export const ResumeUploadDialog = ({ open, onSuccess }: ResumeUploadDialogProps)
             />
             <label
               htmlFor="resume-upload"
-              className="cursor-pointer flex flex-col items-center gap-2"
+              className="cursor-pointer flex flex-col items-center gap-3"
             >
-              <Upload className="h-8 w-8 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Click to select your resume
-              </span>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
+                dragActive ? "bg-primary/10" : "bg-muted"
+              }`}>
+                <Upload className={`h-8 w-8 transition-colors ${
+                  dragActive ? "text-primary" : "text-muted-foreground"
+                }`} />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground mb-1">
+                  {dragActive ? "Drop your resume here" : "Drag & drop your resume"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  or click to browse • PDF, DOC, DOCX
+                </p>
+              </div>
             </label>
           </div>
 

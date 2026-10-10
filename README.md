@@ -1,63 +1,117 @@
-# Jobvance SEO + Growth Launch Plan
+# Jobvance
 
-## 1. Executive Summary
+Jobvance is an application-preparation workspace. Users upload and review a CV, compare its existing experience with a real job description, approve and download the resulting document, and record their own application progress.
 
-**Top opportunities**
-- Ship foundational technical SEO (robots, sitemap, canonical/meta framework, structured data) to unlock indexation, rich results, and cleaner analytics.
-- Rebuild information architecture around three pillar guides and 12 cluster posts to capture "automated job search" demand across the funnel.
-- Launch white-hat backlink and PR engine anchored in data-driven assets (automation benchmarks, calculators, templates) to build authority.
+The current release is a **free beta with live payments disabled**. It provides one free application pack per account. It does not submit applications, generate unsupported achievements, or promise an interview or job. Tailoring works without an external AI service.
 
-**Estimated impact (90 days)**
-- +40–60% increase in qualified organic sessions from automated job search, resume tailoring, and outreach keywords.
-- +25% lift in demo requests via improved BOFU copy, social previews, and conversion tracking.
-- 15+ authoritative backlinks, 3 podcast features, and baseline rankings for new guides.
+## Independent source and hosting
 
-**P0 backlog highlights**
-1. Deploy SEO head middleware (canonical, OG/Twitter, structured data) and robots/sitemap (see `/components/SeoHead.tsx`, `/seo/robots.txt`, `/seo/sitemap.xml`).
-2. Publish Home/Product/Pricing rewrites with embedded schema and social cards.
-3. Launch pillar + cluster content calendar and integrate into sitemap and internal nav.
+This repository contains the frontend, backend functions, additive database migration, document parsing/export code, automated checks and deployment documentation. It can be developed and hosted independently of Lovable. No builder account, preview auth broker or builder-specific runtime is required.
 
-**Core Web Vitals targets**
-- LCP ≤ 2.5s (mobile 75th percentile) via hero image optimization, preloads, and font strategy.
-- INP ≤ 200ms through interaction audit, script deferral, and hydration splitting.
-- CLS ≤ 0.1 with reserved media aspect ratios, font fallback tuning, and consistent component skeletons.
+The frontend is a portable static application. Supabase remains its authentication, database and private-storage backend; changing the frontend host does not migrate or delete existing accounts and files.
 
-**E-E-A-T upgrades**
-- Author bios + About/Contact refresh for transparency.
-- Organization, Product, FAQ, and WebPage schema with contact points and review snippets.
-- Case studies, testimonials, and compliance messaging embedded in site copy.
+**Migration status — 10 October 2026:** the source is being prepared for independent publication. A new frontend deployment and custom-domain cutover are not yet confirmed. Native Sites and Cloudflare are hosting candidates; the domain is managed at Hostinger and the DNS change awaits owner access. See [release status](docs/MVP-RELEASE-STATUS.md) for current verification, rather than treating a local build as a live deployment.
 
-## 2. Technical SEO Audit (crawl-informed backlog)
+## Stack
 
-| Issue | Evidence/URL | Severity | Recommended Fix | Effort |
-| --- | --- | --- | --- | --- |
-| Robots/sitemap missing | jobvance.io root | P0 | Add `seo/robots.txt` and XML sitemap with priority URLs | S |
-| No canonical/Open Graph control | Sitewide | P0 | Introduce reusable `<SeoHead>` component for canonical, OG/Twitter, hreflang-ready meta | S |
-| Structured data absent | Core templates | P0 | Ship JSON-LD for Organization, WebSite + SearchAction, WebPage, SoftwareApplication, FAQ | S |
-| Social previews inconsistent | Sitewide | P0 | Standardize meta descriptions, OG images, and CTA copy via SeoHead | S |
-| Hero assets unoptimized | Home/Product | P1 | Deliver responsive WebP hero with preload + fixed dimensions | M |
-| Fonts blocking render | Sitewide | P1 | Preconnect/optimize Google Fonts, consider self-host critical fonts | S |
-| Analytics coverage gaps | Sitewide | P1 | Implement GA4, GSC, conversion events + dashboards | M |
-| Thin IA & internal links | Blog | P0 | Publish pillar & cluster content, update nav and sitemap | L |
-| Accessibility guardrails lacking | Sitewide | P1 | Adopt WCAG 2.2 AA checklist, regression QA, semantic markup | M |
-| Core Web Vitals risk | PSI + heuristics | P0 | Optimize hero LCP, interaction readiness, layout stability | M |
-| Backlink/PR plan absent | Off-site | P1 | Launch white-hat campaigns, assets, outreach templates | M |
+- React 18, TypeScript, Vite and React Router.
+- Tailwind CSS and shadcn/Radix interface components.
+- TanStack Query for account-scoped workspace data.
+- Supabase Auth, Postgres with row-level ownership policies, private Storage and Deno Edge Functions.
+- PDF.js and local DOCX/TXT parsing; reviewed PDF, DOCX and TXT exports.
+- Vitest/Testing Library, ESLint, TypeScript and isolated PostgreSQL/edge-handler tests.
 
-Full backlog with owners and KPIs lives in [`backlog.csv`](./backlog.csv).
+Paddle is the prepared default payment adapter; Stripe is an optional adapter. Both remain unavailable for real-money purchases in the free beta. Payment-provider code is separate from the CV workflow.
 
-## 3. Commit-Ready Code Changes
+## Run locally
 
-> These snippets assume the existing Vite + React Router setup with `react-helmet-async`. If you migrate to Next.js, swap `<Helmet>` for `<Head>` and `useLocation` for `useRouter` while keeping the same helpers.
+Use **Node 24**, or Node **22.13 or newer within the 22.x series**, and npm. Install from the checked-in npm lockfile:
 
-### `/seo/robots.txt`
-```diff
-+User-agent: *
-+Allow: /
-+
-+# Block noisy internal search parameters
-+Disallow: /search?
-+Disallow: /api/
-+Disallow: /admin/
-+Disallow: /dashboard/export
-+
-+Sitemap: https://jobvance.io/sitemap.xml
+```sh
+npm ci
+npm run dev
+```
+
+The development server uses [http://127.0.0.1:8080](http://127.0.0.1:8080).
+
+Create an ignored `.env.local` file using the names in `.env.example`. Supply the public configuration for your intended Supabase project:
+
+```dotenv
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_PUBLISHABLE_OR_ANON_KEY
+```
+
+Optional `VITE_SUPPORT_EMAIL` sets the published support contact. `VITE_PADDLE_CLIENT_TOKEN` is a public client token for an explicitly configured future sandbox checkout; it is not needed for the free beta.
+
+Public pages still render when backend configuration is missing, but sign-in and account services show an unavailable state. This is a configuration failure, not a demo account. The production build intentionally rejects missing or privileged frontend settings.
+
+Only public Supabase/paddle client values belong in `VITE_*` settings. Service-role keys, payment API keys and webhook secrets stay in Supabase's server-side settings. Never commit `.env`, `.env.local`, private backups or secret values.
+
+## Build and verify
+
+```sh
+npm run typecheck
+npm run lint
+npm run test:run
+npm run build
+npm run preview
+```
+
+The production build validates frontend settings, generates the public sitemap and writes static output to `dist/`. The preview server checks that build locally; it does not publish a website. `build:dev` is a development-mode build and should not replace the production validation gate.
+
+Backend SQL tests use an isolated fixture, not your hosted database:
+
+```sh
+npm run test:run -- --config supabase/tests/vitest.backend.config.ts
+```
+
+Native edge-handler checks and their limits are described in [backend deployment guidance](docs/MVP-BACKEND-DEPLOYMENT.md). Unit/fixture tests do not establish hosted auth, file isolation, mail delivery, domain configuration or merchant approval.
+
+## Source map
+
+| Location | Responsibility |
+|---|---|
+| `src/main.tsx`, `src/App.tsx`, `src/MvpApp.tsx` | Startup, shared providers and active routes |
+| `src/pages/Workspace.tsx` | CV upload/review, tailoring, approval, downloads and application tracking |
+| `src/pages/ProductPage.tsx` | Public product, help and policy pages |
+| `src/contexts/AuthContext.tsx`, `src/utils/auth*` | Auth state, signup, callback and recovery behavior |
+| `src/integrations/supabase/` | Standard Supabase client and frontend configuration validation |
+| `src/lib/cv-*` | CV types, parsing, storage and explicit import of legacy originals |
+| `src/lib/document-*` | Export formats, downloads and the bundled font/license |
+| `src/lib/workspace-api.ts` | Typed requests, ownership filters and access availability |
+| `src/lib/payment-checkout.ts` | Optional provider-specific browser checkout |
+| `supabase/functions/` | Authenticated tailoring/access and disabled-by-default payment adapters |
+| `supabase/migrations/20261010000000_grounded_application_mvp.sql` | Reviewed additive MVP schema, ownership and credit controls |
+| `src/__tests__/`, `supabase/tests/` | Frontend and isolated backend checks |
+| `docs/` | Repair contract, verification status and backend deployment instructions |
+
+Legacy source and historical research remain for reference. The active app starts through `MvpApp`; historical marketing plans and old dashboard implementations are not the current product contract.
+
+## Supabase backend setup
+
+Follow [MVP backend deployment](docs/MVP-BACKEND-DEPLOYMENT.md) against the intended project and its actual migration history. The required free-beta functions are `tailor-cv` and `get-entitlement`. They validate sessions on the server. The new `cv-documents` bucket is private, with per-account folders, supported PDF/DOCX/TXT uploads and a 5 MB limit.
+
+Apply only the reviewed additive migration after checking whether it is already installed. Do **not** replay `0000_init_schema.sql`, reset an existing database, or run the legacy `setup-db` scripts to migrate the production project. Those historical paths are not the new release procedure.
+
+Set `APP_URL` and `ALLOWED_ORIGINS` to the actual independent frontend origins. In Supabase Auth, set the correct Site URL and allow the actual domain's `/auth/callback` and `/auth/reset` redirects, plus intended local/staging origins. Configure email delivery and Google OAuth separately; use a full browser tab for Google sign-in. Supabase handles PKCE sessions without a preview editor.
+
+Keep `JOBVANCE_BILLING_ENABLED=false` for this beta. Existing disabled/retired automation endpoints must not be restored from historical patches. Backend source and the prepared dashboard-editor bundles in `docs/supabase-ui/` are available without a builder; the hosting change does not require new frontend framework code.
+
+## Publish the frontend independently
+
+1. Choose a static host and connect the intended source repository/branch, or upload the validated `dist/` artifact.
+2. Configure the two public Supabase variables in that host's **build** environment. Run `npm ci` and `npm run build`; publish `dist/`.
+3. Serve existing assets directly and route application paths such as `/dashboard`, `/auth/callback` and `/auth/reset` to `index.html`. Reproduce the response-header protections in `vercel.json` on the chosen host; that file is an example, not a Vercel dependency.
+4. Add the exact new origin to Supabase's allowed origins and auth redirects. Test the independent preview before changing DNS.
+5. Connect `jobvance.io` through the host's custom-domain flow, then update the required records in Hostinger. Confirm HTTPS, asset delivery and direct refreshes of nested routes.
+6. Verify two synthetic accounts, signup/confirmation, recovery, upload, one free pack, approval, all export formats, tracking and reload. Keep live purchases disabled.
+
+The frontend deployment, backend deployment and DNS cutover are separate changes. Publish and verify the intended source revision; a successful build alone does not complete any of them.
+
+## Further documentation
+
+- [Repair contract](docs/MVP-REPAIR-CONTRACT.md)
+- [Auth repair and redirect requirements](docs/AUTH-REPAIR.md)
+- [Backend deployment and verification limits](docs/MVP-BACKEND-DEPLOYMENT.md)
+- [Release status](docs/MVP-RELEASE-STATUS.md)
+

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { FileText, Upload, Plus, ExternalLink, Clock, Trash2, Eye, Download } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { FileText, Upload, Plus, Clock, Trash2, Eye, AlertCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizePlan } from "@/utils/planUtils";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import {
   RESUME_BUCKET,
   buildResumeStoragePath,
@@ -32,6 +33,9 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
   const navigate = useNavigate();
   const [resumes, setResumes] = useState<ResumeRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const normalizedPlan = normalizePlan(userPlan);
   const planLimits = usePlanLimits(normalizedPlan);
 
@@ -86,8 +90,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileUpload = async (file: File) => {
     if (!file || !user) return;
 
     if (!isValidResumeFile(file)) {
@@ -108,8 +111,8 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
       return;
     }
 
+    setUploading(true);
     try {
-      // Upload to Supabase Storage with mobile-friendly retry logic
       const normalizedFile = normalizeResumeFile(file);
       const fileName = buildResumeStoragePath(user.id, normalizedFile);
 
@@ -118,10 +121,8 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         size: normalizedFile.size,
         type: normalizedFile.type,
         path: fileName,
-        isMobile: /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|samsung/i.test(navigator.userAgent),
       });
 
-      // Use retry logic for mobile-friendly upload
       const { uploadFileWithRetry } = await import('@/utils/uploadUtils');
       const uploadResult = await uploadFileWithRetry(normalizedFile, fileName, RESUME_BUCKET);
 
@@ -129,7 +130,6 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         throw new Error(uploadResult.error || 'Upload failed');
       }
 
-      // Save record to database with graceful fallback for legacy schemas
       const { data: recordData, error: dbError, ignoredError, fallbackApplied } = await saveResumeRecord({
         userId: user.id,
         filePath: fileName,
@@ -138,17 +138,10 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         mimeType: normalizedFile.type || file.type || "application/octet-stream",
       });
 
-      console.log("Database insert result:", { recordData, dbError, ignoredError, fallbackApplied });
-
       if (dbError) throw dbError;
 
       if (ignoredError) {
-        console.warn(
-          "Database metadata was ignored due to missing columns:",
-          ignoredError,
-          "fallback applied:",
-          fallbackApplied,
-        );
+        console.warn("Database metadata ignored:", ignoredError, "fallback:", fallbackApplied);
       }
 
       toast({
@@ -161,9 +154,40 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
       console.error("Error uploading resume:", error);
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your resume. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error uploading your resume. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+    // Reset input so same file can be selected again
+    event.target.value = '';
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0]);
     }
   };
 
@@ -171,7 +195,7 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     try {
       const { data, error } = await supabase.storage
         .from(RESUME_BUCKET)
-        .createSignedUrl(resume.file_path, 300); // 5 minutes
+        .createSignedUrl(resume.file_path, 300);
 
       if (error) throw error;
       
@@ -190,14 +214,12 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
 
   const handleDeleteResume = async (resume: ResumeRecord) => {
     try {
-      // Delete from storage
       const { error: storageError } = await supabase.storage
         .from(RESUME_BUCKET)
         .remove([resume.file_path]);
 
       if (storageError) throw storageError;
 
-      // Delete from database
       const { error: dbError } = await supabase
         .from('resumes')
         .delete()
@@ -210,7 +232,6 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
         description: "Resume has been permanently deleted.",
       });
 
-      // Refresh the list
       fetchResumes();
     } catch (error) {
       console.error('Error deleting resume:', error);
@@ -226,191 +247,196 @@ export const CVManager = ({ userPlan }: CVManagerProps) => {
     navigate('/pricing?upgrade=true');
   };
 
-  const handleCreateNew = () => {
-    // This could open a resume builder or redirect to a create page
-    toast({
-      title: "Feature coming soon",
-      description: "Resume builder will be available in the next update.",
-    });
-  };
-
-  const handleViewAll = () => {
-    // This could navigate to a full resumes page
-    navigate('/resumes');
-  };
-
   const getFileName = (resume: ResumeRecord) => {
     if (resume.file_name) {
       return resume.file_name.split(".")[0] || resume.file_name;
     }
-
     return resume.file_path.split("/").pop()?.split(".")[0] || "Resume";
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return 'Unknown size';
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${Math.round(kb)} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
+      year: "numeric",
     });
   };
 
+  const canUpload = resumes.length < planLimits.resumeVariants;
+
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            CVs & Resumes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="animate-pulse space-y-3">
-            <div className="h-4 bg-muted rounded"></div>
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="animate-pulse space-y-3">
+          <div className="h-32 bg-muted rounded-lg"></div>
+          <div className="h-20 bg-muted rounded"></div>
+          <div className="h-20 bg-muted rounded"></div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          CVs & Resumes
-          <Badge variant="outline" className="ml-auto">
-            {resumes.length}/{planLimits.resumeVariants}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {resumes.length === 0 ? (
-          <div className="text-center py-6 space-y-4">
-            <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
-              <FileText className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="font-medium">No resumes uploaded</p>
-              <p className="text-sm text-muted-foreground">Upload your first resume to get started</p>
-            </div>
+    <div className="space-y-6">
+      {/* Drag and Drop Upload Zone */}
+      <div
+        className={cn(
+          "relative border-2 border-dashed rounded-lg p-8 transition-all",
+          dragActive && canUpload ? "border-primary bg-primary/5" : "border-muted-foreground/25",
+          !canUpload && "opacity-50 cursor-not-allowed",
+          canUpload && "hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
+        )}
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        onClick={() => canUpload && !uploading && fileInputRef.current?.click()}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={handleFileChange}
+          className="hidden"
+          disabled={!canUpload || uploading}
+        />
+        
+        <div className="text-center space-y-4">
+          <div className={cn(
+            "w-16 h-16 mx-auto rounded-full flex items-center justify-center transition-colors",
+            dragActive && canUpload ? "bg-primary/10" : "bg-muted"
+          )}>
+            <Upload className={cn(
+              "w-8 h-8 transition-colors",
+              dragActive && canUpload ? "text-primary" : "text-muted-foreground"
+            )} />
           </div>
-        ) : (
-          <div className="space-y-3">
-            {resumes.slice(0, 3).map((resume) => (
-              <div key={resume.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm truncate pr-2" title={getFileName(resume)}>
-                      {getFileName(resume)}
-                    </p>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3 flex-shrink-0" />
-                      <span>{formatDate(resume.created_at)}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    className="flex-shrink-0"
-                    onClick={() => handleViewResume(resume)}
-                    title="View resume"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="flex-shrink-0 hover:text-destructive"
-                        title="Delete resume"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Resume</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{getFileName(resume)}"? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
-                          onClick={() => handleDeleteResume(resume)}
-                          className="bg-destructive hover:bg-destructive/90"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            ))}
-            {resumes.length > 3 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="w-full"
-                onClick={handleViewAll}
+          
+          <div>
+            <p className="text-lg font-semibold text-foreground mb-1">
+              {uploading ? "Uploading..." : "Drop your resume here"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              or click to browse • PDF, DOC, DOCX • Max 10MB
+            </p>
+          </div>
+
+          {!canUpload && (
+            <div className="flex items-center justify-center gap-2 text-sm text-destructive">
+              <AlertCircle className="w-4 h-4" />
+              <span>Resume limit reached ({resumes.length}/{planLimits.resumeVariants})</span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-center gap-2">
+            <Badge variant="outline">
+              {resumes.length}/{planLimits.resumeVariants} resumes
+            </Badge>
+            {normalizedPlan === 'free' && (
+              <Button
+                variant="link"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpgradePlan();
+                }}
+                className="h-auto p-0"
               >
-                View all ({resumes.length})
+                Upgrade for more →
               </Button>
             )}
           </div>
-        )}
-
-        <div className="space-y-2">
-          <div className="relative">
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={handleFileUpload}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              disabled={resumes.length >= planLimits.resumeVariants}
-            />
-            <Button variant="outline" size="sm" className="w-full" disabled={resumes.length >= planLimits.resumeVariants}>
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Resume
-            </Button>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full" 
-            disabled={resumes.length >= planLimits.resumeVariants}
-            onClick={handleCreateNew}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create New
-          </Button>
         </div>
+      </div>
 
-        {resumes.length >= planLimits.resumeVariants && normalizedPlan === "free" && (
-          <div className="p-4 bg-muted/50 rounded-lg border border-muted">
-            <div className="text-center space-y-2">
-              <p className="text-sm font-medium">Resume limit reached</p>
-              <p className="text-xs text-muted-foreground">
-                Upgrade your plan to upload more resumes
-              </p>
-              <Button 
-                variant="link" 
-                size="sm" 
-                className="p-0 h-auto text-primary"
-                onClick={handleUpgradePlan}
-              >
-                Upgrade Plan →
-              </Button>
+      {/* Resume List */}
+      {resumes.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Your Resumes</h3>
+          {resumes.map((resume) => (
+            <div
+              key={resume.id}
+              className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-5 h-5 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-sm truncate" title={getFileName(resume)}>
+                    {getFileName(resume)}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatDate(resume.created_at)}
+                    </span>
+                    {resume.file_size && (
+                      <span>{formatFileSize(resume.file_size)}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleViewResume(resume)}
+                  title="View resume"
+                  className="h-9 w-9 p-0"
+                >
+                  <Eye className="w-4 h-4" />
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-9 w-9 p-0 hover:text-destructive"
+                      title="Delete resume"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Resume</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{getFileName(resume)}"? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteResume(resume)}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {resumes.length === 0 && (
+        <div className="text-center py-8 space-y-2">
+          <p className="text-sm text-muted-foreground">
+            No resumes uploaded yet. Upload your first resume above to get started.
+          </p>
+        </div>
+      )}
+    </div>
   );
 };

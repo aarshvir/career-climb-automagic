@@ -3,12 +3,9 @@ export const isInIframe = (): boolean => {
   try { return window.self !== window.top; } catch { return true; }
 };
 
-export const isLovableEnvironment = (): boolean =>
-  typeof window !== 'undefined' && /(^|\.)lovable(?:project)?\.(?:app|com)$/.test(window.location.hostname);
-
-export const getEnvironmentType = (): 'lovable' | 'production' | 'development' => {
+export const getEnvironmentType = (): 'production' | 'development' => {
   if (typeof window === 'undefined' || ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) return 'development';
-  return isLovableEnvironment() ? 'lovable' : 'production';
+  return 'production';
 };
 
 // Compatibility for the development panel; checking support must not open a popup.
