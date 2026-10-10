@@ -95,3 +95,7 @@
 .check-final-summary strong { font-size: 13px; }
 .check-final-summary p { color: #59657a; font-size: 12px; line-height: 1.7; margin-top: 5px; }
 @media (max-width: 740px) { .check-final-document { padding: 14px; max-height: 290px; } }
+.check-audience-guidance { margin: -12px 0 28px; padding: 17px 20px; border: 1px solid #dce2ee; border-radius: 14px; background: #eef0ff; }
+.check-audience-guidance strong { color: #2850df; font-size: 12px; }
+.check-audience-guidance p { color: #59657a; font-size: 13px; line-height: 1.7; margin-top: 4px; }
+@media (max-width: 740px) { .check-audience-guidance { margin: 0 0 22px; padding: 14px 16px; } }

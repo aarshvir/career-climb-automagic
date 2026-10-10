@@ -1,12 +1,13 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, ArrowUpRight, Check, CheckCircle2, CircleHelp, Download, FileText, FolderOpen, LockKeyhole, Plus, ShieldCheck } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen, Briefcase, Check, CheckCircle2, CircleHelp, Download, FileText, FolderOpen, GraduationCap, LockKeyhole, Plus, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import "./ProductPage.css";
 
 type Kind = "home" | "pricing" | "how" | "faq" | "about" | "contact" | "privacy" | "terms" | "refund" | "help" | "notfound";
 const titles: Record<Kind, string> = {
-  home: "Prepare a CV you can stand behind", pricing: "A useful place to start. Free.", how: "One application. Six clear steps.", faq: "A few things worth knowing.", about: "Your experience belongs to you.", contact: "Let’s get you unstuck.", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "This page took a different path.",
+  home: "Your next application, around your day", pricing: "A useful place to start. Free.", how: "One application. Six clear steps.", faq: "A few things worth knowing.", about: "Your experience belongs to you.", contact: "Let’s get you unstuck.", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "This page took a different path.",
 };
 const labels: Record<Kind, string> = { home: "Jobvance", pricing: "Access & pricing", how: "How it works", faq: "Questions & answers", about: "About Jobvance", contact: "Contact", privacy: "Your information", terms: "The details", refund: "Credits & refunds", help: "A little guidance", notfound: "Page not found" };
 const intros: Partial<Record<Kind, string>> = {
@@ -38,32 +39,72 @@ const faqs = [
   ["Which files can I upload?", "Text-based PDF, DOCX and TXT files up to 5 MB. Scanned PDFs and old .doc files need conversion to a readable supported format."],
   ["Can I purchase more packs?", "Jobvance is currently a free beta with one preparation pack per account. Paid passes are not available. The planned pass is a one-time purchase, with no automatic renewal."],
   ["Are interviews or jobs guaranteed?", "No. Jobvance helps prepare and organize applications; employer decisions and hiring outcomes remain outside its control."],
+  ["Can I use Jobvance as a student or MBA student?", "Yes. Your reviewed CV can include clearly labelled academic projects, internships, activities and previous employment. Describe your own contribution accurately. Project work is not automatically evidence of required professional experience."],
+  ["Does the full Job Loop run here yet?", "Not yet. The current site provides a free CV check, private preparation packs and manual application tracking. Career-profile setup, automatic job discovery, inbox connections and recruiter research are being built; they do not run on this site today."],
 ];
 
-function StartLink({ children = "Check my CV for free", light = false }: { children?: React.ReactNode; light?: boolean }) {
-  return <Link to="/check" className={`product-button${light ? " product-button--light" : ""}`}>{children}<ArrowRight size={18} aria-hidden="true" /></Link>;
+type Audience = "student" | "mba" | "switcher";
+const audienceExamples = {
+  student: {
+    label: "Students", checkPath: "/check?audience=student", icon: GraduationCap, cardTitle: "Your first career step", cardText: "Bring coursework, internships and activities into view for an internship or graduate vacancy. Keep academic work labelled as academic work.", cta: "Check my student CV",
+    intro: "Classes and applications compete for your time. Bring a CV built from projects, internships and activities, plus one vacancy. Review its wording and download the version you approve.",
+    role: "Graduate data analyst", firstVacancy: "Develop Python reports.", firstCv: "Developed Python reports for a university project.", firstSource: "ACADEMIC PROJECT",
+    secondVacancy: "Lead Python reporting.", secondCv: "Assisted in leading Python reporting during an internship.", secondSource: "INTERNSHIP CONTRIBUTION",
+    question: "Which work was your own contribution, and which work did you support?", caveat: "Academic project work does not establish a requirement for professional experience.",
+    originalFirst: "Coordinated university project meetings.", originalSecond: "Developed Python reports for a university project.", orderFocus: "Graduate reporting role in focus",
+  },
+  mba: {
+    label: "MBA students", checkPath: "/check?audience=mba", icon: BookOpen, cardTitle: "Your post-MBA direction", cardText: "Connect previous work with MBA projects for the next role. Separate your own contribution from team results and keep forecasts distinct from outcomes.", cta: "Check my MBA CV",
+    intro: "Coursework, recruiting and career decisions fill the week. Bring your previous work and MBA projects together for one vacancy. Check your contribution, review the gaps and approve your CV.",
+    role: "Business analyst", firstVacancy: "Produce stakeholder reports.", firstCv: "Prepared stakeholder reports in a prior analyst role.", firstSource: "PRIOR EMPLOYMENT",
+    secondVacancy: "Manage market research projects.", secondCv: "Supported a market research project during my MBA.", secondSource: "MBA TEAM PROJECT",
+    question: "What did you personally do in the MBA team project?", caveat: "MBA team-project support does not establish project-management ownership.",
+    originalFirst: "Coordinated interviews for an MBA team project.", originalSecond: "Prepared a market research summary for an MBA team project.", orderFocus: "Market research role in focus",
+  },
+  switcher: {
+    label: "Career-switchers", checkPath: "/check?audience=professional", icon: Briefcase, cardTitle: "A move alongside work", cardText: "Review experience that transfers to a new role. Prepare around your working day and record the applications you choose to submit yourself.", cta: "Check my career-switch CV",
+    intro: "Your working day is already full. Start with one vacancy and the experience you can substantiate. Review what transfers, clarify what you supported, and keep an approved version for your next application.",
+    role: "Operations analyst", firstVacancy: "Produce stakeholder reports.", firstCv: "Prepared stakeholder reports.", firstSource: "EMPLOYMENT EXPERIENCE",
+    secondVacancy: "Lead stakeholder reporting.", secondCv: "Assisted in leading stakeholder reporting.", secondSource: "SUPPORTING CONTRIBUTION",
+    question: "Did you lead this work, or support someone who did?", caveat: "Supporting work is not promoted into a claim of leading or owning it.",
+    originalFirst: "Coordinated team meeting schedules.", originalSecond: "Prepared monthly management reports.", orderFocus: "Reporting role in focus",
+  },
+} as const;
+const audiences: Audience[] = ["student", "mba", "switcher"];
+const fullLoopSteps = [
+  { title: "Your profile", text: "Build and confirm reusable career facts." },
+  { title: "Replies", text: "Review selected replies and priorities." },
+  { title: "Search & shortlist", text: "Find roles and check their sources." },
+  { title: "CVs & drafts", text: "Prepare a CV and message drafts per role." },
+  { title: "Review & apply", text: "You approve, send and apply." },
+  { title: "Next actions", text: "Keep deadlines and follow-ups together." },
+];
+
+function StartLink({ children = "Check my CV for free", light = false, to = "/check" }: { children?: React.ReactNode; light?: boolean; to?: string }) {
+  return <Link to={to} className={`product-button${light ? " product-button--light" : ""}`}>{children}<ArrowRight size={18} aria-hidden="true" /></Link>;
 }
 
-function EvidencePreview() {
-  return <figure className="product-preview" aria-labelledby="product-preview-caption">
+function EvidencePreview({ audience }: { audience: Audience }) {
+  const example = audienceExamples[audience];
+  return <figure id="home-audience-example" className="product-preview" aria-labelledby="product-preview-caption">
     <div className="product-preview-label"><span className="product-live-dot" aria-hidden="true" />A look inside <span>Fictional demo</span></div>
     <div className="product-preview-window">
       <div className="product-preview-bar"><span className="product-preview-logo">j<span aria-hidden="true">↗</span></span><span>CV check / Evidence review</span><span className="product-preview-step">04 / 06</span></div>
       <div className="product-preview-body">
-        <div className="product-preview-role"><div><span className="product-micro">ROLE IN FOCUS</span><h2>Operations analyst</h2><p>A fictional vacancy</p></div><FileText size={24} aria-hidden="true" /></div>
+        <div className="product-preview-role"><div><span className="product-micro">ROLE IN FOCUS</span><h2>{example.role}</h2><p>A fictional vacancy · {example.label}</p></div><FileText size={24} aria-hidden="true" /></div>
         <div className="product-evidence-pair">
-          <div className="product-passage"><span className="product-micro">THE VACANCY SAYS</span><p>“Produce stakeholder reports.”</p></div>
-          <div className="product-passage product-passage--cv"><span className="product-micro">YOUR CV SAYS</span><p>“Prepared stakeholder reports.”</p><span className="product-status product-status--direct"><CheckCircle2 size={13} aria-hidden="true" />Direct wording found</span></div>
+          <div className="product-passage"><span className="product-micro">THE VACANCY SAYS</span><p>“{example.firstVacancy}”</p></div>
+          <div className="product-passage product-passage--cv"><span className="product-micro">YOUR CV SAYS · {example.firstSource}</span><p>“{example.firstCv}”</p><span className="product-status product-status--direct"><CheckCircle2 size={13} aria-hidden="true" />Direct wording found</span></div>
         </div>
         <div className="product-evidence-pair product-evidence-pair--second">
-          <div className="product-passage"><span className="product-micro">THE VACANCY SAYS</span><p>“Lead stakeholder reporting.”</p></div>
-          <div className="product-passage product-passage--cv"><span className="product-micro">YOUR CV SAYS</span><p>“Assisted in leading stakeholder reporting.”</p><span className="product-status product-status--review"><CircleHelp size={13} aria-hidden="true" />Related passage—review needed</span></div>
+          <div className="product-passage"><span className="product-micro">THE VACANCY SAYS</span><p>“{example.secondVacancy}”</p></div>
+          <div className="product-passage product-passage--cv"><span className="product-micro">YOUR CV SAYS · {example.secondSource}</span><p>“{example.secondCv}”</p><span className="product-status product-status--review"><CircleHelp size={13} aria-hidden="true" />Related passage—review needed</span></div>
         </div>
-        <div className="product-preview-question"><CircleHelp size={17} aria-hidden="true" /><p>Did you lead this work, or support someone who did?</p></div>
+        <div className="product-preview-question"><CircleHelp size={17} aria-hidden="true" /><p>{example.question}</p></div>
         <div className="product-preview-bottom"><span>Read the passage. Make the call.</span><span><LockKeyhole size={12} aria-hidden="true" />Your review</span></div>
       </div>
     </div>
-    <figcaption id="product-preview-caption">Illustrative example using fictional text. Findings compare wording; they do not confirm qualifications.</figcaption>
+    <figcaption id="product-preview-caption">Illustrative example using fictional text. Findings compare wording; they do not confirm qualifications. {example.caveat}</figcaption>
   </figure>;
 }
 
@@ -71,21 +112,42 @@ function StepList({ compact = false }: { compact?: boolean }) {
   return <ol className={`product-steps${compact ? " product-steps--compact" : ""}`}>{steps.map((step, index) => <li key={step.title}><span className="product-step-number" aria-hidden="true">0{index + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p></div>{index === 5 && <Download size={21} aria-hidden="true" />}</li>)}</ol>;
 }
 
-function HomePage() {
+function HomePage({ workspacePath }: { workspacePath: string }) {
+  const [audience, setAudience] = useState<Audience>("student");
+  const example = audienceExamples[audience];
   return <>
     <section className="product-hero product-shell">
-      <div className="product-hero-copy"><p className="product-eyebrow"><span aria-hidden="true" />A little more clarity for your next move</p><h1>Prepare a CV you can <em>stand behind.</em></h1><p className="product-hero-intro">Have a job in mind? Bring your CV and the vacancy. See where your experience comes through, work through the gaps, and leave with a version you’re ready to send.</p><div className="product-actions"><StartLink /><a href="#example" className="product-text-link">See a worked example<ArrowUpRight size={17} aria-hidden="true" /></a></div><p className="product-hero-note">Free to check and download. No account or card needed.</p></div>
-      <div className="product-hero-art"><span className="product-orbit" aria-hidden="true" /><EvidencePreview /></div>
+      <div className="product-hero-copy">
+        <p className="product-eyebrow"><span aria-hidden="true" />STUDENTS, MBA STUDENTS & BUSY CAREER-SWITCHERS</p>
+        <h1>A busy week.<br /><em>A clearer application.</em></h1>
+        <div className="product-audience-picker"><p id="home-audience-label">I’m preparing as</p><div role="group" aria-labelledby="home-audience-label" className="product-audience-buttons">{audiences.map(choice => { const option = audienceExamples[choice], Icon = option.icon; return <button key={choice} type="button" aria-pressed={audience === choice} aria-controls="home-audience-example" onClick={() => setAudience(choice)}><Icon size={15} aria-hidden="true" />{option.label}</button>; })}</div></div>
+        <p className="product-hero-intro">{example.intro}</p>
+        <div className="product-actions"><StartLink to={example.checkPath} /><a href="#example" className="product-text-link">See this worked example<ArrowUpRight size={17} aria-hidden="true" /></a></div>
+        <p className="product-hero-note">Free to check and download. No account or card needed.</p>
+        <p className="product-selection-note">Your choice changes the examples and starting guidance. It is not saved as a profile.</p>
+        <p className="sr-only" role="status">{example.label} fictional example selected.</p>
+      </div>
+      <div className="product-hero-art"><span className="product-orbit" aria-hidden="true" /><EvidencePreview audience={audience} /></div>
     </section>
     <div className="product-assurances product-shell" aria-label="A workflow you control"><span><FileText size={17} aria-hidden="true" />Your actual experience</span><span><ShieldCheck size={18} aria-hidden="true" />Check on your device</span><span><CheckCircle2 size={18} aria-hidden="true" />Your approval comes first</span></div>
+    <section className="product-audience-section product-shell" aria-labelledby="product-audience-title">
+      <div className="product-section-heading"><div><p className="product-eyebrow">Different starting points</p><h2 id="product-audience-title">An application for<br /><em>your next chapter.</em></h2></div><p>Projects, previous work or a new direction. Start with experience you can explain and one real vacancy.</p></div>
+      <div className="product-audience-cards">{audiences.map(choice => { const option = audienceExamples[choice], Icon = option.icon; return <article key={choice} className={`product-audience-card${choice === audience ? " product-audience-card--active" : ""}`}><div className="product-audience-card-label"><Icon size={20} aria-hidden="true" /><span>{option.label}</span></div><h3>{option.cardTitle}</h3><p>{option.cardText}</p><Link to={option.checkPath} className="product-text-link">{option.cta}<ArrowRight size={16} aria-hidden="true" /></Link></article>; })}</div>
+    </section>
     <section id="example" className="product-evidence-section product-shell">
       <div className="product-section-copy"><p className="product-eyebrow">01 / See what’s already there</p><h2>Relevant experience.<br /><em>In clearer view.</em></h2><p>A good application starts with a real example. Read the vacancy beside your own words, then bring the experience that matters forward.</p><p>Missing evidence is a question for you. Add an example only when it’s yours to share.</p><Link to="/how-it-works" className="product-text-link">How the check works<ArrowRight size={17} aria-hidden="true" /></Link></div>
-      <div className="product-order-demo"><div className="product-order-heading"><span>THE SAME CV. A MORE RELEVANT ORDER.</span><span className="product-demo-tag">Fictional example</span></div><div className="product-order-sheet"><span className="product-micro">ORIGINAL ORDER</span><ol><li>Coordinated team meeting schedules.</li><li>Prepared monthly management reports.</li></ol></div><div className="product-order-transition" aria-hidden="true"><ArrowRight size={21} /><span>Reporting role in focus</span></div><div className="product-order-sheet product-order-sheet--after"><span className="product-micro">RELEVANT ORDER</span><ol><li><mark>Prepared monthly management reports.</mark></li><li>Coordinated team meeting schedules.</li></ol></div><p className="product-demo-note">The original wording and facts stay intact. This is a fictional illustration, not a customer outcome.</p></div>
+      <div className="product-order-demo"><div className="product-order-heading"><span>THE SAME CV. A MORE RELEVANT ORDER.</span><span className="product-demo-tag">Fictional {example.label.toLowerCase()} example</span></div><div className="product-order-sheet"><span className="product-micro">ORIGINAL ORDER</span><ol><li>{example.originalFirst}</li><li>{example.originalSecond}</li></ol></div><div className="product-order-transition" aria-hidden="true"><ArrowRight size={21} /><span>{example.orderFocus}</span></div><div className="product-order-sheet product-order-sheet--after"><span className="product-micro">RELEVANT ORDER</span><ol><li><mark>{example.originalSecond}</mark></li><li>{example.originalFirst}</li></ol></div><p className="product-demo-note">The original wording and facts stay intact. This is a fictional illustration, not a customer outcome.</p></div>
     </section>
-    <section className="product-path-section"><div className="product-shell"><div className="product-section-heading"><div><p className="product-eyebrow">02 / A path you can follow</p><h2>One real vacancy.<br /><em>Six clear steps.</em></h2></div><p>Bring the source. Review the evidence. Approve what leaves your hands.</p></div><StepList /><div className="product-path-footer"><span>PDF, Word or text file. One vacancy at a time.</span><StartLink>Start with your role</StartLink></div></div></section>
+    <section className="product-path-section"><div className="product-shell"><div className="product-section-heading"><div><p className="product-eyebrow">02 / A path you can follow</p><h2>One real vacancy.<br /><em>Six clear steps.</em></h2></div><p>Bring the source. Review the evidence. Approve what leaves your hands.</p></div><StepList /><div className="product-path-footer"><span>PDF, Word or text file. One vacancy at a time.</span><StartLink to={example.checkPath}>Start with your role</StartLink></div></div></section>
+    <section className="product-loop-section product-shell" aria-labelledby="product-loop-title">
+      <div className="product-loop-heading"><div><p className="product-eyebrow">The longer workflow</p><h2 id="product-loop-title">Full Job Loop<br /> <em>being built.</em></h2></div><span className="product-development-label"><span aria-hidden="true" />Not running here yet</span></div>
+      <p className="product-loop-intro">Available today: a free CV check, private CV preparation packs and manual application tracking. The full profile-to-follow-up workflow below is being built.</p>
+      <ol className="product-loop-steps">{fullLoopSteps.map((stage, index) => <li key={stage.title}><span className="product-loop-number">0{index + 1}</span><h3>{stage.title}</h3><p>{stage.text}</p>{index < fullLoopSteps.length - 1 && <ArrowRight size={16} aria-hidden="true" />}</li>)}</ol>
+      <div className="product-loop-footer"><p>Automatic vacancy discovery, inbox connections and recruiter research are not available on this site today. No message or application is sent for you.</p><Link to={workspacePath} className="product-text-link">Open the current workspace<ArrowUpRight size={16} aria-hidden="true" /></Link></div>
+    </section>
     <section className="product-private-section product-shell"><div className="product-private-copy"><p className="product-eyebrow">03 / Room to prepare</p><h2>Your working draft.<br /><em>Your choice to save.</em></h2><p>The free check compares text on your device. Take your time: read, revise and download without creating an account.</p><p>Sign in when you want to save an approved check privately or keep an honest record of the applications you submit yourself.</p><Link to="/privacy" className="product-text-link">Read how your information is handled<ArrowUpRight size={17} aria-hidden="true" /></Link></div><div className="product-private-note"><LockKeyhole size={29} aria-hidden="true" /><span className="product-micro">YOU CONTROL THE NEXT STEP</span><ul><li><Check size={18} aria-hidden="true" /><span>Review the source text</span></li><li><Check size={18} aria-hidden="true" /><span>Approve your final wording</span></li><li><FolderOpen size={18} aria-hidden="true" /><span>Choose whether to save privately</span></li></ul><p>Unsaved checks are held in memory and cleared when the page closes or refreshes. Account saving is an explicit choice.</p></div></section>
-    <section className="product-pilot-section product-shell"><div className="product-pilot-index" aria-hidden="true"><span>YOUR</span><em>next</em><span>CHAPTER</span></div><div><p className="product-eyebrow">A focused place to begin</p><h2>Exploring strategy or transformation roles?</h2><p>Take a look at the free guided pilot and a fictional example. See the workflow before deciding what you want to share.</p><Link to="/pilot" className="product-text-link">Explore the guided pilot<ArrowUpRight size={18} aria-hidden="true" /></Link></div></section>
-    <section className="product-final-section"><div className="product-shell"><p className="product-eyebrow">Your next application starts with what you know</p><h2>Bring your experience.<br /><em>Make it clearer.</em></h2><div className="product-final-actions"><StartLink light /><span>Free check. Reviewed download.<br />No account needed to start.</span></div><span className="product-final-arrow" aria-hidden="true">↗</span></div></section>
+    <section className="product-pilot-section product-shell"><div className="product-pilot-index" aria-hidden="true"><span>YOUR</span><em>next</em><span>CHAPTER</span></div><div><p className="product-eyebrow">An example to explore</p><h2>See a fictional preparation workflow.</h2><p>Explore a prewritten concept demonstration. Its role directions illustrate an example, rather than limits on who can use Jobvance. Review the source and the wording before deciding what to share.</p><Link to="/pilot" className="product-text-link">See the fictional preparation workflow<ArrowUpRight size={18} aria-hidden="true" /></Link></div></section>
+    <section className="product-final-section"><div className="product-shell"><p className="product-eyebrow">Your next application starts with what you know</p><h2>Bring your experience.<br /><em>Make it clearer.</em></h2><div className="product-final-actions"><StartLink light to={example.checkPath} /><span>Free check. Reviewed download.<br />No account needed to start.</span></div><span className="product-final-arrow" aria-hidden="true">↗</span></div></section>
   </>;
 }
 
@@ -119,8 +181,8 @@ export default function ProductPage({ kind }: { kind: Kind }) {
   const support = import.meta.env.VITE_SUPPORT_EMAIL as string | undefined;
   const legal = kind === "privacy" || kind === "terms" || kind === "refund";
   return <main className={`product-page product-page--${kind}`}>
-    <Helmet><title>{titles[kind]} | Jobvance</title><meta name="description" content="Review your CV, tailor existing experience to a real vacancy, download your documents, and track your applications." /></Helmet>
-    {kind === "home" ? <HomePage /> : <div className="product-shell product-inner">
+    <Helmet><title>{titles[kind]} | Jobvance</title><meta name="description" content={kind === "home" ? "A free CV check for students, MBA students and busy career-switchers. Review one vacancy, approve your wording, download your CV and optionally save privately." : "Review your CV, tailor existing experience to a real vacancy, download your documents, and track your applications."} /></Helmet>
+    {kind === "home" ? <HomePage workspacePath={start} /> : <div className="product-shell product-inner">
       <header className="product-page-heading"><p className="product-eyebrow"><Link to="/">Jobvance</Link><span aria-hidden="true">/</span>{labels[kind]}</p><h1>{titles[kind]}</h1><p className="product-page-intro">{intros[kind]}</p></header>
       {kind === "pricing" ? <><div className="product-pricing"><section className="product-plan product-plan--free"><div className="product-plan-top"><span className="product-eyebrow">Available now</span><span className="product-demo-tag">Free beta</span></div><h2>Check, review & download</h2><p className="product-price">Free<span>For your next application</span></p><p>The six-step CV check and approved downloads are free. Optional private account saving does not use a pack credit. The existing workspace also includes one free preparation pack per account.</p><ul><li><Check size={17} aria-hidden="true" />Check your CV against one vacancy</li><li><Check size={17} aria-hidden="true" />Read the original evidence and make your edits</li><li><Check size={17} aria-hidden="true" />Approve and download your version</li></ul><StartLink>Start your free check</StartLink></section><section className="product-plan product-plan--planned"><div className="product-plan-top"><span className="product-eyebrow">Planned access</span><LockKeyhole size={17} aria-hidden="true" /></div><h2>Thirty-day pass</h2><p className="product-price">$29<span>Once · planned price</span></p><p>Ten application packs for thirty days. PDF, DOCX and TXT downloads. No automatic renewal or included practitioner review.</p><button type="button" className="product-button product-button--disabled" disabled>Paid pass not available</button><p className="product-plan-note">Free beta access is available now. Paid sales have not launched. <Link to="/refund">Refund terms</Link>.</p></section></div><p className="product-pricing-note">You submit your application on the employer’s site. Jobvance helps you prepare and keep track.</p></> : <div className="product-content-layout"><article className="product-main-content">
         {(kind === "how" || kind === "help") && <><StepList compact /><div className="product-help-bottom"><StartLink>Start a free CV check</StartLink><p>The existing <Link to={start}>workspace</Link> remains available for saved CV files, preparation packs and tracking. You submit separately on the employer’s site.</p></div></>}

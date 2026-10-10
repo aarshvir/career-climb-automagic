@@ -1,5 +1,6 @@
 export const PILOT_CONTACT = "contact@jobvance.io";
-export type PilotAudience = "professional" | "coach";
+export type PilotAudience = "student" | "mba" | "professional" | "coach";
+const audienceLabels: Record<PilotAudience, string> = { student: "university student", mba: "MBA student", professional: "professional considering a career move", coach: "career coach" };
 export type PilotRequestInput = {
   name: string;
   audience: PilotAudience;
@@ -13,12 +14,14 @@ export function preparePilotRequest(input: PilotRequestInput) {
   if (!directions) throw new Error("Tell us which role directions or client preparation task you want to explore.");
   const name = clean(input.name, 80);
   const availability = clean(input.availability, 160);
-  const subject = `Jobvance free pilot discussion — ${input.audience === "coach" ? "career coach" : "professional"}`;
+  if (!Object.prototype.hasOwnProperty.call(audienceLabels, input.audience)) throw new Error("Choose a participant type.");
+  const audienceLabel = audienceLabels[input.audience];
+  const subject = `Jobvance free pilot discussion — ${audienceLabel}`;
   const body = [
     "Hello Jobvance,",
     "",
     "I would like to discuss the free, guided research pilot.",
-    `I am a ${input.audience === "coach" ? "career coach" : "professional considering a career move"}.`,
+    `I am ${input.audience === "mba" ? "an" : "a"} ${audienceLabel}.`,
     name ? `Name: ${name}` : "",
     `Role directions or preparation task: ${directions}`,
     availability ? `Possible discussion times (with timezone): ${availability}` : "",

@@ -10,14 +10,14 @@ import { PILOT_CONTACT, preparePilotRequest, type PilotAudience } from "@/lib/pi
 import "./AccountPilot.css";
 
 const stages = [
-  { number: "01", title: "Choose two directions", text: "Explore strategy and transformation roles using the same career facts." },
+  { number: "01", title: "Choose your directions", text: "Explore internship, graduate, post-MBA or career-switch roles using your own projects and experience." },
   { number: "02", title: "Review the wording", text: "Check your contribution, result status and what you want to keep private." },
   { number: "03", title: "Prepare your next step", text: "Review an application packet and keep its version with the role." },
 ];
 
 export default function PilotLanding() {
   const [name, setName] = useState("");
-  const [audience, setAudience] = useState<PilotAudience>("professional");
+  const [audience, setAudience] = useState<PilotAudience>("student");
   const [directions, setDirections] = useState("");
   const [availability, setAvailability] = useState("");
   const [request, setRequest] = useState<ReturnType<typeof preparePilotRequest> | null>(null);
@@ -48,14 +48,14 @@ export default function PilotLanding() {
     <main className="jv-pilot">
       <Helmet>
         <title>Free career-transition pilot & fictional demo | Jobvance</title>
-        <meta name="description" content="Explore a fictional two-role application demo and request a free, guided Jobvance pilot discussion for UAE professionals and career coaches." />
+        <meta name="description" content="Explore a fictional application workflow and prepare an unsent free-pilot request as a student, MBA candidate, busy career-switcher or career coach." />
         <link rel="canonical" href="https://jobvance.io/pilot" />
       </Helmet>
       <section className="ap-pilot-hero" aria-labelledby="pilot-title">
         <div className="ap-pilot-intro">
           <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> THE FREE RESEARCH PILOT</p>
           <h1 id="pilot-title">Two directions.<br /><span>One true story.</span></h1>
-          <p>Considering strategy and transformation roles in the UAE? Explore two ways to present your experience, while keeping your contribution and every factual change open to review.</p>
+          <p>Applying during university, recruiting after an MBA, or fitting a career move around work? Explore how one record of your projects and experience can support different applications.</p>
           <div className="ap-pilot-actions">
             <Button asChild className="ap-primary"><a href="#demo">Try the fictional demo <ArrowDown size={16} aria-hidden="true" /></a></Button>
             <Button asChild variant="outline" className="ap-outline"><a href="#request">Prepare a pilot request <ArrowRight size={16} aria-hidden="true" /></a></Button>
@@ -84,10 +84,12 @@ export default function PilotLanding() {
       </aside>
 
       <section className="ap-audience-section" aria-labelledby="pilot-fit">
-        <div className="ap-section-heading"><div><p className="ap-eyebrow">WHO IT IS FOR</p><h2 id="pilot-fit">A thoughtful next move.</h2></div><p>For people with experience to draw on, and coaches helping them make that experience clearer.</p></div>
+        <div className="ap-section-heading"><div><p className="ap-eyebrow">WHO IT IS FOR</p><h2 id="pilot-fit">Your next move.<br />Around your real life.</h2></div><p>Different starting points, the same need: prepare useful applications without rebuilding your story each time.</p></div>
         <div className="ap-audience-grid">
-          <article className="ap-audience"><span className="ap-audience-icon"><Users size={21} aria-hidden="true" /></span><div><h3>Experienced professionals</h3><p>You have a career record to work from and are considering two plausible role directions. Help us test whether preparation is clearer and less repetitive.</p></div></article>
-          <article className="ap-audience"><span className="ap-audience-icon"><MessageCircle size={21} aria-hidden="true" /></span><div><h3>Career coaches</h3><p>You already review client applications. Explore a fictional example first, then discuss a small task comparison with a consenting participant.</p></div></article>
+          <article className="ap-audience"><span className="ap-audience-icon"><Users size={21} aria-hidden="true" /></span><div><h3>University students</h3><p>Bring coursework, internships, volunteering and personal projects. Employment history is not a prerequisite for the pilot.</p></div></article>
+          <article className="ap-audience"><span className="ap-audience-icon"><Layers3 size={21} aria-hidden="true" /></span><div><h3>MBA students</h3><p>Connect previous work and MBA projects to consulting, product, finance or another role you want to pursue. Keep classroom work distinct from employment.</p></div></article>
+          <article className="ap-audience"><span className="ap-audience-icon"><Route size={21} aria-hidden="true" /></span><div><h3>Busy career-switchers</h3><p>Work from your real career record and test a less repetitive preparation routine. You choose what to disclose about your current employer.</p></div></article>
+          <article className="ap-audience"><span className="ap-audience-icon"><MessageCircle size={21} aria-hidden="true" /></span><div><h3>Career coaches</h3><p>Explore the fictional example before discussing a small preparation task with a consenting student or professional.</p></div></article>
         </div>
       </section>
 
@@ -110,8 +112,8 @@ export default function PilotLanding() {
         </div>
         <form onSubmit={prepare} className="ap-pilot-form">
           <div><label htmlFor="pilot-name">Your name <span>(optional)</span></label><Input id="pilot-name" autoComplete="name" maxLength={80} value={name} onChange={e => { setName(e.target.value); resetDraft(); }} /></div>
-          <div><label htmlFor="pilot-audience">I’m exploring this as</label><select id="pilot-audience" value={audience} onChange={e => { setAudience(e.target.value as PilotAudience); resetDraft(); }}><option value="professional">A professional considering a career move</option><option value="coach">A career coach</option></select></div>
-          <div><label htmlFor="pilot-directions">Role directions or preparation task</label><Textarea id="pilot-directions" required maxLength={500} rows={3} aria-describedby="pilot-directions-help" placeholder="For example: strategy and transformation roles, or reviewing two client CV versions." value={directions} onChange={e => { setDirections(e.target.value); resetDraft(); }} /><p id="pilot-directions-help" className="ap-request-help">A brief description is enough. No private career documents at this stage.</p></div>
+          <div><label htmlFor="pilot-audience">I’m exploring this as</label><select id="pilot-audience" value={audience} onChange={e => { setAudience(e.target.value as PilotAudience); resetDraft(); }}><option value="student">A university student</option><option value="mba">An MBA student</option><option value="professional">A professional considering a career move</option><option value="coach">A career coach</option></select></div>
+          <div><label htmlFor="pilot-directions">Role directions or preparation task</label><Textarea id="pilot-directions" required maxLength={500} rows={3} aria-describedby="pilot-directions-help" placeholder="For example: graduate analyst roles, post-MBA consulting, or moving from operations into product." value={directions} onChange={e => { setDirections(e.target.value); resetDraft(); }} /><p id="pilot-directions-help" className="ap-request-help">A brief description is enough. No private career documents at this stage.</p></div>
           <div><label htmlFor="pilot-availability">Possible discussion times and timezone <span>(optional)</span></label><Input id="pilot-availability" maxLength={160} placeholder="For example: weekday afternoons, UAE time." value={availability} onChange={e => { setAvailability(e.target.value); resetDraft(); }} /></div>
           <Button type="submit" className="ap-primary">Prepare request draft <ArrowRight size={16} aria-hidden="true" /></Button>
           {error ? <p role="alert" className="ap-form-error">{error}</p> : null}

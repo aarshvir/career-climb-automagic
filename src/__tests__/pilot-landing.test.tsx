@@ -56,4 +56,14 @@ describe("free pilot request", () => {
     expect(parsed.searchParams.get("body")).toContain("&bcc=unexpected@example.com");
     expect(draft.text).toContain("no payment or job outcome is promised");
   });
+
+  it.each(["student", "mba"] as const)("supports an explicit %s request without presenting it as sent", audience => {
+    const draft = preparePilotRequest({ name: "", audience, directions: "Graduate roles and internship applications", availability: "" });
+    expect(draft.body).toContain(audience === "mba" ? "I am an MBA student." : "I am a university student.");
+    expect(new URL(draft.href).pathname).toBe(PILOT_CONTACT);
+  });
+
+  it("rejects unknown participant types, including object prototype properties", () => {
+    expect(() => preparePilotRequest({ name: "", audience: "constructor" as never, directions: "A role", availability: "" })).toThrow("Choose a participant type");
+  });
 });

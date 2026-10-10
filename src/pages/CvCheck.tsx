@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Download, FileText, Loader2, LockKeyhole, ShieldCheck, Upload } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +22,11 @@ import "./CvCheck.css";
 
 const emptyDraft: CheckDraft = { jobTitle: "", company: "", sourceText: "", reviewedText: "", jobDescription: "" };
 const stepNames = ["Your role", "Your CV", "One vacancy", "The evidence", "Your review", "Approve & download"];
+const audienceGuidance = {
+  student: { label: "University student", example: "e.g. Data analyst internship or Graduate analyst", text: "Projects, coursework, internships and volunteering count as source material. Keep them labelled as what they are; no employment history is required to check a CV." },
+  mba: { label: "MBA student", example: "e.g. Associate consultant, Product manager or Finance associate", text: "Bring previous work and MBA projects. Keep classroom projects distinct from client or employer work, and explain your own contribution." },
+  professional: { label: "Career switcher", example: "e.g. Product lead, Finance manager or Transformation manager", text: "Start with the career record you already have. Show transferable experience without changing your responsibilities, and remove confidential information." },
+};
 const statusLabels: Record<EvidenceStatus, string> = {
   direct: "Direct wording found", partial: "Related passage — review needed", missing: "No passage found", review: "Needs manual review",
 };
@@ -73,6 +78,9 @@ function EvidenceResults({ report, originalText, onQuestion }: { report: Evidenc
 }
 
 export default function CvCheck() {
+  const [searchParams] = useSearchParams();
+  const audienceKey = searchParams.get("audience");
+  const guidance = audienceKey && Object.prototype.hasOwnProperty.call(audienceGuidance, audienceKey) ? audienceGuidance[audienceKey as keyof typeof audienceGuidance] : null;
   const { user, loading: authLoading } = useAuth();
   const [restored] = useState(() => readRetainedCheck());
   const [draft, setDraft] = useState<CheckDraft>(restored ?? emptyDraft);
@@ -215,6 +223,7 @@ export default function CvCheck() {
     <div ref={intro} className="check-intro"><div><p className="check-eyebrow"><ShieldCheck size={15} /> Free CV check <span>NO CARD NEEDED</span></p><h1>One vacancy.<br className="check-mobile-break" /> Your actual experience.</h1><p className="check-intro-description">Check how your experience comes across for this job. Keep what fits, and work through anything unclear.</p></div>
       <Button type="button" variant="ghost" disabled={!!busy} onClick={() => setResetConfirm(true)}>Clear & start again</Button>
     </div>
+    {guidance && <section className="check-audience-guidance" aria-label={`${guidance.label} guidance`}><strong>{guidance.label}</strong><p>{guidance.text}</p></section>}
     {resetConfirm && <Alert className="mb-5"><AlertDescription><p>This clears the check open on this page and any temporary sign-in draft. Previously saved account checks stay in your account.</p><div className="mt-3 flex gap-2"><Button size="sm" variant="outline" onClick={() => setResetConfirm(false)}>Keep this check</Button><Button size="sm" onClick={reset}>Clear current check</Button></div></AlertDescription></Alert>}
     <div className="check-layout">
     <aside className="check-sidebar">
@@ -229,7 +238,7 @@ export default function CvCheck() {
     {notice && <p role="status" className="mb-5 rounded-xl border bg-muted/40 px-4 py-3 text-sm leading-6">{notice}</p>}
     {busy && <p role="status" className="mb-4 flex items-center gap-2 text-sm"><Loader2 size={16} className="animate-spin" />{busy}</p>}
     <Card className="check-stage"><CardContent className="check-stage-content"><div className="check-stage-heading"><span className="check-stage-index">{String(step).padStart(2,"0")} / 06</span><h2 ref={heading} tabIndex={-1} className="outline-none">{stepNames[step - 1]}</h2><p>{["Give this application a clear starting point.","Bring your experience into the picture.","The opportunity you want to prepare for.","Follow the words back to their source.","Make it a CV you can explain in person.","Your final call. Your document to send."][step-1]}</p></div>
-      {step === 1 && <><p className="leading-7 text-muted-foreground">Which job do you have in mind? Use the title from the job description.</p><div className="grid gap-5 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="check-role">Target role</Label><Input id="check-role" placeholder="e.g. Strategy Manager or Transformation Manager" maxLength={200} value={draft.jobTitle} onChange={e => editDraft({ jobTitle: e.target.value })} /></div><div className="space-y-2"><Label htmlFor="check-company">Company (optional)</Label><Input id="check-company" maxLength={200} value={draft.company} onChange={e => editDraft({ company: e.target.value })} placeholder="The employer for this vacancy" /></div></div><p className="flex items-start gap-2 text-sm leading-6 text-muted-foreground"><LockKeyhole size={16} className="mt-1 shrink-0" />Your CV and job description stay on this device unless you choose to save them to your account. Keep this page open while you work; refreshing it clears an unsaved check.</p><Button onClick={checkRole}>Continue to your CV <ArrowRight className="ml-2" size={16} /></Button></>}
+      {step === 1 && <><p className="leading-7 text-muted-foreground">Which job do you have in mind? Use the title from the job description.</p><div className="grid gap-5 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="check-role">Target role</Label><Input id="check-role" placeholder={guidance?.example ?? "e.g. Graduate analyst, Associate consultant or Product manager"} maxLength={200} value={draft.jobTitle} onChange={e => editDraft({ jobTitle: e.target.value })} /></div><div className="space-y-2"><Label htmlFor="check-company">Company (optional)</Label><Input id="check-company" maxLength={200} value={draft.company} onChange={e => editDraft({ company: e.target.value })} placeholder="The employer for this vacancy" /></div></div><p className="flex items-start gap-2 text-sm leading-6 text-muted-foreground"><LockKeyhole size={16} className="mt-1 shrink-0" />Your CV and job description stay on this device unless you choose to save them to your account. Keep this page open while you work; refreshing it clears an unsaved check.</p><Button onClick={checkRole}>Continue to your CV <ArrowRight className="ml-2" size={16} /></Button></>}
       {step === 2 && <><p className="leading-7 text-muted-foreground">Add your CV as a PDF, Word or text file, up to 5 MB. You can paste it instead. Check the text below and remove anything confidential before continuing.</p><div className="rounded-xl border border-dashed bg-muted/25 p-5"><Label htmlFor="check-file" className="mb-3 flex items-center gap-2"><Upload size={18} /> Read a CV file on this device</Label><Input id="check-file" type="file" accept=".pdf,.docx,.txt" disabled={!!busy} onChange={event => { void readFile(event.target.files?.[0]); event.target.value = ""; }} />{filename && <p className="mt-2 break-all text-xs text-muted-foreground">Read: {filename}. The original file is not uploaded by this check.</p>}</div><div className="space-y-2"><Label htmlFor="check-source">CV text — paste, correct or remove private information</Label><Textarea id="check-source" className="min-h-72 font-mono text-sm" maxLength={60000} value={draft.sourceText} disabled={!!busy} onChange={e => { editDraft({ sourceText: e.target.value, reviewedText: "" }); setCvReady(false); }} /><p className="text-xs text-muted-foreground">{draft.sourceText.length.toLocaleString()} / 60,000 characters · scanned PDFs need readable text first</p></div><Button disabled={!!busy} onClick={confirmCv}>Use this reviewed CV text <ArrowRight className="ml-2" size={16} /></Button></>}
       {step === 3 && <><p className="leading-7 text-muted-foreground">Paste the job description, including the responsibilities and requirements. It helps to work with a job you actually want. This check does not open employer links or send applications.</p><div className="space-y-2"><Label htmlFor="check-vacancy">Vacancy description</Label><Textarea id="check-vacancy" className="min-h-72 text-sm" maxLength={20000} value={draft.jobDescription} onChange={e => editDraft({ jobDescription: e.target.value })} /><p className="text-xs text-muted-foreground">{draft.jobDescription.length.toLocaleString()} / 20,000 characters · at least 80 characters</p></div><Button disabled={!cvReady || !!busy} onClick={runCheck}>Check these inputs <ArrowRight className="ml-2" size={16} /></Button></>}
       {step === 4 && report && <><p className="text-muted-foreground">Read what the employer asks for beside what your CV says. A related phrase may still need a better example.</p><EvidenceResults report={report} originalText={draft.sourceText} /><details className="rounded-xl border p-4"><summary className="cursor-pointer text-sm font-medium">Read the full vacancy</summary><pre className="mt-3 whitespace-pre-wrap break-words font-sans text-sm">{draft.jobDescription}</pre></details><Button onClick={() => go(5)}>Review my CV & questions <ArrowRight className="ml-2" size={16} /></Button></>}
@@ -247,4 +256,5 @@ export default function CvCheck() {
     <p className="mt-6 text-center text-xs leading-6 text-muted-foreground">You choose the final wording and send the application yourself. <Link className="underline" to="/privacy">Privacy</Link> · <Link className="underline" to="/pilot">See the clearly labelled fictional pilot demo</Link></p>
   </main>;
 }
+
 
