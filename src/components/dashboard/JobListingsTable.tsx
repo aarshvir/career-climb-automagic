@@ -1,0 +1,1 @@
+import { Link } from 'react-router-dom'; export const JobListingsTable = (_props: {userPlan:string;onFetchJobs:()=>Promise<number>}) => <p>Your application preparation and tracking are in the <Link to='/dashboard?tab=tracker' className='underline'>workspace</Link>.</p>;

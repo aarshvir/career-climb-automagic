@@ -1,0 +1,11 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Jobvance",
+  "url": "https://jobvance.io",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://jobvance.io/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can I try Jobvance before paying?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Start with a 14-day free trial with full access to resume tailoring, job discovery, and application automations."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Jobvance support custom resume templates?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Upload unlimited resume bases, and Jobvance will adapt formatting to the role while respecting your brand."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do team plans work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Career centers and bootcamps can onboard cohorts with admin controls, shared templates, and aggregate reporting."
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+Date,Piece,Stage,Owner,KPI
+2024-06-17,Technical SEO fixes (robots/sitemap/SeoHead),Implement,Engineering,Deploy updated head tags + robots to staging
+2024-06-24,Home/Product/Pricing copy + schema,Publish,Content Lead,New copy live with schema validation
+2024-07-01,Pillar: Automating Job Search,Publish,Content Lead,Organic sessions to /guides/automating-your-job-search
+2024-07-01,Backlog analytics setup (GA4/GSC dashboards),Implement,Marketing Ops,GA4 events firing + Looker dashboard baseline
+2024-07-08,Pillar: AI Resume Tailoring,Publish,Content Lead,Organic clicks to /guides/ai-resume-tailoring-workflow
+2024-07-15,Supporting posts batch 1 (ATS, prompts, LinkedIn),Publish,Content Team,3 TOFU posts live with internal links
+2024-07-22,Structured data QA + Rich Results validation,QA,Engineering,All JSON-LD passing Rich Results Test
+2024-07-29,Pillar: High-Volume Applications,Publish,Content Lead,Guide published + newsletter CTR
+2024-08-05,Supporting posts batch 2 (cover letters, outreach, dashboard),Publish,Content Team,3 TOFU posts live + newsletter shares
+2024-08-12,Backlink outreach sprint #1,Outreach,PR Lead,10 new referring domains from target list
+2024-08-19,Supporting posts batch 3 (interview prep, negotiation, portfolio),Publish,Content Team,3 posts live + 5 internal links each
+2024-08-26,Core Web Vitals perf sprint (hero optimization, font strategy),Implement,Engineering,LCP <=2.5s mobile via WebPageTest
+2024-09-02,Supporting posts batch 4 (burnout, networking, AI coach),Publish,Content Team,3 posts live + engagement time
+2024-09-09,Digital PR + newsjacking push,Outreach,PR Lead,5 placements/podcast bookings
+2024-09-16,Quarterly retro + roadmap update,Analyze,SEO Lead,Report delivered with KPI deltas

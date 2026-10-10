@@ -1,0 +1,1 @@
+import { Link } from 'react-router-dom'; export const PremiumJobsTable = (_props:{userPlan:string;searchQuery:string}) => <p><Link to='/dashboard?tab=tracker'>Open your application tracker</Link></p>;

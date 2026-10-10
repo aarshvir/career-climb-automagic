@@ -1,0 +1,278 @@
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LocationDropdown } from "@/components/ui/LocationDropdown";
+import { Briefcase } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage, logError } from "@/lib/errorUtils";
+
+interface JobPreferencesDialogProps {
+  open: boolean;
+  onSuccess: () => void;
+}
+
+const SENIORITY_LEVELS = [
+  "Internship",
+  "Entry level",
+  "Associate",
+  "Mid-Senior level",
+  "Director",
+  "Executive"
+];
+
+const JOB_TYPES = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Temporary",
+  "Volunteer",
+  "Internship"
+];
+
+const JOB_POSTING_TYPES = [
+  "Easy apply",
+  "All jobs"
+];
+
+const JOB_POSTING_DATES = [
+  "Last 24 hours",
+  "Last 3 days",
+  "Last week",
+  "Last month",
+  "Any time"
+];
+
+export const JobPreferencesDialog = ({ open, onSuccess }: JobPreferencesDialogProps) => {
+  const [preferences, setPreferences] = useState({
+    location: "",
+    job_title: "",
+    seniority_level: "",
+    job_type: "",
+    job_posting_type: "All jobs",
+    job_posting_date: "Last week"
+  });
+  const [saving, setSaving] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const loadExistingPreferences = async () => {
+      if (!open || !user) {
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('preferences')
+        .select('location, job_title, seniority_level, job_type, job_posting_type, job_posting_date')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading job preferences:', error);
+        return;
+      }
+
+      if (data) {
+        setPreferences((prev) => ({
+          ...prev,
+          ...Object.fromEntries(
+            Object.entries(data).map(([key, value]) => [key, value ?? ''])
+          )
+        }));
+      }
+    };
+
+    loadExistingPreferences();
+  }, [open, user]);
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    // Validate required fields with specific error messages
+    const validationErrors = [];
+    
+    if (!preferences.location) validationErrors.push("Preferred location");
+    if (!preferences.job_title) validationErrors.push("Job title");
+    if (!preferences.seniority_level) validationErrors.push("Seniority level");
+    if (!preferences.job_type) validationErrors.push("Job type");
+    if (!preferences.job_posting_type) validationErrors.push("Job posting type");
+    if (!preferences.job_posting_date) validationErrors.push("Job posting date");
+
+    if (validationErrors.length > 0) {
+      toast({
+        title: "Missing required fields",
+        description: `Please fill in: ${validationErrors.join(", ")}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('preferences')
+        .upsert({
+          user_id: user.id,
+          location: preferences.location,
+          job_title: preferences.job_title,
+          seniority_level: preferences.seniority_level,
+          job_type: preferences.job_type,
+          job_posting_type: preferences.job_posting_type,
+          job_posting_date: preferences.job_posting_date,
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Preferences saved",
+        description: "Your job preferences have been saved successfully.",
+      });
+
+      onSuccess();
+    } catch (error: unknown) {
+      logError('Job preferences save failed', error);
+      
+      const errorMessage = getErrorMessage(
+        error,
+        "There was an error saving your preferences. Please try again."
+      );
+      
+      toast({
+        title: "Save failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Briefcase className="h-5 w-5" />
+            Job Preferences
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Tell us about your job preferences to help us find the best matches for you.
+          </p>
+          
+          <div className="space-y-2">
+            <Label htmlFor="location">Preferred Location</Label>
+            <LocationDropdown
+              value={preferences.location}
+              onValueChange={(value) => setPreferences({ ...preferences, location: value })}
+              placeholder="Select your preferred location"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job-title">Job Title</Label>
+            <Input
+              id="job-title"
+              placeholder="e.g., Software Engineer, Product Manager"
+              value={preferences.job_title}
+              onChange={(e) => setPreferences({ ...preferences, job_title: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="seniority">Seniority Level</Label>
+            <Select
+              value={preferences.seniority_level || ""}
+              onValueChange={(value) => setPreferences({ ...preferences, seniority_level: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select seniority level" />
+              </SelectTrigger>
+              <SelectContent className="z-[60]">
+                {SENIORITY_LEVELS.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {level}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job-type">Job Type</Label>
+            <Select
+              value={preferences.job_type || ""}
+              onValueChange={(value) => setPreferences({ ...preferences, job_type: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select job type" />
+              </SelectTrigger>
+              <SelectContent className="z-[60]">
+                {JOB_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job-posting-type">Job Posting Type</Label>
+            <Select
+              value={preferences.job_posting_type || ""}
+              onValueChange={(value) => setPreferences({ ...preferences, job_posting_type: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select posting type" />
+              </SelectTrigger>
+              <SelectContent className="z-[60]">
+                {JOB_POSTING_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job-posting-date">Job Posting Date</Label>
+            <Select
+              value={preferences.job_posting_date || ""}
+              onValueChange={(value) => setPreferences({ ...preferences, job_posting_date: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select posting date" />
+              </SelectTrigger>
+              <SelectContent className="z-[60]">
+                {JOB_POSTING_DATES.map((date) => (
+                  <SelectItem key={date} value={date}>
+                    {date}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full"
+          >
+            {saving ? "Saving..." : "Save Preferences"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};

@@ -1,0 +1,37 @@
+name: Mirror main -> testcodex (safe)
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch testcodex
+        run: |
+          git fetch origin testcodex || true
+      - name: Safe fast-forward mirror
+        shell: bash
+        run: |
+          # Points to remote heads
+          MAIN_SHA=$(git rev-parse origin/main)
+          if git rev-parse --verify origin/testcodex >/dev/null 2>&1; then
+            TEST_SHA=$(git rev-parse origin/testcodex)
+            BASE=$(git merge-base origin/main origin/testcodex)
+            # Only update if testcodex has NOT diverged (fast-forward safe)
+            if [ "$TEST_SHA" = "$BASE" ]; then
+              echo "Fast-forwarding testcodex to main…"
+              git push origin "$MAIN_SHA":refs/heads/testcodex
+            else
+              echo "testcodex has its own commits. Skipping auto-sync."
+            fi
+          else
+            echo "Creating testcodex from main…"
+            git push origin "$MAIN_SHA":refs/heads/testcodex
+          fi
