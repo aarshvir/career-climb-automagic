@@ -1,6 +1,6 @@
 # Jobvance repair verification — 10 October 2026
 
-**Current publication:** https://jobvance-io.clear-moon-9685.chatgpt.site, independently hosted on Cloudflare through Sites. Source is merged into GitHub main and retained locally in `jobvance-independent`. Lovable synchronization has been disconnected. Jobvance.io DNS cutover is awaiting Hostinger access. The deployed backend has additionally passed 13 actual API checks using two private synthetic accounts. These new results supersede the earlier preparation-state notes below; see `INDEPENDENT-HOSTING.md` and `HOSTED-API-VERIFICATION.md` for current details.
+**Current publication:** https://jobvance.io, independently hosted on Cloudflare through Sites. The alternative hosting address is https://jobvance-io.clear-moon-9685.chatgpt.site. Source is merged into GitHub main and retained locally in `jobvance-independent`. Lovable synchronization has been disconnected. Hostinger DNS cutover was applied on 10 October 2026, retaining the existing mail and backend records. The www hostname redirects to the canonical apex so sign-in uses the approved origin. The deployed backend has additionally passed 13 actual API checks using two private synthetic accounts. These new results supersede the earlier preparation-state notes below; see `INDEPENDENT-HOSTING.md` and `HOSTED-API-VERIFICATION.md` for current details. Commercial checkout remains disabled; no real merchant payment has been verified.
 
 ## Applied and verified
 

@@ -1,6 +1,10 @@
 # Independent Jobvance publication
 
-Jobvance is published independently of Lovable at:
+Jobvance is published independently of Lovable at its canonical address:
+
+https://jobvance.io
+
+The independent hosting address also remains available:
 
 https://jobvance-io.clear-moon-9685.chatgpt.site
 
@@ -12,7 +16,7 @@ The initial independent publication used merged main commit `94ca69485385ec47c38
 
 ## Domain cutover
 
-The domain is registered with the new host, but **Jobvance.io still points at Lovable** until the authoritative Hostinger records are changed and HTTPS verification succeeds. Hostinger sign-in is pending. Do not report the domain as migrated based on publication of the alternative URL.
+The authoritative Hostinger DNS cutover was applied on 10 October 2026. Jobvance.io now serves the independently published application, and the new host has issued valid HTTPS certificates for the apex and www hostnames. The Worker redirects `www.jobvance.io` to `https://jobvance.io`, preserving the path and query, so authentication uses the existing approved canonical origin.
 
 Apply these exact records returned for this hosting project; preserve MX, mail-verification TXT and other unrelated records. Keep the current nameservers.
 
@@ -22,8 +26,11 @@ Apply these exact records returned for this hosting project; preserve MX, mail-v
 | A | @ | 172.66.3.26 |
 | TXT | _openai-site-verification | openai-site-verification=Cpb5k92d4RSlb9ZvVoAQHCXo6sOOo8AjtMHu6rLpbA8 |
 | TXT | _cf-custom-hostname | fae150cc-4f07-42be-995c-56b2ea2b34e8 |
+| CNAME | www | custom-domains.chatgpt.site |
+| TXT | _openai-site-verification.www | openai-site-verification=bRYzPXqUNQfK2GfS9CTw5rx9IxF3T90fzjpwryE5_Bs |
+| TXT | _cf-custom-hostname.www | a74aadf6-e899-4608-861b-68d513bfc96e |
 
-Replace the old website A target `185.158.133.1` with the two A targets above. Review any existing apex AAAA record so IPv6 traffic cannot continue reaching the old website. After propagation, refresh custom-domain verification and check Jobvance.io's certificate, home page, assets and direct `/auth`/`dashboard` requests. Unpublish/remove the obsolete Lovable domain binding only after the new domain is working; retain the old project as a recoverable source snapshot.
+The old website A target `185.158.133.1` was replaced with the two A targets above. The old www A record was replaced with the CNAME above. There was no conflicting apex AAAA record. All pre-existing email, DKIM, SPF, DMARC and Supabase API records were retained, as were both Hostinger nameservers. Before/after DNS backups, screenshots and live verification results are retained privately in the adjacent `jobvance-repair-evidence` directory. The old Lovable project remains a recoverable source snapshot; it no longer receives traffic through these DNS records.
 
 ## Backend and verification
 

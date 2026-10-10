@@ -82,6 +82,11 @@ function bytesFor(path,asset){
   return bytes;
 }
 export default {fetch(request){
+  const url=new URL(request.url);
+  if(url.hostname==='www.jobvance.io'){
+    url.protocol='https:';url.host='jobvance.io';
+    return reply(request,308,'Continue at Jobvance.io.',{Location:url.toString()});
+  }
   if(request.method!=='GET'&&request.method!=='HEAD')return reply(request,405,'Method not allowed.',{Allow:'GET, HEAD'});
   const path=publicPath(request);
   if(path===null)return reply(request,404,'Not found.');
