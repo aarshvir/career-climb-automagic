@@ -69,7 +69,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
         subscription_status: planData.subscription_status,
       };
 
-      logger.info('PlanContext: Profile fetched successfully', userProfile);
+      logger.info('PlanContext: Profile fetched successfully', { ...userProfile });
       
       // Update profile state
       setProfile(userProfile);
@@ -102,7 +102,7 @@ export const PlanProvider = ({ children }: PlanProviderProps) => {
       // Try to load from cache as fallback - don't reset to free if we have cached data
       const cachedPlan = planManager.loadPlan(user.id);
       if (cachedPlan) {
-        logger.info('PlanContext: Using cached plan data as fallback', cachedPlan);
+        logger.info('PlanContext: Using cached plan data as fallback', { ...cachedPlan });
         setProfile({
           plan: cachedPlan.plan,
           subscription_status: cachedPlan.subscription_status,

@@ -164,7 +164,7 @@ export class PlanManager {
       // Try to get from cache first
       const memoryCache = this.cache.get(userId);
       if (memoryCache) {
-        logger.info('PlanManager: Using memory cache as fallback', memoryCache);
+        logger.info('PlanManager: Using memory cache as fallback', { ...memoryCache });
         return memoryCache;
       }
 
@@ -173,7 +173,7 @@ export class PlanManager {
       if (storedData) {
         try {
           const planData = JSON.parse(storedData);
-          logger.info('PlanManager: Using localStorage as fallback', planData);
+          logger.info('PlanManager: Using localStorage as fallback', { ...planData });
           this.cache.set(userId, planData);
           return planData;
         } catch (parseError) {
