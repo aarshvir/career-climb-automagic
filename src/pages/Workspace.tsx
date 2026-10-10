@@ -11,6 +11,13 @@ import {
   Loader2,
   RefreshCw,
   CreditCard,
+  FolderOpen,
+  Briefcase,
+  Layers,
+  ShieldCheck,
+  ArrowRight,
+  ChevronRight,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { configurationError } from "@/integrations/supabase/client";
@@ -43,14 +50,21 @@ import {
   startCheckout,
   type ApplicationStatus,
 } from "@/lib/workspace-api";
+import "./Workspace.css";
 
 type Tab = "cv" | "tailor" | "tracker" | "billing";
-const tabs: { id: Tab; label: string }[] = [
-  { id: "cv", label: "Your CVs" },
-  { id: "tailor", label: "Tailor & download" },
-  { id: "tracker", label: "Applications" },
-  { id: "billing", label: "Packs & payments" },
+const tabs: { id: Tab; label: string; icon: typeof FileText }[] = [
+  { id: "cv", label: "Your CVs", icon: FolderOpen },
+  { id: "tailor", label: "Tailor & download", icon: FileText },
+  { id: "tracker", label: "Applications", icon: Briefcase },
+  { id: "billing", label: "Packs & payments", icon: Layers },
 ];
+const sectionDetails: Record<Tab, { title: string; description: string; breadcrumb: string }> = {
+  cv: { title: "Your experience starts here.", description: "Keep a reviewed source CV ready for your next application.", breadcrumb: "Documents" },
+  tailor: { title: "Prepare your next application.", description: "Bring a real vacancy. Review the wording, then download the version you approve.", breadcrumb: "Application packs" },
+  tracker: { title: "Keep your next step in view.", description: "Record your applications, add a reminder and keep useful notes together.", breadcrumb: "Applications" },
+  billing: { title: "Your pack access.", description: "Check your remaining preparation packs and the status of payment access.", breadcrumb: "Pack access" },
+};
 const dateLabel = (value: string) => new Date(value).toLocaleDateString();
 
 function TrackerRow({
@@ -66,16 +80,17 @@ function TrackerRow({
   );
   const url = safeEmployerUrl(item.job_url);
   return (
-    <Card>
+    <Card className="ws-card ws-tracker-card">
       <CardContent className="space-y-4 pt-6">
         <div className="flex flex-wrap justify-between gap-3">
-          <div>
+          <div className="ws-record-title">
             <h3 className="font-semibold">{item.job_title}</h3>
             <p className="text-sm text-muted-foreground">
               {item.company || "Company not recorded"} · saved{" "}
               {dateLabel(item.created_at)}
             </p>
           </div>
+          <span className="ws-status-pill" data-status={item.status}>{item.status[0].toUpperCase() + item.status.slice(1)}</span>
           {url && (
             <a
               href={url}
@@ -133,7 +148,7 @@ function TrackerRow({
             placeholder="Interview details, next action, or a reminder"
           />
         </label>
-        <div className="flex flex-wrap gap-3">
+        <div className="ws-actions">
           <Button
             size="sm"
             variant="outline"
@@ -307,35 +322,36 @@ export default function Workspace() {
   }
   if (loading)
     return (
-      <div className="mx-auto max-w-6xl p-8" role="status">
+      <div className="ws-account-loading" role="status">
+        <Loader2 size={22} className="animate-spin" aria-hidden="true" />
         Loading your account…
       </div>
     );
   if (!user) return <Navigate to="/auth?next=%2Fdashboard" replace />;
   const counts = workspaceCounts(data?.applications ?? []);
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="mb-1 text-sm font-medium text-primary">
-            Your job-search workspace
-          </p>
-          <h1 className="text-3xl font-semibold">
-            Prepare. Review. Keep track.
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Your documents and the progress you record, in one place.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={() => void query.refetch()}
-          disabled={query.isFetching}
-        >
-          <RefreshCw size={16} className="mr-2" />
-          Refresh
-        </Button>
-      </div>
+    <main className="jv-workspace">
+      <div className="ws-shell">
+        <aside className="ws-sidebar">
+          <div className="ws-sidebar-heading"><span className="ws-workspace-mark" aria-hidden="true">J</span><div><strong>Your workspace</strong><span>Prepare with care</span></div></div>
+          <nav aria-label="Workspace sections" className="ws-navigation">
+            {tabs.map((t) => (
+              <Button key={t.id} className="ws-nav-button" variant="ghost" onClick={() => setParams({ tab: t.id })} aria-current={tab === t.id ? "page" : undefined}>
+                <t.icon size={18} aria-hidden="true" /><span>{t.label}</span>
+              </Button>
+            ))}
+          </nav>
+          <Link to="/check" className="ws-free-check">
+            <ShieldCheck size={20} aria-hidden="true" />
+            <span><strong>Free CV evidence check</strong><small>Compare your CV with a vacancy.</small></span>
+            <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+          <p className="ws-sidebar-note">Your documents. Your review.<br />Your next move.</p>
+        </aside>
+        <div className="ws-main">
+          <div className="ws-topbar"><span>Workspace <ChevronRight size={14} aria-hidden="true" /> {sectionDetails[tab].breadcrumb}</span><Button variant="ghost" size="sm" onClick={() => void query.refetch()} disabled={query.isFetching}><RefreshCw size={15} className={query.isFetching ? "animate-spin" : ""} aria-hidden="true" />Refresh</Button></div>
+          <div className="ws-content">
+            <header className="ws-page-heading"><p className="ws-eyebrow">YOUR JOB SEARCH, ORGANIZED</p><h1>{sectionDetails[tab].title}</h1><p>{sectionDetails[tab].description}</p></header>
       {configurationError && (
         <Alert variant="destructive">
           <AlertDescription>
@@ -345,7 +361,8 @@ export default function Workspace() {
         </Alert>
       )}
       {query.isLoading && (
-        <p role="status" className="my-4">
+        <p role="status" className="ws-loading">
+          <Loader2 size={18} className="animate-spin" aria-hidden="true" />
           Loading your saved records…
         </p>
       )}
@@ -373,45 +390,31 @@ export default function Workspace() {
         </Alert>
       )}
       {data && (
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="ws-summary" aria-label="Your recorded activity">
           {[
             ["Saved applications", counts.saved],
             ["Marked applied", counts.applied],
             ["Interviews", counts.interviews],
             ["Packs remaining", data.entitlement?.creditsRemaining ?? "Unavailable"],
           ].map(([label, count]) => (
-            <Card key={String(label)}>
+            <Card key={String(label)} className="ws-summary-card">
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground">{label}</p>
-                <p className="mt-1 text-2xl font-semibold">{count}</p>
+                <p className={`ws-summary-value ${typeof count === "number" ? "" : "ws-summary-unknown"}`}>{count}</p>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
-      <nav
-        aria-label="Workspace sections"
-        className="mb-6 flex flex-wrap gap-2"
-      >
-        {tabs.map((t) => (
-          <Button
-            key={t.id}
-            variant={tab === t.id ? "default" : "outline"}
-            onClick={() => setParams({ tab: t.id })}
-            aria-current={tab === t.id ? "page" : undefined}
-          >
-            {t.label}
-          </Button>
-        ))}
-      </nav>
       <fieldset
         disabled={busy || !data || !!configurationError}
-        className="min-w-0 space-y-6"
+        className="ws-panel-stack"
       >
         {tab === "cv" && (
-          <>
-            <Card>
+          <div className="ws-cv-layout">
+            <Card className="ws-card ws-upload-card">
               <CardHeader>
+                <p className="ws-step-label"><Upload size={16} aria-hidden="true" />SOURCE DOCUMENT</p>
                 <CardTitle>Upload and review your CV</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -420,7 +423,7 @@ export default function Workspace() {
                   text before saving it privately. A scanned PDF needs a
                   text-based version.
                 </p>
-                <label className="block text-sm font-medium">
+                <label className="ws-file-picker">
                   Choose CV file
                   <Input
                     className="mt-2"
@@ -431,15 +434,17 @@ export default function Workspace() {
                 </label>
                 {file && (
                   <>
+                    <div className="ws-file-selection"><FileText size={17} aria-hidden="true" /><span>{file.name}</span><span className="ws-status-pill">Ready to review</span></div>
                     <label className="block space-y-2 text-sm">
                       Review extracted text
                       <Textarea
-                        className="min-h-64"
+                        className="ws-document-editor"
                         maxLength={60000}
                         value={cvText}
                         onChange={(e) => setCvText(e.target.value)}
                       />
                     </label>
+                    <p className="ws-field-help">Check the extracted wording before storing this version. {cvText.length.toLocaleString()} characters.</p>
                     <Button
                       onClick={() =>
                         void run(async () => {
@@ -461,24 +466,26 @@ export default function Workspace() {
                 )}
               </CardContent>
             </Card>
-            <section aria-label="Saved CVs">
-              <h2 className="mb-3 text-xl font-semibold">Saved CVs</h2>
+            <section aria-label="Saved CVs" className="ws-library">
+              <div className="ws-section-heading"><h2>Saved CVs</h2>{data && <span className="ws-count-label">{data.cvs.length} {data.cvs.length === 1 ? "document" : "documents"}</span>}</div>
               {data?.cvs.length === 0 && (
-                <p className="rounded-lg border border-dashed p-6 text-muted-foreground">
+                <p className="ws-empty-state">
+                  <FolderOpen size={28} aria-hidden="true" />
                   No CVs saved yet. Upload one above to begin.
                 </p>
               )}
               <div className="grid gap-3">
                 {data?.cvs.map((cv) => (
-                  <Card key={cv.id}>
-                    <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                      <div>
+                  <Card key={cv.id} className="ws-card ws-document-row">
+                    <CardContent className="ws-document-row-content">
+                      <div className="ws-document-meta"><span className="ws-document-icon"><FileText size={22} aria-hidden="true" /></span><div className="ws-record-title">
                         <h3 className="font-medium">{cv.original_filename}</h3>
                         <p className="text-sm text-muted-foreground">
                           Saved {dateLabel(cv.created_at)}
                         </p>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      </div>
+                      <div className="ws-actions ws-document-actions">
                         <Button
                           variant="outline"
                           size="sm"
@@ -539,7 +546,7 @@ export default function Workspace() {
               </p>
             )}
             {!!legacy.data?.length && (
-              <section className="space-y-3">
+              <section className="ws-legacy-library space-y-3">
                 <h2 className="text-xl font-semibold">
                   Previously uploaded originals
                 </h2>
@@ -548,9 +555,9 @@ export default function Workspace() {
                   for the current workflow.
                 </p>
                 {legacy.data.map((old) => (
-                  <Card key={old.id}>
-                    <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                      <div>
+                  <Card key={old.id} className="ws-card">
+                    <CardContent className="ws-document-row-content">
+                      <div className="ws-record-title">
                         {old.original_filename}
                         {old.created_at && (
                           <p className="text-sm text-muted-foreground">
@@ -558,7 +565,7 @@ export default function Workspace() {
                           </p>
                         )}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="ws-actions">
                         <Button
                           variant="outline"
                           size="sm"
@@ -602,16 +609,17 @@ export default function Workspace() {
                 ))}
               </section>
             )}
-          </>
+          </div>
         )}
         {tab === "tailor" && (
-          <>
-            <Card>
+          <div className="ws-tailor-layout">
+            <Card className="ws-card ws-prepare-card">
               <CardHeader>
+                <p className="ws-step-label"><FileText size={16} aria-hidden="true" />01 / PREPARE</p>
                 <CardTitle>Prepare a CV for a real vacancy</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={(e) => void generate(e)} className="space-y-4">
+                <form onSubmit={(e) => void generate(e)} className="ws-form space-y-4">
                   <label className="block space-y-2 text-sm">
                     Your source CV
                     <select
@@ -677,7 +685,7 @@ export default function Workspace() {
                       required
                       minLength={80}
                       maxLength={20000}
-                      className="min-h-44"
+                      className="ws-vacancy-input"
                       value={jd}
                       onChange={(e) => {
                         setJd(e.target.value);
@@ -686,7 +694,7 @@ export default function Workspace() {
                       placeholder="Paste the full responsibilities and requirements"
                     />
                   </label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="ws-method-note">
                     Tailoring prioritizes relevant wording already in your CV.
                     It preserves your facts and highlights vocabulary to review.
                     One saved pack uses one credit; retries of the same request
@@ -717,12 +725,13 @@ export default function Workspace() {
               </CardContent>
             </Card>
             {selected && (
-              <Card>
+              <Card className="ws-card ws-review-card">
                 <CardHeader>
+                  <div className="ws-review-heading"><p className="ws-step-label"><ShieldCheck size={16} aria-hidden="true" />02 / REVIEW & APPROVE</p><span className="ws-status-pill" data-status={selected.status === "approved" && reviewText === selected.tailored_text ? "approved" : "draft"}>{selected.status === "approved" ? reviewText === selected.tailored_text ? "Approved saved version" : "Edits await approval" : "Draft · review required"}</span></div>
                   <CardTitle>Review: {selected.job_title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-sm">
+                  <div className="ws-wording-notes"><p className="text-sm">
                     <strong>Wording found:</strong>{" "}
                     {(selected.matched_keywords ?? []).join(", ") ||
                       "No shared keywords found."}
@@ -732,20 +741,20 @@ export default function Workspace() {
                     {(selected.missing_keywords ?? []).join(", ") ||
                       "None highlighted."}{" "}
                     Include a missing skill only if you genuinely have it.
-                  </p>
-                  <div className="grid gap-4 lg:grid-cols-2">
+                  </p></div>
+                  <div className="ws-review-grid">
                     <label className="block space-y-2 text-sm">
                       Original CV
                       <Textarea
                         readOnly
-                        className="min-h-80"
+                        className="ws-document-editor ws-original-document"
                         value={selected.original_text}
                       />
                     </label>
                     <label className="block space-y-2 text-sm">
                       Your reviewed version
                       <Textarea
-                        className="min-h-80"
+                        className="ws-document-editor"
                         maxLength={60000}
                         value={reviewText}
                         onChange={(e) => {
@@ -755,7 +764,7 @@ export default function Workspace() {
                       />
                     </label>
                   </div>
-                  <label className="flex items-start gap-3 text-sm">
+                  <label className="ws-approval-confirmation">
                     <input
                       type="checkbox"
                       className="mt-1 h-4 w-4"
@@ -778,7 +787,7 @@ export default function Workspace() {
                     Approve & save version
                   </Button>
                   {selected.status === "approved" && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="ws-actions ws-download-actions">
                       {(["pdf", "docx", "txt"] as const).map((format) => (
                         <Button
                           key={format}
@@ -815,12 +824,13 @@ export default function Workspace() {
                 </CardContent>
               </Card>
             )}
-            <section>
-              <h2 className="mb-3 text-xl font-semibold">
+            <section className="ws-pack-library">
+              <div className="ws-section-heading"><h2>
                 Saved application packs
-              </h2>
+              </h2>{data && <span className="ws-count-label">{data.packs.length} {data.packs.length === 1 ? "pack" : "packs"}</span>}</div>
               {data?.packs.length === 0 && (
-                <p className="rounded-lg border border-dashed p-6 text-muted-foreground">
+                <p className="ws-empty-state">
+                  <Layers size={28} aria-hidden="true" />
                   Your first saved pack will appear here.
                 </p>
               )}
@@ -829,26 +839,27 @@ export default function Workspace() {
                   <button
                     type="button"
                     key={p.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4 text-left hover:bg-muted"
+                    className="ws-pack-row"
                     onClick={() => choosePack(p)}
                   >
-                    <span>
+                    <span className="ws-document-meta"><span className="ws-document-icon"><FileText size={21} aria-hidden="true" /></span><span className="ws-record-title">
                       <strong>{p.job_title}</strong>
                       <span className="block text-sm text-muted-foreground">
                         {p.company || "Company not recorded"} ·{" "}
                         {dateLabel(p.created_at)}
                       </span>
-                    </span>
-                    <span className="text-sm">
+                    </span></span>
+                    <span className="ws-status-pill" data-status={p.status}>
                       {p.status === "approved"
                         ? "Approved — open & download"
                         : "Draft — review"}
                     </span>
+                    <ChevronRight size={17} aria-hidden="true" />
                   </button>
                 ))}
               </div>
             </section>
-          </>
+          </div>
         )}
         {tab === "tracker" && (
           <>
@@ -856,13 +867,14 @@ export default function Workspace() {
               Statuses are your own reports. Opening an employer link never
               marks a job as applied.
             </p>
-            <Card>
+            <div className="ws-tracker-layout"><Card className="ws-card ws-add-application">
               <CardHeader>
+                <p className="ws-step-label"><Briefcase size={16} aria-hidden="true" />YOUR NEXT OPPORTUNITY</p>
                 <CardTitle>Add an application</CardTitle>
               </CardHeader>
               <CardContent>
                 <form
-                  className="space-y-4"
+                  className="ws-form space-y-4"
                   onSubmit={(e) => {
                     e.preventDefault();
                     const form = e.currentTarget;
@@ -908,8 +920,11 @@ export default function Workspace() {
                 </form>
               </CardContent>
             </Card>
+            <div className="ws-tracker-records">
+              <div className="ws-section-heading"><h2>Your recorded applications</h2>{data && <span className="ws-count-label">{data.applications.length} {data.applications.length === 1 ? "entry" : "entries"}</span>}</div>
             {data?.applications.length === 0 && (
-              <p className="rounded-lg border border-dashed p-6 text-muted-foreground">
+              <p className="ws-empty-state">
+                <CalendarDays size={28} aria-hidden="true" />
                 No applications recorded yet. Add one above or save an approved
                 CV pack.
               </p>
@@ -921,15 +936,17 @@ export default function Workspace() {
                 run={run}
               />
             ))}
+            </div></div>
           </>
         )}
         {tab === "billing" && data && (
-          <Card>
+          <Card className="ws-card ws-billing-card">
             <CardHeader>
+              <p className="ws-step-label"><Layers size={16} aria-hidden="true" />PREPARATION PACKS</p>
               <CardTitle>Pack access</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-3xl font-semibold">
+              <p className="ws-access-count">
                 {data.entitlement?.creditsRemaining ?? "Unavailable"}{" "}
                 <span className="text-base font-normal">packs remaining</span>
               </p>
@@ -939,7 +956,8 @@ export default function Workspace() {
                   Saved documents remain available.
                 </p>
               )}
-              <div className="rounded-lg border bg-muted/30 p-5">
+              <div className="ws-pass-description">
+                {!data.entitlement?.billingConfigured && <p className="ws-step-label">PLANNED PASS · PURCHASES UNAVAILABLE</p>}
                 <h3 className="text-xl font-semibold">$29 once</h3>
                 <p className="mt-2">
                   Ten application packs for 30 days. No automatic renewal.
@@ -1005,11 +1023,14 @@ export default function Workspace() {
         )}
       </fieldset>
       {busy && (
-        <div className="mt-4 flex items-center gap-2 text-sm" role="status">
+        <div className="ws-busy-status" role="status">
           <Loader2 size={16} className="animate-spin" />
           Saving or processing your request…
         </div>
       )}
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

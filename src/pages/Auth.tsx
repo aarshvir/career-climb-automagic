@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useId, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Check, FileText, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
+import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
   const navigate = useNavigate();
@@ -22,6 +22,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [error, setError] = useState('');
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const fieldId = useId();
 
   useEffect(() => {
     if (user && !authLoading && !embedded) navigate(searchParams.get('next') === '/check' ? '/check' : '/dashboard', { replace: true });
@@ -89,7 +90,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   };
 
   if (authLoading) return (
-    <div className="min-h-[70vh] flex items-center justify-center" role="status">
+    <div className={embedded ? 'ap-auth-loading ap-auth-loading--embedded' : 'ap-auth-loading'} role="status">
       <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" /><span className="sr-only">Checking sign-in...</span>
     </div>
   );
@@ -97,64 +98,85 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const visibleError = configurationError || error || authError;
 
   const Container = embedded ? 'section' : 'main';
+  const Title = embedded ? 'h3' : 'h1';
   return (
-    <Container aria-label={embedded ? 'Save with your account' : undefined} className={embedded ? 'flex justify-center' : 'min-h-[75vh] flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4'}>
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your JobVance account' : 'Sign in to JobVance'}</CardTitle>
-          <CardDescription>
-            {confirmationSent ? 'Confirm your email to finish creating your account.' : 'Prepare a CV for a role and keep track of your applications.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {visibleError && <Alert variant="destructive" role="alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
-          {resetSent && <p role="status" className="text-sm">If this email has an account, reset instructions were requested. Open the link in a separate tab, then sign in here to keep this CV check open.</p>}
+    <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
+      {!embedded && <aside className="ap-account-story" aria-labelledby={`${fieldId}-story`}>
+        <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> YOUR CAREER, IN YOUR WORDS</p>
+        <h2 id={`${fieldId}-story`}>Your next step.<br /><span>A clearer story.</span></h2>
+        <p className="ap-story-description">Bring your actual experience to the next role. Review your wording, keep your versions, and decide what to share.</p>
+        <div className="ap-document-scene" aria-label="Illustration of a fictional CV review">
+          <div className="ap-document-back" aria-hidden="true" />
+          <div className="ap-document-sheet">
+            <div className="ap-document-heading"><span className="ap-document-icon"><FileText size={20} aria-hidden="true" /></span><span>YOUR REVIEWED CV<br /><small>Fictional illustration</small></span><span className="ap-document-index">01</span></div>
+            <div className="ap-document-lines" aria-hidden="true"><span /><span /><span /></div>
+            <p className="ap-document-label">EXPERIENCE</p>
+            <p className="ap-document-passage">Helped design a pilot, with projected savings.</p>
+            <div className="ap-document-note"><Check size={16} aria-hidden="true" /><p>Your contribution stays clear.<br /><strong>Projected stays projected.</strong></p></div>
+            <div className="ap-document-lines ap-document-lines--short" aria-hidden="true"><span /><span /></div>
+          </div>
+          <div className="ap-review-stamp"><Check size={16} aria-hidden="true" /> Reviewed by you</div>
+        </div>
+        <p className="ap-story-footnote"><LockKeyhole size={16} aria-hidden="true" /> Choose what you save in your account.</p>
+        <Link to="/check" className="ap-story-link">Try the free CV check without an account <ArrowRight size={17} aria-hidden="true" /></Link>
+      </aside>}
+      <div className="ap-auth-panel">
+        <div className="ap-auth-heading">
+          {!embedded && <p className="ap-eyebrow">YOUR JOBVANCE WORKSPACE</p>}
+          <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
+          <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>
+        </div>
+        <div className="ap-auth-content">
+          {visibleError && <Alert variant="destructive" role="alert" className="ap-auth-alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
+          {resetSent && <p role="status" className="ap-auth-notice">If this email has an account, reset instructions were requested. Open the link in a separate tab, then sign in here to keep this CV check open.</p>}
           {confirmationSent ? (
-            <div className="space-y-4">
+            <div className="ap-confirmation">
               <p role="status">If this address can be registered, confirmation instructions will be sent to <strong>{email.trim()}</strong>. Check your spam folder and open the link in this browser.</p>
-              <p className="text-sm text-muted-foreground">After confirming, you can sign in below. If you already have an account, sign in or reset your password.</p>
-              <Button className="w-full" onClick={changeMode}>Back to sign in</Button>
+              <p>After confirming, you can sign in below. If you already have an account, sign in or reset your password.</p>
+              <Button className="ap-primary ap-auth-submit" onClick={changeMode}>Back to sign in <ArrowRight size={16} aria-hidden="true" /></Button>
             </div>
           ) : (
             <>
-              <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={busy || !!configurationError}>
+              <Button type="button" variant="outline" className="ap-google-button" onClick={handleGoogle} disabled={busy || !!configurationError}>
+                <span className="ap-google-mark" aria-hidden="true">G</span>
                 Continue with Google
               </Button>
-              <p className="text-center text-xs text-muted-foreground">or use your email and password</p>
-              <form className="space-y-4" onSubmit={handleSubmit}>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email address</Label>
-                  <Input id="email" type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} required disabled={busy} />
+              <div className="ap-auth-divider"><span>or use your email and password</span></div>
+              <form className="ap-auth-form" onSubmit={handleSubmit}>
+                <div className="ap-field">
+                  <Label htmlFor={`${fieldId}-email`}>Email address</Label>
+                  <Input id={`${fieldId}-email`} type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)} required disabled={busy} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input id="password" type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'} value={password} onChange={event => setPassword(event.target.value)} className="pr-12" required disabled={busy} />
-                    <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(current => !current)}>
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                <div className="ap-field">
+                  <Label htmlFor={`${fieldId}-password`}>Password</Label>
+                  <div className="ap-password-field">
+                    <Input id={`${fieldId}-password`} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'} aria-describedby={mode === 'sign-up' ? `${fieldId}-password-help` : undefined} value={password} onChange={event => setPassword(event.target.value)} required disabled={busy} />
+                    <Button type="button" variant="ghost" size="sm" className="ap-password-toggle" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(current => !current)}>
+                      {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                     </Button>
                   </div>
-                  {mode === 'sign-up' && <p className="text-xs text-muted-foreground">Use at least 8 characters, uppercase and lowercase letters, and a number.</p>}
+                  {mode === 'sign-up' && <p id={`${fieldId}-password-help`} className="ap-field-help">Use at least 8 characters, uppercase and lowercase letters, and a number.</p>}
                 </div>
-                {mode === 'sign-up' && <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm password</Label>
-                  <Input id="confirmPassword" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} required disabled={busy} />
+                {mode === 'sign-up' && <div className="ap-field">
+                  <Label htmlFor={`${fieldId}-confirm`}>Confirm password</Label>
+                  <Input id={`${fieldId}-confirm`} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} required disabled={busy} />
                 </div>}
-                <Button type="submit" className="w-full" disabled={busy || !!configurationError}>
-                  {busy ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Please wait...</> : mode === 'sign-up' ? 'Create account' : 'Sign in'}
+                <Button type="submit" className="ap-primary ap-auth-submit" disabled={busy || !!configurationError}>
+                  {busy ? <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />Please wait...</> : <>{mode === 'sign-up' ? 'Create account' : 'Sign in'}<ArrowRight size={17} aria-hidden="true" /></>}
                 </Button>
               </form>
-              {mode === 'sign-in' && <Button type="button" variant="link" className="w-full" onClick={handleForgot} disabled={busy || !!configurationError}>Forgot your password?</Button>}
-              <div className="text-center text-sm">
-                {mode === 'sign-up' ? 'Already have an account?' : 'New to JobVance?'}{' '}
-                <Button type="button" variant="link" className="p-0 h-auto" onClick={changeMode} disabled={busy}>
+              {mode === 'sign-in' && <Button type="button" variant="link" className="ap-auth-forgot" onClick={handleForgot} disabled={busy || !!configurationError}>Forgot your password?</Button>}
+              <div className="ap-auth-switch">
+                {mode === 'sign-up' ? 'Already have an account?' : 'New to Jobvance?'}{' '}
+                <Button type="button" variant="link" className="ap-mode-link" onClick={changeMode} disabled={busy}>
                   {mode === 'sign-up' ? 'Sign in' : 'Create an account'}
                 </Button>
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+        {!embedded && <p className="ap-auth-footnote"><LockKeyhole size={14} aria-hidden="true" /> Account saving is optional. Free CV checks need no account.</p>}
+      </div>
     </Container>
   );
 };

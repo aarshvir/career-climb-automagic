@@ -1,24 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Brand } from "./MvpHeader";
 export default function MvpFooter() {
-  return (
-    <footer className="mt-12 border-t">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-7 text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} Jobvance</p>
-        <nav aria-label="Footer navigation" className="flex flex-wrap gap-4">
-          {[
-            ["/pilot", "Free pilot"],
-            ["/help", "Help"],
-            ["/contact", "Contact"],
-            ["/privacy", "Privacy"],
-            ["/terms", "Terms"],
-            ["/refund", "Refunds"],
-          ].map(([to, label]) => (
-            <Link key={to} to={to} className="hover:underline">
-              {label}
-            </Link>
-          ))}
-        </nav>
+  const { pathname } = useLocation();
+  const compact = pathname === "/check" || pathname === "/dashboard";
+  return <footer className={`jv-footer${compact ? " jv-footer-compact" : ""}`}>
+    <div className="jv-footer-inner">
+      <div className="jv-footer-top"><div><Brand /><p className="jv-footer-description">Your experience, clearly presented.<br />Your next application, prepared with care.</p></div>
+        <nav aria-label="Footer navigation" className="jv-footer-links">{[["/check","Free CV check"],["/pilot","Free guided pilot"],["/how-it-works","How it works"],["/help","Help"],["/about","About Jobvance"],["/contact","Contact"]].map(([to,label])=><Link key={to} to={to}>{label}</Link>)}</nav>
       </div>
-    </footer>
-  );
+      <div className="jv-footer-bottom"><p>© {new Date().getFullYear()} Jobvance · Free beta</p><nav aria-label="Legal navigation" className="flex flex-wrap gap-5">{[["/privacy","Privacy"],["/terms","Terms"],["/refund","Refunds"]].map(([to,label])=><Link key={to} to={to} className="hover:underline">{label}</Link>)}</nav><p>You make the final call.</p></div>
+    </div>
+  </footer>;
 }
+

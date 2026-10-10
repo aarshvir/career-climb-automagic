@@ -43,11 +43,10 @@ export default function MvpApp() {
             <TooltipProvider>
               <BrowserRouter>
                 <Header />
+                <div id="main-content" tabIndex={-1} className="outline-none">
                 <Suspense
                   fallback={
-                    <p className="p-8" role="status">
-                      Loading…
-                    </p>
+                    <div className="jv-loading" role="status"><div className="jv-loading-line" aria-hidden="true" /><p>Opening your next step…</p><div className="jv-loading-line" aria-hidden="true" /><div className="jv-loading-line" aria-hidden="true" /></div>
                   }
                 >
                   <Routes>
@@ -135,6 +134,7 @@ export default function MvpApp() {
                     <Route path="*" element={<ProductPage kind="notfound" />} />
                   </Routes>
                 </Suspense>
+                </div>
                 <Footer />
               </BrowserRouter>
               <Toaster />

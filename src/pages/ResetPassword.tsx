@@ -56,8 +56,8 @@ const ResetPassword = () => {
   };
 
   return (
-    <main className="min-h-[75vh] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <main className="jv-account-utility min-h-[70vh] flex items-center justify-center p-4">
+      <Card className="jv-account-utility-card w-full max-w-md">
         <CardHeader><CardTitle>Set a new password</CardTitle><CardDescription>Use at least 8 characters, uppercase and lowercase letters, and a number.</CardDescription></CardHeader>
         <CardContent>
           {linkState === 'checking' ? <p role="status" className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Checking reset link...</p> : linkState === 'invalid' ? (
@@ -79,3 +79,4 @@ const ResetPassword = () => {
   );
 };
 export default ResetPassword;
+

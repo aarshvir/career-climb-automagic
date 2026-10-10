@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { ArrowDown, ArrowRight, Check, Copy, Download, FileCheck2, Mail, MessageCircle, ShieldCheck, Users } from "lucide-react";
+import { ArrowDown, ArrowRight, Check, Copy, Download, FileCheck2, Layers3, LockKeyhole, Mail, MessageCircle, Route, ShieldCheck, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import PilotDemo from "@/pages/PilotDemo";
 import { PILOT_CONTACT, preparePilotRequest, type PilotAudience } from "@/lib/pilot-request";
+import "./AccountPilot.css";
 
 const stages = [
   { number: "01", title: "Choose two directions", text: "Explore strategy and transformation roles using the same career facts." },
@@ -44,79 +45,88 @@ export default function PilotLanding() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+    <main className="jv-pilot">
       <Helmet>
         <title>Free career-transition pilot & fictional demo | Jobvance</title>
         <meta name="description" content="Explore a fictional two-role application demo and request a free, guided Jobvance pilot discussion for UAE professionals and career coaches." />
         <link rel="canonical" href="https://jobvance.io/pilot" />
       </Helmet>
-      <section className="grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]" aria-labelledby="pilot-title">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
-            <span className="h-2 w-2 rounded-full bg-blue-500" aria-hidden="true" /> Free, guided research pilot
-          </span>
-          <h1 id="pilot-title" className="mt-6 max-w-2xl text-4xl font-semibold leading-[1.12] tracking-tight sm:text-6xl">Two career directions.<br /><span className="text-primary">One consistent story.</span></h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">Considering strategy and transformation roles in the UAE? Explore how your real experience can support two different applications, with every factual change open to review.</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg"><a href="#demo">Try the fictional demo <ArrowDown className="ml-2 h-4 w-4" /></a></Button>
-            <Button asChild variant="outline" size="lg"><a href="#request">Prepare a pilot request <ArrowRight className="ml-2 h-4 w-4" /></a></Button>
+      <section className="ap-pilot-hero" aria-labelledby="pilot-title">
+        <div className="ap-pilot-intro">
+          <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> THE FREE RESEARCH PILOT</p>
+          <h1 id="pilot-title">Two directions.<br /><span>One true story.</span></h1>
+          <p>Considering strategy and transformation roles in the UAE? Explore two ways to present your experience, while keeping your contribution and every factual change open to review.</p>
+          <div className="ap-pilot-actions">
+            <Button asChild className="ap-primary"><a href="#demo">Try the fictional demo <ArrowDown size={16} aria-hidden="true" /></a></Button>
+            <Button asChild variant="outline" className="ap-outline"><a href="#request">Prepare a pilot request <ArrowRight size={16} aria-hidden="true" /></a></Button>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">Free participation · No card · You decide what to share</p>
+          <p className="ap-pilot-promise"><span><Check size={13} aria-hidden="true" /> Free participation</span><span><Check size={13} aria-hidden="true" /> No card</span><span><Check size={13} aria-hidden="true" /> You choose what to share</span></p>
         </div>
-        <div className="rounded-3xl border bg-card p-6 shadow-sm sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">One record, two perspectives</p>
-          <div className="mt-5 rounded-xl border bg-muted/40 p-4">
-            <div className="flex items-center gap-3"><FileCheck2 className="h-5 w-5 text-primary" /><strong>Alex Morgan</strong></div>
-            <p className="mt-2 text-sm text-muted-foreground">Fictional consultant · Example Advisory</p>
-            <p className="mt-4 text-sm leading-6">Helped design a pilot. Created a workstream tracker. Prepared leadership briefings.</p>
+        <figure className="ap-career-board" aria-label="Fictional career record illustrated in two role directions">
+          <figcaption className="ap-board-caption"><span>ONE RECORD. TWO PERSPECTIVES.</span><span className="ap-fiction-tag"><FileCheck2 size={12} aria-hidden="true" /> FICTIONAL EXAMPLE</span></figcaption>
+          <div className="ap-source-record">
+            <div className="ap-source-profile"><span className="ap-profile-monogram" aria-hidden="true">AM</span><div><strong>Alex Morgan</strong><p>Fictional consultant · Example Advisory</p></div><span className="ap-source-number">SRC–01</span></div>
+            <blockquote className="ap-source-quote">Helped design a procurement pilot across 5 business units, with <mark>8% projected savings.</mark></blockquote>
+            <div className="ap-claim-labels"><span>Contribution: helped design</span><span>Result: projected</span></div>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950"><p className="font-semibold">Strategy</p><p className="mt-1 text-sm text-muted-foreground">Choices & analysis</p></div>
-            <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-800 dark:bg-violet-950"><p className="font-semibold">Transformation</p><p className="mt-1 text-sm text-muted-foreground">Planning & rollout</p></div>
+          <div className="ap-board-connector" aria-hidden="true"><ArrowDown size={20} /></div>
+          <div className="ap-direction-grid">
+            <div className="ap-direction"><span>DIRECTION 01</span><strong><Route size={17} aria-hidden="true" /> Strategy</strong><p>Bring business-case design and briefing preparation forward.</p></div>
+            <div className="ap-direction ap-direction--ink"><span>DIRECTION 02</span><strong><Layers3 size={17} aria-hidden="true" /> Transformation</strong><p>Bring workstream tracking and pilot design support forward.</p></div>
           </div>
-          <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-muted-foreground"><ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-primary" />The emphasis changes for each role. What the person did, and whether the result was projected or achieved, stays clear.</p>
-          <p className="mt-4 text-xs text-muted-foreground">Illustration using fictional facts. No customer results or live vacancies.</p>
-        </div>
+          <p className="ap-board-rule"><ShieldCheck size={16} aria-hidden="true" />The emphasis changes. Support stays support, and a projected result stays projected. No real candidate, customer result or live vacancy is shown.</p>
+        </figure>
       </section>
 
-      <div className="my-10 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100">
-        <strong>What is available here:</strong> a prewritten, interactive concept demonstration. The guided pilot is an early research workflow with human review. This page does not run a live AI agent, search your inbox, apply for jobs or guarantee interviews.
-      </div>
+      <aside className="ap-pilot-disclosure" aria-label="What is available here">
+        <FileCheck2 size={21} aria-hidden="true" />
+        <div><strong>A concept to try. A pilot to shape together.</strong><p>The interactive example is prewritten. The guided pilot is an early research workflow with human review, by mutual agreement. This page does not run a live AI agent, search your inbox, apply for jobs or guarantee interviews.</p></div>
+      </aside>
 
-      <section aria-labelledby="pilot-fit" className="grid gap-5 md:grid-cols-2">
-        <div className="rounded-2xl border bg-card p-6"><Users className="h-6 w-6 text-primary" /><h2 id="pilot-fit" className="mt-4 text-xl font-semibold">For experienced professionals</h2><p className="mt-3 leading-7 text-muted-foreground">You have a career record to work from and are considering two plausible role directions. Help us test whether preparation is clearer and less repetitive.</p></div>
-        <div className="rounded-2xl border bg-card p-6"><MessageCircle className="h-6 w-6 text-primary" /><h2 className="mt-4 text-xl font-semibold">For career coaches</h2><p className="mt-3 leading-7 text-muted-foreground">You already review client applications. Explore a fictional example first, then discuss a small task comparison with a consenting participant.</p></div>
-      </section>
-
-      <section aria-labelledby="pilot-format" className="my-14">
-        <h2 id="pilot-format" className="text-2xl font-semibold sm:text-3xl">A small, practical pilot</h2>
-        <p className="mt-3 max-w-3xl leading-7 text-muted-foreground">Start with a short discussion. If the fit is right, agree a preparation task and optional follow-up feedback over two weeks. Participation is voluntary and by mutual agreement.</p>
-        <ol className="mt-6 grid gap-5 md:grid-cols-3">{stages.map(stage => <li key={stage.number} className="rounded-2xl border bg-card p-6"><span className="text-sm font-semibold text-primary">{stage.number}</span><h3 className="mt-3 text-lg font-semibold">{stage.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{stage.text}</p></li>)}</ol>
-        <p className="mt-4 text-sm text-muted-foreground">We are testing preparation effort and useful review controls. No testimonials, placement claims or measured time savings are implied.</p>
-      </section>
-
-      <section aria-label="Fictional application demonstration"><PilotDemo /></section>
-
-      <section id="request" className="mt-16 scroll-mt-48 rounded-3xl border bg-card p-6 sm:scroll-mt-32 sm:p-9" aria-labelledby="request-title">
-        <div className="grid gap-9 lg:grid-cols-[0.8fr_1.2fr]">
-          <div><p className="text-sm font-medium text-primary">No payment, no automatic send</p><h2 id="request-title" className="mt-3 text-2xl font-semibold sm:text-3xl">Prepare a free pilot request</h2><p className="mt-4 leading-7 text-muted-foreground">This creates a draft on this page. Review it, then choose whether to open your email app or download the text. It does not register you or reserve a session.</p><p className="mt-4 text-sm leading-6 text-muted-foreground">These form details are held only in this page’s memory until you leave or reload. They are not submitted to Jobvance by this form. Please do not include a CV, employer-confidential information or private client data.</p><p className="mt-4 text-sm leading-6">Your chosen email app sends to <a href={`mailto:${PILOT_CONTACT}`} className="break-all text-primary underline">{PILOT_CONTACT}</a> only if you send the draft yourself.</p></div>
-          <form onSubmit={prepare} className="space-y-5">
-            <div><label htmlFor="pilot-name" className="mb-2 block text-sm font-medium">Your name <span className="font-normal text-muted-foreground">(optional)</span></label><Input id="pilot-name" autoComplete="name" maxLength={80} value={name} onChange={e => { setName(e.target.value); resetDraft(); }} /></div>
-            <div><label htmlFor="pilot-audience" className="mb-2 block text-sm font-medium">I’m exploring this as</label><select id="pilot-audience" value={audience} onChange={e => { setAudience(e.target.value as PilotAudience); resetDraft(); }} className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><option value="professional">A professional considering a career move</option><option value="coach">A career coach</option></select></div>
-            <div><label htmlFor="pilot-directions" className="mb-2 block text-sm font-medium">Role directions or preparation task</label><Textarea id="pilot-directions" required maxLength={500} rows={3} placeholder="For example: strategy and transformation roles, or reviewing two client CV versions." value={directions} onChange={e => { setDirections(e.target.value); resetDraft(); }} /><p className="mt-1 text-xs text-muted-foreground">A brief description is enough. No private career documents at this stage.</p></div>
-            <div><label htmlFor="pilot-availability" className="mb-2 block text-sm font-medium">Possible discussion times and timezone <span className="font-normal text-muted-foreground">(optional)</span></label><Input id="pilot-availability" maxLength={160} placeholder="For example: weekday afternoons, UAE time." value={availability} onChange={e => { setAvailability(e.target.value); resetDraft(); }} /></div>
-            <Button type="submit" className="min-h-11">Prepare request draft <ArrowRight className="ml-2 h-4 w-4" /></Button>
-            {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
-            {request ? <div className="rounded-xl border bg-muted/30 p-5"><p role="status" className="flex items-center gap-2 text-sm font-semibold"><Check className="h-4 w-4 text-primary" />Draft prepared. Nothing has been sent.</p><pre className="mt-4 whitespace-pre-wrap break-words font-sans text-sm leading-6">{request.text}</pre><div className="mt-5 flex flex-wrap gap-3"><Button asChild><a href={request.href}><Mail className="mr-2 h-4 w-4" />Open email draft</a></Button><Button type="button" variant="outline" onClick={copyRequest}><Copy className="mr-2 h-4 w-4" />Copy request</Button><Button type="button" variant="outline" onClick={downloadRequest}><Download className="mr-2 h-4 w-4" />Download request</Button></div><p className="mt-3 text-xs leading-5 text-muted-foreground">If your email app is unavailable, copy or download the draft. A prepared draft is not a received pilot request.</p>{copyStatus ? <p className="mt-3 text-sm" role="status">{copyStatus}</p> : null}</div> : null}
-          </form>
+      <section className="ap-audience-section" aria-labelledby="pilot-fit">
+        <div className="ap-section-heading"><div><p className="ap-eyebrow">WHO IT IS FOR</p><h2 id="pilot-fit">A thoughtful next move.</h2></div><p>For people with experience to draw on, and coaches helping them make that experience clearer.</p></div>
+        <div className="ap-audience-grid">
+          <article className="ap-audience"><span className="ap-audience-icon"><Users size={21} aria-hidden="true" /></span><div><h3>Experienced professionals</h3><p>You have a career record to work from and are considering two plausible role directions. Help us test whether preparation is clearer and less repetitive.</p></div></article>
+          <article className="ap-audience"><span className="ap-audience-icon"><MessageCircle size={21} aria-hidden="true" /></span><div><h3>Career coaches</h3><p>You already review client applications. Explore a fictional example first, then discuss a small task comparison with a consenting participant.</p></div></article>
         </div>
       </section>
 
-      <section className="mt-12 grid gap-4 md:grid-cols-2" aria-label="Pilot questions">
-        <details className="rounded-xl border p-5"><summary className="cursor-pointer font-semibold">What stays under my control?</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">What you share, which wording you approve, and whether you apply or send a message. The fictional demo stays in your browser. You can reload to reset it.</p></details>
-        <details className="rounded-xl border p-5"><summary className="cursor-pointer font-semibold">Can I use the existing free workspace?</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">Yes. The current workspace offers private CV upload, reviewed preparation, downloads and manual tracking. The richer career-record demo on this page illustrates a proposed workflow. <Link to="/auth" className="text-primary underline">Sign in or create an account</Link>.</p></details>
-        <details className="rounded-xl border p-5"><summary className="cursor-pointer font-semibold">Will you read my inbox or contact recruiters?</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">No. This pilot page has no Gmail or LinkedIn connection and sends no outreach. Any future research task involving selected messages will need your explicit agreement.</p></details>
-        <details className="rounded-xl border p-5"><summary className="cursor-pointer font-semibold">Is there a fee or outcome guarantee?</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">The research pilot is free. No card or payment is requested. Hiring decisions and interview outcomes are outside Jobvance’s control.</p></details>
+      <section className="ap-program" aria-labelledby="pilot-format">
+        <div className="ap-section-heading"><div><p className="ap-eyebrow">THE GUIDED PROGRAM</p><h2 id="pilot-format">Small steps.<br />Useful questions.</h2></div><p>Start with a short discussion. If the fit is right, agree a preparation task and optional feedback over two weeks. Participation is voluntary and by mutual agreement.</p></div>
+        <ol className="ap-program-steps">{stages.map((stage, index) => <li key={stage.number} className="ap-stage"><div className="ap-stage-top"><span className="ap-stage-number">{stage.number}</span>{index < stages.length - 1 ? <ArrowRight size={18} aria-hidden="true" /> : <Check size={18} aria-hidden="true" />}</div><h3>{stage.title}</h3><p>{stage.text}</p></li>)}</ol>
+        <p className="ap-program-note"><ShieldCheck size={14} aria-hidden="true" />We are testing preparation effort and useful review controls. No testimonials, placement claims or measured time savings are implied.</p>
+      </section>
+
+      <section className="ap-pilot-demo-shell" aria-label="Fictional application demonstration"><PilotDemo /></section>
+
+      <section id="request" className="ap-pilot-request" aria-labelledby="request-title">
+        <div className="ap-request-intro">
+          <p className="ap-eyebrow">A CONVERSATION TO START</p>
+          <h2 id="request-title">Prepare a free<br />pilot request.</h2>
+          <p>A little context is enough. Create a draft here, review it, then decide whether to send it yourself. Preparing a draft does not register you or reserve a session.</p>
+          <ol className="ap-request-steps"><li><span>01</span> Add a brief, non-confidential outline.</li><li><span>02</span> Prepare and review your request draft.</li><li><span>03</span> Send it yourself, if you choose.</li></ol>
+          <p className="ap-request-privacy"><LockKeyhole size={16} aria-hidden="true" /><span>Form details stay only in this page’s memory until you leave or reload. They are not submitted to Jobvance. Please do not include a CV, employer-confidential information or private client data.</span></p>
+          <p className="ap-request-email">Your chosen email app sends to <a href={`mailto:${PILOT_CONTACT}`}>{PILOT_CONTACT}</a> only if you send the draft yourself. No payment is requested.</p>
+        </div>
+        <form onSubmit={prepare} className="ap-pilot-form">
+          <div><label htmlFor="pilot-name">Your name <span>(optional)</span></label><Input id="pilot-name" autoComplete="name" maxLength={80} value={name} onChange={e => { setName(e.target.value); resetDraft(); }} /></div>
+          <div><label htmlFor="pilot-audience">I’m exploring this as</label><select id="pilot-audience" value={audience} onChange={e => { setAudience(e.target.value as PilotAudience); resetDraft(); }}><option value="professional">A professional considering a career move</option><option value="coach">A career coach</option></select></div>
+          <div><label htmlFor="pilot-directions">Role directions or preparation task</label><Textarea id="pilot-directions" required maxLength={500} rows={3} aria-describedby="pilot-directions-help" placeholder="For example: strategy and transformation roles, or reviewing two client CV versions." value={directions} onChange={e => { setDirections(e.target.value); resetDraft(); }} /><p id="pilot-directions-help" className="ap-request-help">A brief description is enough. No private career documents at this stage.</p></div>
+          <div><label htmlFor="pilot-availability">Possible discussion times and timezone <span>(optional)</span></label><Input id="pilot-availability" maxLength={160} placeholder="For example: weekday afternoons, UAE time." value={availability} onChange={e => { setAvailability(e.target.value); resetDraft(); }} /></div>
+          <Button type="submit" className="ap-primary">Prepare request draft <ArrowRight size={16} aria-hidden="true" /></Button>
+          {error ? <p role="alert" className="ap-form-error">{error}</p> : null}
+          {request ? <div className="ap-prepared-request"><p role="status" className="ap-draft-status"><Check size={16} aria-hidden="true" />Draft prepared. Nothing has been sent.</p><pre>{request.text}</pre><div className="ap-draft-actions"><Button asChild className="ap-primary"><a href={request.href}><Mail size={14} aria-hidden="true" />Open email draft</a></Button><Button type="button" variant="outline" className="ap-outline" onClick={copyRequest}><Copy size={14} aria-hidden="true" />Copy request</Button><Button type="button" variant="outline" className="ap-outline" onClick={downloadRequest}><Download size={14} aria-hidden="true" />Download request</Button></div><p className="ap-request-help">If your email app is unavailable, copy or download the draft. A prepared draft is not a received pilot request.</p>{copyStatus ? <p className="ap-copy-status" role="status">{copyStatus}</p> : null}</div> : null}
+        </form>
+      </section>
+
+      <section className="ap-pilot-faq" aria-labelledby="pilot-faq-title">
+        <h2 id="pilot-faq-title">A few things to know.</h2>
+        <div className="ap-faq-grid">
+          <details><summary>What stays under my control?</summary><p>What you share, which wording you approve, and whether you apply or send a message. The fictional demo stays in your browser. You can reload to reset it.</p></details>
+          <details><summary>Can I check my own CV now?</summary><p>Yes. The free CV check compares your reviewed CV text with one vacancy on your device and offers approved downloads. Saving to a private account is optional. The richer career-record demo here illustrates a proposed workflow. <Link to="/check">Start a free CV check</Link>.</p></details>
+          <details><summary>Will you read my inbox or contact recruiters?</summary><p>No. This pilot page has no Gmail or LinkedIn connection and sends no outreach. Any future research task involving selected messages will need your explicit agreement.</p></details>
+          <details><summary>Is there a fee or outcome guarantee?</summary><p>The research pilot is free. No card or payment is requested. Hiring decisions and interview outcomes are outside Jobvance’s control.</p></details>
+        </div>
       </section>
     </main>
   );

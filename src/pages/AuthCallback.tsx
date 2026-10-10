@@ -32,8 +32,8 @@ const AuthCallback = () => {
   }, [navigate]);
 
   return (
-    <main className="min-h-[70vh] flex items-center justify-center p-4">
-      <div className="max-w-md text-center space-y-4">
+    <main className="jv-account-utility min-h-[70vh] flex items-center justify-center p-4">
+      <div className="jv-account-utility-card max-w-md text-center space-y-4 p-8">
         {error ? (
           <><h1 className="text-xl font-semibold">Sign-in could not be completed</h1><p role="alert">{error}</p>{returnToCheck && <Button onClick={() => navigate('/check', { replace: true })}>Return to your CV check</Button>}<Button variant={returnToCheck ? 'outline' : 'default'} onClick={() => navigate('/auth', { replace: true })}>Back to sign in</Button></>
         ) : (
@@ -44,3 +44,4 @@ const AuthCallback = () => {
   );
 };
 export default AuthCallback;
+

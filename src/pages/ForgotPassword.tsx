@@ -66,7 +66,7 @@ const ForgotPassword: React.FC = () => {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
+      <div className="jv-account-utility min-h-[70vh] flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center space-y-2">
             <div className="mx-auto w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
@@ -79,7 +79,7 @@ const ForgotPassword: React.FC = () => {
             </p>
           </div>
 
-          <Card className="premium-card border-0 shadow-lg">
+          <Card className="jv-account-utility-card">
             <CardContent className="pt-6 space-y-4">
               <div className="text-center space-y-2">
                 <p className="text-sm text-muted-foreground">
@@ -112,7 +112,7 @@ const ForgotPassword: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
+    <div className="jv-account-utility min-h-[70vh] flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold gradient-text">Reset Password</h1>
@@ -121,7 +121,7 @@ const ForgotPassword: React.FC = () => {
           </p>
         </div>
 
-        <Card className="premium-card border-0 shadow-lg">
+        <Card className="jv-account-utility-card">
           <CardHeader className="text-center space-y-1">
             <CardTitle className="text-xl">Forgot Password</CardTitle>
             <CardDescription>
@@ -188,3 +188,4 @@ const ForgotPassword: React.FC = () => {
 }
 
 export default ForgotPassword;
+

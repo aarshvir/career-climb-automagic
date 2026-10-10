@@ -29,7 +29,7 @@ async function toReview() {
   fireEvent.click(screen.getByRole("button", { name: "Check these inputs" }));
   fireEvent.click(screen.getByRole("button", { name: "Review my CV & questions" }));
 }
-async function toApproval() { await toReview(); fireEvent.click(screen.getByRole("button", { name: "Recheck my changes & continue" })); }
+async function toApproval() { await toReview(); fireEvent.click(screen.getByRole("button", { name: "Recheck my changes & continue" })); fireEvent.click(screen.getByText("Evidence from your final CV — review the findings")); }
 function approve() {
   fireEvent.click(screen.getByLabelText(/I reviewed the complete CV and vacancy/));
   fireEvent.click(screen.getByLabelText(/Both my source CV and final CV are safe/));
