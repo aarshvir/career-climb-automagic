@@ -1,0 +1,286 @@
+Browser tab: 1, Title: "Free CV-to-vacancy evidence check | Jobvance", URL: "https://jobvance.io/check?audience=student".
+0 AXWebArea Free CV-to-vacancy evidence check | Jobvance, URL: jobvance.io/check?audience=student
+	1 container root
+		2 container
+			3 link Description: Skip to content, Value: jobvance.io/check?audience=student#main-content
+			4 link Description: Jobvance home, Value: jobvance.io/
+			5 text FREE BETA
+			6 container Main navigation
+				7 link Description: Free CV check, Value: jobvance.io/check
+				8 link Description: Job Loop, Value: jobvance.io/loop
+				9 link Description: How it works, Value: jobvance.io/how-it-works
+				10 link Description: Guided pilot, Value: jobvance.io/pilot
+			11 link Description: Sign in, Value: jobvance.io/auth
+			12 link Description: Get started free, Value: jobvance.io/check
+		213 container
+			214 image
+			215 text Free CV check NO CARD NEEDED
+			216 heading One vacancy. Your actual experience., Value: 1
+				217 text One vacancy.  Your actual experience.
+			218 text Check how your experience comes across for this job. Keep what fits, and work through anything unclear.
+			219 button Clear & start again
+			220 container University student guidance
+				221 text University student
+				222 text Projects, coursework, internships and volunteering count as source material. Keep them labelled as what they are; no employment history is required to check a CV.
+			223 container Check progress
+				224 text YOUR APPLICATION
+				225 content list
+					263 button Your role
+						264 image
+						265 text Your role
+					279 button Your CV
+						280 image
+						281 text Your CV
+					282 button One vacancy
+						283 image
+						284 text One vacancy
+					232 container
+						233 text 04 The evidence
+					234 container
+						235 text 05 Your review
+					236 container
+						237 text 06 Approve & download
+				238 container
+					239 text Step  4  of 6 · English wording analysis · you review every finding
+			240 image
+			241 text Graduate Data Analyst
+			242 text Company not specified
+			285 text 12  requirements found in your vacancy
+			243 image
+			244 container
+				245 text On your device.
+				246 text Only saved to your account if you choose.
+			247 text 04  / 06
+			248 heading The evidence, Value: 2
+				249 text The evidence
+			250 text Follow the words back to their source. Read what the employer asks for beside what your CV says. A related phrase may still need a better example.
+			286 container Finding counts
+				287 text 0
+				288 text Direct wording found
+				289 text 2
+				290 text Related passage — review needed
+				291 text 0
+				292 text No passage found
+				293 text 10
+				294 text Needs manual review
+			295 text Use these findings to review your CV. Matching wording does not confirm that you qualify or predict an interview.
+			296 button (collapsed) How this check works and what it may miss, Secondary Actions: Expand
+				297 text How this check works and what it may miss
+			298 container Filter findings
+				299 checkbox All findings, Value: 1
+				300 checkbox Focus on review questions, Value: 0
+			301 container Vacancy finding: SIMULATED VACANCY
+				302 container
+					303 image
+					304 text Needs manual review
+				305 heading IN THE VACANCY, Value: 4
+					306 text IN THE VACANCY
+				307 text SIMULATED VACANCY
+				308 heading IN YOUR CV, Value: 4
+					309 text IN YOUR CV
+				310 text SIMULATED STUDENT CV
+				311 container
+					312 text Line  1  ·  From your reviewed source CV
+				313 text The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+				314 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					315 text Words used in this comparison
+				316 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			317 container Vacancy finding: Graduate Data Analyst, Dubai, full-time.
+				318 container
+					319 image
+					320 text Needs manual review
+				321 heading IN THE VACANCY, Value: 4
+					322 text IN THE VACANCY
+				323 text Graduate Data Analyst, Dubai, full-time.
+				324 heading IN YOUR CV, Value: 4
+					325 text IN YOUR CV
+				326 text My contribution was data cleaning and the report scripts;
+				327 container
+					328 text Line  5  ·  From your reviewed source CV
+				329 text The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+				330 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					331 text Words used in this comparison
+				332 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			333 container Vacancy finding: Develop Python reports.
+				334 container
+					335 image
+					336 text Needs manual review
+				337 heading IN THE VACANCY, Value: 4
+					338 text IN THE VACANCY
+				339 text Develop Python reports.
+				340 heading IN YOUR CV, Value: 4
+					341 text IN YOUR CV
+				342 text Python, SQL coursework, Excel, English.
+				343 container
+					344 text Line  11  ·  From your reviewed source CV
+				345 text Developed Python reports for a university team project.
+				346 container
+					347 text Line  5  ·  From your reviewed source CV
+				348 text The wording needs a closer look. It may describe something unfinished, expired or not held. Check the current position before using it.
+				349 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					350 text Words used in this comparison
+				351 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			352 container Vacancy finding: Clean datasets and create charts.
+				353 container
+					354 image
+					355 text Related passage — review needed
+				356 heading IN THE VACANCY, Value: 4
+					357 text IN THE VACANCY
+				358 text Clean datasets and create charts.
+				359 heading IN YOUR CV, Value: 4
+					360 text IN YOUR CV
+				361 text Cleaned a public dataset and created charts using pandas.
+				362 container
+					363 text Line  5  ·  From your reviewed source CV
+				364 text Your CV covers part of this requirement. Read what is missing and add an example only if it is true.
+				365 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					366 text Words used in this comparison
+				367 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			368 container Vacancy finding: Write SQL queries to support reporting.
+				369 container
+					370 image
+					371 text Needs manual review
+				372 heading IN THE VACANCY, Value: 4
+					373 text IN THE VACANCY
+				374 text Write SQL queries to support reporting.
+				375 heading IN YOUR CV, Value: 4
+					376 text IN YOUR CV
+				377 text Python, SQL coursework, Excel, English.
+				378 container
+					379 text Line  11  ·  From your reviewed source CV
+				380 text The wording needs a closer look. It may describe something unfinished, expired or not held. Check the current position before using it.
+				381 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					382 text Words used in this comparison
+				383 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			384 container Vacancy finding: Collaborate with team members and explain findings.
+				385 container
+					386 image
+					387 text Needs manual review
+				388 heading IN THE VACANCY, Value: 4
+					389 text IN THE VACANCY
+				390 text Collaborate with team members and explain findings.
+				391 heading IN YOUR CV, Value: 4
+					392 text IN YOUR CV
+				393 text Developed Python reports for a university team project.
+				394 container
+					395 text Line  5  ·  From your reviewed source CV
+				396 text I did not lead the team.
+				397 container
+					398 text Line  5  ·  From your reviewed source CV
+				399 text The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+				400 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					401 text Words used in this comparison
+				402 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			403 container Vacancy finding: Bachelor's degree in computer science completed by August 2027.
+				404 container
+					405 image
+					406 text Needs manual review
+				407 heading IN THE VACANCY, Value: 4
+					408 text IN THE VACANCY
+				409 text Bachelor's degree in computer science completed by August 2027.
+				410 heading IN YOUR CV, Value: 4
+					411 text IN YOUR CV
+				412 text BSc Computer Science, expected graduation June 2027.
+				413 container
+					414 text Line  3  ·  From your reviewed source CV
+				415 text This requirement includes a number that needs checking, such as team size or budget. Compare it with your actual experience; the check has not assumed a match.
+				416 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					417 text Words used in this comparison
+				418 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			419 container Vacancy finding: At least one year of professional data analysis experience.
+				420 container
+					421 image
+					422 text Related passage — review needed
+				423 heading IN THE VACANCY, Value: 4
+					424 text IN THE VACANCY
+				425 text At least one year of professional data analysis experience.
+				426 heading IN YOUR CV, Value: 4
+					427 text IN YOUR CV
+				428 text My contribution was data cleaning and the report scripts;
+				429 container
+					430 text Line  5  ·  From your reviewed source CV
+				431 text You mention related work, but the amount of relevant experience is unclear. Check the roles and dates; the check has not assumed a total.
+				432 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					433 text Words used in this comparison
+				434 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			435 container Vacancy finding: Excellent English communication.
+				436 container
+					437 image
+					438 text Needs manual review
+				439 heading IN THE VACANCY, Value: 4
+					440 text IN THE VACANCY
+				441 text Excellent English communication.
+				442 heading IN YOUR CV, Value: 4
+					443 text IN YOUR CV
+				444 text Python, SQL coursework, Excel, English.
+				445 container
+					446 text Line  11  ·  From your reviewed source CV
+				447 text The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+				448 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					449 text Words used in this comparison
+				450 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			451 container Vacancy finding: Must have existing authorization to work in the UAE;
+				452 container
+					453 image
+					454 text Needs manual review
+				455 heading IN THE VACANCY, Value: 4
+					456 text IN THE VACANCY
+				457 text Must have existing authorization to work in the UAE;
+				458 heading IN YOUR CV, Value: 4
+					459 text IN YOUR CV
+				460 text No clear example showed up in this CV. If you have one, you can add it during the review.
+				461 text The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+				462 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			463 container Vacancy finding: visa sponsorship is not available.
+				464 container
+					465 image
+					466 text Needs manual review
+				467 heading IN THE VACANCY, Value: 4
+					468 text IN THE VACANCY
+				469 text visa sponsorship is not available.
+				470 heading IN YOUR CV, Value: 4
+					471 text IN YOUR CV
+				472 text I did not lead the team.
+				473 container
+					474 text Line  5  ·  From your reviewed source CV
+				475 text The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+				476 button (collapsed) Words used in this comparison, Secondary Actions: Expand
+					477 text Words used in this comparison
+				478 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			479 container Vacancy finding: Applications close 31 October 2026.
+				480 container
+					481 image
+					482 text Needs manual review
+				483 heading IN THE VACANCY, Value: 4
+					484 text IN THE VACANCY
+				485 text Applications close 31 October 2026.
+				486 heading IN YOUR CV, Value: 4
+					487 text IN YOUR CV
+				488 text No clear example showed up in this CV. If you have one, you can add it during the review.
+				489 text This requirement includes a number that needs checking, such as team size or budget. Compare it with your actual experience; the check has not assumed a match.
+				490 text Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+			491 button (collapsed) Read the full vacancy, Secondary Actions: Expand
+				492 text Read the full vacancy
+			493 button Review my CV & questions
+				494 text Review my CV & questions
+				495 image
+			275 button Back to one vacancy
+				276 image
+				277 text Back to
+				278 text one vacancy
+			259 text You choose the final wording and send the application yourself.
+			260 link Description: Privacy, Value: jobvance.io/privacy
+			261 text  ·
+			262 link Description: See the clearly labelled fictional pilot demo, Value: jobvance.io/pilot
+		193 container
+			204 text ©  2026  Jobvance · Free beta
+			205 container Legal navigation
+				206 link Description: Privacy, Value: jobvance.io/privacy
+				207 link Description: Terms, Value: jobvance.io/terms
+				208 link Description: Refunds, Value: jobvance.io/refund
+			209 text You make the final call.
+		210 container Notifications (F8)
+			211 content list
+		212 container Notifications alt+T
+
+The focused UI element is 248 heading The evidence, Value: 2

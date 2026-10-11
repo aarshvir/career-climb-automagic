@@ -1,0 +1,81 @@
+Browser tab: 1, Title: "Privacy | Jobvance", URL: "https://jobvance.io/privacy".
+1 AXWebArea Privacy | Jobvance, URL: jobvance.io/privacy
+	2 container root
+		3 container
+			4 link Description: Skip to content, Value: jobvance.io/privacy#main-content
+			5 link Description: Jobvance home, Value: jobvance.io/
+			6 text FREE BETA
+			7 container Main navigation
+				8 link Description: Free CV check, Value: jobvance.io/check
+				9 link Description: Job Loop, Value: jobvance.io/loop
+				10 link Description: How it works, Value: jobvance.io/how-it-works
+				11 link Description: Guided pilot, Value: jobvance.io/pilot
+			12 link Description: Sign in, Value: jobvance.io/auth
+			13 link Description: Get started free, Value: jobvance.io/check
+		14 container
+			15 link Description: JOBVANCE, Value: jobvance.io/
+			16 text YOUR INFORMATION
+			17 heading Privacy, Value: 1
+				18 text Privacy
+			19 text How the free check, your saved documents and the optional cloud Job Loop handle your information.
+			20 heading Your free check, Value: 2
+				21 text Your free check
+			22 text The free CV check reads your file and compares CV/vacancy text on your device. It does not upload the original file or transmit check content during analysis or guest downloads. Unsaved work is held in memory and is cleared when the page closes or refreshes. It does not send check data to advertising tools.
+			23 heading Choosing account saving, Value: 2
+				24 text Choosing account saving
+			25 text If you explicitly choose account saving, the role, company, vacancy, reviewed source CV and approved final CV texts are stored privately in your existing Supabase account. The exact save payload is shown before saving. Saved free checks can be deleted in the check page; deletion does not remove files you already downloaded.
+			26 heading Signing in with an unsaved check, Value: 2
+				27 text Signing in with an unsaved check
+			28 text Google sign-in can retain an unsaved check in this browser tab only after specific consent. A retained draft is eligible for restoration for 30 minutes and cleared on return or when you clear the check; closing the tab also removes tab storage. An expired draft is discarded when next read. This temporary storage is accessible to someone using the same browser tab. Email sign-in can keep the check in memory without this handoff.
+			29 heading Your existing workspace, Value: 2
+				30 text Your existing workspace
+			31 text Your account, uploaded CV, extracted text, application documents and tracker entries are processed to provide this service. Supabase supplies authentication, database and private file storage. Real-money payments are currently disabled. If payment testing is enabled, the configured processor is Paddle or Stripe; Jobvance does not collect full card numbers.
+			32 heading Deleting information, Value: 2
+				33 text Deleting information
+			34 text You can delete an original CV or a tracker entry in your workspace. Original deletion does not remove separately saved application packs. Contact support for account erasure or other data requests; necessary financial records may require retention.
+			35 heading Your cloud Job Loop, Value: 2
+				36 text Your cloud Job Loop
+			37 text Saving a career record is an explicit choice. Its source text, target preferences, confirmed facts, vacancies, run reports and prepared documents are stored in your private Supabase account. Runs use a saved version of your record. A correction or withdrawal requires a new review before a packet can be downloaded again; it cannot recall a file already downloaded.
+			38 heading Optional models and search, Value: 2
+				39 text Optional models and search
+			40 text The free CV check and existing preparation packs do not call external AI. In the cloud loop, you can choose the available rules mode or consent to the selected Claude, OpenAI or Kimi provider for that run. The model receives confirmed facts you marked shareable and vacancy text, rather than the entire raw source CV. Job search queries use target roles and locations. Availability depends on the configured accounts. Remove confidential or unnecessary sensitive information before saving or sharing.
+			41 heading Optional inbox access, Value: 2
+				42 text Optional inbox access
+			43 text Signing in with Google does not connect your inbox. Connecting Gmail requires a separate Google permission screen. When configured, the loop can read relevant job-search messages and store selected summaries. Draft access is optional; creating a draft requires your approval of its recipient and attachment. Jobvance has no email-send or application-submit action. Disconnecting removes its stored connection credentials; it does not delete messages or drafts already in Gmail. Google permissions can also be revoked in your Google account.
+			44 heading Document access, Value: 2
+				45 text Document access
+			46 container
+				47 text Approved documents are retained for your access after pack expiry. Public examples use fictional data.
+				48 link Description: Contact and service availability, Value: jobvance.io/contact
+				49 text .
+			50 text YOUR NEXT STEP
+			51 heading Questions about the details?, Value: 2
+				52 text Questions about the details?
+			53 text Check service availability or read the answers to common questions.
+			54 link Description: Contact & availability, Value: jobvance.io/contact
+			55 container Related pages
+				56 link Description: Questions & answers, Value: jobvance.io/faq
+				57 link Description: Your workspace, Value: jobvance.io/auth
+				58 link Description: Privacy, Value: jobvance.io/privacy
+		59 container
+			60 link Description: Jobvance home, Value: jobvance.io/
+			61 text Your experience, clearly presented.
+			62 text Your next application, prepared with care.
+			63 container Footer navigation
+				64 link Description: Free CV check, Value: jobvance.io/check
+				65 link Description: Free guided pilot, Value: jobvance.io/pilot
+				66 link Description: How it works, Value: jobvance.io/how-it-works
+				67 link Description: Help, Value: jobvance.io/help
+				68 link Description: About Jobvance, Value: jobvance.io/about
+				69 link Description: Contact, Value: jobvance.io/contact
+			70 text ©  2026  Jobvance · Free beta
+			71 container Legal navigation
+				72 link Description: Privacy, Value: jobvance.io/privacy
+				73 link Description: Terms, Value: jobvance.io/terms
+				74 link Description: Refunds, Value: jobvance.io/refund
+			75 text You make the final call.
+		76 container Notifications (F8)
+			77 content list
+		78 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Privacy | Jobvance, URL: jobvance.io/privacy

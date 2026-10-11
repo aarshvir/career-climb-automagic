@@ -1,0 +1,65 @@
+Browser tab: 1, Title: "Free CV-to-vacancy evidence check | Jobvance", URL: "https://jobvance.io/check?audience=student".
+1 AXWebArea Free CV-to-vacancy evidence check | Jobvance, URL: jobvance.io/check?audience=student
+	2 container root
+		3 container
+			4 link Description: Skip to content, Value: jobvance.io/check?audience=student#main-content
+			5 link Description: Jobvance home, Value: jobvance.io/
+			6 button (collapsed) Description: Open navigation, Secondary Actions: Expand
+				7 image
+		8 container
+			9 image
+			10 text Free CV check NO CARD NEEDED
+			11 heading One vacancy. Your actual experience., Value: 1
+				12 text One vacancy.
+				13 text Your actual experience.
+			14 text Check how your experience comes across for this job. Keep what fits, and work through anything unclear.
+			15 button Clear & start again
+			16 container University student guidance
+				17 text University student
+				18 text Projects, coursework, internships and volunteering count as source material. Keep them labelled as what they are; no employment history is required to check a CV.
+			19 container Check progress
+				20 content list
+					21 container
+						22 text 01 Your role
+					23 container
+						24 text 02 Your CV
+					25 container
+						26 text 03 One vacancy
+					27 container
+						28 text 04 The evidence
+					29 container
+						30 text 05 Your review
+					31 container
+						32 text 06 Approve & download
+				33 container
+					34 text Step  1  of 6 · English wording analysis · you review every finding
+			35 text Start with one role
+			36 text You’ll need your CV and a job description. We’ll walk through them together.
+			37 text 01  / 06
+			38 heading Your role, Value: 2
+				39 text Your role
+			40 text Give this application a clear starting point. Which job do you have in mind? Use the title from the job description. Target role
+			41 text field (settable) Target role, ID: check-role
+			42 text Company (optional)
+			43 text field (settable) Company (optional), ID: check-company
+			44 image
+			45 text Your CV and job description stay on this device unless you choose to save them to your account. Keep this page open while you work; refreshing it clears an unsaved check.
+			46 button Continue to your CV
+				47 text Continue to your CV
+				48 image
+			49 text You choose the final wording and send the application yourself.
+			50 link Description: Privacy, Value: jobvance.io/privacy
+			51 text  ·
+			52 link Description: See the clearly labelled fictional pilot demo, Value: jobvance.io/pilot
+		53 container
+			54 text ©  2026  Jobvance · Free beta
+			55 container Legal navigation
+				56 link Description: Privacy, Value: jobvance.io/privacy
+				57 link Description: Terms, Value: jobvance.io/terms
+				58 link Description: Refunds, Value: jobvance.io/refund
+			59 text You make the final call.
+		60 container Notifications (F8)
+			61 content list
+		62 container Notifications alt+T
+
+The focused UI element is 38 heading Your role, Value: 2

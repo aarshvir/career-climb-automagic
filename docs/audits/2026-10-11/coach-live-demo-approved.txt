@@ -1,0 +1,6 @@
+Browser tab: 1, Title: "Free career-transition pilot & fictional demo | Jobvance", URL: "https://jobvance.io/pilot".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~					144 text Approved fictional example
+~					182 button (disabled) Fictional CV approved
+~					183 button Download fictional CV (.txt)
+The focused UI element is 1 AXWebArea Free career-transition pilot & fictional demo | Jobvance, URL: jobvance.io/pilot

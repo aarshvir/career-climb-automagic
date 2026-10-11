@@ -1,0 +1,3 @@
+Browser tab: 1, Title: "Free career-transition pilot & fictional demo | Jobvance", URL: "https://jobvance.io/pilot".
+There has been no change in the accessibility tree.
+The focused UI element is 1 AXWebArea Free career-transition pilot & fictional demo | Jobvance, URL: jobvance.io/pilot

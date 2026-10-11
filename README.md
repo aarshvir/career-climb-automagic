@@ -10,7 +10,7 @@ This repository contains the frontend, backend functions, additive database migr
 
 The frontend is a portable static application. Supabase remains its authentication, database and private-storage backend; changing the frontend host does not migrate or delete existing accounts and files.
 
-**Migration status â€” 10 October 2026:** the source is being prepared for independent publication. A new frontend deployment and custom-domain cutover are not yet confirmed. Native Sites and Cloudflare are hosting candidates; the domain is managed at Hostinger and the DNS change awaits owner access. See [release status](docs/MVP-RELEASE-STATUS.md) for current verification, rather than treating a local build as a live deployment.
+**Deployment status — 11 October 2026:** the independent frontend is live at [Jobvance.io](https://jobvance.io). The existing Supabase backend remains in use. See [cloud release evidence](docs/CLOUD-JOB-LOOP-RELEASE-STATUS.md) for verified mechanics and integration limitations. [The six-perspective audit](docs/audits/2026-10-11/README.md) scores current readiness at 60.9/100; [implementation priorities](docs/JOBVANCE-IMPLEMENTATION-PRIORITIES.md) describe the proposed next work.
 
 ## Stack
 

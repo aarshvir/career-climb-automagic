@@ -1,0 +1,68 @@
+Browser tab: 1, Title: "Jobvance — prepare, review and track applications", URL: "https://jobvance.io/auth?next=%2Floop".
+1 AXWebArea Jobvance — prepare, review and track applications, URL: jobvance.io/auth?next=%2Floop
+	2 container root
+		3 container
+			4 link Description: Skip to content, Value: jobvance.io/auth?next=%2Floop#main-content
+			5 link Description: Jobvance home, Value: jobvance.io/
+			6 text FREE BETA
+			7 container Main navigation
+				8 link Description: Free CV check, Value: jobvance.io/check
+				9 link Description: Job Loop, Value: jobvance.io/loop
+				10 link Description: How it works, Value: jobvance.io/how-it-works
+				11 link Description: Guided pilot, Value: jobvance.io/pilot
+			12 link Description: Sign in, Value: jobvance.io/auth
+			13 link Description: Get started free, Value: jobvance.io/check
+		14 container
+			15 container Your next step. A clearer story.
+				16 text YOUR CAREER, IN YOUR WORDS
+				17 heading Your next step. A clearer story., Value: 2, ID: :r0:-story
+					18 text Your next step.
+					19 text A clearer story.
+				20 text Bring your actual experience to the next role. Review your wording, keep your versions, and decide what to share.
+				21 container Illustration of a fictional CV review
+					22 container
+						23 text YOUR REVIEWED CV
+						24 text Fictional illustration 01 EXPERIENCE Helped design a pilot, with projected savings. Your contribution stays clear.
+						25 text Projected stays projected.
+					26 text Reviewed by you
+				27 text Choose what you save in your account.
+				28 link Description: Try the free CV check without an account, Value: jobvance.io/check
+			29 text YOUR JOBVANCE WORKSPACE
+			30 heading Sign in to Jobvance, Value: 1
+				31 text Sign in to Jobvance
+			32 text Keep your reviewed CVs and applications in one place.
+			33 button Continue with Google
+			34 text or use your email and password
+			35 text Email address
+			36 text field (settable) Email address
+			37 text Password
+			38 container
+				39 text field (settable) Password
+				40 button Show password
+			41 button Sign in
+			42 button Forgot your password?
+			43 text New to Jobvance?
+			44 button Create an account
+			45 text Account saving is optional. Free CV checks need no account.
+		46 container
+			47 link Description: Jobvance home, Value: jobvance.io/
+			48 text Your experience, clearly presented.
+			49 text Your next application, prepared with care.
+			50 container Footer navigation
+				51 link Description: Free CV check, Value: jobvance.io/check
+				52 link Description: Free guided pilot, Value: jobvance.io/pilot
+				53 link Description: How it works, Value: jobvance.io/how-it-works
+				54 link Description: Help, Value: jobvance.io/help
+				55 link Description: About Jobvance, Value: jobvance.io/about
+				56 link Description: Contact, Value: jobvance.io/contact
+			57 text ©  2026  Jobvance · Free beta
+			58 container Legal navigation
+				59 link Description: Privacy, Value: jobvance.io/privacy
+				60 link Description: Terms, Value: jobvance.io/terms
+				61 link Description: Refunds, Value: jobvance.io/refund
+			62 text You make the final call.
+		63 container Notifications (F8)
+			64 content list
+		65 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Jobvance — prepare, review and track applications, URL: jobvance.io/auth?next=%2Floop

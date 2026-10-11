@@ -1,0 +1,177 @@
+{
+  "date": "2026-10-11",
+  "sourceCommit": "2d1ad90356a7c952740dde2c9bf02ab5880a1414",
+  "scope": "Pure function reproduction, not a live browser/cloud test. All inputs fictional. No product files changed.",
+  "onlyDifference": "Python, removed from the separate skills line; project and vacancy unchanged.",
+  "cvOriginal": "Fictional Student\nEDUCATION\nBSc Computer Science, expected graduation June 2027.\nPROJECTS\nUniversity team project\n- Developed Python reports for a university team project.\n- Supported data cleaning. I did not lead the team.\nSKILLS\nPython, SQL coursework, Excel, English",
+  "cvCounterfactual": "Fictional Student\nEDUCATION\nBSc Computer Science, expected graduation June 2027.\nPROJECTS\nUniversity team project\n- Developed Python reports for a university team project.\n- Supported data cleaning. I did not lead the team.\nSKILLS\nSQL coursework, Excel, English",
+  "vacancy": "Requirements\nDevelop Python reports.\nBachelor's degree in computer science completed by August 2027.\nVisa sponsorship is not available.\nApplications close 30 November 2026.",
+  "classificationChanged": true,
+  "original": [
+    {
+      "id": "requirement-1",
+      "vacancyQuote": "Develop Python reports.",
+      "start": 13,
+      "end": 36,
+      "status": "review",
+      "evidence": [
+        {
+          "cvQuote": "Python, SQL coursework, Excel, English",
+          "start": 231,
+          "end": 269,
+          "line": 9,
+          "sourceKind": "skills"
+        },
+        {
+          "cvQuote": "Developed Python reports for a university team project.",
+          "start": 116,
+          "end": 171,
+          "line": 6,
+          "sourceKind": "action"
+        }
+      ],
+      "explanation": "The wording needs a closer look. It may describe something unfinished, expired or not held. Check the current position before using it.",
+      "question": "Is there something your CV should show here? Add a specific example or qualification only if it is accurate.",
+      "matchedTerms": [
+        "develop",
+        "python",
+        "report"
+      ]
+    },
+    {
+      "id": "requirement-2",
+      "vacancyQuote": "Bachelor's degree in computer science completed by August 2027.",
+      "start": 37,
+      "end": 100,
+      "status": "review",
+      "evidence": [
+        {
+          "cvQuote": "BSc Computer Science, expected graduation June 2027.",
+          "start": 28,
+          "end": 80,
+          "line": 3,
+          "sourceKind": "other"
+        }
+      ],
+      "explanation": "This requirement includes a number that needs checking, such as team size or budget. Compare it with your actual experience; the check has not assumed a match.",
+      "question": "Is there something your CV should show here? Add a specific example or qualification only if it is accurate.",
+      "matchedTerms": [
+        "bachelor",
+        "computer",
+        "science"
+      ]
+    },
+    {
+      "id": "requirement-3",
+      "vacancyQuote": "Visa sponsorship is not available.",
+      "start": 101,
+      "end": 135,
+      "status": "review",
+      "evidence": [
+        {
+          "cvQuote": "I did not lead the team.",
+          "start": 199,
+          "end": 223,
+          "line": 7,
+          "sourceKind": "action"
+        }
+      ],
+      "explanation": "The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.",
+      "question": "Is there something your CV should show here? Add a specific example or qualification only if it is accurate.",
+      "matchedTerms": [
+        "not"
+      ]
+    },
+    {
+      "id": "requirement-4",
+      "vacancyQuote": "Applications close 30 November 2026.",
+      "start": 136,
+      "end": 172,
+      "status": "review",
+      "evidence": [],
+      "explanation": "This requirement includes a number that needs checking, such as team size or budget. Compare it with your actual experience; the check has not assumed a match.",
+      "question": "Is there something your CV should show here? Add a specific example or qualification only if it is accurate.",
+      "matchedTerms": []
+    }
+  ],
+  "counterfactual": [
+    {
+      "id": "requirement-1",
+      "vacancyQuote": "Develop Python reports.",
+      "start": 13,
+      "end": 36,
+      "status": "direct",
+      "evidence": [
+        {
+          "cvQuote": "Developed Python reports for a university team project.",
+          "start": 116,
+          "end": 171,
+          "line": 6,
+          "sourceKind": "action"
+        }
+      ],
+      "explanation": "This example mentions the work the employer asks for. Check that it describes your own contribution and the right level of responsibility.",
+      "question": "Is there something your CV should show here? Add a specific example or qualification only if it is accurate.",
+      "matchedTerms": [
+        "develop",
+        "python",
+        "report"
+      ]
+    },
+    {
+      "id": "requirement-2",
+      "vacancyQuote": "Bachelor's degree in computer science completed by August 2027.",
+      "start": 37,
+      "end": 100,
+      "status": "review",
+      "evidence": [
+        {
+          "cvQuote": "BSc Computer Science, expected graduation June 2027.",
+          "start": 28,
+          "end": 80,
+          "line": 3,
+          "sourceKind": "other"
+        }
+      ],
+      "explanation": "This requirement includes a number that needs checking, such as team size or budget. Compare it with your actual experience; the check has not assumed a match.",
+      "question": "Is there something your CV should show here? Add a specific example or qualification only if it is accurate.",
+      "matchedTerms": [
+        "bachelor",
+        "computer",
+        "science"
+      ]
+    },
+    {
+      "id": "requirement-3",
+      "vacancyQuote": "Visa sponsorship is not available.",
+      "start": 101,
+      "end": 135,
+      "status": "review",
+      "evidence": [
+        {
+          "cvQuote": "I did not lead the team.",
+          "start": 199,
+          "end": 223,
+          "line": 7,
+          "sourceKind": "action"
+        }
+      ],
+      "explanation": "The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.",
+      "question": "Is there something your CV should show here? Add a specific example or qualification only if it is accurate.",
+      "matchedTerms": [
+        "not"
+      ]
+    },
+    {
+      "id": "requirement-4",
+      "vacancyQuote": "Applications close 30 November 2026.",
+      "start": 136,
+      "end": 172,
+      "status": "review",
+      "evidence": [],
+      "explanation": "This requirement includes a number that needs checking, such as team size or budget. Compare it with your actual experience; the check has not assumed a match.",
+      "question": "Is there something your CV should show here? Add a specific example or qualification only if it is accurate.",
+      "matchedTerms": []
+    }
+  ]
+}

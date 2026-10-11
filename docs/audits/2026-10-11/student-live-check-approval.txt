@@ -1,0 +1,116 @@
+Browser tab: 1, Title: "Free CV-to-vacancy evidence check | Jobvance", URL: "https://jobvance.io/check?audience=student".
+0 AXWebArea Free CV-to-vacancy evidence check | Jobvance, URL: jobvance.io/check?audience=student
+	1 container root
+		2 container
+			3 link Description: Skip to content, Value: jobvance.io/check?audience=student#main-content
+			4 link Description: Jobvance home, Value: jobvance.io/
+			5 text FREE BETA
+			6 container Main navigation
+				7 link Description: Free CV check, Value: jobvance.io/check
+				8 link Description: Job Loop, Value: jobvance.io/loop
+				9 link Description: How it works, Value: jobvance.io/how-it-works
+				10 link Description: Guided pilot, Value: jobvance.io/pilot
+			11 link Description: Sign in, Value: jobvance.io/auth
+			12 link Description: Get started free, Value: jobvance.io/check
+		213 container
+			214 image
+			215 text Free CV check NO CARD NEEDED
+			216 heading One vacancy. Your actual experience., Value: 1
+				217 text One vacancy.  Your actual experience.
+			218 text Check how your experience comes across for this job. Keep what fits, and work through anything unclear.
+			219 button Clear & start again
+			220 container University student guidance
+				221 text University student
+				222 text Projects, coursework, internships and volunteering count as source material. Keep them labelled as what they are; no employment history is required to check a CV.
+			223 container Check progress
+				224 text YOUR APPLICATION
+				225 content list
+					263 button Your role
+						264 image
+						265 text Your role
+					279 button Your CV
+						280 image
+						281 text Your CV
+					282 button One vacancy
+						283 image
+						284 text One vacancy
+					286 button The evidence
+						287 image
+						288 text The evidence
+					289 button Your review
+						290 image
+						291 text Your review
+					236 container
+						237 text 06 Approve & download
+				238 container
+					239 text Step  6  of 6 · English wording analysis · you review every finding
+			240 image
+			241 text Graduate Data Analyst
+			242 text Company not specified
+			285 text 12  requirements found in your vacancy
+			243 image
+			244 container
+				245 text On your device.
+				246 text Only saved to your account if you choose.
+			247 text 06  / 06
+			248 heading Approve & download, Value: 2
+				249 text Approve & download
+			250 text Your final call. Your document to send. One last read before you download. These findings use your current draft. You are approving the wording, not receiving a qualification certificate.
+			292 button (expanded) Final CV preview — review before approval, Secondary Actions: Collapse
+				293 text Final CV preview — review before approval
+			294 text SIMULATED STUDENT CV
+EDUCATION
+BSc Computer Science, expected graduation June 2027.
+ACADEMIC PROJECT
+Developed Python reports for a university team project. Cleaned a public dataset and created charts using pandas. My contribution was data cleaning and the report scripts; I did not lead the team.
+INTERNSHIP
+Supported weekly Excel reporting during a six-week operations internship. Assisted a supervisor; no revenue or efficiency result was measured.
+ACTIVITIES
+Volunteered at a student society event, coordinating participant registration.
+SKILLS
+Python, SQL coursework, Excel, English.
+			295 image
+			296 text 12  vacancy requirements checked 0  direct wording findings ·  12  findings to review. Matching words do not verify qualifications.
+			297 button (collapsed) Evidence from your final CV — review the findings, Secondary Actions: Expand
+				298 text Evidence from your final CV — review the findings
+			299 checkbox (settable, integer) Value: 0, Description: I reviewed the complete CV and vacancy. My claims are accurate, and I understand the unresolved questions.
+			300 checkbox (settable, integer) Value: 0, Description: Both my source CV and final CV are safe to include. I removed confidential or unnecessary sensitive information.
+			301 button (disabled) Approve this CV
+				302 image
+				303 text Approve this CV
+			304 heading Download free, Value: 3
+				305 image
+				306 text Download free
+			307 text Choose the format you need. The evidence report is separate, so review questions do not end up in your CV. No account or card needed.
+			308 button (disabled) Download PDF
+				309 text Download  PDF
+			310 button (disabled) Download DOCX
+				311 text Download  DOCX
+			312 button (disabled) Download TXT
+				313 text Download  TXT
+			314 button (disabled) Download evidence report
+			315 heading Save privately (optional), Value: 3
+				316 image
+				317 text Save privately (optional)
+			318 text Want to come back to this application? Save the job description and both CV versions privately. The original file stays on your device, and saving uses no pack credit.
+			319 button (disabled) Sign in or create an account to save
+			275 button Back to your review
+				276 image
+				277 text Back to
+				278 text your review
+			259 text You choose the final wording and send the application yourself.
+			260 link Description: Privacy, Value: jobvance.io/privacy
+			261 text  ·
+			262 link Description: See the clearly labelled fictional pilot demo, Value: jobvance.io/pilot
+		193 container
+			204 text ©  2026  Jobvance · Free beta
+			205 container Legal navigation
+				206 link Description: Privacy, Value: jobvance.io/privacy
+				207 link Description: Terms, Value: jobvance.io/terms
+				208 link Description: Refunds, Value: jobvance.io/refund
+			209 text You make the final call.
+		210 container Notifications (F8)
+			211 content list
+		212 container Notifications alt+T
+
+The focused UI element is 248 heading Approve & download, Value: 2

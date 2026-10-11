@@ -1,0 +1,81 @@
+Browser tab: 1, Title: "Using your workspace | Jobvance", URL: "https://jobvance.io/help".
+1 AXWebArea Using your workspace | Jobvance, URL: jobvance.io/help
+	2 container root
+		3 container
+			4 link Description: Skip to content, Value: jobvance.io/help#main-content
+			5 link Description: Jobvance home, Value: jobvance.io/
+			6 text FREE BETA
+			7 container Main navigation
+				8 link Description: Free CV check, Value: jobvance.io/check
+				9 link Description: Job Loop, Value: jobvance.io/loop
+				10 link Description: How it works, Value: jobvance.io/how-it-works
+				11 link Description: Guided pilot, Value: jobvance.io/pilot
+			12 link Description: Sign in, Value: jobvance.io/auth
+			13 link Description: Get started free, Value: jobvance.io/check
+		14 container
+			15 link Description: JOBVANCE, Value: jobvance.io/
+			16 text A LITTLE GUIDANCE
+			17 heading Using your workspace, Value: 1
+				18 text Using your workspace
+			19 text Keep your source, vacancy and approved version together. Take the next step when you are ready.
+			20 content list
+				21 container
+					22 heading Pick your role, Value: 3
+						23 text Pick your role
+					24 text Start with the role you want. Add the employer if you know it.
+				25 container
+					26 heading Bring your CV, Value: 3
+						27 text Bring your CV
+					28 text Add your CV as a PDF, Word or text file, or paste it. Check the extracted text and remove anything private.
+				29 container
+					30 heading Add the vacancy, Value: 3
+						31 text Add the vacancy
+					32 text Paste one job description, including the responsibilities and requirements.
+				33 container
+					34 heading Read the evidence, Value: 3
+						35 text Read the evidence
+					36 text Read the job requirement beside the relevant part of your CV. Look closely at the gaps.
+				37 container
+					38 heading Make it yours, Value: 3
+						39 text Make it yours
+					40 text Make your edits. Add an example only if it is yours to share, then check the revised CV.
+				41 container
+					42 heading Approve & download, Value: 3
+						43 text Approve & download
+					44 text Approve your CV and download it for free. Sign in if you want to save it privately or track the application.
+			45 link Description: Start a free CV check, Value: jobvance.io/check
+			46 container
+				47 text The existing
+				48 link Description: workspace, Value: jobvance.io/auth
+				49 text  remains available for saved CV files, preparation packs and tracking. You submit separately on the employer’s site.
+			50 text YOUR NEXT STEP
+			51 heading Have a vacancy in mind?, Value: 2
+				52 text Have a vacancy in mind?
+			53 text Bring your CV and one job description. Start without an account.
+			54 link Description: Start a free check, Value: jobvance.io/check
+			55 container Related pages
+				56 link Description: Questions & answers, Value: jobvance.io/faq
+				57 link Description: Your workspace, Value: jobvance.io/auth
+				58 link Description: Privacy, Value: jobvance.io/privacy
+		59 container
+			60 link Description: Jobvance home, Value: jobvance.io/
+			61 text Your experience, clearly presented.
+			62 text Your next application, prepared with care.
+			63 container Footer navigation
+				64 link Description: Free CV check, Value: jobvance.io/check
+				65 link Description: Free guided pilot, Value: jobvance.io/pilot
+				66 link Description: How it works, Value: jobvance.io/how-it-works
+				67 link Description: Help, Value: jobvance.io/help
+				68 link Description: About Jobvance, Value: jobvance.io/about
+				69 link Description: Contact, Value: jobvance.io/contact
+			70 text ©  2026  Jobvance · Free beta
+			71 container Legal navigation
+				72 link Description: Privacy, Value: jobvance.io/privacy
+				73 link Description: Terms, Value: jobvance.io/terms
+				74 link Description: Refunds, Value: jobvance.io/refund
+			75 text You make the final call.
+		76 container Notifications (F8)
+			77 content list
+		78 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Using your workspace | Jobvance, URL: jobvance.io/help

@@ -1,0 +1,63 @@
+Browser tab: 1, Title: "A useful place to start. Free. | Jobvance", URL: "https://jobvance.io/pricing".
+1 AXWebArea A useful place to start. Free. | Jobvance, URL: jobvance.io/pricing
+	2 container root
+		3 container
+			4 link Description: Skip to content, Value: jobvance.io/pricing#main-content
+			5 link Description: Jobvance home, Value: jobvance.io/
+			6 text FREE BETA
+			7 container Main navigation
+				8 link Description: Free CV check, Value: jobvance.io/check
+				9 link Description: Job Loop, Value: jobvance.io/loop
+				10 link Description: How it works, Value: jobvance.io/how-it-works
+				11 link Description: Guided pilot, Value: jobvance.io/pilot
+			12 link Description: Sign in, Value: jobvance.io/auth
+			13 link Description: Get started free, Value: jobvance.io/check
+		14 container
+			15 link Description: JOBVANCE, Value: jobvance.io/
+			16 text ACCESS & PRICING
+			17 heading A useful place to start. Free., Value: 1
+				18 text A useful place to start. Free.
+			19 text Check the wording, make your edits and download the CV you approve. There’s no card to enter and no account required to begin.
+			20 text AVAILABLE NOW Free beta
+			21 heading Check, review & download, Value: 2
+				22 text Check, review & download
+			23 text Free For your next application
+			24 text The six-step CV check and approved downloads are free. Optional private account saving does not use a pack credit. The existing workspace also includes one free preparation pack per account.
+			25 content list
+				26 text Check your CV against one vacancy
+				27 text Read the original evidence and make your edits
+				28 text Approve and download your version
+			29 link Description: Start your free check, Value: jobvance.io/check
+			30 text PLANNED ACCESS
+			31 heading Thirty-day pass, Value: 2
+				32 text Thirty-day pass
+			33 text $29 Once · planned price
+			34 text Ten application packs for thirty days. PDF, DOCX and TXT downloads. No automatic renewal or included practitioner review.
+			35 button (disabled) Paid pass not available
+			36 container
+				37 text Free beta access is available now. Paid sales have not launched.
+				38 link Description: Refund terms, Value: jobvance.io/refund
+				39 text .
+			40 text You submit your application on the employer’s site. Jobvance helps you prepare and keep track.
+		41 container
+			42 link Description: Jobvance home, Value: jobvance.io/
+			43 text Your experience, clearly presented.
+			44 text Your next application, prepared with care.
+			45 container Footer navigation
+				46 link Description: Free CV check, Value: jobvance.io/check
+				47 link Description: Free guided pilot, Value: jobvance.io/pilot
+				48 link Description: How it works, Value: jobvance.io/how-it-works
+				49 link Description: Help, Value: jobvance.io/help
+				50 link Description: About Jobvance, Value: jobvance.io/about
+				51 link Description: Contact, Value: jobvance.io/contact
+			52 text ©  2026  Jobvance · Free beta
+			53 container Legal navigation
+				54 link Description: Privacy, Value: jobvance.io/privacy
+				55 link Description: Terms, Value: jobvance.io/terms
+				56 link Description: Refunds, Value: jobvance.io/refund
+			57 text You make the final call.
+		58 container Notifications (F8)
+			59 content list
+		60 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea A useful place to start. Free. | Jobvance, URL: jobvance.io/pricing

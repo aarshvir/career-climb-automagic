@@ -1,0 +1,263 @@
+Browser tab: 1, Title: "Free career-transition pilot & fictional demo | Jobvance", URL: "https://jobvance.io/pilot".
+1 AXWebArea Free career-transition pilot & fictional demo | Jobvance, URL: jobvance.io/pilot
+	2 container root
+		3 container
+			4 link Description: Skip to content, Value: jobvance.io/pilot#main-content
+			5 link Description: Jobvance home, Value: jobvance.io/
+			6 text FREE BETA
+			7 container Main navigation
+				8 link Description: Free CV check, Value: jobvance.io/check
+				9 link Description: Job Loop, Value: jobvance.io/loop
+				10 link Description: How it works, Value: jobvance.io/how-it-works
+				11 link Description: Guided pilot, Value: jobvance.io/pilot
+			12 link Description: Sign in, Value: jobvance.io/auth
+			13 link Description: Get started free, Value: jobvance.io/check
+		14 container
+			15 container Two directions. One true story.
+				16 text THE FREE RESEARCH PILOT
+				17 heading Two directions. One true story., Value: 1, ID: pilot-title
+					18 text Two directions.
+					19 text One true story.
+				20 text Applying during university, recruiting after an MBA, or fitting a career move around work? Explore how one record of your projects and experience can support different applications.
+				21 link Description: Try the fictional demo, Value: jobvance.io/pilot#demo
+				22 link Description: Prepare a pilot request, Value: jobvance.io/pilot#request
+				23 text Free participation No card You choose what to share
+				24 container Fictional career record illustrated in two role directions
+					25 container
+						26 text ONE RECORD. TWO PERSPECTIVES. FICTIONAL EXAMPLE
+					27 text Alex Morgan
+					28 text Fictional consultant · Example Advisory
+					29 text SRC–01
+					30 container
+						31 text Helped design a procurement pilot across 5 business units, with  8% projected savings.
+					32 text Contribution: helped design Result: projected DIRECTION 01
+					33 text Strategy
+					34 text Bring business-case design and briefing preparation forward.
+					35 text DIRECTION 02
+					36 text Transformation
+					37 text Bring workstream tracking and pilot design support forward.
+					38 text The emphasis changes. Support stays support, and a projected result stays projected. No real candidate, customer result or live vacancy is shown.
+			39 container What is available here
+				40 text A concept to try. A pilot to shape together.
+				41 text The interactive example is prewritten. The guided pilot is an early research workflow with human review, by mutual agreement. This page does not run a live AI agent, search your inbox, apply for jobs or guarantee interviews.
+			42 container Your next move. Around your real life.
+				43 text WHO IT IS FOR
+				44 heading Your next move. Around your real life., Value: 2, ID: pilot-fit
+					45 text Your next move.
+					46 text Around your real life.
+				47 text Different starting points, the same need: prepare useful applications without rebuilding your story each time.
+				48 container
+					49 heading University students, Value: 3
+						50 text University students
+					51 text Bring coursework, internships, volunteering and personal projects. Employment history is not a prerequisite for the pilot.
+				52 container
+					53 heading MBA students, Value: 3
+						54 text MBA students
+					55 text Connect previous work and MBA projects to consulting, product, finance or another role you want to pursue. Keep classroom work distinct from employment.
+				56 container
+					57 heading Busy career-switchers, Value: 3
+						58 text Busy career-switchers
+					59 text Work from your real career record and test a less repetitive preparation routine. You choose what to disclose about your current employer.
+				60 container
+					61 heading Career coaches, Value: 3
+						62 text Career coaches
+					63 text Explore the fictional example before discussing a small preparation task with a consenting student or professional.
+			64 container Small steps. Useful questions.
+				65 text THE GUIDED PROGRAM
+				66 heading Small steps. Useful questions., Value: 2, ID: pilot-format
+					67 text Small steps.
+					68 text Useful questions.
+				69 text Start with a short discussion. If the fit is right, agree a preparation task and optional feedback over two weeks. Participation is voluntary and by mutual agreement.
+				70 content list
+					71 container
+						72 text 01
+						73 heading Choose your directions, Value: 3
+							74 text Choose your directions
+						75 text Explore internship, graduate, post-MBA or career-switch roles using your own projects and experience.
+					76 container
+						77 text 02
+						78 heading Review the wording, Value: 3
+							79 text Review the wording
+						80 text Check your contribution, result status and what you want to keep private.
+					81 container
+						82 text 03
+						83 heading Prepare your next step, Value: 3
+							84 text Prepare your next step
+						85 text Review an application packet and keep its version with the role.
+				86 text We are testing preparation effort and useful review controls. No testimonials, placement claims or measured time savings are implied.
+			87 container Fictional application demonstration
+				88 container Different direction. Same facts., ID: demo
+					89 text FICTIONAL CONCEPT DEMO
+					90 heading Different direction. Same facts., Value: 2, ID: :r0:-title
+						91 text Different direction. Same facts.
+					92 text Try a prewritten example: select a role, inspect the sources, reject an inflated claim, and approve a fictional CV for download.
+					93 container
+						94 text Alex Morgan, both employers and every source passage are fictional.  This is a static concept demonstration, with no live AI analysis or customer outcome claims.
+					95 text 01 / CHOOSE A DIRECTION
+					96 heading Alex Morgan (fictional), Value: 3
+						97 text Alex Morgan (fictional)
+					98 container
+						99 text Example Advisory / Example Group
+						100 text Both employers are fictional.
+					101 container Fictional role direction
+						102 checkbox Strategy, Value: 1
+						103 checkbox Transformation, Value: 0
+					104 text Bring the pilot business case and leadership briefings forward. The contribution and projected outcome remain the same.
+					105 text FICTIONAL ROLE BRIEF / NOT A LIVE VACANCY
+					106 heading Strategy Manager at Example Group, Value: 4
+						107 text Strategy Manager at Example Group
+					108 text These requirements and evidence labels are prewritten for the example. They are not an automated fit assessment.
+					109 content list Fictional role requirements
+						110 container
+							111 text Procurement pilot design contribution Supported · F-01 The record supports helping design the pilot and its projected business case.
+						112 container
+							113 text Preparation of leadership briefings Supported · F-03 The record supports preparation of 12 briefings.
+						114 container
+							115 text Ownership of strategy implementation Not established from these facts Design support and briefing preparation do not establish implementation ownership.
+					116 text 02 / REJECT AN INFLATED EDIT
+					117 heading The wording we would reject, Value: 3
+						118 text The wording we would reject
+					119 container
+						120 text “ Led a procurement transformation across 5 business units and delivered 8% savings. ”
+					121 content list
+						122 container
+							123 AXListMarker •
+							124 text “Led” changes the recorded contribution from helped design to ownership.
+						125 container
+							126 AXListMarker •
+							127 text “Delivered 8% savings” turns a projection into a realized result.
+						128 container
+							129 AXListMarker •
+							130 text A pilot design does not establish a delivered transformation.
+					131 text SAFE REPLACEMENT / F-01 · SRC-01
+					132 text Helped design a procurement pilot across 5 business units, with 8% projected savings.
+					133 button Keep the safe replacement
+					134 text This rejection and its explanation are prewritten for the demo.
+					135 heading One note stays private, Value: 3
+						136 text One note stays private
+					137 container
+						138 text SRC-04  / FICTIONAL DISCLOSURE
+					139 container
+						140 text $4.2M  —  fictional confidential internal opportunity estimate .
+					141 container
+						142 text Internal opportunity estimate. Restricted from CVs and recruiter documents, even in this example.  This note is excluded from both downloadable examples.
+					143 text 03 / REVIEW THE EVIDENCE
+					144 text Awaiting your review
+					145 heading Strategy CV preview, Value: 3
+						146 text Strategy  CV preview
+					147 text The three approved facts are reordered for this direction. Check each against its fictional source passage.
+					148 content list Fictional CV facts
+						149 container
+							150 text F-01 Example Advisory  · fictional Helped design a procurement pilot across 5 business units, with 8% projected savings.
+							151 button (collapsed) Read source passage — SRC-01, Secondary Actions: Expand
+								152 text Read source passage —
+								153 text SRC-01
+							154 checkbox (settable, integer) Description: I checked F-01 against SRC-01., Value: 0, ID: :r0:-F-01
+							155 text I checked  F-01  against  SRC-01 .
+						156 container
+							157 text F-03 Example Advisory  · fictional Prepared 12 leadership briefings.
+							158 button (collapsed) Read source passage — SRC-03, Secondary Actions: Expand
+								159 text Read source passage —
+								160 text SRC-03
+							161 checkbox (settable, integer) Description: I checked F-03 against SRC-03., Value: 0, ID: :r0:-F-03
+							162 text I checked  F-03  against  SRC-03 .
+						163 container
+							164 text F-02 Example Group  · fictional Created a tracker covering 6 workstreams.
+							165 button (collapsed) Read source passage — SRC-02, Secondary Actions: Expand
+								166 text Read source passage —
+								167 text SRC-02
+							168 checkbox (settable, integer) Description: I checked F-02 against SRC-02., Value: 0, ID: :r0:-F-02
+							169 text I checked  F-02  against  SRC-02 .
+					170 text PREPARED HANDOFF / PREWRITTEN FICTIONAL EXAMPLE
+					171 heading Recruiter draft for your review, Value: 4
+						172 text Recruiter draft for your review
+					173 text Select the draft to copy it. It uses the same three recorded facts and asks about the unestablished requirement. No message is sent from this demo.
+					174 text Prewritten fictional recruiter draft
+					175 text entry area Prewritten fictional recruiter draft, ID: :r0:-recruiter-draft, Value: Hello,
+
+I am exploring the fictional Strategy Manager at Example Group role.
+My recorded experience examples are:
+• Helped design a procurement pilot across 5 business units, with 8% projected savings.
+• Prepared 12 leadership briefings.
+• Created a tracker covering 6 workstreams.
+
+Could you clarify whether the role requires ownership of implementation or a contribution to analysis and pilot design?
+
+Alex Morgan (fictional)
+					176 heading Proposed next step, Value: 4
+						177 text Proposed next step
+					178 text For a real search, verify the vacancy and clarify implementation responsibility before adapting the draft or deciding to apply.
+					179 text The approved text download includes this role brief, the CV examples, this draft and the proposed next step.
+					180 container
+						181 text 0  of 3 facts reviewed.  Review the safe replacement before approving.
+					182 button (disabled) Approve fictional CV
+					183 button (disabled) Download fictional CV (.txt)
+					184 button Reset review
+					185 text The download is a clearly labeled fictional text document. Review choices stay only in this page’s memory and reset when you reload. It submits no application and sends no message.
+			186 container Prepare a free pilot request., ID: request
+				187 text A CONVERSATION TO START
+				188 heading Prepare a free pilot request., Value: 2, ID: request-title
+					189 text Prepare a free
+					190 text pilot request.
+				191 text A little context is enough. Create a draft here, review it, then decide whether to send it yourself. Preparing a draft does not register you or reserve a session.
+				192 content list
+					193 container
+						194 text 01 Add a brief, non-confidential outline.
+					195 container
+						196 text 02 Prepare and review your request draft.
+					197 container
+						198 text 03 Send it yourself, if you choose.
+				199 text Form details stay only in this page’s memory until you leave or reload. They are not submitted to Jobvance. Please do not include a CV, employer-confidential information or private client data.
+				200 container
+					201 text Your chosen email app sends to
+					202 link Description: contact@jobvance.io, Value: mailto:contact@jobvance.io
+					203 text  only if you send the draft yourself. No payment is requested.
+				204 container
+					205 text Your name  (optional)
+					206 text field (settable) Your name (optional), ID: pilot-name
+					207 text I’m exploring this as
+					208 pop up button (collapsed, settable) I’m exploring this as, Value: A university student, ID: pilot-audience, Secondary Actions: Expand
+						209 menu
+							210 (selected) A university student
+							211 An MBA student
+							212 A professional considering a career move
+							213 A career coach
+					214 text Role directions or preparation task
+					215 text entry area (settable) Role directions or preparation task, ID: pilot-directions
+					216 text A brief description is enough. No private career documents at this stage.
+					217 text Possible discussion times and timezone  (optional)
+					218 text field (settable) Possible discussion times and timezone (optional), ID: pilot-availability
+					219 button Prepare request draft
+			220 container A few things to know.
+				221 heading A few things to know., Value: 2, ID: pilot-faq-title
+					222 text A few things to know.
+				223 button (collapsed) What stays under my control?, Secondary Actions: Expand
+					224 text What stays under my control?
+				225 button (collapsed) Can I check my own CV now?, Secondary Actions: Expand
+					226 text Can I check my own CV now?
+				227 button (collapsed) Will you read my inbox or contact recruiters?, Secondary Actions: Expand
+					228 text Will you read my inbox or contact recruiters?
+				229 button (collapsed) Is there a fee or outcome guarantee?, Secondary Actions: Expand
+					230 text Is there a fee or outcome guarantee?
+		231 container
+			232 link Description: Jobvance home, Value: jobvance.io/
+			233 text Your experience, clearly presented.
+			234 text Your next application, prepared with care.
+			235 container Footer navigation
+				236 link Description: Free CV check, Value: jobvance.io/check
+				237 link Description: Free guided pilot, Value: jobvance.io/pilot
+				238 link Description: How it works, Value: jobvance.io/how-it-works
+				239 link Description: Help, Value: jobvance.io/help
+				240 link Description: About Jobvance, Value: jobvance.io/about
+				241 link Description: Contact, Value: jobvance.io/contact
+			242 text ©  2026  Jobvance · Free beta
+			243 container Legal navigation
+				244 link Description: Privacy, Value: jobvance.io/privacy
+				245 link Description: Terms, Value: jobvance.io/terms
+				246 link Description: Refunds, Value: jobvance.io/refund
+			247 text You make the final call.
+		248 container Notifications (F8)
+			249 content list
+		250 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Free career-transition pilot & fictional demo | Jobvance, URL: jobvance.io/pilot

@@ -1,0 +1,20 @@
+Browser tab: 1, Title: "Free CV-to-vacancy evidence check | Jobvance", URL: "https://jobvance.io/check?audience=student".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 48
++			131 text Ready to download. You can also save this version privately if you want to come back to it. 06  / 06
+~			110 checkbox (settable, integer) Value: 1, Description: I reviewed the complete CV and vacancy. My claims are accurate, and I understand the unresolved questions.
+~			111 checkbox (settable, integer) Value: 1, Description: Both my source CV and final CV are safe to include. I removed confidential or unnecessary sensitive information.
+~			112 button (disabled) Approved by you
+~				114 text Approved by you
+~			119 button Download PDF
+~				120 text Download
++				132 text PDF
+~			121 button Download DOCX
+~				122 text Download
++				133 text DOCX
+~			123 button Download TXT
+~				124 text Download
++				134 text TXT
+~			125 button Download evidence report
+~			130 button Sign in or create an account to save
+The focused UI element is 1 AXWebArea Free CV-to-vacancy evidence check | Jobvance, URL: jobvance.io/check?audience=student

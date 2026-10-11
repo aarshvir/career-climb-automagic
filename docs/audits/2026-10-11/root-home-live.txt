@@ -1,0 +1,216 @@
+Browser tab: 17, Title: "Your next application, around your day | Jobvance", URL: "https://jobvance.io/".
+1 AXWebArea Your next application, around your day | Jobvance, URL: jobvance.io/
+	2 container root
+		3 container
+			4 link Description: Skip to content, Value: jobvance.io/#main-content
+			5 link Description: Jobvance home, Value: jobvance.io/
+			6 text FREE BETA
+			7 container Main navigation
+				8 link Description: Free CV check, Value: jobvance.io/check
+				9 link Description: Job Loop, Value: jobvance.io/loop
+				10 link Description: How it works, Value: jobvance.io/how-it-works
+				11 link Description: Guided pilot, Value: jobvance.io/pilot
+			12 link Description: Sign in, Value: jobvance.io/auth
+			13 link Description: Get started free, Value: jobvance.io/check
+		14 container
+			52 container
+				53 text STUDENTS, MBA STUDENTS & BUSY CAREER-SWITCHERS
+				54 heading A busy week. A clearer application., Value: 1
+					55 text A busy week.
+					56 text A clearer application.
+				57 text I’m preparing as
+				58 container I’m preparing as
+					59 checkbox Students, Value: 1
+					60 checkbox MBA students, Value: 0
+					61 checkbox Career-switchers, Value: 0
+				62 text Classes and applications compete for your time. Bring a CV built from projects, internships and activities, plus one vacancy. Review its wording and download the version you approve.
+				63 link Description: Check my CV for free, Value: jobvance.io/check?audience=student
+				64 link Description: See this worked example, Value: jobvance.io/#example
+				65 text Free to check and download. No account or card needed. Your choice changes the examples and starting guidance. It is not saved as a profile. Students  fictional example selected.
+			66 container ID: home-audience-example, Illustrative example using fictional text. Findings compare wording; they do not confirm qualifications. Academic project work does not establish a requirement for professional experience.
+				67 text A look inside Fictional demo j CV check / Evidence review 04 / 06 ROLE IN FOCUS
+				68 heading Graduate data analyst, Value: 2
+					69 text Graduate data analyst
+				70 container
+					71 text A fictional vacancy ·  Students
+				72 text THE VACANCY SAYS
+				73 container
+					74 text “ Develop Python reports. ”
+				75 text YOUR CV SAYS ·  ACADEMIC PROJECT
+				76 container
+					77 text “ Developed Python reports for a university project. ”
+				78 text Direct wording found
+				79 text THE VACANCY SAYS
+				80 container
+					81 text “ Lead Python reporting. ”
+				82 text YOUR CV SAYS ·  INTERNSHIP CONTRIBUTION
+				83 container
+					84 text “ Assisted in leading Python reporting during an internship. ”
+				85 text Related passage—review needed
+				86 text Which work was your own contribution, and which work did you support?
+				87 text Read the passage. Make the call. Your review
+				88 container product-preview-caption
+					89 text Illustrative example using fictional text. Findings compare wording; they do not confirm qualifications.  Academic project work does not establish a requirement for professional experience.
+			90 container A workflow you control
+				91 text Your actual experience Check on your device Your approval comes first
+			92 container An application for your next chapter.
+				93 text DIFFERENT STARTING POINTS
+				94 heading An application for your next chapter., Value: 2, ID: product-audience-title
+					95 text An application for
+					96 text your next chapter.
+				97 text Projects, previous work or a new direction. Start with experience you can explain and one real vacancy.
+				98 container
+					99 text Students
+					100 heading Your first career step, Value: 3
+						101 text Your first career step
+					102 text Bring coursework, internships and activities into view for an internship or graduate vacancy. Keep academic work labelled as academic work.
+					103 link Description: Check my student CV, Value: jobvance.io/check?audience=student
+				104 container
+					105 text MBA students
+					106 heading Your post-MBA direction, Value: 3
+						107 text Your post-MBA direction
+					108 text Connect previous work with MBA projects for the next role. Separate your own contribution from team results and keep forecasts distinct from outcomes.
+					109 link Description: Check my MBA CV, Value: jobvance.io/check?audience=mba
+				110 container
+					111 text Career-switchers
+					112 heading A move alongside work, Value: 3
+						113 text A move alongside work
+					114 text Review experience that transfers to a new role. Prepare around your working day and record the applications you choose to submit yourself.
+					115 link Description: Check my career-switch CV, Value: jobvance.io/check?audience=professional
+			116 container example
+				117 text 01 / SEE WHAT’S ALREADY THERE
+				118 heading Relevant experience. In clearer view., Value: 2
+					119 text Relevant experience.
+					120 text In clearer view.
+				121 text A good application starts with a real example. Read the vacancy beside your own words, then bring the experience that matters forward.
+				122 text Missing evidence is a question for you. Add an example only when it’s yours to share.
+				123 link Description: How the check works, Value: jobvance.io/how-it-works
+				124 text THE SAME CV. A MORE RELEVANT ORDER. Fictional  students  example ORIGINAL ORDER
+				125 content list
+					126 text Coordinated university project meetings.
+					127 text Developed Python reports for a university project.
+				128 text RELEVANT ORDER
+				129 content list
+					130 text Developed Python reports for a university project.
+					131 text Coordinated university project meetings.
+				132 text The original wording and facts stay intact. This is a fictional illustration, not a customer outcome.
+			133 text 02 / A PATH YOU CAN FOLLOW
+			134 heading One real vacancy. Six clear steps., Value: 2
+				135 text One real vacancy.
+				136 text Six clear steps.
+			137 text Bring the source. Review the evidence. Approve what leaves your hands.
+			138 content list
+				139 container
+					140 heading Pick your role, Value: 3
+						141 text Pick your role
+					142 text Start with the role you want. Add the employer if you know it.
+				143 container
+					144 heading Bring your CV, Value: 3
+						145 text Bring your CV
+					146 text Add your CV as a PDF, Word or text file, or paste it. Check the extracted text and remove anything private.
+				147 container
+					148 heading Add the vacancy, Value: 3
+						149 text Add the vacancy
+					150 text Paste one job description, including the responsibilities and requirements.
+				151 container
+					152 heading Read the evidence, Value: 3
+						153 text Read the evidence
+					154 text Read the job requirement beside the relevant part of your CV. Look closely at the gaps.
+				155 container
+					156 heading Make it yours, Value: 3
+						157 text Make it yours
+					158 text Make your edits. Add an example only if it is yours to share, then check the revised CV.
+				159 container
+					160 heading Approve & download, Value: 3
+						161 text Approve & download
+					162 text Approve your CV and download it for free. Sign in if you want to save it privately or track the application.
+			163 text PDF, Word or text file. One vacancy at a time.
+			164 link Description: Start with your role, Value: jobvance.io/check?audience=student
+			165 container One career record. Your Job Loop.
+				166 text YOUR ONGOING SEARCH
+				167 heading One career record. Your Job Loop., Value: 2, ID: product-loop-title
+					168 text One career record.
+					169 text Your Job Loop.
+				170 text Free pilot
+				171 text Confirm your experience once. Add the vacancies you want, prepare a separate CV for each role and keep the next action in view. Start a run when you need it.
+				172 content list
+					173 container
+						174 text 0 1
+						175 heading Your profile, Value: 3
+							176 text Your profile
+						177 text Build and confirm reusable career facts.
+					178 container
+						179 text 0 2
+						180 heading Replies, Value: 3
+							181 text Replies
+						182 text Review selected replies and priorities.
+					183 container
+						184 text 0 3
+						185 heading Search & shortlist, Value: 3
+							186 text Search & shortlist
+						187 text Find roles and check their sources.
+					188 container
+						189 text 0 4
+						190 heading CVs & drafts, Value: 3
+							191 text CVs & drafts
+						192 text Prepare a CV and message drafts per role.
+					193 container
+						194 text 0 5
+						195 heading Review & apply, Value: 3
+							196 text Review & apply
+						197 text You approve, send and apply.
+					198 container
+						199 text 0 6
+						200 heading Next actions, Value: 3
+							201 text Next actions
+						202 text Keep deadlines and follow-ups together.
+				203 text The loop shows the sources and connections that actually ran. Search, AI models and inbox access need setup and consent. Review the draft, then send or apply yourself.
+				204 link Description: Open your Job Loop, Value: jobvance.io/loop
+			205 text 03 / ROOM TO PREPARE
+			206 heading Your working draft. Your choice to save., Value: 2
+				207 text Your working draft.
+				208 text Your choice to save.
+			209 text The free check compares text on your device. Take your time: read, revise and download without creating an account.
+			210 text Sign in when you want to save an approved check privately or keep an honest record of the applications you submit yourself.
+			211 link Description: Read how your information is handled, Value: jobvance.io/privacy
+			212 text YOU CONTROL THE NEXT STEP
+			213 content list
+				214 text Review the source text
+				215 text Approve your final wording
+				216 text Choose whether to save privately
+			217 text Unsaved checks are held in memory and cleared when the page closes or refreshes. Account saving is an explicit choice.
+			218 text AN EXAMPLE TO EXPLORE
+			219 heading See a fictional preparation workflow., Value: 2
+				220 text See a fictional preparation workflow.
+			221 text Explore a prewritten concept demonstration. Its role directions illustrate an example, rather than limits on who can use Jobvance. Review the source and the wording before deciding what to share.
+			222 link Description: See the fictional preparation workflow, Value: jobvance.io/pilot
+			223 container
+				224 text YOUR NEXT APPLICATION STARTS WITH WHAT YOU KNOW
+				225 heading Bring your experience. Make it clearer., Value: 2
+					226 text Bring your experience.
+					227 text Make it clearer.
+				228 link Description: Check my CV for free, Value: jobvance.io/check?audience=student
+				229 text Free check. Reviewed download.
+				230 text No account needed to start.
+		32 container
+			33 link Description: Jobvance home, Value: jobvance.io/
+			34 text Your experience, clearly presented.
+			35 text Your next application, prepared with care.
+			36 container Footer navigation
+				37 link Description: Free CV check, Value: jobvance.io/check
+				38 link Description: Free guided pilot, Value: jobvance.io/pilot
+				39 link Description: How it works, Value: jobvance.io/how-it-works
+				40 link Description: Help, Value: jobvance.io/help
+				41 link Description: About Jobvance, Value: jobvance.io/about
+				42 link Description: Contact, Value: jobvance.io/contact
+			43 text ©  2026  Jobvance · Free beta
+			44 container Legal navigation
+				45 link Description: Privacy, Value: jobvance.io/privacy
+				46 link Description: Terms, Value: jobvance.io/terms
+				47 link Description: Refunds, Value: jobvance.io/refund
+			48 text You make the final call.
+		49 container Notifications (F8)
+			50 content list
+		51 container Notifications alt+T
+
+The focused UI element is 5 link Description: Jobvance home, URL: jobvance.io/

@@ -1,0 +1,27 @@
+{
+  "auditDate": "2026-10-11",
+  "timezone": "Asia/Dubai",
+  "liveUrl": "https://jobvance.io",
+  "sourceCommit": "2d1ad90356a7c952740dde2c9bf02ab5880a1414",
+  "liveSitesVersionVerified": 10,
+  "siteStatus": "active",
+  "nativeSiteSchedulesObserved": [],
+  "integrationStateEvidence": "Same-day release receipt/status; paid providers and mailbox were not independently activated or tested during this audit.",
+  "priorReleasePaidApisEnabled": false,
+  "priorReleaseGmailEnabled": false,
+  "monthlyAiSearchUsageCapUsd": 50,
+  "auditors": 6,
+  "parallelReviewerSlots": 3,
+  "humanInterviews": 0,
+  "rootLiveObservations": [
+    "Signed-out /loop redirects to /auth?next=%2Floop",
+    "Create-account form opened without account creation",
+    "Public /contact has no support destination",
+    "Public homepage audience controls and loop setup caveat visible"
+  ],
+  "rootPureFunctionReproduction": "root-evidence-reproduction.json",
+  "newPaidCalls": 0,
+  "newMailSends": 0,
+  "newApplicationSubmissions": 0,
+  "productModified": false
+}

@@ -1,0 +1,54 @@
+Browser tab: 17, Title: "Let’s get you unstuck. | Jobvance", URL: "https://jobvance.io/contact".
+1 AXWebArea Let’s get you unstuck. | Jobvance, URL: jobvance.io/contact
+	2 container root
+		3 container
+			4 link Description: Skip to content, Value: jobvance.io/contact#main-content
+			5 link Description: Jobvance home, Value: jobvance.io/
+			6 text FREE BETA
+			7 container Main navigation
+				8 link Description: Free CV check, Value: jobvance.io/check
+				9 link Description: Job Loop, Value: jobvance.io/loop
+				10 link Description: How it works, Value: jobvance.io/how-it-works
+				11 link Description: Guided pilot, Value: jobvance.io/pilot
+			12 link Description: Sign in, Value: jobvance.io/auth
+			13 link Description: Get started free, Value: jobvance.io/check
+		14 container
+			15 link Description: JOBVANCE, Value: jobvance.io/
+			16 text CONTACT
+			17 heading Let’s get you unstuck., Value: 1
+				18 text Let’s get you unstuck.
+			19 text For questions about your documents, your account or service access.
+			20 text For help with documents, access or a payment, include the relevant record or receipt reference. Please do not send passwords, card details or your full CV.
+			21 text SUPPORT AVAILABILITY
+			22 text Direct support contact details are currently unavailable. Real-money purchases remain disabled until support is available.
+			23 text YOUR NEXT STEP
+			24 heading Have a vacancy in mind?, Value: 2
+				25 text Have a vacancy in mind?
+			26 text Bring your CV and one job description. Start without an account.
+			27 link Description: Start a free check, Value: jobvance.io/check
+			28 container Related pages
+				29 link Description: Questions & answers, Value: jobvance.io/faq
+				30 link Description: Your workspace, Value: jobvance.io/auth
+				31 link Description: Privacy, Value: jobvance.io/privacy
+		32 container
+			33 link Description: Jobvance home, Value: jobvance.io/
+			34 text Your experience, clearly presented.
+			35 text Your next application, prepared with care.
+			36 container Footer navigation
+				37 link Description: Free CV check, Value: jobvance.io/check
+				38 link Description: Free guided pilot, Value: jobvance.io/pilot
+				39 link Description: How it works, Value: jobvance.io/how-it-works
+				40 link Description: Help, Value: jobvance.io/help
+				41 link Description: About Jobvance, Value: jobvance.io/about
+				42 link Description: Contact, Value: jobvance.io/contact
+			43 text ©  2026  Jobvance · Free beta
+			44 container Legal navigation
+				45 link Description: Privacy, Value: jobvance.io/privacy
+				46 link Description: Terms, Value: jobvance.io/terms
+				47 link Description: Refunds, Value: jobvance.io/refund
+			48 text You make the final call.
+		49 container Notifications (F8)
+			50 content list
+		51 container Notifications alt+T
+
+The focused UI element is 1 AXWebArea Let’s get you unstuck. | Jobvance, URL: jobvance.io/contact

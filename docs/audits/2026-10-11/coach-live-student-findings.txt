@@ -1,0 +1,3 @@
+Browser tab: 1, Title: "Free CV-to-vacancy evidence check | Jobvance", URL: "https://jobvance.io/check?audience=student".
+There has been no change in the accessibility tree.
+The focused UI element is 49 heading The evidence, Value: 2

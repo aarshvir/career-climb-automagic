@@ -1,0 +1,88 @@
+JOBVANCE — CV EVIDENCE REVIEW REPORT
+Role: Graduate data analyst — fictional audit
+CV text checked: Current reviewed CV; passages added/edited by the user are not independently verified
+Method: english-literal-evidence-v1
+Scope: This is an English wording check of user-provided text. The claims are not verified. Read the job requirements yourself; this check does not decide whether you qualify or predict an interview.
+
+This report describes evidence found in the selected CV text. User additions and edits to a reviewed CV remain user-provided claims, not independently verified facts.
+A missing requirement is not established by this CV text. It is not an instruction to add an unsupported claim.
+
+REQUIREMENT REVIEW
+
+requirement-1: partial
+Vacancy passage: FICTIONAL AUDIT VACANCY — not a real opening
+Explanation: Your CV covers part of this requirement. Read what is missing and add an example only if it is true.
+CV passage (line 1, action): Maya Example — FICTIONAL AUDIT CANDIDATE
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+requirement-2: review
+Vacancy passage: Graduate Data Analyst at Example UAE Company
+Explanation: The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+CV passage (line 9, other): Example Company, data intern, June–August 2026
+CV passage (line 1, action): Maya Example — FICTIONAL AUDIT CANDIDATE
+CV passage (line 2, other): Dubai, UAE
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+requirement-3: direct
+Vacancy passage: Develop Python reports.
+Explanation: This example mentions the work the employer asks for. Check that it describes your own contribution and the right level of responsibility.
+CV passage (line 6, action): Developed Python reports for a university project using a public practice dataset.
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+requirement-4: partial
+Vacancy passage: Lead Python reporting.
+Explanation: Your CV says you supported the work. Keep that distinction. If you led a part of it, explain which part.
+CV passage (line 7, action): Assisted in leading Python reporting during a group academic project.
+CV passage (line 6, action): Developed Python reports for a university project using a public practice dataset.
+CV passage (line 12, skills): Python, SQL, Excel
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+requirement-5: partial
+Vacancy passage: Two years professional Python reporting experience.
+Explanation: You mention related work, but the amount of relevant experience is unclear. Check the roles and dates; the check has not assumed a total.
+CV passage (line 6, action): Developed Python reports for a university project using a public practice dataset.
+CV passage (line 7, action): Assisted in leading Python reporting during a group academic project.
+CV passage (line 12, skills): Python, SQL, Excel
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+requirement-6: direct
+Vacancy passage: Bachelor degree in computer science.
+Explanation: Your CV names the qualification. Check that it is complete, current and accepted for this role.
+CV passage (line 4, other): Bachelor of Science in Computer Science, completed 2026, Example University
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+requirement-7: review
+Vacancy passage: Communicate findings in Arabic and English.
+Explanation: The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+CV passage (line 14, other): English
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+requirement-8: review
+Vacancy passage: Have UAE work authorization.
+Explanation: The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.
+CV passage (line 2, other): Dubai, UAE
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+requirement-9: direct
+Vacancy passage: Prepare Excel dashboards.
+Explanation: This example mentions the work the employer asks for. Check that it describes your own contribution and the right level of responsibility.
+CV passage (line 10, action): Prepared Excel dashboards for the internship supervisor.
+Review question: Is there something your CV should show here? Add a specific example or qualification only if it is accurate.
+
+SUMMARY
+{
+  "total": 9,
+  "direct": 3,
+  "partial": 3,
+  "missing": 0,
+  "review": 3
+}
+
+NOTES REQUIRING HUMAN REVIEW
+The check uses what you provide. It cannot verify your career history, confirm that you qualify or promise a response from an employer.
+Some requirements need your judgment. You will see their original wording, without an assumed match.
+The remaining job description is shown below, including headings and sections outside the check.
+
+VACANCY SECTIONS OUTSIDE THE CHECK
+Requirements
+Responsibilities
