@@ -10,6 +10,44 @@ One private career record → a suitable, source-backed vacancy → a factual ap
 
 The three audiences need different defaults, but the same reliable workflow. Students need internships/graduate eligibility and project evidence. MBAs need recruiting deadlines, career direction and defensible achievement selection. Employed switchers need discretion, fast setup and a useful recurring action list.
 
+## Audience-specific landing pages
+
+These are planned routes, not currently released pages. Keep an audience selector on the general homepage and provide three shareable entry pages. Use explicit visitor selection; do not infer an audience from private browsing, inbox or CV data.
+
+| Planned page | Message and relevant content | Carry into the first task |
+|---|---|---|
+| `/for-students` | “Turn your projects and internships into your first application.” Show a clearly fictional graduate example, coursework versus employment distinctions, graduation timing and internship/graduate-role filters. | Student context, graduation timing if supplied, project/internship examples and an editable one-page preference. |
+| `/for-mba` | “Build focused applications for your next career move.” Show a clearly fictional career-direction example, defensible achievement selection and recruiting deadlines. | MBA context, chosen career direction, recruiting dates and an editable page preference. MBA study alone never establishes role eligibility. |
+| `/for-career-switchers` | “Keep your job search moving while you work.” Show reusable experience, discreet-search controls, current service availability and an example review/action list. | Experienced context, target roles, optional employer exclusions and editable length/availability preferences. |
+
+Use the same accurate capability summary and free offer everywhere. The first call to action is “Check one vacancy free.” A visitor may change audience at any time without losing inputs. Preserve the non-sensitive audience choice through the guest check and sign-in return; storing or sharing CV facts requires its own explicit choice. Do not put employers, contact details, salary or CV content into public URL parameters. Each page changes its examples, priorities and onboarding defaults, not merely its headline or color. Daily-search claims must reflect enabled, verified capabilities.
+
+**Acceptance:** enter from each page on phone and desktop, start the task, change audience, and pass through sign-in. The correct audience and existing inputs persist; editable defaults are clear; no choice silently grants consent. Actual students, MBAs and switchers can explain the relevant value and today's available capabilities.
+
+## One private page showing the candidate's work
+
+The candidate's default signed-in page should be one private workspace, with “Today,” active applications, their career record and a readable activity timeline. Detail panels can show the vacancy, quoted evidence, document versions, actual preview and next action without making the candidate reconstruct progress across separate tools. Guest progress remains visible within the check without requiring cloud saving.
+
+For every substantive event, show what happened, when, who initiated it (candidate or automated run), the linked vacancy/document, and an actionable next step. Record CV parsing, fact confirmation or withdrawal, vacancy addition, a shortlist decision, run progress, blocked/failed states, generated versions, approvals, completed downloads and candidate-reported application updates. Keep sensitive content out of general diagnostic logs; expose personal details only in the owner's authorized view.
+
+Use truthful states such as “Preparing,” “Needs your review,” “Ready to download,” “Application reported by you,” and “Interview date added.” A generated document or opened employer link does not establish submission. An optional permitted integration must identify the event/source it actually observed; unconfirmed status needs a quick candidate confirmation. Jobvance cannot see arbitrary activity on external sites or in an unconnected inbox.
+
+**Acceptance:** one fictional application can be followed from input to reviewed documents and dated tracking without retyping. Refresh, navigation, interrupted runs and a second device show the saved state consistently. Guest recovery follows the selected retention policy. Each timeline entry links to the correct immutable version; a changed or withdrawn fact updates affected approvals. Failed/unavailable work has a useful recovery action. Another account cannot view the timeline, record or files. Coach sharing, if later added, requires separate scoped permission; candidate activity is never a public feed.
+
+## Automate preparation and measure the remaining effort
+
+Automate each repeatable preparation task after the necessary setup and consent: parse source documents, suggest source-backed facts, deduplicate permitted vacancies, extract requirements, rank relevant roles, select confirmed shareable facts, prepare documents and recruiter drafts, render/validate formats, check deadlines, compile in-app next actions, checkpoint work and recover failures. Reuse prior confirmations and ask only for newly missing information. Durable field-level edits should not require re-entering the whole CV or restarting the complete journey.
+
+A recurring workflow must display its cadence, timezone, permitted sources, exclusions and current state. Provide accessible pause and cancel controls; cancellation stops pending work while preserving already prepared records according to the stated retention policy. Show skipped, failed and outdated work in the timeline, with the next decision needed. Batch compatible review questions while keeping factual confirmation and disclosure approval distinct.
+
+Keep the candidate's deliberate decisions: confirm factual claims, choose search/disclosure preferences, approve the exact document and sharing scope, and control sending/submission. The current service has no send/apply route. Future form filling can be assisted where permitted, with review; it is not authorized by this plan. Candidate-correction and approval controls must remain easy to find, including on a phone.
+
+“99% automated” is an aspiration for repetitive preparation, not a verified percentage of the entire job hunt. Distinguish tasks executed automatically from active minutes saved: many quick automated tasks do not prove a 99% reduction in user effort. Measure first setup separately from repeated applications and compare equivalent real tasks at the same evidence/output quality. Track active minutes, manual fields, interruptions/questions, completion, assistance, errors and repeat use; exclude idle background runtime from claimed manual effort saved.
+
+Proposed pilot goals, not achieved results: initial setup within ten active minutes for a straightforward usable CV; a subsequent complete packet review within three active minutes when no new facts or unusual conditions are needed; no duplicate data entry. Observe at least ten consenting users across the three audiences and include failures, complex cases and required corrections. These small-pilot goals are not statistical guarantees or permission to reduce review quality. Publish automation/time-saving claims only when the measured scope, baseline and results support them.
+
+Automation remains bounded by the shared US$50/month model/search ledger. Provide useful rules-mode/manual-source fallback with honest capability states when a provider is disabled, fails or reaches the budget ceiling. Do not silently spend more, change providers' data recipients, send messages, or submit applications to avoid asking a user for an essential decision.
+
 ## Eight implementation workstreams
 
 | Workstream | Concrete implementation | Completion evidence |
