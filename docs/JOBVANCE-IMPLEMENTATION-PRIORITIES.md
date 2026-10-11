@@ -4,6 +4,8 @@
 
 The current audit is **60.9/100 overall**, with **56.8/100 for students, MBA applicants and employed career switchers**. A desired score of 98 is not a forecast. Implementing features cannot establish that score without fresh independent review and observed customer use. Scores describe the reviewed readiness, not employment probability or business success.
 
+The [ten-build roadmap](JOBVANCE-TEN-BUILDS-AND-ARCHETYPES.md) expands this plan into ten customer archetypes plus a separate VC lens, with a full feature-fit matrix, per-archetype acceptance criteria, validation experiments and the requested 95/98 readiness targets. Feature fit is distinct from achieved platform quality.
+
 ## The product to build
 
 One private career record → a suitable, source-backed vacancy → a factual application pack → an exact document review → the user's application → a dated next action. The next vacancy reuses the same confirmed facts and requires substantially less setup.
