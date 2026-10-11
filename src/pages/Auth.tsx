@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowRight, Check, FileText, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
+import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
 import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
@@ -25,7 +26,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const fieldId = useId();
 
   useEffect(() => {
-    if (user && !authLoading && !embedded) navigate(searchParams.get('next') === '/check' ? '/check' : '/dashboard', { replace: true });
+    if (user && !authLoading && !embedded) navigate(accountDestination(searchParams.get('next')), { replace: true });
   }, [user, authLoading, navigate, embedded, searchParams]);
 
   useEffect(() => {
@@ -65,6 +66,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const handleGoogle = async () => {
     if (busy || configurationError) return;
     if (onBeforeGoogle && !onBeforeGoogle()) return;
+    rememberLoopReturn(embedded ? null : searchParams.get('next'));
     setError('');
     setBusy(true);
     try { await signInWithGoogle(); }

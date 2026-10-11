@@ -4,6 +4,7 @@ import { readAuthSession } from '@/utils/authSession';
 import { configurationError } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { checkAuthReturnAvailable, takeCheckAuthReturn } from '@/lib/check-draft';
+import { takeLoopReturn } from '@/lib/account-return';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const AuthCallback = () => {
     void readAuthSession().then(session => {
       if (!active) return;
       if (!session) { setError('This sign-in link is invalid or expired. Please start again.'); return; }
-      navigate(takeCheckAuthReturn(), { replace: true });
+      navigate(takeLoopReturn() ?? takeCheckAuthReturn(), { replace: true });
     }).catch(() => {
       if (active) setError('We could not complete sign-in. Please request a new link or try signing in again.');
     }).finally(() => {

@@ -40,3 +40,17 @@ verify_jwt = true
 [functions.lemon-squeezy-webhook]
 enabled = false
 verify_jwt = true
+
+# Control verifies auth.getUser; worker uses its fixed server credential.
+# OAuth callback verifies an expiring, single-use, owner-bound state.
+[functions.job-loop-control]
+enabled = true
+verify_jwt = false
+
+[functions.job-loop-worker]
+enabled = true
+verify_jwt = false
+
+[functions.job-loop-oauth]
+enabled = true
+verify_jwt = false

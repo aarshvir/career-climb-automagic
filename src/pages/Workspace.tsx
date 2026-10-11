@@ -341,6 +341,11 @@ export default function Workspace() {
               </Button>
             ))}
           </nav>
+          <Link to="/loop" className="ws-free-check">
+            <RefreshCw size={20} aria-hidden="true" />
+            <span><strong>Your Job Loop</strong><small>One record. A CV for each role.</small></span>
+            <ArrowRight size={17} aria-hidden="true" />
+          </Link>
           <Link to="/check" className="ws-free-check">
             <ShieldCheck size={20} aria-hidden="true" />
             <span><strong>Free CV evidence check</strong><small>Compare your CV with a vacancy.</small></span>

@@ -70,7 +70,7 @@ The source requires metrics in a large share of bullets; `make_claims.py` also r
 
 ## Minimum architecture that preserves the runtime
 
-The local-versus-cloud choice is pending. Both options need the same versioned contract and must expose which stages actually ran. A bounded assisted run is preferable to advertising an autonomous loop that lacks its integrations.
+The user selected a **standalone cloud service** on 11 October 2026, with a **$50/month combined AI/search usage ceiling** and interchangeable Claude, GPT and Kimi adapters. The options below document the earlier architecture comparison. The selected implementation is a portable TypeScript port on existing Supabase functions, with checkpointed server execution and PDF/DOCX rendering; it does not execute the original private Python scripts or depend on desktop Word/Claude/browser tools. See [the current build contract](CLOUD-JOB-LOOP-CONTRACT.md) and [owner account setup](CLOUD-JOB-LOOP-ACCOUNTS.md). Every run must still expose which stages actually ran.
 
 ### Common contract
 

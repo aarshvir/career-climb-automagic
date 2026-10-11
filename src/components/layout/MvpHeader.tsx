@@ -11,7 +11,7 @@ export function Brand() {
     <span>jobvance<span style={{color:"var(--jv-blue)"}}>.</span></span>
   </Link>;
 }
-const links = [["/check","Free CV check"],["/how-it-works","How it works"],["/pilot","Guided pilot"],["/pricing","Pricing"]];
+const links = [["/check","Free CV check"],["/loop","Job Loop"],["/how-it-works","How it works"],["/pilot","Guided pilot"]];
 export default function MvpHeader() {
   const { user, loading, signOut } = useAuth();
   const client = useQueryClient();

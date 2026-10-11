@@ -1,0 +1,48 @@
+// Actual Deno handler boundary, hermetic: every runtime fetch is intercepted.
+type Handler=(request:Request)=>Promise<Response>;
+const handlers:Handler[]=[];const originalServe=Deno.serve;
+Deno.serve=((handler:Handler)=>{handlers.push(handler);return undefined;}) as unknown as typeof Deno.serve;
+if(Deno.env.get('JOBVANCE_LOOP_UI_BUNDLES')==='true'){
+  const bundleRoot=new URL('../../docs/supabase-loop-ui/',import.meta.url);await import(new URL('job-loop-control.js',bundleRoot).href);await import(new URL('job-loop-worker.js',bundleRoot).href);await import(new URL('job-loop-oauth.js',bundleRoot).href);
+}else{await import('../functions/job-loop-control/index.ts');await import('../functions/job-loop-worker/index.ts');await import('../functions/job-loop-oauth/index.ts');}Deno.serve=originalServe;
+const owner='11111111-1111-4111-a111-111111111111',runId='22222222-2222-4222-a222-222222222222';const calls:{url:string;body:Record<string,unknown>|null}[]=[];const pending:Promise<unknown>[]=[];
+(globalThis as unknown as {EdgeRuntime:{waitUntil(promise:Promise<unknown>):void}}).EdgeRuntime={waitUntil:promise=>{pending.push(promise);}};
+function assert(value:unknown,message:string):asserts value{if(!value)throw new Error(message);}
+function setup(){for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;}
+const record={user_id:owner,version:0,input_version:0,data:{profile:null,claims:[],opportunities:[],inbox:[]},updated_at:'2026-10-11T00:00:00Z'};
+globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
+  const url=new URL(input instanceof Request?input.url:String(input));const body=typeof init?.body==='string'?JSON.parse(init.body):null;calls.push({url:url.href,body});
+  if(url.hostname!=='supabase.fixture.invalid')throw new Error('A real or paid endpoint is blocked in this test.');
+  if(url.pathname==='/auth/v1/user'){if(new Headers(init?.headers).get('Authorization')!=='Bearer fixture-user')return Response.json({error:'invalid'},{status:401});return Response.json({id:owner,aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-10-11T00:00:00Z'});}
+  if(url.pathname==='/rest/v1/job_loop_records'){assert(url.searchParams.get('user_id')===`eq.${owner}`||body?.user_id===owner,'Every record query binds the authenticated owner.');return init?.method==='POST'?new Response(null,{status:201}):Response.json(record);}
+  if(['/rest/v1/job_loop_runs','/rest/v1/job_loop_packets','/rest/v1/job_loop_usage','/rest/v1/job_loop_connections'].includes(url.pathname)){assert(url.searchParams.get('user_id')===`eq.${owner}`,'Collection must bind owner.');return Response.json([]);}
+  if(url.pathname==='/rest/v1/rpc/job_loop_claim_run'){assert(body?.p_run===runId,'Internal run reference is bound.');return Response.json(null);}
+  throw new Error('Unexpected request blocked by hermetic handler fixture.');
+};
+const req=(body:unknown,authorization:string|null='Bearer fixture-user')=>new Request('https://edge.fixture.invalid',{method:'POST',headers:{'Content-Type':'application/json',...(authorization?{Authorization:authorization}:{})},body:JSON.stringify(body)});
+Deno.test('control rejects absent/invalid identity and caller-supplied owner before persistence',async()=>{
+  setup();assert((await handlers[0](req({action:'get'},null))).status===401,'Missing auth rejected.');assert(calls.length===0,'No persistence without auth.');
+  assert((await handlers[0](req({action:'get'},'Bearer invalid'))).status===401,'Invalid user rejected.');calls.length=0;
+  assert((await handlers[0](req({action:'get',userId:'forged'}))).status===400,'Privileged payload rejected.');assert(calls.every(call=>call.url.includes('/auth/v1/user')),'No persistence for privileged payload.');
+});
+Deno.test('snapshot remains available with no model/mail/search keys and no paid calls',async()=>{
+  setup();const response=await handlers[0](req({action:'get'}));assert(response.status===200,'Authenticated snapshot succeeds.');const body=await response.json();assert(body.snapshot.recordVersion===0,'Initial real record version.');assert(body.snapshot.capabilities.rulesEngine===true&&body.snapshot.capabilities.dailyRunLimit===3,'Rules capability and cap declared.');assert(body.snapshot.models.every((model:{ready:boolean})=>!model.ready),'No paid model is claimed ready.');assert(body.snapshot.gmail.connected===false,'Sign-in is not mailbox connection.');assert(calls.every(call=>call.url.startsWith('https://supabase.fixture.invalid/')),'Only fixture persistence/auth calls.');
+});
+Deno.test('worker rejects candidate credentials and returns accepted while owned background work completes independently',async()=>{
+  setup();assert((await handlers[1](req({runId}))).status===401,'Candidate token cannot run internal worker.');assert(calls.length===0,'No worker persistence before internal auth.');
+  assert((await handlers[1](req({runId},'Bearer fixture-service-only'))).status===202,'Internal invocation accepted.');assert(pending.length===1,'Work registered with waitUntil, independent of browser.');await Promise.all(pending);assert(calls.some(call=>call.url.includes('/rpc/job_loop_claim_run')),'Actual stage lease claim attempted.');
+});
+Deno.test('worker denies body owner injection and OAuth cannot choose an arbitrary return target',async()=>{
+  setup();assert((await handlers[1](req({runId,userId:owner},'Bearer fixture-service-only'))).status===400,'Worker accepts runId only.');assert(calls.length===0,'No forged worker persistence.');
+  const response=await handlers[2](new Request('https://edge.fixture.invalid?return_url=https://evil.example.com'));assert(response.status===303,'Missing code returns fixed application route.');assert(response.headers.get('Location')==='https://jobvance.fixture.invalid/loop?gmail=unavailable','Return target is operator configured, never caller supplied.');assert(calls.length===0,'No OAuth exchange without state/code.');
+});
+Deno.test('actual Deno phase composes and renders grounded student artifacts without provider calls',async()=>{
+  setup();const {processLoopPhase}=await import('../functions/_shared/job-loop-runtime.ts');const {digest}=await import('../functions/_shared/job-loop-providers.ts');
+  const opportunity={id:'33333333-3333-4333-a333-333333333333',title:'Graduate analyst',company:'Fictional employer',location:'',url:'https://careers.example.com/graduate',description:'A graduate role whose requested domain differs from the supplied academic coursework. Review the source evidence and the explicit gaps.',contact:null,source:'manual' as const,sourceKey:'manual:one',checkedAt:'2026-10-11T00:00:00Z',verification:'user_provided' as const,status:'saved' as const,followUpAt:null,notes:''};
+  const profile={audience:'student' as const,name:'Fictional Candidate',contactLine:'',targetTitles:['Graduate analyst'],locations:[],experienceYears:null,languages:[],pageTarget:1 as const,discreetSearch:false,sourceText:'Academic project\nCoursework report\nPrepared a coursework report about fictional retail operations and documented assumptions.',excludedTerms:[],compensation:{currency:'',period:'monthly' as const,minimum:null},revision:1,updatedAt:'2026-10-11T00:00:00Z'};
+  const claims=[{id:'claim-one',revision:1,status:'active' as const,createdAt:profile.updatedAt,sourceKind:'cv_passage' as const,sourceQuote:'Prepared a coursework report about fictional retail operations and documented assumptions.',phrasing:'Prepared a coursework report about fictional retail operations and documented assumptions.',context:'Coursework report',kind:'academic_project' as const,resultStatus:'not_measured' as const,confirmed:true,shareable:true}];
+  const lease=crypto.randomUUID();const run={id:runId,user_id:owner,request_id:runId,request_hash:'a'.repeat(64),input_hash:'a'.repeat(64),input_version:1,snapshot:{profile,claims,opportunities:[opportunity],inbox:[]},provider:'rules' as const,model:'grounded-rules-v1',consents:{model:false,inbox:false},data:{opportunities:[opportunity],lanes:[],messages:[],packetIds:[]},status:'running' as const,phase:2,lease_token:lease,lease_until:null,created_at:profile.updatedAt,finished_at:null};
+  const packets:import('../functions/_shared/job-loop-types.ts').LoopPacket[]=[];let pdf:Uint8Array|undefined;
+  const repo={claimRun:async()=>run,record:async()=>({user_id:owner,version:1,input_version:1,data:run.snapshot,updated_at:profile.updatedAt}),upload:async(user:string,packet:string,key:string,bytes:Uint8Array)=>{if(key==='pdf')pdf=bytes;return `${user}/${packet}/${await digest(bytes)}/${key}`;},commit:async(_run:unknown,_phase:number,_status:string,_data:unknown,built:typeof packets=[])=>{packets.push(...built);return run;}} as unknown as import('../functions/_shared/job-loop-repository.ts').LoopRepository;
+  assert(await processLoopPhase(repo,runId,()=>undefined),'A rendered packet checkpoint asks for the next stage.');assert(packets.length===1&&packets[0].status==='review_required'&&packets[0].pageCount===1,'Actual Deno renderer produces a one-page reviewable packet.');assert(pdf&&new TextDecoder().decode(pdf.slice(0,5))==='%PDF-','Actual PDF bytes are generated.');assert(packets[0].cvText.includes('ACADEMIC PROJECTS'),'Academic context survives.');assert(calls.length===0,'No paid/external runtime request occurred.');
+});
