@@ -10,6 +10,8 @@ export interface EvidencePassage {
   /** One-based line number in the supplied CV. */
   line: number;
   sourceKind: EvidenceSourceKind;
+  /** Classroom and project work must not be presented as professional employment. */
+  contextKind?: 'academic_project' | 'employment' | 'unspecified';
 }
 
 export interface EvidenceRequirement {
@@ -23,6 +25,7 @@ export interface EvidenceRequirement {
   explanation: string;
   question: string;
   matchedTerms: string[];
+  category?: 'capability' | 'qualification' | 'condition' | 'deadline';
 }
 
 export interface EvidenceVacancySpan {
@@ -42,12 +45,12 @@ export interface EvidenceReport {
   warnings: string[];
 }
 
-const METHOD_VERSION = 'english-literal-evidence-v1';
+const METHOD_VERSION = 'english-literal-evidence-v2';
 const MAX_REQUIREMENTS = 40;
 const SCOPE = 'This is an English wording check of user-provided text. The claims are not verified. Read the job requirements yourself; this check does not decide whether you qualify or predict an interview.';
 type Span = { start: number; end: number };
 type Line = Span & { text: string; line: number; newline: string };
-type Section = 'experience' | 'skills' | 'education' | 'credentials' | 'other';
+type Section = 'experience' | 'skills' | 'education' | 'credentials' | 'projects' | 'other';
 type Passage = EvidencePassage & { section: Section; terms: string[]; negative: boolean; pending: boolean; weakened: boolean };
 
 const REQUIRED_HEADING = /^(?:requirements?|qualifications?|essential(?: criteria| requirements)?|desirable(?: criteria| requirements)?|responsibilities|key responsibilities|duties|what (?:you(?:'|’)ll do|you will do|you bring|we need|we(?:'|’)re looking for)|about you|your (?:role|responsibilities|profile)|skills(?: and experience)?|experience(?: and qualifications)?)(?:\s*:|\s*$)/i;
@@ -196,6 +199,7 @@ function sectionFor(text: string): Section | null {
   if (/^(?:(?:technical|key|core|professional) )?(?:skills|competencies|tools|technologies)(?: and (?:tools|technologies))?$/.test(heading)) return 'skills';
   if (/^(?:education|academic (?:background|qualifications)|qualifications)$/.test(heading)) return 'education';
   if (/^(?:certifications?|certificates?|licenses?|licences?|professional qualifications)$/.test(heading)) return 'credentials';
+  if (/^(?:(?:academic|university|classroom|personal|selected) )?projects$/.test(heading)) return 'projects';
   if (/^(?:summary|profile|objective|interests|references|achievements|projects|languages|publications)$/.test(heading)) return 'other';
   return null;
 }
@@ -239,7 +243,8 @@ function cvPassages(text: string): Passage[] {
     for (const part of clauses(text, span, true)) {
       const cvQuote = text.slice(part.start, part.end);
       const sourceKind: EvidenceSourceKind = inlineSkills || section === 'skills' || /\b(?:proficient|proficiency|familiar|knowledge of|skills include|competent)\b/i.test(cvQuote) ? 'skills' : ACTUAL_VERB.test(cvQuote) ? 'action' : 'other';
-      result.push({ cvQuote, ...part, line: line.line + (text.slice(line.start, part.start).match(/\r\n|\r|\n/g)?.length ?? 0), sourceKind, section, terms: meaningful(cvQuote), negative: NEGATIVE.test(cvQuote), pending: PENDING.test(cvQuote), weakened: WEAKENED.test(cvQuote) });
+      const contextKind = section === 'projects' || /\b(?:university|classroom|academic|coursework|student) (?:team )?project\b/i.test(cvQuote) ? 'academic_project' : section === 'experience' ? 'employment' : 'unspecified';
+      result.push({ cvQuote, ...part, line: line.line + (text.slice(line.start, part.start).match(/\r\n|\r|\n/g)?.length ?? 0), sourceKind, contextKind, section, terms: meaningful(cvQuote), negative: NEGATIVE.test(cvQuote), pending: PENDING.test(cvQuote), weakened: WEAKENED.test(cvQuote) });
     }
   }
   return result;
@@ -273,11 +278,27 @@ function requestedActions(text: string): string[] {
 }
 
 function publicPassage(passage: Passage): EvidencePassage {
-  return { cvQuote: passage.cvQuote, start: passage.start, end: passage.end, line: passage.line, sourceKind: passage.sourceKind };
+  return { cvQuote: passage.cvQuote, start: passage.start, end: passage.end, line: passage.line, sourceKind: passage.sourceKind, contextKind: passage.contextKind };
+}
+
+/** A qualification or uncertainty on a different list item is not a conflicting claim. */
+function uncertainFor(passage: Passage, anchors: string[], credential: boolean): boolean {
+  if (!passage.negative && !passage.pending && !(credential && CREDENTIAL_STUDY.test(passage.cvQuote))) return false;
+  const chunks = passage.cvQuote.split(/[,;]|\s+but\s+/i);
+  // Leading negation scopes the whole list: "No SQL, Python" must stay uncertain.
+  if (/^\s*(?:skills\s*:\s*)?(?:no|never|not|without|learning|studying|pursuing)\b/i.test(passage.cvQuote)) return true;
+  if (chunks.some(chunk => /^\s*(?:incomplete|unfinished|expired|revoked|suspended|pending|planned|scheduled|in progress|expected (?:completion|graduation).*)[.!]?\s*$/i.test(chunk))) return true;
+  return chunks.some(chunk => {
+    const terms = meaningful(chunk);
+    return anchors.some(anchor => terms.includes(anchor)) && (NEGATIVE.test(chunk) || PENDING.test(chunk) || (credential && CREDENTIAL_STUDY.test(chunk)));
+  });
 }
 
 function analyzeRequirement(text: string, span: Span, index: number, passages: Passage[]): EvidenceRequirement {
   const vacancyQuote = text.slice(span.start, span.end);
+  const deadline = /\b(?:applications? (?:close|deadline)|apply by|closing date|deadline)\b/i.test(vacancyQuote);
+  const condition = /\b(?:visa|sponsorship|work (?:authorization|authorisation|permit)|right to work|eligible to work|citizenship|nationality|relocat(?:e|ion)|security clearance)\b/i.test(vacancyQuote);
+  if (deadline || condition) return { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: [], matchedTerms: [], category: deadline ? 'deadline' : 'condition', explanation: deadline ? 'This is an application deadline, not a CV achievement. Check the original employer listing and its time zone before setting your reminder.' : 'This is an employer or eligibility condition, not evidence of a work achievement. Confirm the current condition with the employer; the CV check cannot establish your eligibility.', question: deadline ? 'What is the exact closing date and time zone on the employer listing?' : 'Does this employer condition apply to you? Confirm it without adding unsupported eligibility claims to your CV.' };
   const requestedDuration = duration(vacancyQuote);
   const terms = meaningful(vacancyQuote).filter(term => !(term in NUMBER_WORDS) || !requestedDuration);
   const technologies = terms.filter(term => TECH.has(term));
@@ -297,7 +318,13 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     const anchors = matches.filter(term => !actions.includes(term) || TECH.has(term) || CREDENTIAL.has(term));
     return { passage, matches, anchors, full: terms.length > 0 && matches.length === terms.length };
   }).filter(match => match.anchors.length > 0).sort((a, b) => Number(b.full) - Number(a.full) || b.anchors.length - a.anchors.length || b.matches.length - a.matches.length || a.passage.start - b.passage.start);
-  const base: EvidenceRequirement = { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: related.slice(0, 3).map(item => publicPassage(item.passage)), explanation: '', question: `Is there something your CV should show here? Add a specific example or qualification only if it is accurate.`, matchedTerms: [...new Set(related.flatMap(item => item.matches))] };
+  const datedQualification = credentials.length > 0 && /\b(?:by|before|after|completed|graduat(?:e|ed|ion))\b/i.test(vacancyQuote) && /\b(?:20\d\d|january|february|march|april|may|june|july|august|september|october|november|december)\b/i.test(vacancyQuote);
+  const base: EvidenceRequirement = { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: related.slice(0, 3).map(item => publicPassage(item.passage)), explanation: '', question: credentials.length ? 'What exact qualification, completion date and current status can you confirm? Keep expected completion clearly labelled.' : `Is there something your CV should show here? Add a specific example only if it is accurate.`, matchedTerms: [...new Set(related.flatMap(item => item.matches))], category: credentials.length ? 'qualification' : 'capability' };
+  if (datedQualification) {
+    base.evidence = related.filter(item => item.anchors.some(term => CREDENTIAL.has(term)) || item.passage.section === 'education').slice(0, 3).map(item => publicPassage(item.passage));
+    base.explanation = 'The employer gives a qualification completion date. Compare it with your actual or expected graduation date. A future completion date is not a completed qualification, and this check cannot confirm eligibility.';
+    return base;
+  }
   if (!recognized || ambiguous) {
     base.explanation = UNSUPPORTED_SCRIPT.test(vacancyQuote) ? 'This part is not in English. Read it yourself against your CV.' : numericConstraint ? 'This requirement includes a number that needs checking, such as team size or budget. Compare it with your actual experience; the check has not assumed a match.' : ambiguous ? 'The employer gives alternatives or conditions here. Check what they mean before deciding whether your experience fits.' : 'The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.';
     return base;
@@ -307,7 +334,7 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     base.explanation = 'Your CV does not show a clear example of this yet. You may still have the experience; add it only if you can explain your contribution.';
     return base;
   }
-  const uncertain = (passage: Passage) => passage.negative || passage.pending || (credentials.length > 0 && CREDENTIAL_STUDY.test(passage.cvQuote));
+  const uncertain = (passage: Passage) => uncertainFor(passage, terms.filter(term => !actions.includes(term)), credentials.length > 0);
   const conflict = related.some(item => uncertain(item.passage));
   if (conflict) {
     base.evidence = related.filter(item => uncertain(item.passage)).slice(0, 2).map(item => publicPassage(item.passage));
@@ -317,7 +344,8 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     return base;
   }
   const direct = related.find(({ passage, full }) => {
-    if (!full || passage.negative || passage.pending) return false;
+    if (!full || uncertain(passage)) return false;
+    if (/\b(?:professional|industry|commercial|paid|employment)\s+(?:work\s+)?experience\b/i.test(vacancyQuote) && passage.contextKind === 'academic_project') return false;
     if (task && passage.sourceKind !== 'action') return false;
     if (experience && !requestedDuration && passage.sourceKind !== 'action' && !/\bexperience\b/i.test(passage.cvQuote)) return false;
     if (actions.includes('lead') && (passage.weakened || !/\b(?:led|lead|leading)\b(?!\s+by\b)/i.test(passage.cvQuote))) return false;
@@ -335,6 +363,7 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     base.status = 'direct';
     base.evidence = [publicPassage(direct.passage)];
     base.explanation = requestedDuration ? 'This example mentions the work and the amount of experience requested. Check the dates and scope yourself. The check has not added up years from your employment history.' : credentials.length ? 'Your CV names the qualification. Check that it is complete, current and accepted for this role.' : task ? 'This example mentions the work the employer asks for. Check that it describes your own contribution and the right level of responsibility.' : 'You mention this skill. If the role asks how you used it, a concrete example will help.';
+    if (direct.passage.contextKind === 'academic_project') base.explanation += ' This passage is project or academic evidence; keep that context visible. It does not establish professional employment experience.';
   } else {
     base.status = 'partial';
     base.explanation = requestedDuration ? 'You mention related work, but the amount of relevant experience is unclear. Check the roles and dates; the check has not assumed a total.' : actions.includes('lead') && related.some(item => item.passage.weakened) ? 'Your CV says you supported the work. Keep that distinction. If you led a part of it, explain which part.' : task && related.every(item => item.passage.sourceKind !== 'action') ? 'The skill appears in your CV, but the work is not clear. Add a real example if you have one.' : credentials.length ? 'Your CV mentions something related, but the subject, level or current status may differ. Check the exact qualification.' : 'Your CV covers part of this requirement. Read what is missing and add an example only if it is true.';

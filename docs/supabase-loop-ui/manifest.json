@@ -1,238 +1,337 @@
 {
-  "bundles": [
-    {
-      "sha256": "37221443c2783190493ad0910c12bc566d04b6efeb1a9ee971bebfb4c1b305a0",
-      "artifact": "docs/supabase-loop-ui/job-loop-control.js",
-      "sources": [
-        {
-          "sha256": "c539eb50e36ccaf20aad79104f7d815ebb86d9c205cbc003671445452ee9a8b0",
-          "path": "supabase/functions/_shared/core.ts"
-        },
-        {
-          "sha256": "91e5d9d36e7a509c265137ac93c47dacd082e53e27d0b535fe57f22de1a2d253",
-          "path": "supabase/functions/_shared/runtime.ts"
-        },
-        {
-          "sha256": "6eefb4cb209d15bc3685ba428997852d493494ba91f837c39811c22abfe38489",
-          "path": "package-lock.json"
-        },
-        {
-          "sha256": "20c67877d535386f91b337c84fc628ece5599673a51d004cf81417987434a12e",
-          "path": "supabase/functions/_shared/job-loop-engine-font.ts"
-        },
-        {
-          "sha256": "599787a7a51c2299b543ce0c9339b130e1b2c7a0700267e5370e9705eec7ba4d",
-          "path": "supabase/functions/_shared/job-loop-engine.ts"
-        },
-        {
-          "sha256": "f0a0a2ca1596e13621b93940d732a25887ae286fa0942f0a0793a793092692e9",
-          "path": "supabase/functions/_shared/job-loop-providers.ts"
-        },
-        {
-          "sha256": "41d9cab6d55291da80eb713fd7701e59729518182f3643475c02e9f3fa1ae644",
-          "path": "supabase/functions/_shared/job-loop-render.ts"
-        },
-        {
-          "sha256": "f77750974fc90a3e460d1a39b5898012e2c0ed0205554430ded55cfb25b5fb3a",
-          "path": "supabase/functions/_shared/job-loop-repository.ts"
-        },
-        {
-          "sha256": "c1a0e20a39f03cf3e47fbecb4b9b9dc13d3d3d8b803aadd317e4b768389f1ac2",
-          "path": "supabase/functions/_shared/job-loop-runtime.ts"
-        },
-        {
-          "sha256": "755c8805ff44eec575b5ee613947a5ab9492a7d0c423186c3cf93c475965526a",
-          "path": "supabase/functions/_shared/job-loop-types.ts"
-        },
-        {
-          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60",
-          "path": "supabase/functions/job-loop-control/deno.json"
-        },
-        {
-          "sha256": "613a7475e1d8e315a1d5e8e74618db6b15f212565109d0f0d8480fa183543e10",
-          "path": "supabase/functions/job-loop-control/index.ts"
-        },
-        {
-          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60",
-          "path": "supabase/functions/job-loop-worker/deno.json"
-        },
-        {
-          "sha256": "f4a0e374162aaa88b4c0a43d112278e8b2e6023428043123875cb73aa026d64d",
-          "path": "supabase/functions/job-loop-worker/deno.lock"
-        },
-        {
-          "sha256": "ee1b0597b68ef8c0d985eef924361e738c259179d5bd765b1712cbf2af3820d4",
-          "path": "supabase/functions/job-loop-worker/index.ts"
-        },
-        {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
-          "path": "supabase/functions/job-loop-oauth/gmail.ts"
-        },
-        {
-          "sha256": "40a8118e954090d0bfa608295cc5afac9665b182cf41acb1f8aa9f44fa6a16df",
-          "path": "supabase/functions/job-loop-oauth/index.ts"
-        }
-      ],
-      "bytes": 42129,
-      "function": "job-loop-control"
-    },
-    {
-      "sha256": "0633061ceb7c32c16e99ee155ad8125e91f208eadc657993fa3cd37411d12c95",
-      "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
-      "sources": [
-        {
-          "sha256": "c539eb50e36ccaf20aad79104f7d815ebb86d9c205cbc003671445452ee9a8b0",
-          "path": "supabase/functions/_shared/core.ts"
-        },
-        {
-          "sha256": "91e5d9d36e7a509c265137ac93c47dacd082e53e27d0b535fe57f22de1a2d253",
-          "path": "supabase/functions/_shared/runtime.ts"
-        },
-        {
-          "sha256": "6eefb4cb209d15bc3685ba428997852d493494ba91f837c39811c22abfe38489",
-          "path": "package-lock.json"
-        },
-        {
-          "sha256": "20c67877d535386f91b337c84fc628ece5599673a51d004cf81417987434a12e",
-          "path": "supabase/functions/_shared/job-loop-engine-font.ts"
-        },
-        {
-          "sha256": "599787a7a51c2299b543ce0c9339b130e1b2c7a0700267e5370e9705eec7ba4d",
-          "path": "supabase/functions/_shared/job-loop-engine.ts"
-        },
-        {
-          "sha256": "f0a0a2ca1596e13621b93940d732a25887ae286fa0942f0a0793a793092692e9",
-          "path": "supabase/functions/_shared/job-loop-providers.ts"
-        },
-        {
-          "sha256": "41d9cab6d55291da80eb713fd7701e59729518182f3643475c02e9f3fa1ae644",
-          "path": "supabase/functions/_shared/job-loop-render.ts"
-        },
-        {
-          "sha256": "f77750974fc90a3e460d1a39b5898012e2c0ed0205554430ded55cfb25b5fb3a",
-          "path": "supabase/functions/_shared/job-loop-repository.ts"
-        },
-        {
-          "sha256": "c1a0e20a39f03cf3e47fbecb4b9b9dc13d3d3d8b803aadd317e4b768389f1ac2",
-          "path": "supabase/functions/_shared/job-loop-runtime.ts"
-        },
-        {
-          "sha256": "755c8805ff44eec575b5ee613947a5ab9492a7d0c423186c3cf93c475965526a",
-          "path": "supabase/functions/_shared/job-loop-types.ts"
-        },
-        {
-          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60",
-          "path": "supabase/functions/job-loop-control/deno.json"
-        },
-        {
-          "sha256": "613a7475e1d8e315a1d5e8e74618db6b15f212565109d0f0d8480fa183543e10",
-          "path": "supabase/functions/job-loop-control/index.ts"
-        },
-        {
-          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60",
-          "path": "supabase/functions/job-loop-worker/deno.json"
-        },
-        {
-          "sha256": "f4a0e374162aaa88b4c0a43d112278e8b2e6023428043123875cb73aa026d64d",
-          "path": "supabase/functions/job-loop-worker/deno.lock"
-        },
-        {
-          "sha256": "ee1b0597b68ef8c0d985eef924361e738c259179d5bd765b1712cbf2af3820d4",
-          "path": "supabase/functions/job-loop-worker/index.ts"
-        },
-        {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
-          "path": "supabase/functions/job-loop-oauth/gmail.ts"
-        },
-        {
-          "sha256": "40a8118e954090d0bfa608295cc5afac9665b182cf41acb1f8aa9f44fa6a16df",
-          "path": "supabase/functions/job-loop-oauth/index.ts"
-        }
-      ],
-      "bytes": 807107,
-      "function": "job-loop-worker"
-    },
-    {
-      "sha256": "e58851587f3766bd39aef520939213482af1bcd2b4f1e5d6e042a08d4446f207",
-      "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
-      "sources": [
-        {
-          "sha256": "c539eb50e36ccaf20aad79104f7d815ebb86d9c205cbc003671445452ee9a8b0",
-          "path": "supabase/functions/_shared/core.ts"
-        },
-        {
-          "sha256": "91e5d9d36e7a509c265137ac93c47dacd082e53e27d0b535fe57f22de1a2d253",
-          "path": "supabase/functions/_shared/runtime.ts"
-        },
-        {
-          "sha256": "6eefb4cb209d15bc3685ba428997852d493494ba91f837c39811c22abfe38489",
-          "path": "package-lock.json"
-        },
-        {
-          "sha256": "20c67877d535386f91b337c84fc628ece5599673a51d004cf81417987434a12e",
-          "path": "supabase/functions/_shared/job-loop-engine-font.ts"
-        },
-        {
-          "sha256": "599787a7a51c2299b543ce0c9339b130e1b2c7a0700267e5370e9705eec7ba4d",
-          "path": "supabase/functions/_shared/job-loop-engine.ts"
-        },
-        {
-          "sha256": "f0a0a2ca1596e13621b93940d732a25887ae286fa0942f0a0793a793092692e9",
-          "path": "supabase/functions/_shared/job-loop-providers.ts"
-        },
-        {
-          "sha256": "41d9cab6d55291da80eb713fd7701e59729518182f3643475c02e9f3fa1ae644",
-          "path": "supabase/functions/_shared/job-loop-render.ts"
-        },
-        {
-          "sha256": "f77750974fc90a3e460d1a39b5898012e2c0ed0205554430ded55cfb25b5fb3a",
-          "path": "supabase/functions/_shared/job-loop-repository.ts"
-        },
-        {
-          "sha256": "c1a0e20a39f03cf3e47fbecb4b9b9dc13d3d3d8b803aadd317e4b768389f1ac2",
-          "path": "supabase/functions/_shared/job-loop-runtime.ts"
-        },
-        {
-          "sha256": "755c8805ff44eec575b5ee613947a5ab9492a7d0c423186c3cf93c475965526a",
-          "path": "supabase/functions/_shared/job-loop-types.ts"
-        },
-        {
-          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60",
-          "path": "supabase/functions/job-loop-control/deno.json"
-        },
-        {
-          "sha256": "613a7475e1d8e315a1d5e8e74618db6b15f212565109d0f0d8480fa183543e10",
-          "path": "supabase/functions/job-loop-control/index.ts"
-        },
-        {
-          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60",
-          "path": "supabase/functions/job-loop-worker/deno.json"
-        },
-        {
-          "sha256": "f4a0e374162aaa88b4c0a43d112278e8b2e6023428043123875cb73aa026d64d",
-          "path": "supabase/functions/job-loop-worker/deno.lock"
-        },
-        {
-          "sha256": "ee1b0597b68ef8c0d985eef924361e738c259179d5bd765b1712cbf2af3820d4",
-          "path": "supabase/functions/job-loop-worker/index.ts"
-        },
-        {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
-          "path": "supabase/functions/job-loop-oauth/gmail.ts"
-        },
-        {
-          "sha256": "40a8118e954090d0bfa608295cc5afac9665b182cf41acb1f8aa9f44fa6a16df",
-          "path": "supabase/functions/job-loop-oauth/index.ts"
-        }
-      ],
-      "bytes": 12304,
-      "function": "job-loop-oauth"
-    }
-  ],
+  "externalImport": "https://esm.sh/@supabase/supabase-js@2.57.4",
+  "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
   "externalPackages": [
     "npm:jspdf@4.2.1",
     "npm:docx@9.9.0"
   ],
-  "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
-  "externalImport": "https://esm.sh/@supabase/supabase-js@2.57.4"
+  "hashAlgorithms": {
+    "artifact": "sha256-bytes",
+    "source": "sha256-utf8-lf-no-bom",
+    "migration": "sha256-utf8-lf-no-bom"
+  },
+  "bundles": [
+    {
+      "bytes": 54789,
+      "function": "job-loop-control",
+      "artifact": "docs/supabase-loop-ui/job-loop-control.js",
+      "sources": [
+        {
+          "path": "supabase/functions/_shared/core.ts",
+          "sha256": "8c282396b8489124029c5c38e4a5487e661e886c78ec3dee82d4d2af664e0242"
+        },
+        {
+          "path": "supabase/functions/_shared/runtime.ts",
+          "sha256": "fd11dc857c394f26f59116f124778cf2350c166e4f0c1f2b5ecd8c9c22fcf2b6"
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7"
+        },
+        {
+          "path": "scripts/build-job-loop-ui.ps1",
+          "sha256": "c912cd68da9a8f57350a3b2c0aa1c34281c70ab9b6a1dade110c78a6c43d308f"
+        },
+        {
+          "path": "scripts/source-text-hash.mjs",
+          "sha256": "c3bfea1e0cf0a2ff822acf7462a48af0793e0cc6a6aad306e8423fb8686c577f"
+        },
+        {
+          "path": "scripts/read-edge-deploy-chunk.mjs",
+          "sha256": "588d33b954ab45993c379e113da4aa2b1dc324065f2599d48d20b44ebb7fe1fc"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-engine-font.ts",
+          "sha256": "0246d1b7c7a70fc75d6fa38572e2a02be52feed333604207d2695f845671ae4a"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-engine.ts",
+          "sha256": "cd35e51c07fae72e11c7501287e994b11c513c5ce9a7a4a2edca2425068141cb"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-preparation.ts",
+          "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-providers.ts",
+          "sha256": "a300bdf8a582448cc2d18fa3c00aa8cb151e998d5e3011ef2ce3aca52425b863"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-render.ts",
+          "sha256": "2226d3ff2cdae28450a0db0f7d8afc02516d96598e2c7f30965526cf6259ecd0"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-repository.ts",
+          "sha256": "50acfd1fe7fcb294f3d71c46ca2d667b265c839c737b6763845acf30afb17017"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-runtime.ts",
+          "sha256": "a1c479c229301c0f9f83e98a525c01b47395ec54ad903ac44de38688db48e87f"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-schedule.ts",
+          "sha256": "faf662f66eac455743ad7059bc5b8aede8e16c689f1e89a52696dc9d9c029598"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts",
+          "sha256": "5188b853d5583318fd73cdfe5c143f8264f531e063a94464732e1dbba0a2722a"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-types.ts",
+          "sha256": "ee6309fb7e8d5441c565af907d8a35dce3380d10bf668f9d66539e36c5ebb36b"
+        },
+        {
+          "path": "supabase/functions/job-loop-control/deno.json",
+          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60"
+        },
+        {
+          "path": "supabase/functions/job-loop-control/index.ts",
+          "sha256": "613a7475e1d8e315a1d5e8e74618db6b15f212565109d0f0d8480fa183543e10"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/deno.json",
+          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/deno.lock",
+          "sha256": "f4a0e374162aaa88b4c0a43d112278e8b2e6023428043123875cb73aa026d64d"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/index.ts",
+          "sha256": "6d949edc726a39c7f64c325c54e5ec0c5a54d5b8838e0e60215db149b80d27aa"
+        },
+        {
+          "path": "supabase/functions/job-loop-oauth/gmail.ts",
+          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6"
+        },
+        {
+          "path": "supabase/functions/job-loop-oauth/index.ts",
+          "sha256": "40a8118e954090d0bfa608295cc5afac9665b182cf41acb1f8aa9f44fa6a16df"
+        }
+      ],
+      "sha256": "716b591781f0fb7627ba430b5d5c759c879240c60d1dfebc8d4f9004f5d67b0f"
+    },
+    {
+      "bytes": 1073387,
+      "function": "job-loop-worker",
+      "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
+      "sources": [
+        {
+          "path": "supabase/functions/_shared/core.ts",
+          "sha256": "8c282396b8489124029c5c38e4a5487e661e886c78ec3dee82d4d2af664e0242"
+        },
+        {
+          "path": "supabase/functions/_shared/runtime.ts",
+          "sha256": "fd11dc857c394f26f59116f124778cf2350c166e4f0c1f2b5ecd8c9c22fcf2b6"
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7"
+        },
+        {
+          "path": "scripts/build-job-loop-ui.ps1",
+          "sha256": "c912cd68da9a8f57350a3b2c0aa1c34281c70ab9b6a1dade110c78a6c43d308f"
+        },
+        {
+          "path": "scripts/source-text-hash.mjs",
+          "sha256": "c3bfea1e0cf0a2ff822acf7462a48af0793e0cc6a6aad306e8423fb8686c577f"
+        },
+        {
+          "path": "scripts/read-edge-deploy-chunk.mjs",
+          "sha256": "588d33b954ab45993c379e113da4aa2b1dc324065f2599d48d20b44ebb7fe1fc"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-engine-font.ts",
+          "sha256": "0246d1b7c7a70fc75d6fa38572e2a02be52feed333604207d2695f845671ae4a"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-engine.ts",
+          "sha256": "cd35e51c07fae72e11c7501287e994b11c513c5ce9a7a4a2edca2425068141cb"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-preparation.ts",
+          "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-providers.ts",
+          "sha256": "a300bdf8a582448cc2d18fa3c00aa8cb151e998d5e3011ef2ce3aca52425b863"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-render.ts",
+          "sha256": "2226d3ff2cdae28450a0db0f7d8afc02516d96598e2c7f30965526cf6259ecd0"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-repository.ts",
+          "sha256": "50acfd1fe7fcb294f3d71c46ca2d667b265c839c737b6763845acf30afb17017"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-runtime.ts",
+          "sha256": "a1c479c229301c0f9f83e98a525c01b47395ec54ad903ac44de38688db48e87f"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-schedule.ts",
+          "sha256": "faf662f66eac455743ad7059bc5b8aede8e16c689f1e89a52696dc9d9c029598"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts",
+          "sha256": "5188b853d5583318fd73cdfe5c143f8264f531e063a94464732e1dbba0a2722a"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-types.ts",
+          "sha256": "ee6309fb7e8d5441c565af907d8a35dce3380d10bf668f9d66539e36c5ebb36b"
+        },
+        {
+          "path": "supabase/functions/job-loop-control/deno.json",
+          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60"
+        },
+        {
+          "path": "supabase/functions/job-loop-control/index.ts",
+          "sha256": "613a7475e1d8e315a1d5e8e74618db6b15f212565109d0f0d8480fa183543e10"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/deno.json",
+          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/deno.lock",
+          "sha256": "f4a0e374162aaa88b4c0a43d112278e8b2e6023428043123875cb73aa026d64d"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/index.ts",
+          "sha256": "6d949edc726a39c7f64c325c54e5ec0c5a54d5b8838e0e60215db149b80d27aa"
+        },
+        {
+          "path": "supabase/functions/job-loop-oauth/gmail.ts",
+          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6"
+        },
+        {
+          "path": "supabase/functions/job-loop-oauth/index.ts",
+          "sha256": "40a8118e954090d0bfa608295cc5afac9665b182cf41acb1f8aa9f44fa6a16df"
+        }
+      ],
+      "sha256": "d5c8a97cc59da70518960cd4f659f8dad7188a625761b7c9512d2cdfe9a52ce1"
+    },
+    {
+      "bytes": 15088,
+      "function": "job-loop-oauth",
+      "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
+      "sources": [
+        {
+          "path": "supabase/functions/_shared/core.ts",
+          "sha256": "8c282396b8489124029c5c38e4a5487e661e886c78ec3dee82d4d2af664e0242"
+        },
+        {
+          "path": "supabase/functions/_shared/runtime.ts",
+          "sha256": "fd11dc857c394f26f59116f124778cf2350c166e4f0c1f2b5ecd8c9c22fcf2b6"
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7"
+        },
+        {
+          "path": "scripts/build-job-loop-ui.ps1",
+          "sha256": "c912cd68da9a8f57350a3b2c0aa1c34281c70ab9b6a1dade110c78a6c43d308f"
+        },
+        {
+          "path": "scripts/source-text-hash.mjs",
+          "sha256": "c3bfea1e0cf0a2ff822acf7462a48af0793e0cc6a6aad306e8423fb8686c577f"
+        },
+        {
+          "path": "scripts/read-edge-deploy-chunk.mjs",
+          "sha256": "588d33b954ab45993c379e113da4aa2b1dc324065f2599d48d20b44ebb7fe1fc"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-engine-font.ts",
+          "sha256": "0246d1b7c7a70fc75d6fa38572e2a02be52feed333604207d2695f845671ae4a"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-engine.ts",
+          "sha256": "cd35e51c07fae72e11c7501287e994b11c513c5ce9a7a4a2edca2425068141cb"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-preparation.ts",
+          "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-providers.ts",
+          "sha256": "a300bdf8a582448cc2d18fa3c00aa8cb151e998d5e3011ef2ce3aca52425b863"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-render.ts",
+          "sha256": "2226d3ff2cdae28450a0db0f7d8afc02516d96598e2c7f30965526cf6259ecd0"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-repository.ts",
+          "sha256": "50acfd1fe7fcb294f3d71c46ca2d667b265c839c737b6763845acf30afb17017"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-runtime.ts",
+          "sha256": "a1c479c229301c0f9f83e98a525c01b47395ec54ad903ac44de38688db48e87f"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-schedule.ts",
+          "sha256": "faf662f66eac455743ad7059bc5b8aede8e16c689f1e89a52696dc9d9c029598"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts",
+          "sha256": "5188b853d5583318fd73cdfe5c143f8264f531e063a94464732e1dbba0a2722a"
+        },
+        {
+          "path": "supabase/functions/_shared/job-loop-types.ts",
+          "sha256": "ee6309fb7e8d5441c565af907d8a35dce3380d10bf668f9d66539e36c5ebb36b"
+        },
+        {
+          "path": "supabase/functions/job-loop-control/deno.json",
+          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60"
+        },
+        {
+          "path": "supabase/functions/job-loop-control/index.ts",
+          "sha256": "613a7475e1d8e315a1d5e8e74618db6b15f212565109d0f0d8480fa183543e10"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/deno.json",
+          "sha256": "e7f51390802b0ac05801b7b5a7c31b9d3dda2c4f5030f523c96263a24de28d60"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/deno.lock",
+          "sha256": "f4a0e374162aaa88b4c0a43d112278e8b2e6023428043123875cb73aa026d64d"
+        },
+        {
+          "path": "supabase/functions/job-loop-worker/index.ts",
+          "sha256": "6d949edc726a39c7f64c325c54e5ec0c5a54d5b8838e0e60215db149b80d27aa"
+        },
+        {
+          "path": "supabase/functions/job-loop-oauth/gmail.ts",
+          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6"
+        },
+        {
+          "path": "supabase/functions/job-loop-oauth/index.ts",
+          "sha256": "40a8118e954090d0bfa608295cc5afac9665b182cf41acb1f8aa9f44fa6a16df"
+        }
+      ],
+      "sha256": "fb6a0488ef86246ac92af70fffe48a7018935321fab4d63969a65cb92e38c74c"
+    }
+  ],
+  "migrations": [
+    {
+      "path": "supabase/migrations/20261011010000_job_loop_cloud.sql",
+      "sha256": "a3312c82e04f7f8ffa8486aca3ba03eedeb583edec2614b7590ad5e7fe4baba9"
+    },
+    {
+      "path": "supabase/migrations/20261011020000_job_loop_revoke_all.sql",
+      "sha256": "fd1394246f2591cfacf504f8e41e4d4e56f05c5fc17fd3a29a479dbbb648c1e2"
+    },
+    {
+      "path": "supabase/migrations/20261011030000_job_loop_recurring.sql",
+      "sha256": "d1e5fc6d31805e8b3abd28ab1058cb7df00a69aafa2e9622ac31e04d866ce188"
+    },
+    {
+      "path": "supabase/migrations/20261011040000_job_loop_scheduler_dispatch.sql",
+      "sha256": "369458dd0d6c48dcdfeeba884ff6a1b2e134ed3ae96630d97ce8c65c47ad1300"
+    },
+    {
+      "path": "supabase/migrations/20261011050000_job_loop_cron_platform.sql",
+      "sha256": "2d9d3037306d7db4d8aefee1a0cd94e33c9eca68018d678472bacb3891781a7b"
+    }
+  ]
 }

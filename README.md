@@ -2,7 +2,7 @@
 
 Jobvance is an application-preparation workspace. Users upload and review a CV, compare its existing experience with a real job description, approve and download the resulting document, and record their own application progress.
 
-The current release is a **free beta with live payments disabled**. It provides one free application pack per account. It does not submit applications, generate unsupported achievements, or promise an interview or job. Tailoring works without an external AI service.
+The current release is a **free beta with live payments disabled**. Guest CV checks and reviewed downloads are free. The private Job Loop has ten pilot seats, reusable confirmed career facts, limited employer discovery, scheduled preparation, exact document review, follow-ups and activity history. Rules mode works without a paid AI service. Candidates approve documents and submit applications themselves.
 
 ## Independent source and hosting
 
@@ -10,7 +10,9 @@ This repository contains the frontend, backend functions, additive database migr
 
 The frontend is a portable static application. Supabase remains its authentication, database and private-storage backend; changing the frontend host does not migrate or delete existing accounts and files.
 
-**Deployment status — 11 October 2026:** the independent frontend is live at [Jobvance.io](https://jobvance.io). The existing Supabase backend remains in use. See [cloud release evidence](docs/CLOUD-JOB-LOOP-RELEASE-STATUS.md) for verified mechanics and integration limitations. [The six-perspective audit](docs/audits/2026-10-11/README.md) scores current readiness at 60.9/100; [implementation priorities](docs/JOBVANCE-IMPLEMENTATION-PRIORITIES.md) describe the proposed next work.
+The independent frontend is hosted at [Jobvance.io](https://jobvance.io), using the existing Supabase backend. The integrated release scope, observed checks and operating procedure are in [the implementation contract](docs/INTEGRATED-JOB-LOOP-CONTRACT.md), [validation](docs/INTEGRATED-JOB-LOOP-VALIDATION.json) and [pilot operations](docs/INTEGRATED-JOB-LOOP-OPERATIONS.md). Historical cloud evidence and the [11 October audit](docs/audits/2026-10-11/README.md) describe the earlier release; those scores are a baseline, not a score for these changes.
+
+Students, MBAs and experienced professionals have distinct starting pages at `/for-students`, `/for-mba` and `/for-career-switchers`. Proposed future prices are Free Starter, Focus at $15/month and Job Loop at $29/month; there is no purchase or automatic conversion. All available pilot features remain free. The shared AI/search ledger cannot reserve more than $50 in a UTC calendar month; other products, hosting bills and domain renewals are outside that ledger. See [the pricing review](docs/SUBSCRIPTION-PRICING-REVIEW.md).
 
 ## Stack
 
@@ -73,6 +75,8 @@ Native edge-handler checks and their limits are described in [backend deployment
 |---|---|
 | `src/main.tsx`, `src/App.tsx`, `src/MvpApp.tsx` | Startup, shared providers and active routes |
 | `src/pages/Workspace.tsx` | CV upload/review, tailoring, approval, downloads and application tracking |
+| `src/pages/JobLoop.tsx`, `src/pages/JobLoopPanels.tsx` | Private career record, preparation queue, schedule, actual progress and support |
+| `src/pages/AudienceLanding.tsx`, `src/pages/SubscriptionPricing.tsx` | Audience-specific entry and free/proposed access tiers |
 | `src/pages/ProductPage.tsx` | Public product, help and policy pages |
 | `src/contexts/AuthContext.tsx`, `src/utils/auth*` | Auth state, signup, callback and recovery behavior |
 | `src/integrations/supabase/` | Standard Supabase client and frontend configuration validation |

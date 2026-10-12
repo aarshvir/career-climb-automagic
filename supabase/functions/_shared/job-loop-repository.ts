@@ -1,15 +1,16 @@
 import { ApiError } from './core.ts';
 import type { adminClient } from './runtime.ts';
-import type { LoopClaim, LoopInboxSignal, LoopOpportunity, LoopPacket, LoopProfile, LoopRun } from './job-loop-types.ts';
+import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
 import { digest } from './job-loop-providers.ts';
 
 export type LoopAdmin = ReturnType<typeof adminClient>;
 export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
 export interface RecordRow { user_id: string; version: number; input_version: number; data: CareerRecord; updated_at: string }
 export interface RunRow { id: string; user_id: string; request_id: string; request_hash: string; input_hash: string; input_version: number; snapshot: CareerRecord; provider: LoopRun['provider']; model: string; consents: { model: boolean; inbox: boolean }; data: RunState; status: LoopRun['status']; phase: number; lease_token: string | null; lease_until: string | null; created_at: string; finished_at: string | null }
-export interface RunState { lanes?: LoopRun['lanes']; messages?: string[]; nextAction?: string; opportunityIds?: string[]; packetIds?: string[]; opportunities?: LoopOpportunity[]; inbox?: LoopInboxSignal[] }
+export interface RunState { lanes?: LoopRun['lanes']; messages?: string[]; nextAction?: string; opportunityIds?: string[]; packetIds?: string[]; reusedPacketIds?:string[]; opportunities?: LoopOpportunity[]; inbox?: LoopInboxSignal[] }
 export interface UsageRow { id: string; reserved_micros: number; actual_micros: number | null; status: 'reserved' | 'settled' | 'uncertain'; result: unknown; is_new: boolean }
 export interface PacketRow { id: string; user_id: string; input_version: number; status: LoopPacket['status']; data: LoopPacket }
+export interface ScheduleRow { user_id:string;version:number;status:LoopSchedule['status'];settings:LoopScheduleInput;next_run_at:string|null;lease_token:string|null;lease_until:string|null;last_run_id:string|null;last_attempt_at:string|null;message:string }
 const ERRORS: [string, number, string][] = [
   ['LOOP_VERSION_CONFLICT',409,'Your record changed. Refresh it before saving.'],['LOOP_REQUEST_CONFLICT',409,'This request reference belongs to different inputs.'],
   ['LOOP_DAILY_LIMIT',429,'This free pilot permits three new runs per account per UTC day, including corrective rebuilds. Resume an existing run instead.'],['LOOP_ACTIVE_RUN',409,'An active run already exists. Resume or cancel it before starting another.'],['LOOP_BUDGET_LIMIT',429,'The shared monthly AI/search usage limit has been reached.'],
@@ -17,6 +18,11 @@ const ERRORS: [string, number, string][] = [
   ['LOOP_REVIEW_CHANGED',422,'Update and confirm your career record before adding factual edits. This approval must match the generated CV.'],
   ['LOOP_PACKET_HELD',422,'This packet has unresolved document checks and cannot be approved.'],['LOOP_OAUTH_STATE',400,'The connection link expired or was already used. Start a new connection.'],
   ['LOOP_NOT_FOUND',404,'That record is unavailable in your account.'],
+  ['LOOP_PILOT_FULL',429,'All ten free cloud pilot places are currently in use. Your record and free CV check remain available.'],
+  ['LOOP_SCHEDULE_CONFLICT',409,'Your recurring settings changed. Refresh before updating them.'],
+  ['LOOP_SCHEDULE_INVALID',422,'The recurring settings could not be saved. Choose a valid timezone and future time.'],
+  ['LOOP_DAILY_SCHEDULE_LIMIT',429,'One scheduled preparation has already run today. Your next scheduled occurrence remains available.'],
+  ['LOOP_MONTHLY_SCHEDULE_LIMIT',429,'This pilot includes up to thirty scheduled preparations per account per calendar month.'],
 ];
 export function loopDatabaseError(error: { message?: string } | null): void {
   if (!error) return; for (const [code,status,message] of ERRORS) if (error.message?.includes(code)) throw new ApiError(status,code,message);
@@ -48,7 +54,39 @@ export class LoopRepository {
   commit(run: RunRow, phase: number, status: LoopRun['status'], data: RunState, packets: LoopPacket[] = [], opportunities: LoopOpportunity[] = []) {
     return this.rpc<RunRow>('job_loop_commit_phase',{p_run:run.id,p_lease:run.lease_token,p_phase:phase,p_status:status,p_data:data,p_packets:packets,p_opportunities:opportunities});
   }
-  reserve(run: RunRow,key: string,provider: string,micros: number) { return this.rpc<UsageRow>('job_loop_reserve',{p_user:run.user_id,p_run:run.id,p_lease:run.lease_token,p_key:key,p_provider:provider,p_micros:micros}); }
+  reserve(run: RunRow,key: string,provider: string,micros: number,capUsd=50) { return this.rpc<UsageRow>('job_loop_reserve',{p_user:run.user_id,p_run:run.id,p_lease:run.lease_token,p_key:key,p_provider:provider,p_micros:micros,p_cap_micros:Math.floor(capUsd*1000000)}); }
+  async operationalSnapshot(userId:string,capUsd:number) {
+    const [schedule,activity,support,budget,scheduler]=await Promise.all([
+      this.admin.from('job_loop_schedules').select('*').eq('user_id',userId).maybeSingle(),
+      this.admin.from('job_loop_activity').select('*').eq('user_id',userId).order('at',{ascending:false}).limit(100),
+      this.admin.from('job_loop_support_requests').select('id,category,message,status,created_at').eq('user_id',userId).order('created_at',{ascending:false}).limit(20),
+      this.rpc<Record<string,unknown>>('job_loop_budget_snapshot',{p_user:userId,p_cap_micros:Math.floor(capUsd*1000000)}),
+      this.rpc<{ready:boolean}>('job_loop_scheduler_state',{}),
+    ]);
+    for(const result of [schedule,activity,support])loopDatabaseError(result.error);
+    return {schedule:schedule.data?publicSchedule(schedule.data as ScheduleRow):null,
+      activity:(activity.data??[]).map(item=>({id:item.id,kind:item.kind,actor:item.actor,at:item.at,summary:item.summary,opportunityId:item.opportunity_id,runId:item.run_id})) as LoopActivity[],
+      support:(support.data??[]).map(item=>({id:item.id,category:item.category,message:item.message,status:item.status,createdAt:item.created_at})),budget,scheduler};
+  }
+  async recoverableRuns():Promise<RunRow[]> {
+    const {data,error}=await this.admin.from('job_loop_runs').select('*').in('status',['queued','running']).order('created_at',{ascending:true}).limit(20);loopDatabaseError(error);
+    return (data??[]).filter(item=>!item.lease_until||Date.parse(item.lease_until)<Date.now()) as RunRow[];
+  }
+  async eraseArtifacts(userId:string) {
+    await this.rpc('job_loop_begin_erase',{p_user:userId});
+    const folders=[userId];const paths:string[]=[];let scanned=0;
+    while(folders.length){const prefix=folders.shift()!;let offset=0;
+      for(;;){const {data,error}=await this.admin.storage.from('job-loop-artifacts').list(prefix,{limit:1000,offset});loopDatabaseError(error);
+        for(const item of data??[]){if(++scanned>10000)throw new ApiError(503,'LOOP_ERASURE_RETRY','Preparation is stopped and documents are revoked. Erasure needs another retry or owner support.');
+          const path=`${prefix}/${item.name}`;if(!path.startsWith(`${userId}/`)||path.split('/').some(part=>part==='..'||!part||part.includes('\\')))throw new ApiError(503,'LOOP_ERASURE_PATH','A private storage path could not be safely erased.');
+          if(item.id)paths.push(path);else folders.push(path);
+        }
+        if((data?.length??0)<1000)break;offset+=1000;
+      }
+    }
+    for(let index=0;index<paths.length;index+=100){const {error}=await this.admin.storage.from('job-loop-artifacts').remove(paths.slice(index,index+100));loopDatabaseError(error);}
+    await this.rpc('job_loop_finish_erase',{p_user:userId});
+  }
   settle(id: string, actual: number | null, result: unknown, uncertain = false) { return this.rpc<UsageRow>('job_loop_settle',{p_usage:id,p_actual:actual,p_result:result,p_uncertain:uncertain}); }
   async upload(userId: string, packetId: string, key: string, bytes: Uint8Array, mimeType: string): Promise<string> {
     if (!['pdf','docx','txt','report','letter'].includes(key) || bytes.byteLength>5242880) throw new ApiError(422,'LOOP_ARTIFACT_INVALID','The generated artifact cannot be stored.');
@@ -62,6 +100,7 @@ export class LoopRepository {
     const {data,error}=await this.admin.storage.from('job-loop-artifacts').createSignedUrl(path,120); loopDatabaseError(error); if (!data?.signedUrl) throw new ApiError(503,'LOOP_ARTIFACT_MISSING','The download could not be opened.'); return data.signedUrl;
   }
 }
+export function publicSchedule(row:ScheduleRow):LoopSchedule{return {...row.settings,version:Number(row.version),status:row.status,nextRunAt:row.next_run_at,lastRunId:row.last_run_id,lastAttemptAt:row.last_attempt_at,message:row.message};}
 
 export function publicRun(row: RunRow, usage: {run_id:string;reserved_micros:number;actual_micros:number|null;status:string}[]): LoopRun {
   const owned=usage.filter(item=>item.run_id===row.id);

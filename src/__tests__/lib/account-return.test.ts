@@ -15,6 +15,15 @@ describe('account destinations', () => {
     rememberLoopReturn('/loop', 1000);
     expect(takeLoopReturn(1801000)).toBeNull();
   });
+  it('carries only a fixed audience preference through sign-in', () => {
+    for (const audience of ['student', 'mba', 'professional']) {
+      const path = `/loop?audience=${audience}`;
+      expect(accountDestination(path)).toBe(path);
+      rememberLoopReturn(path, 1000);
+      expect(takeLoopReturn(1001)).toBe(path);
+    }
+    for (const path of ['/loop?audience=executive', '/loop?audience=mba&next=https://evil.example', '/loop?audience=mba#token', '/loop?email=private@example.test']) expect(accountDestination(path)).toBe('/dashboard');
+  });
   it('rejects tampered paths and clears an old loop return for other sign-ins', () => {
     sessionStorage.setItem('jobvance_account_return_v1', JSON.stringify({ path: '//evil.example', expiresAt: 2000 }));
     expect(takeLoopReturn(1000)).toBeNull();

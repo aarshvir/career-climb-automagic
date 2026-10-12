@@ -4,7 +4,7 @@ const sdk = vi.hoisted(() => ({ session: vi.fn(), getUser: vi.fn(), invoke: vi.f
 vi.mock('@/utils/authSession', () => ({ readAuthSession: sdk.session }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: sdk.getUser }, functions: { invoke: sdk.invoke } } }));
 vi.mock('@/lib/cv-documents', () => ({ listCvDocuments: sdk.cvs }));
-import { callJobLoop, getLoopDownload, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl } from '@/lib/job-loop-api';
+import { callJobLoop, getLoopDownload, getLoopPreview, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl } from '@/lib/job-loop-api';
 
 beforeEach(() => {
   vi.clearAllMocks(); vi.stubEnv('VITE_SUPABASE_URL', 'https://qa.supabase.co');
@@ -24,6 +24,8 @@ describe('cloud loop API privacy and owner boundaries', () => {
     { action: 'approve_packet', packetId: 'packet-a', inputHash: 'hash-a', reviewedText: 'Synthetic CV', confirmFacts: true, confirmDisclosure: false },
     { action: 'gmail_create_draft', packetId: 'packet-a', requestId: '00000000-0000-4000-8000-000000000001', confirmRecipientAndAttachment: false },
     { action: 'gmail_finalize', ticket: 'synthetic-sealed-ticket', confirmMailbox: false },
+    { action: 'save_schedule', expectedScheduleVersion:0, schedule:{cadence:'daily',timezone:'Asia/Dubai',localTime:'08:30',weeklyDay:null,provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false}, recurringConsent:false },
+    { action: 'erase_loop', confirmErase:false },
   ])('blocks missing contextual consent before any account or control request', async action => {
     await expect(callJobLoop('owner-a', action as LoopAction)).rejects.toThrow();
     expect(sdk.session).not.toHaveBeenCalled(); expect(sdk.invoke).not.toHaveBeenCalled();
@@ -59,6 +61,16 @@ describe('cloud loop API privacy and owner boundaries', () => {
   it('rejects saved CV rows from another owner even when an unexpected client response includes them', async () => {
     sdk.cvs.mockResolvedValue([{ id: 'cv-b', user_id: 'owner-b', text_content: 'Synthetic private CV' }]);
     await expect(loadLoopSavedCvs('owner-a')).rejects.toThrow('did not match');
+  });
+  it('retains validated schedule, budget and attributed activity instead of silently dropping progress fields',async()=>{
+    const snapshot={recordVersion:1,profile:null,claims:[],opportunities:[],runs:[],packets:[],inbox:[],models:[],capabilities:{cloudWorker:true,rulesEngine:true,webSearch:false,gmailRead:false,gmailDrafts:false,monthlyUsageCapUsd:50,dailyRunLimit:3,scheduler:true,packetsPerRun:2},gmail:{connected:false,email:null,status:'Not connected',allowDrafts:false},schedule:{version:1,status:'active',cadence:'daily',timezone:'Asia/Dubai',localTime:'08:30',weeklyDay:null,provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false,nextRunAt:'2026-10-12T04:30:00Z',lastRunId:null,lastAttemptAt:null,message:'Enabled by you.'},budget:{month:'2026-10',capUsd:50,committedUsd:10,remainingUsd:40,scope:'shared_ai_search',maxPilotUsers:10},pilot:{enrolled:true,activeUsers:1,maxUsers:10},activity:[{id:'activity-one',kind:'application_status',actor:'candidate',at:'2026-10-11T10:00:00Z',summary:'You marked this opportunity applied.',opportunityId:'role-one',runId:null}]};
+    sdk.invoke.mockResolvedValue({data:{snapshot},error:null});expect((await callJobLoop('owner-a',{action:'get'})).snapshot).toEqual(snapshot);
+    sdk.invoke.mockResolvedValue({data:{snapshot:{...snapshot,budget:{...snapshot.budget,capUsd:51}}},error:null});await expect(callJobLoop('owner-a',{action:'get'})).rejects.toThrow('still being configured');
+  });
+  it('fetches only the exact owner-scoped current PDF preview and retains the immutable review hash',async()=>{
+    const inputHash='a'.repeat(64),url='https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/packet/hash/pdf?token=synthetic';
+    sdk.invoke.mockResolvedValue({data:{url,filename:'review.pdf'},error:null});const fetcher=vi.fn(async(_input:Request|string|URL)=>new Response(new Uint8Array([37,80,68,70]),{headers:{'Content-Type':'application/pdf'}}));vi.stubGlobal('fetch',fetcher);
+    const preview=await getLoopPreview('owner-a','packet',inputHash);expect(preview.filename).toBe('review.pdf');expect(preview.blob.size).toBe(4);expect(sdk.invoke).toHaveBeenCalledWith('job-loop-control',{body:{action:'preview_packet',packetId:'packet',inputHash}});expect(fetcher.mock.calls[0][0]).toBe(url);
   });
 });
 describe('private document and OAuth destinations', () => {

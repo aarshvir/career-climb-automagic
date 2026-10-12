@@ -98,4 +98,13 @@
 .check-audience-guidance { margin: -12px 0 28px; padding: 17px 20px; border: 1px solid #dce2ee; border-radius: 14px; background: #eef0ff; }
 .check-audience-guidance strong { color: #2850df; font-size: 12px; }
 .check-audience-guidance p { color: #59657a; font-size: 13px; line-height: 1.7; margin-top: 4px; }
+.check-recovery { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 16px 20px; margin-bottom: 24px; border: 1px solid #dce2ee; border-radius: 14px; background: #fff; font-size: 12px; line-height: 1.65; }
+.check-recovery > div { flex: 1; min-width: 220px; }
+.check-recovery strong { color: #24334d; }
+.check-recovery p { color: #59657a; margin-top: 4px; }
+.check-recovery label { display: flex; align-items: flex-start; gap: 9px; max-width: 240px; }
+.check-recovery input { width: 16px; height: 16px; margin-top: 3px; flex-shrink: 0; }
+.check-stage-heading { scroll-margin-top: 100px; }
+.check-pdf-frame { width: 100%; min-height: 520px; border: 1px solid #dce2ee; border-radius: 8px; background: #f3f4f6; }
+@media (max-width: 740px) { .check-recovery { padding: 14px 16px; } .check-recovery label { max-width: none; } .check-pdf-frame { min-height: 360px; } }
 @media (max-width: 740px) { .check-audience-guidance { margin: 0 0 22px; padding: 14px 16px; } }

@@ -3,9 +3,51 @@ import { validateCvText } from "./cv-extraction";
 const DRAFT_KEY = "jobvance_check_oauth_draft_v1";
 const RETURN_KEY = "jobvance_check_oauth_return_v1";
 const TTL = 30 * 60 * 1000;
+const RECOVERY_KEY = "jobvance_check_recovery_v1";
+export type CheckRecovery = { draft: CheckDraft; step: number; cvReady: boolean; filename: string; ownerId: string | null };
+let inMemoryRecovery: { value: CheckRecovery; expiresAt: number } | null = null;
 export type CheckDraft = {
   jobTitle: string; company: string; sourceText: string; reviewedText: string; jobDescription: string;
 };
+
+function boundedRecovery(value: unknown): CheckRecovery | null {
+  if (!value || typeof value !== 'object') return null;
+  const item = value as CheckRecovery;
+  if (!item.draft || typeof item.draft !== 'object' || !Number.isInteger(item.step) || item.step < 1 || item.step > 6 || typeof item.cvReady !== 'boolean' || typeof item.filename !== 'string' || item.filename.length > 300 || (item.ownerId !== null && typeof item.ownerId !== 'string')) return null;
+  for (const [key, limit] of [['jobTitle', 200], ['company', 200], ['sourceText', 60000], ['reviewedText', 60000], ['jobDescription', 20000]] as const) if (typeof item.draft[key] !== 'string' || item.draft[key].length > limit) return null;
+  return { draft: { jobTitle: item.draft.jobTitle, company: item.draft.company, sourceText: item.draft.sourceText, reviewedText: item.draft.reviewedText, jobDescription: item.draft.jobDescription }, step: item.step, cvReady: item.cvReady, filename: item.filename, ownerId: item.ownerId };
+}
+
+/** Browser memory preserves route navigation; tab storage is used only after explicit consent. */
+export function rememberCheckRecovery(value: CheckRecovery, tabStorageConsent: boolean, now = Date.now()): void {
+  const safe = boundedRecovery(value);
+  if (!safe) throw new Error('The draft could not be retained safely.');
+  inMemoryRecovery = { value: safe, expiresAt: now + TTL };
+  if (!tabStorageConsent) { try { sessionStorage.removeItem(RECOVERY_KEY); } catch { /* Memory remains usable. */ } return; }
+  try { sessionStorage.setItem(RECOVERY_KEY, JSON.stringify({ version: 1, value: safe, expiresAt: now + TTL })); }
+  catch { throw new Error('This browser could not retain the draft across refresh. Keep the page open or save to your account.'); }
+}
+
+export function readCheckRecovery(ownerId: string | null, now = Date.now()): { value: CheckRecovery; storageConsented: boolean } | null {
+  let stored: unknown;
+  try {
+    const raw = sessionStorage.getItem(RECOVERY_KEY);
+    if (raw && raw.length <= 1_000_000) stored = JSON.parse(raw);
+  } catch { /* A route-only draft may still exist. */ }
+  if (stored && typeof stored === 'object') {
+    const item = stored as { version: number; expiresAt: number; value: unknown };
+    const safe = boundedRecovery(item.value);
+    if (item.version === 1 && Number.isFinite(item.expiresAt) && item.expiresAt > now && item.expiresAt <= now + TTL && safe?.ownerId === ownerId) return { value: safe, storageConsented: true };
+    try { sessionStorage.removeItem(RECOVERY_KEY); } catch { /* No usable stored draft. */ }
+  }
+  if (inMemoryRecovery && inMemoryRecovery.expiresAt > now && inMemoryRecovery.expiresAt <= now + TTL && inMemoryRecovery.value.ownerId === ownerId) return { value: inMemoryRecovery.value, storageConsented: false };
+  return null;
+}
+
+export function clearCheckRecovery(): void {
+  inMemoryRecovery = null;
+  try { sessionStorage.removeItem(RECOVERY_KEY); } catch { /* Already inaccessible. */ }
+}
 
 export function validateCheckDraft(value: CheckDraft): CheckDraft {
   if (typeof value.jobTitle !== "string" || value.jobTitle.trim().length < 2 || value.jobTitle.length > 200)

@@ -64,7 +64,18 @@ export interface LoopPacket {
   holdReasons: string[]; pageCount: number | null; createdAt: string; approvedAt: string | null;
   model: { provider: LoopProviderId | 'rules'; model: string; method: string };
   artifacts: Record<string, { path: string; sha256: string; byteSize: number }>;
+  formatStatus?: Partial<Record<'pdf' | 'docx' | 'txt', { ready: boolean; reason?: string; pageCount?: number | null }>>;
+  interviewBrief?: { title: string; prompt: string; evidenceClaimIds: string[]; sourceQuote: string }[];
 }
+export interface LoopScheduleInput {
+  cadence: 'daily' | 'weekdays' | 'weekly'; timezone: string; localTime: string; weeklyDay: number | null;
+  provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; inboxConsent: boolean;
+}
+export interface LoopSchedule extends LoopScheduleInput {
+  version: number; status: 'active' | 'paused' | 'cancelled'; nextRunAt: string | null;
+  lastRunId: string | null; lastAttemptAt: string | null; message: string;
+}
+export interface LoopActivity { id: string; kind: string; actor: 'candidate' | 'jobvance'; at: string; summary: string; opportunityId: string | null; runId: string | null }
 export interface LoopInboxSignal {
   id: string; bucket: 'action_needed' | 'progress' | 'rejected' | 'noise';
   subject: string; from: string; receivedAt: string; summary: string; draftReply: string;
@@ -85,8 +96,15 @@ export interface LoopSnapshot {
   recordVersion: number; profile: LoopProfile | null; claims: LoopClaim[];
   opportunities: LoopOpportunity[]; runs: LoopRun[]; packets: LoopPacket[]; inbox: LoopInboxSignal[];
   models: LoopModelOption[];
-  capabilities: { cloudWorker: boolean; rulesEngine: boolean; webSearch: boolean; gmailRead: boolean; gmailDrafts: boolean; monthlyUsageCapUsd: number; dailyRunLimit: number };
+  capabilities: { cloudWorker: boolean; rulesEngine: boolean; webSearch: boolean; gmailRead: boolean; gmailDrafts: boolean; monthlyUsageCapUsd: number; dailyRunLimit: number; scheduler?: boolean; packetsPerRun?: number };
   gmail: { connected: boolean; email: string | null; allowDrafts: boolean; status: string };
+  schedule?: LoopSchedule | null;
+  budget?: { month: string; capUsd: number; committedUsd: number; remainingUsd: number; scope: 'shared_ai_search'; maxPilotUsers: number };
+  pilot?: { enrolled: boolean; activeUsers: number; maxUsers: number };
+  activity?: LoopActivity[];
+  recurringReady?: boolean;
+  employerSources?: { provider: string; company: string; board: string }[];
+  support?: { id: string; category: 'help'|'privacy'|'bug'; message: string; status: 'received'|'in_review'|'resolved'; createdAt: string }[];
 }
 export type LoopAction =
   | { action: 'get' }
@@ -99,8 +117,13 @@ export type LoopAction =
   | { action: 'start_run'; requestId: string; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; inboxConsent: boolean }
   | { action: 'resume_run'; runId: string }
   | { action: 'cancel_run'; runId: string }
+  | { action: 'save_schedule'; expectedScheduleVersion: number; schedule: LoopScheduleInput; recurringConsent: boolean }
+  | { action: 'pause_schedule' | 'cancel_schedule'; expectedScheduleVersion: number }
+  | { action: 'erase_loop' | 'erase_self'; confirmErase: boolean }
+  | { action: 'request_support'; category: 'help' | 'privacy' | 'bug'; message: string }
   | { action: 'approve_packet'; packetId: string; inputHash: string; reviewedText: string; confirmFacts: boolean; confirmDisclosure: boolean }
   | { action: 'download'; packetId: string; format: 'pdf' | 'docx' | 'txt' | 'report' | 'letter' }
+  | { action: 'preview_packet'; packetId: string; inputHash: string }
   | { action: 'gmail_connect'; allowDrafts: boolean }
   | { action: 'gmail_preview'; ticket: string }
   | { action: 'gmail_finalize'; ticket: string; confirmMailbox: boolean }

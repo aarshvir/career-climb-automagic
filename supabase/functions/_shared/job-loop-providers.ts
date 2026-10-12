@@ -1,17 +1,18 @@
 import { ApiError } from './core.ts';
 import type { LoopClaim, LoopModelOption, LoopOpportunity, LoopProviderId } from './job-loop-types.ts';
+import { configuredUsageCap } from './job-loop-schedule.ts';
 
 export type LoopEnv = (name: string) => string | undefined;
 export type LoopFetch = typeof fetch;
 export const RULES_MODEL = 'grounded-rules-v1';
-export const LIMITS = Object.freeze({ monthlyUsd: 50, dailyRuns: 3, packets: 5, queries: 3, outputTokens: 1200, maxResponseBytes: 1000000 });
+export const LIMITS = Object.freeze({ monthlyUsd: 50, dailyRuns: 3, packets: 2, queries: 2, outputTokens: 1200, maxResponseBytes: 1000000 });
 const DESCRIPTORS = Object.freeze([
   { provider: 'anthropic', model: 'claude-sonnet-5-5', label: 'Claude Sonnet 5.5', inputUsdPerMillion: 2, outputUsdPerMillion: 10, key: 'JOB_LOOP_ANTHROPIC_API_KEY' },
   { provider: 'openai', model: 'gpt-6.1-sol', label: 'GPT 6.1 Sol', inputUsdPerMillion: 2, outputUsdPerMillion: 10, key: 'JOB_LOOP_OPENAI_API_KEY' },
   { provider: 'openai', model: 'gpt-6-luna', label: 'GPT 6 Luna', inputUsdPerMillion: .1, outputUsdPerMillion: .5, key: 'JOB_LOOP_OPENAI_API_KEY' },
   { provider: 'moonshot', model: 'kimi-k2.6', label: 'Kimi K2.6', inputUsdPerMillion: 0, outputUsdPerMillion: 0, key: 'JOB_LOOP_MOONSHOT_API_KEY' },
 ] as const);
-export function paidApisEnabled(env: LoopEnv): boolean { return env('JOB_LOOP_PAID_APIS_ENABLED') === 'true'; }
+export function paidApisEnabled(env: LoopEnv): boolean { try { configuredUsageCap(env); return env('JOB_LOOP_PAID_APIS_ENABLED') === 'true'; } catch { return false; } }
 const providerKey=(key:string,env:LoopEnv)=>env(key)||(key==='JOB_LOOP_OPENAI_API_KEY'?env('OPENAI_API_KEY'):undefined);
 export function modelOptions(env: LoopEnv): LoopModelOption[] {
   const rate = (name: string) => { const raw = env(name); const value = raw?.trim() ? Number(raw) : NaN; return Number.isFinite(value) && value > 0 && value <= 1000 ? value : null; };
@@ -113,10 +114,19 @@ export async function searchTavily(query: string, env: LoopEnv, fetcher: LoopFet
   }) : [];
   return { results, actualMicros: credits * TAVILY_CREDIT_MICROS, error: response.ok && Array.isArray(data.results) ? null : 'The search provider returned an unusable result.' };
 }
-function htmlText(value: unknown): string { return text(value, 60000).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, ' ').replace(/&(?:nbsp|amp);/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 20000); }
+function htmlText(value: unknown): string {
+  let result=text(value,100000);
+  for(let pass=0;pass<2;pass++)result=result.replace(/&(?:#(\d+)|#x([\da-f]+)|([a-z]+));/gi,(all,decimal,hex,named)=>{
+    if(decimal||hex){const point=parseInt(decimal||hex,decimal?10:16);return point>0&&point<=0x10ffff&&!(point>=0xd800&&point<=0xdfff)?String.fromCodePoint(point):all;}
+    return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' ' } as Record<string,string>)[String(named).toLowerCase()]??all;
+  });
+  return result.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<\/(?:p|div|li|h[1-6])\s*>|<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/[^\S\n]+/g,' ').replace(/\n\s*\n+/g,'\n').trim();
+}
 export function employerFeeds(env: LoopEnv): { provider: 'greenhouse' | 'lever'; board: string; company?: string }[] {
   try {
-    const values: unknown = JSON.parse(env('JOB_LOOP_EMPLOYER_FEEDS') ?? '[]');
+    // Documented public GET feeds, verified 2026-10-11. Coverage is deliberately
+    // limited and does not imply an employer partnership or market-wide search.
+    const values: unknown = JSON.parse(env('JOB_LOOP_EMPLOYER_FEEDS') ?? '[{"provider":"greenhouse","board":"careem","company":"Careem"},{"provider":"greenhouse","board":"gocardless","company":"GoCardless"},{"provider":"greenhouse","board":"duolingo","company":"Duolingo"}]');
     if (!Array.isArray(values) || values.length > 4) return [];
     return values.flatMap(value => { const row = record(value); return ['greenhouse', 'lever'].includes(String(row.provider)) && typeof row.board === 'string' && /^[a-z0-9_-]{1,80}$/i.test(row.board) ? [{ provider: row.provider as 'greenhouse' | 'lever', board: row.board, company: text(row.company,200) }] : []; });
   } catch { return []; }
@@ -133,8 +143,9 @@ export async function readEmployerFeed(feed: { provider: 'greenhouse' | 'lever';
   for (const value of entries.slice(0, 100)) {
     const row = record(value); const title = text(row.title ?? row.text, 200).trim(); const url = safePublicUrl(text(row.absolute_url ?? row.hostedUrl, 2000)); const id = row.id;
     if (!title || !url || (typeof id !== 'string' && typeof id !== 'number')) continue;
-    const description = htmlText(feed.provider === 'greenhouse' ? row.content : [row.descriptionPlain, row.additionalPlain, ...(Array.isArray(row.lists) ? row.lists.map(item => htmlText(record(item).content)) : [])].join('\n'));
-    if (description.length < 80) continue;
+    const description = htmlText(feed.provider === 'greenhouse' ? row.content : [row.descriptionPlain, ...(Array.isArray(row.lists) ? row.lists.map(item => `${text(record(item).text,200)}\n${htmlText(record(item).content)}`) : []),row.additionalPlain].join('\n'));
+    // Never certify a cropped description as the full employer vacancy.
+    if (description.length < 80 || description.length>20000) continue;
     const sourceKey = `${feed.provider}:${feed.board}:${id}`;
     opportunities.push({ id: await stableUuid(sourceKey), source: 'employer_api', sourceKey, checkedAt: new Date().toISOString(), verification: 'listed_on_source', title, company: text(row.company,200)||feed.company||feed.board, location: text(record(row.location).name ?? record(row.categories).location, 200), url, description, contact: null, status: 'saved', notes: feed.company||row.company?'':'Employer display uses the configured board identifier; confirm the official employer name.', followUpAt: null });
   }

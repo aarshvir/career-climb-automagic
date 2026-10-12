@@ -1,0 +1,311 @@
+{
+  "date": "2026-10-12",
+  "scope": "Local verification of the integrated Job Loop release; this does not confirm deployment or real customer outcomes.",
+  "sourceTree": {
+    "sha256": "ecac465bdf4a84492b25c062e0163e35c171be5952761a12f776dd5bcfd9482d",
+    "fileCount": 316,
+    "roots": [
+      "src",
+      "supabase/functions",
+      "supabase/migrations",
+      "supabase/tests",
+      "scripts"
+    ],
+    "configurationFiles": [
+      "package.json",
+      "package-lock.json",
+      "vite.config.ts",
+      "vitest.config.ts",
+      "tsconfig.app.json",
+      ".gitattributes"
+    ],
+    "hashAlgorithm": "sha256-path-and-file-hash-tree-v2: sha256-utf8-lf-no-bom for text, sha256-bytes for binary"
+  },
+  "tests": {
+    "date": "2026-10-12",
+    "command": "node node_modules/vitest/vitest.mjs run --pool=threads --maxWorkers=1 --no-file-parallelism --isolate",
+    "testFiles": 41,
+    "passed": 490,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 71.19,
+    "testedRuntime": "Complete runtime and fixture suite, including the replay fix. Packaging normalization was subsequently checked independently.",
+    "testedSourceTreeSha256": "f03a01640cb9bf52be43250721b1a66a0e851e44afb9d588c22b34506e90a174"
+  },
+  "typecheck": {
+    "date": "2026-10-12",
+    "command": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json",
+    "passed": true
+  },
+  "deno": {
+    "version": "2.9.6",
+    "sourceBoundary": {
+      "passed": 5,
+      "failed": 0
+    },
+    "generatedBundleBoundary": {
+      "passed": 5,
+      "failed": 0
+    },
+    "network": "cached-only; runtime requests intercepted with fictional fixtures; no paid API calls"
+  },
+  "production": {
+    "date": "2026-10-12",
+    "buildPassed": true,
+    "assets": 56,
+    "staticBytes": 4858705,
+    "workerBytes": 6489856,
+    "workerSha256": "390a5d4cb395191508947a593efcc593caeb6da269ee781c5999e47766fdfcaf",
+    "compressedBytes": 2288069,
+    "compressedLimitBytes": 3145728,
+    "hostChecks": [
+      "security-headers",
+      "spa-deep-routes",
+      "asset-bytes-and-mime",
+      "etag-and-cache",
+      "head",
+      "missing-and-private-paths",
+      "unsafe-methods",
+      "project-identity",
+      "compressed-size"
+    ],
+    "hostChecksPassed": true
+  },
+  "backendBundles": {
+    "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
+    "manifest": "docs/supabase-loop-ui/manifest.json",
+    "hashAlgorithms": {
+      "artifact": "sha256-bytes",
+      "source": "sha256-utf8-lf-no-bom",
+      "migration": "sha256-utf8-lf-no-bom"
+    },
+    "artifactAndSourceHashesVerified": true,
+    "migrationHashesVerified": true,
+    "migrations": [
+      {
+        "path": "supabase/migrations/20261011010000_job_loop_cloud.sql",
+        "sha256": "a3312c82e04f7f8ffa8486aca3ba03eedeb583edec2614b7590ad5e7fe4baba9"
+      },
+      {
+        "path": "supabase/migrations/20261011020000_job_loop_revoke_all.sql",
+        "sha256": "fd1394246f2591cfacf504f8e41e4d4e56f05c5fc17fd3a29a479dbbb648c1e2"
+      },
+      {
+        "path": "supabase/migrations/20261011030000_job_loop_recurring.sql",
+        "sha256": "d1e5fc6d31805e8b3abd28ab1058cb7df00a69aafa2e9622ac31e04d866ce188"
+      },
+      {
+        "path": "supabase/migrations/20261011040000_job_loop_scheduler_dispatch.sql",
+        "sha256": "369458dd0d6c48dcdfeeba884ff6a1b2e134ed3ae96630d97ce8c65c47ad1300"
+      },
+      {
+        "path": "supabase/migrations/20261011050000_job_loop_cron_platform.sql",
+        "sha256": "2d9d3037306d7db4d8aefee1a0cd94e33c9eca68018d678472bacb3891781a7b"
+      }
+    ],
+    "bundles": [
+      {
+        "function": "job-loop-control",
+        "artifact": "docs/supabase-loop-ui/job-loop-control.js",
+        "bytes": 54789,
+        "sha256": "716b591781f0fb7627ba430b5d5c759c879240c60d1dfebc8d4f9004f5d67b0f"
+      },
+      {
+        "function": "job-loop-worker",
+        "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
+        "bytes": 1073387,
+        "sha256": "d5c8a97cc59da70518960cd4f659f8dad7188a625761b7c9512d2cdfe9a52ce1"
+      },
+      {
+        "function": "job-loop-oauth",
+        "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
+        "bytes": 15088,
+        "sha256": "fb6a0488ef86246ac92af70fffe48a7018935321fab4d63969a65cb92e38c74c"
+      }
+    ],
+    "generatedBoundaryRecheck": {
+      "date": "2026-10-12",
+      "passed": 5,
+      "failed": 0,
+      "network": "cached-only; fictional runtime requests intercepted"
+    }
+  },
+  "notes": [
+    "Single isolated thread worker avoids restricted Windows fork cache errors and cross-file mock leakage.",
+    "No dependencies or paid services were installed for this verification.",
+    "Source/bundle/runtime checks use fictional records; live account, publishing, recurrence and domain checks must be recorded separately.",
+    "The 2026-10-12 migration-only compatibility change was checked with both PostgreSQL suites; the complete 475-test suite baseline remains attributed to its original source hash. Runtime bundle hashes are unchanged.",
+    "The replay regression was fixed and the complete 490-test suite passed on 2026-10-12. Both cloud bundles changed and must be deployed together. Exact live scheduled/user results are recorded separately by the operator.",
+    "Source and migration manifest hashes now normalize UTF-8 line endings/BOM; artifact hashes remain byte-exact with repository attributes preventing conversion.",
+    "After the 490-test baseline, only the hosted verification driver was hardened. Its syntax was checked and current source-tree hash refreshed; the test baseline retains its previously observed source hash and was not rerun for this script-only change.",
+    "The final hosted verification driver adds optional fixed-path sanitized report saving. This is a check-script-only change; the 490-test baseline hash remains unchanged."
+  ],
+  "updatedDate": "2026-10-12",
+  "migrationRecheck": {
+    "date": "2026-10-12",
+    "command": "node node_modules/vitest/vitest.mjs run --config supabase/tests/vitest.backend.config.ts supabase/tests/job-loop-cloud-sql.test.ts supabase/tests/job-loop-recurring-sql.test.ts --pool=threads --maxWorkers=1 --no-file-parallelism --isolate",
+    "testFiles": 2,
+    "passed": 22,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 3.12,
+    "testedSourceTreeSha256": "9c717cf8a10d8d5d39e5611f1d8e6a014001eb4da2af56be5c02368b45a28f44",
+    "change": "Preserve the six-argument reserve function as job_loop_reserve_legacy, while the new seven-argument function supplies a default hard cap of US$50.",
+    "migrationHashes": [
+      {
+        "path": "supabase/migrations/20261011010000_job_loop_cloud.sql",
+        "sha256": "a3312c82e04f7f8ffa8486aca3ba03eedeb583edec2614b7590ad5e7fe4baba9"
+      },
+      {
+        "path": "supabase/migrations/20261011020000_job_loop_revoke_all.sql",
+        "sha256": "fd1394246f2591cfacf504f8e41e4d4e56f05c5fc17fd3a29a479dbbb648c1e2"
+      },
+      {
+        "path": "supabase/migrations/20261011030000_job_loop_recurring.sql",
+        "sha256": "d1e5fc6d31805e8b3abd28ab1058cb7df00a69aafa2e9622ac31e04d866ce188"
+      },
+      {
+        "path": "supabase/migrations/20261011040000_job_loop_scheduler_dispatch.sql",
+        "sha256": "369458dd0d6c48dcdfeeba884ff6a1b2e134ed3ae96630d97ce8c65c47ad1300"
+      },
+      {
+        "path": "supabase/migrations/20261011050000_job_loop_cron_platform.sql",
+        "sha256": "2d9d3037306d7db4d8aefee1a0cd94e33c9eca68018d678472bacb3891781a7b"
+      }
+    ]
+  },
+  "payloadPreparation": {
+    "date": "2026-10-12",
+    "script": "scripts/read-edge-deploy-chunk.mjs",
+    "behavior": "Read-only bounded JSON chunk serialization; no network, secrets, writes or deployment.",
+    "chunkCharacters": 36000,
+    "roundtripVerified": true,
+    "functions": [
+      {
+        "name": "job-loop-control",
+        "bytes": 54789,
+        "sha256": "716b591781f0fb7627ba430b5d5c759c879240c60d1dfebc8d4f9004f5d67b0f",
+        "chunks": 2
+      },
+      {
+        "name": "job-loop-worker",
+        "bytes": 1073387,
+        "sha256": "d5c8a97cc59da70518960cd4f659f8dad7188a625761b7c9512d2cdfe9a52ce1",
+        "chunks": 30
+      }
+    ],
+    "entrypoint": "index.js",
+    "files": [
+      "index.js",
+      "deno.json"
+    ],
+    "allRelativeDependenciesInlined": true,
+    "externalImports": [
+      "https://esm.sh/@supabase/supabase-js@2.57.4",
+      "npm:jspdf@4.2.1",
+      "npm:docx@9.9.0"
+    ]
+  },
+  "previousFullSuiteBaseline": {
+    "date": "2026-10-11",
+    "sourceTreeSha256": "6871f1aa17cf6b1052c38662e261aa2caf27bcce6ca32ca884d490bd3988bd2e",
+    "tests": {
+      "command": "node node_modules/vitest/vitest.mjs run --pool=threads --maxWorkers=1 --no-file-parallelism --isolate",
+      "testFiles": 40,
+      "passed": 475,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 66.43,
+      "testedSourceTreeSha256": "6871f1aa17cf6b1052c38662e261aa2caf27bcce6ca32ca884d490bd3988bd2e"
+    },
+    "hashAlgorithm": "sha256-path-and-exact-file-hash-tree-v1"
+  },
+  "replayFixVerification": {
+    "date": "2026-10-12",
+    "testCases": 13,
+    "passed": 13,
+    "failed": 0,
+    "behavior": "Replay the existing owned request after new automatic discoveries and tracking/freshness metadata changes; preserve original vacancy facts by ID and reject changed/deleted original vacancies, new manual vacancies, career corrections, model choices or processing consent changes.",
+    "legacyRunCompatibility": true,
+    "scheduledOccurrenceCompatibility": true,
+    "newRunCreatedOnReplay": false,
+    "sqlMigrationRequired": false
+  },
+  "hashReproducibility": {
+    "date": "2026-10-12",
+    "sourceAndMigrationComparisons": 74,
+    "sourceAlgorithm": "sha256-utf8-lf-no-bom",
+    "crlfAndBomVariantsStable": true,
+    "materialEditsDetected": true,
+    "artifactAlgorithm": "sha256-bytes",
+    "artifactBytesPreservedByRepositoryAttributes": true,
+    "payloadRoundtripVerified": true,
+    "noGlobalGitSettingsChanged": true
+  },
+  "checkScriptHardening": {
+    "date": "2026-10-12",
+    "path": "scripts/verify-integrated-loop-hosted.mjs",
+    "normalizedSha256": "04dd0ee125abe047283fe43d214904022bb098ba4a419bad0b6303d30192b556",
+    "previousValidationSourceTreeSha256": "f03a01640cb9bf52be43250721b1a66a0e851e44afb9d588c22b34506e90a174",
+    "currentSourceTreeSha256": "ecac465bdf4a84492b25c062e0163e35c171be5952761a12f776dd5bcfd9482d",
+    "change": "Permission checks accept explicit 401/403 denial or a successful response containing an empty array; server failures cannot be counted as access-denial success. Fresh fixture snapshots also require initially empty history arrays.",
+    "runtimeChange": false,
+    "fullSuiteRerun": false,
+    "syntaxCheck": {
+      "command": "node --check scripts/verify-integrated-loop-hosted.mjs",
+      "passed": true
+    },
+    "hostedExecution": "Separate operator run in progress; this local receipt does not assert hosted success.",
+    "sanitizedReportSaving": {
+      "flag": "--save-report",
+      "fixedPath": "docs/INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json",
+      "runtimeChange": false,
+      "previousSourceTreeSha256": "143632acda812ef3690a1e64ab77733f757e5d9fc8899d0e0be870a4b0afaf82",
+      "currentSourceTreeSha256": "ecac465bdf4a84492b25c062e0163e35c171be5952761a12f776dd5bcfd9482d",
+      "syntaxCheckPassed": true
+    }
+  },
+  "lint": {
+    "command": "node node_modules/eslint/bin/eslint.js .",
+    "passed": true,
+    "errors": 0,
+    "warnings": 17,
+    "warningScope": "Existing legacy dashboard, context and shared UI hook/refresh warnings; no new errors."
+  },
+  "hostedVerification": {
+    "report": "docs/INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json",
+    "status": "passed",
+    "startedAt": "2026-10-12T17:21:56.057Z",
+    "finishedAt": "2026-10-12T17:23:40.932Z",
+    "passedChecks": 75,
+    "accountsCreated": 2,
+    "syntheticLoopsErased": 2,
+    "paidCalls": 0,
+    "sentMessages": 0,
+    "applicationSubmissions": 0,
+    "authAccountsDeleted": 0,
+    "dispatchHttpStatus": 202
+  },
+  "deployedBackend": {
+    "project": "gvftdfriujrkpptdueyb",
+    "functions": [
+      {
+        "name": "job-loop-control",
+        "version": 4,
+        "artifactSha256": "716b591781f0fb7627ba430b5d5c759c879240c60d1dfebc8d4f9004f5d67b0f"
+      },
+      {
+        "name": "job-loop-worker",
+        "version": 3,
+        "artifactSha256": "d5c8a97cc59da70518960cd4f659f8dad7188a625761b7c9512d2cdfe9a52ce1"
+      }
+    ],
+    "scheduler": {
+      "enabled": true,
+      "cron": "*/5 * * * *",
+      "ready": true,
+      "actualDueRunVerified": true
+    },
+    "databaseDeployment": "Additive native migration parts plus approved SQL-editor function definitions; historical ledger retained. Do not blindly replay canonical migrations against the deployed project."
+  }
+}

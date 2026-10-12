@@ -15,7 +15,9 @@ globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
   if(url.hostname!=='supabase.fixture.invalid')throw new Error('A real or paid endpoint is blocked in this test.');
   if(url.pathname==='/auth/v1/user'){if(new Headers(init?.headers).get('Authorization')!=='Bearer fixture-user')return Response.json({error:'invalid'},{status:401});return Response.json({id:owner,aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-10-11T00:00:00Z'});}
   if(url.pathname==='/rest/v1/job_loop_records'){assert(url.searchParams.get('user_id')===`eq.${owner}`||body?.user_id===owner,'Every record query binds the authenticated owner.');return init?.method==='POST'?new Response(null,{status:201}):Response.json(record);}
-  if(['/rest/v1/job_loop_runs','/rest/v1/job_loop_packets','/rest/v1/job_loop_usage','/rest/v1/job_loop_connections'].includes(url.pathname)){assert(url.searchParams.get('user_id')===`eq.${owner}`,'Collection must bind owner.');return Response.json([]);}
+  if(['/rest/v1/job_loop_runs','/rest/v1/job_loop_packets','/rest/v1/job_loop_usage','/rest/v1/job_loop_connections','/rest/v1/job_loop_schedules','/rest/v1/job_loop_activity','/rest/v1/job_loop_support_requests'].includes(url.pathname)){assert(url.searchParams.get('user_id')===`eq.${owner}`,'Collection must bind owner.');return Response.json([]);}
+  if(url.pathname==='/rest/v1/rpc/job_loop_budget_snapshot'){assert(body?.p_user===owner&&body?.p_cap_micros===50000000,'Budget read binds the authenticated owner and ceiling.');return Response.json({month:'2026-10',capUsd:50,committedUsd:0,remainingUsd:50,scope:'shared_ai_search',maxPilotUsers:10,enrolled:false,activeUsers:0,maxUsers:10});}
+  if(url.pathname==='/rest/v1/rpc/job_loop_scheduler_state')return Response.json({ready:false,lastDispatchAt:null});
   if(url.pathname==='/rest/v1/rpc/job_loop_claim_run'){assert(body?.p_run===runId,'Internal run reference is bound.');return Response.json(null);}
   throw new Error('Unexpected request blocked by hermetic handler fixture.');
 };

@@ -1,0 +1,317 @@
+{
+  "kind": "hosted-integrated-job-loop-synthetic-qa",
+  "startedAt": "2026-10-12T17:21:56.057Z",
+  "status": "passed",
+  "accountsCreated": 2,
+  "paidCalls": 0,
+  "sentMessages": 0,
+  "applicationSubmissions": 0,
+  "authAccountsDeleted": 0,
+  "syntheticLoopsErased": 2,
+  "credentialsPrintedOrSaved": false,
+  "signedLinksPrintedOrSaved": false,
+  "checks": [
+    {
+      "name": "local-public-key-is-project-bound-and-not-privileged",
+      "passed": true
+    },
+    {
+      "name": "public-auth-settings-confirm-signup-sends-no-confirmation-email",
+      "passed": true
+    },
+    {
+      "name": "anonymous-private-loop-access-denied",
+      "passed": true
+    },
+    {
+      "name": "fresh-student-identity-is-own-synthetic-account",
+      "passed": true
+    },
+    {
+      "name": "cloud-worker-and-source-rules-available",
+      "passed": true
+    },
+    {
+      "name": "fifty-dollar-shared-cap-and-two-packets-per-run-reported",
+      "passed": true
+    },
+    {
+      "name": "ten-user-shared-budget-is-reported-without-client-override",
+      "passed": true
+    },
+    {
+      "name": "paid-search-ai-and-mail-integrations-remain-disabled",
+      "passed": true
+    },
+    {
+      "name": "cloud-scheduler-reports-ready",
+      "passed": true
+    },
+    {
+      "name": "fresh-student-record-has-no-fake-activity",
+      "passed": true
+    },
+    {
+      "name": "new-synthetic-pilot-has-available-capacity",
+      "passed": true
+    },
+    {
+      "name": "candidate-cannot-trigger-privileged-shared-worker",
+      "passed": true
+    },
+    {
+      "name": "student-record-saved-with-no-inferred-employment-years",
+      "passed": true
+    },
+    {
+      "name": "unconfirmed-source-facts-cannot-start-preparation",
+      "passed": true
+    },
+    {
+      "name": "manual-vacancy-is-labelled-as-user-provided-not-live-verified",
+      "passed": true
+    },
+    {
+      "name": "first-application-run-is-persisted",
+      "passed": true
+    },
+    {
+      "name": "cloud-run-reaches-an-observable-completion-state",
+      "passed": true
+    },
+    {
+      "name": "run-incurs-no-funded-provider-usage",
+      "passed": true
+    },
+    {
+      "name": "student-application-is-rendered-and-awaits-human-review",
+      "passed": true
+    },
+    {
+      "name": "source-context-and-supporting-contribution-survive-preparation",
+      "passed": true
+    },
+    {
+      "name": "light-interview-preparation-references-cleared-evidence",
+      "passed": true
+    },
+    {
+      "name": "unknown-recipient-does-not-produce-outreach",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-preview-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-preview-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "unapproved-preview-is-a-real-saved-pdf",
+      "passed": true
+    },
+    {
+      "name": "unapproved-packet-cannot-be-downloaded",
+      "passed": true
+    },
+    {
+      "name": "approval-is-bound-to-exact-source-hash-and-reviewed-text",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-pdf-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-pdf-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "download-is-identical-to-preview-bytes",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-docx-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-docx-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "word-roundtrip-preserves-academic-and-work-context",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-txt-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-txt-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "text-download-is-exact-reviewed-cv",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-report-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-report-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-letter-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-letter-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "same-request-replays-without-extra-run",
+      "passed": true
+    },
+    {
+      "name": "cloud-run-reaches-an-observable-completion-state",
+      "passed": true
+    },
+    {
+      "name": "run-incurs-no-funded-provider-usage",
+      "passed": true
+    },
+    {
+      "name": "second-application-reuses-confirmed-facts-without-reentering-them",
+      "passed": true
+    },
+    {
+      "name": "follow-up-stays-a-calendar-date-without-invented-utc-noon",
+      "passed": true
+    },
+    {
+      "name": "tracking-is-recorded-as-candidate-reported-progress",
+      "passed": true
+    },
+    {
+      "name": "support-has-a-persisted-unreviewed-receipt",
+      "passed": true
+    },
+    {
+      "name": "fresh-observer-identity-is-own-synthetic-account",
+      "passed": true
+    },
+    {
+      "name": "second-account-sees-none-of-first-account-private-work",
+      "passed": true
+    },
+    {
+      "name": "second-account-cannot-preview-first-account-artifact",
+      "passed": true
+    },
+    {
+      "name": "direct-api-cannot-leak-foreign-job_loop_packets",
+      "passed": true
+    },
+    {
+      "name": "direct-api-cannot-leak-foreign-job_loop_records",
+      "passed": true
+    },
+    {
+      "name": "direct-api-cannot-leak-foreign-job_loop_schedules",
+      "passed": true
+    },
+    {
+      "name": "direct-api-cannot-leak-foreign-job_loop_activity",
+      "passed": true
+    },
+    {
+      "name": "direct-api-cannot-leak-foreign-job_loop_support_requests",
+      "passed": true
+    },
+    {
+      "name": "browser-cannot-open-privileged-job_loop_budget_months",
+      "passed": true
+    },
+    {
+      "name": "browser-cannot-open-privileged-job_loop_connections",
+      "passed": true
+    },
+    {
+      "name": "candidate-cannot-forge-background-run-state",
+      "passed": true
+    },
+    {
+      "name": "real-money-checkout-remains-disabled",
+      "passed": true
+    },
+    {
+      "name": "explicit-opt-in-persists-a-future-dubai-schedule",
+      "passed": true
+    },
+    {
+      "name": "operator-made-qa-schedule-dispatches-through-cloud-service",
+      "passed": true
+    },
+    {
+      "name": "scheduled-dispatch-advances-real-next-run",
+      "passed": true
+    },
+    {
+      "name": "cloud-run-reaches-an-observable-completion-state",
+      "passed": true
+    },
+    {
+      "name": "run-incurs-no-funded-provider-usage",
+      "passed": true
+    },
+    {
+      "name": "scheduled-progress-has-jobvance-actor-history",
+      "passed": true
+    },
+    {
+      "name": "manual-and-scheduled-rules-runs-do-not-consume-paid-allowance",
+      "passed": true
+    },
+    {
+      "name": "pause-removes-the-next-scheduled-run",
+      "passed": true
+    },
+    {
+      "name": "explicit-resume-restores-a-future-schedule",
+      "passed": true
+    },
+    {
+      "name": "cancel-stops-future-scheduled-preparation",
+      "passed": true
+    },
+    {
+      "name": "withdrawing-evidence-revokes-the-earlier-approved-packet",
+      "passed": true
+    },
+    {
+      "name": "revoked-document-cannot-get-a-new-preview-link",
+      "passed": true
+    },
+    {
+      "name": "only-this-new-synthetic-loop-is-erased",
+      "passed": true
+    },
+    {
+      "name": "synthetic-auth-account-is-preserved-after-loop-erasure",
+      "passed": true
+    },
+    {
+      "name": "only-this-new-synthetic-loop-is-erased",
+      "passed": true
+    },
+    {
+      "name": "synthetic-auth-account-is-preserved-after-loop-erasure",
+      "passed": true
+    }
+  ],
+  "qaRunId": "4448a3328a7cc190",
+  "finishedAt": "2026-10-12T17:23:40.932Z"
+}

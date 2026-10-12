@@ -1,13 +1,22 @@
 import { ApiError, uuid } from '../_shared/core.ts';
 import { adminClient, readJson } from '../_shared/runtime.ts';
 import { LoopRepository } from '../_shared/job-loop-repository.ts';
-import { authenticateWorker, dispatchWorker, processLoopPhase } from '../_shared/job-loop-runtime.ts';
+import { authenticateWorker, dispatchWorker, processLoopPhase, processDueSchedules } from '../_shared/job-loop-runtime.ts';
+import { consumeScheduledTicket } from '../_shared/job-loop-scheduler-ticket.ts';
 declare const EdgeRuntime:{waitUntil(promise:Promise<unknown>):void};
 const env=(name:string)=>Deno.env.get(name);
 Deno.serve(async req=>{
   try{
-    if(req.method!=='POST')return new Response(null,{status:405});await authenticateWorker(req,env);
-    const body=await readJson(req);if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).some(key=>key!=='runId'))throw new ApiError(400,'LOOP_INVALID_INPUT','Use a run reference only.');
+    if(req.method!=='POST')return new Response(null,{status:405});
+    const body=await readJson(req);if(!body||typeof body!=='object'||Array.isArray(body))throw new ApiError(400,'LOOP_INVALID_INPUT','Use a run reference or a scheduler dispatch.');
+    if((body as {action?:unknown}).action==='run_due'){
+      if(Object.keys(body).some(key=>key!=='action'))throw new ApiError(400,'LOOP_INVALID_INPUT','Scheduled dispatch does not accept account or run overrides.');
+      if(!await consumeScheduledTicket(req,env))await authenticateWorker(req,env);
+      const work=processDueSchedules(new LoopRepository(adminClient()),env).catch(error=>{console.error('job_loop_scheduler_failed',{type:error instanceof Error?error.name:'Error'});});
+      EdgeRuntime.waitUntil(work);return new Response(JSON.stringify({accepted:true}),{status:202,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
+    }
+    await authenticateWorker(req,env);
+    if(Object.keys(body).some(key=>key!=='runId'))throw new ApiError(400,'LOOP_INVALID_INPUT','Use a run reference only.');
     const runId=uuid((body as {runId?:unknown}).runId,'Run ID');const repo=new LoopRepository(adminClient());
     const work=processLoopPhase(repo,runId,env).then(async again=>{if(again)await dispatchWorker(runId,env);}).catch(error=>{console.error('job_loop_worker_stage_failed',{type:error instanceof Error?error.name:'Error'});});
     EdgeRuntime.waitUntil(work);return new Response(JSON.stringify({accepted:true}),{status:202,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});

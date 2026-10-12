@@ -3,17 +3,19 @@ import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CvCheck from "@/pages/CvCheck";
+import { clearCheckRecovery } from '@/lib/check-draft';
 
 vi.unmock("react-router-dom");
 const mocks = vi.hoisted(() => ({
   auth: { user: null as null | { id: string; email: string }, loading: false },
-  save: vi.fn(), list: vi.fn(), remove: vi.fn(), download: vi.fn(), tracker: vi.fn(),
+  save: vi.fn(), list: vi.fn(), remove: vi.fn(), download: vi.fn(), tracker: vi.fn(), preview: vi.fn(),
 }));
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => mocks.auth }));
 vi.mock("@/pages/Auth", () => ({ default: () => <div>Optional account form</div> }));
 vi.mock("@/lib/free-check-api", () => ({ saveFreeCheck: mocks.save, listFreeChecks: mocks.list, deleteFreeCheck: mocks.remove }));
 vi.mock("@/lib/document-download", async importOriginal => ({ ...(await importOriginal<typeof import("@/lib/document-download")>()), downloadBlob: mocks.download }));
 vi.mock("@/lib/workspace-api", () => ({ addApplication: mocks.tracker }));
+vi.mock('@/lib/document-export', async importOriginal => ({ ...(await importOriginal<typeof import('@/lib/document-export')>()), createReviewedPdfPreview: mocks.preview }));
 
 const source = "Alex Example\nEXPERIENCE\n• Prepared monthly stakeholder reports using Excel.\n• Supported a transformation pilot across five units.\n• Facilitated weekly workstream meetings.\nSKILLS\nExcel, Power BI\nEDUCATION\nBachelor of Business Administration";
 const StandardURL = globalThis.URL;
@@ -38,10 +40,61 @@ function approve() {
 beforeEach(() => {
   vi.stubGlobal("URL", class extends StandardURL { static createObjectURL = vi.fn(() => "blob:synthetic-reviewed-cv"); static revokeObjectURL = vi.fn(); });
   vi.clearAllMocks(); mocks.auth.user = null; mocks.auth.loading = false; mocks.list.mockResolvedValue([]); sessionStorage.clear(); localStorage.clear();
+  clearCheckRecovery();
+  mocks.preview.mockResolvedValue({ blob: new Blob(['%PDF fictional preview bytes'], { type: 'application/pdf' }), pageCount: 1 });
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("six-step free CV check", () => {
+  it('downloads the exact PDF bytes previewed before approval and revokes the preview after edits', async () => {
+    show(); await toApproval();
+    const pdf = screen.getByRole('button', { name: 'Download PDF' });
+    expect(pdf).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Preview current PDF' }));
+    await waitFor(() => expect(screen.getByTitle('Exact PDF preview before approval')).toBeInTheDocument());
+    expect(screen.getByTitle('Exact PDF preview before approval')).toHaveAttribute('src', 'blob:synthetic-reviewed-cv');
+    approve(); expect(pdf).toBeEnabled(); fireEvent.click(pdf);
+    await waitFor(() => expect(mocks.download).toHaveBeenCalledTimes(1));
+    const preview = await mocks.preview.mock.results[0].value;
+    expect(mocks.download.mock.calls[0][0]).toBe(preview.blob);
+    fireEvent.click(screen.getByRole('button', { name: 'Back to your review' }));
+    const field = screen.getByLabelText('Your CV to review') as HTMLTextAreaElement;
+    fireEvent.change(field, { target: { value: field.value + '\nUpdated verified wording.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
+    expect(screen.queryByTitle('Exact PDF preview before approval')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:synthetic-reviewed-cv');
+  });
+  it('keeps DOCX and TXT approval available when PDF exceeds the chosen page target', async () => {
+    mocks.preview.mockResolvedValue({ blob: new Blob(['%PDF overlong synthetic layout']), pageCount: 3 });
+    show(); await toApproval(); fireEvent.click(screen.getByRole('button', { name: 'Preview current PDF' }));
+    await waitFor(() => expect(screen.getByText(/Above your selected maximum/)).toBeInTheDocument());
+    approve();
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Download DOCX' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();
+  });
+  it('restores a guest review after visiting another page, while clearing its approval', async () => {
+    const view = show(); await toApproval(); approve();
+    const reviewed = document.querySelector('.check-final-document')?.textContent;
+    view.unmount(); show();
+    expect(screen.getByText('Your draft is back. Read it again before you approve a new download.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
+    expect(document.querySelector('.check-final-document')?.textContent).toBe(reviewed);
+    expect(screen.getByLabelText(/I reviewed the complete CV and vacancy/)).not.toBeChecked();
+  });
+  it('omits only deliberately selected whole paragraphs and supports undo', async () => {
+    show(); await toReview();
+    const field = screen.getByLabelText('Your CV to review') as HTMLTextAreaElement;
+    const full = field.value + '\n\nINTERESTS\nFictional chess club.';
+    fireEvent.change(field, { target: { value: full } });
+    fireEvent.click(screen.getByText('Choose whole paragraphs to leave out'));
+    fireEvent.click(screen.getByLabelText(/Leave out paragraph 2/));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove selected paragraphs' }));
+    expect(field.value).toBe(full.split('\n\n')[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Undo paragraph selection' }));
+    expect(field.value).toBe(full);
+  });
   it("runs a real evidence check and permits a guest TXT only after review without quota, storage or network writes", async () => {
     const storage = vi.spyOn(Storage.prototype, "setItem"), fetch = vi.spyOn(globalThis, "fetch");
     show(); await toApproval();

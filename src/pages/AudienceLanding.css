@@ -1,0 +1,53 @@
+.audience-page { --ap-ink:#172338; --ap-blue:#2850df; --ap-muted:#566176; width:min(1180px,calc(100% - 48px)); margin:36px auto 70px; color:var(--ap-ink); overflow-wrap:anywhere; }
+.audience-page * { box-sizing:border-box; }
+.audience-page :is(h1,h2,h3,p,figure) { margin:0; }
+.audience-page :is(a,button):focus-visible { outline:3px solid var(--ap-blue); outline-offset:4px; }
+.audience-switch { display:flex; flex-wrap:wrap; gap:6px; padding:5px; width:fit-content; background:#eef1f7; border:1px solid #dce2ec; border-radius:10px; }
+.audience-switch a { min-height:42px; display:flex; align-items:center; padding:9px 17px; border-radius:7px; color:var(--ap-muted); font-size:12px; font-weight:600; text-decoration:none; }
+.audience-switch a[aria-current=page] { background:#fff; color:var(--ap-blue); box-shadow:0 2px 8px #14274d0c; }
+.audience-hero { display:grid; grid-template-columns:1fr .95fr; align-items:center; gap:65px; padding:65px 0 70px; }
+.audience-eyebrow { color:var(--ap-blue); font-size:10px; font-weight:700; line-height:1.8; letter-spacing:.13em; }
+.audience-copy h1 { font-size:clamp(38px,4.7vw,61px); line-height:1.09; font-weight:600; letter-spacing:-.052em; margin:21px 0 23px; max-width:600px; }
+.audience-intro { color:var(--ap-muted); font-size:15px; line-height:1.95; max-width:570px; }
+.audience-actions { display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin:28px 0 15px; }
+.audience-button { display:inline-flex; align-items:center; justify-content:center; gap:12px; border:1px solid #c5d1e9; border-radius:8px; padding:15px 19px; min-height:48px; background:#fff; color:var(--ap-blue); text-decoration:none; font-size:13px; font-weight:600; }
+.audience-button--primary { color:#fff; background:var(--ap-blue); border-color:var(--ap-blue); }
+.audience-button:hover { box-shadow:0 5px 15px #17233812; }
+.audience-link { display:inline-flex; gap:8px; align-items:center; min-height:44px; color:var(--ap-blue); text-decoration:none; font-size:12px; font-weight:600; }
+.audience-small { font-size:11px; line-height:1.9; color:var(--ap-muted); max-width:520px; }
+.audience-workspace { transform:rotate(1deg); border:1px solid #d9dfeb; border-radius:13px; background:#fff; box-shadow:0 26px 65px #19376512; overflow:hidden; }
+.audience-workspace figcaption { display:flex; justify-content:space-between; gap:12px; padding:15px 20px; background:#f1f0fa; color:#555776; font-size:9px; letter-spacing:.06em; line-height:1.9; }
+.audience-workspace-bar { display:flex; align-items:center; justify-content:space-between; padding:16px 25px; border-bottom:1px solid #e2e6ed; }
+.audience-workspace-bar > span:first-child { font-size:20px; letter-spacing:-.04em; font-weight:650; }
+.audience-workspace-bar > span:last-child { display:flex; align-items:center; gap:7px; color:var(--ap-muted); font-size:10px; }
+.audience-workspace-body { padding:26px; }
+.audience-workspace-body h2 { font-size:23px; font-weight:600; letter-spacing:-.035em; line-height:1.4; margin:11px 0 21px; }
+.audience-evidence { border:1px solid #e0e4ed; border-radius:7px; background:#f7f8fb; padding:17px; margin-top:12px; }
+.audience-evidence span { color:var(--ap-muted); font-size:9px; letter-spacing:.09em; font-weight:650; }
+.audience-evidence p { font-size:13px; line-height:1.9; margin-top:8px; }
+.audience-evidence--fact { border-left:3px solid #5876df; background:#f3f6ff; }
+.audience-evidence small { display:flex; align-items:center; gap:6px; font-size:10px; color:#32548b; margin-top:11px; }
+.audience-question { display:flex; align-items:flex-start; gap:10px; color:#775830; padding:18px 0; }
+.audience-question svg { flex-shrink:0; margin-top:3px; }
+.audience-question p { font-size:11px; line-height:1.9; }
+.audience-next { display:flex; gap:12px; border-top:1px solid #e0e5ee; padding-top:17px; color:var(--ap-blue); }
+.audience-next strong { font-size:11px; color:var(--ap-ink); }
+.audience-next p { color:var(--ap-muted); font-size:10px; line-height:1.8; margin-top:5px; }
+.audience-path { display:grid; grid-template-columns:.8fr 1.2fr; gap:70px; padding:53px 0; border-top:1px solid #dce2ec; }
+.audience-path h2 { font-size:40px; line-height:1.15; font-weight:600; letter-spacing:-.04em; margin:14px 0 18px; }
+.audience-path > div > p:last-child { color:var(--ap-muted); font-size:13px; line-height:1.9; max-width:400px; }
+.audience-path ol { list-style:none; padding:0; margin:0; display:grid; align-content:center; }
+.audience-path li { display:flex; gap:19px; padding:23px 0; border-bottom:1px solid #dce2ec; }
+.audience-path li span { color:var(--ap-blue); font-size:11px; padding-top:3px; font-weight:650; flex-shrink:0; min-width:1.8em; white-space:nowrap; }
+.audience-path li h3 { font-size:17px; line-height:1.6; font-weight:550; letter-spacing:-.02em; }
+.audience-features { display:grid; grid-template-columns:repeat(3,1fr); gap:19px; margin:15px 0 59px; }
+.audience-features article { border:1px solid #dce2ec; border-radius:10px; padding:28px; background:#f8f9fc; }
+.audience-features svg { color:var(--ap-blue); margin-bottom:22px; }
+.audience-features h2 { font-size:19px; font-weight:600; letter-spacing:-.02em; margin-bottom:14px; }
+.audience-features p { color:var(--ap-muted); font-size:12px; line-height:1.95; }
+.audience-final { display:flex; align-items:center; justify-content:space-between; gap:30px; padding:38px; border-radius:12px; background:#edf0fb; }
+.audience-final h2 { font-size:32px; line-height:1.2; letter-spacing:-.04em; font-weight:600; margin:12px 0; }
+.audience-final p:last-child { font-size:12px; line-height:1.9; color:var(--ap-muted); max-width:620px; }
+.audience-final > a { flex-shrink:0; }
+@media(max-width:900px) { .audience-hero { gap:30px; } .audience-workspace { transform:none; } .audience-path { gap:35px; } .audience-features article { padding:22px; } .audience-final { align-items:flex-start; flex-direction:column; } }
+@media(max-width:650px) { .audience-page { width:calc(100% - 32px); margin-top:23px; } .audience-switch { width:100%; } .audience-switch a { flex:1; padding:9px 10px; text-align:center; justify-content:center; font-size:11px; } .audience-hero { grid-template-columns:1fr; gap:35px; padding:39px 0; } .audience-copy h1 { font-size:41px; } .audience-path { grid-template-columns:1fr; gap:15px; padding:35px 0; } .audience-path h2 { font-size:34px; } .audience-features { grid-template-columns:1fr; margin-bottom:35px; } .audience-final { padding:28px 23px; } .audience-final h2 { font-size:29px; } .audience-workspace-body { padding:23px; } }

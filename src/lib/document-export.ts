@@ -1,9 +1,10 @@
-import fontUrl from "./document-noto-sans.ttf?url";
+import fontUrl from "./document-dejavu-sans.ttf?url";
 import { type ApplicationPack, mvpSupabase } from "./cv-database";
 import { downloadBlob, safeDocumentFilename } from "./document-download";
 import { validateCvText } from "./cv-extraction";
 
 export type DocumentFormat = "pdf" | "docx" | "txt";
+export type ReviewedPdfPreview = { blob: Blob; pageCount: number };
 let fontBase64: Promise<string> | undefined;
 
 async function loadPdfFont(): Promise<string> {
@@ -55,15 +56,21 @@ export async function createReviewedCvBlob(reviewedText: string, format: Documen
     return Packer.toBlob(doc);
   }
   if (format !== "pdf") throw new Error("Choose PDF, DOCX or TXT for your CV download.");
+  return (await createReviewedPdfPreview(text, title)).blob;
+}
+
+/** Exact PDF bytes for both preview and download; generating a preview grants no approval. */
+export async function createReviewedPdfPreview(reviewedText: string, title: string): Promise<ReviewedPdfPreview> {
+  const text = validateCvText(reviewedText);
   const { jsPDF } = await import("jspdf");
   const pdf = new jsPDF({ unit: "mm", format: "a4", compress: true });
-  pdf.addFileToVFS("NotoSans-Regular.ttf", await loadPdfFont());
-  pdf.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
-  pdf.setFont("NotoSans", "normal");
+  pdf.addFileToVFS("DejaVuSans.ttf", await loadPdfFont());
+  pdf.addFont("DejaVuSans.ttf", "DejaVuSans", "normal");
+  pdf.setFont("DejaVuSans", "normal");
   pdf.setFontSize(11);
   const metadata = pdf.getFont().metadata as { characterToGlyph?: (code: number) => number };
   if (!metadata.characterToGlyph) throw new Error("The PDF font is unavailable. Download DOCX/TXT or retry.");
-  const unsupported = [...new Set(text)].filter((character) => {
+  const unsupported = [...new Set(text + pdf.processArabic(text))].filter((character) => {
     const code = character.codePointAt(0)!;
     return !/\s/u.test(character) && metadata.characterToGlyph!(code) === 0;
   });
@@ -73,7 +80,7 @@ export async function createReviewedCvBlob(reviewedText: string, format: Documen
   const margin = 18;
   const width = pdf.internal.pageSize.getWidth() - margin * 2;
   const bottom = pdf.internal.pageSize.getHeight() - margin;
-  const lineHeight = 5.3;
+  const lineHeight = 5.4;
   let y = margin;
   for (const paragraph of text.split("\n")) {
     const lines: string[] = paragraph ? pdf.splitTextToSize(paragraph.replace(/\t/g, "    "), width) : [""];
@@ -84,7 +91,7 @@ export async function createReviewedCvBlob(reviewedText: string, format: Documen
     }
   }
   pdf.setProperties({ title: `Reviewed CV - ${title}`, creator: "Jobvance" });
-  return new Blob([pdf.output("arraybuffer")], { type: "application/pdf" });
+  return { blob: new Blob([pdf.output("arraybuffer")], { type: "application/pdf" }), pageCount: pdf.getNumberOfPages() };
 }
 
 export async function downloadPack(pack: ApplicationPack, format: DocumentFormat): Promise<void> {

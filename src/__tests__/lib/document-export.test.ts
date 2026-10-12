@@ -12,7 +12,7 @@ vi.mock("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url", async () => {
   const { resolve } = await import("node:path");
   return { default: pathToFileURL(resolve("node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs")).href };
 });
-import { createPackBlob, downloadPack } from "@/lib/document-export";
+import { createPackBlob, downloadPack, createReviewedPdfPreview } from "@/lib/document-export";
 
 const text = "Zoë Martin — product manager\nEight years of product delivery and stakeholder management.\nLed three teams without inventing skills or changing dates.";
 const pack: ApplicationPack = { id: "pack-1", user_id: "owner", resume_id: "cv-1", request_id: "request-1", job_title: "Product Manager", company: "Example", job_url: null, job_description: "Product management", original_text: text, tailored_text: text, matched_keywords: ["product"], missing_keywords: ["Python"], status: "approved", created_at: "2026-10-10T10:00:00Z" };
@@ -21,11 +21,20 @@ beforeAll(() => vi.stubGlobal("DOMParser", new JSDOM().window.DOMParser));
 beforeEach(async () => {
   vi.clearAllMocks();
   mocks.getUser.mockResolvedValue({ data: { user: { id: "owner" } }, error: null });
-  const font = await readFile("src/lib/document-noto-sans.ttf");
+  const font = await readFile("src/lib/document-dejavu-sans.ttf");
   vi.stubGlobal("fetch", vi.fn(async () => new Response(font, { status: 200 })));
 });
 
 describe("reviewed CV exports", () => {
+  it('renders mixed Arabic and Latin names with shaped glyph coverage and reports actual page count', async () => {
+    const cv = 'محمد أحمد / Mohamed Ahmed\n' + text;
+    const preview = await createReviewedPdfPreview(cv, 'Graduate Analyst');
+    expect(preview.pageCount).toBe(1);
+    const roundtrip = await extractCvText(new File([preview.blob], 'CV.pdf'));
+    expect(roundtrip).toContain('Mohamed Ahmed');
+    expect(roundtrip.normalize('NFKC')).toContain('محمد أحمد');
+    expect(preview.blob.size).toBeGreaterThan(1000);
+  });
   it("exports exactly the approved Unicode text as TXT, without adding missing skills", async () => {
     const blob = await createPackBlob(pack, "txt");
     expect(await blob.text()).toBe(text);

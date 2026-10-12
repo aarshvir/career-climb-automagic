@@ -1,9 +1,10 @@
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 
 export function Brand() {
   return <Link to="/" className="jv-brand" aria-label="Jobvance home">
@@ -11,9 +12,11 @@ export function Brand() {
     <span>jobvance<span style={{color:"var(--jv-blue)"}}>.</span></span>
   </Link>;
 }
-const links = [["/check","Free CV check"],["/loop","Job Loop"],["/how-it-works","How it works"],["/pilot","Guided pilot"]];
+const links = [["/check","Free CV check"],["/loop","Job Loop"],["/how-it-works","How it works"],["/pricing","Plans"]];
 export default function MvpHeader() {
   const { user, loading, signOut } = useAuth();
+  const previousOwner = useRef(user?.id ?? null);
+  useEffect(() => { if (previousOwner.current && previousOwner.current !== user?.id) clearLoopWorkingDraft(); previousOwner.current = user?.id ?? null; }, [user?.id]);
   const client = useQueryClient();
   const location = useLocation();
   const [error,setError] = useState(""), [busy,setBusy] = useState(false);
@@ -21,10 +24,10 @@ export default function MvpHeader() {
   const toggle = useRef<HTMLButtonElement>(null);
   const open = openPath === location.pathname;
   const account = loading ? <span className="text-xs text-muted-foreground">Checking account…</span> : user ? <>
-    <Button asChild size="sm"><Link to="/dashboard">Workspace <ArrowUpRight size={14} /></Link></Button>
+    <Button asChild size="sm"><Link to="/loop">My Job Loop <ArrowUpRight size={14} /></Link></Button>
     <Button size="sm" variant="ghost" disabled={busy} onClick={async () => {
       setBusy(true);setError("");
-      try { await signOut(); client.clear(); setOpenPath(null); }
+      try { await signOut(); clearLoopWorkingDraft(); client.clear(); setOpenPath(null); }
       catch { setError("Sign out failed. Please retry."); }
       finally { setBusy(false); }
     }}>{busy ? "Signing out…" : "Sign out"}</Button>

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkReviewKey, clearRetainedCheck, readRetainedCheck, retainCheckForGoogle, takeCheckAuthReturn, takeRetainedCheck, validateCheckDraft, type CheckDraft } from '@/lib/check-draft';
+import { checkReviewKey, clearRetainedCheck, readRetainedCheck, retainCheckForGoogle, takeCheckAuthReturn, takeRetainedCheck, validateCheckDraft, clearCheckRecovery, readCheckRecovery, rememberCheckRecovery, type CheckDraft } from '@/lib/check-draft';
 
 const DRAFT_KEY = 'jobvance_check_oauth_draft_v1';
 const RETURN_KEY = 'jobvance_check_oauth_return_v1';
@@ -9,10 +9,28 @@ const cv = 'Synthetic candidate. Built Python reports from generated data and do
 const draft: CheckDraft = { jobTitle: 'Data analyst', company: 'Fictional company', sourceText: cv, reviewedText: cv, jobDescription: 'A fictional role requires Python reporting, documentation and careful work with generated data. No application is submitted.' };
 function putEnvelope(value: unknown) { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(value)); sessionStorage.setItem(RETURN_KEY, '/check'); }
 
-beforeEach(() => { sessionStorage.clear(); localStorage.clear(); });
+beforeEach(() => { clearCheckRecovery(); sessionStorage.clear(); localStorage.clear(); });
 afterEach(() => { vi.restoreAllMocks(); sessionStorage.clear(); localStorage.clear(); });
 
 describe('guest checking defaults to no CV storage', () => {
+  it('preserves an incomplete draft for route navigation without writing browser storage', () => {
+    const set = vi.spyOn(Storage.prototype, 'setItem');
+    const value = { draft: { ...draft, jobDescription: '' }, step: 3, cvReady: true, filename: 'fictional.txt', ownerId: null };
+    rememberCheckRecovery(value, false, NOW);
+    expect(readCheckRecovery(null, NOW + 1000)?.value).toEqual(value);
+    expect(readCheckRecovery(null, NOW + 1000)?.storageConsented).toBe(false);
+    expect(set).not.toHaveBeenCalled();
+    expect(readCheckRecovery('different-account', NOW + 1000)).toBeNull();
+  });
+  it('retains across refresh only with consent, expires and clears on explicit discard', () => {
+    const value = { draft, step: 6, cvReady: true, filename: '', ownerId: null };
+    rememberCheckRecovery(value, true, NOW);
+    expect(readCheckRecovery(null, NOW + 1000)?.storageConsented).toBe(true);
+    expect(readCheckRecovery(null, NOW + TTL)).toBeNull();
+    rememberCheckRecovery(value, true, NOW); clearCheckRecovery();
+    expect(readCheckRecovery(null, NOW + 1)).toBeNull();
+    expect(localStorage.length).toBe(0);
+  });
   it('validation and review-key construction do not read or write browser storage', () => {
     const get = vi.spyOn(Storage.prototype, 'getItem');
     const set = vi.spyOn(Storage.prototype, 'setItem');

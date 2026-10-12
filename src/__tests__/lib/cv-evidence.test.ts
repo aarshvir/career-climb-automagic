@@ -4,6 +4,31 @@ import { analyzeCvEvidence, prioritizeCvForVacancy } from '@/lib/cv-evidence';
 const status = (cv: string, vacancy: string) => analyzeCvEvidence(cv, vacancy).requirements[0]?.status;
 
 describe('literal CV evidence comparison', () => {
+  it('keeps a completed project stable when an unrelated skills item changes', () => {
+    const cv = 'EDUCATION\nBSc Computer Science, expected graduation June 2027.\nPROJECTS\n- Developed Python reports for a university team project.\n- Supported data cleaning. I did not lead the team.\nSKILLS\n';
+    const vacancy = 'Develop Python reports.';
+    const a = analyzeCvEvidence(cv + 'Python, SQL coursework, Excel', vacancy).requirements[0];
+    const b = analyzeCvEvidence(cv + 'SQL coursework, Excel', vacancy).requirements[0];
+    expect(a.status).toBe('direct'); expect(b.status).toBe('direct');
+    expect(a.evidence).toEqual(b.evidence);
+    expect(a.evidence[0].contextKind).toBe('academic_project');
+    expect(a.explanation).toMatch(/does not establish professional/);
+  });
+  it('keeps sponsorship and deadlines separate from unrelated CV achievements', () => {
+    const report = analyzeCvEvidence('I did not lead the team.\nLed a team of 30 people.', 'Visa sponsorship is not available.\nApplications close 30 November 2026.');
+    expect(report.requirements.map(item => item.category)).toEqual(['condition', 'deadline']);
+    expect(report.requirements.every(item => item.status === 'review' && item.evidence.length === 0)).toBe(true);
+    expect(report.requirements[0].question).toMatch(/employer condition/);
+    expect(report.requirements[1].question).toMatch(/time zone/);
+    expect(report.requirements[1].explanation).not.toMatch(/team size|budget/);
+  });
+  it('reviews graduation conditions as dates and keeps academic work distinct from professional experience', () => {
+    const dated = analyzeCvEvidence('EDUCATION\nBachelor degree in Computer Science, expected graduation June 2027.\nLed a team of 2027 people.', 'Bachelor degree in Computer Science completed by August 2027.').requirements[0];
+    expect(dated.status).toBe('review'); expect(dated.category).toBe('qualification');
+    expect(dated.explanation).toMatch(/graduation date/); expect(dated.explanation).not.toMatch(/team size|budget/);
+    expect(dated.evidence).toHaveLength(1);
+    expect(status('PROJECTS\nDeveloped Python reports in an academic project.', 'Professional experience in Python reports required.')).not.toBe('direct');
+  });
   it('returns only counts, with an explicit English and unverified-assertion scope', () => {
     const report = analyzeCvEvidence('Skills: SQL', 'SQL required.');
     expect(report.summary).toEqual({ total: 1, direct: 1, partial: 0, missing: 0, review: 0 });

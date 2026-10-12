@@ -1,5 +1,5 @@
 import { Suspense, lazy, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,7 @@ const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
   ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const Workspace = lazy(() => import("@/pages/Workspace"));
 const JobLoop = lazy(() => import("@/pages/JobLoop"));
+const AudienceLanding = lazy(() => import("@/pages/AudienceLanding"));
 const PilotLanding = lazy(() => import("@/pages/PilotLanding"));
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
 const client = new QueryClient({
@@ -37,11 +38,12 @@ function ProtectedWorkspace() {
 }
 function ProtectedJobLoop() {
   const { user, loading } = useAuth();
+  const location = useLocation();
   // Capture the presence only; the sealed ticket belongs to the page's memory.
   // An expired auth session can sign in in another tab without discarding it.
   const [mailboxReturn] = useState(() => new URLSearchParams(window.location.hash.slice(1)).has('gmail_ticket'));
   if (loading) return <p className="p-8" role="status">Opening your Job Loop…</p>;
-  return user || mailboxReturn ? <JobLoop /> : <Navigate to="/auth?next=%2Floop" replace />;
+  return user || mailboxReturn ? <JobLoop /> : <Navigate to={`/auth?next=${encodeURIComponent(`/loop${location.search}`)}`} replace />;
 }
 export default function MvpApp() {
   return (
@@ -63,6 +65,9 @@ export default function MvpApp() {
                     <Route path="/pilot" element={<PilotLanding />} />
                     <Route path="/check" element={<CvCheck />} />
                     <Route path="/loop" element={<ProtectedJobLoop />} />
+                    <Route path="/for-students" element={<AudienceLanding audience="student" />} />
+                    <Route path="/for-mba" element={<AudienceLanding audience="mba" />} />
+                    <Route path="/for-career-switchers" element={<AudienceLanding audience="professional" />} />
                     <Route
                       path="/pricing"
                       element={<ProductPage kind="pricing" />}

@@ -163,16 +163,18 @@ describe('cloud loop portable document rendering', () => {
     expect(new TextDecoder().decode(rendered.artifacts.txt.bytes)).toBe(packet.cvText);
     for (const a of Object.values(rendered.artifacts)) { expect(a.sha256).toMatch(/^[0-9a-f]{64}$/); expect(a.byteSize).toBe(a.bytes.length); expect(a.filename.includes('/')).toBe(false); expect(a.filename.includes('\\')).toBe(false); }
   });
-  it('holds oversized PDFs using actual page count and never invents numbers or grants approval', async () => {
+  it('blocks only oversized PDF downloads using actual page count and never grants approval', async () => {
     const packet = await composePacket({ profile, claims, opportunity, runId: 'run-1' });
     const rendered = await renderPacket({ profile, packet: { ...packet, cvText: Array.from({ length: 130 }, () => project).join('\n') } });
-    expect(rendered.pageCount).toBeGreaterThan(1); expect(rendered.packet.status).toBe('held'); expect(rendered.holdReasons).toContain('PAGE_TARGET_EXCEEDED');
+    expect(rendered.pageCount).toBeGreaterThan(1); expect(rendered.packet.status).toBe('review_required'); expect(rendered.packet.formatStatus?.pdf?.reason).toBe('PAGE_TARGET_EXCEEDED');
+    expect(rendered.packet.formatStatus?.pdf?.ready).toBe(false); expect(rendered.packet.formatStatus?.txt?.ready).toBe(true);
     expect(rendered.packet.approvedAt).toBeNull();
   });
   it('reports unsupported PDF glyphs honestly while retaining Unicode in portable DOCX/TXT', async () => {
     const packet = await composePacket({ profile, claims, opportunity, runId: 'run-1' });
     const rendered = await renderPacket({ profile, packet: { ...packet, cvText: `${packet.cvText}\n工程师` } });
-    expect(rendered.pageCount).toBeNull(); expect(rendered.holdReasons).toContain('PDF_FONT_UNSUPPORTED'); expect(rendered.packet.status).toBe('held');
+    expect(rendered.pageCount).toBeNull(); expect(rendered.packet.formatStatus?.pdf?.reason).toBe('PDF_FONT_UNSUPPORTED'); expect(rendered.packet.status).toBe('review_required');
+    expect(rendered.packet.formatStatus?.docx?.ready).toBe(true); expect(rendered.packet.formatStatus?.txt?.ready).toBe(true);
     expect(new TextDecoder().decode(rendered.artifacts.txt.bytes)).toContain('工程师');
   });
 });

@@ -14,6 +14,7 @@ export async function renderPacket({ packet, profile, pageTarget = profile.pageT
   if (pageTarget !== 1 && pageTarget !== 2) throw new Error('Choose a one- or two-page maximum.');
   const holds = [...packet.holdReasons];
   const artifacts: Record<string, LoopRenderedArtifact> = {};
+  const formatStatus: NonNullable<LoopPacket['formatStatus']> = {};
   const stem = filename(packet.title);
   const excludes = profile.excludedTerms.filter(Boolean);
   const texts = [packet.cvText, packet.evidenceText, packet.coverLetterText, packet.messageText, packet.emailBody, packet.connectionNote];
@@ -26,11 +27,11 @@ export async function renderPacket({ packet, profile, pageTarget = profile.pageT
   if (!holds.includes('CV_TEXT_LENGTH_INVALID')) {
     try {
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
-      pdf.addFileToVFS('NotoSans-Regular.ttf', LOOP_FONT_BASE64);
-      pdf.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
-      pdf.setFont('NotoSans', 'normal'); pdf.setFontSize(11);
+      pdf.addFileToVFS('DejaVuSans.ttf', LOOP_FONT_BASE64);
+      pdf.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+      pdf.setFont('DejaVuSans', 'normal'); pdf.setFontSize(11);
       const font = pdf.getFont().metadata as { characterToGlyph?: (code: number) => number };
-      if (!font.characterToGlyph || [...new Set(packet.cvText)].some(c => !/\s/u.test(c) && font.characterToGlyph!(c.codePointAt(0)!) === 0)) throw new Error('FONT_UNSUPPORTED');
+      if (!font.characterToGlyph || [...new Set(packet.cvText + pdf.processArabic(packet.cvText))].some(c => !/\s/u.test(c) && font.characterToGlyph!(c.codePointAt(0)!) === 0)) throw new Error('FONT_UNSUPPORTED');
       const margin = 18, lineHeight = 5.4;
       const width = pdf.internal.pageSize.getWidth() - 2 * margin;
       const bottom = pdf.internal.pageSize.getHeight() - margin;
@@ -43,17 +44,19 @@ export async function renderPacket({ packet, profile, pageTarget = profile.pageT
         }
       }
       pageCount = pdf.getNumberOfPages();
-      if (pageCount > pageTarget) holds.push('PAGE_TARGET_EXCEEDED');
+      formatStatus.pdf = { ready: pageCount <= pageTarget, pageCount, ...(pageCount > pageTarget ? { reason: 'PAGE_TARGET_EXCEEDED' } : {}) };
       artifacts.pdf = await artifact(new Uint8Array(pdf.output('arraybuffer')), 'application/pdf', `cv-${stem}.pdf`);
-    } catch (error) { holds.push(error instanceof Error && error.message === 'FONT_UNSUPPORTED' ? 'PDF_FONT_UNSUPPORTED' : 'PDF_RENDER_FAILED'); }
+    } catch (error) { formatStatus.pdf = { ready: false, pageCount: null, reason: error instanceof Error && error.message === 'FONT_UNSUPPORTED' ? 'PDF_FONT_UNSUPPORTED' : 'PDF_RENDER_FAILED' }; }
     try {
       const doc = new Document({ styles: { default: { document: { run: { font: 'Arial', size: 22 }, paragraph: { spacing: { after: 80, line: 276 } } } } }, sections: [{ properties: { page: { margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 } } }, children: packet.cvText.split(/\r?\n/).map(line => new Paragraph({ children: [new TextRun(line)], widowControl: true })) }] });
       artifacts.docx = await artifact(new Uint8Array(await Packer.toArrayBuffer(doc)), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', `cv-${stem}.docx`);
-    } catch { holds.push('DOCX_RENDER_FAILED'); }
+      formatStatus.docx = { ready: true };
+    } catch { formatStatus.docx = { ready: false, reason: 'DOCX_RENDER_FAILED' }; }
     artifacts.txt = await artifact(new TextEncoder().encode(packet.cvText), 'text/plain;charset=utf-8', `cv-${stem}.txt`);
+    formatStatus.txt = { ready: true };
     artifacts.report = await artifact(new TextEncoder().encode(packet.evidenceText), 'text/plain;charset=utf-8', `review-${stem}.txt`);
     artifacts.letter = await artifact(new TextEncoder().encode(packet.coverLetterText), 'text/plain;charset=utf-8', `cover-letter-${stem}.txt`);
   }
   const reasons = [...new Set(holds)];
-  return { packet: { ...packet, pageCount, holdReasons: reasons, status: reasons.length ? 'held' : packet.status, approvedAt: reasons.length ? null : packet.approvedAt }, artifacts, pageCount, holdReasons: reasons };
+  return { packet: { ...packet, formatStatus, pageCount, holdReasons: reasons, status: reasons.length ? 'held' : packet.status, approvedAt: reasons.length ? null : packet.approvedAt }, artifacts, pageCount, holdReasons: reasons };
 }

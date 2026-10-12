@@ -1,4 +1,5 @@
 import type { LoopAction, LoopAssessment, LoopClaim, LoopClaimInput, LoopContact, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopProfileInput } from './job-loop-types.ts';
+import { normalizeFollowUp, validateScheduleInput } from './job-loop-schedule.ts';
 
 const CLAIM_KINDS = ['employment', 'internship', 'academic_project', 'personal_project', 'volunteering', 'education', 'skill'] as const;
 const STATUSES = ['saved', 'prepared', 'applied', 'interview', 'offer', 'rejected', 'withdrawn'] as const;
@@ -142,21 +143,26 @@ export function validateAction(value: unknown): LoopAction {
   if (!value || typeof value !== 'object' || !('action' in value)) fail('Missing action.');
   const action = (value as { action: unknown }).action;
   const keys: Record<string, string[]> = {
-    get: [], save_profile: ['expectedVersion', 'profile', 'saveConsent'], suggest_claims: [], save_claim: ['expectedVersion', 'id', 'claim'], withdraw_claim: ['expectedVersion', 'id'], add_opportunity: ['expectedVersion', 'opportunity'], update_opportunity: ['expectedVersion', 'id', 'status', 'followUpAt', 'notes'], start_run: ['requestId', 'provider', 'model', 'modelConsent', 'inboxConsent'], resume_run: ['runId'], cancel_run: ['runId'], approve_packet: ['packetId', 'inputHash', 'reviewedText', 'confirmFacts', 'confirmDisclosure'], download: ['packetId', 'format'], gmail_connect: ['allowDrafts'], gmail_preview: ['ticket'], gmail_finalize: ['ticket', 'confirmMailbox'], gmail_disconnect: [], gmail_create_draft: ['packetId', 'requestId', 'confirmRecipientAndAttachment'],
+    get: [], save_profile: ['expectedVersion', 'profile', 'saveConsent'], suggest_claims: [], save_claim: ['expectedVersion', 'id', 'claim'], withdraw_claim: ['expectedVersion', 'id'], add_opportunity: ['expectedVersion', 'opportunity'], update_opportunity: ['expectedVersion', 'id', 'status', 'followUpAt', 'notes'], start_run: ['requestId', 'provider', 'model', 'modelConsent', 'inboxConsent'], resume_run: ['runId'], cancel_run: ['runId'], approve_packet: ['packetId', 'inputHash', 'reviewedText', 'confirmFacts', 'confirmDisclosure'], download: ['packetId', 'format'], preview_packet: ['packetId','inputHash'], save_schedule:['expectedScheduleVersion','schedule','recurringConsent'], pause_schedule:['expectedScheduleVersion'],cancel_schedule:['expectedScheduleVersion'],erase_loop:['confirmErase'],erase_self:['confirmErase'],request_support:['category','message'], gmail_connect: ['allowDrafts'], gmail_preview: ['ticket'], gmail_finalize: ['ticket', 'confirmMailbox'], gmail_disconnect: [], gmail_create_draft: ['packetId', 'requestId', 'confirmRecipientAndAttachment'],
   };
   if (typeof action !== 'string' || !Object.prototype.hasOwnProperty.call(keys, action)) fail('Unsupported action. Sending and application submission are unavailable.');
   const a = obj(value, ['action', ...keys[action]]);
   if (keys[action].some(key => !(key === 'id' && action === 'save_claim') && !Object.prototype.hasOwnProperty.call(a, key))) fail('An action is missing required inputs.');
   if ('expectedVersion' in a) version(a.expectedVersion);
+  if ('expectedScheduleVersion' in a) version(a.expectedScheduleVersion);
   for (const name of ['id', 'runId', 'packetId']) if (name in a) reference(a[name]);
   if ('requestId' in a && (typeof a.requestId !== 'string' || !UUID.test(a.requestId))) fail('Invalid request ID.');
-  for (const name of ['saveConsent', 'modelConsent', 'inboxConsent', 'confirmFacts', 'confirmDisclosure', 'allowDrafts', 'confirmMailbox', 'confirmRecipientAndAttachment']) if (name in a) bool(a[name]);
+  for (const name of ['saveConsent', 'modelConsent', 'inboxConsent', 'confirmFacts', 'confirmDisclosure', 'allowDrafts', 'confirmMailbox', 'confirmRecipientAndAttachment','recurringConsent','confirmErase']) if (name in a) bool(a[name]);
   if ('ticket' in a) a.ticket = text(a.ticket, 1, 16000);
   if (action === 'save_profile') { a.profile = validateProfile(a.profile); if (!a.saveConsent) fail('Explicit private-storage consent is required.'); }
   if (action === 'add_opportunity') a.opportunity = validateOpportunity(a.opportunity);
   if (action === 'save_claim') { obj(a.claim, ['sourceKind', 'sourceQuote', 'phrasing', 'context', 'kind', 'resultStatus', 'confirmed', 'shareable']); }
   if (action === 'start_run') { enumeration(a.provider, ['rules', 'anthropic', 'openai', 'moonshot']); text(a.model, 1, 150); if (a.provider !== 'rules' && !a.modelConsent) fail('Provider processing consent is required.'); }
-  if (action === 'update_opportunity') { enumeration(a.status, STATUSES); text(a.notes, 0, 5000); if (a.followUpAt !== null && (typeof a.followUpAt !== 'string' || !Number.isFinite(Date.parse(a.followUpAt)) || a.followUpAt.length > 40)) fail('Invalid follow-up date.'); }
+  if (action === 'update_opportunity') { enumeration(a.status, STATUSES); text(a.notes, 0, 5000); a.followUpAt=normalizeFollowUp(a.followUpAt as string|null); }
+  if (action === 'save_schedule') { a.schedule=validateScheduleInput(a.schedule); if(!a.recurringConsent)fail('Explicit recurring preparation permission is required.'); }
+  if ((action === 'erase_loop'||action==='erase_self') && !a.confirmErase) fail('Confirm erasing your private Job Loop record and generated documents.');
+  if (action==='request_support') { enumeration(a.category,['help','privacy','bug']); a.message=text(a.message,5,2000); }
+  if (action === 'preview_packet' && (typeof a.inputHash!=='string'||!/^[0-9a-f]{64}$/.test(a.inputHash)))fail('Choose the exact current packet to preview.');
   if (action === 'approve_packet') { text(a.reviewedText, 80, 60000); if (typeof a.inputHash !== 'string' || !/^[0-9a-f]{64}$/.test(a.inputHash) || !a.confirmFacts || !a.confirmDisclosure) fail('Input-bound factual and disclosure approval is required.'); }
   if (action === 'download') enumeration(a.format, ['pdf', 'docx', 'txt', 'report', 'letter']);
   return a as unknown as LoopAction;
@@ -229,15 +235,30 @@ export async function fingerprintLoopInputs(profile: LoopProfileInput, claims: L
   return [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 export type ComposeLoopPacketInput = { profile: LoopProfile; claims: LoopClaim[]; opportunity: LoopOpportunity; assessment?: LoopAssessment; selectedClaimIds?: string[]; runId: string; packetId?: string; inputHash?: string; createdAt?: string; model?: LoopPacket['model'] };
+/** A portable CV selects complete confirmed facts, never crops sentences or
+ * removes an employment/education context merely to improve keyword overlap. */
+export function boundedRulesClaimIds(profile:LoopProfile,claims:LoopClaim[],assessment:LoopAssessment):string[]{
+  const allowed=eligibleLoopClaims(profile,claims),ranked=assessment.claimIds.map(id=>allowed.find(claim=>claim.id===id)).filter((claim):claim is LoopClaim=>!!claim);
+  const selected:LoopClaim[]=[],contexts=new Set<string>();
+  for(const claim of ranked.filter(value=>['employment','internship','education'].includes(value.kind))){const key=`${claim.kind}:${claim.context}`;if(contexts.has(key))continue;contexts.add(key);
+    const same=ranked.filter(value=>value.kind===claim.kind&&value.context===claim.context);selected.push(same.find(value=>value.phrasing.length<=600)??same.reduce((a,b)=>a.phrasing.length<=b.phrasing.length?a:b));
+  }
+  const budget=profile.pageTarget===1?2600:5500;
+  let used=profile.name.length+profile.contactLine.length+160+selected.reduce((sum,claim)=>sum+claim.context.length+claim.phrasing.length+40,0);
+  for(const claim of ranked){if(selected.some(value=>value.id===claim.id))continue;const cost=claim.phrasing.length+(!selected.some(value=>value.kind===claim.kind&&value.context===claim.context)?claim.context.length+60:10);
+    if(selected.length>=16||used+cost>budget)continue;selected.push(claim);used+=cost;
+  }
+  return selected.map(claim=>claim.id);
+}
 export async function composePacket(input: ComposeLoopPacketInput): Promise<LoopPacket> {
   const { profile, opportunity } = input;
   const allowed = eligibleLoopClaims(profile, input.claims);
   const assessment = assessOpportunity(profile, input.claims, opportunity);
-  const wanted = input.selectedClaimIds ?? assessment.claimIds;
+  const wanted = input.selectedClaimIds ?? boundedRulesClaimIds(profile,input.claims,assessment);
   if (wanted.length > 100 || new Set(wanted).size !== wanted.length || wanted.some(id => !allowed.some(c => c.id === id))) fail('Model selection contains repeated, unknown, withdrawn or unapproved claim IDs.');
   const picked = wanted.map(id => allowed.find(c => c.id === id)!);
   // Never erase an approved employment/internship context or education merely to raise overlap.
-  for (const c of allowed) if (c.kind === 'education' || ['employment', 'internship'].includes(c.kind) && !picked.some(p => p.kind === c.kind && p.context === c.context)) { if (!picked.some(p => p.id === c.id)) picked.push(c); }
+  for (const c of allowed) if (['education', 'employment', 'internship'].includes(c.kind) && !picked.some(p => p.kind === c.kind && p.context === c.context)) { if (!picked.some(p => p.id === c.id)) picked.push(c); }
   const unique: LoopClaim[] = [];
   const sources = new Set<string>();
   for (const c of picked) { const key = `${c.sourceKind}\n${c.context}\n${c.sourceQuote}`; if (!sources.has(key)) { sources.add(key); unique.push(c); } }

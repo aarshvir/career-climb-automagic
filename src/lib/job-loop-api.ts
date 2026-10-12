@@ -20,6 +20,7 @@ const profileSchema = z.object({ audience: z.enum(['student', 'mba', 'profession
 const contactSchema = z.object({ name: short, title: short, email: short, sourceUrl: z.string().max(2000), sourceQuote: text,
   confirmedByUser: z.boolean(), inExistingThread: z.boolean() });
 const opportunitySchema = z.object({ title: short, company: short, location: short, url: z.string().max(2000), description: text, contact: contactSchema.nullable() });
+const scheduleSchema=z.object({cadence:z.enum(['daily','weekdays','weekly']),timezone:z.string().min(1).max(100),localTime:z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/),weeklyDay:z.number().int().min(0).max(6).nullable(),provider:z.union([provider,z.literal('rules')]),model:short,modelConsent:z.boolean(),inboxConsent:z.boolean()});
 const laneSchema = z.object({ name: short, status: z.enum(['completed', 'partial', 'blocked', 'not_connected', 'not_run']), count: z.number().int().nonnegative(), checkedAt: short, message: text });
 const snapshotSchema = z.object({
   recordVersion: z.number().int().nonnegative(), profile: profileSchema.extend({ revision: z.number().int().nonnegative(), updatedAt: short }).nullable(),
@@ -37,12 +38,20 @@ const snapshotSchema = z.object({
       gaps: z.array(text).max(200), flags: z.array(text).max(200), claimIds: z.array(id).max(1000) }),
     status: z.enum(['review_required', 'approved', 'held', 'revoked']), holdReasons: z.array(text).max(200), pageCount: z.number().int().positive().nullable(),
     createdAt: short, approvedAt: short.nullable(), model: z.object({ provider: z.union([provider, z.literal('rules')]), model: short, method: short }),
-    artifacts: z.record(z.object({ path: z.string().max(2000), sha256: short, byteSize: z.number().int().nonnegative() })) })).max(2000),
+    artifacts: z.record(z.object({ path: z.string().max(2000), sha256: short, byteSize: z.number().int().nonnegative() })),
+    formatStatus:z.object({pdf:z.object({ready:z.boolean(),reason:text.optional(),pageCount:z.number().int().positive().nullable().optional()}).optional(),docx:z.object({ready:z.boolean(),reason:text.optional(),pageCount:z.number().int().positive().nullable().optional()}).optional(),txt:z.object({ready:z.boolean(),reason:text.optional(),pageCount:z.number().int().positive().nullable().optional()}).optional()}).optional(),
+    interviewBrief:z.array(z.object({title:short,prompt:text,evidenceClaimIds:z.array(id).max(1000),sourceQuote:text})).max(5).optional() })).max(2000),
   inbox: z.array(z.object({ id, bucket: z.enum(['action_needed', 'progress', 'rejected', 'noise']), subject: short, from: short, receivedAt: short,
     summary: text, draftReply: text, threadId: id, opportunityId: id.nullable(), roleUnconfirmed: z.boolean() })).max(2000),
   models: z.array(z.object({ provider, model: short, label: short, ready: z.boolean(), inputUsdPerMillion: z.number().nonnegative(), outputUsdPerMillion: z.number().nonnegative() })).max(100),
-  capabilities: z.object({ cloudWorker: z.boolean(), rulesEngine: z.boolean(), webSearch: z.boolean(), gmailRead: z.boolean(), gmailDrafts: z.boolean(), monthlyUsageCapUsd: z.number().nonnegative(), dailyRunLimit: z.number().int().nonnegative() }),
+  capabilities: z.object({ cloudWorker: z.boolean(), rulesEngine: z.boolean(), webSearch: z.boolean(), gmailRead: z.boolean(), gmailDrafts: z.boolean(), monthlyUsageCapUsd: z.number().nonnegative(), dailyRunLimit: z.number().int().nonnegative(),scheduler:z.boolean().optional(),packetsPerRun:z.number().int().min(1).max(5).optional() }),
   gmail: z.object({ connected: z.boolean(), email: short.nullable(), status: short, allowDrafts: z.boolean() }),
+  schedule:scheduleSchema.extend({version:z.number().int().nonnegative(),status:z.enum(['active','paused','cancelled']),nextRunAt:short.nullable(),lastRunId:id.nullable(),lastAttemptAt:short.nullable(),message:text}).nullable().optional(),
+  budget:z.object({month:z.string().regex(/^\d{4}-\d{2}$/),capUsd:z.number().positive().max(50),committedUsd:z.number().nonnegative().max(50),remainingUsd:z.number().nonnegative().max(50),scope:z.literal('shared_ai_search'),maxPilotUsers:z.number().int().min(1).max(10)}).optional(),
+  pilot:z.object({enrolled:z.boolean(),activeUsers:z.number().int().min(0).max(10),maxUsers:z.number().int().min(1).max(10)}).optional(),
+  activity:z.array(z.object({id,kind:short,actor:z.enum(['candidate','jobvance']),at:short,summary:short,opportunityId:id.nullable(),runId:id.nullable()})).max(200).optional(),
+  support:z.array(z.object({id,category:z.enum(['help','privacy','bug']),message:z.string().max(2000),status:z.enum(['received','in_review','resolved']),createdAt:short})).max(20).optional(),
+  recurringReady:z.boolean().optional(),employerSources:z.array(z.object({provider:short,company:short,board:short})).max(4).optional(),
 });
 const responseSchema = z.object({ snapshot: snapshotSchema.optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
   url: z.string().max(8000).optional(), filename: short.optional(), message: text.optional(), error: text.optional(), code: short.optional(),
@@ -60,6 +69,11 @@ const actionSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('resume_run'), runId: id }), z.object({ action: z.literal('cancel_run'), runId: id }),
   z.object({ action: z.literal('approve_packet'), packetId: id, inputHash: id, reviewedText: text, confirmFacts: z.boolean(), confirmDisclosure: z.boolean() }),
   z.object({ action: z.literal('download'), packetId: id, format: z.enum(['pdf', 'docx', 'txt', 'report', 'letter']) }),
+  z.object({action:z.literal('preview_packet'),packetId:id,inputHash:id}),
+  z.object({action:z.literal('save_schedule'),expectedScheduleVersion:version,schedule:scheduleSchema,recurringConsent:z.boolean()}),
+  z.object({action:z.literal('pause_schedule'),expectedScheduleVersion:version}),z.object({action:z.literal('cancel_schedule'),expectedScheduleVersion:version}),
+  z.object({action:z.literal('erase_loop'),confirmErase:z.boolean()}),z.object({action:z.literal('erase_self'),confirmErase:z.boolean()}),
+  z.object({action:z.literal('request_support'),category:z.enum(['help','privacy','bug']),message:z.string().min(5).max(2000)}),
   z.object({ action: z.literal('gmail_connect'), allowDrafts: z.boolean() }), z.object({ action: z.literal('gmail_disconnect') }),
   z.object({ action: z.literal('gmail_preview'), ticket: z.string().min(1).max(16000) }),
   z.object({ action: z.literal('gmail_finalize'), ticket: z.string().min(1).max(16000), confirmMailbox: z.boolean() }),
@@ -77,6 +91,9 @@ function assertConsent(action: LoopAction) {
   if (action.action === 'gmail_create_draft' && !action.confirmRecipientAndAttachment) throw new Error('Confirm the recipient and exact approved attachment before creating a Gmail draft.');
   if (action.action === 'gmail_finalize' && !action.confirmMailbox) throw new Error('Confirm the previewed mailbox and permissions before connecting it.');
   if (action.action === 'add_opportunity' && (!isLoopHttpsUrl(action.opportunity.url) || (action.opportunity.contact && !isLoopHttpsUrl(action.opportunity.contact.sourceUrl)))) throw new Error('Use a real HTTPS vacancy and contact source link, without embedded credentials.');
+  if(action.action==='save_schedule'&&(!action.recurringConsent||action.schedule.provider!=='rules'&&!action.schedule.modelConsent))throw new Error('Explicitly allow recurring preparation and any selected provider processing.');
+  if(action.action==='save_schedule'&&action.schedule.provider==='rules'&&action.schedule.model!=='grounded-rules-v1')throw new Error('Choose the available rules preparation method.');
+  if((action.action==='erase_loop'||action.action==='erase_self')&&!action.confirmErase)throw new Error('Confirm erasing your private Job Loop record and documents.');
 }
 export async function requireLoopOwner(userId: string): Promise<void> {
   let session: Awaited<ReturnType<typeof readAuthSession>>;
@@ -140,6 +157,13 @@ export function safeLoopGmailUrl(value: string): string {
 }
 export async function getLoopDownload(userId: string, packetId: string, format: 'pdf' | 'docx' | 'txt' | 'report' | 'letter') {
   const result = await callJobLoop(userId, { action: 'download', packetId, format });
+  return fetchLoopArtifact(userId,result);
+}
+export async function getLoopPreview(userId:string,packetId:string,inputHash:string){
+  const result=await callJobLoop(userId,{action:'preview_packet',packetId,inputHash});
+  return fetchLoopArtifact(userId,result);
+}
+async function fetchLoopArtifact(userId:string,result:LoopResponse){
   if (!result.url || !result.filename) throw new Error('The approved document is not available yet.');
   const url = safeLoopDownloadUrl(result.url, userId);
   let response: Response;
