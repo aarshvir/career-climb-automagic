@@ -1,8 +1,8 @@
 {
   "date": "2026-10-12",
-  "scope": "Local verification of the integrated Job Loop release; this does not confirm deployment or real customer outcomes.",
+  "scope": "Local and synthetic hosted backend verification; frontend publication recorded separately; no real customer outcomes",
   "sourceTree": {
-    "sha256": "ecac465bdf4a84492b25c062e0163e35c171be5952761a12f776dd5bcfd9482d",
+    "sha256": "2dfcbc1818730624898d9d16e8f1433cffb40f8129fea5df90b76f1987cdea92",
     "fileCount": 316,
     "roots": [
       "src",
@@ -53,10 +53,10 @@
     "date": "2026-10-12",
     "buildPassed": true,
     "assets": 56,
-    "staticBytes": 4858705,
-    "workerBytes": 6489856,
-    "workerSha256": "390a5d4cb395191508947a593efcc593caeb6da269ee781c5999e47766fdfcaf",
-    "compressedBytes": 2288069,
+    "staticBytes": 4859633,
+    "workerBytes": 6491092,
+    "workerSha256": "b6ea28b684652dd5a1682853af63a9259dc4408e471750443150a261234e3e4f",
+    "compressedBytes": 2288395,
     "compressedLimitBytes": 3145728,
     "hostChecks": [
       "security-headers",
@@ -69,7 +69,23 @@
       "project-identity",
       "compressed-size"
     ],
-    "hostChecksPassed": true
+    "hostChecksPassed": true,
+    "copyCorrection": {
+      "date": "2026-10-12",
+      "changedFiles": [
+        "src/pages/ProductPage.tsx",
+        "src/__tests__/audience-and-pricing.test.tsx"
+      ],
+      "purpose": "Distinguish guest in-memory navigation recovery from optional consented 30-minute browser-tab recovery across refresh, without changing account saving.",
+      "targetedTests": {
+        "command": "node node_modules/vitest/vitest.mjs run src/__tests__/audience-and-pricing.test.tsx src/__tests__/navigation.test.tsx --pool=threads",
+        "passed": 10,
+        "failed": 0,
+        "durationSeconds": 10.88
+      },
+      "fullSuiteRerun": false,
+      "testedFullSuiteBaselinePreserved": true
+    }
   },
   "backendBundles": {
     "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
@@ -138,7 +154,8 @@
     "The replay regression was fixed and the complete 490-test suite passed on 2026-10-12. Both cloud bundles changed and must be deployed together. Exact live scheduled/user results are recorded separately by the operator.",
     "Source and migration manifest hashes now normalize UTF-8 line endings/BOM; artifact hashes remain byte-exact with repository attributes preventing conversion.",
     "After the 490-test baseline, only the hosted verification driver was hardened. Its syntax was checked and current source-tree hash refreshed; the test baseline retains its previously observed source hash and was not rerun for this script-only change.",
-    "The final hosted verification driver adds optional fixed-path sanitized report saving. This is a check-script-only change; the 490-test baseline hash remains unchanged."
+    "The final hosted verification driver adds optional fixed-path sanitized report saving. This is a check-script-only change; the 490-test baseline hash remains unchanged.",
+    "After the observed 490-test baseline, public homepage/privacy recovery wording and two published privacy guidance regressions were corrected. The 10-case audience/navigation group and all nine built-host checks passed; the complete suite was not rerun and its original tested source hash remains unchanged."
   ],
   "updatedDate": "2026-10-12",
   "migrationRecheck": {
