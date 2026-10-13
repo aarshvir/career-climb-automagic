@@ -47,7 +47,7 @@ describe('one-run hosted candidate harness scope', () => {
   it('starts exactly one explicit OpenRouter run and outputs no credentials or source records', async () => {
     const host = mockedHost();
     const result = await verifyCandidateOpenRouter({ execute: true, sourceReader: async () => publicSource, fetcher: host.fetcher, sleep: async () => {} });
-    expect(result).toMatchObject({ status: 'passed', accountsCreated: 1, runStartRequests: 1, adminDeniedHttpStatus: 403, recordedCostUsd: 0.001, retainedReservationUsd: 0, packetCount: 1 });
+    expect(result).toMatchObject({ status: 'passed', accountsCreated: 1, runStartRequests: 1, adminDeniedHttpStatus: 403, recordedCostUsd: 0.001, retainedReservationUsd: 0, packetCount: 1, fixtureProvenanceProof: { claimCount: 2 } });
     const starts = host.requests.filter(item => item.body?.action === 'start_run');
     expect(starts).toHaveLength(1); expect(starts[0].body).toMatchObject({ provider: 'openai', model: 'gpt-6.1-sol', modelConsent: true, inboxConsent: false, processingRoute: 'openrouter' });
     expect(host.requests.every(item => ['signup', 'user', 'jobvance-admin', 'job-loop-control', 'job_loop_runs'].includes(item.pathname.split('/').at(-1)!))).toBe(true);
@@ -84,6 +84,18 @@ describe('one-run hosted candidate harness scope', () => {
       expect(loaded.matches(profile, opportunity)).toBe(company === 'Generated QA Employer');
     }
     expect(loaded.sourceSha256).toMatch(/^[a-f\d]{64}$/);
+  });
+  it('proves both actual fixture claims and reproduces the missing education-heading failure without hosting', async () => {
+    const host = mockedHost();
+    const result = await verifyCandidateOpenRouter({ execute: true, sourceReader: async () => publicSource, fetcher: host.fetcher, sleep: async () => {} });
+    expect(result.status).toBe('passed');
+    const profile = host.requests.find(item => item.body?.action === 'save_profile')!.body!.profile as LoopProfileInput;
+    const claims = host.requests.filter(item => item.body?.action === 'save_claim').map(item => item.body!.claim);
+    const loaded = await loadDiscoveryMatcher();
+    expect(() => loaded.validateFixtures(profile, claims)).not.toThrow();
+    expect(() => loaded.validateFixtures({ ...profile, sourceText: profile.sourceText.replace('Generated QA University | 2026\n', '') }, claims)).toThrow(/nearby literal course, project or employer label/);
+    const proofIndex = result.checks.findIndex(check => check.name === 'both-fictional-claims-pass-actual-source-context-validation-before-saving');
+    expect(proofIndex).toBeGreaterThan(-1);
   });
   it('retains uncertain usage and never starts or resumes another run', async () => {
     const host = mockedHost('uncertain');

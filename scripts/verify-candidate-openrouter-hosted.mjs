@@ -36,9 +36,10 @@ async function boundedJson(response) {
 /** Compile the actual self-contained source matcher, rather than copying its
  * rule into the harness. The isolated module receives no host/network APIs. */
 export async function loadDiscoveryMatcher() {
-  const [source, adapterSource, manifestText, ts] = await Promise.all([
+  const [source, adapterSource, engineSource, manifestText, ts] = await Promise.all([
     readFile(new URL('../supabase/functions/_shared/job-loop-runtime.ts', import.meta.url), 'utf8'),
     readFile(new URL('../supabase/functions/_shared/job-loop-providers.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/functions/_shared/job-loop-engine.ts', import.meta.url), 'utf8'),
     readFile(new URL('../docs/supabase-loop-ui/manifest.json', import.meta.url), 'utf8'),
     import('typescript'),
   ]);
@@ -49,7 +50,7 @@ export async function loadDiscoveryMatcher() {
     function visit(value) { if (Array.isArray(value)) value.forEach(visit); else if (value && typeof value === 'object') { if (value.path === path && typeof value.sha256 === 'string') found.push(value.sha256); Object.values(value).forEach(visit); } }
     visit(manifest); if (!found.length || found.some(value => value !== found[0])) throw new Stop('source-proof-present-in-release-manifest'); return found[0];
   }
-  if (hash(source) !== declaredHash('supabase/functions/_shared/job-loop-runtime.ts') || hash(adapterSource) !== declaredHash('supabase/functions/_shared/job-loop-providers.ts')) throw new Stop('source-proof-matches-release-manifest');
+  if (hash(source) !== declaredHash('supabase/functions/_shared/job-loop-runtime.ts') || hash(adapterSource) !== declaredHash('supabase/functions/_shared/job-loop-providers.ts') || hash(engineSource) !== declaredHash('supabase/functions/_shared/job-loop-engine.ts')) throw new Stop('source-proof-matches-release-manifest');
   // The public feed may override its configured company. Include the actual
   // response companies too; a metadata-only company proof would be incomplete.
   if (!adapterSource.includes('company: text(row.company,200)||feed.company||feed.board') || !adapterSource.includes('entries.slice(0, 100)')) throw new Stop('employer-company-mapping-contract-unchanged');
@@ -60,7 +61,15 @@ export async function loadDiscoveryMatcher() {
   const exports = {};
   new Script(emitted).runInNewContext({ exports }, { timeout: 1000 });
   if (typeof exports.matchesDiscoveryTarget !== 'function') throw new Stop('actual-discovery-matcher-loaded');
-  return { matches: exports.matchesDiscoveryTarget, sourceSha256: hash(source), adapterSha256: hash(adapterSource) };
+  const engineAst = ts.createSourceFile('engine.ts', engineSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  // All actual profile/claim helpers are retained. Unused schedule imports are
+  // removed so this isolated proof has no module, network or filesystem access.
+  const engineModule = ts.transpileModule(engineAst.statements.filter(node => !ts.isImportDeclaration(node)).map(node => node.getText(engineAst)).join('\n'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
+  function validateFixtures(profile, claims) {
+    const context = { exports: {}, serialized: JSON.stringify({ profile, claims }) };
+    new Script(`${engineModule}\nconst fixture=JSON.parse(serialized); const profile=exports.validateProfile(fixture.profile); for(const claim of fixture.claims) exports.validateClaim(claim,profile);`).runInNewContext(context, { timeout: 1000 });
+  }
+  return { matches: exports.matchesDiscoveryTarget, validateFixtures, sourceSha256: hash(source), adapterSha256: hash(adapterSource), engineSha256: hash(engineSource) };
 }
 function feedIdentities(sources) {
   if (!Array.isArray(sources) || sources.length > 4) throw new Stop('bounded-configured-employer-feeds');
@@ -142,7 +151,8 @@ export async function verifyCandidateOpenRouter({ execute = false, sourceReader 
     const context = 'Generated QA Advisory | Operations Intern | 2025';
     const fact = 'Supported a weekly operations tracker and documented reporting procedures during a synthetic internship.';
     const education = 'Bachelor of Business Administration completed at Generated QA University in 2026.';
-    const sourceText = ['Fictional QA candidate, not a real job seeker.', 'INTERNSHIPS', context, fact, 'EDUCATION', education].join('\n');
+    const educationHeader = 'Generated QA University | 2026';
+    const sourceText = ['Fictional QA candidate, not a real job seeker.', 'INTERNSHIPS', context, fact, 'EDUCATION', educationHeader, education].join('\n');
     // A unique fictional location is a second guard if public feed companies
     // change between the proof read and the worker's independent feed read.
     const location = `Fictional QA zone ${tag}`;
@@ -150,10 +160,14 @@ export async function verifyCandidateOpenRouter({ execute = false, sourceReader 
     const manual = { title: 'Graduate Operations Analyst', company: 'Generated QA Employer', location, url: `https://example.com/jobvance-router-qa/${tag}`, description: 'Fictional verification vacancy, not a real employer listing. Assist the operations team with a weekly operations tracker, reporting procedures and business administration tasks. Internship evidence is acceptable. No application will be submitted.', contact: null };
     const sources = feedIdentities(snapshot.employerSources), matcher = await loadDiscoveryMatcher();
     const proof = await exclusionProof(sources, profile, manual, fetcher, matcher);
+    const claims = [{ sourceQuote: fact, context, kind: 'internship' }, { sourceQuote: education, context: educationHeader, kind: 'education' }].map(entry => ({ ...entry, sourceKind: 'cv_passage', phrasing: entry.sourceQuote, resultStatus: 'not_measured', confirmed: true, shareable: true }));
+    try { matcher.validateFixtures(profile, claims); } catch { throw new Stop('fictional-profile-and-claims-pass-actual-provenance-validation'); }
+    result.fixtureProvenanceProof = { claimCount: claims.length, candidateEngineSha256: matcher.engineSha256 };
+    check(true, 'both-fictional-claims-pass-actual-source-context-validation-before-saving');
     result.feedExclusionProof = { ...proof, matcherSourceSha256: matcher.sourceSha256, employerAdapterSha256: matcher.adapterSha256 };
     check(true, 'actual-release-engine-blocks-feed-exclusions-and-preserves-manual-vacancy');
     snapshot = (await control({ action: 'save_profile', expectedVersion: snapshot.recordVersion, saveConsent: true, profile })).snapshot;
-    for (const entry of [{ sourceQuote: fact, context, kind: 'internship' }, { sourceQuote: education, context: 'Generated QA University | 2026', kind: 'education' }]) snapshot = (await control({ action: 'save_claim', expectedVersion: snapshot.recordVersion, claim: { ...entry, sourceKind: 'cv_passage', phrasing: entry.sourceQuote, resultStatus: 'not_measured', confirmed: true, shareable: true } })).snapshot;
+    for (const claim of claims) snapshot = (await control({ action: 'save_claim', expectedVersion: snapshot.recordVersion, claim })).snapshot;
     snapshot = (await control({ action: 'add_opportunity', expectedVersion: snapshot.recordVersion, opportunity: manual })).snapshot;
     check(snapshot.opportunities.length === 1 && snapshot.opportunities[0].source === 'manual' && snapshot.opportunities[0].verification === 'user_provided', 'one-explicitly-fictional-manual-vacancy');
     preflight(snapshot);

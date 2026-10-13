@@ -1,10 +1,14 @@
 # Candidate OpenRouter verification preparation
 
-13 October 2026. **The initial hosted attempt stopped before any run or paid candidate call; the revised harness below is locally tested and has not been executed against hosting.** Run only after the release owner confirms that the deployed router is active.
+13 October 2026. **Hosted verification passed at 12:12:25 UTC.** The first two attempts stopped before starting a run or making a paid candidate call. The corrected harness started exactly one run, which produced a source-backed review-required packet and recorded settled usage of $0.002344 with no retained reservation. The run honestly reported partial coverage because connected inbox processing and broad paid search were unavailable.
 
 ## Initial stopped trace
 
 The release owner reported that the initial attempt created fictional QA account `b18157e3-6d35-4d09-95bc-ca232a506705`, verified ordinary-user administration denial, then stopped at `no-paid-search-or-extra-discovered-vacancies`. Its candidate record was empty, `runStartRequests` was zero and no paid call occurred. Free configured employer feeds triggered the old overly broad preflight. Preserve that stopped result and account identity; this revision does not alter it, resume it or reuse its credentials. A new QA attempt is appropriate only because no original `start_run` happened.
+
+The second attempt created QA account `8e64a9b8-0e61-4053-a4a7-c66495fa3de2`. Its free-feed proof passed for three boards, 105 raw rows and three exclusions, but it stopped at `control-save_claim`/HTTP503 before any `start_run`. A native read-only query restricted to this exact UUID, its QA metadata and reserved test email verified record version 2, one saved claim and zero runs. The internship claim succeeded; the education claim's `Generated QA University | 2026` context lacked a preceding literal header in the fixture source. The actual local validator reproduced that rejection. This was a fixture provenance defect, not evidence of a failed first claim or a charged candidate call. The ordinary validation error became the handler's generic HTTP503.
+
+The current fixture includes the exact education heading. Before any profile/claim/run write, the harness compiles the actual manifest-hashed profile/claim validation source in its isolated context and validates both full fixture claims. The regression test removes that heading and reproduces the old context rejection locally. Both stopped traces remain unchanged; no old account is reused or resumed by the harness.
 
 ## Invocation
 
@@ -37,8 +41,14 @@ The candidate API reports aggregate usage and the requested model, but does not 
 
 ## Local verification and release-note limits
 
-Ten mocked-host tests pass for preview/no-network behavior, one-run/route consent, disabled routing or paid search, admin-response leakage rejection, unknown reservation retention, secret-safe failures, free-feed company/board/response-override exclusions, manual-company collisions, and actual source-matcher equivalence. Syntax checking, targeted lint and typechecking pass. These do not count as hosted or paid verification.
+Eleven mocked-host tests pass for preview/no-network behavior, one-run/route consent, disabled routing or paid search, admin-response leakage rejection, unknown reservation retention, secret-safe failures, free-feed company/board/response-override exclusions, manual-company collisions, actual source-matcher behavior, and full fixture provenance including the missing education-heading regression. Syntax checking, targeted lint and typechecking pass. These do not count as hosted or paid verification.
 
 Current source limits are **two packets and two search queries per run** (`job-loop-providers.ts:9`), shared monthly AI/search/admin/review spend no greater than $50, with a separate $5 independent-review batch limit. Candidate OpenRouter requests use medium effort; the independent product review requests use maximum effort. Existing rules schedules are not rewritten when router configuration changes.
 
 The dated 11 October `docs/CLOUD-JOB-LOOP-RELEASE-STATUS.md:28–34` describes historical five-packet/three-search limits and earlier paid/scheduler configuration. Preserve that history; current release evidence must explicitly supersede it. Completed independent Kimi/Muse product reviews are separate from this candidate-path check and do not prove real vacancy coverage, customer value, willingness to pay, hiring outcomes, mailbox approval, production latency or multi-session budget-load behavior.
+
+## Observed successful run
+
+Fictional QA user `6b807ff4-7906-4d38-8ab5-7dba24f826bc`, request `cbf5b500-8a96-41f3-adc4-5867029313d1`, run `52a65c74-ed4a-495b-9b45-5d5edaf771cc`. Started 12:11:52 UTC; verification finished 12:12:25 UTC. The existing feeds remained active; the test excluded their opportunities using three company exclusions and a fictional location, after checking 106 public rows and the actual matcher.
+
+The standard signup/session, ordinary-user admin HTTP403, stored OpenRouter route consent, source-validated facts, single run, bounded settled charge, one review-required packet and absence of recipient/outreach text all passed. No retry, resume, schedule, approval, download, send, application, payment or account deletion occurred. The new records remain for private reconciliation. This test establishes this bounded candidate path; it does not establish broad live job coverage, a completed browser download or employment outcomes.

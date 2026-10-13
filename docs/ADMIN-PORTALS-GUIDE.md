@@ -1,6 +1,6 @@
 # Jobvance owner guide: private administration
 
-**Release note — 13 October 2026:** the backend is live; the new frontend is awaiting publication. Follow these steps after frontend release. The live owner browser journey has not been verified.
+**Release note — 13 October 2026:** both portals are published on Jobvance.io. The existing owner session successfully opened both views, and the live connection check returned Valid. GPT 6.1 Sol/OpenRouter completed one fictional evidence-backed candidate preparation; Sonnet 5.5 is selectable but was not separately tested with a paid call. See [current release evidence](LIVE-RELEASE-2026-10-13.md) for the scope and limits.
 
 ## 1. Open your private workspace
 

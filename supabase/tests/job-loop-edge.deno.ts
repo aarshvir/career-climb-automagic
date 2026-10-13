@@ -8,8 +8,9 @@ if(Deno.env.get('JOBVANCE_LOOP_UI_BUNDLES')==='true'){
 const owner='11111111-1111-4111-a111-111111111111',runId='22222222-2222-4222-a222-222222222222';const calls:{url:string;body:Record<string,unknown>|null}[]=[];const pending:Promise<unknown>[]=[];
 (globalThis as unknown as {EdgeRuntime:{waitUntil(promise:Promise<unknown>):void}}).EdgeRuntime={waitUntil:promise=>{pending.push(promise);}};
 function assert(value:unknown,message:string):asserts value{if(!value)throw new Error(message);}
-function setup(){for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;}
-const record={user_id:owner,version:0,input_version:0,data:{profile:null,claims:[],opportunities:[],inbox:[]},updated_at:'2026-10-11T00:00:00Z'};
+function setup(){for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
+let writeFailure=false;
+const record:import('../functions/_shared/job-loop-repository.ts').RecordRow={user_id:owner,version:0,input_version:0,data:{profile:null,claims:[],opportunities:[],inbox:[]},updated_at:'2026-10-11T00:00:00Z'};
 globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
   const url=new URL(input instanceof Request?input.url:String(input));const body=typeof init?.body==='string'?JSON.parse(init.body):null;calls.push({url:url.href,body});
   if(url.hostname!=='supabase.fixture.invalid')throw new Error('A real or paid endpoint is blocked in this test.');
@@ -19,6 +20,11 @@ globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
   if(url.pathname==='/rest/v1/rpc/job_loop_budget_snapshot'){assert(body?.p_user===owner&&body?.p_cap_micros===50000000,'Budget read binds the authenticated owner and ceiling.');return Response.json({month:'2026-10',capUsd:50,committedUsd:0,remainingUsd:50,scope:'shared_ai_search',maxPilotUsers:10,enrolled:false,activeUsers:0,maxUsers:10});}
   if(url.pathname==='/rest/v1/rpc/job_loop_scheduler_state')return Response.json({ready:false,lastDispatchAt:null});
   if(url.pathname==='/rest/v1/rpc/job_loop_claim_run'){assert(body?.p_run===runId,'Internal run reference is bound.');return Response.json(null);}
+  if(url.pathname==='/rest/v1/rpc/job_loop_write_record'){
+    assert(body?.p_user===owner&&body.p_expected===record.version,'Claim write binds its authenticated owner and expected version.');
+    if(writeFailure)return Response.json({message:'PRIVATE_DATABASE_ERROR_MUST_NOT_RETURN',code:'XX000'},{status:500});
+    record.data=body.p_data as typeof record.data;record.version++;record.input_version++;return Response.json(record);
+  }
   throw new Error('Unexpected request blocked by hermetic handler fixture.');
 };
 const req=(body:unknown,authorization:string|null='Bearer fixture-user')=>new Request('https://edge.fixture.invalid',{method:'POST',headers:{'Content-Type':'application/json',...(authorization?{Authorization:authorization}:{})},body:JSON.stringify(body)});
@@ -29,6 +35,17 @@ Deno.test('control rejects absent/invalid identity and caller-supplied owner bef
 });
 Deno.test('snapshot remains available with no model/mail/search keys and no paid calls',async()=>{
   setup();const response=await handlers[0](req({action:'get'}));assert(response.status===200,'Authenticated snapshot succeeds.');const body=await response.json();assert(body.snapshot.recordVersion===0,'Initial real record version.');assert(body.snapshot.capabilities.rulesEngine===true&&body.snapshot.capabilities.dailyRunLimit===3,'Rules capability and cap declared.');assert(body.snapshot.models.every((model:{ready:boolean})=>!model.ready),'No paid model is claimed ready.');assert(body.snapshot.gmail.connected===false,'Sign-in is not mailbox connection.');assert(calls.every(call=>call.url.startsWith('https://supabase.fixture.invalid/')),'Only fixture persistence/auth calls.');
+});
+Deno.test('actual handler distinguishes correctable source/context 422, database 503 and a valid claim save',async()=>{
+  setup();const quote='Bachelor of Business Administration completed at Generated QA University in 2026.',context='Generated QA University | 2026';
+  record.version=1;record.input_version=1;record.data.profile={audience:'student',name:'Fictional Candidate',contactLine:'',targetTitles:['Graduate analyst'],locations:[],experienceYears:null,languages:[],pageTarget:1,discreetSearch:true,sourceText:['Fictional candidate, not a real job seeker.','EDUCATION',context,quote].join('\n'),excludedTerms:[],compensation:{currency:'',period:'monthly',minimum:null},revision:1,updatedAt:'2026-10-13T00:00:00Z'};
+  const claim={sourceKind:'cv_passage',sourceQuote:quote,phrasing:quote,context,kind:'education',resultStatus:'not_measured',confirmed:true,shareable:true};
+  const rejected=await handlers[0](req({action:'save_claim',expectedVersion:1,claim:{...claim,context:'Missing literal source header'}}));const rejectedBody=await rejected.json();
+  assert(rejected.status===422&&rejectedBody.code==='LOOP_CLAIM_INVALID','Correctable context returns a public 422.');assert(!JSON.stringify(rejectedBody).includes(quote)&&!JSON.stringify(rejectedBody).includes(context),'Validation response never echoes source facts or context.');assert(!calls.some(call=>call.url.endsWith('/rpc/job_loop_write_record')),'Invalid provenance never writes.');
+  writeFailure=true;const unavailable=await handlers[0](req({action:'save_claim',expectedVersion:1,claim}));const unavailableBody=await unavailable.json();
+  assert(unavailable.status===503&&unavailableBody.code==='LOOP_PERSISTENCE_FAILED','Persistence failure remains a public 503.');assert(!JSON.stringify(unavailableBody).includes('PRIVATE_DATABASE_ERROR'),'Database internals never return.');
+  writeFailure=false;const saved=await handlers[0](req({action:'save_claim',expectedVersion:1,claim}));const savedBody=await saved.json();
+  assert(saved.status===200&&savedBody.snapshot.claims.length===1&&savedBody.snapshot.claims[0].confirmed===true&&savedBody.snapshot.claims[0].sourceQuote===quote,'A valid source-bound claim still saves unchanged.');assert(calls.every(call=>call.url.startsWith('https://supabase.fixture.invalid/')),'Every request remains hermetic and no provider is called.');
 });
 Deno.test('worker rejects candidate credentials and returns accepted while owned background work completes independently',async()=>{
   setup();assert((await handlers[1](req({runId}))).status===401,'Candidate token cannot run internal worker.');assert(calls.length===0,'No worker persistence before internal auth.');

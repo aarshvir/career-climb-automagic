@@ -102,7 +102,13 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
   if(action.action==='suggest_claims'){if(!data.profile)throw new ApiError(422,'LOOP_PROFILE_REQUIRED','Save a reviewed career record first.');return {suggestions:suggestClaims(data.profile),snapshot:await getLoopSnapshot(repo,userId,env)};}
   if(action.action==='save_claim'){
     if(!data.profile)throw new ApiError(422,'LOOP_PROFILE_REQUIRED','Save a career record first.');
-    const claim=validateClaim(action.claim,data.profile);const previous=action.id?data.claims.find(value=>value.id===action.id):undefined;
+    let claim:ReturnType<typeof validateClaim>;
+    try { claim=validateClaim(action.claim,data.profile); }
+    catch(error) {
+      if(error instanceof ApiError)throw error;
+      throw new ApiError(422,'LOOP_CLAIM_INVALID','Review this claim’s complete source sentence and nearby course, project or employer heading, then save it again.');
+    }
+    const previous=action.id?data.claims.find(value=>value.id===action.id):undefined;
     if(action.id&&!previous)throw new ApiError(404,'LOOP_NOT_FOUND','That claim is unavailable in your record.');
     if(!previous&&data.claims.length>=150)throw new ApiError(422,'LOOP_RECORD_LIMIT','This pilot supports up to 150 recorded claims.');
     const saved:LoopClaim={...claim,id:previous?.id??crypto.randomUUID(),revision:(previous?.revision??0)+1,status:'active',createdAt:previous?.createdAt??new Date().toISOString()};
