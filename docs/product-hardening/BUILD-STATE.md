@@ -76,3 +76,9 @@ Owned preview8381 session10946 and isolated fictional tutorial8382 session36323 
 ### Final source validation —14October01:10Dubai
 
 Final793/793tests across62files passed after five immutable media entries were wired. Explicit application TypeScript check and quiet ESLint also passed. Media asset commit76ed2305be14a9863e37f4faa5daf0a8586b4874 is pushed to GitHub; audited captions/provenance are preserved with Git attributes. Production build and hosting publication are pending this checkpoint. Final deployment and live-playback receipts will be in sibling jobvance-repair-evidence/.
+
+### Live release and bounded follow-up
+
+Version15 was published successfully with sourcee7884914e86118fafa18db7afe6861b419066779. Live HTTP audit passed all38pages/20article bodies, route/security/privacy/caching/sitemap and exact15media hashes. Chrome verified actual playback/chapter seeks/selectable native captions for first-check and source-review; remaining movies have exact hashes, complete decode checks and active public hosting. Google ownership verified; live homepage can be indexed. Sitemap submitted, initial Google retrieval could not read it despite valid XML/default+Googlebot workstation probes. Follow-up indexing result remains open, no rank claim.
+
+Live mobile recheck found the legal footer44px rule was incorrectly scoped to lazily loaded walkthrough CSS. Moved that existing rule to global index.css and removed duplicate. This two-style fix needs build, hosting checks, exact source push, follow-up version publication and mobile recheck;793test result remains prior complete runtime evidence, no mirror tests needed for the low-impact style move. Live receipts are in sibling jobvance-repair-evidence; native3h follow-up prompt now references those authoritative receipts.

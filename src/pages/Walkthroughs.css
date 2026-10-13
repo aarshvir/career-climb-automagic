@@ -10,4 +10,4 @@
 @media(max-width:700px){.wt-button,.wt-caption-toggle,.wt-restart,.wt-step-picker button{min-height:44px}}
 
 .wt-video-chapters{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.wt-video-chapters button{padding:8px 12px;min-height:44px;border:1px solid #ccd3e1;border-radius:9px;font-size:13px;color:#24334a;background:#fff}.wt-video-chapters button:hover{border-color:#2850df;color:#2850df}
-@media(max-width:700px){.wt-task-picker:not(.wt-task-picker--expanded)>button small,.wt-task-picker:not(.wt-task-picker--expanded) .wt-task-audience{display:none}.jv-footer-bottom nav a{display:inline-flex;align-items:center;min-height:44px;padding:4px 0}}
+@media(max-width:700px){.wt-task-picker:not(.wt-task-picker--expanded)>button small,.wt-task-picker:not(.wt-task-picker--expanded) .wt-task-audience{display:none}}
