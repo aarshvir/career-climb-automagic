@@ -105,3 +105,7 @@ Measured activation, completion, reuse, retention and document quality require c
 ## Publication receipt — append only
 
 Status at writing: **pending root publication and final verification**. Append dated source commit/build hash, deployed site/version,38-route and20-guide actual-origin checks, control11/worker8 hashes, migration/grants receipt, final whole-suite count, media URLs/hashes/playback/captions, Search Console verification result, remaining recheck IDs and unchanged budget/rollback bounds. Do not replace initial audit scores or call local files public before these checks pass.
+
+## Final source validation update
+
+After media wiring, all793tests across62files passed, with explicit application TypeScript and quiet ESLint checks passing. Five immutable public media entries reference GitHub asset commit76ed2305be14a9863e37f4faa5daf0a8586b4874; their files match the production manifest hashes. These checks do not change the frozen initial reviewer scores. Production deployment, actual browser playback and Search Console submission remain separate verification steps with receipts in sibling jobvance-repair-evidence/.

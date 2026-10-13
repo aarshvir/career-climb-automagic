@@ -98,7 +98,206 @@ export interface WalkthroughVideoAsset {
 export interface WalkthroughVideoManifest { version: 1; videos: WalkthroughVideoAsset[] }
 
 /** Replace only with a reviewed public manifest after actual rendered assets exist. No startup fetch. */
-export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = { version: 1, videos: [] };
+export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = {
+  "version": 1,
+  "videos": [
+    {
+      "tutorialId": "first-check",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/first-check.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/first-check.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/first-check.jpg",
+      "durationSeconds": 111.275,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "usesFictionalData": true,
+      "contentKind": "screen_walkthrough",
+      "status": "ready",
+      "hasBurnedCaptions": true,
+      "presenterDisclosure": "Original fictional AI presenter and synthetic narration. These tutorials use real product-screen captures with fictional data; Job Loop demonstrations use a clearly labelled local simulation.",
+      "chapters": [
+        {
+          "id": "role",
+          "title": "Choose one target role",
+          "startSeconds": 0
+        },
+        {
+          "id": "cv",
+          "title": "Read and check your CV text",
+          "startSeconds": 13.125
+        },
+        {
+          "id": "vacancy",
+          "title": "Paste the full vacancy",
+          "startSeconds": 34.525
+        },
+        {
+          "id": "evidence",
+          "title": "Follow wording to its source",
+          "startSeconds": 51.099999999999994
+        },
+        {
+          "id": "review",
+          "title": "Keep the words you can explain",
+          "startSeconds": 70.55
+        },
+        {
+          "id": "approve",
+          "title": "Preview, approve and download",
+          "startSeconds": 89.5
+        }
+      ]
+    },
+    {
+      "tutorialId": "job-loop-start",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/job-loop-start.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/job-loop-start.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/job-loop-start.jpg",
+      "durationSeconds": 95.625,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "usesFictionalData": true,
+      "contentKind": "screen_walkthrough",
+      "status": "ready",
+      "hasBurnedCaptions": true,
+      "presenterDisclosure": "Original fictional AI presenter and synthetic narration. These tutorials use real product-screen captures with fictional data; Job Loop demonstrations use a clearly labelled local simulation.",
+      "chapters": [
+        {
+          "id": "open",
+          "title": "Open the saved workspace",
+          "startSeconds": 0
+        },
+        {
+          "id": "source",
+          "title": "Bring your existing text",
+          "startSeconds": 16.175
+        },
+        {
+          "id": "details",
+          "title": "Check three details and save privately",
+          "startSeconds": 34
+        },
+        {
+          "id": "facts",
+          "title": "Choose the fact’s real context",
+          "startSeconds": 51.25
+        },
+        {
+          "id": "next",
+          "title": "Add the vacancy you want",
+          "startSeconds": 75.075
+        }
+      ]
+    },
+    {
+      "tutorialId": "source-review",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/source-review.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/source-review.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/source-review.jpg",
+      "durationSeconds": 78.425,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "usesFictionalData": true,
+      "contentKind": "screen_walkthrough",
+      "status": "ready",
+      "hasBurnedCaptions": true,
+      "presenterDisclosure": "Original fictional AI presenter and synthetic narration. These tutorials use real product-screen captures with fictional data; Job Loop demonstrations use a clearly labelled local simulation.",
+      "chapters": [
+        {
+          "id": "complete",
+          "title": "Keep the complete statement",
+          "startSeconds": 0
+        },
+        {
+          "id": "context",
+          "title": "Keep project and work context distinct",
+          "startSeconds": 17.2
+        },
+        {
+          "id": "contribution",
+          "title": "Say what you personally did",
+          "startSeconds": 36.9
+        },
+        {
+          "id": "clear",
+          "title": "Confirm only what you can share",
+          "startSeconds": 55.25
+        }
+      ]
+    },
+    {
+      "tutorialId": "another-application",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/another-application.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/another-application.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/another-application.jpg",
+      "durationSeconds": 75.30000000000001,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "usesFictionalData": true,
+      "contentKind": "screen_walkthrough",
+      "status": "ready",
+      "hasBurnedCaptions": true,
+      "presenterDisclosure": "Original fictional AI presenter and synthetic narration. These tutorials use real product-screen captures with fictional data; Job Loop demonstrations use a clearly labelled local simulation.",
+      "chapters": [
+        {
+          "id": "preserve",
+          "title": "Keep the current application first",
+          "startSeconds": 0
+        },
+        {
+          "id": "new-check",
+          "title": "Give the new job a fresh review",
+          "startSeconds": 18.4
+        },
+        {
+          "id": "loop-reuse",
+          "title": "Reuse saved Job Loop facts",
+          "startSeconds": 36.825
+        },
+        {
+          "id": "tracking",
+          "title": "Report the status after you act",
+          "startSeconds": 55.825
+        }
+      ]
+    },
+    {
+      "tutorialId": "controls-and-recovery",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.jpg",
+      "durationSeconds": 111.675,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "usesFictionalData": true,
+      "contentKind": "screen_walkthrough",
+      "status": "ready",
+      "hasBurnedCaptions": true,
+      "presenterDisclosure": "Original fictional AI presenter and synthetic narration. These tutorials use real product-screen captures with fictional data; Job Loop demonstrations use a clearly labelled local simulation.",
+      "chapters": [
+        {
+          "id": "manual",
+          "title": "Begin with an available manual run",
+          "startSeconds": 0
+        },
+        {
+          "id": "coverage",
+          "title": "Read partial results as partial",
+          "startSeconds": 22.525
+        },
+        {
+          "id": "optional",
+          "title": "Make separate connection choices",
+          "startSeconds": 43.125
+        },
+        {
+          "id": "recovery",
+          "title": "Choose refresh recovery deliberately",
+          "startSeconds": 67.025
+        },
+        {
+          "id": "loop-memory",
+          "title": "Know what can return",
+          "startSeconds": 87.625
+        }
+      ]
+    }
+  ]
+};
 
 const mediaOrigins = new Map([
   ['https://jobvance.io', '/walkthroughs/media/'],
