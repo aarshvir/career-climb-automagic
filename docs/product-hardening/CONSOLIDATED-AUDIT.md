@@ -109,3 +109,19 @@ Status at writing: **pending root publication and final verification**. Append d
 ## Final source validation update
 
 After media wiring, all793tests across62files passed, with explicit application TypeScript and quiet ESLint checks passing. Five immutable public media entries reference GitHub asset commit76ed2305be14a9863e37f4faa5daf0a8586b4874; their files match the production manifest hashes. These checks do not change the frozen initial reviewer scores. Production deployment, actual browser playback and Search Console submission remain separate verification steps with receipts in sibling jobvance-repair-evidence/.
+
+
+## Published release and final verification —14October2026
+
+**Jobvance.io is live on version16**, source commit 1b096ed361a4eb053386e66731fc171a62451faa. Version15 contained the full product hardening; version16 corrected a mobile legal-footer style that had been loaded only on the walkthrough route. The exact source, five movies/captions/posters and twenty guides are on GitHub. The release archive and source ZIP are preserved in sibling jobvance-repair-evidence.
+
+- All793runtime tests across62files passed, as did application TypeScript and quiet ESLint. The final style move then passed production build and12host-worker checks. Separately,75actual rules-only cloud checks passed with fictional accounts, real approved export bytes, owner isolation and scheduler controls, without paid calls or sends.
+- Independent live HTTP audit checked all38public pages and20complete article bodies, canonical/meta/structured-data/security/private-noindex/404/redirect/sitemap/robots/caching behavior. All15published media files matched production hashes, with CORS and video byte ranges working. Native hosting appends a passive Cloudflare script; normalized page bodies match the build.
+- Actual Chrome playback and chapter seeks worked for allfive recordings. Native English caption tracks loaded for first-check and source-review; allfive include burned captions and transcripts. The fictional AI presenter is disclosed; private Job Loop screens are a labelled local simulation. Audibility, lip-sync quality and every caption were not separately certified by the live reviewer.
+- Public home, Job Loop explanation, Help and tutorial chooser fit the tested390/320px layouts without horizontal overflow. Fresh version16 homepage legal/main footer links measured44px. This is bounded browser evidence, not device or accessibility certification.
+- Google Search Console ownership verified; sitemap now shows **Success and38discovered pages** after an initial read delay. The homepage was already indexed; Google's live test finds it available/indexable and accepted the refresh indexing request. These observations do not establish ranking or all-article indexing.
+- Rollback remains GitHub tag jobvance-rollback-2026-10-13-v14 and exact saved version14. Free ten-user/$50UTC-month bounds remain; payments, ads, outreach, sends and automatic application submission remain disabled.
+
+Original reviewer grades remain frozen at82.56mean. There is no final95+customer rating or proven search superiority. The consenting nine-person formative plan and remaining scoped refinements above remain the acceptance path. The live reviewer avoided private candidate records and guest reuse in the existing signed-in Chrome profile; prior fictional browser/tests and separate actual cloud receipts provide that distinct evidence.
+
+Final receipts: ../jobvance-repair-evidence/product-hardening-release-receipt.json, product-hardening-live-check.json and product-hardening-live-mobile.md. Their external location avoids self-referential publication commit hashes. This final documentation update changes no published runtime code.

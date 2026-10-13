@@ -996,19 +996,44 @@
     "Willingness to pay and cost/unit economics plus monitored service and accurate operator/terms/privacy before separately authorized payment enablement"
   ],
   "publicationReceipt": {
-    "status": "pending",
+    "status": "published-and-verified",
     "appendOnly": true,
-    "sourceCommit": null,
-    "buildHash": null,
-    "siteVersion": null,
-    "actualOriginChecks": null,
-    "backendHashes": null,
-    "migrationReceipt": null,
-    "finalWholeSuite": null,
-    "mediaPlayback": null,
-    "searchConsoleVerification": null,
-    "independentFinalRechecks": null,
-    "initialScoresMayBeReplaced": false
+    "sourceCommit": "1b096ed361a4eb053386e66731fc171a62451faa",
+    "buildHash": "95E0C7CA1D9DF8E649369578442D57A0A7A631DEE62960718816F5C99861592D",
+    "siteVersion": 16,
+    "actualOriginChecks": "../jobvance-repair-evidence/product-hardening-live-check.json",
+    "backendHashes": {
+      "control11": "49c11b02474e071dbb850e4d86b6f228a017ca401d0862cce55075d922a87de2",
+      "worker8": "63e23332d5a6c2098d2443c9a80a793261855a890f46608cea61983ff7cf22e0"
+    },
+    "migrationReceipt": "Applied job_loop_provider_lease:180second service-role lease; candidate data/grants preserved;4SQL regressions passed.",
+    "finalWholeSuite": {
+      "passed": 793,
+      "files": 62,
+      "typecheck": "passed",
+      "eslint": "passed",
+      "followupStyleMove": "Production build and12host-worker checks passed; runtime source unchanged."
+    },
+    "mediaPlayback": "All five actual videos played and chapter seeks passed in Chrome; first-check/source-review native English captions readyState2; burned captions and transcripts available on all five.",
+    "searchConsoleVerification": "ownership verified; sitemap Success with38discovered pages; live homepage available/indexable; refresh indexing request accepted",
+    "independentFinalRechecks": "../jobvance-repair-evidence/product-hardening-live-mobile.md; initial audit reports retain each targeted recheck.",
+    "initialScoresMayBeReplaced": false,
+    "initialStatus": "pending",
+    "releaseEvents": [
+      {
+        "number": 15,
+        "source_commit": "e7884914e86118fafa18db7afe6861b419066779",
+        "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7619c4f386848191a26e200920f9e187",
+        "deployment_id": "appgdep_6ace9f12d0d08191ae0579553789ac16"
+      },
+      {
+        "number": 16,
+        "source_commit": "1b096ed361a4eb053386e66731fc171a62451faa",
+        "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_60251798335c81919f684529f3741ee0",
+        "deployment_id": "appgdep_6acea13d0ce08191ae92a04a1b0d1df2"
+      }
+    ],
+    "completedAtUtc": "2026-10-13T21:27:00.1102913Z"
   },
-  "updatedAtUtc": "2026-10-13T21:06:18.5865693Z"
+  "updatedAtUtc": "2026-10-13T21:28:46.251Z"
 }
