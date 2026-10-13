@@ -1,0 +1,170 @@
+{
+  "contentKind": "screen_walkthrough",
+  "tutorialId": "first-check",
+  "title": "Your first CV check",
+  "file": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\first-check.mp4",
+  "sha256": "199dec6cffe1975912c403a7b44bbb0ebac98bf42d71772c7bc6b775fa90165a",
+  "durationSeconds": 111.275,
+  "sourcePresenterSha256": "279f35c9c9498309557734b06c9365734214bc5e0ca5a0e006796ac05a9915b5",
+  "screens": [
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\01-role.jpg",
+      "durationSeconds": 13.125,
+      "stageId": "check-role",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "e3ab78b3ca6eddd94ad8e6cf097724447cb07fed6c7b8afc15a3f9fec4590e78"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\02-cv.jpg",
+      "durationSeconds": 21.4,
+      "stageId": "check-cv",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "56e1bc3bc846073edd59ac1b23ed2fbc45511eb2971db6bf8c4d0a76aa875580"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\03-vacancy.jpg",
+      "durationSeconds": 16.575,
+      "stageId": "check-vacancy",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "69f962a745144d23fb9b5cdcbd7a85ddbf92f15d7316696a7ac786dfd035b8c4"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\04-evidence-source.jpg",
+      "durationSeconds": 19.45,
+      "stageId": "check-evidence",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "db83cc5dda4e2cc18e61535ec71b1460a564f757c51c2efc16d9e881ea593b3a"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\05-review.jpg",
+      "durationSeconds": 18.95,
+      "stageId": "check-review",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "f13127bf0c99a8d4092547e197a8683f090c9ed89391798667059e80279a4d04"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\06-pdf-controls.jpg",
+      "durationSeconds": 11.323,
+      "stageId": "check-approve-download",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "limitations": "PDF preview/file download completion not independently captured; actual controls and TXT request are shown.",
+      "sha256": "9da98a911ef3b704b9b06de1e0d8352c5baf333886e3c63612f21f220289e9bf"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\06-approve-checks.jpg",
+      "durationSeconds": 5.225999999999999,
+      "stageId": "check-approve-download",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "limitations": "PDF preview/file download completion not independently captured; actual controls and TXT request are shown.",
+      "sha256": "2fc489679b76d354ee619f03e4fd32ae153b510a5190edf077bbe527dddfb96c"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\06-approved-download.jpg",
+      "durationSeconds": 5.225999999999999,
+      "stageId": "check-approve-download",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "limitations": "PDF preview/file download completion not independently captured; actual controls and TXT request are shown.",
+      "sha256": "c55b350c3ce7c269906d15e688bb90420031f6ecf0d3bda36f104284ac93a575"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "role",
+      "stageId": "check-role",
+      "title": "Choose one target role",
+      "startSeconds": 0.0,
+      "durationSeconds": 13.125
+    },
+    {
+      "id": "cv",
+      "stageId": "check-cv",
+      "title": "Read and check your CV text",
+      "startSeconds": 13.125,
+      "durationSeconds": 21.4
+    },
+    {
+      "id": "vacancy",
+      "stageId": "check-vacancy",
+      "title": "Paste the full vacancy",
+      "startSeconds": 34.525,
+      "durationSeconds": 16.575
+    },
+    {
+      "id": "evidence",
+      "stageId": "check-evidence",
+      "title": "Follow wording to its source",
+      "startSeconds": 51.099999999999994,
+      "durationSeconds": 19.45
+    },
+    {
+      "id": "review",
+      "stageId": "check-review",
+      "title": "Keep the words you can explain",
+      "startSeconds": 70.55,
+      "durationSeconds": 18.95
+    },
+    {
+      "id": "approve",
+      "stageId": "check-approve-download",
+      "title": "Preview, approve and download",
+      "startSeconds": 89.5,
+      "durationSeconds": 21.775
+    }
+  ],
+  "screenMethod": "actual CUA browser screenshots, edited as a montage; not a continuous screen recording",
+  "presenterMethod": "original fictional portrait + Kokoro af_heart + MuseTalk V15 manual crop/mask",
+  "captionMethod": "Kokoro predicted token timings and measured speech sample durations",
+  "paidApiCalls": 0,
+  "commercialComponentsReviewed": true,
+  "finalPlaybackReviewed": false,
+  "hasBurnedCaptions": true,
+  "bytes": 4112804,
+  "measuredContainerDurationSeconds": 111.275,
+  "mediaFormat": {
+    "width": 1920,
+    "height": 1080,
+    "fps": "25/1",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "mimeType": "video/mp4"
+  },
+  "verification": {
+    "fullDecodePassed": true,
+    "transcriptExact": true,
+    "currentHelpNarrationMatches": true,
+    "captionWordsMatchTranscript": true,
+    "captionTimesValid": true,
+    "captionMaximumLines": 2,
+    "captionCueCount": 25,
+    "chapterFramesExportedForVisualReview": true,
+    "chapterFramesVisuallyReviewed": true,
+    "sourceScreensVisuallyReviewed": true,
+    "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen review; not uninterrupted human viewing"
+  },
+  "currentHelpSourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
+  "reviewStatus": "ready",
+  "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+  "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+  "limitations": [
+    "Narrated product-screen still montage, not a continuous screen recording.",
+    "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
+    "Caption timing uses model token predictions and measured audio samples.",
+    "Actual PDF controls and approved TXT request are shown; generated PDF view and browser download completion were not independently captured."
+  ]
+}

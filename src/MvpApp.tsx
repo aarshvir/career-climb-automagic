@@ -10,6 +10,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProductPage from "@/pages/ProductPage";
+import RouteNavigation from '@/components/RouteNavigation';
 const Auth = lazy(() => import("@/pages/Auth")),
   AuthCallback = lazy(() => import("@/pages/AuthCallback"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
@@ -20,6 +21,11 @@ const AudienceLanding = lazy(() => import("@/pages/AudienceLanding"));
 const PilotLanding = lazy(() => import("@/pages/PilotLanding"));
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
 const AdminPortal = lazy(() => import("@/pages/admin/AdminPortal"));
+const JobLoopOverview = lazy(() => import('@/pages/JobLoopOverview'));
+const CareerGuides = lazy(() => import('@/pages/CareerGuides'));
+const CareerGuideArticle = lazy(() => import('@/pages/CareerGuides').then(module=>({default:module.CareerGuideArticle})));
+const HelpCenter = lazy(() => import('@/pages/HelpCenter'));
+const Walkthroughs = lazy(() => import('@/pages/Walkthroughs'));
 const client = new QueryClient({
   defaultOptions: { queries: { staleTime: 20000, retry: 1 } },
 });
@@ -61,6 +67,7 @@ export default function MvpApp() {
           <AuthProvider>
             <TooltipProvider>
               <BrowserRouter>
+                <RouteNavigation />
                 <SiteChrome position="header" />
                 <div id="main-content" tabIndex={-1} className="outline-none">
                 <Suspense
@@ -73,6 +80,10 @@ export default function MvpApp() {
                     <Route path="/pilot" element={<PilotLanding />} />
                     <Route path="/check" element={<CvCheck />} />
                     <Route path="/loop" element={<ProtectedJobLoop />} />
+                    <Route path="/job-loop" element={<JobLoopOverview />} />
+                    <Route path="/guides" element={<CareerGuides />} />
+                    <Route path="/guides/:slug" element={<CareerGuideArticle />} />
+                    <Route path="/walkthroughs" element={<Walkthroughs />} />
                     <Route path="/for-students" element={<AudienceLanding audience="student" />} />
                     <Route path="/for-mba" element={<AudienceLanding audience="mba" />} />
                     <Route path="/for-career-switchers" element={<AudienceLanding audience="professional" />} />
@@ -105,7 +116,7 @@ export default function MvpApp() {
                       path="/refund"
                       element={<ProductPage kind="refund" />}
                     />
-                    <Route path="/help" element={<ProductPage kind="help" />} />
+                    <Route path="/help" element={<HelpCenter />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route
@@ -130,7 +141,7 @@ export default function MvpApp() {
                     />
                     <Route
                       path="/jobs"
-                      element={<Navigate to="/dashboard?tab=tailor" replace />}
+                      element={<Navigate to="/job-loop" replace />}
                     />
                     <Route
                       path="/job-preferences"
@@ -154,7 +165,7 @@ export default function MvpApp() {
                     />
                     <Route
                       path="/blog/*"
-                      element={<Navigate to="/help" replace />}
+                      element={<Navigate to="/guides" replace />}
                     />
                     <Route path="*" element={<ProductPage kind="notfound" />} />
                   </Routes>

@@ -7,6 +7,7 @@ import "./ProductPage.css";
 import SubscriptionPricing from "./SubscriptionPricing";
 import SupportContact from "./LoopSupport";
 import './JobLoop.css';
+import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
 type Kind = "home" | "pricing" | "how" | "faq" | "about" | "contact" | "privacy" | "terms" | "refund" | "help" | "notfound";
 const titles: Record<Kind, string> = {
@@ -122,11 +123,11 @@ function HomePage({ workspacePath }: { workspacePath: string }) {
     <section className="product-hero product-shell">
       <div className="product-hero-copy">
         <p className="product-eyebrow"><span aria-hidden="true" />STUDENTS, MBA STUDENTS & BUSY CAREER-SWITCHERS</p>
-        <h1>A busy week.<br /><em>A clearer application.</em></h1>
+        <h1>Your CV. One vacancy.<br /><em>A clearer application.</em></h1>
         <div className="product-audience-picker"><p id="home-audience-label">I’m preparing as</p><div role="group" aria-labelledby="home-audience-label" className="product-audience-buttons">{audiences.map(choice => { const option = audienceExamples[choice], Icon = option.icon; return <button key={choice} type="button" aria-pressed={audience === choice} aria-controls="home-audience-example" onClick={() => setAudience(choice)}><Icon size={15} aria-hidden="true" />{option.label}</button>; })}</div></div>
         <p className="product-hero-intro">{example.intro}</p>
-        <div className="product-actions"><StartLink to={example.loopPath}>Start my free Job Loop</StartLink><Link to={example.checkPath} className="product-text-link">Try one CV check<ArrowRight size={17} aria-hidden="true" /></Link><a href="#example" className="product-text-link">See this worked example<ArrowUpRight size={17} aria-hidden="true" /></a></div>
-        <p className="product-hero-note">Free pilot. Sign in for your private Job Loop, or try one check without an account. No card.</p>
+        <div className="product-actions"><StartLink to={example.checkPath}>Check my CV against a job</StartLink><Link to="/job-loop" className="product-text-link">How Job Loop saves repeat work<ArrowRight size={17} aria-hidden="true" /></Link><a href="#example" className="product-text-link">See this worked example<ArrowUpRight size={17} aria-hidden="true" /></a></div>
+        <p className="product-hero-note">Add your CV and one job description. Review the evidence, then download your approved CV. Free, without an account or card.</p>
         <p className="product-selection-note">Your choice carries into setup as editable guidance. It does not confirm your experience or qualifications.</p>
         <p className="sr-only" role="status">{example.label} fictional example selected.</p>
       </div>
@@ -146,7 +147,7 @@ function HomePage({ workspacePath }: { workspacePath: string }) {
       <div className="product-loop-heading"><div><p className="product-eyebrow">Your ongoing search</p><h2 id="product-loop-title">One career record.<br /> <em>Your Job Loop.</em></h2></div><span className="product-development-label"><span aria-hidden="true" />Free pilot</span></div>
       <p className="product-loop-intro">Confirm your experience once. Keep source-linked vacancies, a reviewed CV for each role and dated next actions together. Use an available manual run or opt into recurring source-based preparation in your private workspace.</p>
       <ol className="product-loop-steps">{fullLoopSteps.map((stage, index) => <li key={stage.title}><span className="product-loop-number">0{index + 1}</span><h3>{stage.title}</h3><p>{stage.text}</p>{index < fullLoopSteps.length - 1 && <ArrowRight size={16} aria-hidden="true" />}</li>)}</ol>
-      <div className="product-loop-footer"><p>The loop shows the sources and connections that actually ran. Search, AI models and inbox access need setup and consent. Review the draft, then send or apply yourself.</p><Link to="/loop" className="product-text-link">Open your Job Loop<ArrowUpRight size={16} aria-hidden="true" /></Link></div>
+      <div className="product-loop-footer"><p>The loop shows the sources and connections that actually ran. Save once, reuse your confirmed facts and review the next packet. You send messages and submit applications.</p><Link to="/job-loop" className="product-text-link">See what Job Loop does<ArrowUpRight size={16} aria-hidden="true" /></Link></div>
     </section>
     <section className="product-private-section product-shell"><div className="product-private-copy"><p className="product-eyebrow">03 / Room to prepare</p><h2>Your working draft.<br /><em>Your choice to save.</em></h2><p>The free check compares text on your device. Take your time: read, revise and download without creating an account.</p><p>Sign in when you want to save an approved check privately or keep an honest record of the applications you submit yourself.</p><Link to="/privacy" className="product-text-link">Read how your information is handled<ArrowUpRight size={17} aria-hidden="true" /></Link></div><div className="product-private-note"><LockKeyhole size={29} aria-hidden="true" /><span className="product-micro">YOU CONTROL THE NEXT STEP</span><ul><li><Check size={18} aria-hidden="true" /><span>Review the source text</span></li><li><Check size={18} aria-hidden="true" /><span>Approve your final wording</span></li><li><FolderOpen size={18} aria-hidden="true" /><span>Choose whether to save privately</span></li></ul><p>Your unsaved check can return when you visit another page in this tab. Refresh recovery requires your permission to use temporary tab storage for 30 minutes after your last change. Without that permission, refreshing clears the draft. Account saving is a separate choice.</p></div></section>
     <section className="product-pilot-section product-shell"><div className="product-pilot-index" aria-hidden="true"><span>YOUR</span><em>next</em><span>CHAPTER</span></div><div><p className="product-eyebrow">An example to explore</p><h2>See a fictional preparation workflow.</h2><p>Explore a prewritten concept demonstration. Its role directions illustrate an example, rather than limits on who can use Jobvance. Review the source and the wording before deciding what to share.</p><Link to="/pilot" className="product-text-link">See the fictional preparation workflow<ArrowUpRight size={18} aria-hidden="true" /></Link></div></section>
@@ -187,8 +188,10 @@ export default function ProductPage({ kind }: { kind: Kind }) {
   const start = user ? "/dashboard" : "/auth";
   const support = import.meta.env.VITE_SUPPORT_EMAIL as string | undefined;
   const legal = kind === "privacy" || kind === "terms" || kind === "refund";
+  const path = kind === 'home' ? '/' : kind === 'how' ? '/how-it-works' : `/${kind}`;
+  const meta = staticPageMeta(path);
   return <main className={`product-page product-page--${kind}`}>
-    <Helmet><title>{titles[kind]} | Jobvance</title><meta name="description" content={kind === "home" ? "A free CV check for students, MBA students and busy career-switchers. Review one vacancy, approve your wording, download your CV and optionally save privately." : "Review your CV, tailor existing experience to a real vacancy, download your documents, and track your applications."} /></Helmet>
+    <Helmet><title>{meta?.title ?? `${titles[kind]} | Jobvance`}</title><meta name="description" content={meta?.description ?? intros[kind]} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}{meta && <meta property="og:title" content={meta.title} />}{meta && <meta property="og:description" content={meta.description} />}{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" />{kind === 'notfound' && <meta name="robots" content="noindex,follow" />}</Helmet>
     {kind === "home" ? <HomePage workspacePath={start} /> : <div className="product-shell product-inner">
       <header className="product-page-heading"><p className="product-eyebrow"><Link to="/">Jobvance</Link><span aria-hidden="true">/</span>{labels[kind]}</p><h1>{titles[kind]}</h1><p className="product-page-intro">{intros[kind]}</p></header>
       {kind === "pricing" ? <SubscriptionPricing /> : <div className="product-content-layout"><article className="product-main-content">

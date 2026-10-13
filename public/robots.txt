@@ -1,21 +1,73 @@
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
+Disallow: /admin2
+Disallow: /loop
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /auth/
 
 User-agent: Bingbot
 Allow: /
 Disallow: /admin
+Disallow: /admin2
+Disallow: /loop
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /auth/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /admin2
+Disallow: /loop
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /auth/
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /admin2
+Disallow: /loop
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /auth/
+
+User-agent: Claude-User
+Allow: /
+Disallow: /admin
+Disallow: /admin2
+Disallow: /loop
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /auth/
 
 User-agent: Twitterbot
 Allow: /
 Disallow: /admin
+Disallow: /admin2
+Disallow: /loop
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /auth/
 
 User-agent: facebookexternalhit
 Allow: /
 Disallow: /admin
+Disallow: /admin2
+Disallow: /loop
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /auth/
 
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /admin2
+Disallow: /loop
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /auth/
 
 Sitemap: https://jobvance.io/sitemap.xml

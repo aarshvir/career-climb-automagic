@@ -4,7 +4,7 @@ const sdk = vi.hoisted(() => ({ session: vi.fn(), getUser: vi.fn(), invoke: vi.f
 vi.mock('@/utils/authSession', () => ({ readAuthSession: sdk.session }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: sdk.getUser }, functions: { invoke: sdk.invoke } } }));
 vi.mock('@/lib/cv-documents', () => ({ listCvDocuments: sdk.cvs }));
-import { callJobLoop, getLoopDownload, getLoopPreview, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl } from '@/lib/job-loop-api';
+import { callJobLoop, getLoopDownload, getLoopPreview, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl,LOOP_ARTIFACT_TIMEOUT_MS } from '@/lib/job-loop-api';
 import { validateAction as validateControlInput } from '../../../supabase/functions/_shared/job-loop-engine';
 
 beforeEach(() => {
@@ -12,7 +12,7 @@ beforeEach(() => {
   sdk.session.mockResolvedValue({ user: { id: 'owner-a' } }); sdk.getUser.mockResolvedValue({ data: { user: { id: 'owner-a' } }, error: null });
   sdk.invoke.mockResolvedValue({ data: { message: 'Synthetic action confirmed' }, error: null });
 });
-afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
+afterEach(() => { vi.useRealTimers();vi.restoreAllMocks(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
 
 describe('cloud loop API privacy and owner boundaries', () => {
   it('keeps the paid route consent across browser parsing and server action validation',async()=>{
@@ -89,6 +89,18 @@ describe('cloud loop API privacy and owner boundaries', () => {
   });
 });
 describe('private document and OAuth destinations', () => {
+  it.each(['headers','body'])('releases a stalled private %s transfer before a minute without losing owner checks',async(stage)=>{
+    vi.useFakeTimers();
+    sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.txt?token=synthetic',filename:'fixture.txt'},error:null});
+    const response=new Response('Fictional text');
+    if(stage==='body')vi.spyOn(response,'blob').mockImplementation(()=>new Promise(()=>{}));
+    const fetcher=vi.fn((_url:unknown,_options:RequestInit)=>stage==='headers'?new Promise<Response>(()=>{}):Promise.resolve(response));vi.stubGlobal('fetch',fetcher);
+    const pending=getLoopDownload('owner-a','packet-a','txt');const rejected=expect(pending).rejects.toThrow(/timed out/);
+    await vi.waitFor(()=>expect(fetcher).toHaveBeenCalledOnce());
+    expect(LOOP_ARTIFACT_TIMEOUT_MS).toBeLessThan(60000);
+    await vi.advanceTimersByTimeAsync(LOOP_ARTIFACT_TIMEOUT_MS+1);await rejected;
+    expect(fetcher.mock.calls[0][1].signal?.aborted).toBe(true);
+  });
   it.each(['http://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf?token=fixture', 'https://untrusted.invalid/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf', 'https://qa.supabase.co/storage/v1/object/sign/cv-documents/owner-a/file.pdf', 'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-b/file.pdf', 'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/%2Fother/file.pdf'])('rejects an unsafe document destination', url => {
     expect(() => safeLoopDownloadUrl(url, 'owner-a')).toThrow();
   });

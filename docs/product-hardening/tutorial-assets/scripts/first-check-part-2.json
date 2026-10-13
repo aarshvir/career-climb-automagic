@@ -1,0 +1,21 @@
+{
+  "tutorialId": "first-check",
+  "part": 2,
+  "totalParts": 3,
+  "title": "Your first CV check · Part 2 of 3",
+  "sceneIds": [
+    "vacancy",
+    "evidence"
+  ],
+  "stageIds": [
+    "check-vacancy",
+    "check-evidence"
+  ],
+  "narration": "In One vacancy, paste the full job description, including responsibilities, requirements and conditions. Use the actual posting, with at least eighty characters. Select Check these inputs. The check does not open links or send an application. Each finding shows what the vacancy asks for beside what your CV says. Related wording may still need a better example. Read the full vacancy too. Matching phrases do not verify a degree, calculate experience years or predict an interview. Select Review my CV and questions.",
+  "captions": [
+    "Use the actual description, including conditions. The check does not open employer links.",
+    "A phrase match is a review aid. It does not establish qualification or eligibility."
+  ],
+  "timingStatus": "planned; final caption timing requires actual rendered audio",
+  "screenshotPolicy": "Only actual reviewed Jobvance UI with clearly fictional career data; no synthetic UI or private account data."
+}

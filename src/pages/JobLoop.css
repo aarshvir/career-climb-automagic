@@ -33,10 +33,32 @@
 .jl-progress-dot > span { width:5px; height:5px; background:#a7b4cb; border-radius:50%; }
 .jl-progress-dot--ready { background:#eaf3ec; color:#356044; border-color:#b4cdbb; }
 .jl-next-cards { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
-.jl-next-cards button { display:flex; align-items:flex-start; gap:12px; padding:17px; background:#fff; border:1px solid #cbd6eb; border-radius:8px; text-align:left; cursor:pointer; }
-.jl-next-cards button:hover { border-color:var(--jl-blue); background:#f8faff; }
-.jl-next-cards button > svg { color:var(--jl-blue); margin-top:3px; }
-.jl-next-cards button > svg:last-child { margin-left:auto; }
+.jl-next-cards--single { grid-template-columns:1fr; }
+.jl-next-cards .jl-primary-next { border-color:#8ca5eb; background:#f1f5ff; }
+.jl-next-cards .jl-primary-next strong { font-size:15px; color:#2547b5; }
+.jl-context-help { display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; margin-top:14px; }
+.jl-context-help a { display:inline-flex; align-items:center; min-height:44px; color:var(--jl-blue); font-size:12px; line-height:1.8; font-weight:600; text-decoration:underline; text-underline-offset:3px; }
+.jl-setup-step > summary { font-size:16px; line-height:1.7; }
+.jl-setup-step > .jl-profile-form { margin-top:12px; }
+.jl-setup-step > .jl-profile-form > details { margin-top:0; }
+.jl-source-setup .jl-setup-step:first-child { border-top:0; padding-top:0; margin-top:0; }
+.jl-source-setup .jl-file-input--primary { padding:18px; border:1px solid #aebde6; border-radius:8px; background:#f3f6ff; }
+.jl-source-setup .jl-file-input--primary input { background:#fff; }
+.jl-source-setup .jl-setup-step:first-child textarea { min-height:185px; }
+.jl-fact-preview { padding:18px; border:1px solid #c7d5ef; background:#f5f8ff; border-radius:8px; }
+.jl-fact-preview blockquote { margin:10px 0 14px; color:var(--jl-ink); font-size:14px; line-height:1.9; white-space:pre-wrap; }
+.jl-fact-preview p { font-size:11px; color:var(--jl-muted); line-height:1.9; }
+.jl-fact-preview p + p { margin-top:8px; }
+.jl-fact-preview .jl-eyebrow { color:var(--jl-blue); }
+.jl-claim-editor .jl-fact-source { margin-top:0; }
+.jl-claim-editor .jl-fact-source > .jl-profile-form { margin-top:12px; }
+.jl-panel.jl-optional-block > summary { font-size:15px; }
+.jl-panel.jl-optional-block > summary .jl-tag { margin-left:8px; vertical-align:middle; }
+.jl-optional-block > .jl-panel { margin-top:18px; padding:0; border:0; background:transparent; }
+.jl-next-cards :is(button,a) { display:flex; align-items:flex-start; gap:12px; padding:17px; background:#fff; border:1px solid #cbd6eb; border-radius:8px; text-align:left; cursor:pointer; }
+.jl-next-cards :is(button,a):hover { border-color:var(--jl-blue); background:#f8faff; }
+.jl-next-cards :is(button,a) > svg { color:var(--jl-blue); margin-top:3px; }
+.jl-next-cards :is(button,a) > svg:last-child { margin-left:auto; }
 .jl-next-cards strong { display:block; font-size:12px; line-height:1.8; }
 .jl-next-cards small { display:block; margin-top:5px; font-size:10px; color:var(--jl-muted); line-height:1.9; }
 .jl-budget { display:grid; gap:7px; padding:17px 0 0; margin-top:22px; border-top:1px solid var(--jl-line); }

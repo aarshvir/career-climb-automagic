@@ -1,0 +1,125 @@
+{
+  "contentKind": "screen_walkthrough",
+  "hasBurnedCaptions": true,
+  "tutorialId": "another-application",
+  "title": "Prepare your next application",
+  "file": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\another-application.mp4",
+  "sha256": "d15d3d9562a8b7309a1bd3dbe23166060e373fa229b60a8feaa4be8a830ed61d",
+  "durationSeconds": 75.30000000000001,
+  "sourcePresenterSha256": "0d9ea290d0615b9387f99e596a27ece085c990d6fd39ea5042fdc180c6fe39e1",
+  "screens": [
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\another-application--preserve.jpg",
+      "durationSeconds": 18.4,
+      "stageId": "check-next-application",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "643d97b0be680097e07150dd82edf19f6f209892710d8a0346be8f9bffcf4ac6"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\another-application--new-check.jpg",
+      "durationSeconds": 9.2125,
+      "stageId": "check-role",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "f426d752d80e49a7a946628783202b7858c4b1b6038b168f8c7589ed7cf841fa"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\another-application--new-check-cv.jpg",
+      "durationSeconds": 9.2125,
+      "stageId": "check-role",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "037f6a9b208fa9395738203137ef60d4b585d3d07ce57c6b5a96a683a82b3430"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\another-application--loop-reuse.jpg",
+      "durationSeconds": 19.0,
+      "stageId": "loop-opportunities",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "e0d1e33b58fa18388b1d6b465e1f63f0e1ed131f11a0e0501d63e480e484d310"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\another-application--tracking.jpg",
+      "durationSeconds": 19.475,
+      "stageId": "loop-application-tracking",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "4671eedf476b7ad2bfe1e0107a11bd50d1167e092056b82fced69a406aa9d68b"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "preserve",
+      "stageId": "check-next-application",
+      "title": "Keep the current application first",
+      "startSeconds": 0.0,
+      "durationSeconds": 18.4
+    },
+    {
+      "id": "new-check",
+      "stageId": "check-role",
+      "title": "Give the new job a fresh review",
+      "startSeconds": 18.4,
+      "durationSeconds": 18.425
+    },
+    {
+      "id": "loop-reuse",
+      "stageId": "loop-opportunities",
+      "title": "Reuse saved Job Loop facts",
+      "startSeconds": 36.825,
+      "durationSeconds": 19.0
+    },
+    {
+      "id": "tracking",
+      "stageId": "loop-application-tracking",
+      "title": "Report the status after you act",
+      "startSeconds": 55.825,
+      "durationSeconds": 19.475
+    }
+  ],
+  "screenMethod": "actual CUA browser screenshots, edited as a montage; not a continuous screen recording",
+  "presenterMethod": "original fictional portrait + Kokoro af_heart + MuseTalk V15 manual crop/mask",
+  "captionMethod": "Kokoro predicted token timings and measured speech sample durations",
+  "paidApiCalls": 0,
+  "commercialComponentsReviewed": true,
+  "finalPlaybackReviewed": false,
+  "bytes": 2692352,
+  "measuredContainerDurationSeconds": 75.3,
+  "mediaFormat": {
+    "width": 1920,
+    "height": 1080,
+    "fps": "25/1",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "mimeType": "video/mp4"
+  },
+  "verification": {
+    "fullDecodePassed": true,
+    "transcriptExact": true,
+    "currentHelpNarrationMatches": true,
+    "captionWordsMatchTranscript": true,
+    "captionTimesValid": true,
+    "captionMaximumLines": 2,
+    "captionCueCount": 16,
+    "chapterFramesExportedForVisualReview": true,
+    "chapterFramesVisuallyReviewed": true,
+    "sourceScreensVisuallyReviewed": true,
+    "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen review; not uninterrupted human viewing"
+  },
+  "currentHelpSourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
+  "reviewStatus": "ready",
+  "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+  "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+  "limitations": [
+    "Narrated product-screen still montage, not a continuous screen recording.",
+    "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
+    "Caption timing uses model token predictions and measured audio samples."
+  ]
+}

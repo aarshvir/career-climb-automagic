@@ -1,0 +1,660 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-reliability-privacy-product-audit",
+  "auditor": "fresh_audit_reliability",
+  "independentOfImplementation": true,
+  "peerReportsOrGradesRead": false,
+  "startedAt": "2026-10-13T18:52:03Z",
+  "initialScoresFrozenAt": "2026-10-13T19:03:20Z",
+  "writtenAt": "2026-10-13T19:08:05.329Z",
+  "initialScoresFrozen": true,
+  "rubric": {
+    "dimensions": 10,
+    "equalWeight": 0.1,
+    "range": [
+      1,
+      100
+    ],
+    "unknownIsNotAutomaticallyADefect": true
+  },
+  "baselineCommit": "f225451e8fc33a71848d8167a793e90c1a2dfb24",
+  "revisionScope": "Uncommitted October 13 hardening build. Selected initial source and generated Worker hashes captured at 18:55:32Z; concurrent root fixes are recorded as narrow rechecks, not a new grade.",
+  "initialSourceHashes": {
+    "src/pages/JobLoop.tsx": "93f2548679f7ac841847e72b65871d439be58184c067fc206d24ac682a9978d6",
+    "src/lib/cv-evidence.ts": "af3285435c72f623c226b8bd9ce9a9c050dd7b1264e94ce82ef1c15ac5dd5dc0",
+    "src/lib/cv-extraction.ts": "7ac949832ac5abeb4e36df6a852347224d08bc9e4de0c8a90edc2c929c7322db",
+    "src/lib/job-loop-api.ts": "9a2d75b3eef60bed42ca47f77eef33f38e6fb6094177f0ea415df9bc8de4008e",
+    "src/lib/loop-draft-memory.ts": "418e66d461915b6f1d22f72fd4c260167742fc599f077f7fbab8f6ce82686b69",
+    "supabase/functions/_shared/job-loop-runtime.ts": "b8508aaf8275e4fafe8e4244cd121977c95aee873e966a6345587405f4b3e9a5",
+    "supabase/functions/_shared/job-loop-engine.ts": "aa987bcbe5d08c425d4923242f72073ac7feb69b2a5fa63589d9eb9f7c1dc91b",
+    "supabase/functions/_shared/job-loop-providers.ts": "436986e77995d1abbeb11028c6c5eee2945e478e514cf67376f87ac1e811d128",
+    "supabase/functions/_shared/job-loop-repository.ts": "c8930e2711c22c2706a818cfa51cafc7eab280b739f0c0dff4fe1279a296c33d",
+    "supabase/functions/_shared/jobvance-openrouter.ts": "90b9e9bfa7faf83f9b95791b145567124d5b10afbebcf5e7119b0e32b3eb4feb",
+    "scripts/build-host-worker.mjs": "1adbd4c16cf8a57b12d4546073e5ac430b523ab92a536e51523647cb82c46e66",
+    "dist/server/index.js": "6c1b44166aa6726430dca39ad00eea3105bb9037d10d199d1ca4312a4171bd99"
+  },
+  "overall": 82.7,
+  "scores": [
+    {
+      "dimension": "clarity",
+      "score": 86,
+      "reason": "The public preview states one CV, one vacancy, human review and separate optional saving. Discovery and application-status claims carry visible limits."
+    },
+    {
+      "dimension": "activation",
+      "score": 85,
+      "reason": "A guest can start without an account or card. The independently exercised fictional journey reached a real one-page PDF preview; cloud activation is supported by supplied synthetic QA, not my own signed-in browser run."
+    },
+    {
+      "dimension": "form effort",
+      "score": 77,
+      "reason": "Import/paste and three required setup details reduce initial effort. Individual claim context, contribution and sharing checks remain substantial, and a full vacancy still needs copying."
+    },
+    {
+      "dimension": "evidence quality",
+      "score": 81,
+      "reason": "Literal complete passages, source references, assisted-role qualifiers and forecast limitations are preserved. The initial internship context inheritance and decorated vacancy heading reproduce misleading labels or unnecessary review noise."
+    },
+    {
+      "dimension": "workflow completeness",
+      "score": 82,
+      "reason": "Source saving, vacancy preparation, exact preview, approval, multiple output formats, tracking, reminders and recurring controls form a coherent loop. Hosted rules execution is supplied evidence. External inbox/model operation was not independently exercised."
+    },
+    {
+      "dimension": "reuse/time-saving",
+      "score": 85,
+      "reason": "Career facts and unchanged packets are reusable; a second free-check vacancy deliberately clears findings and approval. Supplied hosted QA demonstrates fact reuse. No measured customer time saving is inferred."
+    },
+    {
+      "dimension": "help/walkthroughs",
+      "score": 86,
+      "reason": "Task help, original guides, interactive fictional walkthroughs, keyboard step controls and complete transcripts exist. The current video manifest is empty; avatar/recorded assets are in production and were not treated as ready."
+    },
+    {
+      "dimension": "UI/accessibility",
+      "score": 80,
+      "reason": "The observed desktop journey has labelled fields, readable progress, semantic controls and focus handoffs. Claim/output review is dense. Full mobile, assistive-technology and playback testing are outside this independent run."
+    },
+    {
+      "dimension": "trust/privacy",
+      "score": 87,
+      "reason": "Separate storage, sharing, model-route and mailbox choices, server-only model keys, owner checks, anonymous denials and conservative output claims are strong. Signed-link lifetime, retention and downloaded-copy limits remain material operational boundaries."
+    },
+    {
+      "dimension": "reliability",
+      "score": 78,
+      "reason": "Database invariants and selected suites passed, with explicit partial/blocked results and retained uncertain spending. The initial slow-model lease mismatch, accepted paid-schedule route mismatch and unbounded stalled download are reproducible recovery gaps."
+    }
+  ],
+  "scope": {
+    "publicPreview": "http://localhost:8381",
+    "fictionalLocalDemo": "http://localhost:8382/loop",
+    "actualDomain": "https://jobvance.io",
+    "providedBackendVersions": {
+      "control": 10,
+      "worker": 8
+    },
+    "realCandidateDataUsed": false,
+    "accountsCreated": 0,
+    "privilegedKeysExtracted": false,
+    "paidCalls": 0,
+    "purchases": 0,
+    "sends": 0,
+    "applicationSubmissions": 0,
+    "destructiveCloudOperations": 0,
+    "appEdits": false,
+    "commits": false,
+    "childAgents": false,
+    "authorizedPermanentTestFile": "supabase/tests/job-loop-lease.test.ts"
+  },
+  "verification": {
+    "independent": {
+      "frontend": {
+        "files": 14,
+        "tests": 141,
+        "result": "passed"
+      },
+      "backend": {
+        "files": 10,
+        "tests": 98,
+        "result": "passed"
+      },
+      "generatedWorker": {
+        "publicPages": 38,
+        "guideArticles": 20,
+        "gzipBytes": 2652252,
+        "result": "passed",
+        "sourceSha256": "6c1b44166aa6726430dca39ad00eea3105bb9037d10d199d1ca4312a4171bd99",
+        "coverage": [
+          "security headers and exact JSON-LD CSP hashes",
+          "private client noindex routes",
+          "rendered public initial HTML",
+          "canonical redirects",
+          "real 404 status",
+          "asset bytes/MIME/cache/ETag/HEAD",
+          "private filesystem paths",
+          "unsafe HTTP methods",
+          "site identity",
+          "compressed size"
+        ]
+      },
+      "anonymousEndpointProbes": [
+        {
+          "name": "control",
+          "status": 401,
+          "body": "{\"error\":\"Sign in to continue.\",\"code\":\"UNAUTHORIZED\"}",
+          "cacheControl": "no-store"
+        },
+        {
+          "name": "worker",
+          "status": 401,
+          "body": "{\"error\":\"The background worker request is unauthorized.\",\"code\":\"LOOP_WORKER_UNAUTHORIZED\"}",
+          "cacheControl": "no-store"
+        },
+        {
+          "name": "scheduler",
+          "status": 401,
+          "body": "{\"error\":\"The background worker request is unauthorized.\",\"code\":\"LOOP_WORKER_UNAUTHORIZED\"}",
+          "cacheControl": "no-store"
+        },
+        {
+          "name": "admin",
+          "status": 401,
+          "body": "{\"error\":\"Sign in to continue.\",\"code\":\"UNAUTHORIZED\"}",
+          "cacheControl": "no-store"
+        },
+        {
+          "name": "review-fake-ticket",
+          "status": 401,
+          "body": "{\"error\":\"The task ticket is invalid, expired or already consumed.\",\"code\":\"ADMIN_TICKET_INVALID\"}",
+          "cacheControl": "no-store"
+        },
+        {
+          "name": "actual-checkout-anonymous",
+          "status": 401,
+          "body": "{\"error\":\"Sign in to continue.\",\"code\":\"UNAUTHORIZED\"}",
+          "cacheControl": "no-store"
+        }
+      ],
+      "discardedProbe": "A first probe used the nonexistent paddle-checkout route and returned404. It proves only absence of that name and is not used as payment evidence; the actual create-checkout route was subsequently probed.",
+      "browser": {
+        "guestJourney": "Fictional role -> pasted CV -> pasted vacancy -> evidence -> review -> final approval panel -> actual one-page PDF preview. The tab then reset during concurrent source changes before final approval/download; this interruption is not counted as a demonstrated product defect.",
+        "privateDemo": "Fictional local demo only: blank Today, import/paste, copied name, target/location form, private-save choice, confirmed-fact and unavailable-processing states. Demo service behavior is not cloud execution evidence."
+      },
+      "mockedRuntime": {
+        "at": "2026-10-13T18:59:49.708Z",
+        "kind": "independent-mocked-runtime-reproduction",
+        "paidCalls": 0,
+        "leaseMismatch": {
+          "simulatedResponseAfterMs": 101000,
+          "leaseMs": 100000,
+          "settlements": 1,
+          "uploadedArtifacts": 5,
+          "phaseCommitAttempts": 1,
+          "continued": false
+        },
+        "scheduledRoute": {
+          "acceptedSettings": {
+            "cadence": "daily",
+            "timezone": "Asia/Dubai",
+            "localTime": "08:00",
+            "weeklyDay": null,
+            "provider": "openai",
+            "model": "gpt-6.1-sol",
+            "modelConsent": true,
+            "inboxConsent": false
+          },
+          "persistedRunConsents": {
+            "model": true,
+            "inbox": false
+          },
+          "dispatchMessage": "Scheduled preparation queued. Review its actual progress below.",
+          "blockedMessage": "The processing route changed after approval. No paid call was made; start again with explicit route consent.",
+          "paidCalls": 0
+        }
+      },
+      "stalledDownloadTest": {
+        "files": 1,
+        "tests": 1,
+        "result": "passed"
+      },
+      "sourceNarrowRecheck": {
+        "files": 3,
+        "tests": 70,
+        "result": "passed"
+      },
+      "sqlNarrowRecheck": {
+        "at": "2026-10-13T19:04:26.029Z",
+        "kind": "independent-real-PostgreSQL-in-memory-lease-recheck",
+        "initialScoresUnchanged": true,
+        "migrationPath": "supabase/migrations/20261013190000_job_loop_provider_lease.sql",
+        "migrationSha256": "40e6f1f30581f5ad90f8220b7eb90750051aea293060174081944345f1ef6aeb",
+        "oldLeaseSeconds": 100,
+        "newLeaseSeconds": 180,
+        "virtualElapsedSeconds": 101,
+        "checks": {
+          "oldLeaseLateCommitDenied": true,
+          "newLeaseLateCommitAccepted": true,
+          "wrongLeaseDenied": true,
+          "cancelledCommitDenied": true,
+          "staleInputCommitDenied": true,
+          "foreignOwnerReservationDenied": true,
+          "anonymousClaimDenied": true,
+          "authenticatedClaimDenied": true
+        },
+        "paidCalls": 0,
+        "realCloudMutation": false
+      },
+      "rulesOnlyScheduleNarrowRecheck": {
+        "at": "2026-10-13T19:10:23.522Z",
+        "kind": "independent-mocked-rules-only-schedule-recheck",
+        "initialScoresUnchanged": true,
+        "sourcePath": "supabase/functions/_shared/job-loop-runtime.ts",
+        "sourceSha256": "783a4e347763e23d246da6cd6d6969b1c120eb2d99db7d544c1f0b4a4e4d7cfa",
+        "paidSchedulesRejectedBeforeWrite": [
+          {
+            "provider": "openai",
+            "code": "LOOP_SCHEDULE_MODEL_UNAVAILABLE",
+            "status": 422
+          },
+          {
+            "provider": "anthropic",
+            "code": "LOOP_SCHEDULE_MODEL_UNAVAILABLE",
+            "status": 422
+          },
+          {
+            "provider": "moonshot",
+            "code": "LOOP_SCHEDULE_MODEL_UNAVAILABLE",
+            "status": 422
+          }
+        ],
+        "ruleSchedulesPersisted": 1,
+        "actualNetworkCalls": 0,
+        "remainingLimit": "This rejects new paid schedules; existing saved paid schedules and processDueSchedules were not changed by this narrow fix."
+      },
+      "downloadNarrowRecheck": {
+        "at": "2026-10-13T19:10:24Z",
+        "kind": "independent-mocked-private-download-recheck",
+        "sourcePath": "src/lib/job-loop-api.ts",
+        "sourceSha256": "a2f838eb3c7249814062d2451a1f2c6ba6efc5852c5a0436f7c4507b551d5b7d",
+        "initialScoresUnchanged": true,
+        "files": 1,
+        "tests": 3,
+        "result": "passed",
+        "timeoutMs": 45000,
+        "checks": [
+          "stalled response headers time out",
+          "stalled response body times out",
+          "deadline aborts transfer",
+          "fresh private link retry succeeds",
+          "foreign-owner arrival denied"
+        ],
+        "actualNetworkCalls": 0,
+        "remainingLimit": "The body still uses whole-blob allocation with its size checked afterward; streaming byte-limit enforcement and immediate owner/unmount cancellation were not added by this narrow timeout fix."
+      },
+      "permanentLeaseRegression": {
+        "path": "supabase/tests/job-loop-lease.test.ts",
+        "sha256": "2ba87b3dcaa98163ed0f954aff62c20bb1ae7f07b75e098d1affa99ad93ecc96",
+        "files": 1,
+        "tests": 4,
+        "result": "passed",
+        "coverage": [
+          "historical 100-second failure and migrated 180-second success at virtual 101 seconds",
+          "wrong lease",
+          "cancelled run",
+          "stale inputs",
+          "foreign-owner reservation",
+          "anon/authenticated claim denial",
+          "service-role claim allowed"
+        ],
+        "paidCalls": 0,
+        "realCloudMutation": false
+      }
+    },
+    "suppliedEvidence": {
+      "path": "docs/INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json",
+      "kind": "root-run synthetic rules-only hosted QA, not auditor-owned authenticated browser execution",
+      "checks": 75,
+      "status": "passed",
+      "startedAt": "2026-10-13T18:24:52.688Z",
+      "finishedAt": "2026-10-13T18:27:16.557Z",
+      "paidCalls": 0,
+      "coverage": [
+        "source-bound approval",
+        "exact hosted PDF/DOCX/TXT/report/letter bytes",
+        "second-vacancy reuse",
+        "scheduled preparation/pause/resume/cancel",
+        "cross-user record/artifact isolation",
+        "source withdrawal/revocation",
+        "disabled checkout",
+        "no sends or application submissions"
+      ]
+    },
+    "actualDomainReadOnly": [
+      {
+        "path": "/",
+        "status": 200,
+        "xRobotsTag": null,
+        "cacheControl": "no-cache",
+        "htmlSha256": "7ac86c8554790ccfc85cd395d7e08cc0c60e03f3b7cca41e3aa49dce35e703fd",
+        "initialHtmlHasHeading": false,
+        "title": "Jobvance — prepare, review and track applications"
+      },
+      {
+        "path": "/job-loop",
+        "status": 200,
+        "xRobotsTag": null,
+        "cacheControl": "no-cache",
+        "htmlSha256": "ff66b4cd4082d763a3085e21857aa4739c6afa982bf71b498ba0f5e60334ed1e",
+        "initialHtmlHasHeading": false,
+        "title": "Jobvance — prepare, review and track applications"
+      },
+      {
+        "path": "/walkthroughs",
+        "status": 200,
+        "xRobotsTag": null,
+        "cacheControl": "no-cache",
+        "htmlSha256": "1763938aeae1c85e6129aca9b70d509256653fb626c51fc2e97053bc22dcd19b",
+        "initialHtmlHasHeading": false,
+        "title": "Jobvance — prepare, review and track applications"
+      },
+      {
+        "path": "/loop",
+        "status": 200,
+        "xRobotsTag": null,
+        "cacheControl": "no-cache",
+        "htmlSha256": "30a8a14e65b92de29180275684e99873b6d3399a76e789f927601975d2051c19",
+        "initialHtmlHasHeading": false,
+        "title": "Jobvance — prepare, review and track applications"
+      }
+    ]
+  },
+  "boundaryConclusions": [
+    {
+      "area": "Source revision and approval",
+      "conclusion": "Database CAS, source/input versions, exact reviewed text and approval hashes prevent stale factual publication/download. Claim withdrawal and source corrections revoke export authority, including reported application history. UI clears factual/disclosure choices after edits."
+    },
+    {
+      "area": "Ownership and privacy",
+      "conclusion": "Control derives owner from authenticated identity. Repository reads and private paths are owner-scoped, service RPCs are revoked from browsers, and API/Blob responses recheck current owner. Anonymous private endpoint requests independently denied. No candidate account or foreign private record was opened."
+    },
+    {
+      "area": "Source qualifiers and redaction",
+      "conclusion": "Cleared literal claims preserve contribution, negation and forecast qualifications; model input uses eligible phrasing/context plus vacancy, not raw CV/name/contact. Excluded terms suppress/redact output material; the raw saved source still requires user redaction as documented. Initial context classifier gap is R1."
+    },
+    {
+      "area": "Extraction and formats",
+      "conclusion": "5 MiB upload, 80–60,000 readable characters, 100 PDF pages, UTF-8 TXT, and 2 MiB actual inflated DOCX document XML bounds are present. DOCX ignores external relationships/macros, denies DTD/entities and forged-size ZIP bombs. PDF scans/no OCR, corrupt/password-protected and unsupported glyph/page failures have actionable alternatives. DOCX/TXT can remain usable independently of PDF."
+    },
+    {
+      "area": "Downloads and invalidation",
+      "conclusion": "Server verifies stored bytes against the manifest before issuing 120-second owner-path links; no public bucket. Expired requests can get a fresh link, and source changes deny new links. Previously issued signed links/downloaded copies cannot be retroactively recalled. Stalled browser request recovery is R4."
+    },
+    {
+      "area": "Shared budget and model keys",
+      "conclusion": "Model/provider keys remain server-side. Frontend production validation rejects privileged Supabase keys. Candidate/search and admin reservations share the same monthly locked ledger capped at US$50 and owner-configured lower caps; uncertain reservations retain spending and cannot be blindly replayed. Admin review batch cap is US$5. Erasure does not refund committed paid usage. No real funded call was made by this auditor."
+    },
+    {
+      "area": "Sending/payment boundaries",
+      "conclusion": "Sending and application submission are unsupported control actions. Gmail drafts need separately confirmed recipient/attachment and connection permission; Gmail was not connected here. Source disables checkout unless explicitly configured; supplied hosted QA reports disabled real-money checkout and anonymous actual checkout denied."
+    },
+    {
+      "area": "Scheduler ownership and failure states",
+      "conclusion": "Recurring opt-in, timezone-aware future instants, durable occurrence/lease identity, active-user limits and authoritative pause/cancel guards are present. Missed windows prepare once rather than flooding catch-up runs. Current UI is rules-only. Source failures are reported partial/blocked rather than success or an empty market. R2/R3 concern model-related runtime/API edges."
+    },
+    {
+      "area": "SEO/private routes and rollback",
+      "conclusion": "The generated Worker passed noindex headers for private/auth/admin routes and all 38 public rendered routes; robots excludes private roots and sitemap includes public pages. The actual domain still serves older generic initial HTML and lacks a /loop X-Robots-Tag at the observed time; this is a release gap, not failure of the new generated Worker. ROLLBACK.md specifies version 14, f225/tag, exact saved Site identity, preserved data/configuration/usage and function rollback checks."
+    }
+  ],
+  "highestValueFixes": [
+    {
+      "id": "R1",
+      "priority": "P2",
+      "title": "Stop evidence context carrying across internship and other section boundaries",
+      "source": [
+        "src/lib/cv-evidence.ts:sectionFor",
+        "src/lib/cv-evidence.ts:cvPassages",
+        "src/pages/CvCheck.tsx:evidence badges"
+      ],
+      "reproduction": "Use ACADEMIC PROJECTS, an academic Python bullet, then INTERNSHIP and “Assisted in leading Python reporting during an internship at Fictional Example Analytics.” Compare with “Lead Python reporting.” Initially the internship passage is labelled Project / academic evidence. An unrecognized MBA CONSULTING PROJECTS heading after WORK EXPERIENCE also retains employment context.",
+      "impact": "The quote and supporting-role qualifier are intact, but its context label can misrepresent how experience was gained.",
+      "acceptance": "Recognized internship, volunteering and personal-project headings reset context and display accurate badges; ambiguous new section headings must not inherit an affirmative employment/academic label. Assisted work remains partial for a leadership requirement. Preserve full source text and professional-experience safeguards.",
+      "status": "Narrow internship source recheck passed after root correction; remaining ambiguous-heading coverage and final rendered badges require verification.",
+      "evidence": {
+        "at": "2026-10-13T19:02:22.228Z",
+        "initialScoresUnchanged": true,
+        "sourceSha256": "6ed19cb90b349c1ea8ec4c673efc561ce3aa2a0feaa1394c6b891589c4ccdcb4",
+        "narrowContextRecheck": {
+          "status": "partial",
+          "sourceKind": "internship",
+          "quote": "Assisted in leading Python reporting during an internship at Fictional Example Analytics."
+        },
+        "remainingHeaderNoise": {
+          "vacancy": "Graduate Data Analyst at Fictional Example Analytics, Dubai.",
+          "status": "review",
+          "explanation": "The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.",
+          "evidence": [
+            "Assisted in leading Python reporting during an internship at Fictional Example Analytics.",
+            "Alex Example"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R2",
+      "priority": "P2",
+      "title": "Keep the database run lease longer than the bounded model operation",
+      "source": [
+        "supabase/functions/_shared/jobvance-openrouter.ts:callRouter",
+        "supabase/migrations/20261011010000_job_loop_cloud.sql:job_loop_claim_run"
+      ],
+      "reproduction": "With the initial 100-second SQL lease, simulate a valid OpenRouter response at 101 seconds. The real runtime settles one usage row and uploads five artifacts, then phase commit is denied. In a fresh in-memory PostgreSQL instance, the old lease also rejects a simulated 101-second commit.",
+      "impact": "A successful billed model result can fail to publish until recovery or another explicit resume. A competing recovery worker may observe an in-flight reservation and block conservatively.",
+      "acceptance": "Allow a valid response inside the declared 120-second provider deadline to settle/render/commit while the lease remains authoritative. Cancellation, stale-input, owner, token and service-only RPC guards must still deny late/foreign publication. Prove it without real paid calls.",
+      "status": "Local fix independently passed: additive migration extends the run lease to 180 seconds; eight database assertions passed. Hosted migration application was not independently verified.",
+      "evidence": {
+        "at": "2026-10-13T19:04:26.029Z",
+        "kind": "independent-real-PostgreSQL-in-memory-lease-recheck",
+        "initialScoresUnchanged": true,
+        "migrationPath": "supabase/migrations/20261013190000_job_loop_provider_lease.sql",
+        "migrationSha256": "40e6f1f30581f5ad90f8220b7eb90750051aea293060174081944345f1ef6aeb",
+        "oldLeaseSeconds": 100,
+        "newLeaseSeconds": 180,
+        "virtualElapsedSeconds": 101,
+        "checks": {
+          "oldLeaseLateCommitDenied": true,
+          "newLeaseLateCommitAccepted": true,
+          "wrongLeaseDenied": true,
+          "cancelledCommitDenied": true,
+          "staleInputCommitDenied": true,
+          "foreignOwnerReservationDenied": true,
+          "anonymousClaimDenied": true,
+          "authenticatedClaimDenied": true
+        },
+        "paidCalls": 0,
+        "realCloudMutation": false
+      }
+    },
+    {
+      "id": "R3",
+      "priority": "P2",
+      "title": "Reject unsupported paid recurring schedules or persist their explicit processing route",
+      "source": [
+        "supabase/functions/_shared/job-loop-schedule.ts:validateScheduleInput",
+        "supabase/functions/_shared/job-loop-runtime.ts:processDueSchedules"
+      ],
+      "reproduction": "The backend accepts a paid daily openai/gpt-6.1-sol schedule with model consent. When OpenRouter is configured, scheduled dispatch stores only model/inbox consent. First preparation compares missing route as direct against openrouter and blocks before reservation or provider use.",
+      "impact": "An accepted supported API schedule repeatedly queues work that cannot prepare. The current customer UI schedules rules only and is unaffected; this is a latent API/legacy-schedule failure, not an observed paid customer run.",
+      "acceptance": "For the rules-only product, reject paid schedules explicitly before persistence/dispatch. If paid recurrence is supported later, persist and display the exact consented processing route, invalidate consent on route changes, and test routed scheduling with no provider substitution.",
+      "status": "Narrow local fix passed: new paid schedule providers are rejected before persistence; rules scheduling remains functional. Existing stored paid schedules still need explicit legacy handling. Hosted updated function deployment not independently verified.",
+      "evidence": {
+        "acceptedSettings": {
+          "cadence": "daily",
+          "timezone": "Asia/Dubai",
+          "localTime": "08:00",
+          "weeklyDay": null,
+          "provider": "openai",
+          "model": "gpt-6.1-sol",
+          "modelConsent": true,
+          "inboxConsent": false
+        },
+        "persistedRunConsents": {
+          "model": true,
+          "inbox": false
+        },
+        "dispatchMessage": "Scheduled preparation queued. Review its actual progress below.",
+        "blockedMessage": "The processing route changed after approval. No paid call was made; start again with explicit route consent.",
+        "paidCalls": 0
+      }
+    },
+    {
+      "id": "R4",
+      "priority": "P2",
+      "title": "Bound private document requests and release stalled download controls",
+      "source": [
+        "src/lib/job-loop-api.ts:fetchLoopArtifact",
+        "src/pages/JobLoop.tsx:download"
+      ],
+      "reproduction": "Mock the signed private artifact fetch with a promise that never settles. The call receives no cancellation signal and remains pending after ten virtual minutes. The UI download busy state is cleared only when this promise settles.",
+      "impact": "A stalled connection can leave review/download and refresh actions disabled with no fresh-link recovery. The existing descriptive retry errors only run after a rejection or response.",
+      "acceptance": "Use a bounded request/read deadline, cancel stalled work on owner/unmount changes, clear busy state and offer a fresh signed-link retry. Keep the current approval and owner fence. Enforce the byte limit while streaming rather than only after whole-blob allocation.",
+      "status": "Narrow local timeout fix passed: headers and body bounded by 45 seconds, transfer aborted, fresh-link retry succeeds, owner check retained. Streaming byte-limit enforcement and immediate owner/unmount cancellation remain separate limits.",
+      "evidence": {
+        "test": ".sites-runtime/audit-reliability/download-probe.test.ts",
+        "result": "1 passed",
+        "virtualWaitMs": 600000,
+        "actualNetworkCalls": 0
+      }
+    },
+    {
+      "id": "R5",
+      "priority": "P3",
+      "title": "Keep decorated role/employer/location headings out of requirement counts",
+      "source": [
+        "src/lib/cv-evidence.ts:listingRoleHeading",
+        "src/lib/cv-evidence.ts:vacancySpans"
+      ],
+      "reproduction": "Put “Graduate Data Analyst at Fictional Example Analytics, Dubai.” before Responsibilities. It becomes a Needs manual review requirement and offers the candidate name “Alex Example” as related evidence.",
+      "impact": "This adds irrelevant review work and weak source associations to an otherwise clear task. It does not assert that the candidate qualifies.",
+      "acceptance": "Preserve this noun-only listing context verbatim in omitted/full-vacancy text rather than as an evidence requirement. Test role + company + location variants while ensuring mandatory numeric, experience and eligibility criteria remain analyzed.",
+      "status": "Open at initial audit and unchanged in the narrow source recheck.",
+      "evidence": {
+        "vacancy": "Graduate Data Analyst at Fictional Example Analytics, Dubai.",
+        "status": "review",
+        "explanation": "The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.",
+        "evidence": [
+          "Assisted in leading Python reporting during an internship at Fictional Example Analytics.",
+          "Alex Example"
+        ]
+      }
+    }
+  ],
+  "rechecks": [
+    {
+      "at": "2026-10-13T19:02:22.228Z",
+      "initialScoresUnchanged": true,
+      "sourceSha256": "6ed19cb90b349c1ea8ec4c673efc561ce3aa2a0feaa1394c6b891589c4ccdcb4",
+      "narrowContextRecheck": {
+        "status": "partial",
+        "sourceKind": "internship",
+        "quote": "Assisted in leading Python reporting during an internship at Fictional Example Analytics."
+      },
+      "remainingHeaderNoise": {
+        "vacancy": "Graduate Data Analyst at Fictional Example Analytics, Dubai.",
+        "status": "review",
+        "explanation": "The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.",
+        "evidence": [
+          "Assisted in leading Python reporting during an internship at Fictional Example Analytics.",
+          "Alex Example"
+        ]
+      }
+    },
+    {
+      "at": "2026-10-13T19:04:26.029Z",
+      "kind": "independent-real-PostgreSQL-in-memory-lease-recheck",
+      "initialScoresUnchanged": true,
+      "migrationPath": "supabase/migrations/20261013190000_job_loop_provider_lease.sql",
+      "migrationSha256": "40e6f1f30581f5ad90f8220b7eb90750051aea293060174081944345f1ef6aeb",
+      "oldLeaseSeconds": 100,
+      "newLeaseSeconds": 180,
+      "virtualElapsedSeconds": 101,
+      "checks": {
+        "oldLeaseLateCommitDenied": true,
+        "newLeaseLateCommitAccepted": true,
+        "wrongLeaseDenied": true,
+        "cancelledCommitDenied": true,
+        "staleInputCommitDenied": true,
+        "foreignOwnerReservationDenied": true,
+        "anonymousClaimDenied": true,
+        "authenticatedClaimDenied": true
+      },
+      "paidCalls": 0,
+      "realCloudMutation": false
+    },
+    {
+      "at": "2026-10-13T19:10:23.522Z",
+      "kind": "independent-mocked-rules-only-schedule-recheck",
+      "initialScoresUnchanged": true,
+      "sourcePath": "supabase/functions/_shared/job-loop-runtime.ts",
+      "sourceSha256": "783a4e347763e23d246da6cd6d6969b1c120eb2d99db7d544c1f0b4a4e4d7cfa",
+      "paidSchedulesRejectedBeforeWrite": [
+        {
+          "provider": "openai",
+          "code": "LOOP_SCHEDULE_MODEL_UNAVAILABLE",
+          "status": 422
+        },
+        {
+          "provider": "anthropic",
+          "code": "LOOP_SCHEDULE_MODEL_UNAVAILABLE",
+          "status": 422
+        },
+        {
+          "provider": "moonshot",
+          "code": "LOOP_SCHEDULE_MODEL_UNAVAILABLE",
+          "status": 422
+        }
+      ],
+      "ruleSchedulesPersisted": 1,
+      "actualNetworkCalls": 0,
+      "remainingLimit": "This rejects new paid schedules; existing saved paid schedules and processDueSchedules were not changed by this narrow fix."
+    },
+    {
+      "at": "2026-10-13T19:10:24Z",
+      "kind": "independent-mocked-private-download-recheck",
+      "sourcePath": "src/lib/job-loop-api.ts",
+      "sourceSha256": "a2f838eb3c7249814062d2451a1f2c6ba6efc5852c5a0436f7c4507b551d5b7d",
+      "initialScoresUnchanged": true,
+      "files": 1,
+      "tests": 3,
+      "result": "passed",
+      "timeoutMs": 45000,
+      "checks": [
+        "stalled response headers time out",
+        "stalled response body times out",
+        "deadline aborts transfer",
+        "fresh private link retry succeeds",
+        "foreign-owner arrival denied"
+      ],
+      "actualNetworkCalls": 0,
+      "remainingLimit": "The body still uses whole-blob allocation with its size checked afterward; streaming byte-limit enforcement and immediate owner/unmount cancellation were not added by this narrow timeout fix."
+    }
+  ],
+  "gaps": [
+    "No independent authenticated cloud browser journey, real mailbox permission flow, paid model request, purchase or employer application was performed.",
+    "The supplied75-check rules-only hosted QA does not prove model response latency, funding, actual Gmail delivery or user hiring outcomes.",
+    "Public preview and fictional private demo are distinct from the actual older domain. Final release must repeat route/header/sign-in/owner checks against the published artifact.",
+    "No full mobile-device/screen-reader compatibility sweep, adverse slow PDF extraction benchmark, real browser stalled transport run or production avatar-video playback/caption verification.",
+    "The lease migration was independently tested locally; actual Supabase application receipt/version was not independently verified.",
+    "Scores reflect observed initial usefulness and material limits, not customer validation, willingness to pay, employment eligibility or measured time savings.",
+    "Root reported the 180-second migration applied with native hosted privilege checks; this auditor independently verified the migration locally and did not inspect privileged hosted database state."
+  ],
+  "releaseChecks": [
+    "Bind final source/build/Worker/function/database migration hashes to the release receipt.",
+    "Verify actual-domain initial headings/canonicals, private noindex routes,404 behavior and unchanged Site identity after publication.",
+    "Confirm the180-second lease migration exists in hosted database without weakening service-only grants or owner/stale/cancel guards.",
+    "Verify every published tutorial recording/presenter/caption asset plays and matches its current interface and fictional-data disclosure before declaring it ready.",
+    "Keep rollback version 14/tag/source artifacts and candidate data, reservations and audit history intact."
+  ],
+  "updatedAt": "2026-10-13T19:13:05.851Z"
+}

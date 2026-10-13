@@ -1,0 +1,243 @@
+{
+  "audit": "independent-student-first-use",
+  "initialScoreFrozen": true,
+  "initialScore": 82.7,
+  "scale": "1-100, ten equally weighted dimensions",
+  "startedAt": "2026-10-13T18:29:17Z",
+  "endedAt": "2026-10-13T18:36:56Z",
+  "timezone": "Asia/Dubai",
+  "head": "f225451e8fc33a71848d8167a793e90c1a2dfb24",
+  "persona": "University student, first internship application, unfamiliar with ATS; fictional academic team contribution, unimplemented estimate and internship",
+  "independence": "Did not implement product; no prior review or target-score contents read",
+  "scores": {
+    "clarity": 88,
+    "activation": 83,
+    "formEffort": 80,
+    "evidenceQuality": 69,
+    "workflowCompleteness": 82,
+    "reuseTimeSaving": 86,
+    "helpWalkthroughs": 88,
+    "uiAccessibility": 82,
+    "trustPrivacy": 92,
+    "reliability": 77
+  },
+  "publicOrigin": "http://127.0.0.1:8381",
+  "publicPages": [
+    "/for-students",
+    "/",
+    "/job-loop",
+    "/check?audience=student",
+    "/help",
+    "/walkthroughs",
+    "/guides",
+    "/guides/student-projects-on-cv"
+  ],
+  "browser": "New own Chrome tab 1385099002; fictional demo own tab 1385099014",
+  "taskResults": {
+    "existingCvPasted": "observed",
+    "vacancyCompared": "observed; first vacancy four manual-review findings including title",
+    "accurateReview": "observed; academic, team and estimate caveats preserved",
+    "approval": "observed; accuracy/privacy checkboxes required",
+    "downloadRequested": "observed TXT request and fallback link",
+    "downloadTransferred": "unverified; automation event timeout, blob API unsupported, no new file in inspected Downloads directory",
+    "pdfPreview": "observed rendered one-page compact CV, no visible clipping in sample",
+    "secondVacancyReuse": "observed retained full source; role/company/vacancy reset; new approval required; second evidence comparison completed",
+    "emptyCvError": "observed and recoverable",
+    "imageOnlyPdfError": "observed and recoverable with pasted text",
+    "noCvPlainRecord": "observed advance using plain fictional career text",
+    "helpSearch": "observed no CV query returned eight topics",
+    "interactiveWalkthrough": "observed contribution walkthrough navigation",
+    "recordedVideo": "not observed; not credited"
+  },
+  "privateDemo": {
+    "origin": "http://127.0.0.1:8382",
+    "stages": [
+      "record",
+      "confirmed",
+      "opportunities",
+      "coverage"
+    ],
+    "classification": "FICTIONAL LOCAL DEMO; real forms, in-memory adapter, no real account/cloud execution/application",
+    "observedActions": [
+      "Replaced source with fictional student record and saved revision 2",
+      "Inspected source/context/wording/result-status claim controls",
+      "Inspected confirmed academic estimate preset",
+      "Saved fictional manual internship vacancy",
+      "Inspected tracking and blocked coverage"
+    ],
+    "hostedBrowserProof": false,
+    "fixtureLimits": [
+      "Preset audience MBA, not student-routing evidence",
+      "Development reloads reset state; excluded from product defects",
+      "Custom-source suggestion candidate not shown by fixture; not scored as hosted extraction failure",
+      "No actual packet or schedule generated"
+    ]
+  },
+  "providedBackendProof": {
+    "path": "docs/INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json",
+    "status": "passed",
+    "passedChecks": 75,
+    "totalChecks": 75,
+    "independentBrowserProof": false,
+    "paidCalls": 0,
+    "sends": 0,
+    "submissions": 0
+  },
+  "findings": [
+    {
+      "id": "STU-01",
+      "priority": "P1",
+      "title": "Atomic requirements and metadata separation",
+      "repro": "Paste employer/role sentence and comma-separated Excel/Power BI/report/team/SQL responsibilities; title counted and compound line becomes one manual card",
+      "acceptance": "Metadata is separate; supported skills and SQL are individually inspectable with original passage; no qualification prediction"
+    },
+    {
+      "id": "STU-02",
+      "priority": "P2",
+      "title": "Explicit negative evidence and source deduplication",
+      "repro": "Compare Basic SQL is required with skills line ending No SQL experience; identical line appears twice with generic warning",
+      "acceptance": "One excerpt per line and plain explanation of explicitly absent SQL experience with truthful next action"
+    },
+    {
+      "id": "STU-03",
+      "priority": "P2",
+      "title": "Inline no-CV start and precise recovery",
+      "repro": "New student reaches CV step without file and submits blank; no nearby example and error suggests pasting into TXT file",
+      "acceptance": "Inline no-CV example; distinct empty/scanned guidance; direct paste instruction and OCR help link"
+    },
+    {
+      "id": "STU-04",
+      "priority": "P2",
+      "title": "Rank exact help task matches",
+      "repro": "Search help for no CV; eight topics and generic first-check topic precedes dedicated no-CV task",
+      "acceptance": "Dedicated no-CV task first and prominent, with relevant OCR/file support secondary"
+    },
+    {
+      "id": "STU-05",
+      "priority": "P2",
+      "title": "Actionable overview when private preparation unavailable",
+      "repro": "Fictional opportunities/coverage stage recommends Prepare from my saved facts while actual availability state disables cloud preparation",
+      "acceptance": "Conditional unavailable state shows reason and working guest/manual route at overview; available state leads to enabled run",
+      "scope": "conditional UI ease only; no claim production service unavailable"
+    }
+  ],
+  "limitations": [
+    "No independent hosted private browser journey",
+    "No verified file transfer or downloaded document bytes",
+    "No mobile, assistive technology or WCAG assessment",
+    "No multi-page or extensive format corpus",
+    "No external accounts/models/sends/purchases",
+    "Provided backend proof separate from observed browser proof",
+    "Local cache/rebuild refreshes occurred; no product reliability failure inferred"
+  ],
+  "fingerprints": {
+    "src/pages/CvCheck.tsx": "4F66F9E8FA05D50B320E020814584DE29C85E2D463E8F5464DB5CE82EBECD740",
+    "src/pages/JobLoop.tsx": "93F2548679F7AC841847E72B65871D439BE58184C067FC206D24AC682A9978D6",
+    "src/pages/JobLoopPanels.tsx": "E216ED228255B7320E662C25ECE1011C002154DC050F5FADA2A5B3937E507736",
+    "src/pages/HelpCenter.tsx": "00D3B94A3D61A2307869DE3DD0866AB83D6482A90172522A560D5AD7F33276EA",
+    "src/pages/Walkthroughs.tsx": "DEC55073946FD5B3350E23BAC8A31EAE0FBE4DC3273F62A3D7DC9F4EE06D8BE1",
+    "src/pages/JobLoopOverview.tsx": "F308C7B706EECEFB4841059DC094279CE5C5B87E3589F0CF1BD1A7324697BA08",
+    "src/pages/CareerGuides.tsx": "C2202E66BADAA655D071DD13E9B1E44ADAEB9FE31AEBD969BBDBD1D01B73177C",
+    "src/lib/free-check-api.ts": "A235C503C6F5248D690BC1EB779A30325EBEFEDC099E71B15BC00BD01460ADD8",
+    "src/lib/free-check-export.ts": "8E311B9EAC2D0D986171A905E32DD4EE618DC3EF46FF86B509E521196E7B86A2",
+    "src/lib/job-loop-api.ts": "9A2D75B3EEF60BED42CA47F77EEF33F38E6FB6094177F0EA415DF9BC8DE4008E",
+    "src/lib/career-guides.ts": "03772C60E19ED6D04F907B97E677D2AE6801B76A800EF9E48C16D474CA500587",
+    "src/lib/walkthroughs.ts": "F68142F8B66F85E407CEE451453C98E9DAAB0ED794D3CB5312FE364399C0D70E",
+    "docs/INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json": "E50B0FF0897F99F731EF3B9EA341E664B8CAFFFED2BD909DA3A37749603AC512"
+  },
+  "recheckPolicy": "Keep initial score frozen; separately label recheck of fixed findings with changed-source hashes",
+  "rechecks": [
+    {
+      "startedAt": "2026-10-13T19:24:49Z",
+      "endedAt": "2026-10-13T19:26:39Z",
+      "kind": "narrow-findings-recheck",
+      "initialScoreUnchanged": 82.7,
+      "newGlobalScore": null,
+      "tabs": [
+        "1385099057",
+        "1385099063"
+      ],
+      "results": [
+        {
+          "id": "STU-01",
+          "status": "partially-resolved",
+          "observed": "Exact original vacancy + target Data Analyst Intern yields five findings. Employer/title sentence still counted. Clean spreadsheet task split; Power BI/report/team/SQL remainder grouped; whole Requirements sentence grouped.",
+          "remaining": "Title metadata separation and individually inspectable SQL incomplete"
+        },
+        {
+          "id": "STU-02",
+          "status": "resolved-in-tested-sample",
+          "observed": "Standalone Basic SQL required shows negative internship source once and explicit absence-of-experience guidance",
+          "limit": "Not exhaustive negation corpus"
+        },
+        {
+          "id": "STU-03",
+          "status": "resolved-in-tested-cases",
+          "observed": "Inline facts starter with outline/help links; blank direct-paste message; image-only PDF distinct OCR/no-OCR/direct-paste recovery",
+          "limit": "Filled example stays in linked help"
+        },
+        {
+          "id": "STU-04",
+          "status": "resolved-for-reported-query",
+          "observed": "no CV query gives dedicated topic first, uploads second; eight topics retained",
+          "limit": "No broad search ranking assessment"
+        },
+        {
+          "id": "STU-05",
+          "status": "overview-ui-resolved-fixture-route-limited",
+          "observed": "Overview offers free check with unavailable reason and saved/manual alternatives; target /check?audience=mba",
+          "limit": "8382 click reaches unsupported filming-route stub. 8381 guest form separately usable. Hosted navigation and available-cloud branch untested"
+        }
+      ],
+      "fingerprints": {
+        "src/pages/CvCheck.tsx": "81DD3380AD76287F9297C5B4D9D788177E3733C4798DA00883BADF80679AC504",
+        "src/pages/HelpCenter.tsx": "F61E87F45DD54A45C0B464F1E975281FDBD6DE9F35CFF4D1ACCC8DA05621EFAF",
+        "src/pages/JobLoop.tsx": "93F2548679F7AC841847E72B65871D439BE58184C067FC206D24AC682A9978D6",
+        "src/pages/JobLoopPanels.tsx": "98153D6E5E39D9933651BDB1038041DAB61E911C1C722CD6F94F7E3FD2AE4EF5",
+        "src/lib/free-check-api.ts": "A235C503C6F5248D690BC1EB779A30325EBEFEDC099E71B15BC00BD01460ADD8",
+        "src/lib/cv-evidence.ts": "28D24266D61837B91237F8CC4408FF91CB09B9BC686951B0DF12CB52B97E1FD7",
+        "src/lib/cv-extraction.ts": "7AC949832AC5ABEB4E36DF6A852347224D08BC9E4DE0C8A90EDC2C929C7322DB",
+        "src/pages/CvCheck.css": "370DD567FA2DBC520C2784718C65ECC0A8F8F4275164DB2C60A9CDC9AA7AF3A5"
+      }
+    },
+    {
+      "kind": "final-bounded-STU-01-browser-recheck",
+      "startedAt": "2026-10-13T20:59:58Z",
+      "endedAt": "2026-10-13T21:00:53Z",
+      "localDate": "2026-10-14",
+      "timezone": "Asia/Dubai",
+      "tab": "1385099079",
+      "origin": "http://127.0.0.1:8381",
+      "initialScoreUnchanged": 82.7,
+      "newGlobalScore": null,
+      "target": "Data Analyst Intern",
+      "company": "Fictional Cedar Operations",
+      "vacancy": "Fictional Cedar Operations — Data Analyst Intern. Responsibilities: clean spreadsheet data, build Power BI dashboards, communicate findings in clear reports, collaborate in a team, and use SQL to query operational data. Requirements: current university student, Excel, Power BI, basic SQL, attention to detail and written communication. Coursework projects and internship experience are welcome.",
+      "source": "Same original 931-character fictional student CV as initial audit",
+      "results": [
+        {
+          "id": "STU-01",
+          "status": "resolved-for-exact-reported-case",
+          "observed": "11 findings: title sentence omitted; all five tasks separate; Excel and Power BI individual direct wording; basic SQL individual manual review with complete negative internship source; Read full vacancy retains exact original paragraph",
+          "counts": {
+            "direct": 2,
+            "manual": 7,
+            "total": 11,
+            "related": 2
+          },
+          "limits": [
+            "No independent numeric-offset verification",
+            "No broad parser regression corpus",
+            "No new hosted flow or grade"
+          ]
+        }
+      ],
+      "providedSupplementaryEvidence": "Coordinator reports 72 focused evidence tests passed; not run independently by this reviewer",
+      "fingerprints": {
+        "src/lib/cv-evidence.ts": "CCFC9575CF9A49842811B68C1DADDD8C0205EBCC313A3189AA4715B8F8E9DF12",
+        "src/pages/CvCheck.tsx": "91C2E5F7910B3D69979B4159F8BDE119EB36182EC16F66A79E47C109E7401425"
+      },
+      "sourceHashStableBeforeAfter": true
+    }
+  ]
+}

@@ -1,0 +1,442 @@
+{
+  "version": 1,
+  "productionStatus": "five local assets ready; public hosting is separate",
+  "paidApiCalls": 0,
+  "externalPrivateUploads": 0,
+  "rightsRecord": "docs/product-hardening/tutorial-assets/LOCAL-MODEL-LICENSES.md",
+  "retainedNotices": "docs/product-hardening/tutorial-assets/notices/",
+  "modelManifest": "docs/product-hardening/tutorial-assets/notices/model-manifest.json",
+  "providerPlaybackUrls": [],
+  "providerUrlExpiry": null,
+  "videos": [
+    {
+      "tutorialId": "first-check",
+      "status": "ready",
+      "contentKind": "screen_walkthrough",
+      "usesFictionalData": true,
+      "hasBurnedCaptions": true,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "durationSeconds": 111.275,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.mp4",
+          "sha256": "199dec6cffe1975912c403a7b44bbb0ebac98bf42d71772c7bc6b775fa90165a",
+          "bytes": 4112804
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.vtt",
+          "sha256": "c33ad39890157801c47795401a9b88df493b9c8e8375b035fa694f13aaadc4ab",
+          "bytes": 2522
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.txt",
+          "sha256": "17717e3d5089204fd75840ebcdb1c44994a1c1a2f31f69996c5239b8db592f1c",
+          "bytes": 1573
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.jpg",
+          "sha256": "638ea9f9a55520364671901c633938ad59f6ddf339f5a2ed6b9a0c0b7ec85e98",
+          "bytes": 81555
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.json",
+          "sha256": "9bc2d5b6f69b8979942413f1893c1236500e774ff0865ad5af52200c47ee12b4",
+          "bytes": 7850
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "chapters": [
+        {
+          "id": "role",
+          "stageId": "check-role",
+          "title": "Choose one target role",
+          "startSeconds": 0.0,
+          "durationSeconds": 13.125
+        },
+        {
+          "id": "cv",
+          "stageId": "check-cv",
+          "title": "Read and check your CV text",
+          "startSeconds": 13.125,
+          "durationSeconds": 21.4
+        },
+        {
+          "id": "vacancy",
+          "stageId": "check-vacancy",
+          "title": "Paste the full vacancy",
+          "startSeconds": 34.525,
+          "durationSeconds": 16.575
+        },
+        {
+          "id": "evidence",
+          "stageId": "check-evidence",
+          "title": "Follow wording to its source",
+          "startSeconds": 51.099999999999994,
+          "durationSeconds": 19.45
+        },
+        {
+          "id": "review",
+          "stageId": "check-review",
+          "title": "Keep the words you can explain",
+          "startSeconds": 70.55,
+          "durationSeconds": 18.95
+        },
+        {
+          "id": "approve",
+          "stageId": "check-approve-download",
+          "title": "Preview, approve and download",
+          "startSeconds": 89.5,
+          "durationSeconds": 21.775
+        }
+      ],
+      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "limitations": [
+        "Narrated product-screen still montage, not a continuous screen recording.",
+        "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
+        "Caption timing uses model token predictions and measured audio samples.",
+        "Actual PDF controls and approved TXT request are shown; generated PDF view and browser download completion were not independently captured."
+      ]
+    },
+    {
+      "tutorialId": "job-loop-start",
+      "status": "ready",
+      "contentKind": "screen_walkthrough",
+      "usesFictionalData": true,
+      "hasBurnedCaptions": true,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "durationSeconds": 95.625,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.mp4",
+          "sha256": "1daeef330b96e569a9dfec95b837e68abc7f42fb84347875810ae2c3c67ba514",
+          "bytes": 3433314
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.vtt",
+          "sha256": "b5c0c6b27d1d1d924d9f65acb931ca37418ea551d21d840715eb5a373a157fbe",
+          "bytes": 2240
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.txt",
+          "sha256": "055a76e466cf47069a3f74628620aee534e862eb9615902d7dec27c5783e51ee",
+          "bytes": 1403
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.jpg",
+          "sha256": "aeef6454c3ad5a88942c6201c7bda65c0b306f7317963702f2fcda030c9a5590",
+          "bytes": 84636
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.json",
+          "sha256": "8eacd6bd45df0bdbc585600451df0032dca251fc1498aad84cb3b0d1da6471c5",
+          "bytes": 6696
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "chapters": [
+        {
+          "id": "open",
+          "stageId": "loop-today",
+          "title": "Open the saved workspace",
+          "startSeconds": 0.0,
+          "durationSeconds": 16.175
+        },
+        {
+          "id": "source",
+          "stageId": "loop-record-source",
+          "title": "Bring your existing text",
+          "startSeconds": 16.175,
+          "durationSeconds": 17.825
+        },
+        {
+          "id": "details",
+          "stageId": "loop-record-details",
+          "title": "Check three details and save privately",
+          "startSeconds": 34.0,
+          "durationSeconds": 17.25
+        },
+        {
+          "id": "facts",
+          "stageId": "loop-record-facts",
+          "title": "Choose the fact\u2019s real context",
+          "startSeconds": 51.25,
+          "durationSeconds": 23.825
+        },
+        {
+          "id": "next",
+          "stageId": "loop-opportunities",
+          "title": "Add the vacancy you want",
+          "startSeconds": 75.075,
+          "durationSeconds": 20.55
+        }
+      ],
+      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "limitations": [
+        "Narrated product-screen still montage, not a continuous screen recording.",
+        "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
+        "Caption timing uses model token predictions and measured audio samples."
+      ]
+    },
+    {
+      "tutorialId": "source-review",
+      "status": "ready",
+      "contentKind": "screen_walkthrough",
+      "usesFictionalData": true,
+      "hasBurnedCaptions": true,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "durationSeconds": 78.425,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.mp4",
+          "sha256": "fb9d09b0dab0e562a51a9e31aca09efccc5868ab7d639675b675835913c5c7bb",
+          "bytes": 2781322
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.vtt",
+          "sha256": "4a8aee277dcf310b91da66f96b622580caf13a15ce062f63ebf415bf6aef39f9",
+          "bytes": 1807
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.txt",
+          "sha256": "95996e34739323cf3e33e38ef34f021c930ec75e0ed6ab6a3c1a6b8c757247a3",
+          "bytes": 1160
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.jpg",
+          "sha256": "f25bcc93976337c5f3e7e7d90dbc9943210a0c4082f078b0357435715ad97130",
+          "bytes": 89531
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.json",
+          "sha256": "b8c2448e46efbcd79b6b64233806e7ca61ef2c2eefd41669c0b3581bdd16ba3c",
+          "bytes": 5074
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "chapters": [
+        {
+          "id": "complete",
+          "stageId": "loop-fact-source",
+          "title": "Keep the complete statement",
+          "startSeconds": 0.0,
+          "durationSeconds": 17.2
+        },
+        {
+          "id": "context",
+          "stageId": "loop-fact-context",
+          "title": "Keep project and work context distinct",
+          "startSeconds": 17.2,
+          "durationSeconds": 19.7
+        },
+        {
+          "id": "contribution",
+          "stageId": "loop-fact-wording",
+          "title": "Say what you personally did",
+          "startSeconds": 36.9,
+          "durationSeconds": 18.35
+        },
+        {
+          "id": "clear",
+          "stageId": "loop-fact-clearance",
+          "title": "Confirm only what you can share",
+          "startSeconds": 55.25,
+          "durationSeconds": 23.175
+        }
+      ],
+      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "limitations": [
+        "Narrated product-screen still montage, not a continuous screen recording.",
+        "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
+        "Caption timing uses model token predictions and measured audio samples."
+      ]
+    },
+    {
+      "tutorialId": "another-application",
+      "status": "ready",
+      "contentKind": "screen_walkthrough",
+      "usesFictionalData": true,
+      "hasBurnedCaptions": true,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "durationSeconds": 75.30000000000001,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.mp4",
+          "sha256": "d15d3d9562a8b7309a1bd3dbe23166060e373fa229b60a8feaa4be8a830ed61d",
+          "bytes": 2692352
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.vtt",
+          "sha256": "0d23d17cd6fafbaf8c694449603cfdaa81d054995bdc13a624c9b986b9f9da35",
+          "bytes": 1719
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.txt",
+          "sha256": "a01c57ad685c7d606e98ab1f21d8c0edd8ae3824e2fb443b1cabc6f757c7db72",
+          "bytes": 1109
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.jpg",
+          "sha256": "d09f62098e2b4448a9349ebaae3e1143c1b33187536f319dfdbf1110c99b0d4b",
+          "bytes": 88738
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.json",
+          "sha256": "1a751d0e2048516075d490a1f6a5b1eccc81bc5c156e83bcdd777730d7722994",
+          "bytes": 5639
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "chapters": [
+        {
+          "id": "preserve",
+          "stageId": "check-next-application",
+          "title": "Keep the current application first",
+          "startSeconds": 0.0,
+          "durationSeconds": 18.4
+        },
+        {
+          "id": "new-check",
+          "stageId": "check-role",
+          "title": "Give the new job a fresh review",
+          "startSeconds": 18.4,
+          "durationSeconds": 18.425
+        },
+        {
+          "id": "loop-reuse",
+          "stageId": "loop-opportunities",
+          "title": "Reuse saved Job Loop facts",
+          "startSeconds": 36.825,
+          "durationSeconds": 19.0
+        },
+        {
+          "id": "tracking",
+          "stageId": "loop-application-tracking",
+          "title": "Report the status after you act",
+          "startSeconds": 55.825,
+          "durationSeconds": 19.475
+        }
+      ],
+      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "limitations": [
+        "Narrated product-screen still montage, not a continuous screen recording.",
+        "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
+        "Caption timing uses model token predictions and measured audio samples."
+      ]
+    },
+    {
+      "tutorialId": "controls-and-recovery",
+      "status": "ready",
+      "contentKind": "screen_walkthrough",
+      "usesFictionalData": true,
+      "hasBurnedCaptions": true,
+      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "durationSeconds": 111.675,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.mp4",
+          "sha256": "66b098905943b7dca1c7532854733d229583ee41d7b3fea1e56111cf84a5c28a",
+          "bytes": 4034051
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.vtt",
+          "sha256": "482d5876bb48c6f3c9918a57be02222f73e175d5ef6ad2fd85b86629a486b09f",
+          "bytes": 2615
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.txt",
+          "sha256": "2c30791be38f26dd423b832afd566f59ac891488beef2c7761cd5e174d3ad367",
+          "bytes": 1660
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.jpg",
+          "sha256": "2730e0486ff52872d5f0e60e014855210ef86d71e7df807622e5436557c0fff7",
+          "bytes": 85144
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.json",
+          "sha256": "9f6912d94d889676f58e392fea09759e55abcb0796759e49b11d335bf24b20c0",
+          "bytes": 7831
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "chapters": [
+        {
+          "id": "manual",
+          "stageId": "loop-prepare",
+          "title": "Begin with an available manual run",
+          "startSeconds": 0.0,
+          "durationSeconds": 22.525
+        },
+        {
+          "id": "coverage",
+          "stageId": "loop-run-history",
+          "title": "Read partial results as partial",
+          "startSeconds": 22.525,
+          "durationSeconds": 20.6
+        },
+        {
+          "id": "optional",
+          "stageId": "loop-optional-controls",
+          "title": "Make separate connection choices",
+          "startSeconds": 43.125,
+          "durationSeconds": 23.9
+        },
+        {
+          "id": "recovery",
+          "stageId": "check-draft-recovery",
+          "title": "Choose refresh recovery deliberately",
+          "startSeconds": 67.025,
+          "durationSeconds": 20.6
+        },
+        {
+          "id": "loop-memory",
+          "stageId": "loop-draft-recovery",
+          "title": "Know what can return",
+          "startSeconds": 87.625,
+          "durationSeconds": 24.05
+        }
+      ],
+      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "limitations": [
+        "Narrated product-screen still montage, not a continuous screen recording.",
+        "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
+        "Caption timing uses model token predictions and measured audio samples."
+      ]
+    }
+  ]
+}

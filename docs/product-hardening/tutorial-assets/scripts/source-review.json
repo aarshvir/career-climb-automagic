@@ -1,0 +1,109 @@
+{
+  "source": "src/lib/walkthroughs.ts",
+  "sourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
+  "exportedAt": "2026-10-13T19:50:41.434Z",
+  "timingStatus": "planned; not measured render timings",
+  "id": "source-review",
+  "title": "Explain your contribution accurately",
+  "description": "Keep complete sources, classroom context, team credit and forecasts intact.",
+  "audience": "Especially useful for students and MBA pivots",
+  "helpAnchor": "job-loop-facts",
+  "action": {
+    "label": "Read the fact-review help",
+    "to": "/help#job-loop-facts"
+  },
+  "scenes": [
+    {
+      "id": "complete",
+      "stageId": "loop-fact-source",
+      "title": "Keep the complete statement",
+      "instruction": "Open Inspect or correct the source and context. Preserve the complete Source passage or my answer instead of copying isolated keywords or numbers.",
+      "caption": "“Excel, 25%” is a fragment. Keep the full contribution and result qualifications.",
+      "narration": "A claim needs a complete source statement. Open Inspect or correct the source and context. Keep the whole passage, including team credit, dates and estimate language. An isolated keyword or figure is not enough to show what happened or what you contributed.",
+      "durationSeconds": 23,
+      "demo": {
+        "section": "Inspect or correct the source and context",
+        "fields": [
+          {
+            "label": "Source passage or my answer",
+            "value": "In a four-person university team, I built the Excel model. We estimated a possible 25% cost reduction; the proposal was not implemented."
+          }
+        ],
+        "action": "Inspect the full passage",
+        "note": "All people, work and numbers in this example are fictional."
+      }
+    },
+    {
+      "id": "context",
+      "stageId": "loop-fact-context",
+      "title": "Keep project and work context distinct",
+      "instruction": "Choose Evidence context and the literal Source context label. Do not turn a course exercise into paid work or a qualification into a verified credential.",
+      "caption": "Academic project remains academic project. Credentials and eligibility need your own review.",
+      "narration": "Choose the context that is actually true. Use the literal nearby heading in Source context label. University and MBA projects remain academic projects. An unfinished course is not a completed credential, and a phrase match does not verify a license, degree or eligibility.",
+      "durationSeconds": 22,
+      "demo": {
+        "section": "Your claim library",
+        "fields": [
+          {
+            "label": "Evidence context",
+            "value": "academic project"
+          },
+          {
+            "label": "Source context label",
+            "value": "University modelling course, 2026"
+          }
+        ],
+        "action": "Check the context",
+        "note": "Do not relabel this fictional course project as employment."
+      }
+    },
+    {
+      "id": "contribution",
+      "stageId": "loop-fact-wording",
+      "title": "Say what you personally did",
+      "instruction": "Read Wording I can substantiate. State your contribution while preserving team credit and scope. Choose Projected or estimated for a forecast.",
+      "caption": "“Built the model in a team” does not support “Led the transformation”.",
+      "narration": "In Wording I can substantiate, explain your own part. Building a model in a team does not support saying you led an entire transformation. The result in this example is a forecast, so Result status stays Projected or estimated. Keep the limitation in the wording too.",
+      "durationSeconds": 23,
+      "demo": {
+        "section": "Your claim library",
+        "fields": [
+          {
+            "label": "Wording I can substantiate",
+            "value": "Built the Excel model in a four-person university team; our proposed cost reduction was estimated, not implemented."
+          },
+          {
+            "label": "Result status",
+            "value": "Projected or estimated"
+          }
+        ],
+        "action": "Review factual wording",
+        "note": "Team credit and the forecast limitation remain visible."
+      }
+    },
+    {
+      "id": "clear",
+      "stageId": "loop-fact-clearance",
+      "title": "Confirm only what you can share",
+      "instruction": "Confirm your accurate personal contribution and external-use permission only when true. Select Save claim, or Skip this passage for an unnecessary copied fact.",
+      "caption": "Your confirmation is your own statement. Corrected facts require a new document review.",
+      "narration": "Confirm that the wording describes your own accurate contribution, and that every included figure is permitted for external use. These are your statements, not independent verification. Save the claim. Without both confirmations it stays out of outputs. Changing or withdrawing a used fact invalidates affected approvals, so rebuild and review again.",
+      "durationSeconds": 28,
+      "demo": {
+        "section": "Your claim library",
+        "fields": [
+          {
+            "label": "Accuracy confirmation",
+            "value": "Read the complete statement before confirming."
+          },
+          {
+            "label": "External-use permission",
+            "value": "Check permission for every included fact and figure."
+          }
+        ],
+        "action": "Save claim",
+        "note": "This tutorial does not confirm, save or share a claim."
+      }
+    }
+  ]
+}

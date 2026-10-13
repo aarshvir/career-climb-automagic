@@ -26,3 +26,6 @@ dist-ssr
 .sites-runtime/
 .sites-checkout/
 .sites-checkout-*/
+
+# Generated video composition work; preserve final media and source scripts.
+**/videos/**/.composition/

@@ -2,7 +2,7 @@
 import {describe,it,expect,vi} from 'vitest';
 import {configuredUsageCap,nextScheduledInstant,normalizeFollowUp,validateScheduleInput} from '../functions/_shared/job-loop-schedule.ts';
 import {modelOptions,employerFeeds,readEmployerFeed} from '../functions/_shared/job-loop-providers.ts';
-import {validateControlInput,processDueSchedules,matchesDiscoveryTarget} from '../functions/_shared/job-loop-runtime.ts';
+import {validateControlInput,processDueSchedules,matchesDiscoveryTarget,selectPreparationOpportunities,processLoopPhase,packetInputHash} from '../functions/_shared/job-loop-runtime.ts';
 import {buildInterviewBrief} from '../functions/_shared/job-loop-preparation.ts';
 import {composePacket} from '../functions/_shared/job-loop-engine.ts';
 import {renderPacket} from '../functions/_shared/job-loop-render.ts';
@@ -40,6 +40,54 @@ describe('recurring schedule and grounded preparation boundaries',()=>{
     const fetcher=vi.fn(async()=>new Response(JSON.stringify({jobs:[{id:1,title:'Business Analyst',absolute_url:opportunity.url,location:{name:opportunity.location},content:'&lt;p&gt;Prepare business analysis and document assumptions.&lt;/p&gt;&lt;p&gt;We do not provide sponsorship. Applicants need at least five years of experience.&lt;/p&gt;'}]})));
     const result=await readEmployerFeed({provider:'greenhouse',board:'fictional',company:'Fictional employer'},fetcher);expect(result.opportunities[0].description).toContain('We do not provide sponsorship.');expect(result.opportunities[0].description).not.toContain('&lt;');expect(result.opportunities[0].description).not.toContain('<p>');expect(fetcher).toHaveBeenCalledTimes(1);
     expect(matchesDiscoveryTarget(profile,result.opportunities[0])).toBe(true);expect(matchesDiscoveryTarget(profile,{...result.opportunities[0],location:'London'})).toBe(false);
+  });
+  it('applies the same guard to Lever text without inventing discarded salary or remote fields',async()=>{
+    const fetcher=vi.fn(async()=>new Response(JSON.stringify([{id:'fictional-lever',text:'Senior Business Analyst',hostedUrl:opportunity.url,categories:{location:'Dubai, UAE',workplaceType:'remote'},salaryRange:{currency:'AED',interval:'monthly',min:8000,max:10000},descriptionPlain:'Fictional published source text for a role with explicit senior title evidence. Candidate eligibility and compensation need review.',lists:[]}])));
+    const result=await readEmployerFeed({provider:'lever',board:'fictional',company:'Fictional employer'},fetcher);
+    expect(result.opportunities).toHaveLength(1);
+    expect(result.opportunities[0].location).toBe('Dubai, UAE');
+    expect(result.opportunities[0].description).not.toContain('10000');
+    expect(matchesDiscoveryTarget({...profile,targetTitles:['Graduate Business Analyst']},result.opportunities[0])).toBe(false);
+  });
+  it('keeps manual choices and does not turn optional or negated years into a discovery veto',()=>{
+    const early={...profile,audience:'student' as const,targetTitles:['Graduate Business Analyst'],experienceYears:0};
+    const optional={...opportunity,id:'optional-years',description:'Five years preferred. 5 years of experience is not required. Graduates welcome.'};
+    const senior={...opportunity,id:'senior-role',title:'Senior Business Analyst'};
+    const manual={...senior,id:'manual-choice',source:'manual' as const,title:'Unrelated Director',location:'London',description:'Minimum 15 years of experience required.'};
+    expect(selectPreparationOpportunities(early,[claim],[optional,senior,manual]).map(item=>item.id)).toEqual(['manual-choice','optional-years']);
+  });
+  it('refreshes changed automatic source facts without preparing or reusing a newly conflicting role',async()=>{
+    const early={...profile,audience:'student' as const,targetTitles:['Graduate Business Analyst'],experienceYears:null};
+    const automatic={...opportunity,sourceKey:'greenhouse:fictional:1'};
+    const manual={...opportunity,id:'manual-independent',source:'manual' as const,sourceKey:'manual:independent',title:'Unrelated Director',location:'London'};
+    const record={version:1,data:{profile:early,claims:[claim],opportunities:[automatic,manual],inbox:[]}};
+    const previousHash=await packetInputHash(early,[claim],automatic),manualHash=await packetInputHash(early,[claim],manual);
+    const run={id:'11111111-1111-4111-a111-111111111111',user_id:'11111111-1111-4111-a111-111111111111',phase:1,status:'running',provider:'rules',model:'grounded-rules-v1',consents:{model:false,inbox:false},snapshot:record.data,data:{lanes:[],messages:[],packetIds:[]}};
+    const commit=vi.fn(async(..._args:unknown[])=>undefined);
+    const repo={claimRun:vi.fn(async()=>run),record:vi.fn(async()=>record),collections:vi.fn(async()=>({packets:[{id:'previous-automatic',status:'approved',data:{opportunityId:automatic.id,inputHash:previousHash}},{id:'previous-manual',status:'approved',data:{opportunityId:manual.id,inputHash:manualHash}}]})),commit} as unknown as LoopRepository;
+    const fetcher=vi.fn(async()=>new Response(JSON.stringify({jobs:[{id:1,title:'Senior Business Analyst',absolute_url:automatic.url,location:{name:automatic.location},content:'A fictional published vacancy refreshed from a plain matching title to an explicitly senior role. Responsibilities and eligibility require review.'}]})));
+    const env=(name:string)=>name==='JOB_LOOP_EMPLOYER_FEEDS'?'[{"provider":"greenhouse","board":"fictional","company":"Fictional employer"}]':undefined;
+    expect(await processLoopPhase(repo,run.id,env,fetcher)).toBe(true);
+    const state=commit.mock.calls[0][3] as {opportunities:LoopOpportunity[];reusedPacketIds:string[];lanes:{name:string;count:number}[]};
+    expect(state.reusedPacketIds).toEqual(['previous-manual']);
+    expect(state.opportunities).toEqual([]);
+    expect(state.lanes.find(item=>item.name==='Targeted shortlist')?.count).toBe(0);
+    const refreshed=commit.mock.calls[0][5] as LoopOpportunity[];
+    expect(refreshed[0]).toMatchObject({id:automatic.id,title:'Senior Business Analyst',status:'saved',sourceKey:automatic.sourceKey});
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+  it('rechecks a resumed automatic preparation before any provider or document work',async()=>{
+    const early={...profile,targetTitles:['Graduate Business Analyst']};
+    const senior={...opportunity,title:'Senior Business Analyst'};
+    const data={profile:early,claims:[claim],opportunities:[senior],inbox:[]};
+    const run={id:'11111111-1111-4111-a111-111111111111',user_id:'11111111-1111-4111-a111-111111111111',phase:2,status:'running',provider:'rules',model:'grounded-rules-v1',consents:{model:false,inbox:false},snapshot:data,data:{opportunities:[senior],lanes:[],messages:[],packetIds:[]}};
+    const commit=vi.fn(async(..._args:unknown[])=>undefined),upload=vi.fn();
+    const repo={claimRun:vi.fn(async()=>run),record:vi.fn(async()=>({version:1,data})),commit,upload} as unknown as LoopRepository;
+    const fetcher=vi.fn();
+    expect(await processLoopPhase(repo,run.id,()=>undefined,fetcher)).toBe(true);
+    expect(commit.mock.calls[0][1]).toBe(3);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(upload).not.toHaveBeenCalled();
   });
   it('produces five prompts using approved evidence and preserves projections without creating a recruiter recipient',()=>{
     const packet={claimVersions:{[claim.id]:1},assessment:{gaps:['Sponsorship is not offered for this role.']},contact:null} as unknown as LoopPacket;

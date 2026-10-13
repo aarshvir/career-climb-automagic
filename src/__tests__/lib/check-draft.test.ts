@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkReviewKey, clearRetainedCheck, readRetainedCheck, retainCheckForGoogle, takeCheckAuthReturn, takeRetainedCheck, validateCheckDraft, clearCheckRecovery, readCheckRecovery, rememberCheckRecovery, type CheckDraft } from '@/lib/check-draft';
+import { checkReviewKey, clearRetainedCheck, readRetainedCheck, retainCheckForGoogle, takeCheckAuthReturn, takeRetainedCheck, validateCheckDraft, clearCheckRecovery, readCheckRecovery, rememberCheckRecovery, draftForAnotherVacancy, keepReviewedEditsInSource, CheckDraftValidationError, type CheckDraft } from '@/lib/check-draft';
 
 const DRAFT_KEY = 'jobvance_check_oauth_draft_v1';
 const RETURN_KEY = 'jobvance_check_oauth_return_v1';
@@ -13,7 +13,51 @@ function putEnvelope(value: unknown) { sessionStorage.setItem(DRAFT_KEY, JSON.st
 beforeEach(() => { clearCheckRecovery(); sessionStorage.clear(); localStorage.clear(); });
 afterEach(() => { vi.restoreAllMocks(); sessionStorage.clear(); localStorage.clear(); });
 
+describe('a second vacancy has its own inputs and approval', () => {
+  it('copies reviewed removals to the reusable source while preserving surrounding facts and leaving the earlier record intact', () => {
+    const original = { ...draft, sourceText: cv + '\nConfidential fictional reference PROJECT-ALPHA.', reviewedText: cv };
+    const snapshot = JSON.stringify(original), storage = vi.spyOn(Storage.prototype, 'setItem');
+    const updated = keepReviewedEditsInSource(original);
+    expect(updated).toEqual({ ...draft, sourceText: cv, reviewedText: cv });
+    expect(draftForAnotherVacancy(updated, 'source').sourceText).toBe(cv);
+    expect(updated.sourceText).not.toContain('PROJECT-ALPHA'); expect(JSON.stringify(original)).toBe(snapshot);
+    expect(storage).not.toHaveBeenCalled();
+  });
+  it.each(['jobTitle', 'company', 'sourceText', 'reviewedText', 'jobDescription'] as const)('identifies the actual invalid %s field', field => {
+    const invalid = field === 'company' ? 'x'.repeat(201) : 'x';
+    try { validateCheckDraft({ ...draft, [field]: invalid }); throw new Error('Expected invalid input to be rejected.'); }
+    catch (failure) { expect(failure).toBeInstanceOf(CheckDraftValidationError); expect((failure as CheckDraftValidationError).field).toBe(field); }
+  });
+  it('keeps only the deliberately chosen CV text and leaves the earlier application unchanged', () => {
+    const earlier = { ...draft, reviewedText: cv + '\nA later verified contribution.', approved: true, report: { score: 100 } };
+    const snapshot = JSON.stringify(earlier), storage = vi.spyOn(Storage.prototype, 'setItem');
+    expect(draftForAnotherVacancy(earlier, 'source')).toEqual({ jobTitle: '', company: '', sourceText: cv, reviewedText: '', jobDescription: '' });
+    expect(draftForAnotherVacancy(earlier, 'reviewed').sourceText).toBe(earlier.reviewedText);
+    expect(draftForAnotherVacancy(earlier, 'reviewed')).not.toHaveProperty('approved');
+    expect(draftForAnotherVacancy(earlier, 'reviewed')).not.toHaveProperty('report');
+    expect(JSON.stringify(earlier)).toBe(snapshot);
+    expect(storage).not.toHaveBeenCalled();
+  });
+  it('rejects an unreadable selected CV instead of silently falling back to another version', () => {
+    expect(() => draftForAnotherVacancy({ ...draft, reviewedText: 'short' }, 'reviewed')).toThrow(/Too little readable CV text/);
+    expect(draftForAnotherVacancy({ ...draft, reviewedText: 'short' }, 'source').sourceText).toBe(cv);
+  });
+});
+
 describe('guest checking defaults to no CV storage', () => {
+  it('preserves the explicit reuse path with owner-bound consent while stripping approval and undo data', () => {
+    const value = { draft, step: 1, cvReady: true, filename: '', ownerId: 'account-a', pageTarget: 1 as const, reuseMode: true, approved: true, previousApplication: draft };
+    rememberCheckRecovery(value, true, NOW);
+    const recovered = readCheckRecovery('account-a', NOW + 1)!;
+    expect(recovered.value).toEqual({ draft, step: 1, cvReady: true, filename: '', ownerId: 'account-a', pageTarget: 1, reuseMode: true });
+    expect(sessionStorage.getItem(RECOVERY_KEY)).not.toContain('previousApplication');
+    expect(readCheckRecovery('account-b', NOW + 1)).toBeNull();
+  });
+  it.each([{ step: 2, reuseMode: true }, { step: 3, reuseMode: true }, { step: 1, reuseMode: 'true' }, { step: 1, reuseMode: null }])('rejects malformed reuse recovery %j', fields => {
+    sessionStorage.setItem(RECOVERY_KEY, JSON.stringify({ version: 1, value: { draft, cvReady: true, filename: '', ownerId: null, pageTarget: 2, ...fields }, expiresAt: NOW + TTL }));
+    expect(readCheckRecovery(null, NOW + 1)).toBeNull();
+    expect(sessionStorage.getItem(RECOVERY_KEY)).toBeNull();
+  });
   it('preserves an incomplete draft for route navigation without writing browser storage', () => {
     const set = vi.spyOn(Storage.prototype, 'setItem');
     const value = { draft: { ...draft, jobDescription: '' }, step: 3, cvReady: true, filename: 'fictional.txt', ownerId: null, pageTarget: 1 as const };

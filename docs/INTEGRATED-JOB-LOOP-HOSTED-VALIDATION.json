@@ -1,6 +1,6 @@
 {
   "kind": "hosted-integrated-job-loop-synthetic-qa",
-  "startedAt": "2026-10-12T17:21:56.057Z",
+  "startedAt": "2026-10-13T18:24:52.688Z",
   "status": "passed",
   "accountsCreated": 2,
   "paidCalls": 0,
@@ -40,7 +40,7 @@
       "passed": true
     },
     {
-      "name": "paid-search-ai-and-mail-integrations-remain-disabled",
+      "name": "paid-search-and-mail-integrations-remain-disabled",
       "passed": true
     },
     {
@@ -312,6 +312,6 @@
       "passed": true
     }
   ],
-  "qaRunId": "4448a3328a7cc190",
-  "finishedAt": "2026-10-12T17:23:40.932Z"
+  "qaRunId": "5e8c2125e09ab712",
+  "finishedAt": "2026-10-13T18:27:16.557Z"
 }

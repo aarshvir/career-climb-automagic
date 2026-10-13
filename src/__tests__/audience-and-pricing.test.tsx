@@ -18,17 +18,18 @@ beforeEach(() => { account.user = null; });
 afterEach(cleanup);
 
 describe('audience entry points', () => {
-  it.each(['student', 'mba', 'professional'] as const)('carries %s through sign-in without creating a factual profile', audience => {
+  it.each(['student', 'mba', 'professional'] as const)('offers first value without sign-in for %s', audience => {
     render(page(audience));
-    const start = screen.getByRole('link', { name: 'Start my free Job Loop' });
-    expect(start).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
-    expect(screen.getByRole('link', { name: /Try one CV check/ })).toHaveAttribute('href', `/check?audience=${audience}`);
+    const start = screen.getByRole('link', { name: 'Check my CV for free' });
+    expect(start).toHaveAttribute('href', `/check?audience=${audience}`);
+    expect(screen.getByRole('link', { name: /See how Job Loop works/ })).toHaveAttribute('href', '/job-loop');
+    expect(screen.getByRole('link', { name: /Build my career record/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].title);
     expect(screen.getByText('Fictional illustration')).toBeInTheDocument();
   });
   it('opens the selected private setup for a signed-in candidate', () => {
     account.user = { id: 'fictional-owner' }; render(page('professional'));
-    expect(screen.getByRole('link', { name: 'Start my free Job Loop' })).toHaveAttribute('href', '/loop?audience=professional');
+    expect(screen.getByRole('link', { name: 'Open my Job Loop' })).toHaveAttribute('href', '/loop?audience=professional');
   });
   it('uses editable preferences without inferring employment years, titles or claims', () => {
     for (const audience of ['student','mba','professional'] as const) {

@@ -1,0 +1,30 @@
+{
+  "tutorialId": "first-check",
+  "title": "Your first CV check - choose one target role",
+  "file": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\samples\\role-walkthrough.mp4",
+  "sha256": "3f49cf4fd90cbd7bbfeb8bd426f4e0409d9f03769f181788bbeecf353852c3f6",
+  "durationSeconds": 13.125,
+  "sourcePresenterSha256": "4ed6e1401f4e3f1947fca23d9e11c3a668ec5a9aeb05bcc075d53e212212e1a5",
+  "screens": [
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\01-role.jpg",
+      "durationSeconds": 13.125,
+      "sha256": "69f31ee76f4e238f48fbfbef729a2f38eb3371ea9721105569cda3dff4655bec"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "role",
+      "stageId": "check-role",
+      "title": "Choose one target role",
+      "startSeconds": 0.0,
+      "durationSeconds": 13.125
+    }
+  ],
+  "screenMethod": "actual CUA browser screenshots, edited as a montage; not a continuous screen recording",
+  "presenterMethod": "original fictional portrait + Kokoro af_heart + MuseTalk V15 manual crop/mask",
+  "captionMethod": "Kokoro predicted token timings and measured speech sample durations",
+  "paidApiCalls": 0,
+  "commercialComponentsReviewed": true,
+  "finalPlaybackReviewed": false
+}

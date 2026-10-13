@@ -14,6 +14,11 @@ const hosting = JSON.parse(await readFile(join(root, 'vercel.json'), 'utf8'));
 const rules = hosting.headers.find(rule => rule.source === '/(.*)')?.headers;
 if (!Array.isArray(rules)) throw new Error('The existing security response headers are required.');
 const security = Object.fromEntries(rules.map(({ key, value }) => [key, value]));
+const publicRender = JSON.parse(await readFile(join(dist, '.prerender/manifest.json'), 'utf8'));
+if (publicRender.version !== 1 || !Array.isArray(publicRender.pages) || publicRender.pages.length < 20) throw new Error('The public route rendering manifest is required.');
+const structuredHashes = publicRender.scriptHashes;
+if (!Array.isArray(structuredHashes) || structuredHashes.some(value => !/^'sha256-[a-zA-Z\d+/]{43}='$/.test(value))) throw new Error('Only verified structured-data script hashes can be added to CSP.');
+security['Content-Security-Policy'] = security['Content-Security-Policy'].replace(/script-src ([^;]+)/, (_match, policy) => `script-src ${policy} ${structuredHashes.join(' ')}`);
 for (const name of ['Content-Security-Policy', 'X-Frame-Options', 'X-Content-Type-Options', 'Referrer-Policy']) {
   if (!security[name]) throw new Error(`Missing security response header: ${name}`);
 }
@@ -50,6 +55,12 @@ async function collect(directory, prefix = '') {
 }
 await collect(dist);
 if (!assets['/index.html']) throw new Error('Run the frontend build before packaging its Worker.');
+for (const page of publicRender.pages) {
+  if (!/^\/[a-z\d/-]*$/.test(page.path) || !/^\.prerender\/[a-zA-Z\d]+\.html$/.test(page.file)) throw new Error('Public rendered paths must be bounded and canonical.');
+  const bytes = await readFile(join(dist, page.file));
+  assets[page.path] = [mime['.html'], `"${createHash('sha256').update(bytes).digest('hex')}"`, bytes.length, false, bytes.toString('base64')];
+  totalAssetBytes += bytes.length;
+}
 
 // Generated Worker has no imports, dependencies, filesystem access or bindings.
 // Binary decoding is lazy and shared within an isolate, never performed for the entire map per request.
@@ -57,11 +68,14 @@ const worker = `const SECURITY=${JSON.stringify(security)};
 const ASSETS=${JSON.stringify(assets)};
 const PRIVATE_ROOTS=new Set(${JSON.stringify([...privateRoots])});
 const ASSET_ROOTS=new Set(${JSON.stringify([...assetRoots])});
+const CLIENT_PATHS=new Set(${JSON.stringify(publicRender.clientOnlyPaths)});
+const REDIRECTS=${JSON.stringify(publicRender.redirects)};
+const PUBLIC_PATHS=new Set(${JSON.stringify(publicRender.pages.map(page=>page.path))});
 const decoded=new Map();
 function responseHeaders(request,path=new URL(request.url).pathname){
   const headers=new Headers(SECURITY);
   const root=(path.split('/')[1]||'').toLowerCase();
-  if(root==='admin'||root==='admin2')headers.set('X-Robots-Tag','noindex, nofollow, noarchive');
+  if(root==='admin'||root==='admin2'||root==='auth'||CLIENT_PATHS.has(path))headers.set('X-Robots-Tag','noindex, nofollow, noarchive');
   return headers;
 }
 function reply(request,status,message,extra={}){
@@ -96,16 +110,21 @@ export default {fetch(request){
   if(request.method!=='GET'&&request.method!=='HEAD')return reply(request,405,'Method not allowed.',{Allow:'GET, HEAD'});
   const path=publicPath(request);
   if(path===null)return reply(request,404,'Not found.');
+  const withoutSlash=path.length>1?path.replace(/\\/+$/,''):path;
+  if(path!==withoutSlash&&(PUBLIC_PATHS.has(withoutSlash)||CLIENT_PATHS.has(withoutSlash)))return reply(request,308,'Continue at the canonical address.',{Location:withoutSlash+url.search});
+  if(REDIRECTS[path])return reply(request,308,'Continue at the current page.',{Location:REDIRECTS[path]});
+  if(path.startsWith('/blog/')){const guide='/guides/'+path.slice(6);return reply(request,308,'Continue at the guide library.',{Location:PUBLIC_PATHS.has(guide)?guide:'/guides'});}
   let served=path,asset=ASSETS[path];
   if(!asset){
     const segments=path.split('/');
     if(ASSET_ROOTS.has(segments[1])||segments.some(segment=>segment.includes('.')))return reply(request,404,'Not found.');
+    if(!CLIENT_PATHS.has(path)&&!['admin','admin2','auth'].includes((segments[1]||'').toLowerCase()))return reply(request,404,'This page is unavailable. Visit https://jobvance.io/help for the application workflow.');
     served='/index.html';asset=ASSETS[served];
   }
   const headers=responseHeaders(request,path);
   headers.set('Content-Type',asset[0]);
   headers.set('ETag',asset[1]);
-  headers.set('Cache-Control',served.endsWith('.html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');
+  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');
   const condition=request.headers.get('If-None-Match');
   if(condition&&condition.split(',').some(tag=>tag.trim()==='*'||tag.trim().replace(/^W\\//,'')===asset[1]))return new Response(null,{status:304,headers});
   headers.set('Content-Length',String(asset[2]));

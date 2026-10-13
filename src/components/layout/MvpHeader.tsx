@@ -12,7 +12,7 @@ export function Brand() {
     <span>jobvance<span style={{color:"var(--jv-blue)"}}>.</span></span>
   </Link>;
 }
-const links = [["/check","Free CV check"],["/loop","Job Loop"],["/how-it-works","How it works"],["/pricing","Plans"]];
+const links = [["/check","Free CV check"],["/job-loop","Job Loop"],["/guides","Career guides"],["/help","Help"]];
 export default function MvpHeader() {
   const { user, loading, signOut } = useAuth();
   const previousOwner = useRef(user?.id ?? null);

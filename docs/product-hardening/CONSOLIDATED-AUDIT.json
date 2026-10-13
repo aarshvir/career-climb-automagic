@@ -1,0 +1,1014 @@
+{
+  "schemaVersion": 1,
+  "kind": "five-independent-audit-consolidation",
+  "preparedAtUtc": "2026-10-13T21:00:41Z",
+  "localDate": "2026-10-14",
+  "timezone": "Asia/Dubai",
+  "baselineCommit": "f225451e8fc33a71848d8167a793e90c1a2dfb24",
+  "consolidationIndependence": "Written by an implementer after completed independent reports; not a sixth independent rerating.",
+  "scorePolicy": {
+    "initialScoresFrozen": true,
+    "dimensions": 10,
+    "dimensionWeight": 0.1,
+    "auditCount": 5,
+    "auditWeight": 0.2,
+    "equalAuditMean": 82.56,
+    "mbaMean": 81.3,
+    "professionalMean": 81.9,
+    "finalScore": null,
+    "prospectiveQualityGoal": "95+ only after fresh evidence-based assessment; not guaranteed or achieved",
+    "interpretation": "Professional reviewer judgments, not measured user satisfaction."
+  },
+  "sourceAudits": [
+    {
+      "id": "pm-marketing-seo",
+      "initialMean": 83.3,
+      "initialSnapshotAtUtc": "2026-10-13T18:18:10.115Z",
+      "evidenceCapturedAtUtc": "2026-10-13T18:23:48.453Z",
+      "hashRecheckAtUtc": "2026-10-13T18:26:44.929Z",
+      "file": "audits/pm-marketing-seo.json",
+      "sha256AtConsolidation": "60c70ae13120b6f4d488491c0d8bbb4d33d6614c5288596b1209692cf8e2c838"
+    },
+    {
+      "id": "student",
+      "initialMean": 82.7,
+      "startedAtUtc": "2026-10-13T18:29:17Z",
+      "endedAtUtc": "2026-10-13T18:36:56Z",
+      "file": "audits/student.json",
+      "sha256AtConsolidation": "62f5dfcfd2b94ab2ca4466fe0460217c1181a0ff5d00a1015d3a889dbe799e1b"
+    },
+    {
+      "id": "professional-mba",
+      "initialMean": 81.6,
+      "mbaMean": 81.3,
+      "professionalMean": 81.9,
+      "startedAtUtc": "2026-10-13T18:36:35.91Z",
+      "frozenAtUtc": "2026-10-13T18:43:32Z",
+      "endedByUtc": "2026-10-13T18:46:41Z",
+      "sourceDrift": "Evidence parser changed after guest evidence observations; frozen grades unchanged.",
+      "file": "audits/professional-mba.json",
+      "sha256AtConsolidation": "6d5b291556deabaa5b344c8c202a73694eeafdd94a46ced0a81e598ef580b373"
+    },
+    {
+      "id": "mobile-help",
+      "initialMean": 82.5,
+      "startedAtUtc": "2026-10-13T18:40:34Z",
+      "endedAtUtc": "2026-10-13T18:48:12Z",
+      "file": "audits/mobile-help.json",
+      "sha256AtConsolidation": "041faa40927bad6d22a10b61a2280c7bd4ca36b0f85ca26a97286594d4e13ed4"
+    },
+    {
+      "id": "reliability-privacy",
+      "initialMean": 82.7,
+      "startedAtUtc": "2026-10-13T18:52:03Z",
+      "frozenAtUtc": "2026-10-13T19:03:20Z",
+      "file": "audits/reliability-privacy.json",
+      "sha256AtConsolidation": "17e056a235b3db1fdc7cb227a7439f0b198ec54faf9d7bd36e9f10138975401c"
+    }
+  ],
+  "dimensionScores": [
+    {
+      "dimension": "clarity",
+      "pm": 87,
+      "student": 88,
+      "mbaProfessional": 89,
+      "mobileHelp": 87,
+      "reliabilityPrivacy": 86,
+      "mean": 87.4,
+      "mba": 88,
+      "professional": 90
+    },
+    {
+      "dimension": "activation",
+      "pm": 84,
+      "student": 83,
+      "mbaProfessional": 86,
+      "mobileHelp": 82,
+      "reliabilityPrivacy": 85,
+      "mean": 84,
+      "mba": 86,
+      "professional": 86
+    },
+    {
+      "dimension": "form effort",
+      "pm": 83,
+      "student": 80,
+      "mbaProfessional": 75.5,
+      "mobileHelp": 84,
+      "reliabilityPrivacy": 77,
+      "mean": 79.9,
+      "mba": 75,
+      "professional": 76
+    },
+    {
+      "dimension": "evidence quality",
+      "pm": 77,
+      "student": 69,
+      "mbaProfessional": 69,
+      "mobileHelp": 80,
+      "reliabilityPrivacy": 81,
+      "mean": 75.2,
+      "mba": 68,
+      "professional": 70
+    },
+    {
+      "dimension": "workflow completeness",
+      "pm": 81,
+      "student": 82,
+      "mbaProfessional": 70,
+      "mobileHelp": 79,
+      "reliabilityPrivacy": 82,
+      "mean": 78.8,
+      "mba": 70,
+      "professional": 70
+    },
+    {
+      "dimension": "reuse/time-saving",
+      "pm": 85,
+      "student": 86,
+      "mbaProfessional": 81.5,
+      "mobileHelp": 82,
+      "reliabilityPrivacy": 85,
+      "mean": 83.9,
+      "mba": 80,
+      "professional": 83
+    },
+    {
+      "dimension": "help/walkthroughs",
+      "pm": 85,
+      "student": 88,
+      "mbaProfessional": 91,
+      "mobileHelp": 83,
+      "reliabilityPrivacy": 86,
+      "mean": 86.6,
+      "mba": 92,
+      "professional": 90
+    },
+    {
+      "dimension": "UI/accessibility",
+      "pm": 84,
+      "student": 82,
+      "mbaProfessional": 87,
+      "mobileHelp": 79,
+      "reliabilityPrivacy": 80,
+      "mean": 82.4,
+      "mba": 87,
+      "professional": 87
+    },
+    {
+      "dimension": "trust/privacy",
+      "pm": 87,
+      "student": 92,
+      "mbaProfessional": 91,
+      "mobileHelp": 91,
+      "reliabilityPrivacy": 87,
+      "mean": 89.6,
+      "mba": 91,
+      "professional": 91
+    },
+    {
+      "dimension": "reliability",
+      "pm": 80,
+      "student": 77,
+      "mbaProfessional": 76,
+      "mobileHelp": 78,
+      "reliabilityPrivacy": 78,
+      "mean": 77.8,
+      "mba": 76,
+      "professional": 76
+    }
+  ],
+  "findingCount": 25,
+  "findings": [
+    {
+      "id": "EVID-CONTEXT",
+      "sourceAudit": "pm-marketing-seo",
+      "group": "defensible evidence",
+      "originalFinding": {
+        "id": "EVID-CONTEXT",
+        "priority": "P1",
+        "title": "Preserve complete source context and warn when forecasts are compared with delivered results",
+        "status": "Targeted reproduced scenario resolved during audit; frozen finding retained",
+        "impact": "Prevents an academic proposal looking like an implemented achievement.",
+        "acceptance": [
+          "Show whole source line/bullet including team,estimate and negation limitations.",
+          "Use explicit manual review for delivered-result requirements against forecasts/proposals.",
+          "Keep matching clause-scoped so unrelated same-line skills cannot become evidence.",
+          "Reproduce captured fictional scenario and preserve factual exports."
+        ]
+      },
+      "currentStatus": "independently-resolved-in-scenario",
+      "currentEvidence": "Whole academic/team/forecast/not-implemented source plus explicit forecast warning verified by PM at 18:33:22 UTC.",
+      "remainingScope": "No exhaustive matching-quality conclusion.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "FIRST-VALUE",
+      "sourceAudit": "pm-marketing-seo",
+      "group": "guest first value",
+      "originalFinding": {
+        "id": "FIRST-VALUE",
+        "priority": "P1",
+        "title": "Make the no-account check the primary audience-page action",
+        "status": "Three hero entry routes resolved in targeted late browser recheck; measurement remains unverified",
+        "impact": "Aligns acquisition with immediate first value.",
+        "acceptance": [
+          "All three primary audience buttons reach/check with correct editable audience.",
+          "Private saving/reuse remains a clear secondary path.",
+          "Before click,explain CV+vacancy inputs and free reviewed download without account/card.",
+          "Measure actual participant completion; never invent conversion uplift."
+        ]
+      },
+      "currentStatus": "independently-resolved-entry-routing",
+      "currentEvidence": "Late PM browser recheck confirms all three audience hero CTAs reach /check with audience parameter.",
+      "remainingScope": "Real activation and first-value time unmeasured.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "GUEST-SUPPORT",
+      "sourceAudit": "pm-marketing-seo",
+      "group": "task help and recovery",
+      "originalFinding": {
+        "id": "GUEST-SUPPORT",
+        "priority": "P1",
+        "title": "Provide visible help and privacy access for people unable to sign in",
+        "status": "open",
+        "impact": "Anonymous and account-recovery users can obtain support.",
+        "acceptance": [
+          "Public contact has a verified monitored channel or anonymous request path.",
+          "Identify actual service operator and privacy handling using verified information.",
+          "Explain receipt versus response without an unstaffed response-time promise.",
+          "No sign-in requirement to report a login failure; no CV text requested by default."
+        ]
+      },
+      "currentStatus": "open",
+      "currentEvidence": "Task help exists; a verified monitored anonymous support channel/operator identity was not established.",
+      "remainingScope": "Verify actual operator/channel and handling; do not invent staffing or response SLA.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "MOBILE-ENTRY",
+      "sourceAudit": "pm-marketing-seo",
+      "group": "guest first value",
+      "originalFinding": {
+        "id": "MOBILE-ENTRY",
+        "priority": "P2",
+        "title": "Bring the first required field into the initial mobile screen",
+        "status": "open",
+        "impact": "Reduces scroll and attention cost before starting.",
+        "acceptance": [
+          "At375x812 and390x844,Target role and next action are visible without a full-screen introductory scroll.",
+          "Keep concise accessible task/privacy guidance and expandable optional help.",
+          "Provide legible progress labels and44px interaction targets where feasible.",
+          "Preserve keyboard focus,labels and announced step changes without horizontal overflow."
+        ]
+      },
+      "currentStatus": "implementation-verified-independent-recheck-pending",
+      "currentEvidence": "Actual Chrome390x844: Target role top729/bottom779, no horizontal overflow, compact hero/Clear/progress.",
+      "remainingScope": "Independent final snapshot,375x812 and next-action visibility.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "REAL-WALKTHROUGHS",
+      "sourceAudit": "pm-marketing-seo",
+      "group": "task help and media",
+      "originalFinding": {
+        "id": "REAL-WALKTHROUGHS",
+        "priority": "P2",
+        "title": "Publish verified real first-check and second-application recordings",
+        "status": "In progress per parent; absent from frozen public manifest",
+        "impact": "Makes actual screen/document behavior easier to learn.",
+        "acceptance": [
+          "Real UI capture for at least first-check and another-application tasks uses fictional data.",
+          "Assets play to completion with synced captions and readable full transcript.",
+          "Labels match this build including exact approval and new-vacancy reset.",
+          "Only reviewed real assets enter ready manifest; disclose synthetic presenter and retain fallback."
+        ]
+      },
+      "currentStatus": "local-production-verified-publication-pending",
+      "currentEvidence": "Five local screen_walkthrough films total472.3seconds/17.05MB; decode/frame/caption/transcript/provenance checks.",
+      "remainingScope": "Public loading/playback/CSP/captions/final labels; no continuous-recording claim.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "STU-01",
+      "sourceAudit": "student",
+      "group": "defensible evidence",
+      "originalFinding": {
+        "id": "STU-01",
+        "priority": "P1",
+        "title": "Atomic requirements and metadata separation",
+        "repro": "Paste employer/role sentence and comma-separated Excel/Power BI/report/team/SQL responsibilities; title counted and compound line becomes one manual card",
+        "acceptance": "Metadata is separate; supported skills and SQL are individually inspectable with original passage; no qualification prediction"
+      },
+      "currentStatus": "independently-resolved-exact-reported-case",
+      "currentEvidence": "Independent final browser recheck20:59:58-21:00:53UTC: exact395-character case yields11 findings; title omitted; five tasks separate; Excel/Power BI direct; basic SQL manual with full negative internship source; full original vacancy retained. Earlier partial result preserved. Root72 focused cases supplementary.",
+      "remainingScope": "No broad parser or internal numeric-offset verification, no new hosted flow or global rerating.",
+      "initialScoreChanged": false,
+      "latestIndependentRecheck": {
+        "kind": "final-bounded-STU-01-browser-recheck",
+        "startedAt": "2026-10-13T20:59:58Z",
+        "endedAt": "2026-10-13T21:00:53Z",
+        "localDate": "2026-10-14",
+        "timezone": "Asia/Dubai",
+        "tab": "1385099079",
+        "origin": "http://127.0.0.1:8381",
+        "initialScoreUnchanged": 82.7,
+        "newGlobalScore": null,
+        "target": "Data Analyst Intern",
+        "company": "Fictional Cedar Operations",
+        "vacancy": "Fictional Cedar Operations — Data Analyst Intern. Responsibilities: clean spreadsheet data, build Power BI dashboards, communicate findings in clear reports, collaborate in a team, and use SQL to query operational data. Requirements: current university student, Excel, Power BI, basic SQL, attention to detail and written communication. Coursework projects and internship experience are welcome.",
+        "source": "Same original 931-character fictional student CV as initial audit",
+        "results": [
+          {
+            "id": "STU-01",
+            "status": "resolved-for-exact-reported-case",
+            "observed": "11 findings: title sentence omitted; all five tasks separate; Excel and Power BI individual direct wording; basic SQL individual manual review with complete negative internship source; Read full vacancy retains exact original paragraph",
+            "counts": {
+              "direct": 2,
+              "manual": 7,
+              "total": 11,
+              "related": 2
+            },
+            "limits": [
+              "No independent numeric-offset verification",
+              "No broad parser regression corpus",
+              "No new hosted flow or grade"
+            ]
+          }
+        ],
+        "providedSupplementaryEvidence": "Coordinator reports 72 focused evidence tests passed; not run independently by this reviewer",
+        "fingerprints": {
+          "src/lib/cv-evidence.ts": "CCFC9575CF9A49842811B68C1DADDD8C0205EBCC313A3189AA4715B8F8E9DF12",
+          "src/pages/CvCheck.tsx": "91C2E5F7910B3D69979B4159F8BDE119EB36182EC16F66A79E47C109E7401425"
+        },
+        "sourceHashStableBeforeAfter": true
+      }
+    },
+    {
+      "id": "STU-02",
+      "sourceAudit": "student",
+      "group": "defensible evidence",
+      "originalFinding": {
+        "id": "STU-02",
+        "priority": "P2",
+        "title": "Explicit negative evidence and source deduplication",
+        "repro": "Compare Basic SQL is required with skills line ending No SQL experience; identical line appears twice with generic warning",
+        "acceptance": "One excerpt per line and plain explanation of explicitly absent SQL experience with truthful next action"
+      },
+      "currentStatus": "independently-resolved-in-tested-sample",
+      "currentEvidence": "Standalone SQL absence shown once with explicit negative evidence and truthful next action.",
+      "remainingScope": "Not exhaustive negation corpus.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "STU-03",
+      "sourceAudit": "student",
+      "group": "guest first value",
+      "originalFinding": {
+        "id": "STU-03",
+        "priority": "P2",
+        "title": "Inline no-CV start and precise recovery",
+        "repro": "New student reaches CV step without file and submits blank; no nearby example and error suggests pasting into TXT file",
+        "acceptance": "Inline no-CV example; distinct empty/scanned guidance; direct paste instruction and OCR help link"
+      },
+      "currentStatus": "independently-resolved-in-tested-cases",
+      "currentEvidence": "Inline facts starter, direct paste empty recovery and distinct scanned-PDF/OCR help verified.",
+      "remainingScope": "Filled starter remains in linked help.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "STU-04",
+      "sourceAudit": "student",
+      "group": "task help and recovery",
+      "originalFinding": {
+        "id": "STU-04",
+        "priority": "P2",
+        "title": "Rank exact help task matches",
+        "repro": "Search help for no CV; eight topics and generic first-check topic precedes dedicated no-CV task",
+        "acceptance": "Dedicated no-CV task first and prominent, with relevant OCR/file support secondary"
+      },
+      "currentStatus": "independently-resolved-reported-query",
+      "currentEvidence": "no CV help query ranks dedicated no-CV task first, uploads second.",
+      "remainingScope": "Product help search only, not web rank or broad search evaluation.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "STU-05",
+      "sourceAudit": "student",
+      "group": "workflow completion",
+      "originalFinding": {
+        "id": "STU-05",
+        "priority": "P2",
+        "title": "Actionable overview when private preparation unavailable",
+        "repro": "Fictional opportunities/coverage stage recommends Prepare from my saved facts while actual availability state disables cloud preparation",
+        "acceptance": "Conditional unavailable state shows reason and working guest/manual route at overview; available state leads to enabled run",
+        "scope": "conditional UI ease only; no claim production service unavailable"
+      },
+      "currentStatus": "overview-ui-independently-resolved-route-limited",
+      "currentEvidence": "Unavailable overview explains reason and free/manual paths; fixture click reaches unsupported filming route; separate guest form works.",
+      "remainingScope": "Available-cloud branch and actual published navigation.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "F01",
+      "sourceAudit": "professional-mba",
+      "group": "defensible evidence",
+      "originalFinding": {
+        "id": "F01",
+        "priority": "P1",
+        "title": "Give uncertain evidence a specific review reason and passage context",
+        "reproduction": "First fixture yields 8/11 manual rows, including measured-pilot and stakeholder examples; projected academic passage lacks its own context badge in several rows.",
+        "acceptance": "Preserve team/academic/projected qualifiers; explain actual missing context; no invented claim or eligibility score."
+      },
+      "currentStatus": "partial-implementation-with-narrow-peer-rechecks",
+      "currentEvidence": "Complete qualifiers and source badges implemented; narrow PM forecast/reliability internship cases pass.",
+      "remainingScope": "Fresh MBA exact fixture and specific generic-manual-reason evaluation.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "F02",
+      "sourceAudit": "professional-mba",
+      "group": "defensible evidence",
+      "originalFinding": {
+        "id": "F02",
+        "priority": "P1",
+        "title": "Exclude vacancy headings and rank conditional evidence by subject",
+        "reproduction": "Second vacancy title/company becomes a requirement; preferred SQL ranks finance and project negation ahead of the SQL statement.",
+        "acceptance": "Title/headings do not inflate requirements; SQL source first; irrelevant not-containing passages omitted; preferred remains preferred; current post-audit parser independently rechecked."
+      },
+      "currentStatus": "implementation-tested-independent-professional-recheck-pending",
+      "currentEvidence": "Later heading/subject/SQL parser changes and focused tests overlap STU-01/R5.",
+      "remainingScope": "Original professional conditional-SQL/header reproduction on final version.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "F03",
+      "sourceAudit": "professional-mba",
+      "group": "safe reusable source",
+      "originalFinding": {
+        "id": "F03",
+        "priority": "P1",
+        "title": "Offer reversible selected-line redaction across source and final",
+        "reproduction": "Removing confidential line in final leaves source unsafe; whole-paragraph removal would delete entire employment role.",
+        "acceptance": "Explicit selected-text choice, visible source/final changes, preserved surrounding facts, approval reset, shareable CV retained in second vacancy."
+      },
+      "currentStatus": "partial-original-request-implementation-verified",
+      "currentEvidence": "Explicit copy of user-reviewed final to current reusable source; page-only source Undo; approval reset; saved records untouched; approved final default;114 targeted suite includes privacy/source checks.",
+      "remainingScope": "No automated or selected-line redaction UI; independent professional recheck pending.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "F04",
+      "sourceAudit": "professional-mba",
+      "group": "second application reuse",
+      "originalFinding": {
+        "id": "F04",
+        "priority": "P2",
+        "title": "Shorten second-vacancy setup with reused CV visible",
+        "reproduction": "Another vacancy returns user through role, CV, vacancy, evidence, review, approval.",
+        "acceptance": "Role/company/vacancy together; clearly identified reused source with optional inspection/edit; no history retyping or inherited approval; fewer setup transitions."
+      },
+      "currentStatus": "implementation-verified-independent-recheck-pending",
+      "currentEvidence": "One role/company/vacancy setup with optional reused-CV inspect/edit; then evidence/review/fresh approval;114 targeted cases plus actual browser four-stage proof.",
+      "remainingScope": "Independent professional final-snapshot recheck and participant time-saving.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "F05",
+      "sourceAudit": "professional-mba",
+      "group": "task help and media",
+      "originalFinding": {
+        "id": "F05",
+        "priority": "P2",
+        "title": "Publish actual captioned recorded walkthroughs when ready",
+        "reproduction": "Public walkthroughs have interactive steps/transcripts but no playable recording during audit.",
+        "acceptance": "Released videos load/play publicly with synchronized captions/transcript, labelled fiction and end-to-end source/evidence/review/approval/export/reuse; unreleased media stays honestly unavailable."
+      },
+      "currentStatus": "local-production-verified-publication-pending",
+      "currentEvidence": "Same five local narrated presenter files as REAL-WALKTHROUGHS with disclosed fictional/local-fixture scope.",
+      "remainingScope": "Public playback/captions; separately verify actual export delivery.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "MH-01",
+      "sourceAudit": "mobile-help",
+      "group": "UI accessibility",
+      "originalFinding": {
+        "id": "MH-01",
+        "priority": "P2",
+        "type": "reproducible keyboard defect",
+        "title": "Keep keyboard focus when a walkthrough endpoint disables its button",
+        "repro": [
+          "Open /walkthroughs on desktop.",
+          "Focus Next step and press End.",
+          "Inspect focus: step 6 is displayed, Next is disabled, activeElement is BODY.",
+          "From the final step focus Previous step and press Home; the same loss occurs at step 1."
+        ],
+        "impact": "A keyboard user loses their position at the tutorial boundary and must find the controls again.",
+        "acceptance": [
+          "After Next/Previous, Home/End or a direct-step selection reaches a boundary, focus stays in the walkthrough on an enabled control or the focusable region.",
+          "Tab continues to a predictable adjacent control.",
+          "The role=status step announcement remains correct."
+        ]
+      },
+      "currentStatus": "independently-resolved",
+      "currentEvidence": "End/Home keep focus on SECTION tabindex0 and announce correct stage.",
+      "remainingScope": "No screen-reader speech or formal certification.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "MH-02",
+      "sourceAudit": "mobile-help",
+      "group": "field validation",
+      "originalFinding": {
+        "id": "MH-02",
+        "priority": "P2",
+        "type": "reproducible semantic gap",
+        "title": "Associate validation errors with their inputs",
+        "repro": [
+          "Open /check with an empty Target role.",
+          "Activate Continue to your CV.",
+          "An alert appears and focus moves to #check-role; aria-invalid and aria-describedby are absent."
+        ],
+        "impact": "The error exists separately from the field; revisiting the field does not expose an explicit programmatic error relationship.",
+        "acceptance": [
+          "The invalid field has aria-invalid=true and aria-describedby pointing to a visible error with a stable id.",
+          "The error is positioned near the field and remains reachable on phone.",
+          "Correcting the field removes the invalid state and obsolete error reference."
+        ]
+      },
+      "currentStatus": "independently-resolved-original-fields",
+      "currentEvidence": "Independent role/source/vacancy ARIA association and correction checks passed; later combined reuse fields tested by implementer.",
+      "remainingScope": "Independent check of final combined reuse form.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "MH-03",
+      "sourceAudit": "mobile-help",
+      "group": "second application reuse",
+      "originalFinding": {
+        "id": "MH-03",
+        "priority": "P2",
+        "type": "accidental-replacement risk",
+        "title": "Protect the open approved check when starting another vacancy",
+        "repro": [
+          "Complete and approve a fictional check without downloading or saving.",
+          "Under Your next application leave Reviewed source CV selected.",
+          "Activate Use this CV for another vacancy.",
+          "The app immediately returns to step 1 and clears the old vacancy and approval; only the preceding warning provided protection."
+        ],
+        "impact": "A hurried phone user can replace their only open approved comparison before keeping it.",
+        "acceptance": [
+          "A final confirmation or reliable undo protects replacement of an unsaved approved check.",
+          "The confirmation names what will carry over and what will be cleared, and offers download/save or cancel.",
+          "Cancel preserves the open check. New vacancy still requires fresh review and approval."
+        ]
+      },
+      "currentStatus": "independently-resolved-within-page-lifetime",
+      "currentEvidence": "Undo restores prior CV/vacancy/final edits to review with no approval/assets; later mode/owner/reset behavior tested.",
+      "remainingScope": "Undo deliberately lost across refresh/leaving; final mode has implementation rather than independent proof.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "MH-04",
+      "sourceAudit": "mobile-help",
+      "group": "task help and recovery",
+      "originalFinding": {
+        "id": "MH-04",
+        "priority": "P2",
+        "type": "mobile workflow improvement",
+        "title": "Bring the selected walkthrough above the long chooser",
+        "repro": [
+          "Open /walkthroughs at 390×844.",
+          "Measure the selected first tutorial heading: top ~1739.73px.",
+          "Five large choice cards appear before any tutorial step or next-step control."
+        ],
+        "impact": "The first useful instruction is more than two phone viewports down; the page asks for substantial scrolling before the chosen task starts.",
+        "acceptance": [
+          "At phone width show a compact selected-task chooser and the current walkthrough before the full chooser list.",
+          "Selecting a task focuses or scrolls to the selected walkthrough below the sticky header.",
+          "Previous/Next and caption state remain accessible and do not overlap content."
+        ]
+      },
+      "currentStatus": "independently-resolved-core-mobile-chooser",
+      "currentEvidence": "Selected card first with collapsed alternatives; title document Y about1000.4 versus1739.7; no horizontal overflow.",
+      "remainingScope": "Current task still below first phone viewport; no full media recheck.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "MH-05",
+      "sourceAudit": "mobile-help",
+      "group": "UI accessibility",
+      "originalFinding": {
+        "id": "MH-05",
+        "priority": "P3",
+        "type": "mobile hit-area improvement",
+        "title": "Increase standalone secondary help link hit areas",
+        "repro": [
+          "At 390×844 inspect claim-library Help with fact review and walkthrough Read task help / Help links.",
+          "Their measured link boxes are ~17–19.8px high; legal and breadcrumb links are ~19.2–21.4px high."
+        ],
+        "impact": "Small secondary targets are harder to activate accurately for a phone applicant who needs recovery guidance.",
+        "acceptance": [
+          "Provide larger padded hit areas for standalone help/recovery actions, aiming at 44px where layout permits and preserving clear spacing.",
+          "Check adjacent targets for accidental activation.",
+          "Retain underline or another non-color identification. Inline prose links can retain appropriate text layout; do not claim formal compliance from box height alone."
+        ]
+      },
+      "currentStatus": "independently-partially-resolved",
+      "currentEvidence": "Walkthrough standalone links32px rather than19.8px; footer19.2px; claim library not revisited.",
+      "remainingScope": "Broader target-area scope and original44px aim; box height alone does not certify compliance.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "R1",
+      "sourceAudit": "reliability-privacy",
+      "group": "defensible evidence",
+      "originalFinding": {
+        "id": "R1",
+        "priority": "P2",
+        "title": "Stop evidence context carrying across internship and other section boundaries",
+        "source": [
+          "src/lib/cv-evidence.ts:sectionFor",
+          "src/lib/cv-evidence.ts:cvPassages",
+          "src/pages/CvCheck.tsx:evidence badges"
+        ],
+        "reproduction": "Use ACADEMIC PROJECTS, an academic Python bullet, then INTERNSHIP and “Assisted in leading Python reporting during an internship at Fictional Example Analytics.” Compare with “Lead Python reporting.” Initially the internship passage is labelled Project / academic evidence. An unrecognized MBA CONSULTING PROJECTS heading after WORK EXPERIENCE also retains employment context.",
+        "impact": "The quote and supporting-role qualifier are intact, but its context label can misrepresent how experience was gained.",
+        "acceptance": "Recognized internship, volunteering and personal-project headings reset context and display accurate badges; ambiguous new section headings must not inherit an affirmative employment/academic label. Assisted work remains partial for a leadership requirement. Preserve full source text and professional-experience safeguards.",
+        "status": "Narrow internship source recheck passed after root correction; remaining ambiguous-heading coverage and final rendered badges require verification.",
+        "evidence": {
+          "at": "2026-10-13T19:02:22.228Z",
+          "initialScoresUnchanged": true,
+          "sourceSha256": "6ed19cb90b349c1ea8ec4c673efc561ce3aa2a0feaa1394c6b891589c4ccdcb4",
+          "narrowContextRecheck": {
+            "status": "partial",
+            "sourceKind": "internship",
+            "quote": "Assisted in leading Python reporting during an internship at Fictional Example Analytics."
+          },
+          "remainingHeaderNoise": {
+            "vacancy": "Graduate Data Analyst at Fictional Example Analytics, Dubai.",
+            "status": "review",
+            "explanation": "The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.",
+            "evidence": [
+              "Assisted in leading Python reporting during an internship at Fictional Example Analytics.",
+              "Alex Example"
+            ]
+          }
+        }
+      },
+      "currentStatus": "independent-internship-check-passed-broader-scope-partial",
+      "currentEvidence": "Internship section reset and Assisted-not-Led narrow source check passed; broader badges and contexts tested by implementer.",
+      "remainingScope": "Ambiguous headings and final rendered corpus.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "R2",
+      "sourceAudit": "reliability-privacy",
+      "group": "reliability and privacy",
+      "originalFinding": {
+        "id": "R2",
+        "priority": "P2",
+        "title": "Keep the database run lease longer than the bounded model operation",
+        "source": [
+          "supabase/functions/_shared/jobvance-openrouter.ts:callRouter",
+          "supabase/migrations/20261011010000_job_loop_cloud.sql:job_loop_claim_run"
+        ],
+        "reproduction": "With the initial 100-second SQL lease, simulate a valid OpenRouter response at 101 seconds. The real runtime settles one usage row and uploads five artifacts, then phase commit is denied. In a fresh in-memory PostgreSQL instance, the old lease also rejects a simulated 101-second commit.",
+        "impact": "A successful billed model result can fail to publish until recovery or another explicit resume. A competing recovery worker may observe an in-flight reservation and block conservatively.",
+        "acceptance": "Allow a valid response inside the declared 120-second provider deadline to settle/render/commit while the lease remains authoritative. Cancellation, stale-input, owner, token and service-only RPC guards must still deny late/foreign publication. Prove it without real paid calls.",
+        "status": "Local fix independently passed: additive migration extends the run lease to 180 seconds; eight database assertions passed. Hosted migration application was not independently verified.",
+        "evidence": {
+          "at": "2026-10-13T19:04:26.029Z",
+          "kind": "independent-real-PostgreSQL-in-memory-lease-recheck",
+          "initialScoresUnchanged": true,
+          "migrationPath": "supabase/migrations/20261013190000_job_loop_provider_lease.sql",
+          "migrationSha256": "40e6f1f30581f5ad90f8220b7eb90750051aea293060174081944345f1ef6aeb",
+          "oldLeaseSeconds": 100,
+          "newLeaseSeconds": 180,
+          "virtualElapsedSeconds": 101,
+          "checks": {
+            "oldLeaseLateCommitDenied": true,
+            "newLeaseLateCommitAccepted": true,
+            "wrongLeaseDenied": true,
+            "cancelledCommitDenied": true,
+            "staleInputCommitDenied": true,
+            "foreignOwnerReservationDenied": true,
+            "anonymousClaimDenied": true,
+            "authenticatedClaimDenied": true
+          },
+          "paidCalls": 0,
+          "realCloudMutation": false
+        }
+      },
+      "currentStatus": "independent-local-database-passed-hosted-applied-root-reported",
+      "currentEvidence": "180-second lease/101-second commit and service-only/stale/cancel/owner denials independently pass; root reports hosted additive migration applied.",
+      "remainingScope": "Final migration/function hash receipt; no real slow paid call.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "R3",
+      "sourceAudit": "reliability-privacy",
+      "group": "reliability and privacy",
+      "originalFinding": {
+        "id": "R3",
+        "priority": "P2",
+        "title": "Reject unsupported paid recurring schedules or persist their explicit processing route",
+        "source": [
+          "supabase/functions/_shared/job-loop-schedule.ts:validateScheduleInput",
+          "supabase/functions/_shared/job-loop-runtime.ts:processDueSchedules"
+        ],
+        "reproduction": "The backend accepts a paid daily openai/gpt-6.1-sol schedule with model consent. When OpenRouter is configured, scheduled dispatch stores only model/inbox consent. First preparation compares missing route as direct against openrouter and blocks before reservation or provider use.",
+        "impact": "An accepted supported API schedule repeatedly queues work that cannot prepare. The current customer UI schedules rules only and is unaffected; this is a latent API/legacy-schedule failure, not an observed paid customer run.",
+        "acceptance": "For the rules-only product, reject paid schedules explicitly before persistence/dispatch. If paid recurrence is supported later, persist and display the exact consented processing route, invalidate consent on route changes, and test routed scheduling with no provider substitution.",
+        "status": "Narrow local fix passed: new paid schedule providers are rejected before persistence; rules scheduling remains functional. Existing stored paid schedules still need explicit legacy handling. Hosted updated function deployment not independently verified.",
+        "evidence": {
+          "acceptedSettings": {
+            "cadence": "daily",
+            "timezone": "Asia/Dubai",
+            "localTime": "08:00",
+            "weeklyDay": null,
+            "provider": "openai",
+            "model": "gpt-6.1-sol",
+            "modelConsent": true,
+            "inboxConsent": false
+          },
+          "persistedRunConsents": {
+            "model": true,
+            "inbox": false
+          },
+          "dispatchMessage": "Scheduled preparation queued. Review its actual progress below.",
+          "blockedMessage": "The processing route changed after approval. No paid call was made; start again with explicit route consent.",
+          "paidCalls": 0
+        }
+      },
+      "currentStatus": "independent-mock-passed-hosted-root-reported",
+      "currentEvidence": "New paid schedules rejected before write; rules schedules work; root reports control11/worker8 and zero existing paid schedules.",
+      "remainingScope": "Final backend receipt; paid recurrence intentionally unsupported.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "R4",
+      "sourceAudit": "reliability-privacy",
+      "group": "reliability and privacy",
+      "originalFinding": {
+        "id": "R4",
+        "priority": "P2",
+        "title": "Bound private document requests and release stalled download controls",
+        "source": [
+          "src/lib/job-loop-api.ts:fetchLoopArtifact",
+          "src/pages/JobLoop.tsx:download"
+        ],
+        "reproduction": "Mock the signed private artifact fetch with a promise that never settles. The call receives no cancellation signal and remains pending after ten virtual minutes. The UI download busy state is cleared only when this promise settles.",
+        "impact": "A stalled connection can leave review/download and refresh actions disabled with no fresh-link recovery. The existing descriptive retry errors only run after a rejection or response.",
+        "acceptance": "Use a bounded request/read deadline, cancel stalled work on owner/unmount changes, clear busy state and offer a fresh signed-link retry. Keep the current approval and owner fence. Enforce the byte limit while streaming rather than only after whole-blob allocation.",
+        "status": "Narrow local timeout fix passed: headers and body bounded by 45 seconds, transfer aborted, fresh-link retry succeeds, owner check retained. Streaming byte-limit enforcement and immediate owner/unmount cancellation remain separate limits.",
+        "evidence": {
+          "test": ".sites-runtime/audit-reliability/download-probe.test.ts",
+          "result": "1 passed",
+          "virtualWaitMs": 600000,
+          "actualNetworkCalls": 0
+        }
+      },
+      "currentStatus": "independently-partially-resolved",
+      "currentEvidence": "45-second header/body deadline, abort, fresh-link retry and owner fence pass in mocks.",
+      "remainingScope": "Streaming byte limit and immediate owner/unmount cancellation not added; actual stalled-network browser untested.",
+      "initialScoreChanged": false
+    },
+    {
+      "id": "R5",
+      "sourceAudit": "reliability-privacy",
+      "group": "defensible evidence",
+      "originalFinding": {
+        "id": "R5",
+        "priority": "P3",
+        "title": "Keep decorated role/employer/location headings out of requirement counts",
+        "source": [
+          "src/lib/cv-evidence.ts:listingRoleHeading",
+          "src/lib/cv-evidence.ts:vacancySpans"
+        ],
+        "reproduction": "Put “Graduate Data Analyst at Fictional Example Analytics, Dubai.” before Responsibilities. It becomes a Needs manual review requirement and offers the candidate name “Alex Example” as related evidence.",
+        "impact": "This adds irrelevant review work and weak source associations to an otherwise clear task. It does not assert that the candidate qualifies.",
+        "acceptance": "Preserve this noun-only listing context verbatim in omitted/full-vacancy text rather than as an evidence requirement. Test role + company + location variants while ensuring mandatory numeric, experience and eligibility criteria remain analyzed.",
+        "status": "Open at initial audit and unchanged in the narrow source recheck.",
+        "evidence": {
+          "vacancy": "Graduate Data Analyst at Fictional Example Analytics, Dubai.",
+          "status": "review",
+          "explanation": "The check cannot interpret this requirement reliably. Read the wording above and decide what your CV should show.",
+          "evidence": [
+            "Assisted in leading Python reporting during an internship at Fictional Example Analytics.",
+            "Alex Example"
+          ]
+        }
+      },
+      "currentStatus": "implementation-tested-independent-final-recheck-pending",
+      "currentEvidence": "Later heading/atomic parser cases overlap STU-01/F02; root reports focused cases passed.",
+      "remainingScope": "Exact decorated role/employer/location independent final reproduction.",
+      "initialScoreChanged": false
+    }
+  ],
+  "sharedWorkflow": "Source experience applicant can explain -> one vacancy -> inspect evidence -> review accurate CV -> fresh approval and exact document -> reuse for next vacancy.",
+  "operatingCheckpoint": {
+    "evidenceBasis": "Root-supplied operational status plus linked independent local rechecks; publication receipt pending.",
+    "guides": 20,
+    "initialHtmlPublicRoutes": 38,
+    "videos": {
+      "count": 5,
+      "seconds": 472.3,
+      "megabytesReported": 17.05,
+      "contentKind": "screen_walkthrough",
+      "capture": "Actual product-screen still scenes plus speaking fictional AI presenter; not continuous screen recordings",
+      "privateLoopDemo": "Explicit local in-memory fixture, not authenticated cloud",
+      "localDecodeAndFrameChecks": "passed",
+      "publicPublication": "pending",
+      "publicPlayback": "pending",
+      "heygenPublicBytes": 0
+    },
+    "backend": {
+      "controlVersion": 11,
+      "workerVersion": 8,
+      "leaseSeconds": 180,
+      "hostedMigration": "applied per root",
+      "serviceOnlyGrants": "preserved per root",
+      "existingPaidSchedules": 0,
+      "finalHashReceipt": "pending"
+    },
+    "cloudQa": {
+      "file": "../INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json",
+      "checks": 75,
+      "result": "passed",
+      "paidCalls": 0,
+      "provenance": "Root-run fictional rules-only cloud checks, not independent human browser study"
+    },
+    "tests": {
+      "lastWholeSuiteBeforeReuseFollowup": 784,
+      "laterTargeted": 114,
+      "overlappingSets": true,
+      "finalWholeSuite": "pending",
+      "targetedTypecheck": "passed",
+      "targetedLint": "passed",
+      "latestFullAttempt": {
+        "total": 793,
+        "passed": 792,
+        "failed": 1,
+        "failure": "Chapter-time formatting13.125 versus13label",
+        "subsequentFix": "Formatter corrected by root",
+        "targetedWalkthroughAfterFix": 12,
+        "targetedResult": "passed",
+        "typescriptAfterFix": "passed",
+        "finalWholeSuiteAfterManifest": "pending"
+      }
+    },
+    "rollback": {
+      "tag": "jobvance-rollback-2026-10-13-v14",
+      "sitesVersion": 14,
+      "protected": true,
+      "preserve": "Candidate data, reservations, audit history, replacement key"
+    },
+    "budget": {
+      "pilotSeats": 10,
+      "sharedUsdPerMonth": 50,
+      "committedUsdAtCheckpoint": 0.7401,
+      "payments": "off",
+      "ads": "off",
+      "outreach": "off",
+      "messageSends": "off",
+      "applicationSubmission": "off",
+      "period": "UTC month"
+    }
+  },
+  "acceptancePlan": [
+    {
+      "rank": 1,
+      "work": "Defensible evidence",
+      "ids": [
+        "EVID-CONTEXT",
+        "STU-01",
+        "STU-02",
+        "F01",
+        "F02",
+        "R1",
+        "R5"
+      ],
+      "required": "Retain passed exact STU-01 browser recheck; independently check remaining F01/F02/R1/R5 final-snapshot scope, atomic tools/SQL, metadata, qualifiers and PDF/DOCX/TXT/report contents",
+      "estimateDays": "0.5-2 if residual parser defects",
+      "confidence": "High priority, prevalence unknown"
+    },
+    {
+      "rank": 2,
+      "work": "Guest first value",
+      "ids": [
+        "FIRST-VALUE",
+        "MOBILE-ENTRY",
+        "STU-03"
+      ],
+      "required": "Participant useful evidence within5minutes target, no-account accurate download, empty/scanned/plain-record recovery,375x812/390x844 input and next action, keyboard/zoom",
+      "estimateDays": "0.5-1 plus pilot",
+      "confidence": "5-minute requested-need target, not measured"
+    },
+    {
+      "rank": 3,
+      "work": "Safe second application",
+      "ids": [
+        "F03",
+        "F04",
+        "MH-02",
+        "MH-03"
+      ],
+      "required": "Independent final combined form and source/final understanding; no history retyping, no inherited approval/assets; Undo and owner/reset/recovery fences",
+      "estimateDays": "0.5-1",
+      "confidence": "Transition reduction implemented; human time-saving unknown"
+    },
+    {
+      "rank": 4,
+      "work": "Task help, recovery and actual media",
+      "ids": [
+        "GUEST-SUPPORT",
+        "REAL-WALKTHROUGHS",
+        "STU-04",
+        "F05",
+        "MH-01",
+        "MH-04",
+        "MH-05"
+      ],
+      "required": "Verified monitored public contact; remaining target scope; real public playback/captions/transcript fallback matching labels",
+      "estimateDays": "0.5-1.5 plus operator prerequisite",
+      "confidence": "Staffing/publication not established"
+    },
+    {
+      "rank": 5,
+      "work": "Reliable private completion",
+      "ids": [
+        "STU-05",
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "required": "Actual-origin approved byte and owner/source withdrawal/schedule controls; deployment/migration receipt; prioritize remaining streaming/cancellation by observed need",
+      "estimateDays": "0.5-1.5",
+      "confidence": "Local/synthetic proof partly available; paid route untested"
+    },
+    {
+      "rank": 6,
+      "work": "Search and field performance",
+      "ids": [],
+      "required": "Actual-origin38-route/20-guide/metadata/private/404/sitemap checks; successful Search Console verification and indexing reports; eligible field performance data",
+      "estimateDays": "0.5-1 release checks, traffic/crawler timing external",
+      "confidence": "No ranking, indexing, answer-engine inclusion or field latency result claimed"
+    }
+  ],
+  "formativePilot": {
+    "status": "proposed, no participant results or recruitment performed",
+    "participants": 9,
+    "groups": {
+      "students": 3,
+      "mba": 3,
+      "professionalsWith5To10Years": 3
+    },
+    "scope": "Safe participant-selected excerpts or fictional material; first and second vacancy, questionable evidence, safe editing, actual document inspection, help/recovery.",
+    "goals": {
+      "firstValue": "At least8/9 within5minutes unassisted",
+      "eligibilityBoundary": "All9 understand wording is not eligibility certification",
+      "sourcePrivacy": "All9 preserve qualifiers and no unsafe line returns on reuse",
+      "secondSetup": "At least8/9 without history retyping and understand fresh approval",
+      "help": "At least8/9 find relevant task help within90seconds",
+      "timeSaving": "Measure paired time before claiming any saving percentage"
+    },
+    "measures": [
+      "task time",
+      "transitions",
+      "assistance",
+      "abandonments",
+      "field errors",
+      "source/final confusion",
+      "file inspection",
+      "second reuse"
+    ],
+    "limitation": "Formative learning, not statistical conversion, retention, market-fit or hiring evidence.",
+    "noRequiredPaidModelMailboxApplicationOrPurchase": true
+  },
+  "externalPrerequisites": [
+    "Consenting measured-user tasks and subsequent usage",
+    "Eligible real device/field performance data",
+    "Successful owner Search Console verification, sitemap/indexing/impression reports",
+    "Observed answer-engine citation/ranking data before claims",
+    "Willingness to pay and cost/unit economics plus monitored service and accurate operator/terms/privacy before separately authorized payment enablement"
+  ],
+  "publicationReceipt": {
+    "status": "pending",
+    "appendOnly": true,
+    "sourceCommit": null,
+    "buildHash": null,
+    "siteVersion": null,
+    "actualOriginChecks": null,
+    "backendHashes": null,
+    "migrationReceipt": null,
+    "finalWholeSuite": null,
+    "mediaPlayback": null,
+    "searchConsoleVerification": null,
+    "independentFinalRechecks": null,
+    "initialScoresMayBeReplaced": false
+  },
+  "updatedAtUtc": "2026-10-13T21:06:18.5865693Z"
+}

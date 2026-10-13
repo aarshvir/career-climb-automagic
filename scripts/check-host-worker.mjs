@@ -24,18 +24,22 @@ assert.equal(typeof worker?.fetch, 'function');
 assert.equal(decodedAssets, 0, 'Loading the Worker must not decode all assets.');
 const hosting = JSON.parse(await readFile(join(root, 'vercel.json'), 'utf8'));
 const expectedHeaders = hosting.headers.find(rule => rule.source === '/(.*)').headers;
+const publicRender = JSON.parse(await readFile(join(dist,'.prerender/manifest.json'),'utf8'));
 const request = async (path, options) => {
   try { return await worker.fetch(new Request(`https://example.test${path}`, options)); }
   catch { throw new Error(`Worker handler failed for ${path.split('?')[0]}.`); }
 };
 const checkHeaders = response => {
-  for (const { key, value } of expectedHeaders) assert.equal(response.headers.get(key), value, `${key} must match the reviewed hosting policy.`);
+  for (const { key, value } of expectedHeaders) {
+    const expected=key==='Content-Security-Policy'?value.replace(/script-src ([^;]+)/,(_match,policy)=>`script-src ${policy} ${publicRender.scriptHashes.join(' ')}`):value;
+    assert.equal(response.headers.get(key), expected, `${key} must match the reviewed hosting policy and verified data-script hashes.`);
+  }
 };
 const index = await readFile(join(dist, 'index.html'));
 const undecodedHead = await request('/dashboard', { method: 'HEAD' });
 assert.equal(undecodedHead.status, 200);
 assert.equal(decodedAssets, 0, 'HEAD must not decode an asset body.');
-for (const path of ['/', '/dashboard?tab=cv', '/auth/callback?code=synthetic', '/auth/reset', '/privacy']) {
+for (const path of ['/dashboard?tab=cv', '/auth/callback?code=synthetic', '/auth/reset']) {
   const response = await request(path);
   assert.equal(response.status, 200, `SPA route ${path} must serve the frontend.`);
   checkHeaders(response);
@@ -50,6 +54,25 @@ for (const path of ['/admin', '/admin2', '/admin2/ops?days=7', '/admin/users', '
   assert.equal(response.headers.get('X-Robots-Tag'), 'noindex, nofollow, noarchive');
 }
 assert.equal((await request('/')).headers.get('X-Robots-Tag'), null, 'Public marketing remains indexable.');
+const decodedBeforePages=decodedAssets;
+for(const page of publicRender.pages){
+  const response=await request(page.path),html=await response.text();
+  assert.equal(response.status,200);checkHeaders(response);
+  assert.equal(response.headers.get('Cache-Control'),'no-cache');
+  assert.ok(html.includes('<h1'),'Initial HTML must have a visible page heading.');
+  assert.ok(html.includes(`href="https://jobvance.io${page.path}"`),'Each initial page needs its canonical URL.');
+  assert.ok(html.includes(page.title.replaceAll('&','&amp;')),'Each public page needs its own title.');
+  assert.equal(response.headers.get('X-Robots-Tag'),null);
+  if(page.kind==='guide'){assert.ok(!html.includes('We could not find that guide.'));assert.ok(html.includes('BlogPosting'));assert.ok(html.includes('Sources and further reading'));}
+  for(const match of html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)){
+    JSON.parse(match[1]);
+    const {createHash}=await import('node:crypto');
+    assert.ok(response.headers.get('Content-Security-Policy').includes(`'sha256-${createHash('sha256').update(match[1]).digest('base64')}'`),'Actual structured text must be permitted by its exact CSP hash.');
+  }
+}
+const pageDecodes=decodedAssets-decodedBeforePages;
+for(const path of ['/guides/no-such-article','/no-such-product','/unknown/deep/route'])assert.equal((await request(path)).status,404,'Unknown routes must not masquerade as successful pages.');
+for(const [path,target] of [['/blog','/guides'],['/jobs','/job-loop'],['/product','/job-loop'],['/guides/','/guides']]){const response=await request(path);assert.equal(response.status,308);assert.equal(response.headers.get('Location'),target);}
 
 const names = await readdir(join(dist, 'assets'));
 const cases = [
@@ -104,6 +127,6 @@ for (const method of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
   assert.equal(response.headers.get('Cache-Control'), 'no-store');
   checkHeaders(response);
 }
-assert.equal(decodedAssets, 1 + cases.length, 'ETag and HEAD requests must not decode additional assets.');
+assert.equal(decodedAssets, 1 + pageDecodes + 1 + cases.length, 'ETag and HEAD requests must not decode additional assets.');
 globalThis.atob = nativeAtob;
-console.log(JSON.stringify({ result: 'passed', checks: ['security-headers', 'spa-deep-routes', 'asset-bytes-and-mime', 'etag-and-cache', 'head', 'missing-and-private-paths', 'unsafe-methods', 'project-identity', 'compressed-size'], compressedBytes }));
+console.log(JSON.stringify({ result: 'passed', publicPages:publicRender.pages.length, guideArticles:publicRender.pages.filter(page=>page.kind==='guide').length, checks: ['security-headers-and-jsonld-hashes','private-client-routes','rendered-public-content','canonical-redirects','real-notfound-status','asset-bytes-and-mime','etag-and-cache','head','missing-and-private-paths','unsafe-methods','project-identity','compressed-size'], compressedBytes }));

@@ -1,0 +1,2547 @@
+{
+  "evidenceCapturedAt": "2026-10-13T18:23:48.453Z",
+  "baselineCommit": "f225451e8fc33a71848d8167a793e90c1a2dfb24",
+  "snapshotLabel": "newhardeningbuild2026-10-13",
+  "initialFreeze": "2026-10-13T18:18:10.115Z",
+  "method": "Independent Cua live UI audit plus local generated Worker Request/Response harness. No production deployment or ranking evidence asserted.",
+  "capturedFileHashes": {
+    "src/pages/ProductPage.tsx": "351b5e8110ed871d43ac4ec8724863fd73f61cc17c5cfcd06a3fb4e4d956df9f",
+    "src/pages/CvCheck.tsx": "4f66f9e8fa05d50b320e020814584de29c85e2d463e8f5464db5ce82ebecd740",
+    "src/pages/AudienceLanding.tsx": "fbff050edb4039a4fa9c333c5e90044a61f9ad0e1611a9751b2b366720388b3e",
+    "src/pages/HelpCenter.tsx": "00d3b94a3d61a2307869de3dd0866ab83d6482a90172522a560d5ad7f33276ea",
+    "src/pages/Walkthroughs.tsx": "dec55073946fd5b3350e23bac8a31eae0fbe4dc3273f62a3d7dc9f4ee06d8be1",
+    "src/lib/cv-evidence.ts": "badfda7e9091ce03fa9e7e83dd30a775a8f3e13268e73350d1d578d51fc7c909",
+    "src/lib/walkthroughs.ts": "f68142f8b66f85e407cee451453c98e9daab0ed794d3cb5312fe364399c0d70e",
+    "src/lib/career-guides.ts": "03772c60e19ed6d04f907b97e677d2ae6801b76a800ef9e48c16d474ca500587",
+    "src/lib/public-route-manifest.ts": "cfff4fe571656968e44d4c7ab69f707015677550f0733f734e15c6dd87d46890",
+    "src/lib/public-site-meta.ts": "b6a17259c25be6bea24adf6df8e3ad8de0426884b22037c22f93948f306485af",
+    "dist/index.html": "054f9757a9b0b3e55c75f122b611c29c65101d023e5bc2c67bc2690f15bf0380",
+    "dist/server/index.js": "a1dda5928def72d1b6d624e3208e2963d3cffabb97b5ebaff7b62424bc6a87dc",
+    "dist/.prerender/manifest.json": "82d7f78002c336d3dbe486d018855fe3c1783a19fdd7c88f83914b164b22ef75",
+    "public/robots.txt": "9777f318fc3577fdd1afc875e30b75748b48b7e2ce428cac7e6130421060f376",
+    "dist/robots.txt": "8c4ffc3e1c995ce8822ccf41ef8b2c9faf9108f02ef6c51e1293c4de7a5029de",
+    "dist/sitemap.xml": "e5ce006cc4e8d794edee8a15cdae0c4612eb1a67a15cf962ab6fdf91c48b509b"
+  },
+  "workerPublicResponses": [
+    {
+      "path": "/",
+      "status": 200,
+      "sha256": "3273a27ab4892e948b863d0d5f326731ed530e5f3d8f6d30167c664b71e40b39",
+      "h1Count": 1,
+      "title": "Free CV-to-job check and application preparation | Jobvance",
+      "canonical": "https://jobvance.io/",
+      "description": "Compare your actual CV with one vacancy, review source-linked evidence and download an approved CV. Start free without an account; save a private Job Loop for reuse.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/job-loop",
+      "status": 200,
+      "sha256": "a7a6595f1437bf1b3ec307d0e10442ff07fd47ed3616e329c938de1f56f80530",
+      "h1Count": 1,
+      "title": "Job Loop: reuse your CV, prepare each application | Jobvance",
+      "canonical": "https://jobvance.io/job-loop",
+      "description": "Understand exactly what Job Loop does, what it prepares for you and what you review. Start with a free CV check, then optionally save facts and next actions.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/for-students",
+      "status": 200,
+      "sha256": "cd05f1b8f7ec1338695856db8d05d1055910447c9778214ef5fe5d22740d5032",
+      "h1Count": 1,
+      "title": "CV evidence and applications for students and graduates | Jobvance",
+      "canonical": "https://jobvance.io/for-students",
+      "description": "Prepare internship and graduate applications from real coursework, projects and internships. Keep academic work labelled and review the evidence before downloading.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/for-mba",
+      "status": 200,
+      "sha256": "27a074fe69cdd275dbcb1bdb35787dbce6528eb7aeea70f9c968d8a8c48ace62",
+      "h1Count": 1,
+      "title": "MBA CV preparation and career pivot applications | Jobvance",
+      "canonical": "https://jobvance.io/for-mba",
+      "description": "Connect previous employment and MBA projects to a new role. Review your contribution, transferable evidence and gaps before approving an application document.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/for-career-switchers",
+      "status": 200,
+      "sha256": "a46f5ba9fa5b87297eaedf4a919e115c6422496282166c7742420bfb6e2d7bae",
+      "h1Count": 1,
+      "title": "Application preparation for busy career switchers | Jobvance",
+      "canonical": "https://jobvance.io/for-career-switchers",
+      "description": "Reuse confirmed experience for your next career move, keep confidential details private and prepare around your working day. You review and submit each application.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/check",
+      "status": 200,
+      "sha256": "62c618af779cc97df21d95133f61e4959edb39f73191dcce8ab2a383d223dd84",
+      "h1Count": 1,
+      "title": "Free CV-to-vacancy evidence check | Jobvance",
+      "canonical": "https://jobvance.io/check",
+      "description": "Upload or paste a readable CV and one job description. Compare original passages, review your CV and download PDF, DOCX or TXT without creating an account.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/pilot",
+      "status": 200,
+      "sha256": "14cb4907b2bed7689c2e32776a1ea7f532be4657819801ba061bdb3d9f71d3b3",
+      "h1Count": 1,
+      "title": "Fictional application preparation demonstration | Jobvance",
+      "canonical": "https://jobvance.io/pilot",
+      "description": "Explore a clearly fictional Jobvance preparation example. Compare vacancy requirements with source evidence and see the decisions a candidate reviews.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/pricing",
+      "status": 200,
+      "sha256": "ce16db18a8fb3b69bffb51c7cc9e862e27c0577512b746a244cda220a2258df4",
+      "h1Count": 1,
+      "title": "Free Jobvance pilot and proposed future plans | Jobvance",
+      "canonical": "https://jobvance.io/pricing",
+      "description": "The Jobvance pilot and first CV check are free. No card or checkout. Future Focus and Job Loop subscription prices are proposals, not current paid entitlements.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/how-it-works",
+      "status": 200,
+      "sha256": "084d93597a22ad3471f644c8c5a598855b9ec999d43d8addcb09623ed7b5b5c4",
+      "h1Count": 1,
+      "title": "How Jobvance prepares a reviewed application | Jobvance",
+      "canonical": "https://jobvance.io/how-it-works",
+      "description": "Follow six clear steps: choose a role, bring your CV, paste one vacancy, read the evidence, review the wording, then approve and download.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/faq",
+      "status": 200,
+      "sha256": "6634d514586eb3f8d8acb85aa5e08f79df5794d2330224621e2d78a22bf15aec",
+      "h1Count": 1,
+      "title": "Jobvance questions: CV checks, privacy and downloads",
+      "canonical": "https://jobvance.io/faq",
+      "description": "Answers about supported files, evidence findings, free downloads, optional saving, model consent and the limits of Jobvance application preparation.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/about",
+      "status": 200,
+      "sha256": "3ad6dd5c586a8ceace4fe8d4734a4a59e990b541ac3d15af0396b80bd0ca4696",
+      "h1Count": 1,
+      "title": "About Jobvance: evidence-led application preparation",
+      "canonical": "https://jobvance.io/about",
+      "description": "Jobvance helps students, MBA candidates and busy professionals prepare honest applications and keep their next action clear. Your experience and decisions remain yours.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "sha256": "f9310a9d789dd752b3621309894aae516fe75bb7dabffd16bc24023bb640ea91",
+      "h1Count": 1,
+      "title": "Jobvance workflow and privacy support",
+      "canonical": "https://jobvance.io/contact",
+      "description": "Find private support for document, account, workflow and privacy questions. A saved support receipt records a request; it does not imply review or a response time.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "sha256": "fda7a39a48d7d31c44d11342008a8385d888c10065bb2594c0dea23cb98aa5fb",
+      "h1Count": 1,
+      "title": "How Jobvance handles CVs, drafts and optional models",
+      "canonical": "https://jobvance.io/privacy",
+      "description": "Understand on-device CV checks, optional temporary recovery, private account saving, document access and separate cloud model or inbox consent.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "sha256": "edd41543ee395684adb59eb6071ed35d415e339637a3f47eec7cf21d741d83a2",
+      "h1Count": 1,
+      "title": "Jobvance product terms and current free availability",
+      "canonical": "https://jobvance.io/terms",
+      "description": "Read the terms for accurate source information, review and approval, free beta availability and the limits of application preparation.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/refund",
+      "status": 200,
+      "sha256": "734da13a2d6aabf503bea84f7f711a9d406802d89a7feb4c8e08616b6cad1421",
+      "h1Count": 1,
+      "title": "Jobvance failed requests, credits and future paid access",
+      "canonical": "https://jobvance.io/refund",
+      "description": "Read how failed requests and any future paid access are handled. Real-money checkout is currently disabled; no hiring outcome is guaranteed.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/help",
+      "status": 200,
+      "sha256": "7f0c258ca06741272814b4d671eb12c887101132133835017c34ec516a662f8e",
+      "h1Count": 1,
+      "title": "Step-by-step help for your CV check and Job Loop | Jobvance",
+      "canonical": "https://jobvance.io/help",
+      "description": "Find practical guides for CV uploads, source facts, first applications, reuse, document previews, recovery, private saving and recurring preparation.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/walkthroughs",
+      "status": 200,
+      "sha256": "e8f315362f64cad0db196ce0b800830f3a509643fd1fde7ed6bb3047e1d90835",
+      "h1Count": 1,
+      "title": "Jobvance walkthroughs: learn each application step",
+      "canonical": "https://jobvance.io/walkthroughs",
+      "description": "Follow accessible, task-focused walkthroughs for a first CV check, private Job Loop setup, a second application and document review.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides",
+      "status": 200,
+      "sha256": "28ce4bcfd9b781fd45b132b3757deeea9a33c467ef44b9bbebf5074026933e0c",
+      "h1Count": 1,
+      "title": "Practical CV and application guides | Jobvance",
+      "canonical": "https://jobvance.io/guides",
+      "description": "Original guides for students, MBA candidates and busy professionals. Review CV evidence, prepare applications, verify UAE job sources and troubleshoot.",
+      "jsonLd": 1,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/cv-job-description-evidence",
+      "status": 200,
+      "sha256": "36fff123f75492a31670d348760a897987b1d9ffc650d86b6fdf0c4b10af32dd",
+      "h1Count": 1,
+      "title": "Compare your CV with a job description using evidence | Jobvance",
+      "canonical": "https://jobvance.io/guides/cv-job-description-evidence",
+      "description": "Build a requirement-to-evidence check that reveals gaps without inventing experience or turning shared words into a hiring prediction.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/student-projects-on-cv",
+      "status": 200,
+      "sha256": "831762bf5f00023ef9ee205d08e09b9ff8b89aaa003b399b3025938739590827",
+      "h1Count": 1,
+      "title": "Show student projects without calling them work experience | Jobvance",
+      "canonical": "https://jobvance.io/guides/student-projects-on-cv",
+      "description": "Turn coursework, internships and activities into clear CV evidence while keeping academic projects and your own contribution accurately labelled.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/mba-career-pivot-cv",
+      "status": 200,
+      "sha256": "de80b6cc5d9e10d0b764b723efa654564b0159639a629b9de5188983c66b0275",
+      "h1Count": 1,
+      "title": "Build an MBA career-pivot CV with a credible bridge | Jobvance",
+      "canonical": "https://jobvance.io/guides/mba-career-pivot-cv",
+      "description": "Connect previous employment with MBA learning for a new role, keeping case studies, team work and forecasts distinct from delivered business results.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/confidential-career-switch",
+      "status": 200,
+      "sha256": "1ab0088a6fa70ca1efb5cc72de634d8c470eda2f01e4e68b78b86d45842edf03",
+      "h1Count": 1,
+      "title": "Plan a confidential job search alongside your current job | Jobvance",
+      "canonical": "https://jobvance.io/guides/confidential-career-switch",
+      "description": "Separate search activity, work information and public visibility while preparing a career move without assuming any platform guarantees secrecy.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/role-filtering-before-applying",
+      "status": 200,
+      "sha256": "b0dd04ec3b656f0a00b710606239abc0131bf320e1ec59a326d991fbb88e0d48",
+      "h1Count": 1,
+      "title": "Filter roles before spending time on an application | Jobvance",
+      "canonical": "https://jobvance.io/guides/role-filtering-before-applying",
+      "description": "Use a practical shortlist with essential conditions, evidence questions and time costs to choose which vacancies deserve a full application review.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/verify-job-listing-source",
+      "status": 200,
+      "sha256": "805b03af7c117f281ab1d566c62699f7ad3e15ec1314d84c92289a24eed7e67d",
+      "h1Count": 1,
+      "title": "Verify a job listing before sharing your CV | Jobvance",
+      "canonical": "https://jobvance.io/guides/verify-job-listing-source",
+      "description": "Trace a vacancy to a credible source, check its destination and preserve what you verified before sharing documents or preparing an application.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/achievements-without-numbers",
+      "status": 200,
+      "sha256": "73814f54676b6d35ef4d95f78e16ac7d1ae4f2407126e5a1c422ba15bc0f7837",
+      "h1Count": 1,
+      "title": "Write credible CV achievements when you have no numbers | Jobvance",
+      "canonical": "https://jobvance.io/guides/achievements-without-numbers",
+      "description": "Describe useful actions, scope and deliverables without inventing percentages, financial impact or results that you cannot substantiate.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/first-application-pack",
+      "status": 200,
+      "sha256": "873c4818d30a8da82c838643c40246c3a0f6f9a82436414ce6aefc0b08114938",
+      "h1Count": 1,
+      "title": "Prepare your first application pack without extra paperwork | Jobvance",
+      "canonical": "https://jobvance.io/guides/first-application-pack",
+      "description": "Assemble one vacancy-specific CV, required answers and an optional message, with a clear review checklist before you submit anything.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/reuse-second-application",
+      "status": 200,
+      "sha256": "2457d25f45ea99404df78f40ab8b374f95712b7f908c2f5a38bb8ef70a5df531",
+      "h1Count": 1,
+      "title": "Reuse your career record for a second application | Jobvance",
+      "canonical": "https://jobvance.io/guides/reuse-second-application",
+      "description": "Carry confirmed facts into another role while reviewing its requirements, attachments and message separately to avoid copying the wrong claims.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/cv-pdf-or-docx",
+      "status": 200,
+      "sha256": "bf3157439f1e65a5bd629b96e66d1770e6cdc035cead6a8ddfd4ef56998b1bde",
+      "h1Count": 1,
+      "title": "Choose PDF or DOCX for the actual application portal | Jobvance",
+      "canonical": "https://jobvance.io/guides/cv-pdf-or-docx",
+      "description": "Follow the employer's file instructions, inspect exported documents and check extracted form fields instead of assuming one CV format always wins.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/cv-check-no-fit-percentage",
+      "status": 200,
+      "sha256": "2f3fe1df6aa5e99e2748dc6c7ff0bb89e2ba857187032e8fb515fbdc5e0a6190",
+      "h1Count": 1,
+      "title": "Why a CV check should not promise a fit percentage | Jobvance",
+      "canonical": "https://jobvance.io/guides/cv-check-no-fit-percentage",
+      "description": "Interpret wording comparisons as review prompts, understand their limits and make application choices without treating a score as an interview forecast.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/application-tracking-follow-up",
+      "status": 200,
+      "sha256": "dce5bbe650ae894dc0ab1278640ecbe6a4a103f09fa1f72fdfb02c0df647a45f",
+      "h1Count": 1,
+      "title": "Track applications and follow up from real events | Jobvance",
+      "canonical": "https://jobvance.io/guides/application-tracking-follow-up",
+      "description": "Use clear preparation and submission states, record the CV version and set follow-ups from employer instructions rather than arbitrary reminders.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/interview-stories-from-cv",
+      "status": 200,
+      "sha256": "74889348534f619cf5e0a13ee8a292c2d9e43a9f1b22a15bb4848290d43282bc",
+      "h1Count": 1,
+      "title": "Turn CV evidence into interview stories you can defend | Jobvance",
+      "canonical": "https://jobvance.io/guides/interview-stories-from-cv",
+      "description": "Prepare concise stories about your actions, choices and outcomes while preserving team contribution, academic context and uncertain results.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/job-search-time-plan",
+      "status": 200,
+      "sha256": "bfab89849d2ccdd168986db4a6660cf8f3ceedbc3645c7c4d3a8df8de6fb4f92",
+      "h1Count": 1,
+      "title": "Make a job-search plan that fits a busy week | Jobvance",
+      "canonical": "https://jobvance.io/guides/job-search-time-plan",
+      "description": "Set a realistic application budget, separate sourcing from review and use a weekly reset to keep a career move manageable alongside work or study.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/resume-privacy-before-upload",
+      "status": 200,
+      "sha256": "4d58afbded44db050a19e9014d2c27f532a8a9c81007610807c96899fc8bd956",
+      "h1Count": 1,
+      "title": "Review resume privacy before you upload or share | Jobvance",
+      "canonical": "https://jobvance.io/guides/resume-privacy-before-upload",
+      "description": "Create a minimal shareable CV copy, check visible and hidden information, and understand where documents and connected drafts may remain.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/uae-job-search-sources",
+      "status": 200,
+      "sha256": "3ef6ba3289708757f4432006dba2ed97d119f19154b57f4425f9ea71de6c0892",
+      "h1Count": 1,
+      "title": "Build a UAE job search from sources you can check | Jobvance",
+      "canonical": "https://jobvance.io/guides/uae-job-search-sources",
+      "description": "Organise employer pages, public-sector portals and other job leads into a UAE search process with visible source coverage and verification limits.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/academic-qualifications-uae-cv",
+      "status": 200,
+      "sha256": "b397fd46c0d925b4667064537551c8cbdcbaf62a876c82b300d26d78fa0b891c",
+      "h1Count": 1,
+      "title": "State academic qualifications accurately in a UAE application | Jobvance",
+      "canonical": "https://jobvance.io/guides/academic-qualifications-uae-cv",
+      "description": "Distinguish awarded degrees, expected graduation, short courses and attestation questions without implying credentials or recognition you do not hold.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/cancelled-partial-job-loop-runs",
+      "status": 200,
+      "sha256": "2148905591366645f3be7e10ed797c67110bdc50ba9f5800cbd07d2311b33a28",
+      "h1Count": 1,
+      "title": "Understand a cancelled or partial Job Loop run | Jobvance",
+      "canonical": "https://jobvance.io/guides/cancelled-partial-job-loop-runs",
+      "description": "Read the run history, distinguish completed outputs from unfinished preparation and decide whether to review, resume or ask for help.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/cv-upload-failure-checklist",
+      "status": 200,
+      "sha256": "ac7f8f9f8e7bc57d4dda2fef8d8f473c76668dbfac876052ce15d0e0fcfc43b8",
+      "h1Count": 1,
+      "title": "Fix a CV upload failure one step at a time | Jobvance",
+      "canonical": "https://jobvance.io/guides/cv-upload-failure-checklist",
+      "description": "Check supported format, file size, readable text and document access, then recover with a clean copy or a precise support request.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    },
+    {
+      "path": "/guides/truthful-recruiter-drafts",
+      "status": 200,
+      "sha256": "d4cbc8b916985e99f12620aecc822ba6e89b6c733fcb313006e3199476d2e156",
+      "h1Count": 1,
+      "title": "Write recruiter messages that stay true to your evidence | Jobvance",
+      "canonical": "https://jobvance.io/guides/truthful-recruiter-drafts",
+      "description": "Prepare a concise, unsent recruiter draft using a verified contact, the real role and specific evidence without invented referrals or inflated claims.",
+      "jsonLd": 2,
+      "robots": null,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "no-cache"
+    }
+  ],
+  "workerBoundaryResponses": [
+    {
+      "path": "/loop",
+      "status": 200,
+      "robots": "noindex, nofollow, noarchive",
+      "location": null
+    },
+    {
+      "path": "/auth",
+      "status": 200,
+      "robots": "noindex, nofollow, noarchive",
+      "location": null
+    },
+    {
+      "path": "/dashboard",
+      "status": 200,
+      "robots": "noindex, nofollow, noarchive",
+      "location": null
+    },
+    {
+      "path": "/admin",
+      "status": 200,
+      "robots": "noindex, nofollow, noarchive",
+      "location": null
+    },
+    {
+      "path": "/guides/not-real",
+      "status": 404,
+      "robots": null,
+      "location": null
+    },
+    {
+      "path": "/not-real",
+      "status": 404,
+      "robots": null,
+      "location": null
+    },
+    {
+      "path": "/blog",
+      "status": 308,
+      "robots": null,
+      "location": "/guides"
+    },
+    {
+      "path": "/product",
+      "status": 308,
+      "robots": null,
+      "location": "/job-loop"
+    },
+    {
+      "path": "/guides/",
+      "status": 308,
+      "robots": null,
+      "location": "/guides"
+    }
+  ],
+  "guides": [
+    {
+      "slug": "cv-job-description-evidence",
+      "title": "Compare your CV with a job description using evidence",
+      "editorialWordCount": 606,
+      "sections": [
+        "Break the vacancy into decisions",
+        "Find the passage before changing the phrase",
+        "Resolve ownership and result status",
+        "Use gaps to make an application choice",
+        "Review one role at a time"
+      ],
+      "sources": [
+        "https://careerservices.fas.harvard.edu/resources/create-a-strong-resume/",
+        "https://jobvance.io/how-it-works"
+      ],
+      "related": [
+        "achievements-without-numbers",
+        "cv-check-no-fit-percentage",
+        "first-application-pack"
+      ]
+    },
+    {
+      "slug": "student-projects-on-cv",
+      "title": "Show student projects without calling them work experience",
+      "editorialWordCount": 605,
+      "sections": [
+        "Inventory work you can explain",
+        "Choose the project for the vacancy",
+        "Make team contribution visible",
+        "Keep a small proof folder",
+        "Test the entry aloud"
+      ],
+      "sources": [
+        "https://capd.mit.edu/resources/career-toolkit-crafting-an-effective-resume/"
+      ],
+      "related": [
+        "academic-qualifications-uae-cv",
+        "interview-stories-from-cv",
+        "cv-job-description-evidence"
+      ]
+    },
+    {
+      "slug": "mba-career-pivot-cv",
+      "title": "Build an MBA career-pivot CV with a credible bridge",
+      "editorialWordCount": 635,
+      "sections": [
+        "Choose a direction before choosing wording",
+        "Create a bridge from previous employment",
+        "Use MBA evidence for the right claim",
+        "Write a short pivot explanation",
+        "Validate the story across documents"
+      ],
+      "sources": [
+        "https://ocs.yale.edu/stem-ppg-module-5-converting-your-cv-to-a-professional-resume/"
+      ],
+      "related": [
+        "role-filtering-before-applying",
+        "truthful-recruiter-drafts",
+        "student-projects-on-cv"
+      ]
+    },
+    {
+      "slug": "confidential-career-switch",
+      "title": "Plan a confidential job search alongside your current job",
+      "editorialWordCount": 618,
+      "sections": [
+        "Separate personal search activity",
+        "Review public visibility deliberately",
+        "Write evidence without revealing protected details",
+        "Handle references and notice questions",
+        "Keep the next action small"
+      ],
+      "sources": [
+        "https://www.linkedin.com/help/linkedin/answer/a507508",
+        "https://jobvance.io/privacy"
+      ],
+      "related": [
+        "resume-privacy-before-upload",
+        "job-search-time-plan",
+        "achievements-without-numbers"
+      ]
+    },
+    {
+      "slug": "role-filtering-before-applying",
+      "title": "Filter roles before spending time on an application",
+      "editorialWordCount": 617,
+      "sections": [
+        "Define a small search brief",
+        "Run a conditions check first",
+        "Identify your strongest and weakest evidence",
+        "Assign a next action, not a vague bookmark",
+        "Recheck before preparing and before submitting"
+      ],
+      "sources": [
+        "https://ocs.yale.edu/stem-ppg-module-5-converting-your-cv-to-a-professional-resume/"
+      ],
+      "related": [
+        "verify-job-listing-source",
+        "cv-job-description-evidence",
+        "job-search-time-plan"
+      ]
+    },
+    {
+      "slug": "verify-job-listing-source",
+      "title": "Verify a job listing before sharing your CV",
+      "editorialWordCount": 633,
+      "sections": [
+        "Start with the originating organisation",
+        "Inspect the destination before uploading",
+        "Distinguish a listing from a formal offer",
+        "Save a compact evidence note",
+        "Prepare only after the source check"
+      ],
+      "sources": [
+        "https://u.ae/en/information-and-services/visa-and-emirates-id/tips-to-avoid-labour-and-visa-fraud"
+      ],
+      "related": [
+        "uae-job-search-sources",
+        "role-filtering-before-applying",
+        "resume-privacy-before-upload"
+      ]
+    },
+    {
+      "slug": "achievements-without-numbers",
+      "title": "Write credible CV achievements when you have no numbers",
+      "editorialWordCount": 603,
+      "sections": [
+        "Recover the task behind the job title",
+        "Use scope that you can verify",
+        "Separate useful work from causal claims",
+        "Choose verbs that preserve your role",
+        "Create a repeatable evidence note"
+      ],
+      "sources": [
+        "https://capd.mit.edu/resources/resumes-writing-about-your-skills/"
+      ],
+      "related": [
+        "cv-job-description-evidence",
+        "interview-stories-from-cv",
+        "truthful-recruiter-drafts"
+      ]
+    },
+    {
+      "slug": "first-application-pack",
+      "title": "Prepare your first application pack without extra paperwork",
+      "editorialWordCount": 630,
+      "sections": [
+        "Capture the instructions in one place",
+        "Establish your factual source record",
+        "Prepare only the requested outputs",
+        "Review meaning before appearance",
+        "Submit and record the actual event"
+      ],
+      "sources": [
+        "https://careerservices.fas.harvard.edu/resources/create-a-strong-resume/",
+        "https://jobvance.io/how-it-works"
+      ],
+      "related": [
+        "reuse-second-application",
+        "cv-pdf-or-docx",
+        "application-tracking-follow-up"
+      ]
+    },
+    {
+      "slug": "reuse-second-application",
+      "title": "Reuse your career record for a second application",
+      "editorialWordCount": 593,
+      "sections": [
+        "Separate stable facts from role decisions",
+        "Read the second vacancy from the source",
+        "Change emphasis without changing history",
+        "Search for leftovers across the packet",
+        "Keep two applications as two records"
+      ],
+      "sources": [
+        "https://jobvance.io/how-it-works"
+      ],
+      "related": [
+        "first-application-pack",
+        "cv-job-description-evidence",
+        "application-tracking-follow-up"
+      ]
+    },
+    {
+      "slug": "cv-pdf-or-docx",
+      "title": "Choose PDF or DOCX for the actual application portal",
+      "editorialWordCount": 604,
+      "sections": [
+        "Read the upload rules before exporting",
+        "Check the real exported file",
+        "Keep the structure understandable",
+        "Review the portal's interpretation",
+        "Keep both formats under version control"
+      ],
+      "sources": [
+        "https://support.greenhouse.io/hc/en-us/articles/360052218132-Supported-formats-for-resumes-cover-letters-and-other-candidate-uploads",
+        "https://support.greenhouse.io/hc/en-us/articles/200989175-Unsuccessful-resume-parse",
+        "https://jobvance.io/how-it-works"
+      ],
+      "related": [
+        "cv-upload-failure-checklist",
+        "resume-privacy-before-upload",
+        "first-application-pack"
+      ]
+    },
+    {
+      "slug": "cv-check-no-fit-percentage",
+      "title": "Why a CV check should not promise a fit percentage",
+      "editorialWordCount": 612,
+      "sections": [
+        "Identify the question the check can answer",
+        "Watch for the same words doing different work",
+        "Separate document gaps from experience gaps",
+        "Review the employer's process independently",
+        "Make a decision from a short evidence note"
+      ],
+      "sources": [
+        "https://jobvance.io/how-it-works",
+        "https://support.greenhouse.io/hc/en-us/articles/200989175-Unsuccessful-resume-parse"
+      ],
+      "related": [
+        "cv-job-description-evidence",
+        "role-filtering-before-applying",
+        "cv-pdf-or-docx"
+      ]
+    },
+    {
+      "slug": "application-tracking-follow-up",
+      "title": "Track applications and follow up from real events",
+      "editorialWordCount": 598,
+      "sections": [
+        "Choose states that describe observable events",
+        "Preserve the exact packet",
+        "Base reminders on the employer's timeline",
+        "Write a follow-up with a clear purpose",
+        "Review the tracker once a week"
+      ],
+      "sources": [
+        "https://careerservices.fas.harvard.edu/resources/interviewing/"
+      ],
+      "related": [
+        "first-application-pack",
+        "truthful-recruiter-drafts",
+        "cancelled-partial-job-loop-runs"
+      ]
+    },
+    {
+      "slug": "interview-stories-from-cv",
+      "title": "Turn CV evidence into interview stories you can defend",
+      "editorialWordCount": 622,
+      "sections": [
+        "Choose a small evidence bank",
+        "Build a clear sequence",
+        "Preserve the boundary of your contribution",
+        "Practise the questions beneath the story",
+        "Prepare questions that resolve your decision"
+      ],
+      "sources": [
+        "https://careerservices.fas.harvard.edu/resources/interviewing/"
+      ],
+      "related": [
+        "achievements-without-numbers",
+        "student-projects-on-cv",
+        "mba-career-pivot-cv"
+      ]
+    },
+    {
+      "slug": "job-search-time-plan",
+      "title": "Make a job-search plan that fits a busy week",
+      "editorialWordCount": 609,
+      "sections": [
+        "Find the time you can reliably protect",
+        "Separate sourcing from preparation",
+        "Choose a completion budget",
+        "Use small waiting tasks carefully",
+        "Reset the plan from actual progress"
+      ],
+      "sources": [
+        "https://jobvance.io/how-it-works"
+      ],
+      "related": [
+        "role-filtering-before-applying",
+        "reuse-second-application",
+        "confidential-career-switch"
+      ]
+    },
+    {
+      "slug": "resume-privacy-before-upload",
+      "title": "Review resume privacy before you upload or share",
+      "editorialWordCount": 649,
+      "sections": [
+        "Create a shareable source copy",
+        "Inspect more than the visible page",
+        "Check links and attachments as separate disclosures",
+        "Understand the service before sharing",
+        "Plan for copies outside the service"
+      ],
+      "sources": [
+        "https://support.microsoft.com/en-gb/office/collab-files/remove-hidden-data-and-personal-information-by-inspecting-documents-presentations-or-workbooks?nochrome=true",
+        "https://jobvance.io/privacy"
+      ],
+      "related": [
+        "confidential-career-switch",
+        "cv-pdf-or-docx",
+        "verify-job-listing-source"
+      ]
+    },
+    {
+      "slug": "uae-job-search-sources",
+      "title": "Build a UAE job search from sources you can check",
+      "editorialWordCount": 649,
+      "sections": [
+        "Separate the kinds of sources",
+        "Check public-sector roles at their destination",
+        "Use boards as leads and employers as checks",
+        "Verify offers and authorisation separately",
+        "Keep the search operational"
+      ],
+      "sources": [
+        "https://u.ae/en/information-and-services/jobs/searching-for-a-job",
+        "https://www.federalerp.gov.ae/OA_HTML/IrcVisitor.jsp?L=EN",
+        "https://u.ae/en/information-and-services/visa-and-emirates-id/tips-to-avoid-labour-and-visa-fraud"
+      ],
+      "related": [
+        "verify-job-listing-source",
+        "academic-qualifications-uae-cv",
+        "role-filtering-before-applying"
+      ]
+    },
+    {
+      "slug": "academic-qualifications-uae-cv",
+      "title": "State academic qualifications accurately in a UAE application",
+      "editorialWordCount": 624,
+      "sections": [
+        "Use the qualification's actual name",
+        "Make completion status explicit",
+        "Separate learning from professional credentials",
+        "Check UAE documentation requirements separately",
+        "Review the final education record"
+      ],
+      "sources": [
+        "https://u.ae/en/information-and-services/jobs/employment-in-the-private-sector/preparing-to-work"
+      ],
+      "related": [
+        "student-projects-on-cv",
+        "cv-check-no-fit-percentage",
+        "uae-job-search-sources"
+      ]
+    },
+    {
+      "slug": "cancelled-partial-job-loop-runs",
+      "title": "Understand a cancelled or partial Job Loop run",
+      "editorialWordCount": 645,
+      "sections": [
+        "Inspect the current record first",
+        "Separate run completion from packet approval",
+        "Confirm cancellation at the right scope",
+        "Resume only after understanding the stop",
+        "Choose one next action"
+      ],
+      "sources": [
+        "https://jobvance.io/how-it-works"
+      ],
+      "related": [
+        "first-application-pack",
+        "application-tracking-follow-up",
+        "cv-upload-failure-checklist"
+      ]
+    },
+    {
+      "slug": "cv-upload-failure-checklist",
+      "title": "Fix a CV upload failure one step at a time",
+      "editorialWordCount": 624,
+      "sections": [
+        "Check the limits of the service you are using",
+        "Determine whether the document contains readable text",
+        "Check access and encoding",
+        "Change one thing and retry deliberately",
+        "Prepare a useful help request"
+      ],
+      "sources": [
+        "https://jobvance.io/how-it-works",
+        "https://support.greenhouse.io/hc/en-us/articles/200989175-Unsuccessful-resume-parse"
+      ],
+      "related": [
+        "cv-pdf-or-docx",
+        "resume-privacy-before-upload",
+        "cancelled-partial-job-loop-runs"
+      ]
+    },
+    {
+      "slug": "truthful-recruiter-drafts",
+      "title": "Write recruiter messages that stay true to your evidence",
+      "editorialWordCount": 639,
+      "sections": [
+        "Establish a legitimate reason to write",
+        "State the request and connection briefly",
+        "Preserve facts when improving tone",
+        "Review attachments and recipient details",
+        "Send once for a clear purpose and record it"
+      ],
+      "sources": [
+        "https://careerservices.fas.harvard.edu/resources/create-a-strong-resume/",
+        "https://jobvance.io/how-it-works"
+      ],
+      "related": [
+        "application-tracking-follow-up",
+        "confidential-career-switch",
+        "achievements-without-numbers"
+      ]
+    }
+  ],
+  "editorialPolicy": {
+    "publisher": "Jobvance Editorial",
+    "disclosure": "These original guides were prepared with AI assistance. Source checks, fictional-example labels and content checks are part of the preparation process. They are general application guidance; no individual career adviser or legal expert is claimed as their author.",
+    "approach": "We separate published source facts from our practical suggestions. Examples are fictional. Product instructions describe the available review workflow, and connected features depend on setup. You review documents and submit applications yourself.",
+    "researchedAt": "2026-10-13"
+  },
+  "seo": {
+    "kind": "local search readiness",
+    "rankingStatus": "unverified",
+    "productionDeploymentStatus": "not verified in this audit",
+    "score": 83.6,
+    "skillScoreResult": {
+      "overall_score": 83.6,
+      "grade": "B",
+      "industry": "saas",
+      "weights_used": {
+        "technical": 0.27,
+        "content": 0.28,
+        "on_page": 0.2,
+        "schema": 0.05,
+        "performance": 0.1,
+        "ai_readiness": 0.1,
+        "images": 0
+      },
+      "category_scores": {
+        "technical": 91.7,
+        "content": 87.5,
+        "on_page": 80,
+        "schema": 100,
+        "performance": 50,
+        "ai_readiness": 83.3
+      },
+      "total_checks": 22,
+      "passed": 16,
+      "warnings": 6,
+      "failures": 0,
+      "findings": [
+        {
+          "category": "performance",
+          "check": "Production field LCP,INP and CLS verified",
+          "result": "warn",
+          "severity": "high",
+          "detail": "Unmeasured,not a pass or a demonstrated failure. Local rendering is not field Core Web Vitals."
+        },
+        {
+          "category": "technical",
+          "check": "Built robots policy matches current source policy",
+          "result": "warn",
+          "severity": "medium",
+          "detail": "Dist policy only excludes/admin; source excludes other private routes. Private X-Robots-Tag already prevents indexing."
+        },
+        {
+          "category": "content",
+          "check": "Independent expertise and original lived-experience evidence",
+          "result": "warn",
+          "severity": "medium",
+          "detail": "Organisation authorship is honest; no named expert review or measured user research observed."
+        },
+        {
+          "category": "ai_readiness",
+          "check": "Independent authority and real original observations sufficient",
+          "result": "warn",
+          "severity": "medium",
+          "detail": "Credible structure exists; answer-engine citation and external authority remain unverified."
+        },
+        {
+          "category": "on_page",
+          "check": "Social preview has an explicit sharing image",
+          "result": "warn",
+          "severity": "low",
+          "detail": "OG title,description,url and type exist; no og:image observed in generated templates."
+        },
+        {
+          "category": "on_page",
+          "check": "Initial and client metadata are identical",
+          "result": "warn",
+          "severity": "low",
+          "detail": "Help and walkthrough page client titles differ from public manifest titles; meanings consistent but one metadata source would prevent drift."
+        }
+      ],
+      "quick_wins": [
+        {
+          "category": "performance",
+          "check": "Production field LCP,INP and CLS verified",
+          "result": "warn",
+          "severity": "high",
+          "detail": "Unmeasured,not a pass or a demonstrated failure. Local rendering is not field Core Web Vitals."
+        }
+      ],
+      "action_plan": {
+        "critical": [],
+        "high": [
+          {
+            "category": "performance",
+            "check": "Production field LCP,INP and CLS verified",
+            "result": "warn",
+            "severity": "high",
+            "detail": "Unmeasured,not a pass or a demonstrated failure. Local rendering is not field Core Web Vitals."
+          }
+        ],
+        "medium": [
+          {
+            "category": "technical",
+            "check": "Built robots policy matches current source policy",
+            "result": "warn",
+            "severity": "medium",
+            "detail": "Dist policy only excludes/admin; source excludes other private routes. Private X-Robots-Tag already prevents indexing."
+          },
+          {
+            "category": "content",
+            "check": "Independent expertise and original lived-experience evidence",
+            "result": "warn",
+            "severity": "medium",
+            "detail": "Organisation authorship is honest; no named expert review or measured user research observed."
+          },
+          {
+            "category": "ai_readiness",
+            "check": "Independent authority and real original observations sufficient",
+            "result": "warn",
+            "severity": "medium",
+            "detail": "Credible structure exists; answer-engine citation and external authority remain unverified."
+          }
+        ],
+        "low": [
+          {
+            "category": "on_page",
+            "check": "Social preview has an explicit sharing image",
+            "result": "warn",
+            "severity": "low",
+            "detail": "OG title,description,url and type exist; no og:image observed in generated templates."
+          },
+          {
+            "category": "on_page",
+            "check": "Initial and client metadata are identical",
+            "result": "warn",
+            "severity": "low",
+            "detail": "Help and walkthrough page client titles differ from public manifest titles; meanings consistent but one metadata source would prevent drift."
+          }
+        ]
+      }
+    },
+    "checks": [
+      {
+        "category": "technical",
+        "check": "All38 public Worker routes return200 with initial visible content",
+        "result": "pass",
+        "severity": "critical"
+      },
+      {
+        "category": "technical",
+        "check": "Canonical URLs and sitemap cover actual routes",
+        "result": "pass",
+        "severity": "high"
+      },
+      {
+        "category": "technical",
+        "check": "Private pages receive noindex response headers",
+        "result": "pass",
+        "severity": "high"
+      },
+      {
+        "category": "technical",
+        "check": "Unknown routes404 and legacy routes redirect308",
+        "result": "pass",
+        "severity": "high"
+      },
+      {
+        "category": "technical",
+        "check": "Mobile sampled pages fit the viewport",
+        "result": "pass",
+        "severity": "high"
+      },
+      {
+        "category": "technical",
+        "check": "Built robots policy matches current source policy",
+        "result": "warn",
+        "severity": "medium",
+        "detail": "Dist policy only excludes/admin; source excludes other private routes. Private X-Robots-Tag already prevents indexing."
+      },
+      {
+        "category": "content",
+        "check": "20 distinct original task articles with593-649 editorial words",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "content",
+        "check": "Guides match first-application,reuse,UAE and privacy tasks",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "content",
+        "check": "Fictional examples and AI-assisted editorial process disclosed",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "content",
+        "check": "Independent expertise and original lived-experience evidence",
+        "result": "warn",
+        "severity": "medium",
+        "detail": "Organisation authorship is honest; no named expert review or measured user research observed."
+      },
+      {
+        "category": "on_page",
+        "check": "38 unique titles,descriptions and oneH1",
+        "result": "pass",
+        "severity": "high"
+      },
+      {
+        "category": "on_page",
+        "check": "Guide source,related and product links are visible",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "on_page",
+        "check": "Article intent and headings stay specific to each task",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "on_page",
+        "check": "Social preview has an explicit sharing image",
+        "result": "warn",
+        "severity": "low",
+        "detail": "OG title,description,url and type exist; no og:image observed in generated templates."
+      },
+      {
+        "category": "on_page",
+        "check": "Initial and client metadata are identical",
+        "result": "warn",
+        "severity": "low",
+        "detail": "Help and walkthrough page client titles differ from public manifest titles; meanings consistent but one metadata source would prevent drift."
+      },
+      {
+        "category": "schema",
+        "check": "Organisation,Website and WebPage JSON-LD present",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "schema",
+        "check": "20 real articles provide BlogPosting metadata",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "schema",
+        "check": "Non-home pages include breadcrumb structure",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "performance",
+        "check": "Production field LCP,INP and CLS verified",
+        "result": "warn",
+        "severity": "high",
+        "detail": "Unmeasured,not a pass or a demonstrated failure. Local rendering is not field Core Web Vitals."
+      },
+      {
+        "category": "ai_readiness",
+        "check": "Short direct task answers and visible source links",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "ai_readiness",
+        "check": "Product/entity authorship and editorial disclosure clear",
+        "result": "pass",
+        "severity": "medium"
+      },
+      {
+        "category": "ai_readiness",
+        "check": "Independent authority and real original observations sufficient",
+        "result": "warn",
+        "severity": "medium",
+        "detail": "Credible structure exists; answer-engine citation and external authority remain unverified."
+      }
+    ],
+    "onPageChecker": [
+      {
+        "path": "/",
+        "checker": {
+          "title": {
+            "value": "Free CV-to-job check and application preparation | Jobvance",
+            "length": 59,
+            "optimal_range": "50-60 chars",
+            "pass": true,
+            "score": 100,
+            "note": "Good length"
+          },
+          "meta_description": {
+            "value": "Compare your actual CV with one vacancy, review source-linked evidence and downl...",
+            "length": 165,
+            "optimal_range": "150-160 chars",
+            "pass": false,
+            "score": 50,
+            "note": "Too long (165 chars)"
+          },
+          "h1": {
+            "count": 1,
+            "values": [
+              "Your CV. One vacancy. A clearer application."
+            ],
+            "pass": true,
+            "score": 100,
+            "note": "Exactly one H1 ✓"
+          },
+          "heading_hierarchy": {
+            "headings": [
+              [
+                "H1",
+                "Your CV. One vacancy. A clearer application."
+              ],
+              [
+                "H2",
+                "Graduate data analyst"
+              ],
+              [
+                "H2",
+                "An application for your next chapter."
+              ],
+              [
+                "H3",
+                "Your first career step"
+              ],
+              [
+                "H3",
+                "Your post-MBA direction"
+              ],
+              [
+                "H3",
+                "A move alongside work"
+              ],
+              [
+                "H2",
+                "Relevant experience. In clearer view."
+              ],
+              [
+                "H2",
+                "One real vacancy. Six clear steps."
+              ],
+              [
+                "H3",
+                "Pick your role"
+              ],
+              [
+                "H3",
+                "Bring your CV"
+              ],
+              [
+                "H3",
+                "Add the vacancy"
+              ],
+              [
+                "H3",
+                "Read the evidence"
+              ],
+              [
+                "H3",
+                "Make it yours"
+              ],
+              [
+                "H3",
+                "Approve & download"
+              ],
+              [
+                "H2",
+                "One career record.   Your Job Loop."
+              ],
+              [
+                "H3",
+                "Your profile"
+              ],
+              [
+                "H3",
+                "Priorities"
+              ],
+              [
+                "H3",
+                "Search & shortlist"
+              ],
+              [
+                "H3",
+                "CVs & drafts"
+              ],
+              [
+                "H3",
+                "Review & apply"
+              ],
+              [
+                "H3",
+                "Next actions"
+              ],
+              [
+                "H2",
+                "Your working draft. Your choice to save."
+              ],
+              [
+                "H2",
+                "See a fictional preparation workflow."
+              ],
+              [
+                "H2",
+                "Bring your experience. Make it clearer."
+              ]
+            ],
+            "issues": [],
+            "pass": true,
+            "score": 100,
+            "note": "Hierarchy OK"
+          },
+          "image_alt_text": {
+            "total_images": 0,
+            "with_alt": 0,
+            "coverage_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "All images have alt text"
+          },
+          "link_ratio": {
+            "total_links": 34,
+            "internal": 34,
+            "external": 0,
+            "internal_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "Good internal/external balance"
+          },
+          "word_count": {
+            "count": 1041,
+            "minimum": 300,
+            "pass": true,
+            "score": 100,
+            "note": "1041 words (good)"
+          },
+          "viewport_meta": {
+            "present": true,
+            "pass": true,
+            "score": 100,
+            "note": "Mobile viewport tag present"
+          }
+        },
+        "overall": 92
+      },
+      {
+        "path": "/job-loop",
+        "checker": {
+          "title": {
+            "value": "Job Loop: reuse your CV, prepare each application | Jobvance",
+            "length": 60,
+            "optimal_range": "50-60 chars",
+            "pass": true,
+            "score": 100,
+            "note": "Good length"
+          },
+          "meta_description": {
+            "value": "Understand exactly what Job Loop does, what it prepares for you and what you rev...",
+            "length": 157,
+            "optimal_range": "150-160 chars",
+            "pass": true,
+            "score": 100,
+            "note": "Good length"
+          },
+          "h1": {
+            "count": 1,
+            "values": [
+              "What is Job Loop?"
+            ],
+            "pass": true,
+            "score": 100,
+            "note": "Exactly one H1 ✓"
+          },
+          "heading_hierarchy": {
+            "headings": [
+              [
+                "H1",
+                "What is Job Loop?"
+              ],
+              [
+                "H2",
+                "Graduate operations analyst"
+              ],
+              [
+                "H2",
+                "A clear first application. Then a repeatable workflow."
+              ],
+              [
+                "H3",
+                "Bring your existing CV"
+              ],
+              [
+                "H3",
+                "Add one real vacancy"
+              ],
+              [
+                "H3",
+                "Review and download"
+              ],
+              [
+                "H3",
+                "Reuse it for the next role"
+              ],
+              [
+                "H2",
+                "Less repeated input. Clear responsibility."
+              ],
+              [
+                "H2",
+                "Your private Job Loop."
+              ],
+              [
+                "H3",
+                "What is available today?"
+              ],
+              [
+                "H2",
+                "Useful at different career stages."
+              ],
+              [
+                "H3",
+                "Students & graduates"
+              ],
+              [
+                "H3",
+                "MBA students & pivots"
+              ],
+              [
+                "H3",
+                "Busy professionals"
+              ],
+              [
+                "H2",
+                "Before you start"
+              ],
+              [
+                "H2",
+                "Start with the vacancy you already have."
+              ]
+            ],
+            "issues": [],
+            "pass": true,
+            "score": 100,
+            "note": "Hierarchy OK"
+          },
+          "image_alt_text": {
+            "total_images": 0,
+            "with_alt": 0,
+            "coverage_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "All images have alt text"
+          },
+          "link_ratio": {
+            "total_links": 35,
+            "internal": 35,
+            "external": 0,
+            "internal_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "Good internal/external balance"
+          },
+          "word_count": {
+            "count": 856,
+            "minimum": 300,
+            "pass": true,
+            "score": 100,
+            "note": "856 words (good)"
+          },
+          "viewport_meta": {
+            "present": true,
+            "pass": true,
+            "score": 100,
+            "note": "Mobile viewport tag present"
+          }
+        },
+        "overall": 100
+      },
+      {
+        "path": "/check",
+        "checker": {
+          "title": {
+            "value": "Free CV-to-vacancy evidence check | Jobvance",
+            "length": 44,
+            "optimal_range": "50-60 chars",
+            "pass": false,
+            "score": 50,
+            "note": "Too short (44 chars)"
+          },
+          "meta_description": {
+            "value": "Upload or paste a readable CV and one job description. Compare original passages...",
+            "length": 155,
+            "optimal_range": "150-160 chars",
+            "pass": true,
+            "score": 100,
+            "note": "Good length"
+          },
+          "h1": {
+            "count": 1,
+            "values": [
+              "One vacancy.  Your actual experience."
+            ],
+            "pass": true,
+            "score": 100,
+            "note": "Exactly one H1 ✓"
+          },
+          "heading_hierarchy": {
+            "headings": [
+              [
+                "H1",
+                "One vacancy.  Your actual experience."
+              ],
+              [
+                "H2",
+                "Your role"
+              ]
+            ],
+            "issues": [],
+            "pass": true,
+            "score": 100,
+            "note": "Hierarchy OK"
+          },
+          "image_alt_text": {
+            "total_images": 0,
+            "with_alt": 0,
+            "coverage_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "All images have alt text"
+          },
+          "link_ratio": {
+            "total_links": 24,
+            "internal": 24,
+            "external": 0,
+            "internal_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "Good internal/external balance"
+          },
+          "word_count": {
+            "count": 344,
+            "minimum": 300,
+            "pass": true,
+            "score": 100,
+            "note": "344 words (good)"
+          },
+          "viewport_meta": {
+            "present": true,
+            "pass": true,
+            "score": 100,
+            "note": "Mobile viewport tag present"
+          }
+        },
+        "overall": 90
+      },
+      {
+        "path": "/help",
+        "checker": {
+          "title": {
+            "value": "Step-by-step help for your CV check and Job Loop | Jobvance",
+            "length": 59,
+            "optimal_range": "50-60 chars",
+            "pass": true,
+            "score": 100,
+            "note": "Good length"
+          },
+          "meta_description": {
+            "value": "Find practical guides for CV uploads, source facts, first applications, reuse, d...",
+            "length": 149,
+            "optimal_range": "150-160 chars",
+            "pass": false,
+            "score": 50,
+            "note": "Too short (149 chars)"
+          },
+          "h1": {
+            "count": 1,
+            "values": [
+              "What would you like to get done?"
+            ],
+            "pass": true,
+            "score": 100,
+            "note": "Exactly one H1 ✓"
+          },
+          "heading_hierarchy": {
+            "headings": [
+              [
+                "H1",
+                "What would you like to get done?"
+              ],
+              [
+                "H2",
+                "Go to a task"
+              ],
+              [
+                "H2",
+                "Check one CV against one real vacancy"
+              ],
+              [
+                "H2",
+                "Start when you do not have a CV yet"
+              ],
+              [
+                "H2",
+                "Read a file, fix extracted text or convert an old CV"
+              ],
+              [
+                "H2",
+                "Set up Job Loop with the CV you already have"
+              ],
+              [
+                "H2",
+                "Review facts without losing context or overstating your part"
+              ],
+              [
+                "H2",
+                "Add and check a real vacancy"
+              ],
+              [
+                "H2",
+                "Preview, approve and download the exact document"
+              ],
+              [
+                "H2",
+                "Prepare a run, inspect partial results and control optional "
+              ],
+              [
+                "H2",
+                "Prepare another application without retyping your CV"
+              ],
+              [
+                "H2",
+                "Choose what is stored, shared or connected"
+              ],
+              [
+                "H2",
+                "Recover a draft or an interrupted check safely"
+              ],
+              [
+                "H2",
+                "Still need a hand?"
+              ]
+            ],
+            "issues": [],
+            "pass": true,
+            "score": 100,
+            "note": "Hierarchy OK"
+          },
+          "image_alt_text": {
+            "total_images": 0,
+            "with_alt": 0,
+            "coverage_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "All images have alt text"
+          },
+          "link_ratio": {
+            "total_links": 68,
+            "internal": 68,
+            "external": 0,
+            "internal_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "Good internal/external balance"
+          },
+          "word_count": {
+            "count": 3414,
+            "minimum": 300,
+            "pass": true,
+            "score": 100,
+            "note": "3414 words (good)"
+          },
+          "viewport_meta": {
+            "present": true,
+            "pass": true,
+            "score": 100,
+            "note": "Mobile viewport tag present"
+          }
+        },
+        "overall": 92
+      },
+      {
+        "path": "/walkthroughs",
+        "checker": {
+          "title": {
+            "value": "Jobvance walkthroughs: learn each application step",
+            "length": 50,
+            "optimal_range": "50-60 chars",
+            "pass": true,
+            "score": 100,
+            "note": "Good length"
+          },
+          "meta_description": {
+            "value": "Follow accessible, task-focused walkthroughs for a first CV check, private Job L...",
+            "length": 132,
+            "optimal_range": "150-160 chars",
+            "pass": false,
+            "score": 50,
+            "note": "Too short (132 chars)"
+          },
+          "h1": {
+            "count": 1,
+            "values": [
+              "See the next step. Then try it yourself."
+            ],
+            "pass": true,
+            "score": 100,
+            "note": "Exactly one H1 ✓"
+          },
+          "heading_hierarchy": {
+            "headings": [
+              [
+                "H1",
+                "See the next step. Then try it yourself."
+              ],
+              [
+                "H2",
+                "Your first CV check"
+              ],
+              [
+                "H3",
+                "Choose one target role"
+              ],
+              [
+                "H3",
+                "Choose one target role"
+              ],
+              [
+                "H3",
+                "Read and check your CV text"
+              ],
+              [
+                "H3",
+                "Paste the full vacancy"
+              ],
+              [
+                "H3",
+                "Follow wording to its source"
+              ],
+              [
+                "H3",
+                "Keep the words you can explain"
+              ],
+              [
+                "H3",
+                "Preview, approve and download"
+              ],
+              [
+                "H2",
+                "Ready to use your own experience?"
+              ]
+            ],
+            "issues": [],
+            "pass": true,
+            "score": 100,
+            "note": "Hierarchy OK"
+          },
+          "image_alt_text": {
+            "total_images": 0,
+            "with_alt": 0,
+            "coverage_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "All images have alt text"
+          },
+          "link_ratio": {
+            "total_links": 30,
+            "internal": 30,
+            "external": 0,
+            "internal_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "Good internal/external balance"
+          },
+          "word_count": {
+            "count": 967,
+            "minimum": 300,
+            "pass": true,
+            "score": 100,
+            "note": "967 words (good)"
+          },
+          "viewport_meta": {
+            "present": true,
+            "pass": true,
+            "score": 100,
+            "note": "Mobile viewport tag present"
+          }
+        },
+        "overall": 92
+      },
+      {
+        "path": "/guides",
+        "checker": {
+          "title": {
+            "value": "Practical CV and application guides | Jobvance",
+            "length": 46,
+            "optimal_range": "50-60 chars",
+            "pass": false,
+            "score": 50,
+            "note": "Too short (46 chars)"
+          },
+          "meta_description": {
+            "value": "Original guides for students, MBA candidates and busy professionals. Review CV e...",
+            "length": 151,
+            "optimal_range": "150-160 chars",
+            "pass": true,
+            "score": 100,
+            "note": "Good length"
+          },
+          "h1": {
+            "count": 1,
+            "values": [
+              "A clearer next step for your application."
+            ],
+            "pass": true,
+            "score": 100,
+            "note": "Exactly one H1 ✓"
+          },
+          "heading_hierarchy": {
+            "headings": [
+              [
+                "H1",
+                "A clearer next step for your application."
+              ],
+              [
+                "H2",
+                "The guide library"
+              ],
+              [
+                "H3",
+                "Compare your CV with a job description using evidence"
+              ],
+              [
+                "H3",
+                "Show student projects without calling them work experience"
+              ],
+              [
+                "H3",
+                "Build an MBA career-pivot CV with a credible bridge"
+              ],
+              [
+                "H3",
+                "Plan a confidential job search alongside your current job"
+              ],
+              [
+                "H3",
+                "Filter roles before spending time on an application"
+              ],
+              [
+                "H3",
+                "Verify a job listing before sharing your CV"
+              ],
+              [
+                "H3",
+                "Write credible CV achievements when you have no numbers"
+              ],
+              [
+                "H3",
+                "Prepare your first application pack without extra paperwork"
+              ],
+              [
+                "H3",
+                "Reuse your career record for a second application"
+              ],
+              [
+                "H3",
+                "Choose PDF or DOCX for the actual application portal"
+              ],
+              [
+                "H3",
+                "Why a CV check should not promise a fit percentage"
+              ],
+              [
+                "H3",
+                "Track applications and follow up from real events"
+              ],
+              [
+                "H3",
+                "Turn CV evidence into interview stories you can defend"
+              ],
+              [
+                "H3",
+                "Make a job-search plan that fits a busy week"
+              ],
+              [
+                "H3",
+                "Review resume privacy before you upload or share"
+              ],
+              [
+                "H3",
+                "Build a UAE job search from sources you can check"
+              ],
+              [
+                "H3",
+                "State academic qualifications accurately in a UAE applicatio"
+              ],
+              [
+                "H3",
+                "Understand a cancelled or partial Job Loop run"
+              ],
+              [
+                "H3",
+                "Fix a CV upload failure one step at a time"
+              ],
+              [
+                "H3",
+                "Write recruiter messages that stay true to your evidence"
+              ],
+              [
+                "H2",
+                "Start with one real vacancy."
+              ]
+            ],
+            "issues": [],
+            "pass": true,
+            "score": 100,
+            "note": "Hierarchy OK"
+          },
+          "image_alt_text": {
+            "total_images": 0,
+            "with_alt": 0,
+            "coverage_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "All images have alt text"
+          },
+          "link_ratio": {
+            "total_links": 48,
+            "internal": 48,
+            "external": 0,
+            "internal_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "Good internal/external balance"
+          },
+          "word_count": {
+            "count": 1108,
+            "minimum": 300,
+            "pass": true,
+            "score": 100,
+            "note": "1108 words (good)"
+          },
+          "viewport_meta": {
+            "present": true,
+            "pass": true,
+            "score": 100,
+            "note": "Mobile viewport tag present"
+          }
+        },
+        "overall": 90
+      },
+      {
+        "path": "/guides/cv-job-description-evidence",
+        "checker": {
+          "title": {
+            "value": "Compare your CV with a job description using evidence | Jobvance",
+            "length": 64,
+            "optimal_range": "50-60 chars",
+            "pass": false,
+            "score": 50,
+            "note": "Too long (64 chars)"
+          },
+          "meta_description": {
+            "value": "Build a requirement-to-evidence check that reveals gaps without inventing experi...",
+            "length": 134,
+            "optimal_range": "150-160 chars",
+            "pass": false,
+            "score": 50,
+            "note": "Too short (134 chars)"
+          },
+          "h1": {
+            "count": 1,
+            "values": [
+              "Compare your CV with a job description using evidence"
+            ],
+            "pass": true,
+            "score": 100,
+            "note": "Exactly one H1 ✓"
+          },
+          "heading_hierarchy": {
+            "headings": [
+              [
+                "H1",
+                "Compare your CV with a job description using evidence"
+              ],
+              [
+                "H2",
+                "On this page"
+              ],
+              [
+                "H2",
+                "What to take with you"
+              ],
+              [
+                "H2",
+                "Break the vacancy into decisions"
+              ],
+              [
+                "H2",
+                "Find the passage before changing the phrase"
+              ],
+              [
+                "H2",
+                "Resolve ownership and result status"
+              ],
+              [
+                "H2",
+                "Use gaps to make an application choice"
+              ],
+              [
+                "H2",
+                "Review one role at a time"
+              ],
+              [
+                "H2",
+                "Sources and further reading"
+              ],
+              [
+                "H2",
+                "Related guides"
+              ],
+              [
+                "H3",
+                "Write credible CV achievements when you have no numbers"
+              ],
+              [
+                "H3",
+                "Why a CV check should not promise a fit percentage"
+              ],
+              [
+                "H3",
+                "Prepare your first application pack without extra paperwork"
+              ],
+              [
+                "H2",
+                "Start with one real vacancy."
+              ]
+            ],
+            "issues": [],
+            "pass": true,
+            "score": 100,
+            "note": "Hierarchy OK"
+          },
+          "image_alt_text": {
+            "total_images": 0,
+            "with_alt": 0,
+            "coverage_pct": 100,
+            "pass": true,
+            "score": 100,
+            "note": "All images have alt text"
+          },
+          "link_ratio": {
+            "total_links": 40,
+            "internal": 36,
+            "external": 4,
+            "internal_pct": 90,
+            "pass": true,
+            "score": 100,
+            "note": "Good internal/external balance"
+          },
+          "word_count": {
+            "count": 1172,
+            "minimum": 300,
+            "pass": true,
+            "score": 100,
+            "note": "1172 words (good)"
+          },
+          "viewport_meta": {
+            "present": true,
+            "pass": true,
+            "score": 100,
+            "note": "Mobile viewport tag present"
+          }
+        },
+        "overall": 82
+      }
+    ],
+    "performanceStatus": "unmeasured",
+    "additionalActions": [
+      {
+        "priority": "P1 before release",
+        "action": "Final build and actual-origin verification of38public routes,private noindex,404/308,robots and sitemap."
+      },
+      {
+        "priority": "P2",
+        "action": "Use one prerender/client metadata source and add an actual branded sharing image."
+      },
+      {
+        "priority": "P2 after eligible traffic",
+        "action": "Measure real75th-percentile LCP/INP/CLS and Search Console indexing/impressions; keep rankings and answer-engine inclusion unverified until evidenced."
+      },
+      {
+        "priority": "P2",
+        "action": "Add genuine expert review/original task observations with provenance when available; never invent author credentials or results."
+      }
+    ]
+  },
+  "auditRole": "Independent product-manager, marketing and SEO auditor; did not implement the app or read other audit scores",
+  "skillsUsed": [
+    "marketing-skills:seo-audit",
+    "product-skills:product-manager-toolkit"
+  ],
+  "authorizationLimits": {
+    "modelsCalled": false,
+    "accountsCreated": false,
+    "messagesSent": false,
+    "purchases": false,
+    "realCandidateDataChanged": false,
+    "appEdited": false,
+    "committed": false,
+    "fictionalDataOnly": true
+  },
+  "productScore": {
+    "method": "Arithmetic mean of10 equally weighted1-100 professional judgments; not measured user satisfaction",
+    "frozen": true,
+    "score": 83.3,
+    "parameters": [
+      {
+        "parameter": "clarity",
+        "score": 87,
+        "weight": 0.1,
+        "rationale": "Home and Job Loop name the inputs, reviewed output and responsibility; audience primary CTAs introduce account setup before first value.",
+        "confidence": "high"
+      },
+      {
+        "parameter": "activation",
+        "score": 84,
+        "weight": 0.1,
+        "rationale": "A fictional first check reached approved no-account TXT download. On mobile the first required role field is below a full screen of introductory content.",
+        "confidence": "high"
+      },
+      {
+        "parameter": "formeffort",
+        "score": 83,
+        "weight": 0.1,
+        "rationale": "Paste/import avoids retyping history; company is optional and second-use source is retained. Six steps and later fact review require attention; authenticated effort was code inspected.",
+        "confidence": "medium"
+      },
+      {
+        "parameter": "evidencequality",
+        "score": 77,
+        "weight": 0.1,
+        "rationale": "Original passage references and support-versus-lead warnings help. Frozen forecast example omitted not implemented from its shortened source quote. Later targeted rereview resolved it; score remains frozen.",
+        "confidence": "high"
+      },
+      {
+        "parameter": "workflowcompleteness",
+        "score": 81,
+        "weight": 0.1,
+        "rationale": "Anonymous review, approval, download and reuse were observed. Private preparation, scheduling and tracking are code present but authenticated completion was not observed.",
+        "confidence": "medium"
+      },
+      {
+        "parameter": "reuse/time-saving",
+        "score": 85,
+        "weight": 0.1,
+        "rationale": "The chosen source CV is retained for the second vacancy and old approval resets. Actual time saved and adoption are unmeasured.",
+        "confidence": "high for anonymous reuse; medium overall"
+      },
+      {
+        "parameter": "help/walkthroughs",
+        "score": 85,
+        "weight": 0.1,
+        "rationale": "Eleven searchable topics and five interactive task walkthroughs use actual labels and recovery instructions. Next step works; ready recordings are absent and guest support needs sign-in.",
+        "confidence": "high"
+      },
+      {
+        "parameter": "UI/accessibility",
+        "score": 84,
+        "weight": 0.1,
+        "rationale": "Mobile hero fits with visible CTA and44px controls; labels, skip link and step status exist. Small progress captions and first field below fold need refinement. Full assistive-technology/contrast audit is unverified.",
+        "confidence": "medium"
+      },
+      {
+        "parameter": "trust/privacy",
+        "score": 87,
+        "weight": 0.1,
+        "rationale": "Free/no-card, fictional examples, separate saving/recovery/model permissions and AI editorial disclosure are clear. No guest support channel or operator identity was visible in sampled pages.",
+        "confidence": "medium"
+      },
+      {
+        "parameter": "reliability",
+        "score": 80,
+        "weight": 0.1,
+        "rationale": "Anonymous journey and one actual TXT download worked;38 local Worker public responses and private/404/308 boundaries passed. Production operation, authenticated runs and field performance remain unverified.",
+        "confidence": "medium"
+      }
+    ]
+  },
+  "initialSourceHashes": {
+    "src/pages/ProductPage.tsx": "351b5e8110ed871d43ac4ec8724863fd73f61cc17c5cfcd06a3fb4e4d956df9f",
+    "src/pages/CvCheck.tsx": "4f66f9e8fa05d50b320e020814584de29c85e2d463e8f5464db5ce82ebecd740",
+    "src/pages/HelpCenter.tsx": "00d3b94a3d61a2307869de3dd0866ab83d6482a90172522a560d5ad7f33276ea",
+    "src/pages/Walkthroughs.tsx": "dec55073946fd5b3350e23bac8a31eae0fbe4dc3273f62a3d7dc9f4ee06d8be1",
+    "src/lib/career-guides.ts": "03772c60e19ed6d04f907b97e677d2ae6801b76a800ef9e48c16d474ca500587",
+    "src/lib/public-route-manifest.ts": "cfff4fe571656968e44d4c7ab69f707015677550f0733f734e15c6dd87d46890",
+    "src/lib/public-site-meta.ts": "b6a17259c25be6bea24adf6df8e3ad8de0426884b22037c22f93948f306485af",
+    "dist/index.html": "054f9757a9b0b3e55c75f122b611c29c65101d023e5bc2c67bc2690f15bf0380"
+  },
+  "initialHashRecheckAt": "2026-10-13T18:26:44.929Z",
+  "initialHashedFilesUnchangedOnRecheck": true,
+  "evidence": [
+    {
+      "id": "UI-1",
+      "kind": "observed",
+      "route": "/",
+      "finding": "Hero explains CV+vacancy+review/download; audience choice carries into query. Mobile390x844 had no horizontal overflow; client width375px plus scrollbar."
+    },
+    {
+      "id": "UI-2",
+      "kind": "observed",
+      "route": "/check?audience=student",
+      "finding": "Fictional342-character CV and vacancy produced five findings. Review, PDF preview state, accuracy/privacy confirmations, approval and actual TXT download completed without account/card. File C:/Users/user/Downloads/CV-Operations analyst — fictional audit.txt."
+    },
+    {
+      "id": "UI-3",
+      "kind": "observed",
+      "route": "/check?audience=student",
+      "finding": "Reuse reviewed source CV starts a blank role and retains342source characters in the CV step. Previous approval does not transfer."
+    },
+    {
+      "id": "UI-4",
+      "kind": "observed",
+      "route": "/job-loop,/loop",
+      "finding": "Public page explains bounded feeds,ten seats/shared allowance,optional scheduling,unavailable broad paid search/mailbox and disabled checkout. Guest private entry redirects to/auth?next=%2Floop; authenticated workspace not entered."
+    },
+    {
+      "id": "UI-5",
+      "kind": "observed",
+      "route": "/help,/walkthroughs",
+      "finding": "Eleven help topics; automation search returns one relevant topic. Five task walkthroughs have captions/transcripts and working Next step. No recording control available; UI states conditional future recordings."
+    },
+    {
+      "id": "UI-6",
+      "kind": "observed",
+      "route": "/for-students,/for-mba,/for-career-switchers",
+      "finding": "Three distinct audience stories preserve academic/team/confidential context. Primary Start my free Job Loop→auth; secondary Try one CV check→check."
+    },
+    {
+      "id": "UI-7",
+      "kind": "observed",
+      "route": "/pricing",
+      "finding": "Available free pilot and proposed15/29USDfuture tiers clearly labelled; checkout disabled. Complete Job Loop heading is broader than immediately following feature-availability limits."
+    },
+    {
+      "id": "UI-8",
+      "kind": "observed",
+      "route": "/guides and all20 articles",
+      "finding": "20 distinct H1s; five content sections,1-3 source links,three related articles and labelled fictional examples per article. Correct client canonicals. Editorial593-649words; rendered article756-852words including furniture."
+    },
+    {
+      "id": "UI-9",
+      "kind": "observed",
+      "route": "/contact,/privacy",
+      "finding": "Public contact only offers sign-in for private support; no visible email alternative. No clear legal operator identity or staffed response expectation found in sampled public pages."
+    },
+    {
+      "id": "CODE-1",
+      "kind": "code-inspected",
+      "route": "/loop",
+      "finding": "Progressive source setup then three details,optional preferences,fact context/result/accuracy/shareability,separate run/schedule/Gmail controls,source-bound packet approval and user-reported tracking. Not authenticated execution proof."
+    },
+    {
+      "id": "HTTP-1",
+      "kind": "observed local Worker request/response",
+      "finding": "38public200initialHTML,one H1,unique titles,correct canonicals,20real articles and JSON-LD. Private noindex,unknown404 and legacy308 verified."
+    },
+    {
+      "id": "HTTP-2",
+      "kind": "observed artifact/source mismatch",
+      "finding": "Dist robots.txt303bytes excludes/admin only; source excludes other private routes. Private noindex already prevents indexing; final artifact still needs alignment."
+    },
+    {
+      "id": "INFERENCE-1",
+      "kind": "inferred,not customer research",
+      "finding": "Audience signup-first CTA and long mobile entry likely impair first-value conversion; actual conversion unknown."
+    },
+    {
+      "id": "INFERENCE-2",
+      "kind": "inferred,not customer research",
+      "finding": "Confirmed-fact reuse can reduce repeated input; actual time saving and adoption unknown."
+    }
+  ],
+  "media": {
+    "frozen": {
+      "publicReadyRecordings": 0,
+      "manifestVideos": [],
+      "available": "Five interactive storyboards,captions and complete written scripts/transcripts",
+      "manifestSha256": "f68142f8b66f85e407cee451453c98e9daab0ed794d3cb5312fe364399c0d70e"
+    },
+    "inProgress": {
+      "source": "Parent task statement",
+      "status": "Local videos still rendering; not credited as public availability",
+      "playbackVerified": false
+    }
+  },
+  "targetedRereview": {
+    "performedAt": "2026-10-13T18:33:22.903Z",
+    "finding": "EVID-CONTEXT",
+    "initial": "Quote ended at estimated25%cost reduction; omitted proposal was not implemented and used generic skill advice.",
+    "after": "Whole original academic/team/estimated/not-implemented source line visible. Delivered-outcome requirement is Needs manual review with explicit forecast/proposal warning and implemented-vs-projected question.",
+    "status": "resolved in reproduced scenario",
+    "scoreChanged": false,
+    "sourceFile": "src/lib/cv-evidence.ts",
+    "sourceSha256": "badfda7e9091ce03fa9e7e83dd30a775a8f3e13268e73350d1d578d51fc7c909",
+    "limitation": "Targeted scenario only; no exhaustive matcher or full-product rereview asserted"
+  },
+  "competitors": [
+    {
+      "name": "Teal",
+      "url": "https://www.tealhq.com/",
+      "proof": "Official public website",
+      "published": "Tailored resume versions,free core resume/tracking tools,Chrome job bookmarking and contextual recommendations.",
+      "lesson": "Reuse/organisation are category expectations; deliver one immediate result before account work.",
+      "checkedAt": "2026-10-13",
+      "limit": "Published official capabilities only; no authenticated usability,outcome,traffic or ranking benchmark performed"
+    },
+    {
+      "name": "Huntr",
+      "url": "https://help.huntr.co/en/articles/12824077-understanding-huntr-s-resume-builder",
+      "proof": "Official help article dated January13,2026",
+      "published": "Reusable base resumes and tailored versions; separate editor,layout,template and scoring tabs.",
+      "lesson": "Explain stable career source versus job-specific document plainly; make second-use story prominent.",
+      "checkedAt": "2026-10-13",
+      "limit": "Published official capabilities only; no authenticated usability,outcome,traffic or ranking benchmark performed"
+    },
+    {
+      "name": "Jobscan",
+      "url": "https://www.jobscan.co/resume-matcher",
+      "secondaryUrl": "https://www.jobscan.co/video-resume-match-report",
+      "proof": "Official scanner page and walkthrough/transcript",
+      "published": "CV/job comparison,missing keywords,format checks and match report; page says employer ATS does not itself score the resume.",
+      "lesson": "Keep evidence categories/limits explicit and preserve full source context; publish an actual demonstration.",
+      "checkedAt": "2026-10-13",
+      "limit": "Published official capabilities only; no authenticated usability,outcome,traffic or ranking benchmark performed"
+    },
+    {
+      "name": "Rezi",
+      "url": "https://www.rezi.ai/",
+      "proof": "Official public website",
+      "published": "Resume build,section-level score,job targeting,templates,AI Resume Agent and user guides.",
+      "lesson": "Actual document/product demonstration matters; distinguish source-control workflow without unproven higher hiring claims.",
+      "checkedAt": "2026-10-13",
+      "limit": "Published official capabilities only; no authenticated usability,outcome,traffic or ranking benchmark performed"
+    },
+    {
+      "name": "Resume Worded",
+      "url": "https://www.resumeworded.com/resume-tailor",
+      "proof": "Official targeted resume explanation",
+      "published": "Required-versus-preferred matching,user-controlled truthful edits,optional source-based selected-line rewriting and local job-description highlighter.",
+      "lesson": "Honesty and user editing alone are not unique; demonstrate the specific extra source/context controls.",
+      "checkedAt": "2026-10-13",
+      "limit": "Published official capabilities only; no authenticated usability,outcome,traffic or ranking benchmark performed"
+    },
+    {
+      "name": "Careerflow",
+      "url": "https://www.careerflow.ai/how-it-works",
+      "proof": "Official five-stage product walkthrough",
+      "published": "Resume/ATS comparison,LinkedIn optimisation,job tracking,networking CRM,interview practice,extension and reminders.",
+      "lesson": "Broad connected journey is familiar; make actual bounded coverage and next action concrete.",
+      "checkedAt": "2026-10-13",
+      "limit": "Published official capabilities only; no authenticated usability,outcome,traffic or ranking benchmark performed"
+    }
+  ],
+  "highestValueFixes": [
+    {
+      "id": "EVID-CONTEXT",
+      "priority": "P1",
+      "title": "Preserve complete source context and warn when forecasts are compared with delivered results",
+      "status": "Targeted reproduced scenario resolved during audit; frozen finding retained",
+      "impact": "Prevents an academic proposal looking like an implemented achievement.",
+      "acceptance": [
+        "Show whole source line/bullet including team,estimate and negation limitations.",
+        "Use explicit manual review for delivered-result requirements against forecasts/proposals.",
+        "Keep matching clause-scoped so unrelated same-line skills cannot become evidence.",
+        "Reproduce captured fictional scenario and preserve factual exports."
+      ]
+    },
+    {
+      "id": "FIRST-VALUE",
+      "priority": "P1",
+      "title": "Make the no-account check the primary audience-page action",
+      "status": "Three hero entry routes resolved in targeted late browser recheck; measurement remains unverified",
+      "impact": "Aligns acquisition with immediate first value.",
+      "acceptance": [
+        "All three primary audience buttons reach/check with correct editable audience.",
+        "Private saving/reuse remains a clear secondary path.",
+        "Before click,explain CV+vacancy inputs and free reviewed download without account/card.",
+        "Measure actual participant completion; never invent conversion uplift."
+      ]
+    },
+    {
+      "id": "GUEST-SUPPORT",
+      "priority": "P1",
+      "title": "Provide visible help and privacy access for people unable to sign in",
+      "status": "open",
+      "impact": "Anonymous and account-recovery users can obtain support.",
+      "acceptance": [
+        "Public contact has a verified monitored channel or anonymous request path.",
+        "Identify actual service operator and privacy handling using verified information.",
+        "Explain receipt versus response without an unstaffed response-time promise.",
+        "No sign-in requirement to report a login failure; no CV text requested by default."
+      ]
+    },
+    {
+      "id": "MOBILE-ENTRY",
+      "priority": "P2",
+      "title": "Bring the first required field into the initial mobile screen",
+      "status": "open",
+      "impact": "Reduces scroll and attention cost before starting.",
+      "acceptance": [
+        "At375x812 and390x844,Target role and next action are visible without a full-screen introductory scroll.",
+        "Keep concise accessible task/privacy guidance and expandable optional help.",
+        "Provide legible progress labels and44px interaction targets where feasible.",
+        "Preserve keyboard focus,labels and announced step changes without horizontal overflow."
+      ]
+    },
+    {
+      "id": "REAL-WALKTHROUGHS",
+      "priority": "P2",
+      "title": "Publish verified real first-check and second-application recordings",
+      "status": "In progress per parent; absent from frozen public manifest",
+      "impact": "Makes actual screen/document behavior easier to learn.",
+      "acceptance": [
+        "Real UI capture for at least first-check and another-application tasks uses fictional data.",
+        "Assets play to completion with synced captions and readable full transcript.",
+        "Labels match this build including exact approval and new-vacancy reset.",
+        "Only reviewed real assets enter ready manifest; disclose synthetic presenter and retain fallback."
+      ]
+    }
+  ],
+  "completedAt": "2026-10-13T18:35:20.341503+00:00",
+  "lateTargetedChecks": [
+    {
+      "finding": "FIRST-VALUE",
+      "kind": "observed browser targeted rereview",
+      "observedAt": "2026-10-13T18:35:20.340506+00:00",
+      "result": "All three audience hero primary buttons now say Check my CV for free and point to/check?audience=student,mba,professional respectively; secondary links reach public/job-loop.",
+      "status": "resolved for entry routing",
+      "scoreChanged": false,
+      "scope": "Three hero CTA destinations only; no global rerating"
+    },
+    {
+      "finding": "META-ALIGNMENT",
+      "kind": "parent-reported change,not deployed verification",
+      "result": "Parent reports shared static/client SEO metadata alignment. Actual-origin verification is still outside this frozen audit.",
+      "scoreChanged": false
+    },
+    {
+      "finding": "SEARCH-CONSOLE",
+      "kind": "parent-reported preparation,not search evidence",
+      "result": "Parent reports owner-authorized URL-prefix property preparation and a verification meta tag for next release. Verification has not succeeded; no indexing/ranking/traffic credit.",
+      "scoreChanged": false
+    }
+  ],
+  "lateAudienceSourceSha256": "83f7eee95d5fc40906a358263e2ab0a1bbfbd2744360e9e9ed23a2ffb26b6468"
+}

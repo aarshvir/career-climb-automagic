@@ -37,27 +37,27 @@ async function boundedJson(response) {
  * rule into the harness. The isolated module receives no host/network APIs. */
 export async function loadDiscoveryMatcher() {
   const [source, adapterSource, engineSource, manifestText, ts] = await Promise.all([
-    readFile(new URL('../supabase/functions/_shared/job-loop-runtime.ts', import.meta.url), 'utf8'),
+    readFile(new URL('../src/lib/employer-discovery.ts', import.meta.url), 'utf8'),
     readFile(new URL('../supabase/functions/_shared/job-loop-providers.ts', import.meta.url), 'utf8'),
     readFile(new URL('../supabase/functions/_shared/job-loop-engine.ts', import.meta.url), 'utf8'),
     readFile(new URL('../docs/supabase-loop-ui/manifest.json', import.meta.url), 'utf8'),
     import('typescript'),
   ]);
-  const hash = value => createHash('sha256').update(value).digest('hex');
+  const hash = value => createHash('sha256').update(value.replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n')).digest('hex');
   const manifest = JSON.parse(manifestText);
   function declaredHash(path) {
     const found = [];
     function visit(value) { if (Array.isArray(value)) value.forEach(visit); else if (value && typeof value === 'object') { if (value.path === path && typeof value.sha256 === 'string') found.push(value.sha256); Object.values(value).forEach(visit); } }
     visit(manifest); if (!found.length || found.some(value => value !== found[0])) throw new Stop('source-proof-present-in-release-manifest'); return found[0];
   }
-  if (hash(source) !== declaredHash('supabase/functions/_shared/job-loop-runtime.ts') || hash(adapterSource) !== declaredHash('supabase/functions/_shared/job-loop-providers.ts') || hash(engineSource) !== declaredHash('supabase/functions/_shared/job-loop-engine.ts')) throw new Stop('source-proof-matches-release-manifest');
+  if (hash(source) !== declaredHash('src/lib/employer-discovery.ts') || hash(adapterSource) !== declaredHash('supabase/functions/_shared/job-loop-providers.ts') || hash(engineSource) !== declaredHash('supabase/functions/_shared/job-loop-engine.ts')) throw new Stop('source-proof-matches-release-manifest');
   // The public feed may override its configured company. Include the actual
   // response companies too; a metadata-only company proof would be incomplete.
   if (!adapterSource.includes('company: text(row.company,200)||feed.company||feed.board') || !adapterSource.includes('entries.slice(0, 100)')) throw new Stop('employer-company-mapping-contract-unchanged');
   const ast = ts.createSourceFile('matcher.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const functions = ast.statements.filter(node => ts.isFunctionDeclaration(node) && node.name?.text === 'matchesDiscoveryTarget');
   if (functions.length !== 1) throw new Stop('actual-discovery-matcher-found');
-  const emitted = ts.transpileModule(functions[0].getText(ast), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
+  const emitted = ts.transpileModule(ast.statements.filter(node=>!ts.isImportDeclaration(node)).map(node=>node.getText(ast)).join('\n'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
   const exports = {};
   new Script(emitted).runInNewContext({ exports }, { timeout: 1000 });
   if (typeof exports.matchesDiscoveryTarget !== 'function') throw new Stop('actual-discovery-matcher-loaded');

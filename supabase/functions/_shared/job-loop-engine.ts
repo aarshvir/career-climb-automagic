@@ -1,5 +1,6 @@
 import type { LoopAction, LoopAssessment, LoopClaim, LoopClaimInput, LoopContact, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopProfileInput } from './job-loop-types.ts';
 import { normalizeFollowUp, validateScheduleInput } from './job-loop-schedule.ts';
+import { readDiscoveryMinimumExperience } from '../../../src/lib/employer-discovery.ts';
 
 const CLAIM_KINDS = ['employment', 'internship', 'academic_project', 'personal_project', 'volunteering', 'education', 'skill'] as const;
 const STATUSES = ['saved', 'prepared', 'applied', 'interview', 'offer', 'rejected', 'withdrawn'] as const;
@@ -215,9 +216,9 @@ export function assessOpportunity(profile: LoopProfileInput, claims: LoopClaim[]
   if (profile.discreetSearch) flags.push('DISCREET_SEARCH_REVIEW');
   if (opportunity.location && profile.locations.some(location => opportunity.location.toLowerCase().includes(location.toLowerCase()))) constraints += 7;
   else flags.push(opportunity.location ? 'LOCATION_REVIEW_NEEDED' : 'LOCATION_UNKNOWN');
-  const asked = /\b(?:at least|minimum|requires?)?\s*(\d{1,2})\s*\+?\s*years?(?:\s+of)?\s+(?:relevant\s+)?experience\b/i.exec(opportunity.description);
+  const asked = readDiscoveryMinimumExperience(opportunity.description);
   if (profile.experienceYears === null) flags.push('EXPERIENCE_UNKNOWN');
-  else if (asked) { if (profile.experienceYears >= Number(asked[1])) constraints += 8; else flags.push('EXPERIENCE_REQUIREMENT_GAP'); }
+  else if (asked !== null) { if (profile.experienceYears >= asked) constraints += 8; else flags.push('EXPERIENCE_REQUIREMENT_GAP'); }
   else flags.push('EXPERIENCE_REQUIREMENT_NOT_STATED');
   if (!opportunity.contact?.confirmedByUser || !opportunity.contact.name) flags.push('CONTACT_RESEARCH_NEEDED');
   if (allowed.some(c => ['academic_project', 'personal_project', 'internship'].includes(c.kind))) flags.push('PROJECT_AND_INTERNSHIP_CONTEXT_PRESERVED');

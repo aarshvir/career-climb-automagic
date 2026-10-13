@@ -6,16 +6,11 @@
   "applicationCategory": "BusinessApplication",
   "offers": {
     "@type": "Offer",
-    "price": "29",
+    "price": "0",
     "priceCurrency": "USD",
-    "url": "https://jobvance.io/pricing",
-    "availability": "https://schema.org/InStock"
+    "url": "https://jobvance.io/check"
   },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "reviewCount": "112"
-  },
-  "description": "Jobvance automates job discovery, resume tailoring, and AI-personalized outreach so candidates can apply faster without losing quality.",
-  "url": "https://jobvance.io/product"
+  "isAccessibleForFree": true,
+  "description": "Compare an actual CV with one vacancy, review source-linked evidence, approve a document and optionally save a private career record for reuse.",
+  "url": "https://jobvance.io"
 }

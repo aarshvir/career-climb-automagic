@@ -78,7 +78,7 @@ describe('one-run hosted candidate harness scope', () => {
   });
   it('loads the source matcher rather than a harness copy of the exclusion logic', async () => {
     const loaded = await loadDiscoveryMatcher();
-    const profile = { excludedTerms: ['Public Subsidiary'], targetTitles: ['Operations Analyst'], locations: ['Dubai'] } as LoopProfileInput;
+    const profile = { excludedTerms: ['Public Subsidiary'], targetTitles: ['Operations Analyst'], locations: ['Dubai'], experienceYears: 3, compensation: { minimum: null, currency: 'AED', period: 'monthly' } } as LoopProfileInput;
     for (const company of ['Public Subsidiary', 'Generated QA Employer']) {
       const opportunity = { title: 'Operations Analyst', location: 'Dubai', company, description: 'Reporting role.' } as LoopOpportunity;
       expect(loaded.matches(profile, opportunity)).toBe(company === 'Generated QA Employer');

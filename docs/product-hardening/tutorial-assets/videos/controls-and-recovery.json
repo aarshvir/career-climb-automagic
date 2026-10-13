@@ -1,0 +1,168 @@
+{
+  "contentKind": "screen_walkthrough",
+  "hasBurnedCaptions": true,
+  "tutorialId": "controls-and-recovery",
+  "title": "Stay in control of preparation and recovery",
+  "file": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\controls-and-recovery.mp4",
+  "sha256": "66b098905943b7dca1c7532854733d229583ee41d7b3fea1e56111cf84a5c28a",
+  "durationSeconds": 111.675,
+  "sourcePresenterSha256": "986e928857e11da2ce1c10f56801b0e0ef8b2ae57b5e92fe0ed1dc35a3dbe1b2",
+  "screens": [
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--manual.jpg",
+      "durationSeconds": 11.2625,
+      "stageId": "loop-prepare",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "4a9d35fd2673bcacd0537fe7ab651592c46040dccbfc8dd68ac80716210a4e7e"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--manual-control.jpg",
+      "durationSeconds": 11.2625,
+      "stageId": "loop-prepare",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "ea24ff6baeb4d65e390eedf468b30276649d70dad37640c0223e635a983e0e80"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--coverage.jpg",
+      "durationSeconds": 10.3,
+      "stageId": "loop-run-history",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "b1ffcf7de0d562d063f47c53120083a39f8f1e2618d47b107ef0675b5c17e598"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--coverage-outputs.jpg",
+      "durationSeconds": 10.3,
+      "stageId": "loop-run-history",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "e803d30f9ffd6e5e3a86e80d021f337cea8421da560bfb615faa6de528990bf6"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--optional.jpg",
+      "durationSeconds": 11.95,
+      "stageId": "loop-optional-controls",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "253d01b71738e3610a87624cb14b3177b56157f79a37c0bb5fe85835536e34e5"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--optional-gmail.jpg",
+      "durationSeconds": 11.95,
+      "stageId": "loop-optional-controls",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "b7141c0a308ccdc18822254f742dcd5db06c5be2a44117ab989cc204dae1e940"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--recovery.jpg",
+      "durationSeconds": 20.6,
+      "stageId": "check-draft-recovery",
+      "sourceOrigin": "http://127.0.0.1:8381/check",
+      "fictionalLocalService": false,
+      "demonstrationData": "fictional",
+      "sha256": "55eb10425225be3a8f6e46521d40b3fa9653f5062458374734cfd8da338bd9a1"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--loop-memory.jpg",
+      "durationSeconds": 12.025,
+      "stageId": "loop-draft-recovery",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "bbcaf318290dbb4e31e5be172a02304f9e6e938fcd87429c0a31e6a13f8ae2d9"
+    },
+    {
+      "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\controls-and-recovery--loop-memory-return.jpg",
+      "durationSeconds": 12.025,
+      "stageId": "loop-draft-recovery",
+      "sourceOrigin": "http://127.0.0.1:8382/",
+      "fictionalLocalService": true,
+      "demonstrationData": "fictional",
+      "sha256": "7f57ce56a5333f3493582451afb639471c09530e409d87f75028deb770aab327"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "manual",
+      "stageId": "loop-prepare",
+      "title": "Begin with an available manual run",
+      "startSeconds": 0.0,
+      "durationSeconds": 22.525
+    },
+    {
+      "id": "coverage",
+      "stageId": "loop-run-history",
+      "title": "Read partial results as partial",
+      "startSeconds": 22.525,
+      "durationSeconds": 20.6
+    },
+    {
+      "id": "optional",
+      "stageId": "loop-optional-controls",
+      "title": "Make separate connection choices",
+      "startSeconds": 43.125,
+      "durationSeconds": 23.9
+    },
+    {
+      "id": "recovery",
+      "stageId": "check-draft-recovery",
+      "title": "Choose refresh recovery deliberately",
+      "startSeconds": 67.025,
+      "durationSeconds": 20.6
+    },
+    {
+      "id": "loop-memory",
+      "stageId": "loop-draft-recovery",
+      "title": "Know what can return",
+      "startSeconds": 87.625,
+      "durationSeconds": 24.05
+    }
+  ],
+  "screenMethod": "actual CUA browser screenshots, edited as a montage; not a continuous screen recording",
+  "presenterMethod": "original fictional portrait + Kokoro af_heart + MuseTalk V15 manual crop/mask",
+  "captionMethod": "Kokoro predicted token timings and measured speech sample durations",
+  "paidApiCalls": 0,
+  "commercialComponentsReviewed": true,
+  "finalPlaybackReviewed": false,
+  "bytes": 4034051,
+  "measuredContainerDurationSeconds": 111.675,
+  "mediaFormat": {
+    "width": 1920,
+    "height": 1080,
+    "fps": "25/1",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "mimeType": "video/mp4"
+  },
+  "verification": {
+    "fullDecodePassed": true,
+    "transcriptExact": true,
+    "currentHelpNarrationMatches": true,
+    "captionWordsMatchTranscript": true,
+    "captionTimesValid": true,
+    "captionMaximumLines": 2,
+    "captionCueCount": 25,
+    "chapterFramesExportedForVisualReview": true,
+    "chapterFramesVisuallyReviewed": true,
+    "sourceScreensVisuallyReviewed": true,
+    "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen review; not uninterrupted human viewing"
+  },
+  "currentHelpSourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
+  "reviewStatus": "ready",
+  "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+  "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+  "limitations": [
+    "Narrated product-screen still montage, not a continuous screen recording.",
+    "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
+    "Caption timing uses model token predictions and measured audio samples."
+  ]
+}

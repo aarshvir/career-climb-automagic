@@ -1,0 +1,21 @@
+{
+  "tutorialId": "first-check",
+  "part": 1,
+  "totalParts": 3,
+  "title": "Your first CV check · Part 1 of 3",
+  "sceneIds": [
+    "role",
+    "cv"
+  ],
+  "stageIds": [
+    "check-role",
+    "check-cv"
+  ],
+  "narration": "Start with a real job you want. In Your role, enter the title from the posting. Company is optional. Select Continue to your CV. You can complete the check and download without creating an account. Read your English CV as a text-based PDF, DOCX or TXT file, up to five megabytes, or paste the text. A scanned PDF needs readable text first. Check names, dates and headings in the extracted wording. Remove confidential information before selecting Use this reviewed CV text.",
+  "captions": [
+    "Start with one job you want. No account is needed for the free check.",
+    "English CV · text-based PDF, DOCX or TXT · up to 5 MB. Scanned PDFs need OCR first."
+  ],
+  "timingStatus": "planned; final caption timing requires actual rendered audio",
+  "screenshotPolicy": "Only actual reviewed Jobvance UI with clearly fictional career data; no synthetic UI or private account data."
+}

@@ -1,0 +1,109 @@
+{
+  "source": "src/lib/walkthroughs.ts",
+  "sourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
+  "exportedAt": "2026-10-13T19:50:41.435Z",
+  "timingStatus": "planned; not measured render timings",
+  "id": "another-application",
+  "title": "Prepare your next application",
+  "description": "Reuse a chosen CV or unchanged career facts, then report your actual application progress.",
+  "audience": "Anyone applying to a second vacancy",
+  "helpAnchor": "second-application",
+  "action": {
+    "label": "Return to my free check",
+    "to": "/check"
+  },
+  "scenes": [
+    {
+      "id": "preserve",
+      "stageId": "check-next-application",
+      "title": "Keep the current application first",
+      "instruction": "Download or save the approved check before replacing it. Under Your next application, choose CV version for another vacancy.",
+      "caption": "Choose Reviewed source CV or Approved final CV deliberately.",
+      "narration": "Before starting another application, download or save the approved check if you want to keep it. Under Your next application, choose which CV to reuse: Reviewed source CV or Approved final CV. The choice replaces the open check; saved applications stay unchanged.",
+      "durationSeconds": 23,
+      "demo": {
+        "section": "Your next application",
+        "fields": [
+          {
+            "label": "CV version for another vacancy",
+            "value": "Reviewed source CV"
+          }
+        ],
+        "action": "Use this CV for another vacancy",
+        "note": "The old vacancy and its approval do not carry over."
+      }
+    },
+    {
+      "id": "new-check",
+      "stageId": "check-role",
+      "title": "Give the new job a fresh review",
+      "instruction": "Select Use this CV for another vacancy. Enter the new role, review the reused CV and paste the new vacancy. Complete the evidence, review and approval steps again.",
+      "caption": "Useful source wording can carry over. Findings and approval belong to the new inputs.",
+      "narration": "Select Use this CV for another vacancy. Enter the new target role and optional company, review the reused CV and paste the new posting. Work through the evidence and your review again. A previous approval cannot approve this new combination of CV and vacancy.",
+      "durationSeconds": 22,
+      "demo": {
+        "section": "Your role · another vacancy",
+        "fields": [
+          {
+            "label": "Target role",
+            "value": "Business analyst — fictional new target"
+          },
+          {
+            "label": "Company (optional)",
+            "value": "Add the new employer, if you want."
+          }
+        ],
+        "action": "Continue to your CV",
+        "note": "A fresh comparison is required for the new posting."
+      }
+    },
+    {
+      "id": "loop-reuse",
+      "stageId": "loop-opportunities",
+      "title": "Reuse saved Job Loop facts",
+      "instruction": "In Job Loop, open Opportunities and add the next vacancy. Reuse unchanged confirmed facts, inspect preparation on Today, and review the separate document in Outputs.",
+      "caption": "You do not need to re-enter unchanged career facts for every job.",
+      "narration": "In Job Loop, your saved career record and unchanged cleared facts are already available. Add the next real vacancy in Opportunities. Inspect available preparation on Today, then review the new document in Outputs. Every packet still has its own source checks and exact approval.",
+      "durationSeconds": 23,
+      "demo": {
+        "section": "Opportunities",
+        "fields": [
+          {
+            "label": "Your saved facts",
+            "value": "Unchanged confirmed facts are available for reuse."
+          },
+          {
+            "label": "New vacancy",
+            "value": "A separate actual posting you choose."
+          }
+        ],
+        "action": "Save opportunity",
+        "note": "This fictional storyboard creates no application document."
+      }
+    },
+    {
+      "id": "tracking",
+      "stageId": "loop-application-tracking",
+      "title": "Report the status after you act",
+      "instruction": "Apply yourself on the employer’s site. Then choose Application status, confirm that you report it, add a follow-up date if useful and select Save tracking update.",
+      "caption": "Saved or prepared is not applied. All application outcomes are user reported.",
+      "narration": "Submit on the employer site yourself. When you have actually applied, update Application status in Opportunities and confirm that you report it. Add a follow-up date and notes if helpful, then select Save tracking update. Preparing or downloading a CV does not mean an application was submitted.",
+      "durationSeconds": 25,
+      "demo": {
+        "section": "Your opportunities · tracking",
+        "fields": [
+          {
+            "label": "Application status",
+            "value": "saved — no employer submission in this tutorial"
+          },
+          {
+            "label": "Follow-up date",
+            "value": "Choose your own date after reviewing progress."
+          }
+        ],
+        "action": "Save tracking update",
+        "note": "Interview, offer and rejection are also your reported outcomes."
+      }
+    }
+  ]
+}

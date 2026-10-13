@@ -72,11 +72,13 @@ async function signup(suffix) {
   check(identity.response.ok && identity.body?.id === actor.id && identity.body?.user_metadata?.qa_fixture === true && identity.body?.user_metadata?.qa_run_id === tag, `fresh-${suffix}-identity-is-own-synthetic-account`);
   return actor;
 }
-function requireUnfundedConfiguration(snapshot) {
+function requireRulesOnlyTestConfiguration(snapshot) {
   check(snapshot.capabilities?.cloudWorker === true && snapshot.capabilities?.rulesEngine === true, 'cloud-worker-and-source-rules-available');
   check(snapshot.capabilities?.monthlyUsageCapUsd === 50 && snapshot.capabilities?.packetsPerRun === 2, 'fifty-dollar-shared-cap-and-two-packets-per-run-reported');
   check(snapshot.budget?.capUsd === 50 && snapshot.budget?.scope === 'shared_ai_search' && snapshot.budget?.maxPilotUsers === 10 && snapshot.pilot?.maxUsers === 10 && snapshot.pilot.activeUsers <= 10, 'ten-user-shared-budget-is-reported-without-client-override');
-  check(!snapshot.capabilities.webSearch && !snapshot.capabilities.gmailRead && !snapshot.capabilities.gmailDrafts && snapshot.models.every(model => !model.ready), 'paid-search-ai-and-mail-integrations-remain-disabled');
+  check(!snapshot.capabilities.webSearch && !snapshot.capabilities.gmailRead && !snapshot.capabilities.gmailDrafts, 'paid-search-and-mail-integrations-remain-disabled');
+  // Live model availability is separate from this explicitly rules-only test.
+  // finishRun checks the actual provider/model and both zero usage/reservation.
   check(snapshot.capabilities.scheduler === true, 'cloud-scheduler-reports-ready');
 }
 async function finishRun(actor, runId, idleFirst = true) {
@@ -139,7 +141,7 @@ async function main() {
   check(anonymous.response.status === 401, 'anonymous-private-loop-access-denied');
   const actor = await signup('student');
   let snapshot = (await control(actor, { action: 'get' })).snapshot;
-  requireUnfundedConfiguration(snapshot);
+  requireRulesOnlyTestConfiguration(snapshot);
   check(snapshot.profile === null && snapshot.claims.length === 0 && snapshot.opportunities.length === 0 && snapshot.runs.length === 0 && snapshot.activity.length === 0 && snapshot.packets.length === 0 && snapshot.schedule === null, 'fresh-student-record-has-no-fake-activity');
   check(snapshot.pilot.enrolled || snapshot.pilot.activeUsers < 10, 'new-synthetic-pilot-has-available-capacity');
   const deniedWorker = await api('/functions/v1/job-loop-worker', actor, { action: 'run_due' });

@@ -23,7 +23,7 @@ export function normalizeCvText(text: string): string {
 export function validateCvText(text: string): string {
   const normalized = normalizeCvText(text);
   if (!normalized || !/[\p{L}\p{N}]/u.test(normalized)) {
-    throw new Error("No readable CV text was found. Scanned PDFs need OCR first. Choose a text-based CV or paste your CV into a TXT file.");
+    throw new Error("No readable CV text yet. Paste your career record into the CV text field, or choose a readable file.");
   }
   if (normalized.length < 80) throw new Error("Too little readable CV text was found. Review the extracted text and include at least 80 characters of your experience, education or skills.");
   if (normalized.length > MAX_CV_TEXT_LENGTH) throw new Error("This document contains too much text for a CV. Keep it below 60,000 characters.");
@@ -69,7 +69,9 @@ export async function extractCvText(file: File): Promise<string> {
         pages.push(pageText.trim());
         page.cleanup();
       }
-      return validateCvText(pages.join("\n\n"));
+      const extracted=pages.join("\n\n");
+      if(!/[\p{L}\p{N}]/u.test(extracted))throw new Error("This PDF has no readable CV text. Scanned PDFs need OCR first; this check does not perform OCR. Use a text-based version or paste readable text into the CV text field.");
+      return validateCvText(extracted);
     } finally {
       await task.destroy();
     }

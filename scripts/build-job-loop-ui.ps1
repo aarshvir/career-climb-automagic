@@ -51,7 +51,7 @@ try {
     [System.IO.File]::WriteAllText((Join-Path $loopRepo $loopArtifact), $loopCode, [System.Text.UTF8Encoding]::new($false))
     $loopBytes = (Get-Item -LiteralPath $loopArtifact).Length
     if ($loopBytes -gt 5000000) { throw "$loopName exceeds the dashboard's 5 MB bundle limit. Use a separately authenticated official CLI deployment; do not paste a truncated bundle." }
-    $loopSources = @('src/lib/admin-types.ts', 'package-lock.json', 'scripts/build-job-loop-ui.ps1', 'scripts/source-text-hash.mjs', 'scripts/read-edge-deploy-chunk.mjs') + $loopShared + $loopHandlers
+    $loopSources = @('src/lib/admin-types.ts', 'src/lib/employer-discovery.ts', 'package-lock.json', 'scripts/build-job-loop-ui.ps1', 'scripts/source-text-hash.mjs', 'scripts/read-edge-deploy-chunk.mjs') + $loopShared + $loopHandlers
     $loopHashes = @($loopSources | ForEach-Object { @{ path = $_; sha256 = Get-LoopNormalizedTextHash (Join-Path $loopRepo $_) } })
     $loopManifest += @{ function = $loopName; artifact = $loopArtifact; bytes = $loopBytes; sha256 = (Get-FileHash -LiteralPath $loopArtifact -Algorithm SHA256).Hash.ToLowerInvariant(); sources = $loopHashes }
   }

@@ -1,0 +1,244 @@
+import { useEffect, useId, useMemo, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { staticPageMeta } from '@/lib/public-site-meta';
+import { ArrowRight, BookOpen, ClipboardList, FileText, Search } from 'lucide-react';
+import './HelpCenter.css';
+
+type HelpCategory = 'Free CV check' | 'Job Loop' | 'Privacy & recovery';
+export interface HelpTopic {
+  id: string;
+  category: HelpCategory;
+  title: string;
+  summary: string;
+  steps: string[];
+  fields?: { label: string; help: string }[];
+  notes: string[];
+  action: { label: string; to: string };
+  related?: { label: string; id: string }[];
+}
+
+export const helpTopics: HelpTopic[] = [
+  {
+    id: 'first-check', category: 'Free CV check', title: 'Check one CV against one real vacancy',
+    summary: 'Start without an account. You need your CV text and the full description of a job you want.',
+    steps: [
+      'Open the free CV check. In Your role, enter the Target role from the posting. Company (optional) can stay empty. Select Continue to your CV.',
+      'In Your CV, choose Read a CV file on this device or paste into CV text — paste, correct or remove private information. Read the extracted text, correct dates and headings, and remove confidential information. Select Use this reviewed CV text.',
+      'In One vacancy, paste the actual posting into Vacancy description, including responsibilities, requirements and conditions. Select Check these inputs.',
+      'In The evidence, compare In the vacancy with In your CV. Open Read the full vacancy and check anything the comparison missed. Select Review my CV & questions.',
+      'In Your review, read Your CV to review and edit only what you can explain truthfully. Optional examples and paragraph removal are available here. Select Recheck my changes & continue.',
+      'In Approve & download, read the final CV and evidence. Select Maximum PDF length and Preview current PDF if you want PDF. Confirm factual accuracy and privacy, select Approve this CV, then Download PDF, Download DOCX or Download TXT.',
+    ],
+    notes: [
+      'The check compares English wording on your device. A matching phrase does not verify a qualification, establish eligibility, calculate your experience years or predict an interview.',
+      'You can leave review questions unresolved. Keep missing credentials missing; a skill keyword, classroom project or team result cannot substitute for a credential or personal achievement.',
+      'Download evidence report keeps the review questions separate from your CV. Sign-in is an optional later step for private saving.',
+    ],
+    action: { label: 'Start the free CV check', to: '/check' },
+    related: [{ label: 'File problems', id: 'uploads' }, { label: 'No CV yet', id: 'no-cv' }],
+  },
+  {
+    id: 'no-cv', category: 'Free CV check', title: 'Start when you do not have a CV yet',
+    summary: 'A plain text career record is enough. Begin with one useful example, then add the context needed to understand it.',
+    steps: [
+      'Open the free CV check, enter your target role and select Continue to your CV.',
+      'Paste a simple record into CV text — paste, correct or remove private information. Include your name, education, project or work heading, dates, your contribution and skills you actually use. At least 80 characters of readable text are needed.',
+      'For a student, label coursework, academic projects, internships and volunteering correctly. For an MBA pivot, keep prior work and classroom projects in separate sections. For an employed professional, start with a shareable version of your existing experience.',
+      'Read the record and select Use this reviewed CV text. Paste one real vacancy on the next step. Work through the evidence and review before approving a download.',
+    ],
+    fields: [{ label: 'Fictional starting example', help: 'University analytics project, 2026. In a four-person team, I cleaned the survey data and built the charts. Our proposed improvement was an estimate; no business result was measured.' }],
+    notes: ['Describe what you did. Do not call a university project employment, a group result your individual result, a forecast a measured outcome, or an unfinished course a completed credential.'],
+    action: { label: 'Begin with my experience', to: '/check' }, related: [{ label: 'Review source facts', id: 'job-loop-facts' }],
+  },
+  {
+    id: 'uploads', category: 'Free CV check', title: 'Read a file, fix extracted text or convert an old CV',
+    summary: 'Use an English CV as a text-based PDF, DOCX or UTF-8 TXT file, up to 5 MB. You can paste text instead.',
+    steps: [
+      'In the free check, open Your CV and choose Read a CV file on this device. In Job Loop, open Career record, then 1. Import or paste your CV and choose Read a local CV on this device.',
+      'Select a PDF, DOCX or TXT file of 5 MB or less. The original file stays on your device. Reading a file is separate from choosing to save the extracted text to your account.',
+      'If a scanned PDF has no readable text, use OCR in a document tool you trust, or copy text from the original document. Review the OCR output carefully, then paste it or save a text-based PDF, DOCX or TXT file. Jobvance does not perform OCR here.',
+      'For an old .doc file, open it in your word processor and save a .docx, text-based PDF or TXT copy. Renaming the extension does not convert a document.',
+      'If the file is empty, too large or has scrambled lines, export a smaller text-based copy or paste the correct text. Check names, dates, bullets, course headings and numbers before continuing.',
+    ],
+    notes: ['Keep readable CV text between 80 and 60,000 characters. Preserve nearby headings so a project cannot look like an employer role. Remove sensitive or confidential details before saving or sharing.'],
+    action: { label: 'Read my CV in the free check', to: '/check' }, related: [{ label: 'Recover an interrupted draft', id: 'recovery' }],
+  },
+  {
+    id: 'job-loop-start', category: 'Job Loop', title: 'Set up Job Loop with the CV you already have',
+    summary: 'Save one private career record, then confirm only the facts useful for your next application. An account is needed for the saved workspace.',
+    steps: [
+      'Open Job Loop and sign in to your own account if prompted. On Today, select Import or paste my CV, or choose Career record in the section navigation.',
+      'Open 1. Import or paste your CV. Read a local CV on this device, paste into Reviewed source CV or career record, or choose Use an owned saved CV (optional) when one is available.',
+      'Read the source text, correct extraction errors and remove confidential details. Select Continue with this text.',
+      'In 2. Check three details and save privately, check My name, enter Target roles and Locations. Review optional preferences only when they are useful. Confirm private saving, then select Save career record.',
+      'Review the offered literal passages one at a time in Your claim library. Choose the evidence context and confirm only accurate, shareable facts. Save claim or Skip this passage. You can add your own specific example later.',
+    ],
+    fields: [
+      { label: 'Target roles', help: 'One role per line. Use the level you intend to apply for; a suggested title does not establish your qualifications.' },
+      { label: 'Locations', help: 'Places where you would work, or Remote. These focus preparation; they do not confirm work authorization or availability.' },
+      { label: 'Optional preferences and privacy boundaries', help: 'Page preference, actual languages, exclusions and compensation can wait. Leave unknown experience or pay unknown.' },
+    ],
+    notes: ['Saving privately does not activate AI, mailbox reading, recurring runs or employer submission. Unchanged confirmed facts can be reused for the next vacancy.'],
+    action: { label: 'Open my Job Loop workspace', to: '/loop' }, related: [{ label: 'Confirm useful facts', id: 'job-loop-facts' }],
+  },
+  {
+    id: 'job-loop-facts', category: 'Job Loop', title: 'Review facts without losing context or overstating your part',
+    summary: 'A source passage needs enough context to explain whose work it was, what you contributed and whether the result was measured.',
+    steps: [
+      'Open Career record and Your claim library. Review the next copied passage, select Suggest literal passages if available, or open Add my own specific example.',
+      'Choose Evidence context yourself: employment, internship, academic project, personal project, volunteering, education or skill. A project remains a project even if its vocabulary matches a job.',
+      'Open Inspect or correct the source and context (or Source and factual wording for your own example). Choose Source of this statement. Keep the complete line or passage in Source passage or my answer, including team credit, dates and estimate wording.',
+      'Use the nearby literal course, project or employer heading in Source context label. In Wording I can substantiate, describe your own accurate contribution. For My own answer, make the source answer a complete statement with contribution and context.',
+      'Choose Result status: No measured result stated, Projected or estimated, or Measured result. An estimate stays an estimate. Check factual accuracy and permission for external use only when both are true, then select Save claim.',
+    ],
+    fields: [
+      { label: 'Source passage or my answer', help: 'A fragment such as “Excel, 25%” is not evidence. Preserve the full statement and qualifications. Your confirmation is your statement, not independent verification.' },
+      { label: 'Wording I can substantiate', help: '“I analysed the survey data in a four-person MBA team” preserves personal contribution. Do not change it to “Led a client transformation” without supporting facts.' },
+      { label: 'Result status', help: 'Keep projected benefits, team outcomes and personally measured results distinct. A degree, certificate or required license must be stated accurately; matching words do not verify it.' },
+    ],
+    notes: ['Only active, confirmed and externally shareable facts can enter fresh outputs. Saving without both confirmations keeps a fact out of outputs. Editing or withdrawing a source fact invalidates affected approvals; rebuild and review the document again.'],
+    action: { label: 'Review my career facts', to: '/loop' }, related: [{ label: 'Review the exact document', id: 'job-loop-review' }],
+  },
+  {
+    id: 'job-loop-vacancies', category: 'Job Loop', title: 'Add and check a real vacancy',
+    summary: 'Use the employer posting you want to apply for. Search coverage and a saved link do not prove a role is open.',
+    steps: [
+      'Open Opportunities, or select Add a vacancy I already found on Today.',
+      'In Add an opportunity, enter Vacancy title and Company. Add Location, the Vacancy HTTPS link and the Full vacancy description from the actual posting. The description needs at least 80 characters.',
+      'Leave Add a named contact I have checked (optional) unchecked unless you have a real source. If you add a contact, preserve the supporting source passage and check identity and role yourself. Never guess an email.',
+      'Select Save opportunity. In Your opportunities, select Open vacancy yourself and verify the closing date, location, pay, work authorization and required qualifications against the original source.',
+      'On Today, read Know where your shortlist comes from and Run history & source coverage. Inspect each source’s actual result, date and message. Added vacancies can remain useful when discovery is unavailable.',
+    ],
+    notes: ['Configured employer feeds are bounded sources, not the entire market. No found vacancies, an unavailable source or a partial run must be read as reported; none establishes that no jobs exist. Unknown compensation and eligibility remain unknown.'],
+    action: { label: 'Add a vacancy in Job Loop', to: '/loop' }, related: [{ label: 'Prepare and control runs', id: 'job-loop-controls' }],
+  },
+  {
+    id: 'job-loop-review', category: 'Job Loop', title: 'Preview, approve and download the exact document',
+    summary: 'Approval belongs to the current document and its source versions. Read the whole output before confirming it.',
+    steps: [
+      'Open Outputs and select the document you want to review, or select Review this run’s outputs in the run history.',
+      'Open Source references and evidence and Relevance and unresolved questions. Read CV text for factual review, including the context and result status of each claim.',
+      'Select Open exact PDF preview when a PDF artifact is ready. Inspect every page for cut-off text, missing characters, headings and the selected page preference. If the preview is blank, select open this exact PDF in a new tab. Do not treat a blank panel as a successful review.',
+      'If a fact is wrong, select Edit career facts, then rebuild, save and confirm the corrected career fact, and prepare a fresh output. A text edit cannot bypass source controls. Read any format warnings; a failed PDF does not imply a ready DOCX or TXT failed too.',
+      'Confirm that the complete CV and evidence are accurate and safe for external use. Select Approve exact packet. Then choose a ready Download PDF, Download DOCX or Download TXT format. Download evidence report separately.',
+      'Read Cover letter and message drafts (unsent) separately. You send or apply yourself on the employer’s site. An optional Create Gmail draft action creates an unsent draft only and has its own recipient and attachment confirmation.',
+    ],
+    notes: ['Approval is blocked for outdated sources, held packets or unsaved career edits. Correct the record, rebuild and review again. In the free check, select Preview current PDF, then Open the exact PDF preview in a new tab if the inline PDF is blank. PDF download requires a current preview within the chosen maximum; approved DOCX/TXT can remain available.'],
+    action: { label: 'Review my Job Loop outputs', to: '/loop' }, related: [{ label: 'Accuracy of facts', id: 'job-loop-facts' }, { label: 'Run recovery', id: 'job-loop-controls' }],
+  },
+  {
+    id: 'job-loop-controls', category: 'Job Loop', title: 'Prepare a run, inspect partial results and control optional automation',
+    summary: 'Begin with a manual source-based run when it is available. Cloud, AI, scheduling and Gmail each have their own availability and permission checks.',
+    steps: [
+      'Save or discard all career record and claim edits. Check that at least one active fact is both confirmed and shareable, and add the vacancy you want to prepare for.',
+      'On Today, read Prepare a cloud run. Choose Preparation provider. Source-based preparation · no AI uses cleared facts without an external model. An available AI model needs explicit permission for that selected provider and processing route.',
+      'Select Prepare today’s applications only when the service reports it available. If cloud processing is not configured, the pilot is full or the allowance is exhausted, use saved records and manual tracking or the free check. No unavailable provider is silently substituted.',
+      'Read Run history & source coverage. Check the status and message of every lane. For partial, blocked or failed runs, keep usable results separate from missing coverage. Use Resume run when available after addressing the stated issue. Use Cancel run for a queued or running job, then refresh to confirm its state.',
+      'Open Optional recurring preparation only if you want it. Check Preparation cadence, Local preparation time and Schedule timezone, then opt in and select Enable recurring preparation. Read the actual saved next run. Pause schedule stops future scheduling; Cancel schedule does not cancel an already running job, which has its own Cancel run.',
+      'Open Optional Gmail access only if you need it and access is available. Select chosen permissions, connect, and confirm the returned mailbox. Reading recruitment messages requires separate run consent; draft creation requires its own checks. Use Disconnect Gmail to stop future connection use.',
+    ],
+    notes: ['Cloud runs can continue after the page closes. Refresh records to inspect actual progress; closing the tab is not a cancel action. Recurring preparation currently uses the rules method and the same pilot allowance. Google account sign-in alone does not authorize mailbox reading. No messages or applications are sent automatically.'],
+    action: { label: 'Inspect my Job Loop controls', to: '/loop' }, related: [{ label: 'Privacy choices', id: 'privacy' }, { label: 'Interrupted draft', id: 'recovery' }],
+  },
+  {
+    id: 'second-application', category: 'Free CV check', title: 'Prepare another application without retyping your CV',
+    summary: 'Keep useful experience; give every new vacancy its own comparison, review and approval.',
+    steps: [
+      'In the free check, download or privately save the open approved check before replacing it. Under Your next application, choose CV version for another vacancy: Reviewed source CV or Approved final CV.',
+      'Select Use this CV for another vacancy. Enter the new Target role and Company (optional). Review the reused CV and paste the new vacancy description. The previous vacancy, findings and approval do not carry over.',
+      'Work through The evidence, Your review and Approve & download for the new job. You must approve the current version again before downloading.',
+      'In Job Loop, use your saved career record and unchanged confirmed facts. Open Opportunities and add the next real vacancy, then return to Today to prepare and Outputs to review its separate document. Do not repeat unchanged fact entry.',
+      'After you actually submit on the employer’s site, update Application status in Opportunities. Confirm that you report the status yourself, add a Follow-up date and My application notes if useful, and select Save tracking update.',
+    ],
+    notes: ['Saved or prepared does not mean applied. Jobvance does not submit an employer application. Interview, offer, rejected and withdrawn are also your reported statuses, not independently verified outcomes.'],
+    action: { label: 'Continue in the free check', to: '/check' }, related: [{ label: 'Job Loop start', id: 'job-loop-start' }],
+  },
+  {
+    id: 'privacy', category: 'Privacy & recovery', title: 'Choose what is stored, shared or connected',
+    summary: 'Reading a local file, saving an account record, temporary recovery and third-party processing are separate choices.',
+    steps: [
+      'Before continuing, remove confidential figures, unnecessary personal details and material you lack permission to share from the CV text. An exclusion preference is not a substitute for redacting the raw source.',
+      'Use the free check on your device without signing in. To save later, read Exactly what will be saved: role, company, vacancy, reviewed source CV, approved final CV and review metadata. Confirm private saving, then select Save approved check to my account.',
+      'In Job Loop, confirm private account saving for your career record. Confirm external-use permission for each fact separately. Only cleared claim wording, its context and vacancy text are permitted for a chosen external-model run; the raw CV source, name and contact line are not included in that model request.',
+      'Choose Draft recovery (optional) separately if you need refresh recovery in the free check. Google sign-in also asks separately to keep the CV and vacancy in the tab while you leave the page. Both temporary storage choices use a 30-minute expiry.',
+      'For Job Loop support or account erasure, open Help & privacy. For a saved free check, use Delete in Your saved free checks and review the deletion confirmation. Downloaded files remain on your device.',
+    ],
+    notes: ['Anyone using your browser tab may see a temporarily retained draft. Confirm a returned Gmail mailbox and its permissions yourself. Disconnecting Gmail does not delete drafts already created there. Read the privacy policy for the full service policy.'],
+    action: { label: 'Read the privacy policy', to: '/privacy' }, related: [{ label: 'Recovery and limits', id: 'recovery' }],
+  },
+  {
+    id: 'recovery', category: 'Privacy & recovery', title: 'Recover a draft or an interrupted check safely',
+    summary: 'Page navigation, refresh and account saving have different recovery limits. Restored drafts must be read and approved again.',
+    steps: [
+      'If you followed a help link from the free check, return to /check in the same tab within 30 minutes. The working text can return from tab memory. Read the restored draft; previous approval is cleared.',
+      'If you need the free-check draft after refresh, open Draft recovery (optional) and check Keep my draft in this tab across refresh before refreshing. This stores the CV and vacancy in the tab for 30 minutes after your last change. Closing the tab or clearing the draft removes this temporary copy.',
+      'For Google sign-in from the free check, check Keep my CV and job description in this tab while I sign in with Google before leaving. Return in the same tab within 30 minutes. The temporary sign-in copy is cleared on return and you approve again.',
+      'In Job Loop, unsaved career record, claim and new-vacancy drafts remain only in this tab’s memory for up to 30 minutes across page navigation. Refresh, closing the tab or changing accounts clears them. Recovered claim and contact confirmations are reset; read and confirm them again.',
+      'Saved account records are separate from temporary drafts. Sign in to the same account, reopen a saved check or use Refresh records in Job Loop. A cloud run may still be progressing even when local edits are gone.',
+      'If recovery has expired or the browser cannot retain the draft, paste your source again or open your saved account version. Clear & start again, followed by Clear current check, removes the open free check and its temporary sign-in draft. Use Contact if a repeatable service problem remains.',
+    ],
+    notes: ['Temporary memory is a convenience, not a backup. Reading, saving and approval controls still apply after recovery. Avoid putting private CV text into a support message unless it is needed and safe to share.'],
+    action: { label: 'Return to the free check', to: '/check' }, related: [{ label: 'Privacy choices', id: 'privacy' }, { label: 'Run availability and recovery', id: 'job-loop-controls' }],
+  },
+];
+
+export function searchHelpTopics(query: string, category: HelpCategory | 'All topics' = 'All topics'): HelpTopic[] {
+  const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const normalized=query.toLowerCase().trim();
+  const matches=helpTopics.filter(topic => {
+    if (category !== 'All topics' && topic.category !== category) return false;
+    const text = [topic.id.replace(/-/g, ' '), topic.title, topic.summary, topic.category, ...topic.steps, ...topic.notes, ...(topic.fields ?? []).flatMap(field => [field.label, field.help])].join(' ').toLowerCase();
+    return words.every(word => text.includes(word));
+  });
+  if(!normalized)return matches;
+  const rank=(topic:HelpTopic)=>(topic.id.replace(/-/g,' ').includes(normalized)?100:0)+(topic.title.toLowerCase().includes(normalized)?80:0)+words.filter(word=>topic.title.toLowerCase().includes(word)).length*4+words.filter(word=>topic.summary.toLowerCase().includes(word)).length;
+  return matches.sort((a,b)=>rank(b)-rank(a));
+}
+
+export default function HelpCenter() {
+  const meta=staticPageMeta('/help')!;
+  const searchId = useId();
+  const route = useLocation();
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<HelpCategory | 'All topics'>('All topics');
+  const topics = useMemo(() => searchHelpTopics(query, category), [query, category]);
+  function reset() { setQuery(''); setCategory('All topics'); }
+  useEffect(() => {
+    const id = route.hash.slice(1);
+    if (!helpTopics.some(topic => topic.id === id)) return;
+    setQuery(''); setCategory('All topics');
+    const timer = setTimeout(() => document.getElementById(id)?.scrollIntoView?.({ block: 'start' }), 0);
+    return () => clearTimeout(timer);
+  }, [route.hash]);
+  return <main className="help-center">
+    <Helmet><title>{meta.title}</title><meta name="description" content={meta.description} /><link rel="canonical" href="https://jobvance.io/help" /></Helmet>
+    <nav className="hc-breadcrumb" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">Help center</span></nav>
+    <header className="hc-hero"><p className="hc-eyebrow"><BookOpen size={16} aria-hidden="true" /> HELP AT THE NEXT STEP</p><h1>What would you like to get done?</h1><p>Find the next click, understand a field, or get back to your draft. All instructions are open to read; an account is only needed for saved workspace actions.</p><Link className="hc-text-link" to="/walkthroughs">Try an interactive walkthrough <ArrowRight size={16} aria-hidden="true" /></Link></header>
+    <section className="hc-start" aria-label="Choose a starting task">
+      <a href="#first-check" onClick={reset}><FileText size={22} aria-hidden="true" /><strong>One CV, one vacancy</strong><span>Start with the free check.</span><ArrowRight size={16} aria-hidden="true" /></a>
+      <a href="#job-loop-start" onClick={reset}><ClipboardList size={22} aria-hidden="true" /><strong>Save once, reuse your facts</strong><span>Set up your Job Loop record.</span><ArrowRight size={16} aria-hidden="true" /></a>
+      <a href="#recovery" onClick={reset}><BookOpen size={22} aria-hidden="true" /><strong>Pick up where you left off</strong><span>Check recovery and storage limits.</span><ArrowRight size={16} aria-hidden="true" /></a>
+    </section>
+    <section className="hc-filters" aria-label="Find help"><label htmlFor={searchId}>Search help topics</label><div className="hc-search"><Search size={19} aria-hidden="true" /><input id={searchId} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Try PDF, MBA projects, another vacancy…" /></div><div className="hc-categories" aria-label="Help categories">{(['All topics', 'Free CV check', 'Job Loop', 'Privacy & recovery'] as const).map(item => <button key={item} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></section>
+    <div className="hc-results"><p role="status">{topics.length} {topics.length === 1 ? 'topic' : 'topics'}{query || category !== 'All topics' ? ' match your choices' : ' to help you move forward'}</p>{(query || category !== 'All topics') && <button type="button" onClick={reset}>Show all topics</button>}</div>
+    <div className="hc-reading-layout"><aside className="hc-contents"><nav aria-label="Help topics on this page"><h2>Go to a task</h2><ol>{topics.map(topic => <li key={topic.id}><a href={`#${topic.id}`}>{topic.title}</a></li>)}</ol><Link to="/job-loop">How Job Loop works</Link><Link to="/guides">Career guide library</Link></nav></aside><div className="hc-topic-list">
+      {topics.length ? topics.map(topic => <section id={topic.id} className="hc-topic" key={topic.id} aria-labelledby={`hc-${topic.id}`}>
+        <p className="hc-eyebrow">{topic.category}</p>
+        <h2 id={`hc-${topic.id}`}>{topic.title}</h2>
+        <p className="hc-topic-summary">{topic.summary}</p>
+        <ol className="hc-steps">{topic.steps.map((step, index) => <li key={index}>{step}</li>)}</ol>
+        {topic.fields && <dl className="hc-field-help">{topic.fields.map(field => <div key={field.label}><dt>{field.label}</dt><dd>{field.help}</dd></div>)}</dl>}
+        <div className="hc-note">{topic.notes.map(note => <p key={note}>{note}</p>)}</div>
+        <div className="hc-topic-action"><Link className="hc-button" to={topic.action.to}>{topic.action.label}<ArrowRight size={16} aria-hidden="true" /></Link></div>
+        {topic.related && <p className="hc-related">Related help: {topic.related.map((related, index) => <span key={related.id}>{index > 0 && ' · '}<Link to={`/help#${related.id}`} onClick={reset}>{related.label}</Link></span>)}</p>}
+      </section>) : <section className="hc-empty">
+        <h2>No matching help topic yet.</h2>
+        <p>Try a shorter phrase such as “PDF” or “facts”, or show all topics. You can also ask for help with the step you are on.</p>
+        <button className="hc-button" type="button" onClick={reset}>Show all topics</button>
+        <Link to="/contact">Contact Jobvance</Link>
+      </section>}
+    </div></div>
+    <section className="hc-further"><div><p className="hc-eyebrow">KEEP MOVING</p><h2>Still need a hand?</h2><p>Tell us which step you reached and the message you saw. Leave confidential CV details out of your request.</p></div><div><Link className="hc-button hc-button--primary" to="/contact">Contact Jobvance<ArrowRight size={16} aria-hidden="true" /></Link><Link to="/guides">Read the career guides</Link></div></section>
+  </main>;
+}

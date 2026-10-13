@@ -85,7 +85,7 @@ describe('literal CV evidence comparison', () => {
   it('recognizes an explicit, limited alias while retaining its literal wording', () => {
     const report = analyzeCvEvidence('Technical skills\nMS Excel; JavaScript; Amazon Web Services', 'Microsoft Excel required.');
     expect(report.requirements[0].status).toBe('direct');
-    expect(report.requirements[0].evidence[0].cvQuote).toBe('MS Excel;');
+    expect(report.requirements[0].evidence[0].cvQuote).toBe('MS Excel; JavaScript; Amazon Web Services');
   });
 
   it('requires the requested task and object rather than stakeholders alone', () => {

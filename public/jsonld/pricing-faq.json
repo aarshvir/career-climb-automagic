@@ -4,26 +4,26 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Can I try Jobvance before paying?",
+      "name": "Can I check my CV without signing up?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Start with a 14-day free trial with full access to resume tailoring, job discovery, and application automations."
+        "text": "Yes. The CV-to-vacancy check and reviewed downloads are free without an account. Sign in only for private saving and cloud reuse."
       }
     },
     {
       "@type": "Question",
-      "name": "Does Jobvance support custom resume templates?",
+      "name": "Can I purchase a subscription?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Upload unlimited resume bases, and Jobvance will adapt formatting to the role while respecting your brand."
+        "text": "No. The pilot is free, checkout is unavailable and no card is required. The published future tier prices are proposals, not current paid entitlements."
       }
     },
     {
       "@type": "Question",
-      "name": "How do team plans work?",
+      "name": "Does Jobvance apply or send messages for me?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Career centers and bootcamps can onboard cohorts with admin controls, shared templates, and aggregate reporting."
+        "text": "No. You approve your documents, submit applications on the employer's site and send any messages yourself. Tracking records the progress you report."
       }
     }
   ]

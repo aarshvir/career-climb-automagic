@@ -5,6 +5,7 @@ export default defineConfig({
   // Vite's built-in transformer keeps tests independent of SWC's native cache.
   oxc: { jsx: { runtime: 'automatic' } },
   test: {
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'supabase/tests/**/*.test.ts'],
     environment: 'jsdom',
     setupFiles: ['./src/test-utils/setup.ts'],
     coverage: {

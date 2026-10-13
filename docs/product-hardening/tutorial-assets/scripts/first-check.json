@@ -1,0 +1,149 @@
+{
+  "source": "src/lib/walkthroughs.ts",
+  "sourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
+  "exportedAt": "2026-10-13T19:50:41.431Z",
+  "timingStatus": "planned; not measured render timings",
+  "id": "first-check",
+  "title": "Your first CV check",
+  "description": "Bring your CV and one real vacancy, review the evidence, then approve your own document.",
+  "audience": "Students · MBA students · Busy professionals",
+  "helpAnchor": "first-check",
+  "action": {
+    "label": "Start my free check",
+    "to": "/check"
+  },
+  "scenes": [
+    {
+      "id": "role",
+      "stageId": "check-role",
+      "title": "Choose one target role",
+      "instruction": "In Your role, enter Target role from the actual posting. Add Company (optional), then select Continue to your CV.",
+      "caption": "Start with one job you want. No account is needed for the free check.",
+      "narration": "Start with a real job you want. In Your role, enter the title from the posting. Company is optional. Select Continue to your CV. You can complete the check and download without creating an account.",
+      "durationSeconds": 18,
+      "demo": {
+        "section": "Your role",
+        "fields": [
+          {
+            "label": "Target role",
+            "value": "Graduate analyst"
+          },
+          {
+            "label": "Company (optional)",
+            "value": "Example Company — fictional"
+          }
+        ],
+        "action": "Continue to your CV",
+        "note": "Only the role is required here."
+      }
+    },
+    {
+      "id": "cv",
+      "stageId": "check-cv",
+      "title": "Read and check your CV text",
+      "instruction": "Read a CV file on this device or paste your text. Correct extraction errors, remove confidential information, then select Use this reviewed CV text.",
+      "caption": "English CV · text-based PDF, DOCX or TXT · up to 5 MB. Scanned PDFs need OCR first.",
+      "narration": "Read your English CV as a text-based PDF, DOCX or TXT file, up to five megabytes, or paste the text. A scanned PDF needs readable text first. Check names, dates and headings in the extracted wording. Remove confidential information before selecting Use this reviewed CV text.",
+      "durationSeconds": 24,
+      "demo": {
+        "section": "Your CV",
+        "fields": [
+          {
+            "label": "CV text — paste, correct or remove private information",
+            "value": "University analytics project, 2026. In a four-person team, I cleaned survey data and built the charts. No business result was measured."
+          }
+        ],
+        "action": "Use this reviewed CV text",
+        "note": "The original file stays on your device."
+      }
+    },
+    {
+      "id": "vacancy",
+      "stageId": "check-vacancy",
+      "title": "Paste the full vacancy",
+      "instruction": "In One vacancy, paste responsibilities, requirements and conditions into Vacancy description. Select Check these inputs.",
+      "caption": "Use the actual description, including conditions. The check does not open employer links.",
+      "narration": "In One vacancy, paste the full job description, including responsibilities, requirements and conditions. Use the actual posting, with at least eighty characters. Select Check these inputs. The check does not open links or send an application.",
+      "durationSeconds": 19,
+      "demo": {
+        "section": "One vacancy",
+        "fields": [
+          {
+            "label": "Vacancy description",
+            "value": "Fictional posting: Graduate analyst. Support survey analysis, prepare clear charts and explain the findings. Review the listed location, qualifications and closing date."
+          }
+        ],
+        "action": "Check these inputs",
+        "note": "You review employer conditions yourself."
+      }
+    },
+    {
+      "id": "evidence",
+      "stageId": "check-evidence",
+      "title": "Follow wording to its source",
+      "instruction": "Compare In the vacancy with In your CV. Read the full vacancy, then select Review my CV & questions.",
+      "caption": "A phrase match is a review aid. It does not establish qualification or eligibility.",
+      "narration": "Each finding shows what the vacancy asks for beside what your CV says. Related wording may still need a better example. Read the full vacancy too. Matching phrases do not verify a degree, calculate experience years or predict an interview. Select Review my CV and questions.",
+      "durationSeconds": 24,
+      "demo": {
+        "section": "The evidence",
+        "fields": [
+          {
+            "label": "In the vacancy",
+            "value": "Prepare clear charts and explain the findings."
+          },
+          {
+            "label": "In your CV",
+            "value": "In a four-person team, I cleaned survey data and built the charts."
+          }
+        ],
+        "action": "Review my CV & questions",
+        "note": "Fictional comparison. Team context stays in the source passage."
+      }
+    },
+    {
+      "id": "review",
+      "stageId": "check-review",
+      "title": "Keep the words you can explain",
+      "instruction": "Read Your CV to review. Edit only accurate wording, optionally add your own complete example, then select Recheck my changes & continue.",
+      "caption": "Keep your contribution, project context and measured or estimated result clear.",
+      "narration": "Read the complete CV and ask whether you could explain it in an interview. A team achievement stays a team achievement. An estimate stays an estimate. You do not need to fill every gap. Add an accurate, shareable example only if you have one, then select Recheck my changes and continue.",
+      "durationSeconds": 25,
+      "demo": {
+        "section": "Your review",
+        "fields": [
+          {
+            "label": "Your CV to review",
+            "value": "University analytics project, 2026. In a four-person team, I cleaned survey data and built the charts. No business result was measured."
+          }
+        ],
+        "action": "Recheck my changes & continue",
+        "note": "The example is an academic project, not employment."
+      }
+    },
+    {
+      "id": "approve",
+      "stageId": "check-approve-download",
+      "title": "Preview, approve and download",
+      "instruction": "For PDF, choose Maximum PDF length and Preview current PDF. Read all pages, confirm accuracy and privacy, select Approve this CV, then download a ready format.",
+      "caption": "If the PDF panel is blank, use Open the exact PDF preview in a new tab. Approval is yours.",
+      "narration": "Read the final CV and evidence. For PDF, choose the maximum length and select Preview current PDF. If the panel is blank, open the exact preview in a new tab. Confirm accuracy and privacy, then select Approve this CV. Download PDF, DOCX or TXT. You send the document yourself.",
+      "durationSeconds": 28,
+      "demo": {
+        "section": "Approve & download",
+        "fields": [
+          {
+            "label": "Maximum PDF length",
+            "value": "Two pages"
+          },
+          {
+            "label": "Final CV preview — review before approval",
+            "value": "Complete fictional CV text to read. No preview artifact has been generated in this tutorial."
+          }
+        ],
+        "action": "Approve this CV",
+        "note": "PDF requires a current preview within your chosen maximum. DOCX/TXT layout depends on your reader."
+      }
+    }
+  ]
+}

@@ -98,13 +98,50 @@
 .check-audience-guidance { margin: -12px 0 28px; padding: 17px 20px; border: 1px solid #dce2ee; border-radius: 14px; background: #eef0ff; }
 .check-audience-guidance strong { color: #2850df; font-size: 12px; }
 .check-audience-guidance p { color: #59657a; font-size: 13px; line-height: 1.7; margin-top: 4px; }
-.check-recovery { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 16px 20px; margin-bottom: 24px; border: 1px solid #dce2ee; border-radius: 14px; background: #fff; font-size: 12px; line-height: 1.65; }
-.check-recovery > div { flex: 1; min-width: 220px; }
+.check-first-step .check-intro { margin-bottom: 24px; }
+.check-first-step .check-audience-guidance { margin-bottom: 20px; }
+.check-recovery { padding: 12px 20px; margin-top: 18px; border: 1px solid #dce2ee; border-radius: 14px; background: #fff; font-size: 12px; line-height: 1.65; }
+.check-recovery summary { cursor: pointer; min-height: 32px; }
+.check-recovery summary span { margin-left: 12px; color: #59657a; }
+.check-recovery > div { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; margin-top: 10px; padding-top: 12px; border-top: 1px solid #e5e9f1; }
+.check-recovery > div > p { flex: 1; min-width: 200px; }
 .check-recovery strong { color: #24334d; }
 .check-recovery p { color: #59657a; margin-top: 4px; }
 .check-recovery label { display: flex; align-items: flex-start; gap: 9px; max-width: 240px; }
 .check-recovery input { width: 16px; height: 16px; margin-top: 3px; flex-shrink: 0; }
+.check-reuse-action { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+.check-reuse-action label { font-size: 12px; }
+.check-reuse-action select { max-width: 100%; padding: 9px 12px; border: 1px solid #dce2ee; border-radius: 8px; font-size: 13px; background: white; }
+.check-reuse-action button { white-space: normal; text-align: left; min-height: 44px; }
+.check-reuse-action > p { flex-basis: 100%; font-size: 12px; line-height: 1.7; color: #59657a; }
+.check-source-update, .check-no-cv, .check-reused-cv { border: 1px solid #dce2ee; padding: 16px 20px; border-radius: 14px; background: #f7f8fc; }
+.check-source-update h3 { font-size: 14px; font-weight: 650; }
+.check-source-update p, .check-no-cv p, .check-reused-cv > p, .check-undo-application p { color: #59657a; font-size: 12px; line-height: 1.7; margin: 8px 0; }
+.check-source-update button { min-height: 44px; margin: 8px 8px 0 0; white-space: normal; }
+.check-stage .check-no-cv summary, .check-stage .check-reused-cv summary { cursor: pointer; font-size: 13px; font-weight: 550; min-height: 44px; display: list-item; align-content: center; }
+.check-no-cv a { color: #2850df; text-decoration: underline; font-size: 12px; }
+.check-undo-application { margin-bottom: 18px; padding: 14px 16px; border: 1px solid #dce2ee; border-radius: 12px; background: white; }
+.check-undo-application button { min-height: 44px; }
+.check-stage [aria-invalid="true"] { border-color: #b42318; outline-color: #b42318; }
+.cv-check-page button:focus-visible, .cv-check-page summary:focus-visible { outline: 2px solid #2850df; outline-offset: 3px; }
 .check-stage-heading { scroll-margin-top: 100px; }
 .check-pdf-frame { width: 100%; min-height: 520px; border: 1px solid #dce2ee; border-radius: 8px; background: #f3f4f6; }
 @media (max-width: 740px) { .check-recovery { padding: 14px 16px; } .check-recovery label { max-width: none; } .check-pdf-frame { min-height: 360px; } }
 @media (max-width: 740px) { .check-audience-guidance { margin: 0 0 22px; padding: 14px 16px; } }
+@media (max-width: 740px) { .check-recovery summary span { display: block; margin: 3px 0 0; } .check-reuse-action { align-items: stretch; flex-direction: column; } .check-reuse-action button { width: 100%; } }
+@media (max-width: 740px) { .check-source-update, .check-no-cv, .check-reused-cv { padding: 14px 16px; } .check-source-update button { width: 100%; margin-right: 0; } }
+@media (max-width: 740px) {
+  .check-first-step { padding-top: 18px; }
+  .check-first-step .check-intro { position: relative; display: block; margin-bottom: 16px; }
+  .check-first-step .check-intro > button { position: absolute; top: 27px; right: 0; padding: 0 4px; font-size: 10px; }
+  .check-first-step .check-intro h1 { font-size: 28px; }
+  .check-first-step .check-eyebrow { font-size: 11px; margin-bottom: 10px; }
+  .check-first-step .check-intro-description { margin-top: 10px; line-height: 1.55; }
+  .check-first-step .check-audience-guidance { margin-bottom: 16px; padding: 12px 14px; }
+  .check-first-step .check-audience-guidance p { line-height: 1.55; }
+  .check-first-step .check-context { display: none; }
+  .check-first-step .check-sidebar { margin-bottom: 14px; }
+  .check-first-step .check-progress li > button, .check-first-step .check-progress li > div { min-height: 68px; gap: 5px; }
+  .check-first-step .check-stage-content { gap: 18px; }
+  .check-first-step .check-stage-heading { padding-bottom: 16px; }
+}

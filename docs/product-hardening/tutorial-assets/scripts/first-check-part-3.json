@@ -1,0 +1,21 @@
+{
+  "tutorialId": "first-check",
+  "part": 3,
+  "totalParts": 3,
+  "title": "Your first CV check · Part 3 of 3",
+  "sceneIds": [
+    "review",
+    "approve"
+  ],
+  "stageIds": [
+    "check-review",
+    "check-approve-download"
+  ],
+  "narration": "Read the complete CV and ask whether you could explain it in an interview. A team achievement stays a team achievement. An estimate stays an estimate. You do not need to fill every gap. Add an accurate, shareable example only if you have one, then select Recheck my changes and continue. Read the final CV and evidence. For PDF, choose the maximum length and select Preview current PDF. If the panel is blank, open the exact preview in a new tab. Confirm accuracy and privacy, then select Approve this CV. Download PDF, DOCX or TXT. You send the document yourself.",
+  "captions": [
+    "Keep your contribution, project context and measured or estimated result clear.",
+    "If the PDF panel is blank, use Open the exact PDF preview in a new tab. Approval is yours."
+  ],
+  "timingStatus": "planned; final caption timing requires actual rendered audio",
+  "screenshotPolicy": "Only actual reviewed Jobvance UI with clearly fictional career data; no synthetic UI or private account data."
+}

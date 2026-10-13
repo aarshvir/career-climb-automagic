@@ -11,7 +11,7 @@ export interface EvidencePassage {
   line: number;
   sourceKind: EvidenceSourceKind;
   /** Classroom and project work must not be presented as professional employment. */
-  contextKind?: 'academic_project' | 'employment' | 'unspecified';
+  contextKind?: 'academic_project' | 'personal_project' | 'internship' | 'volunteering' | 'employment' | 'unspecified';
 }
 
 export interface EvidenceRequirement {
@@ -45,13 +45,13 @@ export interface EvidenceReport {
   warnings: string[];
 }
 
-const METHOD_VERSION = 'english-literal-evidence-v2';
+const METHOD_VERSION = 'english-literal-evidence-v3';
 const MAX_REQUIREMENTS = 40;
 const SCOPE = 'This is an English wording check of user-provided text. The claims are not verified. Read the job requirements yourself; this check does not decide whether you qualify or predict an interview.';
 type Span = { start: number; end: number };
 type Line = Span & { text: string; line: number; newline: string };
-type Section = 'experience' | 'skills' | 'education' | 'credentials' | 'projects' | 'other';
-type Passage = EvidencePassage & { section: Section; terms: string[]; negative: boolean; pending: boolean; weakened: boolean };
+type Section = 'experience' | 'internships' | 'volunteering' | 'personal_projects' | 'skills' | 'education' | 'credentials' | 'projects' | 'other';
+type Passage = EvidencePassage & { section: Section; terms: string[]; negative: boolean; pending: boolean; weakened: boolean; sourceSpan: Span; sourceLine: number; sourceQuote: string };
 
 const REQUIRED_HEADING = /^(?:requirements?|qualifications?|essential(?: criteria| requirements)?|desirable(?: criteria| requirements)?|responsibilities|key responsibilities|duties|what (?:you(?:'|’)ll do|you will do|you bring|we need|we(?:'|’)re looking for)|about you|your (?:role|responsibilities|profile)|skills(?: and experience)?|experience(?: and qualifications)?)(?:\s*:|\s*$)/i;
 const OTHER_HEADING = /^(?:about (?:us|the company|our company)|company (?:overview|description)|who we are|benefits|perks|what we offer|salary|compensation|how to apply|application process|equal opportunit(?:y|ies)|our values)(?:\s*:|\s*$)/i;
@@ -144,7 +144,43 @@ function headingText(text: string): string {
   return text.trim().replace(/^#{1,6}\s+/, '').replace(/\*\*/g, '').trim();
 }
 
-function vacancySpans(text: string): { requirements: Span[]; omitted: Span[]; overflow: number } {
+/** A role heading is listing context, not an achievement the CV must prove.
+ * Keep it verbatim among omitted context; never drop a mandatory criterion. */
+function listingRoleHeading(text: string, index: number, enteredTitle=''): boolean {
+  const value = headingText(text).replace(/[.!]$/, '');
+  if (index > 2 || value.length > 100 || MANDATORY.test(value)) return false;
+  if (/^(?:job title|role title|position|employer|company)\s*:\s*\S/i.test(value)) return true;
+  const words=(value:string)=>value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+  const title=words(enteredTitle);
+  if(title && ` ${words(value)} `.includes(` ${title} `) && value.split(/\s+/).length<=14 && !/\b(?:with|must|required|qualifications?|skills?|experience|degree|years?|deadline|visa|proficient|preferred|eligible|knowledge|ability|responsibilities|duties|prepare|build|support|manage|deliver|develop|coordinate)\b/i.test(value))return true;
+  if (!/(?:intern|internship|analyst|engineer|developer|designer|consultant|associate|specialist|coordinator|administrator|manager|director|officer|assistant)(?:\s*[-|–]\s*[\w\s]{1,30})?$/i.test(value)) return false;
+  // A noun phrase at the top can be a title; a task or criterion stays a task.
+  return !/^(?:prepare|produce|develop|build|create|support|assist|coordinate|manage|design|deliver|analy[sz]e|conduct|work|be|have|hold|demonstrate|ensure|maintain|own|write|review|complete|report|lead a|lead the)\b/i.test(value) && value.split(/\s+/).length <= 8;
+}
+function vacancyClauses(text:string,span:Span):Span[] {
+  return clauses(text,span).flatMap(sentence=>{
+    const value=text.slice(sentence.start,sentence.end), result:Span[]=[];
+    const explicitList=/^(?:requirements?|qualifications?)\s*:/i.test(value);
+    const declaredTool=(part:string)=>/^(?:(?:basic|advanced|intermediate)\s+)?(?:SQL|Excel|Power\s*BI|Python|JavaScript|Tableau|AWS|Azure|Git)$/i.test(part.trim());
+    let cursor=0;
+    for(const comma of value.matchAll(/,\s+/g)){
+      const following=value.slice(comma.index!+comma[0].length);
+      const predicate=following.replace(/^and\s+/i,'');
+      const left=value.slice(cursor,comma.index!).replace(/^(?:requirements?|qualifications?)\s*:/i,'').trim();
+      const next=predicate.split(',')[0].trim();
+      // Split only a new explicit task or independently stated technical criterion.
+      // Lists of objects sharing one verb remain together, e.g. financial, risk reports.
+      if(!/^(?:clean|build|prepare|produce|develop|create|support|assist|coordinate|manage|design|deliver|analy[sz]e|work|review|maintain|write|present|communicate|collaborate|query|use)\b/i.test(predicate) && !/^(?:basic\s+)?(?:SQL|Excel|Power\s*BI|Python|JavaScript)\s+(?:(?:is|are)\s+)?(?:required|mandatory|essential)\b/i.test(predicate) && !(explicitList && (declaredTool(left)||declaredTool(next))))continue;
+      const part=trimmedSpan(text,sentence.start+cursor,sentence.start+comma.index!);
+      if(part)result.push(part);
+      cursor=comma.index!+comma[0].length;
+    }
+    const tail=trimmedSpan(text,sentence.start+cursor,sentence.end);if(tail)result.push(tail);
+    return result;
+  });
+}
+
+function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omitted: Span[]; overflow: number } {
   const requirements: Span[] = [];
   const omitted: Span[] = [];
   let ignoreSection = false;
@@ -155,6 +191,7 @@ function vacancySpans(text: string): { requirements: Span[]; omitted: Span[]; ov
     const raw = trimmedSpan(text, line.start, line.end);
     if (!raw) continue;
     const heading = headingText(line.text);
+    if (listingRoleHeading(line.text, i,enteredTitle)) { omitted.push(raw); continue; }
     const required = REQUIRED_HEADING.exec(heading);
     const other = OTHER_HEADING.exec(heading);
     if (required || other) {
@@ -164,7 +201,8 @@ function vacancySpans(text: string): { requirements: Span[]; omitted: Span[]; ov
         omitted.push({ start: raw.start, end: line.start + colon + 1 });
         const tail = trimmedSpan(text, line.start + colon + 1, line.end);
         if (tail) {
-          for (const part of clauses(text, tail)) {
+          for (const part of vacancyClauses(text, tail)) {
+            if(listingRoleHeading(text.slice(part.start,part.end),i,enteredTitle)){omitted.push(part);continue;}
             if (ignoreSection && !MANDATORY.test(text.slice(part.start, part.end))) omitted.push(part);
             else if (requirements.length < MAX_REQUIREMENTS) requirements.push(part);
             else { omitted.push(part); overflow++; }
@@ -186,7 +224,8 @@ function vacancySpans(text: string): { requirements: Span[]; omitted: Span[]; ov
     }
     const span = trimmedSpan(text, line.start + (bullet?.[0].length ?? 0), end);
     if (!span) continue;
-    for (const part of clauses(text, span)) {
+    for (const part of vacancyClauses(text, span)) {
+      if(listingRoleHeading(text.slice(part.start,part.end),i,enteredTitle)){omitted.push(part);continue;}
       if (requirements.length < MAX_REQUIREMENTS) requirements.push(part);
       else { omitted.push(part); overflow++; }
     }
@@ -197,10 +236,13 @@ function vacancySpans(text: string): { requirements: Span[]; omitted: Span[]; ov
 function sectionFor(text: string): Section | null {
   const heading = headingText(text).replace(/:$/, '').toLowerCase();
   if (/^(?:(?:professional|work|relevant|career) )?(?:experience|employment(?: history)?|career history|work history)$/.test(heading)) return 'experience';
+  if (/^(?:(?:summer|work|relevant) )?(?:internships?|internship experience|placements?|work placements?|industrial placements?)$/.test(heading)) return 'internships';
+  if (/^(?:volunteering|volunteer(?:ing)? (?:work|experience)|community (?:work|service))$/.test(heading)) return 'volunteering';
+  if (/^personal projects$/.test(heading)) return 'personal_projects';
   if (/^(?:(?:technical|key|core|professional) )?(?:skills|competencies|tools|technologies)(?: and (?:tools|technologies))?$/.test(heading)) return 'skills';
   if (/^(?:education|academic (?:background|qualifications)|qualifications)$/.test(heading)) return 'education';
   if (/^(?:certifications?|certificates?|licenses?|licences?|professional qualifications)$/.test(heading)) return 'credentials';
-  if (/^(?:(?:academic|university|classroom|personal|selected) )?projects$/.test(heading)) return 'projects';
+  if (/^(?:(?:academic|university|classroom|personal|selected) )?projects?$/.test(heading)) return 'projects';
   if (/^(?:summary|profile|objective|interests|references|achievements|projects|languages|publications)$/.test(heading)) return 'other';
   return null;
 }
@@ -244,8 +286,8 @@ function cvPassages(text: string): Passage[] {
     for (const part of clauses(text, span, true)) {
       const cvQuote = text.slice(part.start, part.end);
       const sourceKind: EvidenceSourceKind = inlineSkills || section === 'skills' || /\b(?:proficient|proficiency|familiar|knowledge of|skills include|competent)\b/i.test(cvQuote) ? 'skills' : ACTUAL_VERB.test(cvQuote) ? 'action' : 'other';
-      const contextKind = section === 'projects' || /\b(?:university|classroom|academic|coursework|student) (?:team )?project\b/i.test(cvQuote) ? 'academic_project' : section === 'experience' ? 'employment' : 'unspecified';
-      result.push({ cvQuote, ...part, line: line.line + (text.slice(line.start, part.start).match(/\r\n|\r|\n/g)?.length ?? 0), sourceKind, contextKind, section, terms: meaningful(cvQuote), negative: NEGATIVE.test(cvQuote), pending: PENDING.test(cvQuote), weakened: WEAKENED.test(cvQuote) });
+      const contextKind = section === 'internships' ? 'internship' : section === 'volunteering' ? 'volunteering' : section === 'personal_projects' ? 'personal_project' : section === 'projects' || /\b(?:university|classroom|academic|coursework|student) (?:team )?project\b/i.test(cvQuote) ? 'academic_project' : section === 'experience' ? 'employment' : 'unspecified';
+      result.push({ cvQuote, ...part, line: line.line + (text.slice(line.start, part.start).match(/\r\n|\r|\n/g)?.length ?? 0), sourceKind, contextKind, section, terms: meaningful(cvQuote), negative: NEGATIVE.test(cvQuote), pending: PENDING.test(cvQuote), weakened: WEAKENED.test(cvQuote), sourceSpan: span, sourceLine: line.line, sourceQuote: text.slice(span.start,span.end) });
     }
   }
   return result;
@@ -279,7 +321,13 @@ function requestedActions(text: string): string[] {
 }
 
 function publicPassage(passage: Passage): EvidencePassage {
-  return { cvQuote: passage.cvQuote, start: passage.start, end: passage.end, line: passage.line, sourceKind: passage.sourceKind, contextKind: passage.contextKind };
+  // Match individual clauses, but show their complete logical source line/bullet.
+  // This retains team contribution, forecasts and qualifications after a semicolon.
+  return { cvQuote: passage.sourceQuote, ...passage.sourceSpan, line: passage.sourceLine, sourceKind: passage.sourceKind, contextKind: passage.contextKind };
+}
+function publicPassages(passages: Passage[], limit=3): EvidencePassage[] {
+  const seen=new Set<string>();
+  return passages.map(publicPassage).filter(passage=>{const key=`${passage.start}:${passage.end}`;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,limit);
 }
 
 /** A qualification or uncertainty on a different list item is not a conflicting claim. */
@@ -316,13 +364,13 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
   const related = passages.map(passage => {
     const matches = terms.filter(term => passage.terms.includes(term));
     // A shared generic verb alone is not a related passage for the requested object.
-    const anchors = matches.filter(term => !actions.includes(term) || TECH.has(term) || CREDENTIAL.has(term));
+    const anchors = matches.filter(term => technologies.length && !task ? TECH.has(term) : !actions.includes(term) || TECH.has(term) || CREDENTIAL.has(term));
     return { passage, matches, anchors, full: terms.length > 0 && matches.length === terms.length };
   }).filter(match => match.anchors.length > 0).sort((a, b) => Number(b.full) - Number(a.full) || b.anchors.length - a.anchors.length || b.matches.length - a.matches.length || a.passage.start - b.passage.start);
   const datedQualification = credentials.length > 0 && /\b(?:by|before|after|completed|graduat(?:e|ed|ion))\b/i.test(vacancyQuote) && /\b(?:20\d\d|january|february|march|april|may|june|july|august|september|october|november|december)\b/i.test(vacancyQuote);
-  const base: EvidenceRequirement = { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: related.slice(0, 3).map(item => publicPassage(item.passage)), explanation: '', question: credentials.length ? 'What exact qualification, completion date and current status can you confirm? Keep expected completion clearly labelled.' : `Is there something your CV should show here? Add a specific example only if it is accurate.`, matchedTerms: [...new Set(related.flatMap(item => item.matches))], category: credentials.length ? 'qualification' : 'capability' };
+  const base: EvidenceRequirement = { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: publicPassages(related.map(item=>item.passage)), explanation: '', question: credentials.length ? 'What exact qualification, completion date and current status can you confirm? Keep expected completion clearly labelled.' : `Is there something your CV should show here? Add a specific example only if it is accurate.`, matchedTerms: [...new Set(related.flatMap(item => item.matches))], category: credentials.length ? 'qualification' : 'capability' };
   if (datedQualification) {
-    base.evidence = related.filter(item => item.anchors.some(term => CREDENTIAL.has(term)) || item.passage.section === 'education').slice(0, 3).map(item => publicPassage(item.passage));
+    base.evidence = publicPassages(related.filter(item => item.anchors.some(term => CREDENTIAL.has(term)) || item.passage.section === 'education').map(item=>item.passage));
     base.explanation = 'The employer gives a qualification completion date. Compare it with your actual or expected graduation date. A future completion date is not a completed qualification, and this check cannot confirm eligibility.';
     return base;
   }
@@ -335,18 +383,28 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     base.explanation = 'Your CV does not show a clear example of this yet. You may still have the experience; add it only if you can explain your contribution.';
     return base;
   }
+  const asksDeliveredOutcome = /\b(?:implemented|delivered|achieved|realised|realized|measured|actual)\b[^.!?]*\b(?:results?|savings?|reductions?|improvements?|revenue|growth)\b|\b(?:reduce|increase)\b[^.!?]*\b(?:costs?|revenue)\b/i.test(vacancyQuote);
+  const projected = related.filter(item=>/\b(?:estimat(?:e|ed)|projected|possible|potential|forecast(?:ed)?|proposal)\b|\b(?:not|never)\s+(?:implemented|measured|delivered|realised|realized)\b/i.test(item.passage.sourceQuote));
+  if (asksDeliveredOutcome && projected.length) {
+    base.status = 'review';
+    base.evidence = publicPassages(projected.map(item=>item.passage));
+    base.explanation = 'This source describes an estimate, forecast or proposal; it does not establish a delivered or measured result. Keep the full context and your own contribution visible. Add an implemented result only if you can substantiate it.';
+    base.question = 'Was this result actually implemented and measured, or only projected? What was your own contribution? Keep an estimate labelled as an estimate.';
+    return base;
+  }
   const uncertain = (passage: Passage) => uncertainFor(passage, terms.filter(term => !actions.includes(term)), credentials.length > 0);
   const conflict = related.some(item => uncertain(item.passage));
   if (conflict) {
-    base.evidence = related.filter(item => uncertain(item.passage)).slice(0, 2).map(item => publicPassage(item.passage));
+    base.evidence = publicPassages(related.filter(item => uncertain(item.passage)).map(item=>item.passage),2);
     const positive = related.find(item => !uncertain(item.passage));
-    if (positive && base.evidence.length < 3) base.evidence.push(publicPassage(positive.passage));
-    base.explanation = 'The wording needs a closer look. It may describe something unfinished, expired or not held. Check the current position before using it.';
+    if (positive && base.evidence.length < 3) { const source=publicPassage(positive.passage); if(!base.evidence.some(item=>item.start===source.start&&item.end===source.end))base.evidence.push(source); }
+    const explicitlyNegative=related.some(item=>item.passage.negative&&uncertain(item.passage));
+    base.explanation = explicitlyNegative ? 'Your CV explicitly describes missing experience or another negative statement about this requirement. Keep that distinction visible. Review your actual position; do not turn an absence of experience into a positive claim.' : 'The wording needs a closer look. It may describe something unfinished, expired or not held. Check the current position before using it.';
     return base;
   }
   const direct = related.find(({ passage, full }) => {
     if (!full || uncertain(passage)) return false;
-    if (/\b(?:professional|industry|commercial|paid|employment)\s+(?:work\s+)?experience\b/i.test(vacancyQuote) && passage.contextKind === 'academic_project') return false;
+    if (/\b(?:professional|industry|commercial|paid|employment)\s+(?:work\s+)?experience\b/i.test(vacancyQuote) && ['academic_project','personal_project','volunteering'].includes(passage.contextKind ?? '')) return false;
     if (task && passage.sourceKind !== 'action') return false;
     if (experience && !requestedDuration && passage.sourceKind !== 'action' && !/\bexperience\b/i.test(passage.cvQuote)) return false;
     if (actions.includes('lead') && (passage.weakened || !/\b(?:led|lead|leading)\b(?!\s+by\b)/i.test(passage.cvQuote))) return false;
@@ -373,8 +431,8 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
 }
 
 /** Deterministic and local: no model, external request, fabricated quote or percentage score. */
-export function analyzeCvEvidence(cvText: string, jobDescription: string): EvidenceReport {
-  const parsed = vacancySpans(jobDescription);
+export function analyzeCvEvidence(cvText: string, jobDescription: string,enteredTitle=''): EvidenceReport {
+  const parsed = vacancySpans(jobDescription,enteredTitle);
   const passages = cvPassages(cvText);
   const requirements = parsed.requirements.map((span, index) => analyzeRequirement(jobDescription, span, index, passages));
   const summary = { total: requirements.length, direct: 0, partial: 0, missing: 0, review: 0 };

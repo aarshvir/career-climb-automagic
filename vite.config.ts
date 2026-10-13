@@ -6,5 +6,5 @@ export default defineConfig({
   // additional SWC native cache, which is unavailable on restricted Windows.
   oxc: { jsx: { runtime: 'automatic' } },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
-  build: { chunkSizeWarningLimit: 600 },
+  build: { chunkSizeWarningLimit: 600, manifest: true },
 });

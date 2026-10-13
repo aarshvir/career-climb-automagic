@@ -1,0 +1,137 @@
+{
+  "source": "src/lib/walkthroughs.ts",
+  "sourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
+  "exportedAt": "2026-10-13T19:50:41.437Z",
+  "timingStatus": "planned; not measured render timings",
+  "id": "controls-and-recovery",
+  "title": "Stay in control of preparation and recovery",
+  "description": "Read run coverage, make separate privacy choices and recover drafts within their limits.",
+  "audience": "Especially useful for busy professionals",
+  "helpAnchor": "job-loop-controls",
+  "action": {
+    "label": "Read privacy and recovery help",
+    "to": "/help#recovery"
+  },
+  "scenes": [
+    {
+      "id": "manual",
+      "stageId": "loop-prepare",
+      "title": "Begin with an available manual run",
+      "instruction": "Save or discard career edits. On Today, check Prepare a cloud run and Preparation provider. Select Prepare today’s applications when available.",
+      "caption": "Availability is reported in your workspace. Private saving does not start a run.",
+      "narration": "Save or discard pending career edits and check that you have a confirmed, shareable fact. On Today, inspect preparation availability. Source-based preparation uses no external AI. Select Prepare today’s applications when the service permits it. A full pilot, missing configuration or allowance stop can make runs unavailable.",
+      "durationSeconds": 27,
+      "demo": {
+        "section": "Today · Prepare a cloud run",
+        "fields": [
+          {
+            "label": "Preparation provider",
+            "value": "Source-based preparation · no AI"
+          },
+          {
+            "label": "Availability",
+            "value": "Check the actual workspace. This tutorial reports no live service state."
+          }
+        ],
+        "action": "Prepare today’s applications",
+        "note": "Available external models require separate consent for the selected route."
+      }
+    },
+    {
+      "id": "coverage",
+      "stageId": "loop-run-history",
+      "title": "Read partial results as partial",
+      "instruction": "Inspect every lane in Run history & source coverage. Address reported issues before Resume run. Use Cancel run for queued or running jobs and refresh to confirm.",
+      "caption": "Closing the page does not cancel a cloud run. A source failure is not proof that no jobs exist.",
+      "narration": "Read the status, count and message for every source lane. A partial run may have usable outputs and missing coverage. Address the reported issue before using Resume run if available. Use Cancel run for a queued or running job, then refresh to confirm. Closing the page does not cancel cloud processing.",
+      "durationSeconds": 27,
+      "demo": {
+        "section": "Run history & source coverage",
+        "fields": [
+          {
+            "label": "Fictional lane A",
+            "value": "Completed: illustrative source check only."
+          },
+          {
+            "label": "Fictional lane B",
+            "value": "Unavailable: no coverage should be inferred."
+          }
+        ],
+        "action": "Inspect lane messages",
+        "note": "No real run, search or model call takes place here."
+      }
+    },
+    {
+      "id": "optional",
+      "stageId": "loop-optional-controls",
+      "title": "Make separate connection choices",
+      "instruction": "Use Optional recurring preparation or Optional Gmail access only when needed and available. Check saved next-run details and confirm any returned mailbox.",
+      "caption": "Pause schedule, Cancel schedule and Cancel run control different things. No automatic sending.",
+      "narration": "Recurring preparation is optional and uses the rules method. Check the saved next run after enabling it. Pause or cancel the schedule controls future scheduling; an active job has a separate Cancel run. Gmail connection and run reading consent are separate choices. A Gmail draft is unsent and requires its own recipient confirmation.",
+      "durationSeconds": 29,
+      "demo": {
+        "section": "Today · Optional controls",
+        "fields": [
+          {
+            "label": "Optional recurring preparation",
+            "value": "Not enabled in this fictional demo."
+          },
+          {
+            "label": "Optional Gmail access",
+            "value": "Not connected in this fictional demo."
+          }
+        ],
+        "action": "Read permissions before choosing",
+        "note": "Google sign-in alone does not authorize inbox reading."
+      }
+    },
+    {
+      "id": "recovery",
+      "stageId": "check-draft-recovery",
+      "title": "Choose refresh recovery deliberately",
+      "instruction": "In the free check, open Draft recovery (optional) and check Keep my draft in this tab across refresh if needed. Otherwise route recovery stays in tab memory.",
+      "caption": "Optional tab storage lasts 30 minutes after your last change. Restored approval is cleared.",
+      "narration": "The free check can return from memory when you navigate away and come back in the same tab within thirty minutes. Refresh recovery needs the separate Keep my draft in this tab across refresh choice. It stores the CV and vacancy in that tab for thirty minutes after your last change. Read a restored draft and approve again.",
+      "durationSeconds": 29,
+      "demo": {
+        "section": "Draft recovery (optional)",
+        "fields": [
+          {
+            "label": "Keep my draft in this tab across refresh",
+            "value": "Choose only if you want temporary tab storage."
+          },
+          {
+            "label": "Restored approval",
+            "value": "Cleared; review and approval are required again."
+          }
+        ],
+        "action": "Review recovery choices",
+        "note": "Anyone using this browser tab may see a retained draft."
+      }
+    },
+    {
+      "id": "loop-memory",
+      "stageId": "loop-draft-recovery",
+      "title": "Know what can return",
+      "instruction": "Return to Job Loop in the same tab within 30 minutes for unsaved draft memory. Refresh, closing the tab or changing accounts clears it. Saved account records are separate.",
+      "caption": "Recovered claim and contact confirmations reset. A saved account record is not a temporary draft.",
+      "narration": "Job Loop keeps unsaved career, claim and new-vacancy edits only in memory for up to thirty minutes across page navigation. Refresh, closing the tab or changing accounts clears them. Recovered claim and contact confirmations reset. Saved account records are separate, and cloud runs may still continue. Read recovery help before relying on temporary memory.",
+      "durationSeconds": 29,
+      "demo": {
+        "section": "Job Loop · Unsaved edits",
+        "fields": [
+          {
+            "label": "Route recovery",
+            "value": "Same tab and account, up to 30 minutes."
+          },
+          {
+            "label": "After recovery",
+            "value": "Read the source again; fact and contact confirmations reset."
+          }
+        ],
+        "action": "Read recovery help",
+        "note": "This tutorial records no CV text, account details or browser draft."
+      }
+    }
+  ]
+}

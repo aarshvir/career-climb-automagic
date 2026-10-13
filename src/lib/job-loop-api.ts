@@ -163,15 +163,24 @@ export async function getLoopPreview(userId:string,packetId:string,inputHash:str
   const result=await callJobLoop(userId,{action:'preview_packet',packetId,inputHash});
   return fetchLoopArtifact(userId,result);
 }
+export const LOOP_ARTIFACT_TIMEOUT_MS=45000;
 async function fetchLoopArtifact(userId:string,result:LoopResponse){
   if (!result.url || !result.filename) throw new Error('The approved document is not available yet.');
   const url = safeLoopDownloadUrl(result.url, userId);
-  let response: Response;
-  try { response = await fetch(url, { credentials: 'omit', cache: 'no-store', redirect: 'error' }); }
-  catch { throw new Error('The private document could not be loaded. Request a fresh link and retry.'); }
-  if (!response.ok) throw new Error('The document could not be downloaded. Request a fresh link and retry.');
-  if (Number(response.headers.get('content-length') || 0) > 10 * 1024 * 1024) throw new Error('The document exceeds the download limit.');
-  const blob = await response.blob().catch(() => { throw new Error('The private document could not be read. Request a fresh link and retry.'); });
+  const controller=new AbortController();
+  let deadlineTimer:ReturnType<typeof setTimeout>;
+  const deadline=new Promise<never>((_,reject)=>{deadlineTimer=setTimeout(()=>{controller.abort();reject(new Error('The document download timed out. Try again to request a fresh private link.'));},LOOP_ARTIFACT_TIMEOUT_MS);});
+  const transfer=(async()=>{
+    let response:Response;
+    try { response=await fetch(url,{credentials:'omit',cache:'no-store',redirect:'error',signal:controller.signal}); }
+    catch { throw new Error('The private document could not be loaded. Request a fresh link and retry.'); }
+    if(!response.ok)throw new Error('The document could not be downloaded. Request a fresh link and retry.');
+    if(Number(response.headers.get('content-length')||0)>10*1024*1024)throw new Error('The document exceeds the download limit.');
+    return response.blob().catch(()=>{throw new Error('The private document could not be read. Request a fresh link and retry.');});
+  })();
+  let blob:Blob;
+  try {blob=await Promise.race([transfer,deadline]);}
+  finally {clearTimeout(deadlineTimer!);controller.abort();}
   await requireLoopOwner(userId);
   if (blob.size > 10 * 1024 * 1024) throw new Error('The document exceeds the download limit.');
   return { blob, filename: safeDocumentFilename(result.filename) };

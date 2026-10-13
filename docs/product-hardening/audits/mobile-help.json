@@ -1,0 +1,414 @@
+{
+  "auditId": "mobile-help",
+  "auditorRole": "Independent mobile, accessibility and help customer auditor",
+  "persona": "30-year-old nontechnical applicant using a phone with a readable CV",
+  "initialScoresFrozen": true,
+  "scoreFrozenAtUtc": "2026-10-13T18:48:12Z",
+  "timing": {
+    "startedAtUtc": "2026-10-13T18:40:34Z",
+    "initialObservationEndedAtUtc": "2026-10-13T18:48:12Z",
+    "initialObservationDurationSeconds": 458,
+    "notes": "Audit wall time, not a human task-completion benchmark. UI tool wall times included ~0.39 s for several step changes and 3.30 s for PDF preview generation plus observation; these are not browser performance measurements."
+  },
+  "scope": {
+    "publicBaseUrl": "http://127.0.0.1:8381",
+    "publicRoutes": [
+      "/",
+      "/check",
+      "/job-loop",
+      "/for-students",
+      "/for-mba",
+      "/for-career-switchers",
+      "/help",
+      "/walkthroughs",
+      "/guides",
+      "/guides/cv-upload-failure-checklist"
+    ],
+    "privateDemoBaseUrl": "http://127.0.0.1:8382",
+    "privateDemoStages": [
+      "record",
+      "confirmed",
+      "opportunities",
+      "coverage"
+    ],
+    "privateDemoLimit": "FICTIONAL LOCAL DEMO: real product screens with fictional data and in-memory service; external network blocked. This is not evidence of real account, cloud, source, model, mailbox or application execution.",
+    "browser": "Codex In-app Browser, independent audit-created tab 1",
+    "mobileViewport": {
+      "width": 390,
+      "height": 844
+    },
+    "desktopViewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "viewportOverrideReset": true,
+    "actualInputs": "Only fictional CV and fictional vacancy text",
+    "noActions": [
+      "No real account creation or login",
+      "No purchases",
+      "No external model calls",
+      "No mail actions",
+      "No employer application actions",
+      "No real user data"
+    ],
+    "notTested": [
+      "Real handset/browser",
+      "Screen-reader output",
+      "Formal contrast audit",
+      "Zoom and reduced-motion preferences",
+      "CV file import",
+      "Downloaded document fidelity",
+      "Live cloud persistence or scheduling",
+      "Mailbox integration"
+    ],
+    "suppliedCloudChecks": "The parent may supply 75 cloud checks as separate root proof. This auditor did not run, inspect or count them as independent UI evidence."
+  },
+  "fingerprint": {
+    "repository": "C:/Users/user/OneDrive/Documents/Projects/Job CV linkedin/jobvance-independent",
+    "branch": "main",
+    "baseCommit": "f225451e8fc33a71848d8167a793e90c1a2dfb24",
+    "workingTree": "Modified hardening tree; base commit alone does not identify the served code.",
+    "fingerprintCapturedAtUtc": "2026-10-13T18:48:12Z",
+    "files": {
+      "src/pages/CvCheck.tsx": "4f66f9e8fa05d50b320e020814584de29c85e2d463e8f5464db5ce82ebecd740",
+      "src/pages/CvCheck.css": "e3bd7b485155ac4f944e979876fe44a7ab03f773fbe0691a2d38d3c2600fa9ed",
+      "src/pages/HelpCenter.tsx": "00d3b94a3d61a2307869de3dd0866ab83d6482a90172522a560d5ad7f33276ea",
+      "src/pages/Walkthroughs.tsx": "dec55073946fd5b3350e23bac8a31eae0fbe4dc3273f62a3d7dc9f4ee06d8be1",
+      "src/pages/Walkthroughs.css": "5f916314ca15ff7757416ad5671979fff3b3f9a17bf4a2b09329cdd31106cc69",
+      "src/pages/JobLoop.tsx": "93f2548679f7ac841847e72b65871d439be58184c067fc206d24ac682a9978d6",
+      "src/pages/JobLoopPanels.tsx": "e216ed228255b7320e662c25ece1011c002154dc050f5fada2a5b3937e507736",
+      "src/pages/CareerGuides.tsx": "c2202e66badaa655d071dd13e9b1e44adaeb9fe31aebd969bbdbd1d01b73177c",
+      "src/components/RouteNavigation.tsx": "357bec62238e46bfa97886bb04489517058fec00e0e206e8ccde7ee998e08821",
+      "src/components/layout/MvpHeader.tsx": "0402c30c1d6a62c4e8f1dedc4909fca20307e0d84a5df86a30ebd66d5c27cf5e"
+    },
+    "note": "Hashes only: no implementation source, prior grades, or target scores were read. This is a repository fingerprint adjacent to the UI audit, not a complete served-bundle fingerprint."
+  },
+  "scores": {
+    "clarity": 87,
+    "activation": 82,
+    "formEffort": 84,
+    "evidenceQuality": 80,
+    "workflowCompleteness": 79,
+    "reuseTimeSaving": 82,
+    "helpWalkthroughs": 83,
+    "uiAccessibility": 79,
+    "trustPrivacy": 91,
+    "reliability": 78
+  },
+  "equalWeightMean": 82.5,
+  "dimensions": [
+    {
+      "key": "clarity",
+      "label": "Clarity",
+      "score": 87,
+      "weight": 0.1,
+      "rationale": "Free start, required materials and applicant responsibility are explicit. Phone pages have more introductory copy and repeated choices than the task needs."
+    },
+    {
+      "key": "activation",
+      "label": "Activation",
+      "score": 82,
+      "weight": 0.1,
+      "rationale": "The free check starts without an account or card and a prominent phone CTA is usable. Walkthrough entry requires substantial scrolling."
+    },
+    {
+      "key": "formEffort",
+      "label": "Form effort",
+      "score": 84,
+      "weight": 0.1,
+      "rationale": "One required role, CV text and vacancy text; company and factual additions are optional. The private demo requests name, roles and location with other preferences collapsed."
+    },
+    {
+      "key": "evidenceQuality",
+      "label": "Evidence quality",
+      "score": 80,
+      "weight": 0.1,
+      "rationale": "Literal passages, line references and missing evidence are clear. A vacancy-title line was counted as a finding in the fictional sample, so counts require interpretation."
+    },
+    {
+      "key": "workflowCompleteness",
+      "label": "Workflow completeness",
+      "score": 79,
+      "weight": 0.1,
+      "rationale": "The public six-step journey reached approval and enabled download choices, plus reuse. Private screens expose the continuing loop, but this auditor did not execute real saving or cloud work."
+    },
+    {
+      "key": "reuseTimeSaving",
+      "label": "Reuse / time-saving",
+      "score": 82,
+      "weight": 0.1,
+      "rationale": "Chosen CV text carries to another vacancy and unchanged facts are explicitly reusable in the private demo. Replacing the current approved check is immediate after the explanatory warning."
+    },
+    {
+      "key": "helpWalkthroughs",
+      "label": "Help / walkthroughs",
+      "score": 83,
+      "weight": 0.1,
+      "rationale": "Search, no-results guidance, task links, five interactive walkthroughs, captions and transcripts are useful and honest. There were no recorded video/audio/track elements at initial audit time."
+    },
+    {
+      "key": "uiAccessibility",
+      "label": "UI / accessibility",
+      "score": 79,
+      "weight": 0.1,
+      "rationale": "Measured no horizontal overflow in inspected states, labeled controls, landmarks, skip link and strong visible focus. Endpoint buttons lose keyboard focus; validation does not associate its alert with the input; some link targets are small."
+    },
+    {
+      "key": "trustPrivacy",
+      "label": "Trust / privacy",
+      "score": 91,
+      "weight": 0.1,
+      "rationale": "Local checking, optional temporary storage, private saving, factual review and user submission are distinguished clearly. This score reflects visible consent and disclosure, not a security certification."
+    },
+    {
+      "key": "reliability",
+      "label": "Reliability",
+      "score": 78,
+      "weight": 0.1,
+      "rationale": "Sampled transitions, filtering, draft navigation recovery and clear cancellation worked. The embedded PDF panel was blank in IAB and live private/cloud behavior was outside independent test scope."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E01",
+      "kind": "measured + visual inspection",
+      "route": "/",
+      "finding": "390×844 viewport confirmed; document scrollWidth 375 with the browser's scrollbar, no horizontal overflow. Mobile menu toggles expanded/collapsed with accessible names."
+    },
+    {
+      "id": "E02",
+      "kind": "UI interaction",
+      "route": "/check",
+      "finding": "Fictional Operations analyst role, short readable CV and 4 substantive vacancy requirements completed all six steps. Source passages were stacked and readable on phone; approval enabled PDF/DOCX/TXT and separate report controls."
+    },
+    {
+      "id": "E03",
+      "kind": "measured DOM semantics",
+      "route": "/check",
+      "finding": "Empty role submit focused #check-role and created role=alert text 'Enter the role you want to prepare for.' The input had aria-invalid=null and aria-describedby=null."
+    },
+    {
+      "id": "E04",
+      "kind": "UI interaction",
+      "route": "/check",
+      "finding": "Use this CV for another vacancy immediately returned to step 1, preserved chosen source CV and cleared role, vacancy and approval. Consequence warning was visible before the action; no confirmation or undo was shown."
+    },
+    {
+      "id": "E05",
+      "kind": "UI interaction + measurement",
+      "route": "/check",
+      "finding": "Preview current PDF returned 1 page within selected maximum in a 3.30-second tool wall time. The 275×360 iframe was visually blank and AXWebArea about:blank; exact-preview new-tab link was present. Browser-specific rendering, not proven corrupt PDF."
+    },
+    {
+      "id": "E06",
+      "kind": "UI interaction",
+      "route": "/help",
+      "finding": "Search 'scanned' returned 1 topic; result count has role=status. A nonsense query returned 0 topics plus shorter-search and Show all topics guidance. Related recovery link reset filters and focused #recovery."
+    },
+    {
+      "id": "E07",
+      "kind": "UI interaction + measurement",
+      "route": "/walkthroughs",
+      "finding": "Previous, Next, Restart, direct-step buttons and caption toggle worked. Initial tutorial heading top was 1739.73px at 390×844, beneath five stacked chooser cards. Full transcript opens and labels narration times as planned."
+    },
+    {
+      "id": "E08",
+      "kind": "measured DOM + keyboard interaction",
+      "route": "/walkthroughs",
+      "finding": "ArrowRight advanced a focused Next button; End reached step 6, disabled the focused Next button and document.activeElement became BODY. Home while Previous was focused likewise reached step 1 and lost focus. Home/End focused on section[tabindex=0] retained section focus."
+    },
+    {
+      "id": "E09",
+      "kind": "UI interaction",
+      "route": "/guides",
+      "finding": "Search 'upload' returned 3 guides. The upload-failure guide opened with sources, fictional example, takeaways and help-request guidance. Guide section anchor updated hash and focus to its section."
+    },
+    {
+      "id": "E10",
+      "kind": "visual + measured inspection",
+      "route": "/for-students, /for-mba, /for-career-switchers, /job-loop",
+      "finding": "Audience-specific copy and CTAs are understandable and no horizontal overflow was measured. Main MBA lead text was 15px; secondary account disclosure 11px; source/reuse supporting copy 13px."
+    },
+    {
+      "id": "E11",
+      "kind": "fictional local UI evidence",
+      "route": "8382 stages",
+      "finding": "Career record exposes named labels; source suggestion preserves complete university passage, team credit, forecast and no measured savings. Opportunity form separates vacancy data from optional contact and self-reported tracking. Coverage explicitly states no run/network/document was created."
+    },
+    {
+      "id": "E12",
+      "kind": "keyboard interaction",
+      "route": "/, /check",
+      "finding": "Skip link moved focus to main-content. Tab order went Target role → Company (optional) → Continue. Header Help then Free CV check restored 291-character draft and review reminder. Clear & start again exposed Keep this check / Clear current check; keyboard cancellation preserved the draft."
+    },
+    {
+      "id": "E13",
+      "kind": "measured hitboxes + visual contrast inspection",
+      "route": "Multiple",
+      "finding": "Standalone claim help links were ~17px high; walkthrough secondary links ~19.8px; footer legal links ~19.2px; breadcrumb links ~21.4px. Primary actions were visibly larger and focus rings readable. This is not a WCAG target-size or contrast pass/fail audit."
+    }
+  ],
+  "highestValueFixes": [
+    {
+      "id": "MH-01",
+      "priority": "P2",
+      "type": "reproducible keyboard defect",
+      "title": "Keep keyboard focus when a walkthrough endpoint disables its button",
+      "repro": [
+        "Open /walkthroughs on desktop.",
+        "Focus Next step and press End.",
+        "Inspect focus: step 6 is displayed, Next is disabled, activeElement is BODY.",
+        "From the final step focus Previous step and press Home; the same loss occurs at step 1."
+      ],
+      "impact": "A keyboard user loses their position at the tutorial boundary and must find the controls again.",
+      "acceptance": [
+        "After Next/Previous, Home/End or a direct-step selection reaches a boundary, focus stays in the walkthrough on an enabled control or the focusable region.",
+        "Tab continues to a predictable adjacent control.",
+        "The role=status step announcement remains correct."
+      ]
+    },
+    {
+      "id": "MH-02",
+      "priority": "P2",
+      "type": "reproducible semantic gap",
+      "title": "Associate validation errors with their inputs",
+      "repro": [
+        "Open /check with an empty Target role.",
+        "Activate Continue to your CV.",
+        "An alert appears and focus moves to #check-role; aria-invalid and aria-describedby are absent."
+      ],
+      "impact": "The error exists separately from the field; revisiting the field does not expose an explicit programmatic error relationship.",
+      "acceptance": [
+        "The invalid field has aria-invalid=true and aria-describedby pointing to a visible error with a stable id.",
+        "The error is positioned near the field and remains reachable on phone.",
+        "Correcting the field removes the invalid state and obsolete error reference."
+      ]
+    },
+    {
+      "id": "MH-03",
+      "priority": "P2",
+      "type": "accidental-replacement risk",
+      "title": "Protect the open approved check when starting another vacancy",
+      "repro": [
+        "Complete and approve a fictional check without downloading or saving.",
+        "Under Your next application leave Reviewed source CV selected.",
+        "Activate Use this CV for another vacancy.",
+        "The app immediately returns to step 1 and clears the old vacancy and approval; only the preceding warning provided protection."
+      ],
+      "impact": "A hurried phone user can replace their only open approved comparison before keeping it.",
+      "acceptance": [
+        "A final confirmation or reliable undo protects replacement of an unsaved approved check.",
+        "The confirmation names what will carry over and what will be cleared, and offers download/save or cancel.",
+        "Cancel preserves the open check. New vacancy still requires fresh review and approval."
+      ]
+    },
+    {
+      "id": "MH-04",
+      "priority": "P2",
+      "type": "mobile workflow improvement",
+      "title": "Bring the selected walkthrough above the long chooser",
+      "repro": [
+        "Open /walkthroughs at 390×844.",
+        "Measure the selected first tutorial heading: top ~1739.73px.",
+        "Five large choice cards appear before any tutorial step or next-step control."
+      ],
+      "impact": "The first useful instruction is more than two phone viewports down; the page asks for substantial scrolling before the chosen task starts.",
+      "acceptance": [
+        "At phone width show a compact selected-task chooser and the current walkthrough before the full chooser list.",
+        "Selecting a task focuses or scrolls to the selected walkthrough below the sticky header.",
+        "Previous/Next and caption state remain accessible and do not overlap content."
+      ]
+    },
+    {
+      "id": "MH-05",
+      "priority": "P3",
+      "type": "mobile hit-area improvement",
+      "title": "Increase standalone secondary help link hit areas",
+      "repro": [
+        "At 390×844 inspect claim-library Help with fact review and walkthrough Read task help / Help links.",
+        "Their measured link boxes are ~17–19.8px high; legal and breadcrumb links are ~19.2–21.4px high."
+      ],
+      "impact": "Small secondary targets are harder to activate accurately for a phone applicant who needs recovery guidance.",
+      "acceptance": [
+        "Provide larger padded hit areas for standalone help/recovery actions, aiming at 44px where layout permits and preserving clear spacing.",
+        "Check adjacent targets for accidental activation.",
+        "Retain underline or another non-color identification. Inline prose links can retain appropriate text layout; do not claim formal compliance from box height alone."
+      ]
+    }
+  ],
+  "caveats": [
+    "One initial pointer click on a filtered help result left /help with focus main-content and target top about 624px. Desktop keyboard recheck correctly navigated to /help#uploads and focused uploads, settled top 205px. The initial anomaly is not asserted as a reproducible defect or included among the five fixes.",
+    "Smooth scrolling produced some intermediate screenshots; stable measurements and subsequent state were used before drawing conclusions.",
+    "No contrast ratios were calculated. Contrast and focus visibility were inspected visually; this is not WCAG certification.",
+    "Initial public walkthrough inspection showed zero video, audio and track elements. A later recording/caption addition needs a targeted recheck and must not silently replace these frozen initial scores."
+  ],
+  "screenshot": ".sites-runtime/audit-mobile/walkthrough-keyboard-end.jpg",
+  "lateRecheck": {
+    "type": "narrow independent fix verification",
+    "startedAtUtc": "2026-10-13T19:25:40Z",
+    "endedAtUtc": "2026-10-13T19:29:14Z",
+    "scorePolicy": "Original 82.5 mean and all original dimension scores remain frozen. No new global score.",
+    "browser": "New Chrome audit tab 1385099060; IAB unavailable on recheck",
+    "viewports": {
+      "mobile": {
+        "width": 390,
+        "height": 844
+      },
+      "desktop": {
+        "width": 1920,
+        "height": 855
+      }
+    },
+    "viewportOverrideReset": true,
+    "baseUrl": "http://127.0.0.1:8381",
+    "scope": "Only MH-01 through MH-05. Fictional local CV/vacancy text, no service/account/mail/model/application action.",
+    "resolutions": [
+      {
+        "id": "MH-01",
+        "status": "resolved",
+        "evidence": "End from focused Next now reaches step 6 with focus on SECTION tabindex=0 aria-labelledby=wt-tutorial-title; Home from focused Previous reaches step 1 and retains the same player focus. Status announces the correct step."
+      },
+      {
+        "id": "MH-02",
+        "status": "resolved",
+        "evidence": "Empty role, empty CV and empty vacancy submits each focused the offending field, set aria-invalid=true and aria-describedby=check-validation-error. The referenced text matched that field's actual validation message. Filling each field removed both attributes."
+      },
+      {
+        "id": "MH-03",
+        "status": "resolved within stated page lifetime",
+        "evidence": "After approving an unsaved fictional check and starting another vacancy, Undo new application appeared with its page-only lifetime explained. Undo returned to step 5 and restored source CV, previous vacancy, and the distinct final edit (Education newline BA Business, 2021). In a direct undo→Recheck my changes & continue test, both approval/privacy checks were false and Approve, PDF, DOCX, TXT and evidence-report downloads remained disabled. No old approval was reused."
+      },
+      {
+        "id": "MH-04",
+        "status": "resolved core mobile chooser issue",
+        "evidence": "At 390×844 initial chooser contains only the selected task, with Choose a different task exposing all five. Selecting the career-record tutorial collapsed alternatives and left that selected card first and visible. First tutorial title document Y was 1000.375px compared with initial 1739.73px. Selection remains focused on the selected card; player is immediately below it, with no horizontal overflow."
+      },
+      {
+        "id": "MH-05",
+        "status": "partially resolved; walkthrough scope verified",
+        "evidence": "Help, Read task help, How Job Loop works, Career guides and Get workflow help link boxes are all 32px high, increased from about 19.8px. Footer Privacy/Terms/Refunds remain 19.1875px high. Claim-library links were not revisited in this narrow public recheck. 32px is an improvement but below the original suggested 44px aim; target height alone is not a formal compliance result."
+      }
+    ],
+    "remainingIssues": [
+      {
+        "priority": "P3",
+        "id": "MH-05",
+        "finding": "Broader original secondary-target recommendation remains partly open: footer legal links still 19.19px; walkthrough links are 32px rather than the suggested 44px aim. No remaining material keyboard/undo defect was observed in the requested reproductions."
+      }
+    ],
+    "screenshots": [
+      ".sites-runtime/audit-mobile/mobile-chooser-recheck.jpg",
+      ".sites-runtime/audit-mobile/undo-review-recheck.jpg"
+    ],
+    "fingerprintCapturedAtUtc": "2026-10-13T19:29:14Z",
+    "sha256": {
+      "src/pages/CvCheck.tsx": "81dd3380ad76287f9297c5b4d9d788177e3733c4798da00883badf80679ac504",
+      "src/pages/CvCheck.css": "370dd567fa2dbc520c2784718c65ecc0a8f8f4275164db2c60a9cdc9aa7af3a5",
+      "src/pages/Walkthroughs.tsx": "79f1a90ff065d313adb5e704812d3c60a3915a51cc3f6334837708e106d0916f",
+      "src/pages/Walkthroughs.css": "07d24688c18ecabb4a1239605c966c3d6d38823e3d82526e11ce8f71e906db0f"
+    },
+    "mediaPolicy": "No video availability credit or playback/caption assessment. Media/metadata additions are outside this fix recheck.",
+    "limitation": "Keyboard DOM focus, ARIA relationships and visible states were tested. No screen-reader speech or WCAG certification claim."
+  }
+}
+

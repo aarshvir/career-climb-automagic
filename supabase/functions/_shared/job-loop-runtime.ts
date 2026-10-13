@@ -7,22 +7,17 @@ import { buildInterviewBrief } from './job-loop-preparation.ts';
 import { LIMITS, RULES_MODEL, digest, stableUuid, modelOptions, modelConfiguration, prepareModelRequest, callModel, searchReady, searchTavily, TAVILY_CREDIT_MICROS, employerFeeds, readEmployerFeed, safePublicUrl, type LoopEnv, type LoopFetch } from './job-loop-providers.ts';
 import { beginGmail, createGmailDraft, gmailConfigured, readRecruitmentInbox,previewGmailTicket,finalizeGmailTicket } from '../job-loop-oauth/gmail.ts';
 import type { LoopAction, LoopClaim, LoopLane, LoopOpportunity, LoopResponse, LoopSnapshot } from './job-loop-types.ts';
+import { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
+export { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
 
 export function validateControlInput(value: unknown): LoopAction {
   try { return validateAction(value); } catch(error) { throw new ApiError(400,'LOOP_INVALID_INPUT',error instanceof Error?error.message.slice(0,300):'Invalid loop input.'); }
 }
 export function selectPreparationOpportunities(profile:Parameters<typeof assessOpportunity>[0],claims:LoopClaim[],opportunities:LoopOpportunity[]):LoopOpportunity[]{
   return opportunities.filter(item=>['saved','prepared'].includes(item.status)&&item.verification!=='closed_confirmed').map(opportunity=>({opportunity,assessment:assessOpportunity(profile,claims,opportunity)}))
-    .filter(item=>item.opportunity.source==='manual'||matchesDiscoveryTarget(profile,item.opportunity)&&!item.assessment.flags.includes('EXPERIENCE_REQUIREMENT_GAP'))
+    .filter(item=>item.opportunity.source==='manual'||matchesDiscoveryTarget(profile,item.opportunity))
     .sort((a,b)=>Number(b.opportunity.source==='manual')-Number(a.opportunity.source==='manual')||Number(b.opportunity.status==='saved')-Number(a.opportunity.status==='saved')||b.assessment.score-a.assessment.score)
     .slice(0,LIMITS.packets).map(item=>item.opportunity);
-}
-export function matchesDiscoveryTarget(profile:Parameters<typeof assessOpportunity>[0],opportunity:LoopOpportunity):boolean {
-  if(profile.excludedTerms.some(term=>`${opportunity.title} ${opportunity.company} ${opportunity.description}`.toLowerCase().includes(term.toLowerCase())))return false;
-  const words=(value:string)=>value.toLowerCase().match(/[\p{L}\p{N}]+/gu)?.filter(word=>word.length>2&&!['senior','junior','graduate','entry','level','intern','internship','the','and','for','with'].includes(word))??[];
-  const title=new Set(words(opportunity.title));const role=profile.targetTitles.some(target=>{const targets=words(target);return targets.length>0&&targets.filter(word=>title.has(word)).length/targets.length>=0.5;});
-  const location=!profile.locations.length||profile.locations.some(place=>opportunity.location.toLowerCase().includes(place.toLowerCase())||/^(?:remote|anywhere|global|worldwide)$/i.test(place)&&/remote|global|worldwide/i.test(opportunity.location));
-  return role&&location;
 }
 export function workerEnabled(env: LoopEnv): boolean { return env('JOB_LOOP_ENABLED')!=='false' && !!env('SUPABASE_URL') && !!env('SUPABASE_SERVICE_ROLE_KEY'); }
 export async function packetInputHash(profile:Parameters<typeof fingerprintLoopInputs>[0],claims:LoopClaim[],opportunity:LoopOpportunity):Promise<string>{
@@ -77,7 +72,7 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     configuredUsageCap(env);if(!action.recurringConsent)throw new ApiError(400,'LOOP_RECURRING_CONSENT','Explicitly enable recurring preparation.');
     if(!data.profile||!eligibleLoopClaims(data.profile,data.claims).length)throw new ApiError(422,'LOOP_CLAIMS_REQUIRED','Save your target and confirm at least one shareable fact before scheduling.');
     if(action.schedule.provider==='rules'){if(action.schedule.model!==RULES_MODEL)throw new ApiError(400,'LOOP_MODEL_INVALID','Choose the current rules preparation method.');}
-    else modelConfiguration(action.schedule.provider,action.schedule.model,env);
+    else throw new ApiError(422,'LOOP_SCHEDULE_MODEL_UNAVAILABLE','Recurring preparation currently uses the rules method. Start a manual run to explicitly select a model and review its processing route.');
     const scheduler=await repo.rpc<{ready:boolean}>('job_loop_scheduler_state',{});if(!scheduler.ready)throw new ApiError(503,'LOOP_SCHEDULER_UNAVAILABLE','Recurring dispatch is not connected yet. Manual preparation remains available.');
     await repo.rpc('job_loop_save_schedule',{p_user:userId,p_expected:action.expectedScheduleVersion,p_settings:action.schedule,p_next:nextScheduledInstant(action.schedule)});return finish('Recurring preparation is enabled. You can pause or cancel it here; sending remains your choice.');
   }
@@ -231,9 +226,12 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
         state.lanes!.push(lane('Broad web search',errors||profile.targetTitles.length>LIMITS.queries?'partial':queries.length?'completed':'not_run',count,`${queries.length} bounded title/location queries attempted of ${profile.targetTitles.length} target titles. Search results and snippets are not proof that a vacancy is open.`));
       }else state.lanes!.push(lane('Broad web search','not_connected',0,'Search is disabled or its server key is missing. No market-wide search is claimed.'));
       const known=await repo.record(run.user_id);const indexed=new Map(known.data.opportunities.map(item=>[item.sourceKey,item]));const newFound:LoopOpportunity[]=[];
-      for(const opportunity of found){const existing=indexed.get(opportunity.sourceKey);if(existing&&existing.source!=='manual'){const refreshed={...opportunity,id:existing.id,status:existing.status,notes:existing.notes,followUpAt:existing.followUpAt};indexed.set(opportunity.sourceKey,refreshed);newFound.push(refreshed);}else if(!existing&&indexed.size<100&&(opportunity.source==='web_search'||matchesDiscoveryTarget(profile,opportunity))){indexed.set(opportunity.sourceKey,opportunity);newFound.push(opportunity);}}
-      state.lanes!.push(lane('Targeted shortlist','completed',newFound.length,'Only target-role/location matches from the configured feeds are added. A limited-source result does not establish the size of the wider job market. Eligibility and source conditions still need your review.'));
-      const all=[...indexed.values()].filter(item=>['saved','prepared'].includes(item.status)&&item.verification!=='closed_confirmed');
+      let admitted=0;
+      // Refresh source facts on existing discoveries even if they no longer fit;
+      // retain their history, then apply the current target before preparation/reuse.
+      for(const opportunity of found){const matches=matchesDiscoveryTarget(profile,opportunity);const existing=indexed.get(opportunity.sourceKey);if(existing&&existing.source!=='manual'){const refreshed={...opportunity,id:existing.id,status:existing.status,notes:existing.notes,followUpAt:existing.followUpAt};indexed.set(opportunity.sourceKey,refreshed);newFound.push(refreshed);if(matches)admitted++;}else if(matches&&!existing&&indexed.size<100){indexed.set(opportunity.sourceKey,opportunity);newFound.push(opportunity);admitted++;}}
+      state.lanes!.push(lane('Targeted shortlist','completed',admitted,'Only declared role/location matches without a stated seniority, experience or comparable pay conflict are added. Unknown conditions remain unknown. Limited sources do not establish the size of the wider job market; eligibility and source conditions still need your review.'));
+      const all=[...indexed.values()].filter(item=>['saved','prepared'].includes(item.status)&&item.verification!=='closed_confirmed'&&(item.source==='manual'||matchesDiscoveryTarget(profile,item)));
       const existingPackets=(await repo.collections(run.user_id)).packets.filter(item=>['review_required','approved'].includes(item.status));
       const reusable=new Map<string,string>();
       for(const opportunity of all){const currentHash=await packetInputHash(profile,run.snapshot.claims,opportunity),packet=existingPackets.find(item=>item.data.opportunityId===opportunity.id&&item.data.inputHash===currentHash);if(packet)reusable.set(opportunity.id,packet.id);}
@@ -249,6 +247,7 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
       const opportunity=state.opportunities?.[run.phase-2];if(!opportunity){await repo.commit(run,7,'running',state);return true;}
       const current=await repo.record(run.user_id);const actual=current.data.opportunities.find(item=>item.id===opportunity.id);
       if(actual&&!['saved','prepared'].includes(actual.status)){state.messages!.push('An opportunity moved beyond preparation; its existing application history was preserved.');await repo.commit(run,run.phase+1,'running',state);return true;}
+      if(opportunity.source!=='manual'&&!matchesDiscoveryTarget(profile,opportunity)){state.messages!.push('An automatically found vacancy does not match the declared target and stated constraints. It was kept in your history and skipped for preparation.');await repo.commit(run,run.phase+1,'running',state);return true;}
       const assessment=assessOpportunity(profile,run.snapshot.claims,opportunity);const allowed=eligibleLoopClaims(profile,run.snapshot.claims).filter(claim=>assessment.claimIds.includes(claim.id));let selectedClaimIds:string[]|undefined;let modelQuestions:{question:string;claimIds:string[]}[]=[];
       if(run.provider!=='rules'){
         if((modelConfiguration(run.provider,run.model,env).transport??'direct')!==(run.consents.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','The processing route changed after approval. No paid call was made; start again with explicit route consent.');

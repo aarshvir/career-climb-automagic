@@ -1,0 +1,141 @@
+{
+  "source": "src/lib/walkthroughs.ts",
+  "sourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
+  "exportedAt": "2026-10-13T19:50:41.433Z",
+  "timingStatus": "planned; not measured render timings",
+  "id": "job-loop-start",
+  "title": "Set up your reusable career record",
+  "description": "Import once, check three details and confirm useful facts one passage at a time.",
+  "audience": "Students · MBA pivots · Employed professionals",
+  "helpAnchor": "job-loop-start",
+  "action": {
+    "label": "Open my Job Loop workspace",
+    "to": "/loop"
+  },
+  "scenes": [
+    {
+      "id": "open",
+      "stageId": "loop-today",
+      "title": "Open the saved workspace",
+      "instruction": "Sign in to your own Job Loop account. On Today, select Import or paste my CV, or open Career record.",
+      "caption": "The workspace saves your record. The free check remains available without an account.",
+      "narration": "Job Loop uses a private saved workspace. Sign in to your own account and open Today. Select Import or paste my CV, or choose Career record. If you want to try one comparison without an account, use the free CV check instead.",
+      "durationSeconds": 20,
+      "demo": {
+        "section": "Today",
+        "fields": [
+          {
+            "label": "Bring your CV",
+            "value": "Import or paste once"
+          },
+          {
+            "label": "Confirm useful facts",
+            "value": "No facts cleared in this fictional starting record"
+          }
+        ],
+        "action": "Import or paste my CV",
+        "note": "Fictional starting state; no account has been created."
+      }
+    },
+    {
+      "id": "source",
+      "stageId": "loop-record-source",
+      "title": "Bring your existing text",
+      "instruction": "Open 1. Import or paste your CV. Read a local CV on this device or paste into Reviewed source CV or career record. Select Continue with this text.",
+      "caption": "Review the wording before private saving. Your source file stays on your device.",
+      "narration": "Open the import step. Read a local CV, paste your career text or choose an owned saved CV if one is available. Review the extracted wording and remove confidential information. Select Continue with this text. Reading the file does not yet save your record.",
+      "durationSeconds": 23,
+      "demo": {
+        "section": "Career record · 1. Import or paste your CV",
+        "fields": [
+          {
+            "label": "Reviewed source CV or career record",
+            "value": "MBA operations project, 2026. My part was to map the process. Our team estimated a possible reduction in waiting time; this was not an implemented client result."
+          }
+        ],
+        "action": "Continue with this text",
+        "note": "English PDF, DOCX or TXT, up to 5 MB, or pasted text."
+      }
+    },
+    {
+      "id": "details",
+      "stageId": "loop-record-details",
+      "title": "Check three details and save privately",
+      "instruction": "Check My name, Target roles and Locations. Confirm private saving, then select Save career record. Leave optional preferences for later if you do not need them.",
+      "caption": "Roles and locations focus the work. A suggested role does not prove you qualify.",
+      "narration": "Check your name, enter one target role per line and add the places where you would work, or Remote. Optional preferences can wait. Leave unknown pay or experience unknown. Confirm that you want the reviewed text saved privately, then select Save career record.",
+      "durationSeconds": 24,
+      "demo": {
+        "section": "Career record · 2. Check three details and save privately",
+        "fields": [
+          {
+            "label": "My name",
+            "value": "Maya Example — fictional"
+          },
+          {
+            "label": "Target roles",
+            "value": "Operations analyst"
+          },
+          {
+            "label": "Locations",
+            "value": "Dubai"
+          }
+        ],
+        "action": "Save career record",
+        "note": "Private saving does not activate AI, inbox access or a schedule."
+      }
+    },
+    {
+      "id": "facts",
+      "stageId": "loop-record-facts",
+      "title": "Choose the fact’s real context",
+      "instruction": "In Your claim library, review the copied passage. Choose Evidence context, inspect the complete source and set Result status. Save claim only with accurate wording and appropriate sharing choices.",
+      "caption": "Keep the course or employer heading, your own contribution and estimated-result wording.",
+      "narration": "Review one literal passage at a time. Choose Evidence context yourself, and inspect the complete source and nearby heading. In this fictional MBA example, the team estimated a possible result, so choose Projected or estimated. Do not turn it into measured client work. Confirm accuracy and external-use permission only when true, then save the claim.",
+      "durationSeconds": 31,
+      "demo": {
+        "section": "Your claim library",
+        "fields": [
+          {
+            "label": "Evidence context",
+            "value": "academic project"
+          },
+          {
+            "label": "Source context label",
+            "value": "MBA operations project, 2026"
+          },
+          {
+            "label": "Result status",
+            "value": "Projected or estimated"
+          }
+        ],
+        "action": "Save claim",
+        "note": "Skip this passage is available for a fact you do not need."
+      }
+    },
+    {
+      "id": "next",
+      "stageId": "loop-opportunities",
+      "title": "Add the vacancy you want",
+      "instruction": "Open Opportunities. Enter the real posting in Add an opportunity and select Save opportunity. Return to Today to inspect available preparation.",
+      "caption": "Use unchanged confirmed facts again. Each output still needs its own review.",
+      "narration": "With useful facts saved, open Opportunities and add the posting you want to apply for. Use the actual title, company, HTTPS link and full description. Leave a named contact out unless you have checked a real source. Save the opportunity, then return to Today to inspect preparation availability.",
+      "durationSeconds": 25,
+      "demo": {
+        "section": "Opportunities · Add an opportunity",
+        "fields": [
+          {
+            "label": "Vacancy title",
+            "value": "Operations analyst — fictional posting"
+          },
+          {
+            "label": "Full vacancy description",
+            "value": "Copy the complete actual posting in your own workspace. This tutorial does not create a vacancy."
+          }
+        ],
+        "action": "Save opportunity",
+        "note": "A source link is not independent proof that a role is open."
+      }
+    }
+  ]
+}
