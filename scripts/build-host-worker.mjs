@@ -58,8 +58,14 @@ const ASSETS=${JSON.stringify(assets)};
 const PRIVATE_ROOTS=new Set(${JSON.stringify([...privateRoots])});
 const ASSET_ROOTS=new Set(${JSON.stringify([...assetRoots])});
 const decoded=new Map();
-function reply(request,status,message,extra={}){
+function responseHeaders(request,path=new URL(request.url).pathname){
   const headers=new Headers(SECURITY);
+  const root=(path.split('/')[1]||'').toLowerCase();
+  if(root==='admin'||root==='admin2')headers.set('X-Robots-Tag','noindex, nofollow, noarchive');
+  return headers;
+}
+function reply(request,status,message,extra={}){
+  const headers=responseHeaders(request);
   headers.set('Content-Type','text/plain; charset=utf-8');
   headers.set('Cache-Control','no-store');
   for(const [name,value] of Object.entries(extra))headers.set(name,value);
@@ -96,7 +102,7 @@ export default {fetch(request){
     if(ASSET_ROOTS.has(segments[1])||segments.some(segment=>segment.includes('.')))return reply(request,404,'Not found.');
     served='/index.html';asset=ASSETS[served];
   }
-  const headers=new Headers(SECURITY);
+  const headers=responseHeaders(request,path);
   headers.set('Content-Type',asset[0]);
   headers.set('ETag',asset[1]);
   headers.set('Cache-Control',served.endsWith('.html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');

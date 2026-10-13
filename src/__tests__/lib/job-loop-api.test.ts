@@ -5,6 +5,7 @@ vi.mock('@/utils/authSession', () => ({ readAuthSession: sdk.session }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: sdk.getUser }, functions: { invoke: sdk.invoke } } }));
 vi.mock('@/lib/cv-documents', () => ({ listCvDocuments: sdk.cvs }));
 import { callJobLoop, getLoopDownload, getLoopPreview, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl } from '@/lib/job-loop-api';
+import { validateAction as validateControlInput } from '../../../supabase/functions/_shared/job-loop-engine';
 
 beforeEach(() => {
   vi.clearAllMocks(); vi.stubEnv('VITE_SUPABASE_URL', 'https://qa.supabase.co');
@@ -14,6 +15,20 @@ beforeEach(() => {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
 
 describe('cloud loop API privacy and owner boundaries', () => {
+  it('keeps the paid route consent across browser parsing and server action validation',async()=>{
+    const action={action:'start_run',requestId:'00000000-0000-4000-8000-000000000001',provider:'openai',model:'gpt-6.1-sol',modelConsent:true,inboxConsent:false,processingRoute:'openrouter'} as const;
+    sdk.invoke.mockImplementationOnce(async(_name,options)=>{expect(validateControlInput(options.body)).toEqual(action);return{data:{message:'Synthetic action confirmed'},error:null};});
+    await callJobLoop('owner-a',action);expect(sdk.invoke).toHaveBeenCalledWith('job-loop-control',{body:action});
+  });
+  it('keeps the existing rules action valid without any external route',async()=>{
+    const action={action:'start_run',requestId:'00000000-0000-4000-8000-000000000001',provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false} as const;
+    sdk.invoke.mockImplementationOnce(async(_name,options)=>{expect(validateControlInput(options.body)).toEqual(action);return{data:{message:'Synthetic action confirmed'},error:null};});
+    await callJobLoop('owner-a',action);
+  });
+  it('preserves the named router transport in a parsed server snapshot',async()=>{
+    const snapshot={recordVersion:0,profile:null,claims:[],opportunities:[],runs:[],packets:[],inbox:[],models:[{provider:'openai',model:'gpt-6.1-sol',label:'GPT via OpenRouter',ready:true,transport:'openrouter',inputUsdPerMillion:2,outputUsdPerMillion:10}],capabilities:{cloudWorker:true,rulesEngine:true,webSearch:false,gmailRead:false,gmailDrafts:false,monthlyUsageCapUsd:50,dailyRunLimit:3},gmail:{connected:false,email:null,status:'Not connected',allowDrafts:false}};
+    sdk.invoke.mockResolvedValueOnce({data:{snapshot},error:null});const result=await callJobLoop('owner-a',{action:'get'});expect(result.snapshot?.models[0].transport).toBe('openrouter');
+  });
   it('strips unknown owner/endpoint/pricing fields instead of forwarding them', async () => {
     const action = { action: 'start_run', requestId: '00000000-0000-4000-8000-000000000001', provider: 'rules', model: 'grounded-rules-v1', modelConsent: false, inboxConsent: false } as const;
     await callJobLoop('owner-a', { ...action, userId: 'owner-b', endpoint: 'https://untrusted.invalid', price: 0 } as unknown as LoopAction);

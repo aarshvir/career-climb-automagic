@@ -95,7 +95,7 @@ export default function CvCheck() {
   const [cvReady, setCvReady] = useState(!!restored || !!recovery?.value.cvReady), [filename, setFilename] = useState(recovery?.value.filename ?? "");
   const [recoveryConsent, setRecoveryConsent] = useState(!!recovery?.storageConsented);
   const [pdfPreview, setPdfPreview] = useState<{ url: string; blob: Blob; key: string; pageCount: number } | null>(null), [pdfError, setPdfError] = useState('');
-  const [pageTarget, setPageTarget] = useState<1 | 2>(2);
+  const [pageTarget, setPageTarget] = useState<1 | 2>(recovery?.value.pageTarget ?? 2);
   const [omitParagraphs, setOmitParagraphs] = useState<number[]>([]), [beforeSelection, setBeforeSelection] = useState<string | null>(null);
   const [fact, setFact] = useState(""), [factPermitted, setFactPermitted] = useState(false), [question, setQuestion] = useState("");
   const [googleConsent, setGoogleConsent] = useState(false), [showAccount, setShowAccount] = useState(false);
@@ -117,7 +117,7 @@ export default function CvCheck() {
   function editDraft(patch: Partial<CheckDraft>, keepSelectionUndo = false) { invalidate(); setOmitParagraphs([]); if (!keepSelectionUndo) setBeforeSelection(null); setDraft(current => ({ ...current, ...patch })); }
   function reset() {
     invalidate(); setDraft(emptyDraft); setStep(1); setReport(null); setCvReady(false); setFilename(""); setFact(""); setQuestion(""); setFactPermitted(false); setGoogleConsent(false); setShowAccount(false); setResetConfirm(false); setDeleteTarget(null);
-    clearCheckRecovery(); setRecoveryConsent(false); setOmitParagraphs([]); setBeforeSelection(null);
+    clearCheckRecovery(); setRecoveryConsent(false); setPageTarget(2); setOmitParagraphs([]); setBeforeSelection(null);
   }
   useEffect(() => {
     mounted.current = true; clearRetainedCheck();
@@ -126,15 +126,15 @@ export default function CvCheck() {
   useEffect(() => () => { if (preparedFile) URL.revokeObjectURL(preparedFile.url); }, [preparedFile]);
   useEffect(() => () => { if (pdfPreview) URL.revokeObjectURL(pdfPreview.url); }, [pdfPreview]);
   useEffect(() => {
-    try { rememberCheckRecovery({ draft, step, cvReady, filename, ownerId: user?.id ?? null }, recoveryConsent); }
+    try { rememberCheckRecovery({ draft, step, cvReady, filename, ownerId: user?.id ?? null, pageTarget }, recoveryConsent); }
     catch (failure) { setRecoveryConsent(false); setError(failure instanceof Error ? failure.message : 'Draft recovery is unavailable.'); }
-  }, [draft, step, cvReady, filename, user?.id, recoveryConsent]);
+  }, [draft, step, cvReady, filename, user?.id, recoveryConsent, pageTarget]);
   useEffect(() => { heading.current?.focus({ preventScroll: true }); const target = step === 1 ? intro.current : heading.current; target?.scrollIntoView?.({ block: "start", behavior: "auto" }); }, [step]);
   useEffect(() => {
     const id = user?.id ?? null;
     if (previousOwner.current && previousOwner.current !== id) {
       revision.current += 1; clearRetainedCheck(); setDraft(emptyDraft); setStep(1); setReport(null); setPreparedFile(null); setApproved(null); setCheckedFacts(false); setCheckedPrivacy(false); setSaved(null); setSaveConsent(false); setCvReady(false); setFilename(""); setFact(""); setQuestion(""); setFactPermitted(false); setTracked(false); setShowAccount(false); setNotice("The account changed. The previous check was cleared from this page."); setError("");
-      clearCheckRecovery(); setRecoveryConsent(false); setPdfPreview(null); setPdfError(''); setBeforeSelection(null); setOmitParagraphs([]);
+      clearCheckRecovery(); setRecoveryConsent(false); setPageTarget(2); setPdfPreview(null); setPdfError(''); setBeforeSelection(null); setOmitParagraphs([]);
     }
     previousOwner.current = id;
     setSavedChecks([]); setSavedError(""); setDeleteTarget(null); setSavedLoading(!!id);

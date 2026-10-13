@@ -1,0 +1,115 @@
+{
+  "kind": "independent_review",
+  "usage": {
+    "inputTokens": 31085,
+    "actualMicros": 92963,
+    "outputTokens": 7027
+  },
+  "effort": "max",
+  "review": {
+    "scores": [
+      {
+        "score": 74,
+        "reason": "Strong need-fit in source for this persona: a dedicated student audience landing ('Your projects deserve a proper introduction'), record hints covering projects/internships/volunteering/coursework, claim kinds for academic_project/volunteering/internship, and a free no-account CV-to-vacancy evidence check with real downloads. The tool reviews and aligns existing material against a pasted vacancy rather than authoring a first CV, and it explicitly refuses to verify qualifications or predict outcomes — honest, but students starting from nothing still do the writing themselves. Live usefulness is not demonstrated by this package.",
+        "category": "user_need_value"
+      },
+      {
+        "score": 70,
+        "reason": "Source implements low-friction entry: /check works without signup, six numbered steps with guidance, audience carried via ?audience=student, editable suggested starting roles (e.g., 'Graduate business analyst', 'Operations intern'), and a 30-minute draft recovery with a clear restore notice. Account creation is only needed for private saving/tracking. However, the cloud Job Loop is capped at a 10-account pilot with explicit pilot-full handling, so a new student may be gated; no live onboarding journey was observed.",
+        "category": "onboarding"
+      },
+      {
+        "score": 60,
+        "reason": "Implemented source shows deliberate accessibility work: role=status loading regions, aria-labels/aria-current, decorative icons aria-hidden, per-step heading focus management with scrollIntoView, labelled Field/Select/Consent controls, details/summary disclosures, and titled iframes for PDF preview. But the coverage limits state layout, accessibility and mobile PDF interoperability were not observed; responsive/mobile behavior, keyboard completion of the full wizard, and screen-reader outcomes cannot be confirmed from excerpts. Partial confidence only.",
+        "category": "ux_accessibility_mobile"
+      },
+      {
+        "score": 80,
+        "reason": "This is the strongest area in source: server-side validateClaim enforces complete literal source passages preserving negation, contribution and attribution; the evidence engine distinguishes direct/partial/missing/review, detects pending coursework, weakened verbs, negation scoping and non-English text; downloads require dual fact/privacy confirmations; PDF preview is the exact byte artifact later downloaded; the evidence report is kept separate from the CV; and stale input hashes force re-review. Caveats: rendering is plain text-based layout with no demonstrated templates, and unsupported characters block PDF with DOCX/TXT fallback. Not observed live.",
+        "category": "evidence_trust_document_quality"
+      },
+      {
+        "score": 45,
+        "reason": "The reliable, implemented path is manual: the student pastes one vacancy, and assessment is an honestly-labeled heuristic ('approved-phrase-overlap-v1; heuristic relevance, not ATS or eligibility certification') with flags like EXPERIENCE_REQUIREMENT_GAP and PROJECT_AND_INTERNSHIP_CONTEXT_PRESERVED — good for internship gap analysis. Automated discovery (Tavily web search, employer feeds) requires configured API keys; matching is token-overlap heuristics on titles/locations. Actual vacancy coverage and configuration are unobserved and unknown; neither assumed working nor broken.",
+        "category": "job_coverage_relevance"
+      },
+      {
+        "score": 55,
+        "reason": "Automation exists in source but is consent- and configuration-gated: a rules mode using confirmed facts, optional per-run external model consent limited to claim selection, opt-in recurring schedules (weekdays/daily/weekly with timezone), Gmail draft creation only after packet approval plus recipient/attachment confirmation, and idempotent background runs. There is deliberately no auto-submit or send. For the free check, effort is mostly manual review and editing. Whether scheduler/providers are actually enabled is unobserved; realistic time savings are not established.",
+        "category": "automation_effort"
+      },
+      {
+        "score": 68,
+        "reason": "Source implements a coherent tracker: statuses saved→prepared→applied→interview→offer/rejected/withdrawn, follow-up dates with due/upcoming computation, next-action cards in the workspace overview, deadline requirements flagged in the evidence engine with timezone cautions, and Gmail read of recruitment inbox as an optional configured lane. Honest framing: 'The tracker records the progress you report. Opening a link does not count as a submission.' Manual status entry and unobserved live tracking mutations cap the score.",
+        "category": "tracking_actionability"
+      },
+      {
+        "score": 75,
+        "reason": "Notable implemented behavior: idempotency keys with 409 conflict when facts change, LOOP_STALE_INPUT rejection on approval after record/vacancy edits, resume/cancel run actions with honest worker-unreachable messaging, failed requests not consuming credits, 30-minute owner-bound draft recovery (memory-only by default, consented sessionStorage for refresh), account-change clearing, object-URL cleanup, ErrorBoundary and React Query retry. Recovery limits (tab close/sign-out clears unsaved work) are communicated rather than hidden. Live reliability and recovery outcomes were not observed.",
+        "category": "reliability_recovery"
+      },
+      {
+        "score": 82,
+        "reason": "Source implements unusually granular control: the free check runs client-side with no external AI; drafts stay in tab memory unless sessionStorage is consented; claims carry confirmed/shareable flags; excluded terms and discreet-search review flags exist; models receive only confirmed shareable facts plus vacancy text, not the raw CV; Gmail requires separate OAuth, drafts need explicit approval, no send capability, disconnect removes stored credentials; a privacy-request form is built in. Residual gaps: actual deployed data handling, retention and deletion execution are unobserved, and students are still advised to self-redact sensitive content.",
+        "category": "privacy_control"
+      },
+      {
+        "score": 42,
+        "reason": "Explicitly a persona inference, not purchase research: the capabilities a first-applicant needs most — CV check, evidence review, downloads, optional saving/tracking — are free with no card, and the pilot makes even the Job Loop free (capped at 10 accounts). Proposed tiers ($15/mo Focus, $29/mo Job Loop) are not for sale and skew toward recurring volume that suits busy professionals more than students, who are typically price-sensitive and apply in bursts. Inferred willingness to pay is therefore low-to-moderate; the free tier likely cannibalizes student payment unless recurring discovery proves indispensable.",
+        "category": "willingness_to_pay"
+      }
+    ],
+    "actions": [
+      {
+        "action": "Verify the live student onboarding and pilot gating end-to-end: create a fresh student account, complete career-record save, and confirm either pilot enrollment or an explicit pilot-full state with a defined waitlist path.",
+        "acceptanceCriterion": "A recorded test shows a new student account reaching a saved career record and receiving either active loop access or a clear, accurate pilot-full message; zero silent failures; evidence (screenshots/recordings) attached to the release notes."
+      },
+      {
+        "action": "Run and publish an authenticated rules-mode end-to-end test using a student fixture (academic project + volunteering, no inferred experience years), covering claim confirmation, packet review, dual-confirmation approval, and downloads.",
+        "acceptanceCriterion": "Test evidence shows a completed rules run; approval blocked until both fact and disclosure confirmations; downloaded PDF/DOCX byte-identical to the previewed artifact (hash match); tracker status changes only via explicit user update."
+      },
+      {
+        "action": "Validate internship/graduate vacancy discovery quality before relying on it: with search configured in a staging environment, run seeded internship queries and measure relevance of returned opportunities and correctness of experience-gap flags.",
+        "acceptanceCriterion": "In the seeded evaluation set, ≥80% of surfaced opportunities match declared target roles/locations by human review, EXPERIENCE_REQUIREMENT_GAP fires on listings stating minimum years above the profile, and all flags are visible in the run report."
+      },
+      {
+        "action": "Commission a WCAG 2.2 AA and mobile audit of /check and /loop, including full keyboard-only completion of the six-step check and small-viewport PDF preview behavior, then remediate findings.",
+        "acceptanceCriterion": "axe-core reports 0 critical/serious violations on both routes at 360px and desktop widths; the six-step check is completable by keyboard alone with visible focus; audit report and fixes linked in the commit."
+      },
+      {
+        "action": "Improve export document quality for first-applicant expectations: add at least one clean, ATS-parseable styled template while preserving the exact-preview guarantee, and extend character/format coverage guidance.",
+        "acceptanceCriterion": "Exported PDF/DOCX passes automated text-extraction checks (all sections machine-readable in reading order), respects the 1-/2-page target, matches the preview bytes, and unsupported-character cases produce the documented DOCX/TXT fallback with a clear message."
+      }
+    ],
+    "overall": 65.1,
+    "strengths": [
+      "Direct student fit: a dedicated /for-students audience, record guidance to 'start with projects, internships, volunteering and coursework', claim kinds covering academic_project/personal_project/volunteering/internship/education, a one-page CV default for students, and an explicit guarantee that no years of experience, credentials or leadership are inferred from audience choice.",
+      "Evidence integrity and anti-overclaiming: server-side claim validation requires complete literal source passages preserving negation, contribution and team attribution; the evidence engine flags pending coursework, weakened verbs (assisted/supported) and negations; external model output is restricted to claim IDs only — 'No generated factual text has been accepted.'",
+      "Genuinely free, account-optional core: the six-step CV check needs no signup or card, uses no pack credits, runs client-side without external AI, and provides exact-byte PDF preview plus PDF/DOCX/TXT downloads with a separate evidence report.",
+      "Privacy and consent architecture: in-memory 30-minute draft recovery with sessionStorage only after explicit consent, owner-bound drafts cleared on account change, per-claim shareable flags, excluded terms, discreet search, shareable-facts-only model payloads, separate Gmail OAuth with drafts requiring recipient/attachment approval, and no send or submit action.",
+      "Reliability engineering in source: idempotent run requests with hash-bound conflict detection, stale-input rejection before packet approval, resume/cancel run actions, dual fact/disclosure confirmations, draft invalidation on any edit, and honest failure messaging (e.g., worker unreachable → resume run)."
+    ],
+    "weaknesses": [
+      "No observed live behavior: this package is bounded source excerpts only; no authenticated run, scheduler execution, provider call, account save, or employer submission is demonstrated, and the free pilot is capped at 10 accounts (subscription-plans maxUsers: 10) with explicit pilot-full handling, so actual availability for a new student is unknown.",
+      "Job coverage is thin and uncertain: discovery depends on configured Tavily/employer feeds (searchReady requires API keys), matchesDiscoveryTarget uses token-overlap heuristics, and actual vacancy coverage was not observed; the dependable path is manual vacancy paste.",
+      "Document output quality is functionally plain: exports render reviewed text via jsPDF/docx with basic styling and no evidence of designed CV templates; unsupported characters hard-fail PDF generation (fallback to DOCX/TXT advised), and scanned PDFs/legacy .doc are unsupported, which affects real student files.",
+      "High manual burden by design: students must supply a CV and vacancy, review evidence, edit wording themselves, and tick dual confirmations; there is no guided CV authoring for someone writing their first CV, and English-only text analysis excludes non-English documents.",
+      "Automation value is gated: scheduler, external models, Gmail and search all require configuration and consent, none of which is demonstrated; the rules mode is implemented but its end-to-end effect on effort is unverified."
+    ],
+    "evidenceLimitations": [
+      "Bounded, partially truncated excerpts from one pinned commit; the full source is larger and unexamined files may change conclusions.",
+      "No live browser journey, authenticated execution, configured provider, scheduled run, account save, tracking mutation, erasure or employer submission is demonstrated; all behavior described is implemented source behavior, not observed live behavior.",
+      "Pilot availability (10-account cap), scheduler enablement, search/Gmail configuration and deployment parity with this commit are unknown.",
+      "Audience and pilot content in source is expressly fictional illustration, not customer outcomes or successful execution evidence.",
+      "Layout, accessibility conformance, mobile behavior, PDF interoperability across readers, multilingual and scanned-file handling, and realistic time savings were not observed.",
+      "Actual vacancy coverage, run limits enforcement, and document visual quality cannot be verified from excerpts; unknown capabilities are neither assumed successful nor declared broken.",
+      "Pricing and plan text do not establish purchase demand or paid entitlements; willingness-to-pay is a qualified persona inference, not purchase research."
+    ]
+  },
+  "persona": "student",
+  "returnedModel": "moonshotai/kimi-k3",
+  "baselineCommit": "2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69",
+  "evidenceSha256": "3ceffd92ca847f1f3376cbce9a134be6cfe3ec2e4ad498bda22e464422b1c385",
+  "requestedModel": "moonshotai/kimi-k3",
+  "providerRequestId": "gen-1791830775-hNhtGhOs5rAltZHqnk7Q"
+}

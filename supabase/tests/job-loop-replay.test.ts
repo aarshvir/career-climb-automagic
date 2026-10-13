@@ -25,6 +25,20 @@ async function fixture(){
   return {repo,row,run,rpc};
 }
 describe('candidate-input idempotence after real background discovery',()=>{
+  it('binds paid processing consent and request identity to the reviewed routing service',async()=>{
+    const h=await fixture();h.run.provider='openai';h.run.model='gpt-6.1-sol';h.run.consents={model:true,inbox:false,processingRoute:'openrouter'};
+    const routed={provider:'openai' as const,model:'gpt-6.1-sol',modelConsent:true,inboxConsent:false,processingRoute:'openrouter' as const};
+    expect(await canReplayPreparation(h.run,h.row.data,routed)).toBe(true);
+    expect(await canReplayPreparation(h.run,h.row.data,{...routed,processingRoute:'direct'})).toBe(false);
+    expect(await preparationRequestHash(h.row.data,routed)).not.toBe(await preparationRequestHash(h.row.data,{...routed,processingRoute:'direct'}));
+  });
+  it('requires renewed route consent before a new OpenRouter run and reserves nothing on stale direct consent',async()=>{
+    const h=await fixture();vi.mocked(h.repo.requestRun).mockResolvedValue(null);
+    const routedEnv=(name:string)=>name==='JOB_LOOP_OPENROUTER_API_KEY'?'fictional-test-credential':name==='JOB_LOOP_OPENROUTER_ENABLED'?'true':env(name);
+    const request={...action,provider:'openai' as const,model:'gpt-6.1-sol',modelConsent:true};
+    await expect(controlLoop(h.repo,owner,request,routedEnv)).rejects.toMatchObject({code:'LOOP_PROCESSING_ROUTE_CHANGED'});
+    expect(h.rpc).not.toHaveBeenCalled();
+  });
   it('replays the owned legacy request after listings and freshness timestamps change without creating a new run or paid call',async()=>{
     const h=await fixture(),network=vi.fn(async()=>{throw Error('A completed replay must not make network calls.');});
     expect(await fingerprintLoopInputs(h.row.data.profile!,h.row.data.claims,h.row.data.opportunities)).not.toBe(h.run.input_hash);

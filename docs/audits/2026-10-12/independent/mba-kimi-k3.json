@@ -1,0 +1,116 @@
+{
+  "kind": "independent_review",
+  "usage": {
+    "inputTokens": 31079,
+    "actualMicros": 81688,
+    "outputTokens": 5900
+  },
+  "effort": "max",
+  "review": {
+    "scores": [
+      {
+        "score": 75,
+        "reason": "The core need — connecting prior employment and MBA projects to a new role without overstating — is directly implemented: the 'mba' audience has tailored copy, record hints and suggested roles; claim kinds cover employment, internship, academic_project and education; result status distinguishes measured vs projected outcomes; the free six-step check and free Job Loop pilot let the persona build evidence-linked applications. Material gaps keep this below exceptional: no authenticated run is demonstrated, discovery depends on unconfirmed provider configuration, interview preparation exists only as a referenced brief builder, and all value requires sustained manual review effort.",
+        "category": "user_need_value"
+      },
+      {
+        "score": 75,
+        "reason": "Onboarding is coherent: /for-mba landing explains the workflow with a clearly labeled fictional illustration, the audience choice carries into setup, suggested roles are optional editable chips, blankLoopProfile infers no qualifications or years, and the free CV check works without signup. Friction remains: the full loop requires an account, career-record confirmation demands finding complete literal source passages, and dual fact/privacy confirmations plus PDF preview steps make first successful approval effortful; the first-run experience has not been observed live.",
+        "category": "onboarding"
+      },
+      {
+        "score": 58,
+        "reason": "Source shows real accessibility work: role='status' live regions, aria-labels, labelled form fields, heading focus management on step change, a main-content skip target, descriptive page titles and semantic structure. However, the package explicitly did not observe layout, responsive/mobile behavior or mobile PDF interoperability; the exact-PDF preview relies on an iframe, multi-step forms with small checkboxes and dense panels may be hard on small screens, and no WCAG audit or touch-target evidence exists. Implemented intent is visible; demonstrated usability is not.",
+        "category": "ux_accessibility_mobile"
+      },
+      {
+        "score": 88,
+        "reason": "This is the strongest area. The engine rejects cropped quotes, requires complete literal source passages with nearby literal context, and forbids wording that drops negation, contribution or team attribution. The free check detects weakened verbs, pending credentials ('MBA candidate'), negations scoped across list chunks, deadlines and eligibility conditions, and hands ambiguous or non-English requirements back to the user. PDF downloads use the exact previewed bytes with page-target enforcement, the evidence report is kept separate from the CV, relevance scores are labeled 'not ATS or eligibility certification', and fictional demo content is explicitly marked. Score is held below exceptional only because end-to-end document generation was not executed in this package.",
+        "category": "evidence_trust_document_quality"
+      },
+      {
+        "score": 52,
+        "reason": "Vacancy intake is honest but unproven for this persona. Manual paste always works, and the MBA page suggests relevant target titles; discovery exists via employer feeds and Tavily search with title-word-overlap and location matching, and jobs with experience-requirement gaps are excluded from automated preparation. But coverage depends on configured API keys and paid-API enablement that this package cannot confirm, search caps at 5 results per query, matching is keyword overlap with a 50% title threshold that may miss pivot-relevant roles phrased differently, and no actual vacancy yield or listing quality has been observed.",
+        "category": "job_coverage_relevance"
+      },
+      {
+        "score": 60,
+        "reason": "Real automation is implemented: background runs with worker dispatch, opt-in schedules with cadence/timezone, reusable confirmed facts across vacancies, rules-mode packet composition bounded by page target, optional per-run consent to Claude/OpenAI/Kimi for claim selection only, and Gmail draft creation gated on approval and recipient confirmation. Yet the deliberate design keeps the human in the loop for every fact and packet, no email-send or application-submit exists, and no time savings are claimed or demonstrated. Effort reduction is plausible through fact reuse ('Start once. Keep moving.') but unverified, and scheduler availability itself is conditional.",
+        "category": "automation_effort"
+      },
+      {
+        "score": 70,
+        "reason": "Tracking is concrete and actionable in source: opportunity statuses from saved through offer/rejected/withdrawn, follow-up due detection with upcoming items sorted by date, workspace next-action cards keyed to record/facts/vacancies/review state, run history with actual completion, and support requests with references. The FAQ is honest that the tracker records user-reported progress and opening a link is not a submission. Limits: no observed tracking mutation in live execution, no reminders beyond follow-up dates, no analytics on funnel conversion, and interview/deadline management depends on the user maintaining statuses manually.",
+        "category": "tracking_actionability"
+      },
+      {
+        "score": 78,
+        "reason": "Engineering for reliability is evident: idempotent run requests bound to input and request hashes with 409 conflict handling, LOOP_STALE_INPUT preventing approval of outdated packets, resume/cancel run actions, graceful worker-dispatch failure messaging, draft recovery with 30-minute TTL in memory plus consent-gated session storage scoped to the account, full state clearing on account switch, revision-guarded async with object-URL cleanup, error boundary, query retry, and UncertainProviderCall treating ambiguous provider outcomes as uncertain rather than failed. What is missing is any observed production behavior, deployment parity, or failure-injection evidence, so demonstrated reliability remains unestablished.",
+        "category": "reliability_recovery"
+      },
+      {
+        "score": 89,
+        "reason": "Data minimization is implemented, not just promised: unsaved edits live only in tab memory by default with explicit consent for session storage and owner-scoped recovery; models receive only confirmed shareable facts plus vacancy text, never the raw CV; excluded terms and discreet-search flags are enforced; Gmail requires separate OAuth with preview-then-finalize mailbox confirmation, drafts need recipient and attachment approval, and there is no send or submit capability; gaps are redacted before display; the support form warns against including sensitive data; privacy and terms pages accurately describe retention and revocation. Unverified server-side handling and unobserved erasure keep this below exceptional.",
+        "category": "privacy_control"
+      },
+      {
+        "score": 55,
+        "reason": "Explicitly qualified persona inference: an MBA student is typically budget-constrained, has access to campus career services, and faces a concentrated recruiting window. The entire current product is free (pilot, no card, checkout disabled), so there is nothing to buy today, and willingness is speculative. If discovery and scheduling demonstrably work, the proposed $15/month Focus tier plausibly fits a recruiting-season purchase for 2–4 months; $29/month Job Loop is a harder student sell. Competing free alternatives (school resources, manual tailoring, generic AI chat) and the unproven automation temper willingness. No purchase research, demand data or paid entitlement exists in this package.",
+        "category": "willingness_to_pay"
+      }
+    ],
+    "actions": [
+      {
+        "action": "Execute and publish one authenticated end-to-end MBA-persona pilot journey: create a record combining prior employment and two academic projects, confirm claims, paste three real post-MBA vacancies, build packets via rules mode, approve one and download PDF/DOCX.",
+        "acceptanceCriterion": "A run report shows every stage (record, claims, vacancies, packet, approval, download) completing with zero unexplained blocked lanes; the approved packet text consists solely of confirmed shareable claims each verifiable against a complete source passage; all three download formats open correctly."
+      },
+      {
+        "action": "Validate discovery coverage and listing quality for typical post-MBA targets by enabling search/employer feeds in a staging environment and measuring yield across target titles and locations.",
+        "acceptanceCriterion": "For 5 target titles × 3 locations, at least 70% of discovery runs return ≥5 source-linked vacancies with deduplicated, reachable HTTPS URLs, no closed_confirmed listings advanced to preparation, and per-run credit usage within the configured cap."
+      },
+      {
+        "action": "Test pivot relevance quality with real users: have 5 MBA students each complete the full flow from a mixed prior-work plus coursework record and interpret assessment flags and gaps.",
+        "acceptanceCriterion": "≥80% of participants correctly explain at least three flag types (e.g., EXPERIENCE_REQUIREMENT_GAP, ELIGIBILITY_NOT_VERIFIED), complete an approved packet without assistance, and report that gaps reflected genuine differences rather than missed transferable evidence in ≥70% of sampled requirements."
+      },
+      {
+        "action": "Commission an independent WCAG 2.2 AA and mobile audit of the six-step check and Job Loop workspace, including the iframe PDF preview, and fix findings.",
+        "acceptanceCriterion": "Zero critical or serious violations on an automated plus manual audit; all core tasks (upload, review, approve, download, confirm claim, approve packet) completable at 360px viewport, by keyboard alone, and with a screen reader, with the PDF preview having an accessible text alternative."
+      },
+      {
+        "action": "Reduce claim-confirmation friction for long CV passages while preserving integrity, and measure the confirmation workflow in usability tests.",
+        "acceptanceCriterion": "Median time to confirm one claim ≤60 seconds across ≥8 participants; invalid-quote rejection messages identify the mismatch (negation, contribution, context) precisely enough that users correct the quote within ≤2 attempts, with zero accepted cropped or altered passages."
+      }
+    ],
+    "overall": 70,
+    "strengths": [
+      "Evidence-integrity architecture built for exactly this persona's risk: claims must be complete literal source passages (cropped quotes rejected), approved wording must preserve negation, contribution and team attribution, and results are classified measured/projected/not_measured — an MBA pivoter can reframe experience without overstating it.",
+      "Deliberate MBA onboarding: a dedicated /for-mba audience page, record hints ('Connect prior employment with MBA projects. Separate your contribution from team results and estimates from measured outcomes'), suggested roles (business analyst, strategy associate, operations manager), and explicit guarantees that no years, credentials or seniority are inferred from audience choice.",
+      "Claim kinds include employment, internship, academic_project, personal_project and volunteering, so prior work plus MBA classroom projects are first-class, combinable evidence in one career record reused across applications.",
+      "Strong document trust workflow: exact PDF bytes previewed before approval, one/two-page target enforcement, dual fact/privacy confirmations, hash-bound approvals that reject stale packets, and a separate evidence report so unresolved questions never leak into the CV.",
+      "Privacy and honesty by default: consent-gated session storage with owner scoping, account-switch clearing, shareable-only facts sent to models, discreet-search flag, Gmail draft-only access with recipient confirmation, no send or auto-submit action, and consistently accurate disclaimers (relevance is 'not ATS', fictional demos labeled, scheduler unavailability stated plainly)."
+    ],
+    "weaknesses": [
+      "No live or authenticated execution is established: vacancy discovery, scheduled runs, external models, Gmail drafts and account saving all depend on configuration that these excerpts cannot confirm, and actual vacancy coverage for post-MBA roles is unknown.",
+      "Relevance scoring is keyword-overlap heuristics (approved-phrase-overlap-v1); for a pivoter whose prior-employment language differs from target-role vocabulary, transferable evidence may be under-matched and gaps over-reported, with no synonym or skill-transfer modeling evident in the excerpts.",
+      "The human-in-loop design imposes real effort: claims must be confirmed as complete literal source passages, every packet needs dual confirmation and review, and time savings are asserted nowhere with evidence — the workload may feel heavy during recruiting season.",
+      "Accessibility, responsive/mobile behavior and PDF preview interoperability (iframe-based) are unobserved; multi-step forms, small checkboxes and embedded previews may be difficult on phones or with assistive technology.",
+      "The evidence check is English-text oriented (non-English requirements are handed back to the user), scanned PDFs and .doc files are unsupported, and the 5 MB upload limit excludes some portfolios or transcript bundles."
+    ],
+    "evidenceLimitations": [
+      "This package contains bounded, partly truncated excerpts from the pinned commit 2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69; the full source is larger, and relevant behavior may exist outside the selected ranges.",
+      "No live browser journey, authenticated production execution, configured provider keys, scheduled occurrence, account saving, tracking mutation, data erasure or employer submission is established by these excerpts; all cloud-loop behavior is inferred from source, not observed.",
+      "All audience-page and pilot examples in the included source are expressly fictional illustrations, not customer outcomes or evidence of successful execution.",
+      "Layout, accessibility, mobile and PDF preview interoperability, multilingual and scanned-file handling, realistic time savings and actual vacancy coverage were not observed; scores in those dimensions reflect implemented intent plus uncertainty, not demonstrated experience.",
+      "Pricing text and plan definitions do not establish purchase demand, paid entitlements, checkout availability (it is explicitly disabled) or deployment parity between this commit and any live service.",
+      "Tests, environment configuration, credentials, deployment state, support responsiveness and service availability are excluded from the package, so reliability, coverage and recovery claims rest on code structure alone.",
+      "The relevance and evidence engines are heuristic text matchers; their real-world match quality for career-pivot language (transferable skills phrased differently from the vacancy) cannot be validated from excerpts.",
+      "No prior reviews, target scores or improvement baselines were supplied; scores are independent judgments against the rubric anchors only."
+    ]
+  },
+  "persona": "mba",
+  "returnedModel": "moonshotai/kimi-k3",
+  "baselineCommit": "2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69",
+  "evidenceSha256": "3ceffd92ca847f1f3376cbce9a134be6cfe3ec2e4ad498bda22e464422b1c385",
+  "requestedModel": "moonshotai/kimi-k3",
+  "providerRequestId": "gen-1791830771-DRnstnWCUP1THImbMnOH"
+}

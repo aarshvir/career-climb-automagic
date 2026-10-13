@@ -1,0 +1,114 @@
+{
+  "kind": "independent_review",
+  "usage": {
+    "inputTokens": 30863,
+    "actualMicros": 80038,
+    "outputTokens": 9755
+  },
+  "effort": "max",
+  "review": {
+    "scores": [
+      {
+        "score": 58,
+        "reason": "Source implements MBA-specific path: /for-mba intro 'Bring your previous work and MBA projects together', recordHint to separate own contribution from team results and estimates from measured outcomes, claim kinds including employment/internship/academic_project and resultStatus measured/projected/not_measured, plus 6-step single-vacancy check and reusable confirmed facts. Directly addresses pivot honesty and transferable-evidence mapping. No authenticated execution, interview outcome, or time saving demonstrated; free check handles one pasted JD at a time and suggested roles are only 3 generic titles, so value is source-described not observed.",
+        "category": "user_need_value"
+      },
+      {
+        "score": 62,
+        "reason": "Source shows progressive entry: /for-mba landing with 'Start my free Job Loop' and 'Try one CV check ?audience=mba', free check without signup and sign-in only to save privately with no pack credit, blankLoopProfile with MBA pageTarget/discreetSearch and suggestedRoles, and explicit non-inference of years/credentials. Protected routes redirect to /auth?next= when unauthenticated. No live signup, pilot enrollment, or completion funnel demonstrated, and free pilot capped at ten accounts with actual run access shown only in workspace, leaving availability uncertain.",
+        "category": "onboarding"
+      },
+      {
+        "score": 48,
+        "reason": "Source includes semantic structure: focusable main-content, role=status loading states, labelled fields, details/summary for evidence/preview, checkbox approvals, and PDF preview via link plus iframe. No responsive layout, touch, mobile PDF interoperability, keyboard-only completion, screen-reader, or multilingual behavior demonstrated. Flow spans 6 check steps plus multi-panel Job Loop with free-text timezone and separate consents, implying complexity whose mobile usability and accessibility conformance cannot be confirmed.",
+        "category": "ux_accessibility_mobile"
+      },
+      {
+        "score": 72,
+        "reason": "Source implements explicit honesty controls for pivots: complete literal source passage required, cropped quotes rejected, context must be nearby literal label, pending logic flags MBA candidate/coursework/expected/completion, weakened/negative handling, deadline/condition forced to review, matching words 'do not verify qualifications', heuristic relevance 'not ATS', packets bound to inputHash with stale-change rejection, exact PDF bytes shared between preview and download, holdReasons block preview, and fictional examples labeled fictional. No live output layout, rendering fidelity, or employer acceptance observed, so quality beyond source logic is unproven.",
+        "category": "evidence_trust_document_quality"
+      },
+      {
+        "score": 38,
+        "reason": "Source relevance is user-supplied: free check requires pasting one JD responsibilities plus requirements, manual opportunities always eligible for preparation, assessment uses title/JD token overlap and location/experience flags with gaps list. Broad discovery depends on configured Tavily key plus paid APIs (max 5 results per query) and employer feeds whose content is not shown; availability depends on configured accounts and reports identify unavailable stages. Suggested MBA titles only Business analyst/Strategy associate/Operations manager. No live vacancy volume, freshness, or MBA-role coverage demonstrated.",
+        "category": "job_coverage_relevance"
+      },
+      {
+        "score": 46,
+        "reason": "Source limits automation to preparation: free check is 6 manual steps (pick role, bring CV up to 5MB, paste JD, read side-by-side evidence, edit, approve/download); Job Loop reuses only confirmed plus shareable facts, rules mode or per-run model consent where model only returns claimIds max 16 with no generated factual text accepted, manual runs available but UI states 'Recurring execution is not currently available', and no messages/applications sent. User submits on employer site while tracker records user-reported progress. Preserves control but leaves substantial reading/confirming/review effort; no time saving demonstrated.",
+        "category": "automation_effort"
+      },
+      {
+        "score": 54,
+        "reason": "Source implements manual tracking structure: opportunity status saved/prepared/applied/interview/offer/rejected/withdrawn, followUpAt with due versus upcoming filtering and next-action cards, deadline clauses flagged to check employer listing/timezone, run/schedule history with actual next run and last attempt, and packet review/approved states. Opening a link does not count as submission; all progress is user-reported with no send, auto-sync, or demonstrated reminders/calendar. MBA promise of 'one place for recruiting deadlines' is source-described tracking without observed notification behavior.",
+        "category": "tracking_actionability"
+      },
+      {
+        "score": 52,
+        "reason": "Source shows defensive patterns: ErrorBoundary, react-query retry 1, idempotent requestId with conflict check, resume/cancel run, worker-unreachable message, unavailable-stage reporting, approval/preview invalidation on edit, stale inputHash rejection, and check recovery bounded plus owner-bound with 30-min in-memory TTL plus sessionStorage only after explicit consent; account change clears check. Unsaved Job Loop edits clear on refresh/close/sign-out/account switch. No live failure rates, run completion, scheduler firing, or recovery success demonstrated; pilot subject to run limits and service availability, and support receipt means recorded not reviewed with no response time promised.",
+        "category": "reliability_recovery"
+      },
+      {
+        "score": 76,
+        "reason": "Source gives explicit user control: saving career record is explicit choice in private Supabase account, shareable plus confirmed gating, excludedTerms and discreetSearch, pre-save redaction prompts, model receives only shareable facts plus vacancy not entire raw CV, per-run provider choice rules/Claude/OpenAI/Kimi, Google sign-in does not connect Gmail and separate permission required, Gmail draft needs recipient plus attachment approval and no send/submit exists, disconnect removes credentials only, support form warns against passwords/full CV/confidential info, and dual approvals for facts and disclosure. No live erasure, retention enforcement, or compliance audit demonstrated.",
+        "category": "privacy_control"
+      },
+      {
+        "score": 32,
+        "reason": "Qualified persona inference only, not purchase research: source states pilot is free, checkout unavailable, Free Starter ready with free check/downloads/optional saving/manual tracking, while Focus $15/mo and Loop $29/mo are proposed future tiers not offers. For a budget- and time-constrained MBA pivot needing a few honest tailored applications, free tier likely suffices; paid value hinges on unproven discovery, scheduled runs currently shown unavailable, and reuse at scale with continued manual review and no interview/employment promise. Inferred willingness to pay for proposed tiers is low until live availability and time savings are demonstrated.",
+        "category": "willingness_to_pay"
+      }
+    ],
+    "actions": [
+      {
+        "action": "Make the MBA pivot starting point explicit by surfacing prior-employment versus MBA-project separation and contribution versus result-status labeling at record creation.",
+        "acceptanceCriterion": "MBA record screen shows MBA recordHint plus one employment and one academic_project example with measured/projected/not_measured labels; a test MBA draft with 2 target titles and 1 academic_project claim passes validateClaim without cropped-quote error."
+      },
+      {
+        "action": "Reduce single-vacancy friction by supporting multiple saved manual vacancies and visible reuse of confirmed facts across a second MBA target role.",
+        "acceptanceCriterion": "Same saved profile supports 2 manually added vacancies and a second packet reusing cleared claims without re-entering profile; run report lists reused claim IDs and any new gaps."
+      },
+      {
+        "action": "Disclose discovery and model availability before recruiting effort by showing search, employer-feed, and model readiness with a preserved manual fallback.",
+        "acceptanceCriterion": "Workspace displays searchReady, employer-feed lane status, and model readiness as configured or not configured; when unconfigured it states broad search is unavailable and preserves manual paste plus rules-mode preparation."
+      },
+      {
+        "action": "Strengthen deadline actionability by making follow-up dates, due filtering, and manual status persistence verifiable for concurrent MBA applications.",
+        "acceptanceCriterion": "Opportunity with followUpAt appears in due versus upcoming lists within one minute of save, shows employer-listing timezone warning for deadlines, and manual status change persists across reload."
+      },
+      {
+        "action": "Prevent MBA upload dead ends by validating file type, size, scanned content, and language upfront with specific conversion guidance.",
+        "acceptanceCriterion": "Unsupported upload shows 5MB limit, text-based PDF/DOCX/TXT requirement, scanned-PDF and .doc conversion guidance, and English-only evidence notice before analysis starts."
+      }
+    ],
+    "overall": 53.8,
+    "strengths": [
+      "MBA pivot framing in source: /for-mba title, intro, recordHint, steps, and suggestedRoles plus claim kinds employment/internship/academic_project and resultStatus measured/projected/not_measured preserve prior work versus MBA projects and estimates versus measured outcomes.",
+      "Evidence honesty suited to career switching: complete literal source passage required, weakened/pending/negative and MBA-candidate/coursework flags, deadlines/conditions forced to review, and explicit limits that matching words do not verify qualifications and scores are not ATS.",
+      "Free low-friction document control: check and approve without signup, PDF/DOCX/TXT downloads of reviewed wording, exact PDF bytes shared between preview and download, evidence report kept separate from CV, and optional private saving uses no credit.",
+      "Granular consent and confidentiality boundaries: confirmed plus shareable gating, per-run rules or external-model choice, model receives only shareable facts plus vacancy, separate Gmail permission with no send/submit, excludedTerms, and dual fact plus disclosure approvals."
+    ],
+    "weaknesses": [
+      "Pivot discovery unproven: one manually pasted JD per free check, Tavily search requires configured key plus paid APIs, employer feeds and listing freshness unshown, and only 3 generic MBA suggested roles.",
+      "Input constraints for MBA materials: text-based PDF/DOCX/TXT up to 5MB, scanned PDFs and .doc need conversion, evidence is comparison of supplied English text, and PDF font may reject unsupported characters.",
+      "Limited automation: recurring execution shown as not currently available, external AI only selects eligible claimIds, every output needs review, and user submits on employer site with manual tracker updates.",
+      "Pilot scale and live availability uncertain: ten-account free pilot, scheduler gated by pilot capacity and capabilities, run limits and service availability apply, checkout disabled, and no authenticated run demonstrated.",
+      "Actionability and mobile gaps: manual status and followUpAt entry with no demonstrated reminders or calendar, support receipt without promised response time, and layout/mobile/PDF/accessibility behavior beyond basic semantics unobserved."
+    ],
+    "evidenceLimitations": [
+      "Bounded excerpts from pinned commit 2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69 only; same package for all persona reviewers, larger source not reviewed.",
+      "No live browser journey, authenticated execution, configured provider, Tavily search, employer feed, scheduled run, account save, tracking mutation, erasure, or employer submission is demonstrated.",
+      "Audience and pilot examples are expressly fictional illustrations, not customer outcomes or successful execution evidence.",
+      "Excerpts record lines and SHA-256 hashes; truncated excerpts may stop inside a line and omit surrounding logic.",
+      "Layout, responsive mobile behavior, PDF interoperability, keyboard and screen-reader accessibility, and multilingual or scanned-file handling are not observed.",
+      "Actual vacancy coverage, freshness, relevance ranking quality, document layout quality, time savings, and reliability rates are not observed.",
+      "Pricing and availability statements do not establish purchase demand, paid entitlements, operating availability, or deployment parity with this commit."
+    ]
+  },
+  "persona": "mba",
+  "returnedModel": "meta/muse-spark-1.3",
+  "baselineCommit": "2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69",
+  "evidenceSha256": "3ceffd92ca847f1f3376cbce9a134be6cfe3ec2e4ad498bda22e464422b1c385",
+  "requestedModel": "meta/muse-spark-1.3",
+  "providerRequestId": "gen-1791861326-l1drBTXyus6glRthZNzM"
+}

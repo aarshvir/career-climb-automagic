@@ -1,0 +1,115 @@
+{
+  "kind": "independent_review",
+  "usage": {
+    "inputTokens": 30867,
+    "actualMicros": 100307,
+    "outputTokens": 14523
+  },
+  "effort": "max",
+  "review": {
+    "scores": [
+      {
+        "score": 50,
+        "reason": "Source includes a dedicated professional path at /for-career-switchers with discreetSearch true, pageTarget 2, senior suggested titles, redaction hints, and reusable confirmed facts, plus a free 6-step CV check with free downloads. However pilot is limited to 10 users, Focus 15 USD and Loop 29 USD are proposals with checkout unavailable and billing false, external models/search/inbox need configuration and consent, scheduler may report not currently available, and user must review every output and submit on employer site with no interview promise. No live time savings or outcomes demonstrated.",
+        "category": "user_need_value"
+      },
+      {
+        "score": 60,
+        "reason": "Source shows low-friction entry: free /check without signup, audience landing with Start my free Job Loop and Try one CV check, audience carried into setup, blankLoopProfile with no inferred years or qualifications, and professional form with situation, targets, locations, optional experienceYears, page preference, and discreet consent. Auth, callback, forgot and reset routes exist. Counterweight: manual CV paste or upload, manual targets and vacancy paste, per-claim confirm and shareable review, text files only up to 5 MB with scanned and .doc needing conversion, and 10-user pilot cap. No live onboarding observed.",
+        "category": "onboarding"
+      },
+      {
+        "score": 50,
+        "reason": "Source implements semantic patterns: main with Header/Footer, ErrorBoundary, Suspense and loading role=status, aria labels and aria-current, labelled fields, heading focus and scroll on step change, details-summary previews, PDF iframe title, and status or alert roles. Package explicitly states layout, accessibility, mobile PDF interoperability were not observed; no mobile-specific excerpts or authenticated UI run is shown. PDF uses object-URL iframe preview and DOCX-TXT layout depends on reader, with glyph fallback that may force format change. Implemented markup exists but usable mobile experience for a busy professional is unproven.",
+        "category": "ux_accessibility_mobile"
+      },
+      {
+        "score": 65,
+        "reason": "Source shows strong trust controls: free check uses local analyzeCvEvidence with no external AI, findings with direct-partial-missing-review and disclaimer that matching words do not verify qualifications, two-checkbox approval for facts and privacy, evidence report separate from CV, exact PDF bytes preview with pageTarget enforcement, export requires approved status, Job Loop requires complete literal source passage plus nearby literal context, only active confirmed shareable claims are eligible with excludedTerms filtering, packet inputHash binding with 409 stale-input block, and assessment labelled heuristic not ATS. Gaps: basic text-to-Paragraph and jsPDF layout, English-text focus, no live document observed.",
+        "category": "evidence_trust_document_quality"
+      },
+      {
+        "score": 40,
+        "reason": "Source relevance is user-driven plus heuristic: manual vacancy paste, matchesDiscoveryTarget requiring about 50 percent title-word overlap stripping senior-junior terms plus location match, and assessOpportunity role plus evidence plus constraints with flags like ELIGIBILITY_NOT_VERIFIED and LOCATION_REVIEW_NEEDED. Only 3 generic suggested titles are shown. Automated discovery via Tavily max 5 results per query and employer feeds requires paid APIs and API key; searchReady is false if unconfigured. No configured provider, vacancy results, or coverage is observed. Seniority and industry precision for 5-10 year specialists is unproven.",
+        "category": "job_coverage_relevance"
+      },
+      {
+        "score": 45,
+        "reason": "Source provides reusable confirmed facts across vacancies, manual runs plus opt-in scheduled runs with daily-weekdays-weekly cadence, timezone and explicit consent, and proposed 20-60 packs per month. But user must confirm each claim, review every packet, approve with two consents, download and submit manually; there is no email-send or submit action; discovery filters EXPERIENCE_REQUIREMENT_GAP; scheduler requires saved profile plus shareable claims plus no edits and warns when not ready; worker failure requires manual resume. Pilot has 50 USD AI-search cap. No scheduled occurrence or time savings demonstrated, so substantial manual effort remains.",
+        "category": "automation_effort"
+      },
+      {
+        "score": 55,
+        "reason": "Source defines a tracking model: opportunity status from saved to offer-rejected-withdrawn, followUpAt with loopFollowUpDue, verification, notes, LoopWorkspaceOverview stages and next-action cards, due and upcoming lists, run history with next and last attempt, and packet status review_required-approved-held-revoked. FAQ states tracker records progress you report and opening a link does not count as submission; user submits on employer site. Interview brief builder is imported but not detailed in excerpts. No authenticated tracking mutation, reminder delivery, or run completion is observed. Actionability depends on manual updates.",
+        "category": "tracking_actionability"
+      },
+      {
+        "score": 55,
+        "reason": "Source includes ErrorBoundary, query retry 1, idempotent requestId with 409 conflict on differing facts, run saved plus background dispatch with resume on worker unreachable, stale-input 409, model unusable-selection error with no factual text accepted, credit anomaly handling, safePublicUrl filtering, PDF preview bound to inputHash and cleared on change, 30-minute in-memory recovery with sessionStorage only after explicit consent, ownerId binding, and account-change clear. Limits: unsaved edits cleared on refresh-close-sign-out-switch without consented storage, 30-minute TTL, support receipt means recorded not reviewed with no response time promised, and scheduler-worker depend on env config. No live reliability observed.",
+        "category": "reliability_recovery"
+      },
+      {
+        "score": 70,
+        "reason": "Source shows extensive confidentiality design for an employed professional: professional discreetSearch true default, redaction hints, minimal contact-line disclosure, excludedTerms filtering, per-claim confirmed-shareable gating, no external AI for free check, cloud models receive only shareable facts plus vacancy text not raw CV, separate Gmail permission with Google sign-in alone not connecting inbox, draft needs recipient and attachment approval, no send or submit action, disconnect removes credentials, explicit consents for recovery-saving-scheduling, memory-first recovery, original file stays on device, and account-change clear. Gaps: cloud record in private Supabase account, approved docs retained after expiry, disconnect does not delete Gmail drafts-messages, and no live erasure observed.",
+        "category": "privacy_control"
+      },
+      {
+        "score": 35,
+        "reason": "Inference only, not purchase research. An employed professional could afford proposed Focus 15 USD and Loop 29 USD, and source offers a free 10-user pilot with no card or conversion to test discreet reusable-facts workflow. However checkout is unavailable with billing false, tiers are proposals not offers, limits and cancellation are unconfirmed, no interview or employment guarantee is offered, substantial manual review and submission remain, scheduler-models-search-inbox depend on configuration, and no time savings, coverage, or senior document polish is demonstrated. Hypothetical interest in free pilot; paid conversion would need proven confidentiality and time fit.",
+        "category": "willingness_to_pay"
+      }
+    ],
+    "actions": [
+      {
+        "action": "Provide a time-boxed discreet setup for employed professionals that reuses the existing profile and claim model with a redaction checklist and reusable-facts preview.",
+        "acceptanceCriterion": "A new professional test account can paste or import CV, set 2-3 target roles and locations, keep discreetSearch on, and reach first evidence review in <=15 minutes and <=20 required fields, with redaction guidance shown before any save or share step, verified by scripted source-level walkthrough."
+      },
+      {
+        "action": "Make vacancy sourcing predictable by surfacing configured versus unavailable discovery in the workspace with a one-paste manual fallback and seniority-aware relevance explanation.",
+        "acceptanceCriterion": "Workspace shows for each run whether employer feeds and web search were configured, counts of vacancies by source and verification state, and assessment components with flags; manual vacancy paste always available; verified for professional profile with 3 diverse senior postings."
+      },
+      {
+        "action": "Strengthen confidential control with visible retention, export, and deletion for career records, claims, vacancies, and packets.",
+        "acceptanceCriterion": "Authenticated user can view stored categories, export own record, delete draft or record and confirm removal from workspace listings, and disconnect Gmail credentials; disconnect and delete behaviours match privacy text; verified without retaining unsaved tab memory after sign-out."
+      },
+      {
+        "action": "Improve 2-page senior CV output quality with readable templates and pre-download validation for PDF exactness and file compatibility.",
+        "acceptanceCriterion": "Approved 2-page PDF preview equals download bytes, enforces pageTarget, reports unsupported glyphs with DOCX or TXT fallback, and rejects scanned or .doc uploads with conversion guidance; verified with text PDF, DOCX, TXT up to 5 MB and a scanned-PDF negative case."
+      },
+      {
+        "action": "Clarify pilot access and paid proposal readiness with enrollment status and measured review burden.",
+        "acceptanceCriterion": "Pricing and workspace consistently show pilot enrollment status with 10 max, actual run access, and that Focus 15 USD and Loop 29 USD are proposals with checkout disabled; median time from run completion to packet approval is measured and displayed from run history for pilot users."
+      }
+    ],
+    "overall": 52.5,
+    "strengths": [
+      "Professional-specific path in source: /for-career-switchers with discreetSearch true, pageTarget 2, senior suggested titles, recordHint to redact client info, and steps for confidential boundaries and reusable facts.",
+      "Free 6-step CV check without signup in source: one vacancy paste, local evidence comparison, user edits, dual-checkbox approval, separate evidence report, exact-PDF preview with page-limit enforcement, and free PDF-DOCX-TXT downloads.",
+      "Anti-fabrication controls in source: claims require complete literal source passage and nearby literal context, only active confirmed shareable claims are eligible, packets bind to inputHash with stale-input rejection, and assessments are labelled heuristic not ATS or eligibility proof.",
+      "Confidentiality defaults in source: no external AI for free check, cloud models receive only shareable facts plus vacancy text, Gmail needs separate permission with no send or submit action, and recovery uses memory by default with session storage only after consent.",
+      "Honest availability signalling in source: pilot labelled free with no card, Focus and Loop labelled proposed tiers with checkout disabled, and scheduler plus run history report actual next run and incomplete stages."
+    ],
+    "weaknesses": [
+      "Manual effort remains high for a time-poor professional in source: user must build record, confirm each fact, paste each vacancy, review every packet with two consents, download and submit on employer site, with recurring runs needing opt-in plus configured scheduler.",
+      "Automated vacancy discovery is unproven in package: Tavily needs paid APIs and API key with max 5 results per query, employer feeds have no observed output, relevance is keyword overlap that strips senior-junior terms, and only 3 generic suggested titles are shown.",
+      "Senior document polish and input limits in source: basic text-to-Paragraph and jsPDF layout, English-text focus with non-English left to user, text-based PDF-DOCX-TXT up to 5 MB only with scanned PDFs and old .doc needing conversion, and no live PDF observed.",
+      "Recovery and support fragility in source: unsaved edits kept 30 minutes in tab memory and cleared on refresh-close-sign-out-switch without consented storage, worker failures require manual resume, and support receipt means recorded not reviewed with no promised response time.",
+      "Paid readiness and scale unproven in source: 10-user pilot cap with 50 USD AI-search cap, billing false and checkout unavailable, proposed limits and terms unconfirmed, and no demonstrated time savings, coverage, or senior outcomes while public examples are labelled fictional."
+    ],
+    "evidenceLimitations": [
+      "Bounded excerpts from pinned commit 2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69 only; full source is larger and truncated excerpts may stop inside a source line.",
+      "Same package for every persona reviewer; no persona-specific live journey is provided.",
+      "No live browser journey, authenticated execution, configured provider, scheduled occurrence, account saving, tracking mutation, erasure, or employer submission is established by source excerpts.",
+      "Public audience and pilot examples are expressly fictional illustrations, not customer outcomes or execution proof.",
+      "Layout, accessibility, mobile behaviour, PDF interoperability, multilingual or scanned-file handling, realistic time savings, and actual vacancy coverage have not been observed in this package.",
+      "Pricing and availability statements do not establish purchase demand, paid entitlements, operating availability, or deployment parity with this commit.",
+      "Prior reviews, scores, tests, environment files, credentials, private records, and fixes outside these excerpts are excluded."
+    ]
+  },
+  "persona": "professional",
+  "returnedModel": "meta/muse-spark-1.3",
+  "baselineCommit": "2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69",
+  "evidenceSha256": "3ceffd92ca847f1f3376cbce9a134be6cfe3ec2e4ad498bda22e464422b1c385",
+  "requestedModel": "meta/muse-spark-1.3",
+  "providerRequestId": "gen-1791830773-k8JBZ3GSoPVyNhhc2ihM"
+}

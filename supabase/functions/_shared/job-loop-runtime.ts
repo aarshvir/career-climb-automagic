@@ -35,10 +35,11 @@ export async function candidatePreparationHash(data:CareerRecord):Promise<string
   const vacancies=[...data.opportunities].sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0).map(item=>({id:item.id,title:item.title,company:item.company,location:item.location,url:item.url,description:item.description,contact:item.contact,source:item.source,verification:item.verification}));
   return fingerprintLoopInputs(data.profile,data.claims,vacancies);
 }
-type PreparationChoices=Pick<Extract<LoopAction,{action:'start_run'}>,'provider'|'model'|'modelConsent'|'inboxConsent'>;
-export async function preparationRequestHash(data:CareerRecord,choices:PreparationChoices):Promise<string>{return digest(JSON.stringify([choices.provider,choices.model,choices.modelConsent,choices.inboxConsent,await candidatePreparationHash(data)]));}
+type PreparationChoices=Pick<Extract<LoopAction,{action:'start_run'}>,'provider'|'model'|'modelConsent'|'inboxConsent'|'processingRoute'>;
+export async function preparationRequestHash(data:CareerRecord,choices:PreparationChoices):Promise<string>{return digest(JSON.stringify([choices.provider,choices.model,choices.modelConsent,choices.inboxConsent,await candidatePreparationHash(data),...(choices.provider==='rules'?[]:[choices.processingRoute??'direct'])]));}
 export async function canReplayPreparation(run:RunRow,data:CareerRecord,action:PreparationChoices):Promise<boolean>{
   if(run.provider!==action.provider||run.model!==action.model||(run.consents.model===true)!==action.modelConsent||(run.consents.inbox===true)!==action.inboxConsent||!run.snapshot.profile||!data.profile)return false;
+  if(run.provider!=='rules'&&(run.consents.processingRoute??'direct')!==(action.processingRoute??'direct'))return false;
   const originals=new Set(run.snapshot.opportunities.map(item=>item.id));
   if(data.opportunities.some(item=>item.source==='manual'&&!originals.has(item.id))||run.snapshot.opportunities.some(item=>!data.opportunities.some(current=>current.id===item.id)))return false;
   // Additional automatic discoveries belong to this run's output. Every
@@ -133,8 +134,8 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     // Compare their immutable saved candidate snapshot instead of rejecting an
     // honest retry just because the background worker found or refreshed jobs.
     if(existing&&!await canReplayPreparation(existing,data,action))throw new ApiError(409,'LOOP_REQUEST_CONFLICT','This request reference belongs to different career facts, original vacancy facts or processing choices. Start a new request.');
-    if(!existing){if(action.provider==='rules'){if(action.model!==RULES_MODEL)throw new ApiError(400,'LOOP_MODEL_INVALID','Use the declared rules engine model.');}else{if(!action.modelConsent)throw new ApiError(400,'LOOP_MODEL_CONSENT','Allow the selected provider to process eligible claims and vacancy text explicitly.');modelConfiguration(action.provider,action.model,env);}}
-    const run=existing??await repo.rpc<RunRow>('job_loop_start_run',{p_user:userId,p_request:action.requestId,p_request_hash:requestHash,p_input_hash:inputHash,p_expected:row.version,p_provider:action.provider,p_model:action.model,p_consents:{model:action.modelConsent,inbox:action.inboxConsent}});
+    if(!existing){if(action.provider==='rules'){if(action.model!==RULES_MODEL)throw new ApiError(400,'LOOP_MODEL_INVALID','Use the declared rules engine model.');}else{if(!action.modelConsent)throw new ApiError(400,'LOOP_MODEL_CONSENT','Allow the selected provider to process eligible claims and vacancy text explicitly.');const config=modelConfiguration(action.provider,action.model,env);if((config.transport??'direct')!==(action.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','The processing route changed. Refresh and explicitly review the named provider route before starting.');}}
+    const run=existing??await repo.rpc<RunRow>('job_loop_start_run',{p_user:userId,p_request:action.requestId,p_request_hash:requestHash,p_input_hash:inputHash,p_expected:row.version,p_provider:action.provider,p_model:action.model,p_consents:{model:action.modelConsent,inbox:action.inboxConsent,...(action.provider!=='rules'?{processingRoute:action.processingRoute??'direct'}:{})}});
     let message=existing?'This request already has a saved run. Its current status is shown below; no second run was started.':'The run is saved and continues in the background.';try{if(['queued','running'].includes(run.status))await dispatchWorker(run.id,env,fetcher);}catch{message='The run is saved. The worker could not be reached; resume this run to continue.';}
     return {...await finish(message),runId:run.id};
   }
@@ -242,13 +243,18 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
       const opportunity=state.opportunities?.[run.phase-2];if(!opportunity){await repo.commit(run,7,'running',state);return true;}
       const current=await repo.record(run.user_id);const actual=current.data.opportunities.find(item=>item.id===opportunity.id);
       if(actual&&!['saved','prepared'].includes(actual.status)){state.messages!.push('An opportunity moved beyond preparation; its existing application history was preserved.');await repo.commit(run,run.phase+1,'running',state);return true;}
-      const assessment=assessOpportunity(profile,run.snapshot.claims,opportunity);const allowed=eligibleLoopClaims(profile,run.snapshot.claims).filter(claim=>assessment.claimIds.includes(claim.id));let selectedClaimIds:string[]|undefined;
+      const assessment=assessOpportunity(profile,run.snapshot.claims,opportunity);const allowed=eligibleLoopClaims(profile,run.snapshot.claims).filter(claim=>assessment.claimIds.includes(claim.id));let selectedClaimIds:string[]|undefined;let modelQuestions:{question:string;claimIds:string[]}[]=[];
       if(run.provider!=='rules'){
+        if((modelConfiguration(run.provider,run.model,env).transport??'direct')!==(run.consents.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','The processing route changed after approval. No paid call was made; start again with explicit route consent.');
         const request=prepareModelRequest(run.provider,run.model,env,opportunity,allowed);const result=await metered(repo,run,`model:${opportunity.id}`,run.provider,request.reservedMicros,()=>callModel(request,fetcher),env);
-        if(result.error)throw new ApiError(422,'LOOP_MODEL_OUTPUT_INVALID',result.error);selectedClaimIds=result.claimIds;
+        if(result.error)throw new ApiError(422,'LOOP_MODEL_OUTPUT_INVALID',result.error);selectedClaimIds=result.claimIds;modelQuestions=result.reviewQuestions??[];
       }
       const packetId=await stableUuid(`${run.id}:${opportunity.id}`);const packet=await composePacket({profile,claims:run.snapshot.claims,opportunity,assessment,selectedClaimIds,runId:run.id,packetId,inputHash:await packetInputHash(profile,run.snapshot.claims,opportunity),createdAt:run.created_at,model:{provider:run.provider,model:run.model,method:run.provider==='rules'?RULES_MODEL:'approved-claim-id-selection-v1'}});
       packet.interviewBrief=buildInterviewBrief(profile,run.snapshot.claims,opportunity,packet);
+      if(modelQuestions.length){
+        packet.interviewBrief=modelQuestions.map((item,index)=>({title:`AI review question ${index+1} — check before use`,prompt:item.question,evidenceClaimIds:item.claimIds,sourceQuote:item.claimIds.map(id=>allowed.find(claim=>claim.id===id)?.sourceQuote??'').join('\n')})).concat(packet.interviewBrief.slice(modelQuestions.length));
+        packet.model.method='OpenRouter; approved evidence selection and reviewable questions; calculations remain deterministic';
+      }
       packet.evidenceText+='\n\nINTERVIEW PREPARATION — FACTUAL PROMPTS, NOT PERFORMANCE SCORING\n'+packet.interviewBrief.map(item=>`${item.title}\n${item.prompt}\nSource: ${item.sourceQuote}\nEvidence IDs: ${item.evidenceClaimIds.join(', ')||'vacancy/conditions only'}`).join('\n\n');
       if(opportunity.source==='web_search'&&opportunity.verification==='unverified'){packet.holdReasons.push('The employer and complete vacancy are unverified. Add confirmed source text before using this packet.');packet.status='held';}
       const rendered=await renderPacket({packet,profile});packet.pageCount=rendered.pageCount;packet.formatStatus=rendered.packet.formatStatus;packet.holdReasons=[...new Set([...packet.holdReasons,...rendered.holdReasons])];if(packet.holdReasons.length)packet.status='held';

@@ -31,4 +31,10 @@ describe('account destinations', () => {
     rememberLoopReturn('/check', 1001);
     expect(takeLoopReturn(1002)).toBeNull();
   });
+  it('accepts only bounded administration return routes, preserving the evidence range', () => {
+    for (const path of ['/admin', '/admin2', '/admin?days=7', '/admin2?days=30', '/admin2?days=90']) {
+      expect(accountDestination(path)).toBe(path); rememberLoopReturn(path, 1000); expect(takeLoopReturn(1001)).toBe(path);
+    }
+    for (const path of ['/admin?days=365', '/admin2?days=30&next=https://evil.example', '/admin?role=owner', '/admin#token', '/admin/../dashboard']) expect(accountDestination(path)).toBe('/dashboard');
+  });
 });

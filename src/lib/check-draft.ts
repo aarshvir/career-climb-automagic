@@ -4,7 +4,7 @@ const DRAFT_KEY = "jobvance_check_oauth_draft_v1";
 const RETURN_KEY = "jobvance_check_oauth_return_v1";
 const TTL = 30 * 60 * 1000;
 const RECOVERY_KEY = "jobvance_check_recovery_v1";
-export type CheckRecovery = { draft: CheckDraft; step: number; cvReady: boolean; filename: string; ownerId: string | null };
+export type CheckRecovery = { draft: CheckDraft; step: number; cvReady: boolean; filename: string; ownerId: string | null; pageTarget: 1 | 2 };
 let inMemoryRecovery: { value: CheckRecovery; expiresAt: number } | null = null;
 export type CheckDraft = {
   jobTitle: string; company: string; sourceText: string; reviewedText: string; jobDescription: string;
@@ -14,8 +14,11 @@ function boundedRecovery(value: unknown): CheckRecovery | null {
   if (!value || typeof value !== 'object') return null;
   const item = value as CheckRecovery;
   if (!item.draft || typeof item.draft !== 'object' || !Number.isInteger(item.step) || item.step < 1 || item.step > 6 || typeof item.cvReady !== 'boolean' || typeof item.filename !== 'string' || item.filename.length > 300 || (item.ownerId !== null && typeof item.ownerId !== 'string')) return null;
+  // Existing version-one drafts predate this preference and used a two-page maximum.
+  const pageTarget = item.pageTarget === undefined ? 2 : item.pageTarget;
+  if (pageTarget !== 1 && pageTarget !== 2) return null;
   for (const [key, limit] of [['jobTitle', 200], ['company', 200], ['sourceText', 60000], ['reviewedText', 60000], ['jobDescription', 20000]] as const) if (typeof item.draft[key] !== 'string' || item.draft[key].length > limit) return null;
-  return { draft: { jobTitle: item.draft.jobTitle, company: item.draft.company, sourceText: item.draft.sourceText, reviewedText: item.draft.reviewedText, jobDescription: item.draft.jobDescription }, step: item.step, cvReady: item.cvReady, filename: item.filename, ownerId: item.ownerId };
+  return { draft: { jobTitle: item.draft.jobTitle, company: item.draft.company, sourceText: item.draft.sourceText, reviewedText: item.draft.reviewedText, jobDescription: item.draft.jobDescription }, step: item.step, cvReady: item.cvReady, filename: item.filename, ownerId: item.ownerId, pageTarget };
 }
 
 /** Browser memory preserves route navigation; tab storage is used only after explicit consent. */

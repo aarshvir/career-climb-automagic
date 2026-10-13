@@ -19,6 +19,7 @@ const JobLoop = lazy(() => import("@/pages/JobLoop"));
 const AudienceLanding = lazy(() => import("@/pages/AudienceLanding"));
 const PilotLanding = lazy(() => import("@/pages/PilotLanding"));
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
+const AdminPortal = lazy(() => import("@/pages/admin/AdminPortal"));
 const client = new QueryClient({
   defaultOptions: { queries: { staleTime: 20000, retry: 1 } },
 });
@@ -45,6 +46,13 @@ function ProtectedJobLoop() {
   if (loading) return <p className="p-8" role="status">Opening your Job Loop…</p>;
   return user || mailboxReturn ? <JobLoop /> : <Navigate to={`/auth?next=${encodeURIComponent(`/loop${location.search}`)}`} replace />;
 }
+function SiteChrome({ position }: { position: 'header' | 'footer' }) {
+  const { pathname } = useLocation();
+  // Private navigation is rendered only after a verified administration response.
+  const path = pathname.replace(/\/+$/, '');
+  if (path === '/admin' || path === '/admin2') return null;
+  return position === 'header' ? <Header /> : <Footer />;
+}
 export default function MvpApp() {
   return (
     <ErrorBoundary>
@@ -53,7 +61,7 @@ export default function MvpApp() {
           <AuthProvider>
             <TooltipProvider>
               <BrowserRouter>
-                <Header />
+                <SiteChrome position="header" />
                 <div id="main-content" tabIndex={-1} className="outline-none">
                 <Suspense
                   fallback={
@@ -106,6 +114,8 @@ export default function MvpApp() {
                     />
                     <Route path="/auth/reset" element={<ResetPassword />} />
                     <Route path="/dashboard" element={<ProtectedWorkspace />} />
+                    <Route path="/admin" element={<AdminPortal view="operations" />} />
+                    <Route path="/admin2" element={<AdminPortal view="founder" />} />
                     <Route
                       path="/resume-management"
                       element={<Navigate to="/dashboard?tab=cv" replace />}
@@ -150,7 +160,7 @@ export default function MvpApp() {
                   </Routes>
                 </Suspense>
                 </div>
-                <Footer />
+                <SiteChrome position="footer" />
               </BrowserRouter>
               <Toaster />
               <Sonner />

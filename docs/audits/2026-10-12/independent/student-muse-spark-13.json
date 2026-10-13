@@ -1,0 +1,115 @@
+{
+  "kind": "independent_review",
+  "usage": {
+    "inputTokens": 30869,
+    "actualMicros": 89463,
+    "outputTokens": 11971
+  },
+  "effort": "max",
+  "review": {
+    "scores": [
+      {
+        "score": 68,
+        "reason": "Source shows dedicated student fit: /for-students, recordHint to start with projects/internships/volunteering/coursework and label academic work, suggestedRoles Graduate business analyst/Operations intern/Junior data analyst, claim kinds academic_project/internship/volunteering/education/skill, and question 'Was this coursework or paid work?' Free CV-to-vacancy check with PDF/DOCX/TXT downloads addresses first-application need. Gaps: requires existing CV text plus pasted JD; thin records likely yield many gaps; no live internship coverage or outcomes demonstrated.",
+        "category": "user_need_value"
+      },
+      {
+        "score": 58,
+        "reason": "Source shows low-friction entry: Try one CV check without signup, Start my free Job Loop with audience carrying into setup, six steps Pick role/Bring CV/Add vacancy/Read evidence/Make it yours/Approve & download, editable preferences with no years/credentials inferred. Friction: /dashboard and /loop redirect to /auth when signed out, profile form has many fields (target roles, locations, experienceYears, languages, compensation, discreetSearch), pilot capped at 10 accounts. No observed signup completion or guidance effectiveness.",
+        "category": "onboarding"
+      },
+      {
+        "score": 48,
+        "reason": "Code includes accessible patterns: main landmarks, aria labels, role=status loading, labelled selects, titled PDF iframe, heading focus plus scrollIntoView on step change, error/notice regions. No observed layout, mobile, or assistive-tech behavior in package. Intake limited to text-based PDF/DOCX/TXT <=5MB with scanned PDFs/.doc requiring conversion, hurting phone-scanned student docs; DOCX/TXT layout depends on reader. Cannot confirm coherent mobile experience.",
+        "category": "ux_accessibility_mobile"
+      },
+      {
+        "score": 72,
+        "reason": "Source implements conservative model: local heuristic comparison with ACTUAL_VERB/WEAKENED/PENDING/NEGATIVE, deadline/condition separated as review, dated-qualification handling, per-requirement explanation plus question, complete literal source-passage preservation including negation/contribution, context must be nearby literal label, dual approval (facts plus privacy/disclosure), exact PDF-bytes preview with page-target gate, evidence report separate from CV, relevance labeled heuristic not ATS/eligibility. Limits: English-text comparison only, unsupported-script self-review fallback, no observed typography or employer acceptance.",
+        "category": "evidence_trust_document_quality"
+      },
+      {
+        "score": 32,
+        "reason": "Demonstrated relevance path is manual: paste one JD with responsibilities/requirements; opportunities typed manual/employer_api/web_search with verification states. Discovery depends on optional Tavily search requiring JOB_LOOP_TAVILY_API_KEY plus paid APIs (basic 5-result queries) and referenced employer feeds with no coverage shown, plus role/location matching that filters senior/junior/graduate/intern terms. Only three example student titles; EXPERIENCE_REQUIREMENT_GAP can exclude discovery prep. No live internship/graduate listings or location coverage demonstrated.",
+        "category": "job_coverage_relevance"
+      },
+      {
+        "score": 44,
+        "reason": "Free check and rules mode run without external AI using confirmed facts; model use limited to selecting claimIds (<=16, eligible/unique) with no generated factual text accepted; packets compose from shareable facts. Student effort stays high: supply CV, paste JD, inspect findings, add only accurate examples, enforce 1-page limit, dual-confirm, download, submit on employer site, manually track. Recurring preparation needs explicit opt-in plus configured scheduler; UI warns 'Recurring execution is not currently available'; worker may need resume. No time savings observed.",
+        "category": "automation_effort"
+      },
+      {
+        "score": 54,
+        "reason": "Source shows manual tracking structure: statuses saved/prepared/applied/interview/offer/rejected/withdrawn, followUpAt with due/upcoming filtering via loopFollowUpDue, deadline requirements with closing-date timezone question, overview stages and next-action cards, next-run/last-attempt/run-history reporting, FAQ that tracker records self-reported progress and link-open is not submission. Gaps: status/follow-up appear self-reported with no observed reminders, notifications, calendar integration, or demonstrated mutation persistence. Partial actionability with uncertainty.",
+        "category": "tracking_actionability"
+      },
+      {
+        "score": 57,
+        "reason": "Code shows defensive flows: ErrorBoundary/Suspense, QueryClient retry 1, 30-min in-memory draft recovery with sessionStorage only after explicit consent and owner binding, clear on account change/refresh/close/sign-out, requestId idempotency with 409 on conflicting facts, resume/cancel run, stale-input 409 requiring rebuild before approval, model/search unusable-result errors, PDF font/unsupported-char fallbacks to DOCX/TXT. Limits: unsaved edits lost on refresh without consent, pilot subject to run limits/availability, support receipt means recorded not reviewed with no promised time, no live failure rates demonstrated.",
+        "category": "reliability_recovery"
+      },
+      {
+        "score": 71,
+        "reason": "Source shows explicit control: saving career record is explicit choice to private Supabase account; unsaved edits in tab memory <=30 min not browser storage; bounded recovery limits; per-run choice of rules vs consented Claude/OpenAI/Kimi with only shareable facts plus vacancy text sent not raw CV; Google sign-in is not inbox access, Gmail needs separate permission, drafts need recipient/attachment approval, no send/submit action, disconnect removes credentials; original file stays on device; corrections require re-review, cannot recall downloaded file. Gaps: student must self-redact, deletion/erasure flow not demonstrated.",
+        "category": "privacy_control"
+      },
+      {
+        "score": 28,
+        "reason": "Explicitly qualified persona inference, not purchase research. Source pricing: Free Starter (free check, PDF/DOCX/TXT downloads, optional saving/tracking) ready now; Focus $15/mo and Job Loop $29/mo are proposed future tiers with checkout unavailable, pilot free for 10 accounts with no card/conversion, and explicit no interview/employment guarantee. Cash-constrained student with seasonal internship applications likely uses free check and hesitates at $15-29/mo without proven listings, automation, or outcomes. No purchase demand or paid entitlement demonstrated.",
+        "category": "willingness_to_pay"
+      }
+    ],
+    "actions": [
+      {
+        "action": "Ship a guided first-CV starter for students that turns prompted academic projects and volunteering into editable source text with contribution and measured/projected/not_measured labels.",
+        "acceptanceCriterion": "A signed-out student with no CV file can complete <=10 guided prompts (project/internship/volunteering, contribution, result status) to create validated sourceText that passes validateCvText, maps to academic_project/internship/volunteering claim kinds, and reaches evidence review without external paste in a scripted test."
+      },
+      {
+        "action": "Make internship/graduate vacancy sourcing transparent with explicit availability states and one-click manual capture fallback.",
+        "acceptanceCriterion": "Opportunities panel displays search and employer-feed configured vs not-configured status with last-checked time, up to 5 source-linked results with verification labels (user_provided/listed_on_source/unverified), and manual JD paste fallback; when unconfigured it states manual-only with no implied coverage."
+      },
+      {
+        "action": "Reduce one-page and mobile-intake friction with inline length guidance and early file-validation errors for text-based PDF/DOCX/TXT only.",
+        "acceptanceCriterion": "During CV editing the student sees live length estimate and shorten/omit hints that achieve a 1-page PDF preview within selected pageTarget on retry; oversize >5MB, scanned PDF, or .doc inputs show a specific conversion error before analysis in <=2 steps."
+      },
+      {
+        "action": "Strengthen deadline and follow-up actionability so multiple internship applications keep a visible next action and persisted manual tracker state.",
+        "acceptanceCriterion": "Each opportunity persists status (saved/prepared/applied/interview/offer/rejected/withdrawn), followUpAt, and notes; workspace shows due vs upcoming sorted lists and deadline timezone prompt, and updates remain after reload in the same authenticated account snapshot."
+      },
+      {
+        "action": "Publish and implement verifiable retention and deletion controls for student records and saved checks.",
+        "acceptanceCriterion": "Workspace provides confirmed delete for saved checks and career-record data with post-delete list verification, documents what is removed versus retained approved docs, and privacy support requests return a trackable reference showing recorded status."
+      }
+    ],
+    "overall": 53.2,
+    "strengths": [
+      "Student-specific record path that starts with projects, internships, volunteering and coursework, preserves academic vs paid-work context, and defaults to one page with editable roles.",
+      "Free six-step CV check without signup offering requirement-by-requirement evidence, exact PDF preview, and approved PDF/DOCX/TXT downloads plus separate evidence report.",
+      "Anti-invention document model requiring complete literal source-passage preservation, nearby literal context, dual fact plus disclosure approvals, and explicit heuristic-not-ATS disclaimers.",
+      "Granular privacy and control with explicit save choice, 30-minute tab-memory recovery, per-run model consent limited to shareable facts, and separate Gmail permission with no auto-send.",
+      "Stale-input and hold protections that invalidate approval when record or vacancy changes, clear old previews, and require rebuild and re-review before download."
+    ],
+    "weaknesses": [
+      "Internship/graduate discovery unproven; primary demonstrated path is manual paste of one JD, with web search and employer feeds gated by configuration and basic 5-result search.",
+      "High manual effort for novices: supply CV plus JD, interpret gaps, shorten to page limit, approve, submit externally, manually update tracker; recurring runs flagged as not currently available.",
+      "Mobile, accessibility, and file handling unverified; text-based PDF/DOCX/TXT <=5MB only with scanned PDFs/.doc excluded and no observed mobile layout or assistive-tech validation.",
+      "Live reliability unproven under 10-account free pilot with scheduler/worker availability caveats, resume flows, and support receipt without promised review time.",
+      "Limited paid relevance for students: checkout disabled, Focus $15 and Loop $29 are proposals only, with explicit no interview/employment guarantee and likely seasonal use."
+    ],
+    "evidenceLimitations": [
+      "Bounded excerpts from pinned commit 2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69 only; same package for all reviewers with full source larger and truncated excerpts possibly stopping mid-line.",
+      "No live browser journey, authenticated execution, configured provider, scheduled run, account save, tracking mutation, erasure, or employer submission is demonstrated by these excerpts.",
+      "Audience and pilot examples are expressly fictional illustrations (e.g., Alex Morgan, Example Advisory), not customer outcomes or execution proof.",
+      "Layout, accessibility, mobile behavior, PDF interoperability, multilingual or scanned-file handling, time savings, and actual vacancy coverage have not been observed.",
+      "Pricing, free-pilot limits, and availability statements do not establish purchase demand, paid entitlements, operating availability, or deployment parity with this commit.",
+      "Prior reviews, desired scores, tests, env files, credentials, private records, and new fixes are excluded; each excerpt carries path, lines, and SHA hashes.",
+      "Assessment infers from source structure only; unknown capabilities are neither assumed successful nor declared broken."
+    ]
+  },
+  "persona": "student",
+  "returnedModel": "meta/muse-spark-1.3",
+  "baselineCommit": "2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69",
+  "evidenceSha256": "3ceffd92ca847f1f3376cbce9a134be6cfe3ec2e4ad498bda22e464422b1c385",
+  "requestedModel": "meta/muse-spark-1.3",
+  "providerRequestId": "gen-1791830775-dFbcngosgWZJCLzicYl5"
+}

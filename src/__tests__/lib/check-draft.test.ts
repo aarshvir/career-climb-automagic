@@ -3,6 +3,7 @@ import { checkReviewKey, clearRetainedCheck, readRetainedCheck, retainCheckForGo
 
 const DRAFT_KEY = 'jobvance_check_oauth_draft_v1';
 const RETURN_KEY = 'jobvance_check_oauth_return_v1';
+const RECOVERY_KEY = 'jobvance_check_recovery_v1';
 const TTL = 30 * 60 * 1000;
 const NOW = 1800000000000;
 const cv = 'Synthetic candidate. Built Python reports from generated data and documented internal QA processes. '.repeat(3).trim();
@@ -15,7 +16,7 @@ afterEach(() => { vi.restoreAllMocks(); sessionStorage.clear(); localStorage.cle
 describe('guest checking defaults to no CV storage', () => {
   it('preserves an incomplete draft for route navigation without writing browser storage', () => {
     const set = vi.spyOn(Storage.prototype, 'setItem');
-    const value = { draft: { ...draft, jobDescription: '' }, step: 3, cvReady: true, filename: 'fictional.txt', ownerId: null };
+    const value = { draft: { ...draft, jobDescription: '' }, step: 3, cvReady: true, filename: 'fictional.txt', ownerId: null, pageTarget: 1 as const };
     rememberCheckRecovery(value, false, NOW);
     expect(readCheckRecovery(null, NOW + 1000)?.value).toEqual(value);
     expect(readCheckRecovery(null, NOW + 1000)?.storageConsented).toBe(false);
@@ -23,13 +24,35 @@ describe('guest checking defaults to no CV storage', () => {
     expect(readCheckRecovery('different-account', NOW + 1000)).toBeNull();
   });
   it('retains across refresh only with consent, expires and clears on explicit discard', () => {
-    const value = { draft, step: 6, cvReady: true, filename: '', ownerId: null };
+    const value = { draft, step: 6, cvReady: true, filename: '', ownerId: null, pageTarget: 2 as const };
     rememberCheckRecovery(value, true, NOW);
     expect(readCheckRecovery(null, NOW + 1000)?.storageConsented).toBe(true);
+    expect(readCheckRecovery(null, NOW + 1000)?.value).toEqual(value);
     expect(readCheckRecovery(null, NOW + TTL)).toBeNull();
     rememberCheckRecovery(value, true, NOW); clearCheckRecovery();
     expect(readCheckRecovery(null, NOW + 1)).toBeNull();
     expect(localStorage.length).toBe(0);
+  });
+  it('restores a consented page target only for its owner and never restores approval', () => {
+    const value = { draft: { ...draft, approved: true }, step: 6, cvReady: true, filename: '', ownerId: 'account-a', pageTarget: 1, approved: true, report: { score: 100 } };
+    sessionStorage.setItem(RECOVERY_KEY, JSON.stringify({ version: 1, value, expiresAt: NOW + TTL }));
+    const recovered = readCheckRecovery('account-a', NOW + 1)!;
+    expect(recovered.value.pageTarget).toBe(1);
+    expect(recovered.value).not.toHaveProperty('approved');
+    expect(recovered.value).not.toHaveProperty('report');
+    expect(recovered.value.draft).not.toHaveProperty('approved');
+    expect(readCheckRecovery('account-b', NOW + 1)).toBeNull();
+    expect(sessionStorage.getItem(RECOVERY_KEY)).toBeNull();
+  });
+  it('accepts an existing recovery envelope with the original two-page default', () => {
+    const legacy = { draft, step: 6, cvReady: true, filename: '', ownerId: null };
+    sessionStorage.setItem(RECOVERY_KEY, JSON.stringify({ version: 1, value: legacy, expiresAt: NOW + TTL }));
+    expect(readCheckRecovery(null, NOW + 1)?.value).toEqual({ ...legacy, pageTarget: 2 });
+  });
+  it.each([0, 3, '1', null])('rejects an invalid stored page target %s', pageTarget => {
+    sessionStorage.setItem(RECOVERY_KEY, JSON.stringify({ version: 1, value: { draft, step: 6, cvReady: true, filename: '', ownerId: null, pageTarget }, expiresAt: NOW + TTL }));
+    expect(readCheckRecovery(null, NOW + 1)).toBeNull();
+    expect(sessionStorage.getItem(RECOVERY_KEY)).toBeNull();
   });
   it('validation and review-key construction do not read or write browser storage', () => {
     const get = vi.spyOn(Storage.prototype, 'getItem');

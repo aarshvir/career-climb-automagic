@@ -4,6 +4,22 @@ import { analyzeCvEvidence, prioritizeCvForVacancy } from '@/lib/cv-evidence';
 const status = (cv: string, vacancy: string) => analyzeCvEvidence(cv, vacancy).requirements[0]?.status;
 
 describe('literal CV evidence comparison', () => {
+  it('recognizes a completed coursework action without calling academic context unfinished', () => {
+    const quote = 'Built an Excel dashboard for a university coursework project using a synthetic dataset of 200 orders.';
+    const cv = `PROJECTS\n${quote}`;
+    const finding = analyzeCvEvidence(cv, 'Build an Excel dashboard.').requirements[0];
+    expect(finding.status).toBe('direct');
+    expect(finding.evidence[0]).toMatchObject({ cvQuote: quote, contextKind: 'academic_project' });
+    expect(cv.slice(finding.evidence[0].start, finding.evidence[0].end)).toBe(quote);
+    expect(finding.explanation).toMatch(/academic evidence/);
+    expect(finding.explanation).not.toMatch(/unfinished|expired|not held/);
+    expect(status(cv, 'Professional experience in Excel dashboards required.')).not.toBe('direct');
+  });
+  it('still reviews coursework that explicitly remains in progress', () => {
+    const finding = analyzeCvEvidence('PROJECTS\nBuilt an Excel dashboard for a coursework project, in progress.', 'Build an Excel dashboard.').requirements[0];
+    expect(finding.status).toBe('review');
+    expect(finding.explanation).toMatch(/unfinished/);
+  });
   it('keeps a completed project stable when an unrelated skills item changes', () => {
     const cv = 'EDUCATION\nBSc Computer Science, expected graduation June 2027.\nPROJECTS\n- Developed Python reports for a university team project.\n- Supported data cleaning. I did not lead the team.\nSKILLS\n';
     const vacancy = 'Develop Python reports.';
@@ -129,6 +145,8 @@ describe('literal CV evidence comparison', () => {
     'Bachelor degree in Engineering expected next year.',
     'Studied for a Bachelor degree in Engineering.',
     'Education\nBachelor degree in Engineering, incomplete.',
+    'Education\nBachelor degree in Engineering in progress.',
+    'Education\nCompleted Bachelor degree in Engineering coursework.',
   ])('does not equate attendance or future completion with a completed credential: %s', cv => {
     expect(status(cv, 'Bachelor degree in Engineering required.')).toBe('review');
   });

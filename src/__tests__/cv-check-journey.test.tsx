@@ -74,14 +74,27 @@ describe("six-step free CV check", () => {
     expect(screen.getByRole('button', { name: 'Download DOCX' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();
   });
-  it('restores a guest review after visiting another page, while clearing its approval', async () => {
-    const view = show(); await toApproval(); approve();
+  it.each([false, true])('restores the chosen one-page maximum with tab-storage consent %s, while clearing approval and preview', async consent => {
+    const storage = vi.spyOn(Storage.prototype, 'setItem');
+    const view = show(); await toApproval();
+    fireEvent.change(screen.getByLabelText('Maximum PDF length'), { target: { value: '1' } });
+    if (consent) fireEvent.click(screen.getByLabelText('Keep my draft in this tab across refresh'));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview current PDF' }));
+    await waitFor(() => expect(screen.getByTitle('Exact PDF preview before approval')).toBeInTheDocument());
+    approve();
     const reviewed = document.querySelector('.check-final-document')?.textContent;
     view.unmount(); show();
     expect(screen.getByText('Your draft is back. Read it again before you approve a new download.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled();
+    expect(screen.queryByTitle('Exact PDF preview before approval')).not.toBeInTheDocument();
     expect(document.querySelector('.check-final-document')?.textContent).toBe(reviewed);
+    expect(screen.getByLabelText('Maximum PDF length')).toHaveValue('1');
     expect(screen.getByLabelText(/I reviewed the complete CV and vacancy/)).not.toBeChecked();
+    expect(screen.getByLabelText(/Both my source CV and final CV are safe/)).not.toBeChecked();
+    expect(screen.getByLabelText('Keep my draft in this tab across refresh')).toHaveProperty('checked', consent);
+    if (!consent) expect(storage).not.toHaveBeenCalled();
+    storage.mockRestore();
   });
   it('omits only deliberately selected whole paragraphs and supports undo', async () => {
     show(); await toReview();

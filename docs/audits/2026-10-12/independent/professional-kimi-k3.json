@@ -1,0 +1,117 @@
+{
+  "kind": "independent_review",
+  "usage": {
+    "inputTokens": 31083,
+    "actualMicros": 67321,
+    "outputTokens": 4463
+  },
+  "effort": "max",
+  "review": {
+    "scores": [
+      {
+        "score": 70,
+        "reason": "The core value — one reusable, source-verified career record, evidence-side-by-side review and prepared packs around a working day — is explicitly built for this persona (job-loop-audiences.ts professional entry, discreetSearch true). The free no-signup CV check delivers standalone value. However, preparation stops at review: the user still submits manually, discovery is conditional on configured providers, and time savings are asserted in copy but not demonstrated. Useful coherent experience with material gaps.",
+        "category": "user_need_value"
+      },
+      {
+        "score": 65,
+        "reason": "Onboarding offers a no-account six-step check, audience-specific landing pages with suggested roles, prefilled editable preferences (pageTarget 2, discreetSearch), draft recovery, and protected routes that preserve intent (MvpApp.tsx ProtectedJobLoop retains the gmail ticket). Against that, the cloud loop demands substantial upfront work — profile, source text, claim-by-claim confirmation, vacancy input — before any prepared packet, which is heavy for someone with limited search time, and first-packet time is unmeasured.",
+        "category": "onboarding"
+      },
+      {
+        "score": 55,
+        "reason": "Source shows real accessibility effort: role='status' loading states, labelled fields, aria-current on audience nav, focus management and scroll-to-heading on step change, skip-target #main-content, and consent checkboxes with clear copy. But this package observes no rendered layout: mobile responsiveness, small-screen usability of the multi-panel Job Loop, iframe PDF previews on mobile, and WCAG conformance are unverified. Partial usefulness with substantial uncertainty.",
+        "category": "ux_accessibility_mobile"
+      },
+      {
+        "score": 85,
+        "reason": "Strongest area. Claims are validated against literal source passages with negation/attribution preserved and cropped quotes rejected; pending, weakened and negated wording is flagged (cv-evidence.ts PENDING/WEAKENED/NEGATIVE analysis); deadlines and eligibility conditions are classed as review items, not achievements; the PDF preview is the exact download artifact; evidence reports stay separate from the CV; external model output is accepted only as a bounded claimId selection with 'No generated factual text has been accepted' on parse failure. Genuinely conservative, inspectable document quality.",
+        "category": "evidence_trust_document_quality"
+      },
+      {
+        "score": 45,
+        "reason": "Manually pasted vacancies work and are source-linked, but breadth is unproven: employer feeds and Tavily web search exist only when configured (searchReady requires an API key; 503 LOOP_SEARCH_NOT_CONFIGURED otherwise), discovery matching is a simple ≥50% title word-overlap plus location substring heuristic, and experience-gap flags filter out discoveries. No actual vacancy coverage, source list or freshness is demonstrated. Major unmet-need risk for a professional relying on the tool to surface roles.",
+        "category": "job_coverage_relevance"
+      },
+      {
+        "score": 55,
+        "reason": "Automation building blocks are real: rules mode without external AI, consented Claude/OpenAI/Kimi claim selection, background runs, a weekday/daily/weekly scheduler with timezone and opt-in consent, and optional Gmail draft creation with recipient confirmation. Yet everything is gated on deployment configuration (capabilities.scheduler, model readiness, Gmail), review burden is mandatory at every step, and no scheduled run has been observed. Effort reduction is plausible but unverified and partly manual.",
+        "category": "automation_effort"
+      },
+      {
+        "score": 60,
+        "reason": "The workspace surfaces the next action, follow-up dues, upcoming reminders, run history and per-opportunity statuses from saved through offer/rejected/withdrawn (JobLoopPanels overview, loopFollowUpDue). Honestly, it records only user-reported progress — opening a link does not count as submission — and Gmail read summaries that could automate status detection are optional and unverified. Actionable but manual.",
+        "category": "tracking_actionability"
+      },
+      {
+        "score": 68,
+        "reason": "Designed-for-failure behavior is evident: idempotency via requestId with hash comparison and 409 conflicts, resume/cancel run actions, stale-input rejection at approval, graceful worker-dispatch degradation, ErrorBoundary and retry:1 queries, and draft recovery cleared on account change. Limitations: recovery lasts 30 minutes and dies on refresh without consent or on tab close, and none of the recovery or run behavior has been observed executing live.",
+        "category": "reliability_recovery"
+      },
+      {
+        "score": 85,
+        "reason": "Confidentiality needs are addressed structurally: discreet-search consent default for professionals with a DISCREET_SEARCH_REVIEW flag, user-managed excludedTerms, redaction of gap text against the profile, per-claim confirmed/shareable gates, models receiving only cleared facts rather than the raw CV, a separate previewed Gmail OAuth flow with disconnect semantics, no send/submit capability, owner-scoped recovery cleared on account switch, and support forms warning against including confidential data. Deletion controls exist (deleteTarget). Live verification of erasure is not in this package.",
+        "category": "privacy_control"
+      },
+      {
+        "score": 50,
+        "reason": "Qualified persona inference only: an employed 5–10-year professional has disposable income and acute time scarcity, so $15–$29/month tiers are plausibly within range if preparation genuinely saves hours. But checkout is disabled, tiers are explicitly 'proposals, not offers for sale', the pilot is capped at ten accounts, and the time-saving core (discovery plus scheduled preparation) is unverified. Willingness is contingent on demonstrated automation value; currently unproven and unpurchasable.",
+        "category": "willingness_to_pay"
+      }
+    ],
+    "actions": [
+      {
+        "action": "Prove and publish job-discovery coverage for professional roles: enable and document employer feeds/search in a staging deployment and measure returned opportunities for typical senior-role profiles.",
+        "acceptanceCriterion": "For 3 test profiles (senior business analyst, operations manager, project manager) with 2 locations each, one discovery run returns ≥5 source-linked opportunities per profile with verification states recorded, or the UI verifiably reports search as not configured; results documented per run."
+      },
+      {
+        "action": "Reduce and measure time-to-first-prepared-packet for the busy-professional path, streamlining claim confirmation (e.g., batch confirm with per-item edit).",
+        "acceptanceCriterion": "In moderated tests with ≥5 target users, median time from account creation to a review_required packet is ≤20 minutes, with all confirmation steps still explicitly recorded; step-level timing instrumented."
+      },
+      {
+        "action": "Demonstrate the recurring scheduler end-to-end in a verifiable environment.",
+        "acceptanceCriterion": "A saved weekday schedule with a stated nextRunAt executes within 5 minutes of that time in a test deployment, run history shows completed status, produced packet count respects the 2-per-run cap, and pause/cancel is reflected before the following run."
+      },
+      {
+        "action": "Run a mobile and accessibility audit of the core journey (CV check steps 1–6, loop review and approval).",
+        "acceptanceCriterion": "At 360px viewport width there is no horizontal scrolling, touch targets ≥44px, all interactive elements reachable by keyboard with visible focus, and axe-core reports 0 critical violations on the tested screens."
+      },
+      {
+        "action": "Reduce unsaved-work loss risk for interrupted professionals by extending recovery or adding explicit save prompts.",
+        "acceptanceCriterion": "With storage consent, a check draft survives browser refresh after 30+ minutes or the user is warned via beforeunload before tab close with unsaved changes; verified in an automated browser test, and recovery remains owner-scoped and cleared on sign-out."
+      }
+    ],
+    "overall": 63.8,
+    "strengths": [
+      "Direct persona targeting: a dedicated 'professional' audience ('5–10 YEARS OF EXPERIENCE. A FULL WORKING DAY.') with discreetSearch defaulted true, two-page CV target, confidential-boundary setup steps and reusable confirmed facts across vacancies (src/lib/job-loop-audiences.ts).",
+      "Evidence integrity is enforced in source: claims must preserve the complete literal source passage 'including negation, contribution and team attribution' (job-loop-engine.ts validateClaim), relevance scoring is labeled 'heuristic relevance, not ATS or eligibility certification', and the UI repeatedly states matching words do not verify qualifications.",
+      "Approval-gated document quality: the free check requires explicit fact and privacy confirmations, an exact-byte PDF preview (same artifact as download) within a page target before approval, and any edit invalidates approval (src/pages/CvCheck.tsx, src/lib/document-export.ts).",
+      "Privacy architecture fits a confidentiality-sensitive searcher: per-claim shareable flags, excludedTerms, discreet-search review flags, models receive only confirmed shareable facts plus vacancy text rather than the raw CV, Gmail requires a separate previewed consent ticket, and there is no email-send or application-submit action.",
+      "Reliability-conscious design: idempotent run requests with 409 conflict on changed facts, LOOP_STALE_INPUT rejection when approving against changed records, resumable background runs with honest 'worker could not be reached' messaging, and bounded draft recovery (src/lib/check-draft.ts, job-loop-runtime.ts)."
+    ],
+    "weaknesses": [
+      "No automated submission exists by design (ProductPage FAQ: 'You submit on the employer's site. Opening a link does not count as a submission'), so the time-poor persona still performs every application manually; automation covers preparation only.",
+      "Job discovery and external models are configuration-dependent and may be absent: searchTavily throws 503 LOOP_SEARCH_NOT_CONFIGURED without a key, the schedule panel warns 'Recurring execution is not currently available' unless capabilities.scheduler is true, and no live authenticated run, scheduled occurrence or Gmail connection is demonstrated by this package.",
+      "Discovery relevance is a thin keyword heuristic (matchesDiscoveryTarget: ≥50% word overlap on titles plus location substring), which is likely noisy for senior professional roles, and actual vacancy coverage is unestablished.",
+      "Tracking is manual and self-reported; statuses and follow-ups depend on user updates, and Gmail inbox reading (which could automate detection) is unverified and optional.",
+      "Unsaved work recovery is limited to a 30-minute in-memory window (consented sessionStorage for refresh), cleared on tab close, sign-out or account switch — a real loss risk for a busy user interrupted mid-review."
+    ],
+    "evidenceLimitations": [
+      "Assessment is based on bounded, partly truncated excerpts of a pinned source commit; the full repository, tests, migrations and environment configuration were not available.",
+      "No live browser journey, authenticated session, configured provider, scheduled run, Gmail connection or employer submission was executed or observed; all run-time behavior is inferred from source only.",
+      "Pilot and audience examples are expressly fictional illustrations; they are not customer outcomes or evidence of successful execution.",
+      "Scheduler availability, model provider readiness, search configuration and deployment parity with this commit are unknown; features may be absent or different in any actual deployment.",
+      "Mobile rendering, responsive layout, real-device PDF preview behavior and WCAG conformance were not observed.",
+      "Actual vacancy coverage, discovery quality, run completion rates and realistic time savings are unmeasured.",
+      "Data deletion, erasure requests and account-scoping guarantees are inferred from UI state and consent design, not from verified backend behavior.",
+      "Willingness-to-pay is an explicitly qualified persona inference; checkout is disabled, tiers are proposals, and no purchase research exists.",
+      "The ten-account pilot cap means access itself may be unavailable to a new user; capacity status is not established."
+    ]
+  },
+  "persona": "professional",
+  "returnedModel": "moonshotai/kimi-k3",
+  "baselineCommit": "2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69",
+  "evidenceSha256": "3ceffd92ca847f1f3376cbce9a134be6cfe3ec2e4ad498bda22e464422b1c385",
+  "requestedModel": "moonshotai/kimi-k3",
+  "providerRequestId": "gen-1791830775-WKPzCTgWb3j7ijbAcShT"
+}

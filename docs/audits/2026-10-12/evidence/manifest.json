@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "sourceCommit": "2e134180a8cdbb248c5fa5dca01b1a1bf8b1fb69",
+  "evidenceSha256": "3ceffd92ca847f1f3376cbce9a134be6cfe3ec2e4ad498bda22e464422b1c385",
+  "hashFormat": "sha256-utf8-canonical-json-sorted-object-keys",
+  "utf8Bytes": 115991,
+  "sourceFiles": 20,
+  "excerpts": 27,
+  "paths": [
+    "src/MvpApp.tsx",
+    "src/pages/ProductPage.tsx",
+    "src/pages/AudienceLanding.tsx",
+    "src/lib/job-loop-audiences.ts",
+    "src/pages/CvCheck.tsx",
+    "src/lib/cv-evidence.ts",
+    "src/lib/check-draft.ts",
+    "src/lib/document-export.ts",
+    "src/pages/SubscriptionPricing.tsx",
+    "src/lib/subscription-plans.ts",
+    "src/pages/PilotLanding.tsx",
+    "src/pages/JobLoop.tsx",
+    "src/pages/JobLoopPanels.tsx",
+    "src/pages/LoopPacketPreview.tsx",
+    "src/pages/LoopSupport.tsx",
+    "supabase/functions/_shared/job-loop-engine.ts",
+    "supabase/functions/_shared/job-loop-runtime.ts",
+    "supabase/functions/_shared/job-loop-providers.ts",
+    "supabase/functions/_shared/job-loop-types.ts",
+    "src/lib/pilot-demo.ts"
+  ],
+  "coverageLimits": [
+    "This package contains bounded excerpts from the pinned source commit only. It is the same package for every external persona reviewer.",
+    "No live browser journey, authenticated production execution, configured provider, scheduled occurrence, account saving, tracking mutation, erasure or employer submission is established by source excerpts.",
+    "Public examples in the included audience and pilot source are expressly fictional illustrations, not customer outcomes or successful execution evidence.",
+    "The full source is larger than these selected ranges. Each excerpt records its lines, full-source SHA-256 and excerpt SHA-256; truncated excerpts may stop inside a source line.",
+    "Layout, accessibility, mobile PDF interoperability, multilingual or scanned-file handling, realistic time savings and actual vacancy coverage have not been observed by this package.",
+    "Pricing and statements in source do not establish actual purchase demand, paid entitlements, operating service availability or deployment parity with this commit.",
+    "Prior independent reviews, their scores, improvement targets, tests, environment files, credentials, private records and newly implemented fixes are excluded."
+  ]
+}

@@ -54,3 +54,13 @@ verify_jwt = false
 [functions.job-loop-oauth]
 enabled = true
 verify_jwt = false
+
+# Every admin action checks auth.getUser and a fresh private membership.
+[functions.jobvance-admin]
+enabled = true
+verify_jwt = false
+
+# Internal review/status work consumes an action-bound, single-use owner ticket.
+[functions.jobvance-review-worker]
+enabled = true
+verify_jwt = false

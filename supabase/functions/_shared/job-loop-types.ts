@@ -89,6 +89,7 @@ export interface LoopRun {
   reservedUsd: number; usageUsd: number;
 }
 export interface LoopModelOption {
+  transport?: 'openrouter' | 'direct';
   provider: LoopProviderId; model: string; label: string; ready: boolean;
   inputUsdPerMillion: number; outputUsdPerMillion: number;
 }
@@ -114,7 +115,7 @@ export type LoopAction =
   | { action: 'withdraw_claim'; expectedVersion: number; id: string }
   | { action: 'add_opportunity'; expectedVersion: number; opportunity: LoopOpportunityInput }
   | { action: 'update_opportunity'; expectedVersion: number; id: string; status: LoopApplicationStatus; followUpAt: string | null; notes: string }
-  | { action: 'start_run'; requestId: string; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; inboxConsent: boolean }
+  | { action: 'start_run'; requestId: string; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; inboxConsent: boolean; processingRoute?: 'direct' | 'openrouter' }
   | { action: 'resume_run'; runId: string }
   | { action: 'cancel_run'; runId: string }
   | { action: 'save_schedule'; expectedScheduleVersion: number; schedule: LoopScheduleInput; recurringConsent: boolean }
