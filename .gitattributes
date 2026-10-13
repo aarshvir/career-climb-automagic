@@ -1,3 +1,5 @@
 # Deployment artifacts are exact immutable bytes; do not rewrite their line endings.
 docs/supabase-loop-ui/*.js -text
 docs/supabase-loop-ui/manifest.json text eol=lf
+# Retain audited media, captions and provenance hashes byte for byte.
+docs/product-hardening/tutorial-assets/videos/* -text
