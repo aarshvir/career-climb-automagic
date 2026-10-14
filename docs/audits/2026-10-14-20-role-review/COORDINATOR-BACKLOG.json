@@ -118,6 +118,21 @@
         "PA-01",
         "PA-03",
         "UX-01"
+      ],
+      "implementation_status": "partial: v28 explicit saved-check to Loop local draft continuation shipped; shared application home and durable identity remain open",
+      "implementation_evidence": "../../CHECK-CONTINUATION-RELEASE-2026-10-15.md",
+      "completed_within_validation_scope": [
+        "Owner/auth-lifetime/generation-bound approved saved-check chooser and exact opaque auth return",
+        "Reviewed final text default; original source requires separate choice",
+        "Draft fingerprint-bound replacement, guarded page-memory undo, existing header/target preservation and stale vacancy contact clearing",
+        "No import-triggered save, run or model call; separate confirmations retained",
+        "1290 full-suite tests, TypeScript,12 hosting groups,83 live HTTP checks; independent bounded reviews"
+      ],
+      "remaining_acceptance": [
+        "Shared Applications home with side-effect-free existing-record reads; do not use initializing Loop GET passively",
+        "Additive idempotent exact check/pack/tracker relationships and adapters; do not merge by title/company",
+        "Hosted authenticated import/save and unassisted first/second applications",
+        "JV-04 exact chosen-opportunity run identity, preparation and per-application composition"
       ]
     },
     {

@@ -1,6 +1,6 @@
 # Saved-check continuation — 15 October 2026
 
-Implementation and local validation complete; publication/readback pending. Public v27 remains the verified baseline until the native receipt below is recorded. This is a bounded JV-03 continuation slice, not the shared application home or automatic preparation.
+**Published as v28 on Jobvance.io at 14 October22:23UTC /15 October02:23Dubai.** This is a bounded JV-03 continuation slice, not the shared application home or automatic preparation.
 
 ## Customer task
 
@@ -29,7 +29,15 @@ Actual hosted authenticated import/save, fresh signup/OAuth, unassisted first/se
 
 ## Publication receipt
 
-Pending exact source/archive/version/readback. No backend migration or handler release is required.
+[Exact release receipt](releases/2026-10-15-check-continuation.json) and [83/83 live HTTP byte/header checks](releases/2026-10-15-check-continuation-live-check.json).
+
+- Source: `31f56678cdcdb3eb63fb6a3af358154c8f2dfc85`, pushed to GitHub and the Site source repository.
+- Saved version: `appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_77a3a87c5584819197bb57b9a00ff062`.
+- Successful deployment: `appgdep_6ad000c4e80c81919a02dd9ae701b457`.
+- Archive SHA256: `6aa4e7bf3773050af85c602d82fd09c11f8c15be014e721f362c6db22204dca6`; all130 archive members reviewed, no source/private documentation/environment files; Worker bytes match the tested build.
+- Actual Jobvance.io guest browser retained the exact created UUID selector through the sign-in redirect and rendered the new help topic. No sign-in or private record mutation was performed.
+
+No backend migration or handler release. Control14/worker11/OAuth5 remain the prior deployed versions. Last collection-gate configuration readback was v26; no new enablement or readback is claimed.
 
 ## Rollback and operation
 

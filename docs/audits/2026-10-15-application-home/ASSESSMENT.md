@@ -17,7 +17,7 @@ Review found an older-than-50 exact selector exclusion and a blank-header preser
 
 ## Acceptance
 
-Full suite: 1,290/1,290 in89 files; TypeScript; 12 hosting groups. Actual local signed-out app route and isolated chooser/browser mobile checks are documented in [release note](../../CHECK-CONTINUATION-RELEASE-2026-10-15.md). Production publication and integrity readback must be attached there before calling the slice shipped. No new numerical customer score is assigned. No complete hosted authenticated or unassisted customer journey is claimed.
+Full suite: 1,290/1,290 in89 files; TypeScript; 12 hosting groups. Actual local signed-out app route and isolated chooser/browser mobile checks are documented in [release note](../../CHECK-CONTINUATION-RELEASE-2026-10-15.md). Published v28 with83/83 actual HTTP byte/header checks; exact receipts are linked from the release note. Actual hosted guest route/help were observed; authenticated import/save remains a local-regression acceptance boundary. No new numerical customer score is assigned. No complete hosted authenticated or unassisted customer journey is claimed.
 
 ## Next coherent work
 

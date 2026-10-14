@@ -1,0 +1,88 @@
+{
+  "releasedAt": "2026-10-14T22:23:31.985177+00:00",
+  "site": "https://jobvance.io",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "version": 28,
+  "sourceCommit": "31f56678cdcdb3eb63fb6a3af358154c8f2dfc85",
+  "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_77a3a87c5584819197bb57b9a00ff062",
+  "deploymentId": "appgdep_6ad000c4e80c81919a02dd9ae701b457",
+  "status": "succeeded",
+  "nativeDeployment": {
+    "id": "appgdep_6ad000c4e80c81919a02dd9ae701b457",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_77a3a87c5584819197bb57b9a00ff062",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-14T22:23:31.985177+00:00"
+  },
+  "savedArchive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_0000000085c48208aa38a6a6e0037929",
+    "content_hash": "sha256:15284656da3cc93a034cbaa2ca015236be754b761d671f30e7e61cd49567e19a",
+    "size_bytes": 14448640,
+    "file_count": 122
+  },
+  "validation": {
+    "vitest": {
+      "files": 89,
+      "passed": 1290,
+      "failed": 0
+    },
+    "typescript": "passed",
+    "hostingGroups": 12,
+    "liveHttpChecks": 83,
+    "liveHttpFailures": 0,
+    "publicPages": 38,
+    "guideArticles": 20,
+    "prerenderExternalRequests": 0,
+    "workerCompressedBytes": 2768975
+  },
+  "backend": {
+    "changed": false,
+    "controlVersion": 14,
+    "workerVersion": 11,
+    "oauthVersion": 5,
+    "freshConfigurationReadback": false,
+    "note": "Existing lifecycle/path fences and disabled collection configuration retained; v26 is the last configuration readback, not fresh proof this turn."
+  },
+  "rollback": {
+    "tag": "jobvance-before-check-continuation-2026-10-15",
+    "tagCommit": "6bb6ca6d3c4ea9a337c79b02fae7186d1978a545",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_4bd56e97682c819197f5eb2567f1d650",
+    "note": "Frontend/source rollback only; retain coordinated backend guards and spending commitments."
+  },
+  "acceptance": {
+    "sharedHome": false,
+    "canonicalApplicationLinks": false,
+    "scopedWorkerPreparation": false,
+    "authenticatedHostedImportSave": false,
+    "unassistedCustomerJourney": false,
+    "localRealComponentImportTests": 19,
+    "isolatedChooserMobile": true,
+    "noNewPaidCalls": true,
+    "noRealCandidateMutation": true
+  },
+  "artifact": {
+    "archive": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-repair-evidence\\check-continuation-2026-10-15.tar.gz",
+    "sha256": "6aa4e7bf3773050af85c602d82fd09c11f8c15be014e721f362c6db22204dca6",
+    "bytes": 4694044,
+    "members": 130,
+    "forbiddenMembers": [],
+    "workerBytesMatch": true
+  },
+  "hostedBrowser": {
+    "guestOpaqueSelectorToExactAuthReturn": true,
+    "publicHelpAnchorReadable": true,
+    "signedIn": false,
+    "syntheticSelectorOnly": true,
+    "privateCandidateRecordsAccessed": false,
+    "screenshot": "../jobvance-repair-evidence/check-continuation-live-help.png"
+  }
+}
