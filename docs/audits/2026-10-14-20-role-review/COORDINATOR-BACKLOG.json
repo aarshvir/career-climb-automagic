@@ -63,6 +63,20 @@
         "DB-01",
         "BACKEND-02",
         "CS-02"
+      ],
+      "implementation_status": "partial: v23 durable erasure, bounded cleanup, stale upload/CV version fencing and candidate continuation shipped",
+      "implementation_evidence": "../../DURABLE-ERASURE-RELEASE-2026-10-14.md",
+      "completed_within_validation_scope": [
+        "Original enrollment/storage interleaving now refused in local SQL; production definitions/privileges read back",
+        "10001 synthetic objects removed through 11 bounded calls with retry progress",
+        "Actual, uncertain and reserved shared commitments preserved in real PGlite fixtures",
+        "Generation-checked finish requires empty exact private prefix; refresh continuation tested locally"
+      ],
+      "remaining_acceptance": [
+        "Safe automatic unreferenced terminal-run artifact collection",
+        "Comprehensive schedule/OAuth HTTP request-generation binding",
+        "Real isolated two-connection and actual Storage API deletion verification",
+        "Whole-account synthetic checklist execution and coordinated restore rehearsal"
       ]
     },
     {

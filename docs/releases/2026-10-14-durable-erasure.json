@@ -1,0 +1,166 @@
+{
+  "releasedAt": "2026-10-14T10:34:24.722010+00:00",
+  "site": "https://jobvance.io",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "version": 23,
+  "sourceCommit": "033348c302cefa429b3ed447544d8fd1ad356846",
+  "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7e7ba761ec5081919345cf12e71997ba",
+  "deploymentId": "appgdep_6acf5a9cd2f08191b80803affe2cd484",
+  "status": "succeeded",
+  "nativeDeployment": {
+    "id": "appgdep_6acf5a9cd2f08191b80803affe2cd484",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7e7ba761ec5081919345cf12e71997ba",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-14T10:34:24.722010+00:00"
+  },
+  "savedArchive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_0000000069cc820bb8a69236db373350",
+    "content_hash": "sha256:8b9ed9a59e5209c544a7d9392ee4f04d3a4bbeb73a606f5b1ea2ac0ec55206b0",
+    "size_bytes": 14428160,
+    "file_count": 123
+  },
+  "localArchive": "C:/Users/user/OneDrive/Documents/Projects/Job CV linkedin/jobvance-repair-evidence/durable-erasure-2026-10-14.tar.gz",
+  "localArchiveMetadata": {
+    "sha256": "79a4f0b1f22285da19ece28f65d41a85fc42557eaa9978b34dee9e2dde26a95a",
+    "bytes": 4685468,
+    "members": 131,
+    "forbiddenPaths": []
+  },
+  "sourceZip": "../jobvance-repair-evidence/durable-erasure-source-033348c.zip",
+  "backend": {
+    "kind": "durable-erasure-backend-release",
+    "status": "live",
+    "project": "gvftdfriujrkpptdueyb",
+    "sourceCommit": "18912d4cd26ecc2a35fe10888da321bcee2f2d8c",
+    "additionalValidationCommit": "033348c302cefa429b3ed447544d8fd1ad356846",
+    "migration": {
+      "version": "20261014102428",
+      "name": "job_loop_durable_erasure"
+    },
+    "localMigration": "supabase/migrations/20261014101107_job_loop_durable_erasure.sql",
+    "schemaReadback": {
+      "lifecycle_present": true,
+      "grants_present": true,
+      "service_batch": true,
+      "browser_batch": false,
+      "anon_upload_grant": false,
+      "service_unfenced_finish": false,
+      "insert_update_storage_guard": 1
+    },
+    "control": {
+      "id": "76fd913b-ada8-4234-b7ac-f589bc034ad2",
+      "name": "job-loop-control",
+      "version": 12,
+      "verify_jwt": false,
+      "ezbr_sha256": "f73ca69e8ff3805ba34e84c39daaa1da60b6ce73f51531adafa8614643c5fb58",
+      "codeMatches": true
+    },
+    "worker": {
+      "id": "1bd00daf-f44b-478a-bf9b-91d227a2bc61",
+      "name": "job-loop-worker",
+      "version": 9,
+      "verify_jwt": false,
+      "ezbr_sha256": "835d2bd38ee4e12fdcc651b6f5c7a28a57dc48871bda10fe45cad5b340461136",
+      "codeMatches": true
+    },
+    "edgeCodeHashes": {
+      "control": "34288945f5ae19c9664850af753a9fa87d6c02ea4808d0f9db11fd02aa97b346",
+      "worker": "c7e16eff91a189ad0da9a5d9155e2ed16ee7f1b1a25d98c4a57a81a071cca496"
+    },
+    "validation": {
+      "vitest": 293,
+      "vitestFiles": 14,
+      "denoHandlerTests": 6,
+      "typescript": "passed",
+      "newRetentionTests": 42,
+      "storageMockObjects": 10001,
+      "boundedCallsToEraseFixture": 11,
+      "unauthenticatedControl": 401,
+      "unauthenticatedWorker": 401,
+      "paidCalls": 0,
+      "productionCandidateRecordsErased": 0
+    },
+    "rollback": {
+      "frontendSavedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_787f3ab567a081918a93369da14ff7ce",
+      "sourceTag": "jobvance-before-durable-erasure-2026-10-14",
+      "sourceCommit": "083a0368fd48d1cd83f5aa3fad721ff7331199ed",
+      "priorControlVersion": 11,
+      "priorWorkerVersion": 8,
+      "priorSourceBackups": [
+        "durable-erasure-before-control.json",
+        "durable-erasure-before-worker.json",
+        "durable-erasure-before-schema.json"
+      ],
+      "warning": "Do not redeploy the old worker against the new upload-grant guard. Backend rollback requires coordinated review, preserving active erasure state and budget. No database/file restore rehearsal occurred."
+    },
+    "remaining": [
+      "Automatic terminal-run orphan collection",
+      "Complete schedule/OAuth request epoch binding",
+      "Hosted two-connection race and actual Storage API deletion smoke",
+      "Whole-account deletion execution and isolated restore rehearsal"
+    ],
+    "dataBoundary": "Migration definitions and schema checks only in production. All erasure scenarios used isolated synthetic/local fixtures. No candidate was erased; no model, search, email, send or employer application call."
+  },
+  "validation": {
+    "vitest": 293,
+    "vitestFiles": 14,
+    "denoHandlerTests": 6,
+    "typescript": "passed",
+    "renderedPublicPages": 38,
+    "guideArticles": 20,
+    "prerenderExternalRequests": 0,
+    "hostingCheckGroups": 12,
+    "compressedWorkerBytes": 2764383,
+    "liveSiteChecks": 50,
+    "liveSiteFailures": 0,
+    "liveCheckEvidence": "../jobvance-repair-evidence/durable-erasure-live-check.json",
+    "independentAgents": 3,
+    "newRetentionTests": 42,
+    "additionalUiApiCases": 7,
+    "paidApiCalls": 0
+  },
+  "scope": "Bounded JV-02 release: durable owner/generation erasure fence, current-lease storage grants, version floors preventing prior CV-write replay, flat progressive storage deletion, final verified-empty completion and owner-bound continuation after refresh.",
+  "rollback": {
+    "frontendSavedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_787f3ab567a081918a93369da14ff7ce",
+    "sourceTag": "jobvance-before-durable-erasure-2026-10-14",
+    "sourceCommit": "083a0368fd48d1cd83f5aa3fad721ff7331199ed",
+    "priorControlVersion": 11,
+    "priorWorkerVersion": 8,
+    "priorSourceBackups": [
+      "durable-erasure-before-control.json",
+      "durable-erasure-before-worker.json",
+      "durable-erasure-before-schema.json"
+    ],
+    "warning": "Do not redeploy the old worker against the new upload-grant guard. Backend rollback requires coordinated review, preserving active erasure state and budget. No database/file restore rehearsal occurred."
+  },
+  "limits": [
+    "Automatic terminal-run orphan collection",
+    "Complete schedule/OAuth request epoch binding",
+    "Hosted two-connection race and actual Storage API deletion smoke",
+    "Whole-account deletion execution and isolated restore rehearsal",
+    "No production candidate was erased and no synthetic hosted account was created. Actual Storage API deletion and two-connection hosted concurrency remain unverified.",
+    "Local full erasure of 10001 objects used mock Storage API, with real SQL interleavings separately tested using PGlite.",
+    "The frontend v22 and source tag are preserved, but backend rollback requires coordinated review; do not restore the old worker alone against the new grant guard.",
+    "Existing Security Advisor warnings concern other definer permissions/password protection. New server-only lifecycle RLS-without-client-policy notice is informational; table/function browser privilege checks passed.",
+    "Public v21 guide media remains unchanged; no new media-byte or premium video-quality audit occurred."
+  ],
+  "productionCandidateMutations": 0,
+  "actualProductionErasures": 0,
+  "paidApiCalls": 0,
+  "outreachSent": 0,
+  "automationContextUpdated": true,
+  "sourceZipMetadata": {
+    "sha256": "5869abc84f38167488559cb13afedb6ea97e2e1142018db6b43f91e77d8406c5",
+    "bytes": 29223371
+  }
+}
