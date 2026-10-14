@@ -92,9 +92,24 @@ function EvidenceResults({ report, originalText, onQuestion }: { report: Evidenc
 }
 
 export default function CvCheck() {
+  const { loading, authError } = useAuth();
+  const [authResolved, setAuthResolved] = useState(!loading && !authError);
+  useEffect(() => { if (!loading && !authError) setAuthResolved(true); }, [loading, authError]);
+  // Unknown ownership during bootstrap is not a signed-out visitor. Do not read
+  // or replace an owner-bound draft until the persisted session has resolved.
+  return authResolved ? <CvCheckWorkspace /> : <CheckSessionPending failed={!!authError} />;
+}
+
+function CheckSessionPending({ failed = false }: { failed?: boolean }) {
+  const { retryConnection } = useAuth();
+  return <main className="cv-check-page"><p role="status">{failed ? 'Your sign-in could not be restored. Your stored draft has been kept. Try again to open it safely.' : 'Restoring your session and draft…'}</p>{failed && <Button type="button" variant="outline" onClick={retryConnection}>Retry sign-in recovery</Button>}</main>;
+}
+
+function CvCheckWorkspace() {
   const [searchParams] = useSearchParams();
   const requestedAudience = checkAudience(searchParams.get("audience"));
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, authError } = useAuth();
+  const [draftOwner, setDraftOwner] = useState(user?.id ?? null);
   const [recovery] = useState(() => readCheckRecovery(user?.id ?? null));
   const [audience, setAudience] = useState<CheckAudience | null>(() => requestedAudience ?? recovery?.value.audience ?? null);
   const guidance = audience ? audienceGuidance[audience] : null;
@@ -103,7 +118,8 @@ export default function CvCheck() {
   const [draft, setDraft] = useState<CheckDraft>(initialDraft);
   const [step, setStep] = useState(restored ? 5 : recovery?.value.step ?? 1);
   const [reuseMode, setReuseMode] = useState(!!recovery?.value.reuseMode), [reuseInspect, setReuseInspect] = useState(false);
-  const [report, setReport] = useState<EvidenceReport | null>(() => initialDraft.reviewedText && initialDraft.jobDescription ? analyzeCvEvidence(initialDraft.reviewedText, initialDraft.jobDescription, initialDraft.jobTitle) : null);
+  const [report, setReport] = useState<EvidenceReport | null>(() => (initialDraft.reviewedText || recovery?.value.reviewStarted) && initialDraft.jobDescription ? analyzeCvEvidence(initialDraft.reviewedText, initialDraft.jobDescription, initialDraft.jobTitle) : null);
+  const [reviewStarted, setReviewStarted] = useState(!!restored || (recovery?.value.reviewStarted ?? !!(initialDraft.reviewedText && initialDraft.jobDescription)));
   const [approved, setApproved] = useState<ApprovedCheck | null>(null);
   const [preparedFile, setPreparedFile] = useState<{ url: string; filename: string } | null>(null);
   const [checkedFacts, setCheckedFacts] = useState(false), [checkedPrivacy, setCheckedPrivacy] = useState(false);
@@ -141,7 +157,7 @@ export default function CvCheck() {
   }
 
   function invalidate() {
-    revision.current += 1; setPreparedFile(null); setApproved(null); setCheckedFacts(false); setCheckedPrivacy(false); setSaveConsent(false); setSaved(null); setTracked(false); setError(""); setNotice("");
+    revision.current += 1; setBusy(''); setPreparedFile(null); setApproved(null); setCheckedFacts(false); setCheckedPrivacy(false); setSaveConsent(false); setSaved(null); setTracked(false); setError(""); setNotice("");
     clearRetainedCheck();
     setPdfPreview(null); setPdfError('');
     setSelectedSourceLines([]); setSourceRemovalPreview(null);
@@ -154,10 +170,11 @@ export default function CvCheck() {
     }
     invalidate(); if (keepError && errorField) setFieldError(errorField, error);
     setOmitParagraphs([]); if (!keepSelectionUndo) setBeforeSelection(null); if (patch.sourceText !== undefined && patch.sourceText !== draft.sourceText) setPreviousSource(null);
+    if (patch.reviewedText === '' && patch.sourceText !== undefined) { setReviewStarted(false); setReport(null); }
     setDraft(current => ({ ...current, ...patch }));
   }
   function reset() {
-    invalidate(); setDraft(emptyDraft); setStep(1); setReport(null); setCvReady(false); setFilename(""); setFact(""); setQuestion(""); setFactPermitted(false); setGoogleConsent(false); setShowAccount(false); setResetConfirm(false); setDeleteTarget(null);
+    invalidate(); setDraft(emptyDraft); setStep(1); setReport(null); setReviewStarted(false); setCvReady(false); setFilename(""); setFact(""); setQuestion(""); setFactPermitted(false); setGoogleConsent(false); setShowAccount(false); setResetConfirm(false); setDeleteTarget(null);
     clearCheckRecovery(); setRecoveryConsent(false); setPageTarget(2); setOmitParagraphs([]); setBeforeSelection(null);
     setPreviousSource(null); setPreviousApplication(null);
     setReuseMode(false); setReuseInspect(false);
@@ -169,7 +186,7 @@ export default function CvCheck() {
       const next = draftForAnotherVacancy(previous, choice);
       try { setPreviousApplication({ draft: validateCheckDraft(draft), filename, pageTarget, ownerId: owner.current, sourceUndo: previousSource, reuseMode }); }
       catch { setPreviousApplication(null); }
-      invalidate(); clearCheckRecovery(); setDraft(next); setStep(1); setReport(null); setCvReady(true); setReuseMode(true); setReuseInspect(false);
+      invalidate(); clearCheckRecovery(); setDraft(next); setStep(1); setReport(null); setReviewStarted(false); setCvReady(true); setReuseMode(true); setReuseInspect(false);
       setFilename(choice === 'source' ? previousFilename : ''); setFact(''); setQuestion(''); setFactPermitted(false);
       setGoogleConsent(false); setShowAccount(false); setResetConfirm(false); setDeleteTarget(null); setOmitParagraphs([]); setBeforeSelection(null);
       setPreviousSource(null);
@@ -180,7 +197,7 @@ export default function CvCheck() {
     if (busy || !previousApplication || previousApplication.ownerId !== owner.current) return;
     const previous = previousApplication;
     invalidate(); clearCheckRecovery(); setDraft(previous.draft); setFilename(previous.filename); setPageTarget(previous.pageTarget); setCvReady(true); setReuseMode(previous.reuseMode); setReuseInspect(false);
-    setReport(analyzeCvEvidence(previous.draft.reviewedText, previous.draft.jobDescription, previous.draft.jobTitle)); setStep(5); setPreviousApplication(null); setPreviousSource(previous.sourceUndo);
+    setReport(analyzeCvEvidence(previous.draft.reviewedText, previous.draft.jobDescription, previous.draft.jobTitle)); setReviewStarted(true); setStep(5); setPreviousApplication(null); setPreviousSource(previous.sourceUndo);
     setFact(''); setFactPermitted(false); setQuestion(''); setBeforeSelection(null); setOmitParagraphs([]); setShowAccount(false); setGoogleConsent(false); setDeleteTarget(null); setResetConfirm(false);
     setNotice('Your previous CV, vacancy and edits are restored. Review them again before approving a new download.');
   }
@@ -222,28 +239,38 @@ export default function CvCheck() {
   useEffect(() => () => { if (preparedFile) URL.revokeObjectURL(preparedFile.url); }, [preparedFile]);
   useEffect(() => () => { if (pdfPreview) URL.revokeObjectURL(pdfPreview.url); }, [pdfPreview]);
   useEffect(() => {
-    try { rememberCheckRecovery({ draft, step, cvReady, filename, ownerId: user?.id ?? null, pageTarget, ...(reuseMode ? { reuseMode: true } : {}), ...(audience ? { audience } : {}) }, recoveryConsent); }
+    // An ownership change must finish resetting/adopting state before any
+    // persistence effect can label the draft with the newly signed-in account.
+    if (authLoading || authError || draftOwner !== (user?.id ?? null)) return;
+    try { rememberCheckRecovery({ draft, step, cvReady, filename, ownerId: user?.id ?? null, pageTarget, reviewStarted, ...(reuseMode ? { reuseMode: true } : {}), ...(audience ? { audience } : {}) }, recoveryConsent); }
     catch (failure) { setRecoveryConsent(false); setError(failure instanceof Error ? failure.message : 'Draft recovery is unavailable.'); }
-  }, [draft, step, cvReady, filename, user?.id, recoveryConsent, pageTarget, reuseMode, audience]);
+  }, [draft, step, cvReady, filename, user?.id, authLoading, authError, draftOwner, recoveryConsent, pageTarget, reuseMode, audience, reviewStarted]);
   useEffect(() => { heading.current?.focus({ preventScroll: true }); const target = step === 1 ? intro.current : heading.current; target?.scrollIntoView?.({ block: "start", behavior: "auto" }); }, [step, focusRequest]);
   useEffect(() => { if (errorField) document.getElementById(fieldIds[errorField])?.focus(); }, [errorField, step, reuseInspect]);
   useEffect(() => {
+    if (authLoading || authError) { invalidate(); return; }
     const id = user?.id ?? null;
-    if (previousOwner.current !== id) { setPreviousSource(null); setPreviousApplication(null); setSelectedSourceLines([]); setSourceRemovalPreview(null); }
+    if (previousOwner.current !== id) { setBusy(''); setPreviousSource(null); setPreviousApplication(null); setSelectedSourceLines([]); setSourceRemovalPreview(null); }
     if (previousOwner.current && previousOwner.current !== id) {
       revision.current += 1; clearRetainedCheck(); setDraft(emptyDraft); setStep(1); setReport(null); setPreparedFile(null); setApproved(null); setCheckedFacts(false); setCheckedPrivacy(false); setSaved(null); setSaveConsent(false); setCvReady(false); setFilename(""); setFact(""); setQuestion(""); setFactPermitted(false); setTracked(false); setShowAccount(false); setNotice("The account changed. The previous check was cleared from this page."); setError("");
       clearCheckRecovery(); setRecoveryConsent(false); setPageTarget(2); setPdfPreview(null); setPdfError(''); setBeforeSelection(null); setOmitParagraphs([]);
       setSelectedSourceLines([]); setSourceRemovalPreview(null);
       setReuseMode(false); setReuseInspect(false);
+      setReviewStarted(false);
       setAudience(null);
+    } else if (previousOwner.current !== id) {
+      // Email sign-in may adopt the open guest draft, but never its approval.
+      invalidate(); setShowAccount(false); setGoogleConsent(false);
+      setNotice("Your draft is still here. Review it again before approving a download or saving it.");
     }
     previousOwner.current = id;
+    setDraftOwner(id);
     setSavedChecks([]); setSavedError(""); setDeleteTarget(null); setSavedLoading(!!id);
     if (!id) return;
     let active = true;
     void listFreeChecks(id).then(rows => { if (active && owner.current === id) { setSavedChecks(rows); setSavedLoading(false); } }).catch(() => { if (active && owner.current === id) { setSavedError("Saved checks could not be loaded. Your current check and free downloads are still available."); setSavedLoading(false); } });
     return () => { active = false; };
-  }, [user?.id]);
+  }, [user?.id, authLoading, authError]);
 
   function go(next: number) { setError(""); setNotice(""); setStep(next); }
   function checkRole() {
@@ -253,24 +280,25 @@ export default function CvCheck() {
   }
   async function readFile(file: File | undefined) {
     if (!file || busy) return;
-    invalidate(); const atRevision = revision.current; setBusy("Reading your CV on this device…"); setCvReady(false);
+    invalidate(); const atRevision = revision.current, startingOwner = owner.current; setBusy("Reading your CV on this device…"); setCvReady(false);
     try {
       const text = await extractCvText(file);
-      if (!mounted.current || revision.current !== atRevision) return;
-      setDraft(current => ({ ...current, sourceText: text, reviewedText: "" })); setFilename(file.name);
+      if (!mounted.current || revision.current !== atRevision || owner.current !== startingOwner) return;
+      setDraft(current => ({ ...current, sourceText: text, reviewedText: "" })); setFilename(file.name); setReviewStarted(false); setReport(null);
       setNotice("Your CV text is ready to check. Fix any reading errors and remove private details. The file is still on your device.");
-    } catch (failure) { if (mounted.current && revision.current === atRevision) setFieldError('file', failure instanceof Error ? failure.message : "This CV could not be read. Try a readable file or paste text."); }
-    finally { if (mounted.current) setBusy(""); }
+    } catch (failure) { if (mounted.current && revision.current === atRevision && owner.current === startingOwner) setFieldError('file', failure instanceof Error ? failure.message : "This CV could not be read. Try a readable file or paste text."); }
+    finally { if (mounted.current && revision.current === atRevision && owner.current === startingOwner) setBusy(""); }
   }
   function confirmCv() {
-    try { const text = validateCheckField('sourceText', draft.sourceText); editDraft({ sourceText: text, reviewedText: text }); setCvReady(true); go(3); }
+    try { const text = validateCheckField('sourceText', draft.sourceText); editDraft({ sourceText: text }); setCvReady(true); go(3); }
     catch (failure) { setFieldError('sourceText', failure instanceof Error ? failure.message : "Review your CV text."); }
   }
   function runCheck() {
     try {
-      const valid = validateCheckDraft({ ...draft, reviewedText: draft.sourceText });
-      invalidate(); const result = analyzeCvEvidence(valid.sourceText, valid.jobDescription, valid.jobTitle);
-      setDraft({ ...valid, reviewedText: prioritizeCvForVacancy(valid.sourceText, result) }); setReport(analyzeCvEvidence(prioritizeCvForVacancy(valid.sourceText, result), valid.jobDescription, valid.jobTitle)); setCvReady(true); setStep(4);
+      const valid = validateCheckDraft({ ...draft, reviewedText: reviewStarted ? draft.reviewedText : draft.sourceText });
+      const reviewedText = reviewStarted ? valid.reviewedText : prioritizeCvForVacancy(valid.sourceText, analyzeCvEvidence(valid.sourceText, valid.jobDescription, valid.jobTitle));
+      invalidate();
+      setDraft({ ...valid, reviewedText }); setReport(analyzeCvEvidence(reviewedText, valid.jobDescription, valid.jobTitle)); setReviewStarted(true); setCvReady(true); setStep(4);
     } catch (failure) { showValidationFailure(failure, 'jobDescription', "The check could not complete. Review your inputs and retry."); }
   }
   function reviewChanges() {
@@ -286,12 +314,12 @@ export default function CvCheck() {
   }
   async function previewPdf() {
     if (busy || !report) return;
-    const atRevision = revision.current, key = currentKey;
+    const atRevision = revision.current, key = currentKey, startingOwner = owner.current;
     setApproved(null); setCheckedFacts(false); setCheckedPrivacy(false); setPreparedFile(null);
     setBusy('Preparing your exact PDF preview…'); setPdfError('');
-    try { const preview = await createReviewedPdfPreview(draft.reviewedText, draft.jobTitle); if (mounted.current && revision.current === atRevision) setPdfPreview({ ...preview, key, url: URL.createObjectURL(preview.blob) }); }
-    catch (failure) { if (mounted.current && revision.current === atRevision) setPdfError(failure instanceof Error ? failure.message : 'PDF preview is unavailable. DOCX and TXT preserve your text.'); }
-    finally { if (mounted.current) setBusy(''); }
+    try { const preview = await createReviewedPdfPreview(draft.reviewedText, draft.jobTitle); if (mounted.current && revision.current === atRevision && owner.current === startingOwner) setPdfPreview({ ...preview, key, url: URL.createObjectURL(preview.blob) }); }
+    catch (failure) { if (mounted.current && revision.current === atRevision && owner.current === startingOwner) setPdfError(failure instanceof Error ? failure.message : 'PDF preview is unavailable. DOCX and TXT preserve your text.'); }
+    finally { if (mounted.current && revision.current === atRevision && owner.current === startingOwner) setBusy(''); }
   }
   function addFact() {
     if (!fact.trim()) { setError("Add your own specific example, or leave this gap unanswered."); return; }
@@ -316,8 +344,8 @@ export default function CvCheck() {
       const filename = `${safeDocumentFilename(`CV-${snapshot.draft.jobTitle}`)}.${format}`;
       setPreparedFile({ url: URL.createObjectURL(blob), filename });
       downloadBlob(blob, filename); setNotice(`${format.toUpperCase()} download requested. Check your browser’s downloads.`);
-    } catch (failure) { if (mounted.current && revision.current === atRevision) setError(failure instanceof Error ? failure.message : "Download failed. Retry or choose TXT."); }
-    finally { if (mounted.current) setBusy(""); }
+    } catch (failure) { if (mounted.current && revision.current === atRevision && owner.current === startingOwner) setError(failure instanceof Error ? failure.message : "Download failed. Retry or choose TXT."); }
+    finally { if (mounted.current && revision.current === atRevision && owner.current === startingOwner) setBusy(""); }
   }
   async function save() {
     if (!approvalReady || !approved || !user || !saveConsent || busy) return;
@@ -328,7 +356,7 @@ export default function CvCheck() {
       if (!mounted.current || owner.current !== id || revision.current !== atRevision) return;
       setSaved(record); setSavedChecks(rows => [record, ...rows.filter(row => row.id !== record.id)]); setNotice("Saved privately in your account for free.");
     } catch (failure) { if (mounted.current && owner.current === id && revision.current === atRevision) setError(failure instanceof Error ? failure.message : "The check could not be saved. Your free downloads remain available."); }
-    finally { if (mounted.current) setBusy(""); }
+    finally { if (mounted.current && revision.current === atRevision && owner.current === id) setBusy(""); }
   }
   async function saveTracker() {
     if (!user || !approved || !approvalReady || busy || tracked) return;
@@ -336,20 +364,20 @@ export default function CvCheck() {
     setBusy("Saving the vacancy…"); setError("");
     try { await addApplication(id, { jobTitle: approved.draft.jobTitle, company: approved.draft.company, jobUrl: "" }); if (mounted.current && owner.current === id && revision.current === atRevision) { setTracked(true); setNotice("Vacancy added as Saved. Nothing was submitted to an employer."); } }
     catch (failure) { if (mounted.current && owner.current === id && revision.current === atRevision) setError(failure instanceof Error ? failure.message : "The vacancy could not be saved."); }
-    finally { if (mounted.current) setBusy(""); }
+    finally { if (mounted.current && revision.current === atRevision && owner.current === id) setBusy(""); }
   }
   function openSaved(record: FreeCvCheck) {
     if (!user || record.user_id !== user.id || busy) return;
     setReuseMode(false); setReuseInspect(false);
     invalidate(); setPreviousSource(null); setPreviousApplication(null); const value: CheckDraft = { jobTitle: record.job_title, company: record.company, sourceText: record.original_text, reviewedText: record.reviewed_text, jobDescription: record.job_description };
-    setDraft(value); setCvReady(true); setReport(analyzeCvEvidence(value.reviewedText, value.jobDescription, value.jobTitle)); setStep(6); setSaved(record); setNotice("Your saved CV is open. We checked its wording again; read it before approving a new download.");
+    setDraft(value); setCvReady(true); setReviewStarted(true); setReport(analyzeCvEvidence(value.reviewedText, value.jobDescription, value.jobTitle)); setStep(6); setSaved(record); setNotice("Your saved CV is open. We checked its wording again; read it before approving a new download.");
   }
   async function removeSaved(record: FreeCvCheck) {
     if (!user || record.user_id !== user.id || deleteTarget !== record.id || busy) return;
-    const id = user.id; setBusy("Deleting the saved check…"); setError("");
-    try { await deleteFreeCheck(record); if (mounted.current && owner.current === id) { setSavedChecks(rows => rows.filter(row => row.id !== record.id)); if (saved?.id === record.id) setSaved(null); setNotice("Saved check deleted. Files you downloaded are still on your device."); } }
-    catch (failure) { if (mounted.current && owner.current === id) setError(failure instanceof Error ? failure.message : "Deletion failed. Please retry."); }
-    finally { if (mounted.current) { setBusy(""); setDeleteTarget(null); } }
+    const id = user.id, atRevision = revision.current; setBusy("Deleting the saved check…"); setError("");
+    try { await deleteFreeCheck(record); if (mounted.current && owner.current === id && revision.current === atRevision) { setSavedChecks(rows => rows.filter(row => row.id !== record.id)); if (saved?.id === record.id) setSaved(null); setNotice("Saved check deleted. Files you downloaded are still on your device."); } }
+    catch (failure) { if (mounted.current && owner.current === id && revision.current === atRevision) setError(failure instanceof Error ? failure.message : "Deletion failed. Please retry."); }
+    finally { if (mounted.current && owner.current === id && revision.current === atRevision) { setBusy(""); setDeleteTarget(null); } }
   }
 
   const sourceReviewControls = <details className="check-source-update"><summary className="text-sm font-medium">Reuse these edits later (optional)</summary><section aria-label="Update your reusable source">
@@ -361,6 +389,8 @@ export default function CvCheck() {
     </details>
     {previousSource && previousSource.ownerId === owner.current && <><Button type="button" variant="ghost" disabled={!!busy} onClick={undoSourceUpdate}>{previousSource.reviewedText === undefined ? 'Undo source update' : 'Undo source-line removal'}</Button><p>Undo restores the prior source{previousSource.reviewedText === undefined ? '' : ' and current CV'}, which may include removed details. This undo is kept only on this page.</p></>}
   </section></details>;
+
+  if (authLoading || authError || draftOwner !== (user?.id ?? null)) return <CheckSessionPending failed={!!authError} />;
 
   return <main className={`cv-check-page${step === 1 ? ' check-first-step' : ''}`}>
     <Helmet><title>{checkMeta.title}</title><meta name="description" content={checkMeta.description} /><link rel="canonical" href="https://jobvance.io/check" /></Helmet>
