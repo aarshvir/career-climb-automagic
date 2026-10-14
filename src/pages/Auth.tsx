@@ -107,10 +107,10 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
         <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> SAVE YOUR WORK FOR THE NEXT APPLICATION</p>
         <h2 id={`${fieldId}-story`}>Keep your CVs and applications <span>together.</span></h2>
         <p className="ap-story-description">Bring your actual experience to the next role. Review your wording, keep your versions, and decide what to share.</p>
-        <div className="ap-document-scene" aria-label="Illustration of a fictional CV review">
+        <div className="ap-document-scene" aria-label="Example CV review">
           <div className="ap-document-back" aria-hidden="true" />
           <div className="ap-document-sheet">
-            <div className="ap-document-heading"><span className="ap-document-icon"><FileText size={20} aria-hidden="true" /></span><span>YOUR REVIEWED CV<br /><small>Fictional illustration</small></span><span className="ap-document-index">01</span></div>
+            <div className="ap-document-heading"><span className="ap-document-icon"><FileText size={20} aria-hidden="true" /></span><span>YOUR REVIEWED CV<br /><small>Example application</small></span><span className="ap-document-index">01</span></div>
             <div className="ap-document-lines" aria-hidden="true"><span /><span /><span /></div>
             <p className="ap-document-label">EXPERIENCE</p>
             <p className="ap-document-passage">Helped design a pilot, with projected savings.</p>

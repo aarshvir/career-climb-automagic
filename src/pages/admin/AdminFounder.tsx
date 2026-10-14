@@ -40,7 +40,7 @@ export default function AdminFounder({ snapshot, busy, stale = false, onAction }
   const { analytics } = snapshot;
   const budget = analytics.budget;
   return <>
-    <div className="admin-founder-intro"><div><span className="admin-eyebrow">Evidence before growth</span><h2>What the pilot can tell us.</h2><p>Read observed milestones alongside their sample sizes. Historical guest visits and checks have no complete telemetry.</p></div><div className="admin-payment-lock"><LockKeyhole size={19} aria-hidden="true" /><strong>Payments disabled</strong><span>Free pilot · no checkout activation</span></div></div>
+    <div className="admin-founder-intro"><div><span className="admin-eyebrow">Evidence before growth</span><h2>What the pilot can tell us.</h2><p>Read observed milestones alongside the number of accounts measured. Historical guest visits and checks have no complete telemetry.</p></div><div className="admin-payment-lock"><LockKeyhole size={19} aria-hidden="true" /><strong>Payments disabled</strong><span>Free pilot · no checkout activation</span></div></div>
     <Panel id="milestones" title="Observed milestones" subtitle="Events across retained customer accounts within the selected UTC window. Synthetic QA accounts are excluded.">
       <Metrics metrics={analytics.milestones} snapshot={snapshot} />
     </Panel>

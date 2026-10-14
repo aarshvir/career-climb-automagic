@@ -20,7 +20,7 @@ export function preparePilotRequest(input: PilotRequestInput) {
   const body = [
     "Hello Jobvance,",
     "",
-    "I would like to discuss the free, guided research pilot.",
+    "I would like to discuss the free guided pilot.",
     `I am ${input.audience === "mba" ? "an" : "a"} ${audienceLabel}.`,
     name ? `Name: ${name}` : "",
     `Role directions or preparation task: ${directions}`,

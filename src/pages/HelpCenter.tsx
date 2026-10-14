@@ -47,7 +47,7 @@ export const helpTopics: HelpTopic[] = [
       'For a student, label coursework, academic projects, internships and volunteering correctly. For an MBA pivot, keep prior work and classroom projects in separate sections. For an employed professional, start with a shareable version of your existing experience.',
       'Read the record and select Use this reviewed CV text. Paste one real vacancy on the next step. Work through the evidence and review before approving a download.',
     ],
-    fields: [{ label: 'Fictional starting example', help: 'University analytics project, 2026. In a four-person team, I cleaned the survey data and built the charts. Our proposed improvement was an estimate; no business result was measured.' }],
+    fields: [{ label: 'Starting example', help: 'University analytics project, 2026. In a four-person team, I cleaned the survey data and built the charts. Our proposed improvement was an estimate; no business result was measured.' }],
     notes: ['Use headings that show where the work happened, explain your part in team projects, label forecasts as estimates and list courses as completed or in progress.'],
     action: { label: 'Begin with my experience', to: '/check' }, related: [{ label: 'Review source facts', id: 'job-loop-facts' }],
   },

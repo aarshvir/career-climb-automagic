@@ -14,12 +14,12 @@ async function reviewAll(user: ReturnType<typeof userEvent.setup>) {
   for (const checkbox of screen.getAllByRole("checkbox")) await user.click(checkbox);
 }
 
-describe("fictional pilot demo", () => {
-  it("discloses a static fictional example and blocks downloads before explicit review and approval", () => {
+describe("application product tour", () => {
+  it("identifies the prepared tour record and blocks downloads before explicit review and approval", () => {
     render(<PilotDemo />);
-    expect(screen.getByText(/static concept demonstration/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Approve fictional CV" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Download fictional CV (.txt)" })).toBeDisabled();
+    expect(screen.getByText(/career record, employer names and source notes were created for this tour/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve CV" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Download packet (.txt)" })).toBeDisabled();
     expect(() => downloadPilotDemo("strategy", false)).toThrow("approve");
     expect(mocks.downloadBlob).not.toHaveBeenCalled();
   });
@@ -38,11 +38,11 @@ describe("fictional pilot demo", () => {
     const user = userEvent.setup();
     render(<PilotDemo />);
     await reviewAll(user);
-    expect(screen.getByRole("button", { name: "Approve fictional CV" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Download fictional CV (.txt)" })).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: "Approve fictional CV" }));
-    await user.click(screen.getByRole("button", { name: "Download fictional CV (.txt)" }));
-    expect(mocks.downloadBlob).toHaveBeenCalledWith(expect.any(Blob), "jobvance-fictional-demo-strategy.txt");
+    expect(screen.getByRole("button", { name: "Approve CV" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Download packet (.txt)" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Approve CV" }));
+    await user.click(screen.getByRole("button", { name: "Download packet (.txt)" }));
+    expect(mocks.downloadBlob).toHaveBeenCalledWith(expect.any(Blob), "jobvance-product-tour-strategy.txt");
     expect(screen.getByText(/Nothing was submitted or sent/)).toBeInTheDocument();
   });
 
@@ -50,31 +50,31 @@ describe("fictional pilot demo", () => {
     const user = userEvent.setup();
     render(<PilotDemo />);
     await reviewAll(user);
-    await user.click(screen.getByRole("button", { name: "Approve fictional CV" }));
+    await user.click(screen.getByRole("button", { name: "Approve CV" }));
     await user.click(screen.getByRole("button", { name: "Transformation" }));
     expect(screen.getByRole("button", { name: "Transformation" })).toHaveAttribute("aria-pressed", "true");
-    const rows = within(screen.getByRole("list", { name: "Fictional CV facts" })).getAllByRole("listitem");
+    const rows = within(screen.getByRole("list", { name: "CV facts" })).getAllByRole("listitem");
     expect(rows[0]).toHaveTextContent(pilotFacts["F-02"].wording);
     expect(rows[1]).toHaveTextContent(pilotFacts["F-01"].wording);
     expect(screen.getAllByRole("checkbox").every((checkbox) => !(checkbox as HTMLInputElement).checked)).toBe(true);
-    expect(screen.getByRole("button", { name: "Download fictional CV (.txt)" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Download packet (.txt)" })).toBeDisabled();
   });
 
   it("revokes approval when a checked fact is unchecked", async () => {
     const user = userEvent.setup();
     render(<PilotDemo />);
     await reviewAll(user);
-    await user.click(screen.getByRole("button", { name: "Approve fictional CV" }));
+    await user.click(screen.getByRole("button", { name: "Approve CV" }));
     await user.click(screen.getByLabelText("I checked F-01 against SRC-01."));
-    expect(screen.getByRole("button", { name: "Download fictional CV (.txt)" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Approve fictional CV" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Download packet (.txt)" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Approve CV" })).toBeDisabled();
   });
 
   it("exports the same truthful facts for both roles and never includes restricted or inflated claims", () => {
     for (const role of ["strategy", "transformation"] as PilotRole[]) {
       const document = buildPilotDemoText(role);
-      expect(document).toContain("FICTIONAL CONCEPT DEMO");
-      expect(document).toContain("Alex Morgan (fictional)");
+      expect(document).toContain("EXAMPLE APPLICATION");
+      expect(document).toContain("career record, employer names and source notes were created for this tour");
       for (const fact of Object.values(pilotFacts)) expect(document).toContain(fact.wording);
       expect(document).not.toContain("$4.2M");
       expect(document).not.toContain("SRC-04");
@@ -82,18 +82,18 @@ describe("fictional pilot demo", () => {
     }
   });
 
-  it("shows a real evidence gap and includes the grounded draft and next step in the fictional packet", async () => {
+  it("shows an evidence gap and includes the grounded draft and next step in the tour packet", async () => {
     const user = userEvent.setup();
     render(<PilotDemo />);
     await user.click(screen.getByRole("button", { name: "Transformation" }));
-    const requirements = within(screen.getByRole("list", { name: "Fictional role requirements" })).getAllByRole("listitem");
+    const requirements = within(screen.getByRole("list", { name: "Role requirements" })).getAllByRole("listitem");
     const ownership = requirements.find((item) => item.textContent?.includes("Transformation delivery ownership"));
     expect(ownership).toHaveTextContent("Not established from these facts");
-    const draft = screen.getByRole("textbox", { name: "Prewritten fictional recruiter draft" });
+    const draft = screen.getByRole("textbox", { name: "Recruiter draft" });
     expect(draft).toHaveAttribute("readonly");
     expect(draft).toHaveValue(buildPilotRecruiterDraft("transformation"));
     const packet = buildPilotDemoText("transformation");
-    expect(packet).toContain("FICTIONAL ROLE BRIEF — NOT A LIVE VACANCY");
+    expect(packet).toContain("ROLE BRIEF FOR THE TOUR");
     expect(packet).toContain("Transformation delivery ownership: Not established");
     expect(packet).toContain(buildPilotRecruiterDraft("transformation"));
     expect(packet).toContain("PROPOSED NEXT STEP");

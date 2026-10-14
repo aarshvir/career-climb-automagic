@@ -187,6 +187,12 @@
       "instruction": "Don't miss instructions from the last three days (14 Oct 05:57).",
       "status_evidence": "**This tracker and three independent reconciliations created.**",
       "next_acceptance": "Every resumed task reads this ledger and latest release receipt, then updates requirement-level evidence without silently dropping pending work."
+    },
+    {
+      "id": "RQ-30",
+      "instruction": "Remove repeated customer-facing AI presenter, fictional, sample, fake and dummy wording so Jobvance feels like a finished product (14 Oct latest steering).",
+      "status_evidence": "Implemented and validated; publication pending. Polished all 38 public pages, sign-in and private analytics labels, pilot tour/download/request copy and five recorded guides. 77 relevant tests passed before final release validation. All 24 video chapter frames reviewed; source/timing/caption/geometry checks passed. See COPY-POLISH-2026-10-14.md. Internal fixtures and historical evidence retained.",
+      "next_acceptance": "Publish tested polished public copy and refreshed media, retain concise example attribution and accessible generated-guide provenance, verify no legacy labels remain in active customer pages. Do not turn example records into claimed customer outcomes."
     }
   ],
   "standing_constraints": [

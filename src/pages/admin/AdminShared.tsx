@@ -22,7 +22,7 @@ export function MetricCard({ metric, snapshot }: { metric: AdminMetric; snapshot
     <div className="admin-metric-label">{metric.label}</div>
     <strong className="admin-metric-value">{measured ? metric.count.toLocaleString() : metric.availability === 'untracked' ? 'Untracked' : metric.availability === 'disabled' ? 'Disabled' : 'Unavailable'}</strong>
     <div className="admin-metric-basis">{validRate ? `${metric.percent.toFixed(1)}% · ${metric.count} of ${metric.denominator}` : metric.denominator !== null ? `${metric.count ?? 'Unknown'} of ${metric.denominator} · rate unavailable` : 'No complete denominator'}</div>
-    {metric.smallSample && measured && <Badge tone="warning">Small sample</Badge>}
+    {metric.smallSample && measured && <Badge tone="warning">Limited data</Badge>}
     <p>{metric.definition}</p>
     <WindowNote snapshot={snapshot} source={metric.source} />
   </article>;

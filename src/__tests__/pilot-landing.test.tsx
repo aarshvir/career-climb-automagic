@@ -5,7 +5,7 @@ import { HelmetProvider } from "react-helmet-async";
 import PilotLanding from "@/pages/PilotLanding";
 import { PILOT_CONTACT, preparePilotRequest } from "@/lib/pilot-request";
 
-vi.mock("@/pages/PilotDemo", () => ({ default: () => <section id="demo">Fictional demonstration</section> }));
+vi.mock("@/pages/PilotDemo", () => ({ default: () => <section id="demo">Application product tour</section> }));
 function showLanding() {
   return render(<HelmetProvider><PilotLanding /></HelmetProvider>);
 }

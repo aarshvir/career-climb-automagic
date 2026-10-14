@@ -61,7 +61,7 @@ describe("public career guides", () => {
       const id = link.getAttribute("href")?.slice(1);
       expect(container.querySelector(`[id="${id}"]`)).toBeInTheDocument();
     }
-    expect(screen.getByText("Fictional example")).toBeInTheDocument();
+    expect(screen.getByText("Worked example")).toBeInTheDocument();
     expect(screen.getByText("Jobvance Editorial", { selector: ".cg-byline span" })).toBeInTheDocument();
     expect(container.querySelectorAll(".cg-source-note")).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Sources and further reading" })).toBeInTheDocument();

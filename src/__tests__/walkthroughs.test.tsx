@@ -18,8 +18,8 @@ describe('honest interactive walkthroughs', () => {
     const { container } = showWalkthrough();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Watch how to use Jobvance.');
     expect(screen.getByRole('status')).toHaveTextContent('Step 1 of 6: Choose one target role');
-    expect(screen.getByText('FICTIONAL DEMO')).toBeInTheDocument();
-    expect(screen.getByText(/not a live form/)).toBeInTheDocument();
+    expect(screen.getByText('PRODUCT TOUR')).toBeInTheDocument();
+    expect(screen.getByText(/The tour does not change your account/)).toBeInTheDocument();
     expect(screen.getByText(/planned script timings/i)).toBeInTheDocument();
     expect(screen.getByText(/Planned narration 0:00–0:18/)).toBeInTheDocument();
     expect(container.querySelector('video, iframe')).toBeNull();
@@ -92,7 +92,7 @@ describe('honest interactive walkthroughs', () => {
     expect(within(selected).getByRole('link', { name: 'Watch the video' })).toHaveAttribute('href', '#wt-recorded');
     expect(within(selected).getByRole('link', { name: 'Follow interactive steps' })).toHaveAttribute('href', '#wt-interactive');
     expect(container.querySelector('#wt-task-options')).toHaveAttribute('hidden');
-    expect(screen.getByText(/separate, untimed interactive steps/)).toBeInTheDocument();
+    expect(screen.getByText(/Follow the steps at your own pace/)).toBeInTheDocument();
     expect(screen.getByText('Video chapter 0:13–0:34 · Your CV')).toBeInTheDocument();
     expect(screen.getByText('Video chapter 1:29–1:51 · Approve & download')).toBeInTheDocument();
     expect(screen.queryByText(/Planned narration/)).not.toBeInTheDocument();
@@ -126,7 +126,7 @@ describe('honest interactive walkthroughs', () => {
     vi.stubGlobal('window', undefined);
     vi.stubGlobal('navigator', undefined);
     const html = renderToString(<MemoryRouter><Walkthroughs /></MemoryRouter>);
-    expect(html).toContain('FICTIONAL DEMO');
+    expect(html).toContain('PRODUCT TOUR');
     expect(html).toContain('Complete video transcript and measured chapter timings');
     expect(html).toContain('Continue to your CV');
     expect(fetch).not.toHaveBeenCalled();

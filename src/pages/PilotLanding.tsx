@@ -47,25 +47,25 @@ export default function PilotLanding() {
   return (
     <main className="jv-pilot">
       <Helmet>
-        <title>Free career-transition pilot & fictional demo | Jobvance</title>
-        <meta name="description" content="Explore a fictional application workflow and prepare an unsent free-pilot request as a student, MBA candidate, busy career-switcher or career coach." />
+        <title>Free guided career pilot & product tour | Jobvance</title>
+        <meta name="description" content="Explore the CV-to-application review process, then prepare a free guided-pilot request as a student, MBA candidate, career-switcher or career coach." />
         <link rel="canonical" href="https://jobvance.io/pilot" />
       </Helmet>
       <section className="ap-pilot-hero" aria-labelledby="pilot-title">
         <div className="ap-pilot-intro">
-          <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> THE FREE RESEARCH PILOT</p>
-          <h1 id="pilot-title">Two directions.<br /><span>One true story.</span></h1>
+          <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> FREE GUIDED PILOT</p>
+          <h1 id="pilot-title">Prepare for your<br /><span>next career move.</span></h1>
           <p>Applying during university, recruiting after an MBA, or fitting a career move around work? Explore how one record of your projects and experience can support different applications.</p>
           <div className="ap-pilot-actions">
-            <Button asChild className="ap-primary"><a href="#demo">Try the fictional demo <ArrowDown size={16} aria-hidden="true" /></a></Button>
+            <Button asChild className="ap-primary"><a href="#demo">Explore the product tour <ArrowDown size={16} aria-hidden="true" /></a></Button>
             <Button asChild variant="outline" className="ap-outline"><a href="#request">Prepare a pilot request <ArrowRight size={16} aria-hidden="true" /></a></Button>
           </div>
           <p className="ap-pilot-promise"><span><Check size={13} aria-hidden="true" /> Free participation</span><span><Check size={13} aria-hidden="true" /> No card</span><span><Check size={13} aria-hidden="true" /> You choose what to share</span></p>
         </div>
-        <figure className="ap-career-board" aria-label="Fictional career record illustrated in two role directions">
-          <figcaption className="ap-board-caption"><span>ONE RECORD. TWO PERSPECTIVES.</span><span className="ap-fiction-tag"><FileCheck2 size={12} aria-hidden="true" /> FICTIONAL EXAMPLE</span></figcaption>
+        <figure className="ap-career-board" aria-label="Example career record in two role directions">
+          <figcaption className="ap-board-caption"><span>ONE RECORD. TWO PERSPECTIVES.</span><span className="ap-fiction-tag"><FileCheck2 size={12} aria-hidden="true" /> PRODUCT TOUR</span></figcaption>
           <div className="ap-source-record">
-            <div className="ap-source-profile"><span className="ap-profile-monogram" aria-hidden="true">AM</span><div><strong>Alex Morgan</strong><p>Fictional consultant · Example Advisory</p></div><span className="ap-source-number">SRC–01</span></div>
+            <div className="ap-source-profile"><span className="ap-profile-monogram" aria-hidden="true">AM</span><div><strong>Alex Morgan</strong><p>Consulting experience</p></div><span className="ap-source-number">SRC–01</span></div>
             <blockquote className="ap-source-quote">Helped design a procurement pilot across 5 business units, with <mark>8% projected savings.</mark></blockquote>
             <div className="ap-claim-labels"><span>Contribution: helped design</span><span>Result: projected</span></div>
           </div>
@@ -74,13 +74,13 @@ export default function PilotLanding() {
             <div className="ap-direction"><span>DIRECTION 01</span><strong><Route size={17} aria-hidden="true" /> Strategy</strong><p>Bring business-case design and briefing preparation forward.</p></div>
             <div className="ap-direction ap-direction--ink"><span>DIRECTION 02</span><strong><Layers3 size={17} aria-hidden="true" /> Transformation</strong><p>Bring workstream tracking and pilot design support forward.</p></div>
           </div>
-          <p className="ap-board-rule"><ShieldCheck size={16} aria-hidden="true" />The emphasis changes. Support stays support, and a projected result stays projected. No real candidate, customer result or live vacancy is shown.</p>
+          <p className="ap-board-rule"><ShieldCheck size={16} aria-hidden="true" />An example career record: the emphasis changes, while the contribution and projected result stay accurate.</p>
         </figure>
       </section>
 
       <aside className="ap-pilot-disclosure" aria-label="What is available here">
         <FileCheck2 size={21} aria-hidden="true" />
-        <div><strong>A concept to try. A pilot to shape together.</strong><p>The interactive example is prewritten. The guided pilot is an early research workflow with human review, by mutual agreement. This page does not run a live AI agent, search your inbox, apply for jobs or guarantee interviews.</p></div>
+        <div><strong>Explore the workflow, then discuss your own search.</strong><p>The tour uses a prepared career record. The free pilot offers a small, agreed preparation task with human review. To work with your own CV now, <Link to="/check">start a free CV check</Link>.</p></div>
       </aside>
 
       <section className="ap-audience-section" aria-labelledby="pilot-fit">
@@ -89,17 +89,17 @@ export default function PilotLanding() {
           <article className="ap-audience"><span className="ap-audience-icon"><Users size={21} aria-hidden="true" /></span><div><h3>University students</h3><p>Bring coursework, internships, volunteering and personal projects. Employment history is not a prerequisite for the pilot.</p></div></article>
           <article className="ap-audience"><span className="ap-audience-icon"><Layers3 size={21} aria-hidden="true" /></span><div><h3>MBA students</h3><p>Connect previous work and MBA projects to consulting, product, finance or another role you want to pursue. Keep classroom work distinct from employment.</p></div></article>
           <article className="ap-audience"><span className="ap-audience-icon"><Route size={21} aria-hidden="true" /></span><div><h3>Busy career-switchers</h3><p>Work from your real career record and test a less repetitive preparation routine. You choose what to disclose about your current employer.</p></div></article>
-          <article className="ap-audience"><span className="ap-audience-icon"><MessageCircle size={21} aria-hidden="true" /></span><div><h3>Career coaches</h3><p>Explore the fictional example before discussing a small preparation task with a consenting student or professional.</p></div></article>
+          <article className="ap-audience"><span className="ap-audience-icon"><MessageCircle size={21} aria-hidden="true" /></span><div><h3>Career coaches</h3><p>Explore the review process, then discuss a small preparation task with a student or professional who wants your support.</p></div></article>
         </div>
       </section>
 
       <section className="ap-program" aria-labelledby="pilot-format">
-        <div className="ap-section-heading"><div><p className="ap-eyebrow">THE GUIDED PROGRAM</p><h2 id="pilot-format">Small steps.<br />Useful questions.</h2></div><p>Start with a short discussion. If the fit is right, agree a preparation task and optional feedback over two weeks. Participation is voluntary and by mutual agreement.</p></div>
+        <div className="ap-section-heading"><div><p className="ap-eyebrow">THE GUIDED PROGRAM</p><h2 id="pilot-format">Get help with<br />one application task.</h2></div><p>Start with a short discussion. If the fit is right, agree a preparation task and optional feedback over two weeks. Participation is voluntary and by mutual agreement.</p></div>
         <ol className="ap-program-steps">{stages.map((stage, index) => <li key={stage.number} className="ap-stage"><div className="ap-stage-top"><span className="ap-stage-number">{stage.number}</span>{index < stages.length - 1 ? <ArrowRight size={18} aria-hidden="true" /> : <Check size={18} aria-hidden="true" />}</div><h3>{stage.title}</h3><p>{stage.text}</p></li>)}</ol>
-        <p className="ap-program-note"><ShieldCheck size={14} aria-hidden="true" />We are testing preparation effort and useful review controls. No testimonials, placement claims or measured time savings are implied.</p>
+        <p className="ap-program-note"><ShieldCheck size={14} aria-hidden="true" />Focus on a useful application you can review and use. Your feedback helps improve the preparation process.</p>
       </section>
 
-      <section className="ap-pilot-demo-shell" aria-label="Fictional application demonstration"><PilotDemo /></section>
+      <section className="ap-pilot-demo-shell" aria-label="Application product tour"><PilotDemo /></section>
 
       <section id="request" className="ap-pilot-request" aria-labelledby="request-title">
         <div className="ap-request-intro">
@@ -124,10 +124,10 @@ export default function PilotLanding() {
       <section className="ap-pilot-faq" aria-labelledby="pilot-faq-title">
         <h2 id="pilot-faq-title">A few things to know.</h2>
         <div className="ap-faq-grid">
-          <details><summary>What stays under my control?</summary><p>What you share, which wording you approve, and whether you apply or send a message. The fictional demo stays in your browser. You can reload to reset it.</p></details>
-          <details><summary>Can I check my own CV now?</summary><p>Yes. The free CV check compares your reviewed CV text with one vacancy on your device and offers approved downloads. Saving to a private account is optional. The richer career-record demo here illustrates a proposed workflow. <Link to="/check">Start a free CV check</Link>.</p></details>
+          <details><summary>What stays under my control?</summary><p>What you share, which wording you approve, and whether you apply or send a message. Tour choices stay in your browser and reset when you reload.</p></details>
+          <details><summary>Can I check my own CV now?</summary><p>Yes. The free CV check compares your reviewed CV text with one vacancy on your device and offers approved downloads. Saving to a private account is optional. <Link to="/check">Start a free CV check</Link>.</p></details>
           <details><summary>Will you read my inbox or contact recruiters?</summary><p>No. This pilot page has no Gmail or LinkedIn connection and sends no outreach. Any future research task involving selected messages will need your explicit agreement.</p></details>
-          <details><summary>Is there a fee or outcome guarantee?</summary><p>The research pilot is free. No card or payment is requested. Hiring decisions and interview outcomes are outside Jobvance’s control.</p></details>
+          <details><summary>Is there a fee or outcome guarantee?</summary><p>The guided pilot is free. No card or payment is requested. Hiring decisions and interview outcomes are outside Jobvance’s control.</p></details>
         </div>
       </section>
     </main>
