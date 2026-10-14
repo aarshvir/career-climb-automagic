@@ -1,12 +1,20 @@
 # Finished Jobvance walkthrough assets
 
-The five ready films and their measured chapter timing are listed in `production-manifest.json`. Each `videos/<tutorial-id>` has `.mp4`, `.vtt`, `.txt`, `.jpg` and `.json` files. The MP4s total 17,053,843 bytes and 472.3 seconds. All use 1920 × 1080, 25 fps, H.264/AAC, fast-start MP4 and burned captions.
+The five ready films and their measured chapter timing are listed in `production-manifest.json`. Each `videos/<tutorial-id>` has `.mp4`, `.vtt`, `.txt`, `.jpg` and `.json` files. All use 1920 × 1080, 25 fps, H.264/AAC, fast-start MP4 and burned captions. The manifest records exact file sizes, hashes and measured duration.
 
 Use **measured chapter starts from the production manifest** for seeking. The original help scene durations are planning estimates and are longer than the actual speech. Video and caption URLs are assigned by the publishing task; this producer manifest does not assert public hosting.
 
 `contentKind` is `screen_walkthrough`: actual browser capture stills with an actual speaking AI portrait, not continuous screen recordings. Job Loop scenes retain a fictional local-service disclosure. They establish no real account, cloud execution, employer application or email. The first film shows real PDF controls and an approved TXT request, without independently captured browser export completion. The presenter has generated mouth motion with mostly static head/eyes.
 
 `LOCAL-MODEL-LICENSES.md` and `notices/` retain the actual model cards, pinned revisions/hashes, package versions and installed license notices. No weights/runtime binaries are redistributed. No HeyGen footage is included; provider draft metadata/proof is private under ignored `.sites-runtime/avatar-production/internal/`.
+
+## Caption and narration repair, 14 October 2026
+
+All five films were recomposed with 54 px captions (previously 32 px), at most two lines, a separate dark caption band and a 180 px bottom margin for native playback controls. The compositor retains the full captured screen height and keeps the presenter separate from the product UI. Fine UI text is best read fullscreen or alongside the written steps; English VTT captions and exact narration transcripts remain included.
+
+`controls-and-recovery` was synthesized and animated again from the current exact help narration using the existing local environment and cached models. It now says Pause retains current work, Cancel schedule also stops the latest queued or running scheduled job, and a separate manual run has its own Cancel run. Its measured duration is 115.375 seconds. The other four films reuse their existing speech and speaking-portrait sources. The current next-vacancy chapter stage ID was synchronized without changing its speech.
+
+This repair used no paid API calls, new model downloads, private candidate data or external uploads. Original portrait, screenshots, model sources, licenses and retained notices are unchanged. Verification covers complete decoder playback, exact current narration/transcript matching, caption words/times, chapter identity and visual chapter-frame/source-screen/caption-safe-area review. It does not assert uninterrupted human viewing or independently assessed lip-sync quality. Final playback with browser controls on a phone is a separate publishing review.
 
 ## Reproduction
 

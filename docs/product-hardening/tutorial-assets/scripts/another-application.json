@@ -1,7 +1,7 @@
 {
   "source": "src/lib/walkthroughs.ts",
-  "sourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
-  "exportedAt": "2026-10-13T19:50:41.435Z",
+  "sourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
+  "exportedAt": "2026-10-14T03:51:43.615Z",
   "timingStatus": "planned; not measured render timings",
   "id": "another-application",
   "title": "Prepare your next application",
@@ -17,7 +17,7 @@
       "id": "preserve",
       "stageId": "check-next-application",
       "title": "Keep the current application first",
-      "instruction": "Download or save the approved check before replacing it. Under Your next application, choose CV version for another vacancy.",
+      "instruction": "Download or save the approved check before replacing it. Under Your next application, choose CV version for another vacancy. Undo new application can restore the previous check for review only while this page stays open.",
       "caption": "Choose Reviewed source CV or Approved final CV deliberately.",
       "narration": "Before starting another application, download or save the approved check if you want to keep it. Under Your next application, choose which CV to reuse: Reviewed source CV or Approved final CV. The choice replaces the open check; saved applications stay unchanged.",
       "durationSeconds": 23,
@@ -30,19 +30,19 @@
           }
         ],
         "action": "Use this CV for another vacancy",
-        "note": "The old vacancy and its approval do not carry over."
+        "note": "The old vacancy and its approval do not carry over. Undo returns to review with approval cleared."
       }
     },
     {
       "id": "new-check",
-      "stageId": "check-role",
+      "stageId": "check-next-vacancy",
       "title": "Give the new job a fresh review",
-      "instruction": "Select Use this CV for another vacancy. Enter the new role, review the reused CV and paste the new vacancy. Complete the evidence, review and approval steps again.",
+      "instruction": "Select Use this CV for another vacancy. Enter the target role, optional company and new vacancy together. Open Inspect or edit the reused CV if needed, then select Check this next vacancy. Review the new evidence and approve again.",
       "caption": "Useful source wording can carry over. Findings and approval belong to the new inputs.",
       "narration": "Select Use this CV for another vacancy. Enter the new target role and optional company, review the reused CV and paste the new posting. Work through the evidence and your review again. A previous approval cannot approve this new combination of CV and vacancy.",
       "durationSeconds": 22,
       "demo": {
-        "section": "Your role · another vacancy",
+        "section": "Next vacancy · reused CV",
         "fields": [
           {
             "label": "Target role",
@@ -53,7 +53,7 @@
             "value": "Add the new employer, if you want."
           }
         ],
-        "action": "Continue to your CV",
+        "action": "Check this next vacancy",
         "note": "A fresh comparison is required for the new posting."
       }
     },

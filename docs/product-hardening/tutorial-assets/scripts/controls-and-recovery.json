@@ -1,7 +1,7 @@
 {
   "source": "src/lib/walkthroughs.ts",
-  "sourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
-  "exportedAt": "2026-10-13T19:50:41.437Z",
+  "sourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
+  "exportedAt": "2026-10-14T03:51:43.617Z",
   "timingStatus": "planned; not measured render timings",
   "id": "controls-and-recovery",
   "title": "Stay in control of preparation and recovery",
@@ -66,8 +66,8 @@
       "stageId": "loop-optional-controls",
       "title": "Make separate connection choices",
       "instruction": "Use Optional recurring preparation or Optional Gmail access only when needed and available. Check saved next-run details and confirm any returned mailbox.",
-      "caption": "Pause schedule, Cancel schedule and Cancel run control different things. No automatic sending.",
-      "narration": "Recurring preparation is optional and uses the rules method. Check the saved next run after enabling it. Pause or cancel the schedule controls future scheduling; an active job has a separate Cancel run. Gmail connection and run reading consent are separate choices. A Gmail draft is unsent and requires its own recipient confirmation.",
+      "caption": "Pause retains current work. Cancel schedule also stops its latest queued or running scheduled job. No automatic sending.",
+      "narration": "Recurring preparation is optional and uses the rules method. Check the saved next run after enabling it. Pause stops future scheduling and retains current work. Cancel schedule also stops its latest queued or running scheduled job. A separate manual run has its own Cancel run. Gmail connection and run reading consent are separate choices. A Gmail draft is unsent and requires its own recipient confirmation.",
       "durationSeconds": 29,
       "demo": {
         "section": "Today · Optional controls",

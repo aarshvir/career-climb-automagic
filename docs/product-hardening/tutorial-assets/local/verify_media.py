@@ -33,6 +33,9 @@ def main():
         current_script = json.loads((Path(args.scripts_root) / f'{movie.stem}.json').read_text(encoding='utf8'))
         if expected != '\n\n'.join(c['narration'] for c in current_script['scenes']):
             raise ValueError(f'Current product narration changed: {movie.name}')
+        chapter_identity = lambda items: [tuple(c[key] for key in ['id', 'stageId', 'title']) for c in items]
+        if chapter_identity(chapters['chapters']) != chapter_identity(current_script['scenes']):
+            raise ValueError(f'Current product chapter metadata changed: {movie.name}')
         transcript = movie.with_suffix('.txt').read_text(encoding='utf8').strip()
         if transcript != expected:
             raise ValueError(f'Transcript changed: {movie.name}')
@@ -75,10 +78,11 @@ def main():
                                        'videoCodec': video['codec_name'], 'audioCodec': sound['codec_name'], 'mimeType': 'video/mp4'},
                        'verification': {'fullDecodePassed': True, 'transcriptExact': True,
                                         'currentHelpNarrationMatches': True,
+                                        'currentHelpChapterMetadataMatches': True,
                                         'captionWordsMatchTranscript': True, 'captionTimesValid': True,
                                         'captionMaximumLines': 2, 'captionCueCount': len(cues),
                                         'chapterFramesExportedForVisualReview': True}})
-        movie.with_suffix('.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf8')
+        movie.with_suffix('.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf8', newline='\n')
         results.append({'id': movie.stem, 'durationSeconds': duration, 'bytes': movie.stat().st_size, 'sha256': record['sha256']})
     print(json.dumps(results, indent=2))
 

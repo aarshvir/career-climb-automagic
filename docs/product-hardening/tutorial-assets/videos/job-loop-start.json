@@ -4,7 +4,7 @@
   "tutorialId": "job-loop-start",
   "title": "Set up your reusable career record",
   "file": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\job-loop-start.mp4",
-  "sha256": "1daeef330b96e569a9dfec95b837e68abc7f42fb84347875810ae2c3c67ba514",
+  "sha256": "ef32125719e46d7d2a9133ec4b54dd61e2f74d64962939c60cb2d530dcda8a80",
   "durationSeconds": 95.625,
   "sourcePresenterSha256": "cd3102545e168492eff9560fc946c3adfabbd7441972ad7ad882c6604ea75284",
   "screens": [
@@ -112,10 +112,23 @@
   "screenMethod": "actual CUA browser screenshots, edited as a montage; not a continuous screen recording",
   "presenterMethod": "original fictional portrait + Kokoro af_heart + MuseTalk V15 manual crop/mask",
   "captionMethod": "Kokoro predicted token timings and measured speech sample durations",
+  "captionPresentation": {
+    "fontSizeAt1080p": 54,
+    "maximumLines": 2,
+    "wrapCharacters": 52,
+    "bottomMarginPixels": 180,
+    "reservedBand": {
+      "top": 784,
+      "bottom": 944
+    },
+    "nativeControlsSafeAreaPixels": 180,
+    "screenCapturedHeightRetained": true
+  },
   "paidApiCalls": 0,
   "commercialComponentsReviewed": true,
   "finalPlaybackReviewed": false,
-  "bytes": 3433314,
+  "bytes": 3495551,
+  "currentHelpSourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
   "measuredContainerDurationSeconds": 95.625,
   "mediaFormat": {
     "width": 1920,
@@ -129,6 +142,7 @@
     "fullDecodePassed": true,
     "transcriptExact": true,
     "currentHelpNarrationMatches": true,
+    "currentHelpChapterMetadataMatches": true,
     "captionWordsMatchTranscript": true,
     "captionTimesValid": true,
     "captionMaximumLines": 2,
@@ -136,15 +150,16 @@
     "chapterFramesExportedForVisualReview": true,
     "chapterFramesVisuallyReviewed": true,
     "sourceScreensVisuallyReviewed": true,
-    "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen review; not uninterrupted human viewing"
+    "captionSafeAreaVisuallyReviewed": true,
+    "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing"
   },
-  "currentHelpSourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
   "reviewStatus": "ready",
-  "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+  "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
   "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
   "limitations": [
     "Narrated product-screen still montage, not a continuous screen recording.",
     "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
-    "Caption timing uses model token predictions and measured audio samples."
+    "Caption timing uses model token predictions and measured audio samples.",
+    "Fine product text is best read fullscreen or alongside the written steps. Native controls vary by browser; a 180 px bottom caption margin is reserved."
   ]
 }

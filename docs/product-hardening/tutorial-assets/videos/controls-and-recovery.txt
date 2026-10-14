@@ -2,7 +2,7 @@ Save or discard pending career edits and check that you have a confirmed, sharea
 
 Read the status, count and message for every source lane. A partial run may have usable outputs and missing coverage. Address the reported issue before using Resume run if available. Use Cancel run for a queued or running job, then refresh to confirm. Closing the page does not cancel cloud processing.
 
-Recurring preparation is optional and uses the rules method. Check the saved next run after enabling it. Pause or cancel the schedule controls future scheduling; an active job has a separate Cancel run. Gmail connection and run reading consent are separate choices. A Gmail draft is unsent and requires its own recipient confirmation.
+Recurring preparation is optional and uses the rules method. Check the saved next run after enabling it. Pause stops future scheduling and retains current work. Cancel schedule also stops its latest queued or running scheduled job. A separate manual run has its own Cancel run. Gmail connection and run reading consent are separate choices. A Gmail draft is unsent and requires its own recipient confirmation.
 
 The free check can return from memory when you navigate away and come back in the same tab within thirty minutes. Refresh recovery needs the separate Keep my draft in this tab across refresh choice. It stores the CV and vacancy in that tab for thirty minutes after your last change. Read a restored draft and approve again.
 

@@ -4,7 +4,7 @@
   "tutorialId": "source-review",
   "title": "Explain your contribution accurately",
   "file": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\source-review.mp4",
-  "sha256": "fb9d09b0dab0e562a51a9e31aca09efccc5868ab7d639675b675835913c5c7bb",
+  "sha256": "1054ec524925e21cf683cd8b6c5162d0b6049da4b7b6e92d9dd7047211ebf2d0",
   "durationSeconds": 78.425,
   "sourcePresenterSha256": "b08f7dc9b5e051afa22e474b1ddb51adadff5bc3aa563612c6b806a2202b3890",
   "screens": [
@@ -78,10 +78,23 @@
   "screenMethod": "actual CUA browser screenshots, edited as a montage; not a continuous screen recording",
   "presenterMethod": "original fictional portrait + Kokoro af_heart + MuseTalk V15 manual crop/mask",
   "captionMethod": "Kokoro predicted token timings and measured speech sample durations",
+  "captionPresentation": {
+    "fontSizeAt1080p": 54,
+    "maximumLines": 2,
+    "wrapCharacters": 52,
+    "bottomMarginPixels": 180,
+    "reservedBand": {
+      "top": 784,
+      "bottom": 944
+    },
+    "nativeControlsSafeAreaPixels": 180,
+    "screenCapturedHeightRetained": true
+  },
   "paidApiCalls": 0,
   "commercialComponentsReviewed": true,
   "finalPlaybackReviewed": false,
-  "bytes": 2781322,
+  "bytes": 2836844,
+  "currentHelpSourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
   "measuredContainerDurationSeconds": 78.425,
   "mediaFormat": {
     "width": 1920,
@@ -95,6 +108,7 @@
     "fullDecodePassed": true,
     "transcriptExact": true,
     "currentHelpNarrationMatches": true,
+    "currentHelpChapterMetadataMatches": true,
     "captionWordsMatchTranscript": true,
     "captionTimesValid": true,
     "captionMaximumLines": 2,
@@ -102,15 +116,16 @@
     "chapterFramesExportedForVisualReview": true,
     "chapterFramesVisuallyReviewed": true,
     "sourceScreensVisuallyReviewed": true,
-    "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen review; not uninterrupted human viewing"
+    "captionSafeAreaVisuallyReviewed": true,
+    "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing"
   },
-  "currentHelpSourceSha256": "b39c85833e3c743cad62eab25d426718d0d1c846a2bfb810fe523720e6614158",
   "reviewStatus": "ready",
-  "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+  "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
   "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
   "limitations": [
     "Narrated product-screen still montage, not a continuous screen recording.",
     "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
-    "Caption timing uses model token predictions and measured audio samples."
+    "Caption timing uses model token predictions and measured audio samples.",
+    "Fine product text is best read fullscreen or alongside the written steps. Native controls vary by browser; a 180 px bottom caption margin is reserved."
   ]
 }

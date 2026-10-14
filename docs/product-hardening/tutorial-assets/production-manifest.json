@@ -15,33 +15,33 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "durationSeconds": 111.275,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.mp4",
-          "sha256": "199dec6cffe1975912c403a7b44bbb0ebac98bf42d71772c7bc6b775fa90165a",
-          "bytes": 4112804
+          "sha256": "0567ecdbec7121367f25ea2269614dc87eb7340ce19fd7eef4191eaa91d677ab",
+          "bytes": 4122965
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.vtt",
-          "sha256": "c33ad39890157801c47795401a9b88df493b9c8e8375b035fa694f13aaadc4ab",
-          "bytes": 2522
+          "sha256": "4a81e3f922e1c92e06e460d1286079989febb9e67071bca85b30fd3ecda1c46a",
+          "bytes": 2405
         },
         "transcript": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.txt",
-          "sha256": "17717e3d5089204fd75840ebcdb1c44994a1c1a2f31f69996c5239b8db592f1c",
-          "bytes": 1573
+          "sha256": "26e19df81e5f9e027b472e8c3666a7a45ed6fcc0cb1a4ba8ef19ed6d2d0003d9",
+          "bytes": 1562
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.jpg",
-          "sha256": "638ea9f9a55520364671901c633938ad59f6ddf339f5a2ed6b9a0c0b7ec85e98",
-          "bytes": 81555
+          "sha256": "05dad121a42d3b17e5e94c325f955f3d2fd4073256c444efba5c80ec9bb37675",
+          "bytes": 73492
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.json",
-          "sha256": "9bc2d5b6f69b8979942413f1893c1236500e774ff0865ad5af52200c47ee12b4",
-          "bytes": 7850
+          "sha256": "8c77119f8bd76faf90805d2e08f07092f143d21ebf80d8564a9bc422ed1f585c",
+          "bytes": 8236
         }
       },
       "mediaFormat": {
@@ -96,11 +96,24 @@
           "durationSeconds": 21.775
         }
       ],
+      "captionPresentation": {
+        "fontSizeAt1080p": 54,
+        "maximumLines": 2,
+        "wrapCharacters": 52,
+        "bottomMarginPixels": 180,
+        "reservedBand": {
+          "top": 784,
+          "bottom": 944
+        },
+        "nativeControlsSafeAreaPixels": 180,
+        "screenCapturedHeightRetained": true
+      },
       "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
         "Caption timing uses model token predictions and measured audio samples.",
+        "Fine product text is best read fullscreen or alongside the written steps. Native controls vary by browser; a 180 px bottom caption margin is reserved.",
         "Actual PDF controls and approved TXT request are shown; generated PDF view and browser download completion were not independently captured."
       ]
     },
@@ -110,33 +123,33 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "durationSeconds": 95.625,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.mp4",
-          "sha256": "1daeef330b96e569a9dfec95b837e68abc7f42fb84347875810ae2c3c67ba514",
-          "bytes": 3433314
+          "sha256": "ef32125719e46d7d2a9133ec4b54dd61e2f74d64962939c60cb2d530dcda8a80",
+          "bytes": 3495551
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.vtt",
-          "sha256": "b5c0c6b27d1d1d924d9f65acb931ca37418ea551d21d840715eb5a373a157fbe",
-          "bytes": 2240
+          "sha256": "8fd2ebe1e798761a5e7ab13f5f4292e2a08c640e076879690024d7aeed829581",
+          "bytes": 2136
         },
         "transcript": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.txt",
-          "sha256": "055a76e466cf47069a3f74628620aee534e862eb9615902d7dec27c5783e51ee",
-          "bytes": 1403
+          "sha256": "63c8745c4e6e1d3baed41921297b5aff9c901758a7c31c79ea0bd5ee1dc60773",
+          "bytes": 1394
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.jpg",
-          "sha256": "aeef6454c3ad5a88942c6201c7bda65c0b306f7317963702f2fcda030c9a5590",
-          "bytes": 84636
+          "sha256": "6a7b0b59aee0c47b58f969f22ad8b92b5b41efc09d2807d0e1bd7553a6e57624",
+          "bytes": 78389
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.json",
-          "sha256": "8eacd6bd45df0bdbc585600451df0032dca251fc1498aad84cb3b0d1da6471c5",
-          "bytes": 6696
+          "sha256": "ce07a4e1bfdd4f2cc0a85a5693bc0da8b8ae1495fc7ad118d371b911718ac0db",
+          "bytes": 7102
         }
       },
       "mediaFormat": {
@@ -184,11 +197,24 @@
           "durationSeconds": 20.55
         }
       ],
+      "captionPresentation": {
+        "fontSizeAt1080p": 54,
+        "maximumLines": 2,
+        "wrapCharacters": 52,
+        "bottomMarginPixels": 180,
+        "reservedBand": {
+          "top": 784,
+          "bottom": 944
+        },
+        "nativeControlsSafeAreaPixels": 180,
+        "screenCapturedHeightRetained": true
+      },
       "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
-        "Caption timing uses model token predictions and measured audio samples."
+        "Caption timing uses model token predictions and measured audio samples.",
+        "Fine product text is best read fullscreen or alongside the written steps. Native controls vary by browser; a 180 px bottom caption margin is reserved."
       ]
     },
     {
@@ -197,33 +223,33 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "durationSeconds": 78.425,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.mp4",
-          "sha256": "fb9d09b0dab0e562a51a9e31aca09efccc5868ab7d639675b675835913c5c7bb",
-          "bytes": 2781322
+          "sha256": "1054ec524925e21cf683cd8b6c5162d0b6049da4b7b6e92d9dd7047211ebf2d0",
+          "bytes": 2836844
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.vtt",
-          "sha256": "4a8aee277dcf310b91da66f96b622580caf13a15ce062f63ebf415bf6aef39f9",
-          "bytes": 1807
+          "sha256": "9c524df70d32cbd5a016087f923369039152174ce349178e49bbf3e00348c2ee",
+          "bytes": 1726
         },
         "transcript": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.txt",
-          "sha256": "95996e34739323cf3e33e38ef34f021c930ec75e0ed6ab6a3c1a6b8c757247a3",
-          "bytes": 1160
+          "sha256": "803b564b395b797f757dd0d2682e64f7c80021d7a007b3a2ba6086fbbca681f9",
+          "bytes": 1153
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.jpg",
-          "sha256": "f25bcc93976337c5f3e7e7d90dbc9943210a0c4082f078b0357435715ad97130",
-          "bytes": 89531
+          "sha256": "0c7531a31b2bde852272f386d4649e8ec0ee1f388595dedcacd0ae6dee4a11c7",
+          "bytes": 88969
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.json",
-          "sha256": "b8c2448e46efbcd79b6b64233806e7ca61ef2c2eefd41669c0b3581bdd16ba3c",
-          "bytes": 5074
+          "sha256": "90b910bfcd546384a7f98b0225ef3f1c833f081222f73e0eb4bfc1829017d6ec",
+          "bytes": 5514
         }
       },
       "mediaFormat": {
@@ -264,11 +290,24 @@
           "durationSeconds": 23.175
         }
       ],
+      "captionPresentation": {
+        "fontSizeAt1080p": 54,
+        "maximumLines": 2,
+        "wrapCharacters": 52,
+        "bottomMarginPixels": 180,
+        "reservedBand": {
+          "top": 784,
+          "bottom": 944
+        },
+        "nativeControlsSafeAreaPixels": 180,
+        "screenCapturedHeightRetained": true
+      },
       "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
-        "Caption timing uses model token predictions and measured audio samples."
+        "Caption timing uses model token predictions and measured audio samples.",
+        "Fine product text is best read fullscreen or alongside the written steps. Native controls vary by browser; a 180 px bottom caption margin is reserved."
       ]
     },
     {
@@ -277,33 +316,33 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "durationSeconds": 75.30000000000001,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.mp4",
-          "sha256": "d15d3d9562a8b7309a1bd3dbe23166060e373fa229b60a8feaa4be8a830ed61d",
-          "bytes": 2692352
+          "sha256": "0877754c4f363d3e98d466a26e43d002df3cab2cf8e5fa8bf91ddc3827542b9b",
+          "bytes": 2744980
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.vtt",
-          "sha256": "0d23d17cd6fafbaf8c694449603cfdaa81d054995bdc13a624c9b986b9f9da35",
-          "bytes": 1719
+          "sha256": "f36c24757960bd94f71dd4371aaa4bf08ea0792dd33a923f9b8d445cc0025538",
+          "bytes": 1641
         },
         "transcript": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.txt",
-          "sha256": "a01c57ad685c7d606e98ab1f21d8c0edd8ae3824e2fb443b1cabc6f757c7db72",
-          "bytes": 1109
+          "sha256": "080971071d4184030c8b1821df0fc3e717945f44f4427c2127521a48a3ff01f9",
+          "bytes": 1102
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.jpg",
-          "sha256": "d09f62098e2b4448a9349ebaae3e1143c1b33187536f319dfdbf1110c99b0d4b",
-          "bytes": 88738
+          "sha256": "744f7ae001423d71cc01c617ebbf2399ba30520d47ed6af22f7a617dfdd49c95",
+          "bytes": 81944
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.json",
-          "sha256": "1a751d0e2048516075d490a1f6a5b1eccc81bc5c156e83bcdd777730d7722994",
-          "bytes": 5639
+          "sha256": "7c3f2b64cc3a3c416dd3b7ae97f0f75f49c15798c1b1ca35589efbeb845028af",
+          "bytes": 6094
         }
       },
       "mediaFormat": {
@@ -324,7 +363,7 @@
         },
         {
           "id": "new-check",
-          "stageId": "check-role",
+          "stageId": "check-next-vacancy",
           "title": "Give the new job a fresh review",
           "startSeconds": 18.4,
           "durationSeconds": 18.425
@@ -344,11 +383,24 @@
           "durationSeconds": 19.475
         }
       ],
+      "captionPresentation": {
+        "fontSizeAt1080p": 54,
+        "maximumLines": 2,
+        "wrapCharacters": 52,
+        "bottomMarginPixels": 180,
+        "reservedBand": {
+          "top": 784,
+          "bottom": 944
+        },
+        "nativeControlsSafeAreaPixels": 180,
+        "screenCapturedHeightRetained": true
+      },
       "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
-        "Caption timing uses model token predictions and measured audio samples."
+        "Caption timing uses model token predictions and measured audio samples.",
+        "Fine product text is best read fullscreen or alongside the written steps. Native controls vary by browser; a 180 px bottom caption margin is reserved."
       ]
     },
     {
@@ -357,33 +409,33 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
-      "durationSeconds": 111.675,
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
+      "durationSeconds": 115.37499999999999,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.mp4",
-          "sha256": "66b098905943b7dca1c7532854733d229583ee41d7b3fea1e56111cf84a5c28a",
-          "bytes": 4034051
+          "sha256": "f1a723c509b155251b0c711085a6d76402bb994dff25a98e280cef2a889f4a17",
+          "bytes": 4241939
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.vtt",
-          "sha256": "482d5876bb48c6f3c9918a57be02222f73e175d5ef6ad2fd85b86629a486b09f",
-          "bytes": 2615
+          "sha256": "6379d254cb47ebd3d4942302304d99047bc00163cdd000afe8c58ff13506f6f8",
+          "bytes": 2604
         },
         "transcript": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.txt",
-          "sha256": "2c30791be38f26dd423b832afd566f59ac891488beef2c7761cd5e174d3ad367",
-          "bytes": 1660
+          "sha256": "198a502de4c060ab7023ac6d9c1de9b1813ba5010a8f8ab94e99c7cf3144791e",
+          "bytes": 1726
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.jpg",
-          "sha256": "2730e0486ff52872d5f0e60e014855210ef86d71e7df807622e5436557c0fff7",
-          "bytes": 85144
+          "sha256": "8bfd607335eea5352d2a3c5ac31cbc844c24eda12044fde72f7157f8a360e5d1",
+          "bytes": 79238
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.json",
-          "sha256": "9f6912d94d889676f58e392fea09759e55abcb0796759e49b11d335bf24b20c0",
-          "bytes": 7831
+          "sha256": "a0fead26641942d29a03b89760830adbfd7466a9c2b0d7163712182b23021a1a",
+          "bytes": 8239
         }
       },
       "mediaFormat": {
@@ -414,28 +466,41 @@
           "stageId": "loop-optional-controls",
           "title": "Make separate connection choices",
           "startSeconds": 43.125,
-          "durationSeconds": 23.9
+          "durationSeconds": 27.6
         },
         {
           "id": "recovery",
           "stageId": "check-draft-recovery",
           "title": "Choose refresh recovery deliberately",
-          "startSeconds": 67.025,
+          "startSeconds": 70.725,
           "durationSeconds": 20.6
         },
         {
           "id": "loop-memory",
           "stageId": "loop-draft-recovery",
           "title": "Know what can return",
-          "startSeconds": 87.625,
+          "startSeconds": 91.32499999999999,
           "durationSeconds": 24.05
         }
       ],
+      "captionPresentation": {
+        "fontSizeAt1080p": 54,
+        "maximumLines": 2,
+        "wrapCharacters": 52,
+        "bottomMarginPixels": 180,
+        "reservedBand": {
+          "top": 784,
+          "bottom": 944
+        },
+        "nativeControlsSafeAreaPixels": 180,
+        "screenCapturedHeightRetained": true
+      },
       "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
-        "Caption timing uses model token predictions and measured audio samples."
+        "Caption timing uses model token predictions and measured audio samples.",
+        "Fine product text is best read fullscreen or alongside the written steps. Native controls vary by browser; a 180 px bottom caption margin is reserved."
       ]
     }
   ]
