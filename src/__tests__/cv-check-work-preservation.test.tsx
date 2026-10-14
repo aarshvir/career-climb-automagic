@@ -303,7 +303,7 @@ describe("JV-01 CV work preservation", () => {
 
     expect(screen.queryByLabelText("Target role")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Your CV to review")).not.toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("Your stored draft has been kept");
+    expect(screen.getByRole("status")).toHaveTextContent("Your sign-in could not be restored");
     const retainedAfterFailure = sessionStorage.getItem(recoveryKey);
     expect(retainedAfterFailure).not.toBeNull();
     expect(JSON.parse(retainedAfterFailure!).value).toMatchObject({ ownerId: "owner-a", draft });
