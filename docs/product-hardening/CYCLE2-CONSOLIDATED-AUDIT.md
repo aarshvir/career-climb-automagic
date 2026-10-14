@@ -68,3 +68,11 @@ Keep one core product for students, MBAs and busy professionals: source once, on
 5. Continue the existing quiet three-hour improvement heartbeat through its authorized window. Notify only about a meaningful fix, completion, failure or required external action. Do not rerun unchanged passed checks, invent metrics, enable paid services or rewrite grades.
 
 The stronger three-persona marketing lab remains private at127.0.0.1:8397 and outside production/Git assets; [copy research plan](COPY-RESEARCH-PLAN.md) explains the tests. The public site sells current capabilities without invented customers, testimonials or outcomes.
+
+## Published outcome
+
+Version18 is live on Jobvance.io, runtime012b669385d3046d4f3676e0d7d8df8ecd1db623. Version17 delivered the functional fixes and rebuilt videos; version18 resolves the actual phone caption/control overlap. The original mobile reviewer passed the final local phone/English-caption check, then root verified actual published playback and clear paused captions at390px without overflow. All13original findings have targeted verification; grades remain frozen. A fresh complete rerating remains a distinct future assessment.
+
+Version17's independent1,357actual-domain checks passed; the bounded version18follow-up passed825checks, reusing unchanged runtime/media proof rather than redownloading them. These totals overlap and are not added as unique coverage. Exact releases, archives, sourceZIPs, browser screenshots and HTTP evidence are preserved outside Git in sibling jobvance-repair-evidence; product-hardening-release-receipt.json identifies the current release. The final browser evidence is explicitly bounded to decoded first-check playback, caption/control separation, signed-in public support receipt create/lookup and exact own-fictional-QAcleanup. Prior actual cloud checks and local/mocked tests retain their separate scopes.
+
+The quiet three-hour improvement/review heartbeat now starts from verified version18. It preserves rollback14and the later16/17fallbacks, the free pilot/cost bounds and the ban on ads/outreach/sends/submission. Future independent reviewers receive tasks and source hashes without a target grade. Actual participant usability, demand, retention and Google/AI-search ranking still need observed data.
