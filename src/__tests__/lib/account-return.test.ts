@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { accountDestination, rememberLoopReturn, takeLoopReturn } from '@/lib/account-return';
+import { accountDestination, rememberLoopReturn, takeLoopReturn, workspaceReturnPath } from '@/lib/account-return';
 
 describe('account destinations', () => {
   beforeEach(() => sessionStorage.clear());
@@ -36,5 +36,25 @@ describe('account destinations', () => {
       expect(accountDestination(path)).toBe(path); rememberLoopReturn(path, 1000); expect(takeLoopReturn(1001)).toBe(path);
     }
     for (const path of ['/admin?days=365', '/admin2?days=30&next=https://evil.example', '/admin?role=owner', '/admin#token', '/admin/../dashboard']) expect(accountDestination(path)).toBe('/dashboard');
+  });
+  it('preserves only fixed workspace tabs through an expiring, single-use return', () => {
+    for (const path of ['/dashboard', '/dashboard?tab=cv', '/dashboard?tab=tailor', '/dashboard?tab=tracker', '/dashboard?tab=billing']) {
+      expect(accountDestination(path)).toBe(path);
+      rememberLoopReturn(path, 1000);
+      expect(takeLoopReturn(1001)).toBe(path);
+      expect(takeLoopReturn(1002)).toBeNull();
+    }
+    rememberLoopReturn('/dashboard?tab=tracker', 1000);
+    expect(takeLoopReturn(1801000)).toBeNull();
+    for (const path of ['/dashboard?tab=unknown', '/dashboard?tab=tracker&next=//evil.example', '/dashboard?tab=tracker#token', '/dashboard?tab=tracker&tab=billing', '//evil.example/dashboard?tab=tracker']) {
+      expect(accountDestination(path)).toBe('/dashboard');
+      rememberLoopReturn(path, 1000);
+      expect(takeLoopReturn(1001)).toBeNull();
+    }
+  });
+  it('normalizes a protected workspace request without retaining unrelated query data', () => {
+    for (const tab of ['cv', 'tailor', 'tracker', 'billing']) expect(workspaceReturnPath(`?tab=${tab}`)).toBe(`/dashboard?tab=${tab}`);
+    expect(workspaceReturnPath('?email=private@example.test&tab=tracker&next=https://evil.example')).toBe('/dashboard?tab=tracker');
+    for (const search of ['', '?tab=', '?tab=unknown', '?tab=tracker&tab=billing', '?tab=tracker%23token', '?tab=%2F%2Fevil.example']) expect(workspaceReturnPath(search)).toBe('/dashboard');
   });
 });

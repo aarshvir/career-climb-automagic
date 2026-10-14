@@ -341,7 +341,7 @@
         "All three persona examples"
       ],
       "acceptance_criteria": [
-        "A metadata-only guest count can describe source→check→review→approved export action without CV text or sensitive URLs.",
+        "A metadata-only guest count can describe source\u00e2\u2020\u2019check\u00e2\u2020\u2019review\u00e2\u2020\u2019approved export action without CV text or sensitive URLs.",
         "Prepared request, received inquiry, admitted account and genuine research participant remain separate denominators.",
         "Scheduled runs cannot count as a voluntary human return; successful job-search exit is distinguished from harmful dropout.",
         "First/repeat task records include active minutes, assistance, corrections, usefulness and non-completion reason.",
@@ -446,7 +446,7 @@
       "acceptance_criteria": [
         "Each intended participant has an actual vacancy, existing CV/project evidence, available review time and a segment/source record.",
         "Coach relevance, current service verification and willingness to introduce remain separate fields; unknowns stay unknown.",
-        "Request reception→acknowledgement→admission→agreed task is rehearsed with fictional data.",
+        "Request reception\u00e2\u2020\u2019acknowledgement\u00e2\u2020\u2019admission\u00e2\u2020\u2019agreed task is rehearsed with fictional data.",
         "Ten participants are not promised ten additional cloud seats or an automaticUS$5entitlement.",
         "A named owner/back-up checks both support queues and handles public exposed-data/inaccurate-claim concerns.",
         "No invitations, followups, ads or messages are sent by this audit; founder research/support time is separately budgeted."
@@ -593,5 +593,24 @@
         "FO-05"
       ]
     }
-  ]
+  ],
+  "latest_claude_reconciliation": "../2026-10-15-clarity-evidence-repair/ASSESSMENT.md",
+  "latest_clarity_repair": {
+    "status": "implementation prepared; publication pending",
+    "release_note": "../../CLARITY-EVIDENCE-RELEASE-2026-10-15.md",
+    "scope": [
+      "neutral public entry",
+      "current free offer",
+      "legacy tab auth return",
+      "literal evidence repair",
+      "public check explanation"
+    ],
+    "not_completed": [
+      "shared application home and carryover",
+      "semantic preparation",
+      "grouped review",
+      "novice acceptance",
+      "hosted auth/storage/restore acceptance"
+    ]
+  }
 }

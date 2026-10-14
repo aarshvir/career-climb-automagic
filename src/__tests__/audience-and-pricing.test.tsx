@@ -1,10 +1,9 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { blankLoopProfile, loopAudienceContent } from '@/lib/job-loop-audiences';
-import { subscriptionPlans } from '@/lib/subscription-plans';
 vi.unmock('react-router-dom');
 const account = vi.hoisted(() => ({ user: null as { id: string } | null }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: account.user }) }));
@@ -42,17 +41,42 @@ describe('audience entry points', () => {
   });
 });
 
-describe('free pilot and proposed subscriptions', () => {
-  it('shows separate free and proposed tiers without enabling a purchase', () => {
+describe('current free offer', () => {
+  it('offers useful check access without speculative prices, quotas or disabled purchase controls', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: 'Free Starter' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Focus' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Job Loop' })).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'Checkout not available' })).toHaveLength(2);
-    for (const button of screen.getAllByRole('button', { name: 'Checkout not available' })) expect(button).toBeDisabled();
-    expect(screen.getByText(/No card, charge or automatic conversion/)).toBeInTheDocument();
-    expect(subscriptionPlans.every(plan => plan.billing === false)).toBe(true);
+    expect(screen.getByRole('heading', { name: 'Your CV and one job' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Keep your job search organised' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
+    expect(screen.getByRole('link', { name: 'See what Job Loop includes' })).toHaveAttribute('href', '/job-loop');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByText(/\$15|\$29|20 reviewed|30 scheduled|60 per month|proposed future tier/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/Cloud preparation is limited to ten accounts/)).toBeInTheDocument();
+    expect(screen.getByText(/no guaranteed daily AI allowance/)).toBeInTheDocument();
+    expect(screen.getByText(/does not become a paid subscription automatically/)).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /buy|subscribe|pay/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('neutral homepage start', () => {
+  it('changes the visible example without changing any check destination or requiring an audience setup', () => {
+    render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
+    const examples = screen.getByRole('group', { name: 'Compare examples' });
+    const expectedExamples = [
+      ['Project experience', 'Graduate data analyst'],
+      ['Career change', 'Business analyst'],
+      ['Work experience', 'Operations analyst'],
+    ];
+    for (const [label, role] of expectedExamples) {
+      fireEvent.click(within(examples).getByRole('button', { name: label }));
+      expect(within(examples).getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByRole('heading', { name: role })).toBeInTheDocument();
+      expect(screen.getByRole('status')).toHaveTextContent('This changes the example only; everyone starts with the same CV check.');
+      const starts = screen.getAllByRole('link').filter(link => link.getAttribute('href')?.startsWith('/check'));
+      expect(starts.length).toBeGreaterThan(0);
+      for (const start of starts) expect(start).toHaveAttribute('href', '/check');
+    }
+    expect(screen.getByText(/There is no separate student or professional setup to choose/)).toBeInTheDocument();
+    expect(screen.getByText(/Saved free checks do not transfer into it automatically yet/)).toBeInTheDocument();
   });
 });
 

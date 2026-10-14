@@ -11,6 +11,7 @@ import Footer from "@/components/layout/Footer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProductPage from "@/pages/ProductPage";
 import RouteNavigation from '@/components/RouteNavigation';
+import { workspaceReturnPath } from '@/lib/account-return';
 const Auth = lazy(() => import("@/pages/Auth")),
   AuthCallback = lazy(() => import("@/pages/AuthCallback"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
@@ -31,6 +32,7 @@ const client = new QueryClient({
 });
 function ProtectedWorkspace() {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading)
     return (
       <p className="p-8" role="status">
@@ -40,7 +42,7 @@ function ProtectedWorkspace() {
   return user ? (
     <Workspace key={user.id} />
   ) : (
-    <Navigate to="/auth?next=%2Fdashboard" replace />
+    <Navigate to={`/auth?next=${encodeURIComponent(workspaceReturnPath(location.search))}`} replace />
   );
 }
 function ProtectedJobLoop() {

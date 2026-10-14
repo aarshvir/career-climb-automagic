@@ -63,6 +63,16 @@ for(const page of publicRender.pages){
   assert.ok(html.includes(`href="https://jobvance.io${page.path}"`),'Each initial page needs its canonical URL.');
   assert.ok(html.includes(page.title.replaceAll('&','&amp;')),'Each public page needs its own title.');
   assert.equal(response.headers.get('X-Robots-Tag'),null);
+  if(page.path==='/') assert.ok(!/href="\/check\?audience=/.test(html),'Examples must not select a persona for a neutral visitor.');
+  if(page.path==='/pricing') {
+    assert.ok(html.includes('Jobvance is free while in beta.'));
+    assert.ok(!/\$15|\$29|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable purchases.');
+  }
+  if(page.path==='/check') {
+    assert.ok(html.includes('Compare your CV with a job description'),'The initial check page must explain its purpose before JavaScript/auth resolves.');
+    assert.ok(html.includes('Similar wording does not prove you meet a requirement'));
+    assert.ok(html.includes('The check and downloads are free without an account.'));
+  }
   if(page.kind==='guide'){assert.ok(!html.includes('We could not find that guide.'));assert.ok(html.includes('BlogPosting'));assert.ok(html.includes('Sources and further reading'));}
   for(const match of html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)){
     JSON.parse(match[1]);

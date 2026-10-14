@@ -10,7 +10,6 @@ import {
   Trash2,
   Loader2,
   RefreshCw,
-  CreditCard,
   FolderOpen,
   Briefcase,
   Layers,
@@ -33,7 +32,7 @@ import {
   downloadOriginalCv,
 } from "@/lib/cv-documents";
 import { downloadPack } from "@/lib/document-export";
-import { isPaddleClientReady, openPaymentCheckout } from "@/lib/payment-checkout";
+import { currentOffer } from "@/lib/current-offer";
 import { listLegacyCvs, downloadLegacyCv } from "@/lib/cv-legacy";
 import type { ApplicationPack, TrackedApplication } from "@/lib/cv-database";
 import {
@@ -47,7 +46,6 @@ import {
   applicationStatuses,
   safeEmployerUrl,
   workspaceCounts,
-  startCheckout,
   type ApplicationStatus,
 } from "@/lib/workspace-api";
 import "./Workspace.css";
@@ -58,13 +56,13 @@ const tabs: { id: Tab; label: string; icon: typeof FileText }[] = [
   { id: "cv", label: "Your CVs", icon: FolderOpen },
   { id: "tailor", label: "Tailor & download", icon: FileText },
   { id: "tracker", label: "Applications", icon: Briefcase },
-  { id: "billing", label: "Packs & payments", icon: Layers },
+  { id: "billing", label: "Access", icon: Layers },
 ];
 const sectionDetails: Record<Tab, { title: string; description: string; breadcrumb: string }> = {
   cv: { title: "Your experience starts here.", description: "Keep a reviewed source CV ready for your next application.", breadcrumb: "Documents" },
   tailor: { title: "Prepare your next application.", description: "Bring a real vacancy. Review the wording, then download the version you approve.", breadcrumb: "Application packs" },
   tracker: { title: "Keep your next step in view.", description: "Record your applications, add a reminder and keep useful notes together.", breadcrumb: "Applications" },
-  billing: { title: "Your pack access.", description: "Check your remaining preparation packs and the status of payment access.", breadcrumb: "Pack access" },
+  billing: { title: "Your access.", description: "Use the free check or continue with your saved documents.", breadcrumb: "Access" },
 };
 const dateLabel = (value: string) => new Date(value).toLocaleDateString();
 
@@ -208,8 +206,6 @@ export default function Workspace() {
   operationOwner.current = user?.id ?? null;
   useEffect(() => { operationMounted.current = true; return () => { operationMounted.current = false; operationRevision.current++; }; }, []);
   const packRequest = useRef(crypto.randomUUID());
-  const checkoutRequest = useRef(crypto.randomUUID());
-  const [checkoutAttempted, setCheckoutAttempted] = useState(false);
   const query = useQuery({
     queryKey: ["workspace", user?.id],
     queryFn: () => loadWorkspace(user!.id),
@@ -400,7 +396,7 @@ export default function Workspace() {
             ["Saved applications", counts.saved],
             ["Marked applied", counts.applied],
             ["Interviews", counts.interviews],
-            ["Packs remaining", data.entitlement?.creditsRemaining ?? "Unavailable"],
+            ["Saved preparations available", data.entitlement?.creditsRemaining ?? "Unavailable"],
           ].map(([label, count]) => (
             <Card key={String(label)} className="ws-summary-card">
               <CardContent className="p-4">
@@ -702,8 +698,8 @@ export default function Workspace() {
                   <p className="ws-method-note">
                     Tailoring prioritizes relevant wording already in your CV.
                     It preserves your facts and highlights vocabulary to review.
-                    One saved pack uses one credit; retries of the same request
-                    do not use another.
+                    This workspace uses your existing preparation allowance.
+                    The free CV check remains available separately.
                   </p>
                   <Button
                     type="submit"
@@ -714,16 +710,12 @@ export default function Workspace() {
                     <FileText size={16} className="mr-2" />
                     Prepare application pack
                   </Button>
-                  {data?.entitlement?.creditsRemaining === 0 && (
+                  {(data?.entitlement?.creditsRemaining === 0 || !data?.entitlement) && (
                     <p className="text-sm">
-                      No packs remaining.{" "}
-                      <button
-                        type="button"
-                        className="text-primary underline"
-                        onClick={() => setParams({ tab: "billing" })}
-                      >
-                        View pack access
-                      </button>
+                      {data?.entitlement ? 'Your existing preparation allowance is used up.' : 'Your existing preparation allowance could not be checked.'}{' '}
+                      Your saved documents are still available.{' '}
+                      <Link className="text-primary underline" to="/check">Check a CV for free</Link>
+                      {' '}starts a separate check with your CV and a job description.
                     </p>
                   )}
                 </form>
@@ -947,83 +939,16 @@ export default function Workspace() {
         )}
         {tab === "billing" && data && (
           <Card className="ws-card ws-billing-card">
-            <CardHeader>
-              <p className="ws-step-label"><Layers size={16} aria-hidden="true" />PREPARATION PACKS</p>
-              <CardTitle>Pack access</CardTitle>
-            </CardHeader>
+            <CardHeader><p className="ws-step-label">YOUR ACCESS</p><CardTitle>{currentOffer.statement}</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <p className="ws-access-count">
-                {data.entitlement?.creditsRemaining ?? "Unavailable"}{" "}
-                <span className="text-base font-normal">packs remaining</span>
-              </p>
-              {data.entitlement?.expiresAt && (
-                <p className="text-sm">
-                  Paid access expires {dateLabel(data.entitlement.expiresAt)}.
-                  Saved documents remain available.
-                </p>
-              )}
-              <div className="ws-pass-description">
-                {!data.entitlement?.billingConfigured && <p className="ws-step-label">PLANNED PASS · PURCHASES UNAVAILABLE</p>}
-                <h3 className="text-xl font-semibold">$29 once</h3>
-                <p className="mt-2">
-                  Ten application packs for 30 days. No automatic renewal.
-                  Includes your review and PDF, DOCX and TXT downloads.
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Practitioner review is not included. Purchase access only
-                  after you have tried the free pack.
-                </p>
-              </div>
-              {data.entitlement?.billingMode === "test" && (
-                <Alert>
-                  <AlertDescription>
-                    Test checkout: no real money is collected. Do not enter real
-                    card details.
-                  </AlertDescription>
-                </Alert>
-              )}
-              {(!data.entitlement?.billingConfigured || (data.entitlement.paymentProvider === 'paddle' && !isPaddleClientReady(data.entitlement.billingMode))) && (
-                <p role="status">
-                  Jobvance is a free beta. Real-money purchases are unavailable. You can still use your
-                  existing pack access and saved records.
-                </p>
-              )}
-              <Button
-                disabled={!data.entitlement?.billingConfigured || (data.entitlement.paymentProvider === 'paddle' && !isPaddleClientReady(data.entitlement.billingMode))}
-                onClick={() =>
-                  void run(async () => {
-                    setCheckoutAttempted(true);
-                    const checkout = await startCheckout(
-                      checkoutRequest.current,
-                    );
-                    await openPaymentCheckout(checkout,()=>void client.invalidateQueries({queryKey:['workspace',user.id]}));
-                  }, "Opening secure checkout…")
-                }
-              >
-                <CreditCard size={16} className="mr-2" />
-                Buy ten packs
-              </Button>
-              {checkoutAttempted && (
-                <Button variant="outline" onClick={() => {
-                  checkoutRequest.current = crypto.randomUUID();
-                  setCheckoutAttempted(false);
-                  setError("");
-                  setNotice("A fresh checkout request is ready. Confirm your balance and that no payment was completed before opening it.");
-                }}>
-                  Start a new checkout request
-                </Button>
-              )}
-              {checkoutAttempted && <p className="text-sm text-muted-foreground">Retrying Buy ten packs reuses your current request. Start a new request only after checking that the previous checkout did not complete, to avoid a duplicate purchase.</p>}
-              <p className="text-sm text-muted-foreground">
-                Access changes only after confirmed payment.{" "}
-                <Link to="/refund" className="underline">
-                  Refund terms
-                </Link>{" "}
-                ·{" "}
-                <Link to="/privacy" className="underline">
-                  Privacy
-                </Link>
-              </p>
+              <p>{currentOffer.check}</p>
+              <Button asChild><Link to="/check">Check a CV for free</Link></Button>
+              <p>This starts a separate check. Your existing documents and tracking entries stay in this workspace.</p>
+              <h3 className="font-semibold">Your existing workspace allowance</h3>
+              <p>{data.entitlement ? `${data.entitlement.creditsRemaining} saved preparations available.` : 'Access could not be checked. Reload to try again.'} Previously approved documents remain available to download.</p>
+              {data.entitlement?.expiresAt && <p>Existing preparation access ends {dateLabel(data.entitlement.expiresAt)}. Saved documents remain available.</p>}
+              <p>{currentOffer.future}</p>
+              <Link to="/pricing" className="underline">See what’s included</Link>
             </CardContent>
           </Card>
         )}

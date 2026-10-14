@@ -39,6 +39,7 @@ const calls = vi.hoisted(() => ({
   upload: vi.fn(),
   extract: vi.fn(),
   download: vi.fn(),
+  original: vi.fn(),
   checkout: vi.fn(),
   create: vi.fn(),
   openCheckout: vi.fn(),
@@ -51,7 +52,7 @@ vi.mock("@/lib/cv-documents", () => ({
   extractCvText: calls.extract,
   uploadCvDocument: calls.upload,
   deleteCvDocument: vi.fn(),
-  downloadOriginalCv: vi.fn(),
+  downloadOriginalCv: calls.original,
 }));
 vi.mock("@/lib/document-export", () => ({ downloadPack: calls.download }));
 vi.mock("@/lib/cv-legacy", () => ({
@@ -179,6 +180,7 @@ beforeEach(() => {
     return cv;
   });
   calls.download.mockResolvedValue(undefined);
+  calls.original.mockResolvedValue(undefined);
 });
 describe("Real workspace journey and truthful failures", () => {
   it("shows an honest zero state and persists a manually reported application status", async () => {
@@ -283,9 +285,9 @@ describe("Real workspace journey and truthful failures", () => {
     await screen.findByText(/Checkout returned/);
     expect(state.data.entitlement!.creditsRemaining).toBe(1);
     expect(calls.checkout).not.toHaveBeenCalled();
-    expect(
-      screen.getByRole("button", { name: "Buy ten packs" }),
-    ).toBeDisabled();
+    expect(calls.openCheckout).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /buy|checkout/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Check a CV for free' })).toHaveAttribute('href', '/check');
   });
   it("saves in-progress notes and date when the status changes", async () => {
     state.data.applications.push({ id: 'track1', user_id: state.user.id, pack_id: null, job_title: 'Analyst', company: '', job_url: null, status: 'saved', notes: '', applied_at: null, follow_up_at: null, created_at: '2026-10-10T00:00:00Z', updated_at: '2026-10-10T00:00:00Z' });
@@ -309,21 +311,53 @@ describe("Real workspace journey and truthful failures", () => {
     fireEvent.click(screen.getByRole('button',{name:'Tailor this CV'}));
     expect(screen.getByRole('button',{name:'Prepare application pack'})).toBeDisabled();
   });
-  it("retries uncertain checkout with the same request and allows an explicit fresh request", async () => {
-    state.data.entitlement = {creditsRemaining:1,expiresAt:null,billingConfigured:true,billingMode:'test',paymentProvider:'stripe'};
-    calls.checkout.mockRejectedValue(new Error('This checkout expired. Start a new checkout.'));
+  it.each(['stripe', 'paddle'] as const)('does not expose checkout even when the backend reports %s billing ready', async provider => {
+    state.data.entitlement = {creditsRemaining:0,expiresAt:null,billingConfigured:true,billingMode:'live',paymentProvider:provider};
     mount('/dashboard?tab=billing');
-    const buy=await screen.findByRole('button',{name:'Buy ten packs'});
-    fireEvent.click(buy);
-    await screen.findByText('This checkout expired. Start a new checkout.');
-    const first=calls.checkout.mock.calls[0][0];
-    fireEvent.click(buy);
-    await waitFor(()=>expect(calls.checkout).toHaveBeenCalledTimes(2));
-    expect(calls.checkout.mock.calls[1][0]).toBe(first);
-    await waitFor(()=>expect(screen.getByRole('button',{name:'Start a new checkout request'})).toBeEnabled());
-    fireEvent.click(screen.getByRole('button',{name:'Start a new checkout request'}));
-    fireEvent.click(buy);
-    await waitFor(()=>expect(calls.checkout).toHaveBeenCalledTimes(3));
-    expect(calls.checkout.mock.calls[2][0]).not.toBe(first);
+    await screen.findByText('Jobvance is free while in beta.');
+    expect(screen.getByRole('button', {name:'Access'})).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', {name:'Check a CV for free'})).toHaveAttribute('href', '/check');
+    expect(screen.getByText(/0 saved preparations available/)).toHaveTextContent('Previously approved documents remain available to download.');
+    expect(screen.queryByRole('button', {name:/buy|checkout|purchase|subscribe|payment/i})).not.toBeInTheDocument();
+    expect(screen.queryByText(/\$29|Ten application packs for 30 days/)).not.toBeInTheDocument();
+    expect(calls.checkout).not.toHaveBeenCalled();
+    expect(calls.openCheckout).not.toHaveBeenCalled();
+  });
+  it.each(['zero', 'unavailable'] as const)('keeps original files, approved downloads and tracking usable with %s preparation access', async access => {
+    state.data.cvs = [cv];
+    state.data.entitlement = access === 'zero' ? {creditsRemaining:0,expiresAt:null,billingConfigured:true,billingMode:'live',paymentProvider:'stripe'} : null;
+    state.data.entitlementError = access === 'unavailable' ? 'Pack access could not be checked.' : null;
+    state.data.packs = [{
+      id:'approved-pack',user_id:state.user.id,resume_id:cv.id,request_id:'original-request',
+      job_title:'Saved role',company:'Example employer',job_url:null,job_description:'Saved vacancy description',
+      original_text:original,tailored_text:original,matched_keywords:[],missing_keywords:[],status:'approved',created_at:'2026-10-10T00:00:00Z',
+    }];
+    state.data.applications = [{
+      id:'saved-application',user_id:state.user.id,pack_id:'approved-pack',job_title:'Recorded application',company:'Example employer',job_url:null,
+      status:'saved',notes:'Existing private note',applied_at:null,follow_up_at:null,created_at:'2026-10-10T00:00:00Z',updated_at:'2026-10-10T00:00:00Z',
+    }];
+    mount();
+    const originalDownload = await screen.findByRole('button', {name:'Original'});
+    expect(originalDownload).toBeEnabled();
+    fireEvent.click(originalDownload);
+    await waitFor(() => expect(calls.original).toHaveBeenCalledWith(expect.objectContaining({id:cv.id})));
+    await waitFor(() => expect(screen.getByRole('button', {name:'Tailor this CV'})).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', {name:'Tailor this CV'}));
+    expect(screen.getByRole('button', {name:'Prepare application pack'})).toBeDisabled();
+    expect(screen.getByRole('link', {name:'Check a CV for free'})).toHaveAttribute('href', '/check');
+    expect(screen.getByText(/Your saved documents are still available/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', {name:/Saved role.*Approved — open & download/}));
+    await screen.findByText('Review: Saved role');
+    expect(screen.getByRole('button', {name:'Download PDF'})).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', {name:'Download PDF'}));
+    await waitFor(() => expect(calls.download).toHaveBeenCalledWith(expect.objectContaining({id:'approved-pack',status:'approved'}), 'pdf'));
+    await waitFor(() => expect(screen.getByRole('button', {name:'Applications'})).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', {name:'Applications'}));
+    await screen.findByText('Recorded application');
+    expect(screen.getByLabelText('Notes')).toHaveValue('Existing private note');
+    expect(screen.getByRole('button', {name:'Save application'})).toBeEnabled();
+    expect(calls.create).not.toHaveBeenCalled();
+    expect(calls.checkout).not.toHaveBeenCalled();
+    expect(calls.openCheckout).not.toHaveBeenCalled();
   });
 });
