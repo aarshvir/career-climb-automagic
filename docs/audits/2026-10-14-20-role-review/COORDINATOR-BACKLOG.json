@@ -29,10 +29,10 @@
         "QA-01",
         "UX-04"
       ],
-      "implementation_status": "partial: v22 and v26 controlled work-preservation repairs shipped; hosted/unassisted acceptance remains open",
+      "implementation_status": "partial: v22/v26 preservation and v27 workspace auth-return repairs shipped; hosted IAB guest exports verified; broader hosted/unassisted acceptance remains open",
       "implementation_evidence": "../../NAVIGATION-SAVE-RELEASE-2026-10-14.md",
       "remaining_acceptance": [
-        "Hosted native file receipt/opening and supported mobile verification",
+        "Other-browser and native mobile file delivery/opening; v27 desktop IAB PDF/DOCX/TXT received and parsed",
         "Fresh production signup/email/OAuth continuation and unassisted first/second application acceptance",
         "Memory-only undo/tracking limitations remain explicit; no hard-refresh guarantee without separate consent/design"
       ],
@@ -42,7 +42,8 @@
         "Owner/application/surface/authority/generation-bound memory tracking recovery",
         "Dirty-field server refresh/recovery and fresh status attestation",
         "Optional saving independent of approved local export; unchanged retry identity retained",
-        "Independent stale-operation tests and full1198-case suite passed; live created source/final undo observed"
+        "Independent stale-operation tests and full1198-case suite passed; live created source/final undo observed",
+        "v27 allowlisted tracker tab return plus actual live guest export receipt/readback; see clarity release"
       ]
     },
     {
@@ -596,7 +597,7 @@
   ],
   "latest_claude_reconciliation": "../2026-10-15-clarity-evidence-repair/ASSESSMENT.md",
   "latest_clarity_repair": {
-    "status": "implementation prepared; publication pending",
+    "status": "shipped v27, bounded validation; all wider packages remain partial/open",
     "release_note": "../../CLARITY-EVIDENCE-RELEASE-2026-10-15.md",
     "scope": [
       "neutral public entry",
@@ -611,6 +612,8 @@
       "grouped review",
       "novice acceptance",
       "hosted auth/storage/restore acceptance"
-    ]
+    ],
+    "source_commit": "5bf52c4e5b749d80822b5973cc85b2adeea985c7",
+    "receipt": "../../releases/2026-10-15-clarity-evidence.json"
   }
 }

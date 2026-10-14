@@ -1,0 +1,120 @@
+{
+  "releasedAt": "2026-10-14T20:59:47.434790+00:00",
+  "site": "https://jobvance.io",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "version": 27,
+  "sourceCommit": "5bf52c4e5b749d80822b5973cc85b2adeea985c7",
+  "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_4bd56e97682c819197f5eb2567f1d650",
+  "deploymentId": "appgdep_6acfed26960481918ac86fbe9fff5bba",
+  "status": "succeeded",
+  "nativeDeployment": {
+    "id": "appgdep_6acfed26960481918ac86fbe9fff5bba",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_4bd56e97682c819197f5eb2567f1d650",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-14T20:59:47.434790+00:00"
+  },
+  "artifact": {
+    "archive": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-repair-evidence\\clarity-evidence-2026-10-15.tar.gz",
+    "sha256": "92f3f8b3d0c057688498abc4a8b66ff1542adfa6992f026ff318e78d4bf46118",
+    "bytes": 4684381,
+    "members": 128,
+    "forbiddenMembers": [],
+    "workerBytesMatch": true,
+    "savedArchive": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_0000000027f4820894512d020fc2f7aa",
+      "content_hash": "sha256:fc339d2782caca40ed339200c8cd2b694ddea1a5839af973a716defd48dd9482",
+      "size_bytes": 14407680,
+      "file_count": 120
+    }
+  },
+  "validation": {
+    "vitest": {
+      "files": 87,
+      "passed": 1255,
+      "failed": 0
+    },
+    "typescript": "passed",
+    "hostingGroups": 12,
+    "liveHttpChecks": 81,
+    "liveHttpFailures": 0,
+    "publicPages": 38,
+    "guideArticles": 20,
+    "prerenderExternalRequests": 0,
+    "workerCompressedBytes": 2763603
+  },
+  "backend": {
+    "changed": false,
+    "priorReceipt": "2026-10-14-artifact-maintenance.json",
+    "controlVersion": 14,
+    "workerVersion": 11,
+    "oauthVersion": 5,
+    "freshConfigurationReadback": false,
+    "note": "No backend/collection gate mutation. Prior v26 readback confirms disabled collection and empty allowlist; not a fresh query this turn."
+  },
+  "rollback": {
+    "tag": "jobvance-before-clarity-repair-2026-10-15",
+    "tagCommit": "9498b07b964f4c1a0dc160674ec544c7cd5f7144",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_2dc8ea7a34208191979fb787654a1691",
+    "note": "Frontend rollback only; retain all backend fences and commitments. Not database/file restoration."
+  },
+  "hostedBrowser": {
+    "environment": "IAB guest on Jobvance.io",
+    "createdFixture": true,
+    "realCandidateMutations": false,
+    "completedSixSteps": true,
+    "qualificationFalseMatchRemoved": true,
+    "supportNotUpgradedToLeadership": true,
+    "sourceContactNotCited": true,
+    "nativeExports": {
+      "pdf": {
+        "bytes": 58197,
+        "sha256": "7cfa77aa91ea374d449b7d9808f809f3e972b0e53fa015e1e82e9f5778306175",
+        "parsed": true,
+        "expectedText": true,
+        "noVacancyContamination": true,
+        "pages": 1
+      },
+      "docx": {
+        "bytes": 9895,
+        "sha256": "47619ea873fb6950a2561c1bc82b9de524bb0c8de824ae531713a42c0bc4db0a",
+        "parsed": true,
+        "expectedText": true,
+        "noVacancyContamination": true
+      },
+      "txt": {
+        "bytes": 360,
+        "sha256": "8ebb79ebd67df26636b3c0be8db8b6133899d677f2f7854234c50e9d1ea8bc6c",
+        "parsed": true,
+        "expectedText": true,
+        "noVacancyContamination": true
+      }
+    },
+    "repeatApplicationStartedWithReusedCv": true,
+    "repeatApplicationCompleted": false,
+    "freshSignupOrOAuth": false,
+    "unassistedParticipants": 0
+  },
+  "remaining": [
+    "Shared application/home and consented carryover",
+    "Source-bound per-vacancy preparation and grouped review",
+    "Full hosted signup/OAuth and isolated Storage/restore",
+    "Unassisted first/second-task research",
+    "Original loop/model/presenter parity"
+  ],
+  "constraints": {
+    "paidCalls": 0,
+    "paymentsEnabled": false,
+    "adsOrOutreach": false,
+    "realCandidateDeletion": false
+  }
+}

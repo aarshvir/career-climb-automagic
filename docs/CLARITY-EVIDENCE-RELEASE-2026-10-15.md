@@ -1,6 +1,6 @@
 # Clarity and evidence repair — 15 October 2026
 
-Publication pending final validation. This bounded release incorporates verified findings from the owner-provided Claude brief and a separate source/browser review. It is not completion of the wider application workflow or a new product grade.
+Published **v27** on [Jobvance.io](https://jobvance.io) at **20:59 UTC, 14 October / 00:59 Dubai, 15 October**, source `5bf52c4e5b749d80822b5973cc85b2adeea985c7`. [Exact receipt](releases/2026-10-15-clarity-evidence.json). This bounded release incorporates verified findings from the owner-provided Claude brief and a separate source/browser review. It is not completion of the wider application workflow or a new product grade.
 
 ## Changes
 
@@ -19,7 +19,7 @@ The original Claude files remain local and unchanged; they include private found
 
 ## Automated validation
 
-The final full suite passed 1,255 tests in 87 files, including 33 cases in the new evidence regression file and fixed-tab email/Google route regressions. TypeScript passed. Independent evidence re-review passed 124 scoped cases after correcting the two newly found regressions. All 12 hosting groups passed, with 38 public pages, 20 guides and zero external prerender requests. Exact packaging/publication integrity will be recorded in the release receipt.
+The final full suite passed 1,255 tests in 87 files, including 33 cases in the new evidence regression file and fixed-tab email/Google route regressions. TypeScript passed. Independent evidence re-review passed 124 scoped cases after correcting the two newly found regressions. All 12 hosting groups passed, with 38 public pages, 20 guides and zero external prerender requests. The compressed Worker is 2,763,603 bytes. The archive contains 128 members, no source/private research/environment files and exact built Worker bytes. Native publication succeeded and all **81 live HTTP byte/header checks** passed.
 
 ## Browser and export evidence
 
@@ -27,7 +27,7 @@ The local production-mode preview was checked as a guest. All six steps were com
 
 This walkthrough caught an additional false related match between “six analysts” and “Six Sigma certification”; regression coverage and a qualification-admission repair were added before release. Independent review also checks contact-adjacent skills and negating compound prefixes. A local signed-out tracker visit returned /auth?next=%2Fdashboard%3Ftab%3Dtracker; actual hosted email/OAuth completion remains unverified.
 
-The new home and pricing were inspected at 390px and desktop widths. The mobile page had no horizontal overflow and a visible primary action. Native downloads here initially establish the local preview path only; hosted observations will be recorded separately. They are scripted acceptance, not unassisted customer research.
+The new home and pricing were inspected at 390px and desktop widths. The mobile page had no horizontal overflow and a visible primary action. A fresh guest run on **published v27** repeated all six steps and the corrected qualification comparison, then received actual PDF, DOCX and TXT files through browser download events. Each hosted download was parsed and checked for the exact expected CV passages and no vacancy contamination. PDF rendered as one page. Reuse opened the four-step next-vacancy form with the approved CV; the second application was not completed. This establishes the observed desktop IAB native export path, not every browser/mobile reader, signup/OAuth or unassisted customer acceptance.
 
 ## Operation and rollback
 
