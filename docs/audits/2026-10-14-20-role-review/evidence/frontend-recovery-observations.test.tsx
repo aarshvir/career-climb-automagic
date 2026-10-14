@@ -1,0 +1,41 @@
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { HelmetProvider } from 'react-helmet-async';
+import { MemoryRouter } from 'react-router-dom';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import CvCheck from '@/pages/CvCheck';
+import { clearCheckRecovery, rememberCheckRecovery } from '@/lib/check-draft';
+vi.unmock('react-router-dom');
+const mocks = vi.hoisted(() => ({ auth: { user: null as null | {id: string}, loading: true }, list: vi.fn() }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => mocks.auth }));
+vi.mock('@/pages/Auth', () => ({default: () => <div>Account form</div>}));
+vi.mock('@/lib/free-check-api', () => ({listFreeChecks: mocks.list, saveFreeCheck: vi.fn(), deleteFreeCheck: vi.fn()}));
+vi.mock('@/lib/workspace-api', () => ({addApplication: vi.fn()}));
+const draft = {jobTitle:'Transformation Manager', company:'Fictional Employer', sourceText:'Alex Example\nEXPERIENCE\nPrepared monthly stakeholder reports using Excel for the transformation pilot.\nEDUCATION\nBachelor of Business Administration',reviewedText:'',jobDescription:''};
+function tree(){return <HelmetProvider><MemoryRouter><CvCheck /></MemoryRouter></HelmetProvider>}
+beforeEach(()=>{sessionStorage.clear();clearCheckRecovery();mocks.auth.user=null;mocks.auth.loading=true;mocks.list.mockResolvedValue([])});
+afterEach(cleanup);
+it('observes that an owner-bound refresh draft is cleared before delayed authentication resolves',()=>{
+ rememberCheckRecovery({draft,step:2,cvReady:false,filename:'',ownerId:'fictional-owner',pageTarget:2},true);
+ const view=render(tree());
+ expect(screen.getByLabelText('Target role')).toHaveValue('');
+ expect(sessionStorage.getItem('jobvance_check_recovery_v1')).toBeNull();
+ mocks.auth.user={id:'fictional-owner'};mocks.auth.loading=false;view.rerender(tree());
+ expect(screen.getByLabelText('Target role')).toHaveValue('');
+});
+it('observes final edits replaced when an unchanged vacancy is rechecked through backward navigation',()=>{
+ mocks.auth.loading=false;
+ render(tree());
+ fireEvent.change(screen.getByLabelText('Target role'),{target:{value:draft.jobTitle}});
+ fireEvent.click(screen.getByRole('button',{name:'Continue to your CV'}));
+ fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'),{target:{value:draft.sourceText}});
+ fireEvent.click(screen.getByRole('button',{name:'Use this reviewed CV text'}));
+ fireEvent.change(screen.getByLabelText('Vacancy description'),{target:{value:'Responsibilities\nPrepare monthly stakeholder reports using Excel. Support transformation pilots and explain the results. Requirements\nBachelor degree.'}});
+ fireEvent.click(screen.getByRole('button',{name:'Check these inputs'}));
+ fireEvent.click(screen.getByRole('button',{name:'Review my CV & questions'}));
+ const edited=draft.sourceText+'\nADDITIONAL EXPERIENCE\nPrepared a fictional board report.';
+ fireEvent.change(screen.getByLabelText('Your CV to review'),{target:{value:edited}});
+ fireEvent.click(screen.getByRole('button',{name:/One vacancy/}));
+ fireEvent.click(screen.getByRole('button',{name:'Check these inputs'}));
+ fireEvent.click(screen.getByRole('button',{name:'Review my CV & questions'}));
+ expect(screen.getByLabelText('Your CV to review')).toHaveValue(draft.sourceText);
+});

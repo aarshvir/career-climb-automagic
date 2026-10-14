@@ -1,0 +1,104 @@
+{
+  "role_id": "technical-writer",
+  "role_title": "Technical Writer",
+  "phase": "build",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Read the fixed review brief and verified repository HEAD.",
+    "Inspected current HelpCenter, walkthrough source, career-guide presentation, auth recovery controls, README, operations and admin instructions.",
+    "Executed the exact exported searchHelpTopics function after in-memory TypeScript transpilation; analysis script is .tmp/20-role-review/10-technical-writer/help-search.cjs.",
+    "Listed five local MP4/VTT/TXT/poster sets and read production asset provenance; treated ready/playback claims as documentation claims rather than observed playback."
+  ],
+  "not_tested": [
+    "Live site or browser interaction",
+    "Authenticated/private candidate records",
+    "Actual email delivery or recovery links",
+    "Current configured model, Gmail or scheduler availability",
+    "Local/public video playback, caption synchronization or human assessment of lip sync",
+    "Full test suite or newcomer usability study"
+  ],
+  "criteria": [
+    {"name":"First-task and repeat-task completeness","score":18,"weight":20,"evidence":"src/pages/HelpCenter.tsx:23-39 and 158-168 name actual six-step and second-application controls and renewed approval."},
+    {"name":"Plain language and factual boundaries","score":18,"weight":20,"evidence":"src/pages/HelpCenter.tsx:99-114 preserves context, contribution and result status; src/lib/career-guides.ts:28-32 discloses AI assistance and conditional connections."},
+    {"name":"Findability and recovery","score":14,"weight":20,"evidence":"Strong file/draft/run recovery content; exact search execution misranks resume and lost draft and returns no result for resume upload. No public account-access recovery topic."},
+    {"name":"Multimodal instruction integrity","score":18,"weight":20,"evidence":"Five MP4/VTT/TXT/poster sets exist. src/pages/Walkthroughs.tsx:27-32,72,81 supplies honest fiction/AI labels, chapters and written fallbacks. Playback not independently observed."},
+    {"name":"Maintenance and operator handoff","score":12,"weight":20,"evidence":"README.md:30-35,96-102 and ADMIN-PORTALS-GUIDE.md are concrete, but docs/OPERATIONS.md and parts of INTEGRATED-JOB-LOOP-OPERATIONS.md conflict with current scripts and admin procedures."}
+  ],
+  "role_score": 80,
+  "score_confidence": "medium",
+  "strengths": [
+    "Exact first-check and another-vacancy instructions, with useful no-CV and upload alternatives.",
+    "Source context, team credit, estimates, eligibility and user confirmation are carefully distinguished.",
+    "Temporary recovery, cloud cancellation and account storage limits are described separately.",
+    "Five prerecorded AI-presenter assets have local captions/transcripts; source distinguishes capture stills and simulated Job Loop services from live execution."
+  ],
+  "findings": [
+    {
+      "id":"TW-01","priority":"P1","category":"Operator documentation maintenance",
+      "problem":"Plausibly current operations documents contain obsolete setup commands, broad browser-state clearing and conflicting support/provider instructions, increasing avoidable setup and pilot support errors.",
+      "evidence":[
+        {"type":"source-confirmed","path":"docs/OPERATIONS.md","line":5,"detail":"Lists Node 18+; lines 14-37 use historical repository/install/database commands; lines 53-67 list scripts not present in package.json; lines 92-94 advise localStorage.clear()."},
+        {"type":"source-confirmed","path":"package.json","line":6,"detail":"Current scripts include typecheck, test:run and setup-db, not type-check, test:e2e, db:migrate or db:seed."},
+        {"type":"source-confirmed","path":"README.md","line":30,"detail":"Requires Node 24 or supported Node 22 and npm ci; lines 96-102 explain reviewed additive migrations and prohibit replaying historical setup paths."},
+        {"type":"source-confirmed","path":"docs/INTEGRATED-JOB-LOOP-OPERATIONS.md","line":28,"detail":"Directs support status work through Table Editor; line 34 says model adapters remain unavailable pending setup."},
+        {"type":"source-confirmed","path":"docs/ADMIN-PORTALS-GUIDE.md","line":15,"detail":"Documents audited portal support status actions; lines 3 and 44-50 provide dated connection evidence and current owner controls. These claims were not live-verified by this reviewer."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Mark historical entry guides explicitly, publish one canonical operations index, replace obsolete commands and broad storage purges, and attach verified date/feature-state source to current support and provider instructions.",
+      "acceptance_criteria":["Every script in the active setup path exists and prerequisites match README.","A fresh maintainer completes install and non-mutating readiness checks using only the canonical index.","Support status instructions follow current audited portal controls.","Blanket localStorage clearing is not the default session-recovery action."],
+      "dependencies":["Operator owner validates canonical procedure and current feature-state evidence without exposing credentials"],
+      "effort_engineer_days":{"low":0.5,"high":1.5},
+      "cost_effect":"No additional service spend; reduces avoidable setup/support investigation. Savings are unmeasured.",
+      "pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"TW-02","priority":"P2","category":"Help search vocabulary",
+      "problem":"Literal all-word matching fails ordinary candidate task language and can send resume searches toward cloud-run recovery despite existing CV upload help.",
+      "evidence":[
+        {"type":"source-confirmed","path":"src/pages/HelpCenter.tsx","line":199,"detail":"Search checks every whitespace-separated literal word against concatenated topic content and ranks literal title matches."},
+        {"type":"observed","path":".tmp/20-role-review/10-technical-writer/help-search.cjs","line":8,"detail":"Exact exported function execution: resume => job-loop-controls; resume upload => no matches; lost draft => job-loop-review; PDF and another vacancy return relevant existing topics. This was function execution, not browser observation."},
+        {"type":"source-confirmed","path":"src/pages/HelpCenter.tsx","line":55,"detail":"CV file reading/upload help exists; interrupted draft recovery exists at line 184."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Add a small editorial alias and task-phrase map for resume/CV, upload/read file, lost/interrupted draft and login/sign-in; offer relevant task suggestions when no result matches.",
+      "acceptance_criteria":["Resume upload ranks file-reading help first.","Lost draft ranks draft recovery first.","Existing exact-title and PDF searches remain useful.","Five pilot participants locate relevant help using their own task language."],
+      "dependencies":["Approved task vocabulary","Search implementation owner"],
+      "effort_engineer_days":{"low":0.5,"high":1},
+      "cost_effect":"No external search or model service needed; editorial query mapping fits existing code.",
+      "pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"TW-03","priority":"P2","category":"Account-access recovery content",
+      "problem":"Public help explains draft recovery but offers no dedicated password, missing-confirmation-email or expired-sign-in-link task for returning users seeking saved facts.",
+      "evidence":[
+        {"type":"source-confirmed","path":"src/pages/HelpCenter.tsx","line":21,"detail":"Complete topic list through line 197 lacks an account-access recovery topic; recovery at lines 184-195 addresses drafts and saved records."},
+        {"type":"observed","path":".tmp/20-role-review/10-technical-writer/help-search.cjs","line":8,"detail":"Exact search function returns no topics for forgot password, confirmation email and cannot log in."},
+        {"type":"source-confirmed","path":"src/pages/Auth.tsx","line":133,"detail":"Existing auth interface has reset/confirmation guidance and a Forgot your password action at line 170."},
+        {"type":"source-confirmed","path":"src/pages/ResetPassword.tsx","line":63,"detail":"Existing invalid/expired reset-link state supplies same-browser instructions and a link to request another reset."},
+        {"type":"source-confirmed","path":"src/pages/GuestSupport.tsx","line":15,"detail":"Guest contact receipt path is available without signup; delivery and service state were not live-tested."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Add one public account-access task that helps choose the existing Google/password route, links password reset, explains current missing/expired-email guidance and protects an open check; link the guest contact receipt fallback.",
+      "acceptance_criteria":["Signed-out readers find the appropriate existing recovery action without creating another account.","Instructions match actual auth controls and the current same-browser reset requirement.","The topic preserves no-delivery-guarantee wording and warns against sharing credentials in support.","Pilot readers distinguish saved account records from temporary unsaved drafts."],
+      "dependencies":["Auth owner verifies method-specific instructions","Editorial review"],
+      "effort_engineer_days":{"low":0.5,"high":1},
+      "cost_effect":"No new auth integration or incremental vendor cost.",
+      "pilot_required":true,"confidence":"high"
+    }
+  ],
+  "open_questions":[
+    "Which single operator index will supersede older setup and support instructions?",
+    "Which phrases do actual pilot users use when trying to recover a check or sign in?",
+    "Do current public media assets play with readable captions and successful transcript fallback on pilot phones? This reviewer did not observe playback."
+  ],
+  "do_not_build_now":[
+    "Another paid avatar or media integration",
+    "Separate persona-specific help products",
+    "Public API documentation for interfaces that are not public",
+    "Additional guide volume before maintenance and retrieval gaps are addressed"
+  ]
+}

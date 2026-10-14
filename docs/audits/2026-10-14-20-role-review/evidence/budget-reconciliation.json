@@ -1,0 +1,14 @@
+{
+  "observed_date_utc": "2026-10-14",
+  "scope": "Read-only aggregate production SQL; no account IDs, private content or keys.",
+  "candidate_actual_usd": 0.002344,
+  "admin_model_actual_usd": 0.511780,
+  "admin_uncertain_reservation_usd": 0.225976,
+  "committed_ledger_usd": 0.740100,
+  "sum_reconciles": true,
+  "admin_usage": [
+    {"month":"2026-10","status":"settled","provider":"openrouter","operations":6,"reserved_usd":1.443541,"actual_usd":0.511780},
+    {"month":"2026-10","status":"uncertain","provider":"openrouter","operations":1,"reserved_usd":0.225976,"actual_usd":null}
+  ],
+  "cautions": ["Actual amounts are stored application-metered usage, not a verified provider invoice.","A sum of original reservations is not current cost after settlement.","An uncertain call retains its reservation; actual cost is unknown, not zero.","The shared US$50 ceiling covers pilot AI/search calls routed through this accounting; infrastructure and unrelated providers/accounts are excluded."]
+}

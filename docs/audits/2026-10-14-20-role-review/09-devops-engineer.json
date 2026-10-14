@@ -1,0 +1,308 @@
+{
+  "role_id": "devops-engineer",
+  "role_title": "DevOps Engineer",
+  "phase": "operations",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": true
+  },
+  "methods": [
+    "Independent source inspection of actual Sites Worker packager, CI workflows, Supabase worker/scheduler/ledger and release/recovery procedures.",
+    "Read-only Node verification of237 manifest source/artifact/migration entries: zero mismatches; enumerated missing guest-support migration.",
+    "Read-only public HEAD checks: /200, /check200, /health404; sanitized root live-service baseline for active function versions and aggregate budget.",
+    "No suites rerun, build/deployment changes, secret retrieval, paid requests or private candidate reads."
+  ],
+  "not_tested": [
+    "Live deployed edge-function source bytes/import graph or schema migration-history digests; active version metadata cannot prove parity.",
+    "Authenticated end-to-end workflow, provider calls, production concurrency, failover, backup contents, actual restore or rollout rehearsal.",
+    "GitHub workflow executions/branch protections, provider invoices, undocumented external alerting or backup configuration."
+  ],
+  "criteria": [
+    {
+      "name": "Build reproducibility and deployment safety",
+      "score": 15,
+      "weight": 20,
+      "evidence": "npm lockfile, public-only config, npm ci and Node22 CI plus deterministic Worker checks; auxiliary Pages path ignores failures and chooses public after dist."
+    },
+    {
+      "name": "Release traceability and layer compatibility",
+      "score": 14,
+      "weight": 20,
+      "evidence": "237 manifest entries verify locally; rollback tag/Sites version and backend compatibility documented, but guest-support migration omitted and deployed bytes unverified."
+    },
+    {
+      "name": "Reliability and recovery readiness",
+      "score": 12,
+      "weight": 20,
+      "evidence": "Leases, checkpoints, additive migrations and safe rollback exist; data restore remains unrehearsed and recovery objectives expressly unestablished."
+    },
+    {
+      "name": "Operational health and diagnostics",
+      "score": 10,
+      "weight": 20,
+      "evidence": "Private operations and Cron/log procedures exist; ready measures attempted dispatch and errors lack correlation; generic operations guide is stale."
+    },
+    {
+      "name": "Cost and pilot guardrails",
+      "score": 18,
+      "weight": 20,
+      "evidence": "SQL row-locked50m-micro ceiling, ten seats, conservative reservations and retained uncertain spend; root aggregate baseline reports$0.740100 committed. External/provider charges still require reconciliation."
+    }
+  ],
+  "role_score": 69,
+  "score_confidence": "medium",
+  "strengths": [
+    "Actual production architecture is appropriately small: Sites-hosted Cloudflare Worker plus existing Supabase; no VM/container platform is needed.",
+    "Worker package enforces identity, compressed-size bound, private-path denial, canonical redirects, cache policy and security headers; CI checks responses.",
+    "Local backend source/artifact hashes are consistent, and saved frontend/backend rollback constraints preserve candidate data and spend ledger.",
+    "Database-enforced shared cap and uncertain-call reservation retention are credible guardrails; payments remain disabled."
+  ],
+  "findings": [
+    {
+      "id": "DEVOPS-01",
+      "priority": "P2",
+      "category": "Release compatibility",
+      "problem": "The edge bundle manifest omits the new guest-support migration; it cannot describe the complete database contract of the functions it packages.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "scripts/build-job-loop-ui.ps1",
+          "line": 58,
+          "detail": "Migration inclusion matches only _job_loop_ or _jobvance_admin_. Guest-support is in loopNames at line6, but 20261014020000_jobvance_guest_support.sql is absent from manifest.migrations."
+        },
+        {
+          "type": "observed",
+          "path": "docs/supabase-loop-ui/manifest.json",
+          "line": 1,
+          "detail": "Read-only hash verification checked237 source/artifact/migration entries with zero mismatches; completeness is the defect, not stale checked hashes."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Include all active-feature migrations through an explicit reviewed allowlist or dependency inventory. Make CI reject missing dependency migrations and emit a release receipt joining Sites version/source SHA, edge artifact hash/version, schema migration hashes and rollback compatibility.",
+      "acceptance_criteria": [
+        "Guest-support migration appears with its normalized digest; all currently recorded digests still match.",
+        "A fixture omitting a required migration fails validation.",
+        "Receipt identifies v19/runtime57713fb and exact backend contracts without retrieving secret values."
+      ],
+      "dependencies": [
+        "Release owner",
+        "Existing Sites save/deploy procedure",
+        "Supabase migration history metadata"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1.5
+      },
+      "cost_effect": "No additional service subscription; prevents manual release reconciliation.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "DEVOPS-02",
+      "priority": "P2",
+      "category": "Scheduler health and diagnostics",
+      "problem": "Scheduler readiness proves a recent dispatch attempt, not successful worker acceptance or useful progress; downstream failures can leave the ready flag true.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261011050000_job_loop_cron_platform.sql",
+          "line": 18,
+          "detail": "last_dispatch_at is updated before net.http_post at line27; ready at lines36–38 checks enabled/origin/Cron/recent timestamp and does not inspect HTTP response or completion."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/job-loop-worker/index.ts",
+          "line": 17,
+          "detail": "Background scheduler/stage catches log error.name only; stage catch at line23 lacks a run correlation reference."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/INTEGRATED-JOB-LOOP-OPERATIONS.md",
+          "line": 18,
+          "detail": "Operator monitoring relies on manually inspecting Cron and function logs."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Show attempted dispatch separately from worker acknowledgement and last successful progress. Surface overdue due jobs and stale active runs in the existing private operations portal, using redacted correlation references and a documented daily check during this pilot.",
+      "acceptance_criteria": [
+        "A mocked worker500 or timeout increments an actionable failure/overdue state despite Cron continuing.",
+        "A successful due dispatch records acknowledgement and phase progress; idle queues remain healthy.",
+        "Diagnostics include event code and run/dispatch reference without candidate text, tokens or email."
+      ],
+      "dependencies": [
+        "Backend SQL/worker owner",
+        "Private admin portal"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Uses existing database/portal; bounded retention avoids unneeded logging cost.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "DEVOPS-03",
+      "priority": "P1",
+      "category": "Data recovery",
+      "problem": "A frontend rollback is documented, but recoverability of private database records and cloud artifacts remains unproven before widening the pilot.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "docs/product-hardening/ROLLBACK.md",
+          "line": 3,
+          "detail": "Exact saved Sites version14, Git tag and backend rollback constraints are preserved; these restore code, not deleted/corrupted candidate data."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/CLOUD-JOB-LOOP-CONTRACT.md",
+          "line": 9,
+          "detail": "RPO24h/RTO8h are explicitly future objectives contingent on funded backups and a restore rehearsal."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/INTEGRATED-JOB-LOOP-OPERATIONS.md",
+          "line": 44,
+          "detail": "No backup/restore SLA is established; restoration is to be tested separately."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Define an owner-operated encrypted backup and restore procedure covering Postgres ownership/policies, required storage objects and artifact metadata, with a deletion/retention rule. Rehearse on isolated synthetic data before enrolling more candidates; choose a funded option only if the owner later accepts its separate cost.",
+      "acceptance_criteria": [
+        "An isolated rehearsal restores a synthetic approved packet and its matching files, ownership isolation and usage ledger.",
+        "Record actual restore time/data-loss window and responsible operator; do not promise the unachieved objectives.",
+        "Demonstrate that restored approval/erasure semantics remain correct and backup retention is documented."
+      ],
+      "dependencies": [
+        "Owner retention decision",
+        "Approved separate backup destination or existing backup facility",
+        "Synthetic restoration environment"
+      ],
+      "effort_engineer_days": {
+        "low": 1.5,
+        "high": 3
+      },
+      "cost_effect": "Engineering and storage effort; recurring cost depends on the selected approved facility, outside the $50 AI/search ledger.",
+      "pilot_required": true,
+      "confidence": "medium"
+    },
+    {
+      "id": "DEVOPS-04",
+      "priority": "P2",
+      "category": "Auxiliary deployment safety",
+      "problem": "The GitHub Pages preview workflow can publish the wrong directory after a failed build and differs from the actual Sites Worker target.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": ".github/workflows/deploy-testcodex-pages.yml",
+          "line": 26,
+          "detail": "npm ci falls back to npm install; npm run build at line34 ignores failure. Directory selection sets dist then overwrites it with public at line46; public exists in this checkout."
+        },
+        {
+          "type": "source-confirmed",
+          "path": ".github/workflows/deploy-testcodex-pages.yml",
+          "line": 23,
+          "detail": "Auxiliary workflow uses Node20 while main CI uses Node22 and hosting guidance supports Node22/24."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/INDEPENDENT-HOSTING.md",
+          "line": 15,
+          "detail": "Canonical jobvance.io is a Cloudflare Worker through Sites, so this preview flaw is not evidence of a production v19 outage."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Retire the unused preview workflow or make it a clearly separate, fail-closed supported preview: npm ci, one supported runtime, successful build, explicit artifact path and route/security checks appropriate to that target.",
+      "acceptance_criteria": [
+        "An intentionally failing build cannot upload or deploy an artifact.",
+        "Successful selection is explicit and cannot be overwritten by public/.",
+        "Workflow/docs name Sites as the canonical production route and state whether the Pages preview is supported."
+      ],
+      "dependencies": [
+        "Repository maintainer",
+        "Decision on keeping the auxiliary preview"
+      ],
+      "effort_engineer_days": {
+        "low": 0.25,
+        "high": 1
+      },
+      "cost_effect": "No new hosting service required; may remove redundant deployments.",
+      "pilot_required": false,
+      "confidence": "high"
+    },
+    {
+      "id": "DEVOPS-05",
+      "priority": "P2",
+      "category": "Operator documentation",
+      "problem": "The generic operations guide gives invalid commands and a wrong hosting/health model, making recovery slower for a new maintainer.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "docs/OPERATIONS.md",
+          "line": 33,
+          "detail": "Guide references absent db:migrate; line61 uses type-check rather than package.json typecheck; line147 says Vercel/Netlify; line121 points at /health."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "package.json",
+          "line": 6,
+          "detail": "The available npm scripts do not implement the guide's database/e2e/format commands."
+        },
+        {
+          "type": "observed",
+          "url": "https://jobvance.io/health",
+          "detail": "Read-only HEAD on14October2026 returned404; / and /check returned200 with no-cache and CSP. This is a stale instruction, not evidence that a promised production health service failed."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Replace the generic guide with a short index to current Sites and integrated-loop procedures; preserve historical notes as dated archives. Define the actual public route checks and private scheduler/budget checks operators should perform.",
+      "acceptance_criteria": [
+        "Every documented command exists and is appropriate for a clean checkout.",
+        "A maintainer can identify production publisher, backend deployment ordering, pause controls and exact rollback receipt from one index.",
+        "Health guidance uses existing meaningful checks and distinguishes reachability from dependency progress."
+      ],
+      "dependencies": [
+        "Documentation owner"
+      ],
+      "effort_engineer_days": {
+        "low": 0.25,
+        "high": 0.75
+      },
+      "cost_effect": "No recurring cost; reduces operator support/recovery time.",
+      "pilot_required": true,
+      "confidence": "high"
+    }
+  ],
+  "open_questions": [
+    "Can the release owner supply a non-secret complete v19 receipt that maps backend source digests, schema migration-history hashes and active edge versions?",
+    "What backup facility currently exists outside the reviewed repository, who owns it, and when was the last successful isolated restore?",
+    "Are external alerts or branch protections configured outside the reviewed artifacts?",
+    "Is the testcodex Pages workflow still intentionally supported?"
+  ],
+  "do_not_build_now": [
+    "Kubernetes, Docker orchestration, multi-cloud failover or a new AWS/Vercel project for this ten-person pilot.",
+    "A paid observability platform before defining useful health signals and the operator response.",
+    "An uptime or RPO/RTO promise based only on code rollback or an untested backup."
+  ]
+}

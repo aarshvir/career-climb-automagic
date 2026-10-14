@@ -1,0 +1,113 @@
+{
+  "role_id": "lead-generation",
+  "role_title": "Lead Generation",
+  "phase": "growth",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Read review brief before independent examination; verified local HEAD.",
+    "Inspected dated acquisition plan, four-row coach starter list, twenty-row official-source prospect CSV and unsent outreach drafts as historical research, not earlier audit grades.",
+    "Reviewed PilotLanding, pilot-request, audience content/routes and admin capacity/funnel source.",
+    "Retrieved three representative official business pages on 2026-10-14; no contacting, bulk collection, new accounts or paid calls. Thrive result reports an older crawl and does not prove recent operation."
+  ],
+  "not_tested": ["Live Jobvance browser journey", "Actual pilot occupancy or remaining committed budget", "Private account or candidate records", "Message delivery or response rates", "Partner willingness, participant demand, conversion or paid willingness", "Full freshness of all twenty businesses"],
+  "criteria": [
+    {"name": "Public lead evidence and freshness", "score": 16, "weight": 20, "evidence": "Twenty official-source rows dated 2026-10-11 and marked UNSENT; three official business samples support broad service relevance but do not prove readiness."},
+    {"name": "Coverage of three core segments", "score": 9, "weight": 20, "evidence": "Historical acquisition plan lines 9 and 92 focuses experienced UAE professionals through two coaches; equivalent student/MBA participant qualification records absent in reviewed assets."},
+    {"name": "Qualification and research suitability", "score": 10, "weight": 20, "evidence": "CSV high-fit labels reflect public services; current vacancy, exact experience bracket, review volume and consented introduction remain unknown."},
+    {"name": "Invitation and current-task match", "score": 14, "weight": 20, "evidence": "AudienceLanding routes guests to one-CV/one-vacancy check; historical plan requires two directions and links coach concept discovery."},
+    {"name": "Capacity, attribution and stop conditions", "score": 11, "weight": 20, "evidence": "Plan includes learning gates; pilot request creates unsent drafts, admin lacks complete guest telemetry and ten cloud places include QA occupancy."}
+  ],
+  "role_score": 60,
+  "score_confidence": "medium",
+  "strengths": ["Prospects are explicitly unsent research, not customers or endorsements.", "Official business sources, checked dates and personalization facts already exist.", "Initial invitations avoid private client documents and outcome promises.", "Shared workflow has current persona-specific landing routes and free no-account first check.", "Historical plan includes rejection, assistance-cost and repeat-use learning rather than signup-only targets."],
+  "findings": [
+    {
+      "id": "LG-01", "priority": "P1", "category": "segmentation",
+      "problem": "A coach-business list and professional-only historical acquisition hypothesis do not establish a balanced participant pipeline across the three core segments.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "../jobvance-product-research/UAE-CAREER-COACHES-20.csv", "line": 1, "detail": "Twenty public coach-business rows; no participant-readiness stage or student/MBA recruitment channel evidence."},
+        {"type": "source-confirmed", "path": "../jobvance-product-research/CUSTOMER-ACQUISITION-PLAN.md", "line": 92, "detail": "Historical target is two coaches each introducing three participants; first hypothesis at line 9 is an experienced UAE professional."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Prepare separate channel hypotheses for opted-in student communities, MBA recruiting/alumni organizers and existing professional relationships/relevant coaches; provisionally target 3 student, 3 MBA and 4 professional research participants. Count partners separately from users.",
+      "acceptance_criteria": ["Each intended participant has one segment, source and actual preparation task.", "Ten-place allocation is a research hypothesis, not a demand forecast.", "Organizer permission and introductions are unverified until later authorized recruitment; no collection of inferred job seekers."],
+      "dependencies": ["Founder relationship inventory", "Organizer permission", "Later recruitment authorization"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "Manual preparation with existing tools; US$0 advertising/enrichment spend. Founder research time must be recorded.",
+      "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "LG-02", "priority": "P1", "category": "lead-quality-and-freshness",
+      "problem": "High-fit public service evidence is being used without separate pilot-ready qualification. Broad executive coaching does not establish the exact audience, recurring CV work or willingness to refer.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "../jobvance-product-research/UAE-CAREER-COACHES-20.csv", "line": 2, "detail": "Linkk is labelled high with 2026-10-11 check; row describes broad executive positioning and career roadmap."},
+        {"type": "source-confirmed", "url": "https://www.linkksearch.com/", "detail": "Retrieved 2026-10-14: official site describes Dubai executive positioning and career/job-search coaching; also workshops including MBA programs. No introduction willingness verified."},
+        {"type": "source-confirmed", "url": "https://zetayarwood.com/career-coaching/", "detail": "Retrieved 2026-10-14: official senior-professional job-search service supports broad category relevance, not exact 5–10-year audience or recurring CV workload."},
+        {"type": "source-confirmed", "url": "https://thrive-transitions.com/about-kinga-malec-career-transition-coach/", "detail": "Retrieved 2026-10-14; returned page describes Dubai career transitions but reports a six-month-old crawl. It does not establish recent operation or repeated document preparation."},
+        {"type": "unavailable", "detail": "No partner willingness, participant introduction, actual workload or exact target experience qualification has been observed."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Split service_fit, verified_at, unresolved_questions and pilot_ready. Recheck official service/contact route before any later authorized invitation. Qualify existing CV, actual vacancy within 30 days, review availability and voluntary feedback; ask partners separately about relevant recurring work and a consented introduction.",
+      "acceptance_criteria": ["Unknown facts remain unknown rather than inheriting a high-fit label.", "Every pilot-ready participant meets the task and availability gates.", "Partner discussion uses fictional material; no private client CV requested.", "No more than a small manual batch is prepared; no enrichment or contact harvesting."],
+      "dependencies": ["Later discovery answers", "Current official service-page verification"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "US$0 enrichment; reduces low-fit interviews and privacy exposure.",
+      "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "LG-03", "priority": "P1", "category": "offer-and-route-match",
+      "problem": "Historical two-direction screening selects for a concept exercise while the current first product task uses one existing CV and one actual vacancy.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "../jobvance-product-research/CUSTOMER-ACQUISITION-PLAN.md", "line": 21, "detail": "Pilot offer asks for two target roles; line 92 requires two plausible role directions."},
+        {"type": "source-confirmed", "path": "src/pages/PilotLanding.tsx", "line": 83, "detail": "Prewritten concept demo and early human-reviewed research disclosure; lines 108–120 explicitly create an unsent request, not registration."},
+        {"type": "source-confirmed", "path": "src/pages/AudienceLanding.tsx", "line": 13, "detail": "Guest first action is /check?audience=...; lines 18–19 describe CV against one vacancy and approved review."},
+        {"type": "inferred", "detail": "Requiring two directions can reject otherwise suitable current-task participants and change the task being validated; no conversion loss has been measured."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Prepare segment-matched invitations linking /for-students, /for-mba and /for-career-switchers, promising one CV and one actual vacancy. Make a second vacancy an optional week-two reuse task. Keep /pilot as explicitly disclosed coach/concept discovery.",
+      "acceptance_criteria": ["Two directions are not an entry requirement.", "Each draft's promise matches the destination's current task.", "An outsider can accurately restate the task after reading the draft; no time-saving or hiring claim."],
+      "dependencies": ["Copy/UX owner", "Research protocol owner"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "US$0; prevents spending scarce research sessions on the wrong promise.",
+      "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "LG-04", "priority": "P1", "category": "measurement-and-stop-conditions",
+      "problem": "Prepared requests, received interest and useful research outcomes cannot be reconciled from the reviewed acquisition assets and current account funnel alone.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "src/lib/pilot-request.ts", "line": 11, "detail": "Function creates text/mailto output only; it does not record a received request."},
+        {"type": "source-confirmed", "path": "src/pages/admin/AdminFounder.tsx", "line": 43, "detail": "Admin explicitly states incomplete historical guest/check telemetry; signup-cohort funnel at line 47 cannot measure visitor-to-account conversion."},
+        {"type": "source-confirmed", "path": "../jobvance-product-research/COACH-PROSPECTS-STARTER.csv", "line": 1, "detail": "Business/service qualification/status/next-action fields exist, but no participant outcomes, assistance time or segment denominator."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Use a manual research ledger with anonymous ID, segment/source, checked date, permission, stage/reason, task date, assistance minutes, corrections and optional week-two return. Distinguish prepared, later sent, replied, qualified, attended, completed and returned. Propose pause/review gates before later recruitment.",
+      "acceptance_criteria": ["No CV text or private contact details in the research sheet.", "After ten qualified invitations with no discussions, revise one variable; after three repeated task failures, pause recruitment.", "At ten sessions, proposed continuation gate is six usable approved downloads and four voluntary reuses, reviewed by segment; labelled planning assumptions, not established benchmarks.", "Declines stop contact; at most one unanswered follow-up in later authorized recruitment."],
+      "dependencies": ["Research owner", "Later authorized recruitment", "Participant feedback permission"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "US$0 CRM/analytics spend; records true founder assistance cost and avoids false conversion claims.",
+      "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "LG-05", "priority": "P1", "category": "pilot-capacity",
+      "problem": "A ten-participant recruitment target is not evidence that ten new cloud seats or a per-participant processing allowance are available.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "supabase/functions/_shared/job-loop-runtime.ts", "line": 65, "detail": "Snapshot exposes shared budget, maxPilotUsers 10 and actual activeUsers/enrolled fields."},
+        {"type": "source-confirmed", "path": "src/pages/admin/AdminOperations.tsx", "line": 56, "detail": "Fixed capacity ten; lines 58–59 display occupancy and explicitly state QA accounts occupy seats."},
+        {"type": "unavailable", "detail": "No private occupancy, committed spend or actual available seats accessed during this audit."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Separate guest research checks from cloud enrollment. Stage one participant per segment first; check current capacity and shared committed budget before further cloud invitations. Use local/rules tasks initially; never promise paid providers or ten additional accounts. Plan 12–16 founder hours and measure actual effort.",
+      "acceptance_criteria": ["Operations owner verifies available cloud seats before each cohort and pauses enrollment when full.", "No QA account is removed or modified by this audit.", "Shared US$50 UTC-month ceiling remains authoritative; no invented US$5-per-person entitlement.", "Prepared plan requires US$0 new external-service spend and no automatic payment conversion."],
+      "dependencies": ["Operations owner", "Actual occupancy/budget check", "Existing shared ceiling and service configuration"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "US$0 new paid calls in preparation; staged research reduces support overload without claiming measured savings.",
+      "pilot_required": true, "confidence": "high"
+    }
+  ],
+  "open_questions": ["Which existing university, MBA/alumni and professional relationships does the founder actually have permission to approach?", "How many cloud places remain after QA and existing enrollment?", "Do any sampled coaches repeatedly review vacancy-specific CVs for the exact target experience bracket?", "Will participants voluntarily use the workflow for a second actual vacancy without substantial founder rewriting?", "How much founder time does one useful preparation task require?"],
+  "do_not_build_now": ["Lead scrapers or enrichment pipelines", "Automated outreach or follow-up", "New CRM/analytics integration before the manual ledger is insufficient", "Coach dashboard or multi-tenant client workspace", "Paid ads or paid search/model recruitment calls", "Separate products for each segment"]
+}

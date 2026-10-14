@@ -1,0 +1,339 @@
+{
+  "role_id": "social-media-manager",
+  "role_title": "Social Media Manager",
+  "phase": "growth",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": true
+  },
+  "methods": [
+    "Independent source review of current positioning, routes, demo, walkthrough assets and analytics contract",
+    "Visual inspection of original public/og-jobvance.png",
+    "Read-only public homepage web fetch on 2026-10-14",
+    "Historical sibling acquisition and pilot delivery asset review; no peer grades used",
+    "Current official LinkedIn video and YouTube GenAI disclosure guidance checked 2026-10-14",
+    "Bounded search for UTM/campaign attribution in current src"
+  ],
+  "not_tested": [
+    "Social profile ownership, follower counts, engagement and account analytics unavailable",
+    "No platform upload, posting, scheduling, contacting or account changes",
+    "No video/audio playback or phone readability test",
+    "No private candidate/account journey",
+    "Web-reader fetches of /pilot and /walkthroughs unavailable; not classified as site failures",
+    "No runtime edits, paid model/media/search calls, purchases or complete test suite"
+  ],
+  "criteria": [
+    {
+      "name": "Audience positioning and credible claims",
+      "score": 18,
+      "weight": 20,
+      "evidence": ".claude/product-marketing-context.md:3-13; public homepage read 2026-10-14"
+    },
+    {
+      "name": "Demonstration and reusable assets",
+      "score": 15,
+      "weight": 20,
+      "evidence": "src/lib/pilot-demo.ts; docs/product-hardening/tutorial-assets/videos/first-check.json; visually inspected public/og-jobvance.png"
+    },
+    {
+      "name": "Platform-native production and channel fit",
+      "score": 11,
+      "weight": 20,
+      "evidence": "1200x630 sharing card and 1920x1080 tutorial exist; no inspected short-format package or audience/channel results"
+    },
+    {
+      "name": "Destination and conversion continuity",
+      "score": 11,
+      "weight": 20,
+      "evidence": "src/lib/public-site-meta.ts:4-10; public/pilot-demo-guide.txt:13; src/pages/PilotLanding.tsx:108-120"
+    },
+    {
+      "name": "Measurement moderation and operating capacity",
+      "score": 5,
+      "weight": 20,
+      "evidence": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql:59-85; social attribution, staffing and campaign results unavailable"
+    }
+  ],
+  "role_score": 60,
+  "score_confidence": "medium",
+  "strengths": [
+    "Credible evidence-based proposition with user review and no recruiting guarantees",
+    "Clearly fictional source examples preserve contribution, projected results and confidentiality",
+    "Free no-account first check offers a concrete destination",
+    "Original sharing card plus narrated tutorial/transcript assets provide low-cost reuse material",
+    "Existing private funnel distinguishes free activity from revenue"
+  ],
+  "findings": [
+    {
+      "id": "SOCIAL-01",
+      "priority": "P1",
+      "category": "destination continuity",
+      "problem": "Historical discussion-request CTAs can divert candidates from the currently available self-serve free check.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "public/pilot-demo-guide.txt",
+          "line": 12,
+          "detail": "The walkthrough ends with /pilot#request rather than /check."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/PilotLanding.tsx",
+          "line": 108,
+          "detail": "Request preparation is a local draft, not registration or a received request."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/public-site-meta.ts",
+          "line": 9,
+          "detail": "Current /check offers approved PDF/DOCX/TXT without an account."
+        },
+        {
+          "type": "observed",
+          "url": "https://jobvance.io/",
+          "detail": "Public homepage read 2026-10-14 leads with free CV check and no account/card."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Make /check the primary CTA for task demonstrations; preserve /pilot#request only for explicitly guided research invitations. Review old guide and historical acquisition asset references. Use existing audience query values where appropriate.",
+      "acceptance_criteria": [
+        "Each draft CTA matches its promised next action",
+        "Three fresh consenting visitors understand the task and optional private saving",
+        "Prepared request drafts are never counted as received leads"
+      ],
+      "dependencies": [
+        "Owner decision on campaign objective",
+        "Review of existing links and asset briefs"
+      ],
+      "effort_engineer_days": {
+        "low": 0.25,
+        "high": 0.5
+      },
+      "cost_effect": "No new cash cost; 1-2 editorial hours.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SOCIAL-02",
+      "priority": "P2",
+      "category": "credible demonstration production",
+      "problem": "The existing long desktop tutorial needs a shorter readable social demonstration; its documented limitations do not support presenting it as an uninterrupted completed workflow.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.json",
+          "line": 8,
+          "detail": "111.275-second tutorial; lines153-154 specify1920x1080."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.json",
+          "line": 179,
+          "detail": "Still montage; fine text needs fullscreen; PDF view/download completion not independently captured."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/pilot-demo.ts",
+          "line": 6,
+          "detail": "Demo is prewritten fictional material, not live evaluation."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Create original 35-second fictional source-versus-overstatement master with enlarged passages, captions, current review/approval controls, honestly captured download and /check CTA. Produce readable square/vertical derivatives from individual scenes, not a whole-screen crop. Do not claim the prewritten rejection is live AI.",
+      "acceptance_criteria": [
+        "Sound-off phone review can read source context and captions",
+        "Fictional label remains visible",
+        "Approval/download claims match what was actually captured",
+        "Original source contribution and estimate language survive edits"
+      ],
+      "dependencies": [
+        "Fresh fictional recording",
+        "Editorial claim check",
+        "Phone review"
+      ],
+      "effort_engineer_days": {
+        "low": 0.25,
+        "high": 0.75
+      },
+      "cost_effect": "3-5 production hours using existing tools; no new paid media calls.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SOCIAL-03",
+      "priority": "P2",
+      "category": "audience channel test and reuse",
+      "problem": "Historical coach/strategy-transition acquisition plans do not validate social channel fit for the current three audiences.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "../jobvance-product-research/CUSTOMER-ACQUISITION-PLAN.md",
+          "line": 9,
+          "detail": "10 October hypothesis targets UAE professionals and coach buyers/channels."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "../jobvance-product-research/CUSTOMER-ACQUISITION-PLAN.md",
+          "line": 121,
+          "detail": "Proposes LinkedIn/video/workshop content, permission for communities, no copying creators' reels."
+        },
+        {
+          "type": "unavailable",
+          "detail": "Current social accounts, audience/channel results and posting capacity were not supplied."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Test LinkedIn first as a hypothesis using an owner-authorized identity. Prepare two posts/week for two weeks: source comparison, short demo, persona comparison and reuse walkthrough. Reuse one master into an enlarged evidence image and five-panel document; use distinct student project, MBA forecast and professional lateral-move hooks. Consider Instagram only after student audience evidence.",
+      "acceptance_criteria": [
+        "Four drafts have one objective, audience and /check destination",
+        "Each persona can identify a useful real preparation task",
+        "Record participant reasons and staff effort without invented engagement benchmarks",
+        "No unsolicited community posting or new accounts created by this audit"
+      ],
+      "dependencies": [
+        "Owner channel choice and time",
+        "Consenting pilot feedback",
+        "Permission for any community distribution"
+      ],
+      "effort_engineer_days": {
+        "low": 0,
+        "high": 0
+      },
+      "cost_effect": "4-6 editorial hours; zero ad spend.",
+      "pilot_required": true,
+      "confidence": "medium"
+    },
+    {
+      "id": "SOCIAL-04",
+      "priority": "P1",
+      "category": "measurement",
+      "problem": "Existing account funnel does not establish attribution from social content to guest first value.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql",
+          "line": 59,
+          "detail": "Account funnel and retained activity metrics exist; week-two observed return at85. Signup explicitly says guest visits are untracked; download_requested is a server-link request with browser completion untracked."
+        },
+        {
+          "type": "inferred",
+          "detail": "Bounded src search found no UTM/campaign attribution implementation; this is not a claim that all analytics are absent."
+        },
+        {
+          "type": "unavailable",
+          "detail": "No social impressions, clicks, guest completion or campaign results were available."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Start with an asset ledger and consenting participant source question; separate impressions/clicks, observed guest approved download, corrections, assistance, optional signup and second task. Consider a minimal consent-appropriate source counter later without CV text or sensitive query values.",
+      "acceptance_criteria": [
+        "Ledger records channel date hook audience destination and owner",
+        "Counts and unknown denominators are reported separately",
+        "Guest completion is not replaced by signup as first value",
+        "Free activity never becomes inferred revenue or hiring success",
+        "Ten-person results are labelled exploratory, not causal lift"
+      ],
+      "dependencies": [
+        "Analytics/privacy owner",
+        "Decision on consent-appropriate guest measurement",
+        "Pilot observation protocol"
+      ],
+      "effort_engineer_days": {
+        "low": 0,
+        "high": 1.5
+      },
+      "cost_effect": "Manual ledger can start at zero cost; no paid analytics service needed.",
+      "pilot_required": true,
+      "confidence": "medium"
+    },
+    {
+      "id": "SOCIAL-05",
+      "priority": "P1",
+      "category": "moderation disclosure and capacity",
+      "problem": "Public-content ownership, moderation coverage and private-pilot capacity responses are not evidenced; presenter disclosure could be lost during reuse.",
+      "evidence": [
+        {
+          "type": "unavailable",
+          "detail": "Social ownership, comment history, moderation rules and response coverage unavailable."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/PilotLanding.tsx",
+          "line": 110,
+          "detail": "Public intake excludes CVs, employer-confidential and private client data."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.json",
+          "line": 177,
+          "detail": "Original fictional AI presenter is disclosed."
+        },
+        {
+          "type": "observed",
+          "url": "https://www.linkedin.com/help/linkedin/answer/a7174587",
+          "detail": "Official guidance checked2026-10-14 describes reviewed captions, comment control and safe-zone considerations."
+        },
+        {
+          "type": "observed",
+          "url": "https://support.google.com/youtube/answer/14328491?hl=en",
+          "detail": "Official current guidance requires disclosure for meaningful photorealistic AI content; apply if presenter clips are reused there."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Assign daily reviewer and backup; direct support privately via /contact and workflow answers via /help; never solicit public CVs. Define exposed-data and inaccurate-claim handling, capacity-full wording and explicit distinction between public check and ten-user private pilot. Preserve fictional/AI notices and platform disclosure settings in reuse.",
+      "acceptance_criteria": [
+        "Tabletop personal-data comment and full-capacity scenarios have named responders",
+        "No unsupported response-time promise",
+        "Pilot invitation stops when private capacity is full",
+        "Disclosures survive every export and any required platform setting is checked before publication"
+      ],
+      "dependencies": [
+        "Owner and support backup",
+        "Pilot capacity visibility",
+        "Pre-publication review"
+      ],
+      "effort_engineer_days": {
+        "low": 0,
+        "high": 0.5
+      },
+      "cost_effect": "1-2 operations hours; no new tools.",
+      "pilot_required": false,
+      "confidence": "medium"
+    }
+  ],
+  "open_questions": [
+    "Which existing identities and channels does the owner authorize, and who can review replies daily?",
+    "How many hours/week can the owner sustain for recording, editing and moderation?",
+    "Which audience has an actual vacancy and is ready for the first pilot task?",
+    "Will guest source/completion be observed manually or through a consent-appropriate minimal counter?",
+    "Are the historical guided research offer and current self-serve offer both intended to remain active?"
+  ],
+  "do_not_build_now": [
+    "Paid scheduler or five-platform content operation",
+    "Scraped prospect messaging or automated outreach",
+    "Paid ads or new paid avatar/media calls",
+    "Referral incentives or a new community before repeat use",
+    "Recruiting guarantees, fake proof, copied reels or claims of measured time savings"
+  ]
+}

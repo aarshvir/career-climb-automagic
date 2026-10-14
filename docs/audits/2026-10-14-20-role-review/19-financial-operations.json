@@ -1,0 +1,325 @@
+{
+  "role_id": "financial-operations",
+  "role_title": "Financial Operations",
+  "phase": "operations",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Independent source review of shared candidate/admin monthly reservations, settlement, router bounds, quotas, billing boundary and admin budget display.",
+    "Read supplied live-service-baseline.json and root-budget-reconciliation.json only; no independent production query.",
+    "Local mocked tests: npx vitest run --config supabase/tests/vitest.backend.config.ts supabase/tests/jobvance-openrouter.test.ts supabase/tests/jobvance-admin.test.ts --maxWorkers=4; 2 files, 19 tests passed.",
+    "Official OpenRouter usage-accounting and Supabase cost-control documentation checked 2026-10-14; no current model prices assumed."
+  ],
+  "not_tested": [
+    "No invoices, payouts, payments, keys, private account records or new paid model/search calls accessed.",
+    "No independent hosted interaction or live concurrency test.",
+    "No merchant eligibility, paid subscription lifecycle, actual full operating expense or support time verified."
+  ],
+  "criteria": [
+    {
+      "name": "Shared expenditure containment",
+      "score": 19,
+      "weight": 20,
+      "evidence": "Candidate reservation migration 20261012181402 lines106-125 and admin platform lines108-148 share locked monthly ledger. Supplied $0.740100 aggregate reconciles."
+    },
+    {
+      "name": "Settlement and reconciliation operations",
+      "score": 14,
+      "weight": 20,
+      "evidence": "Conservative retained uncertainty and idempotent settlement exist; supported admin actions do not provide reconciliation; supplied aggregate has $0.225976 uncertain."
+    },
+    {
+      "name": "Pilot allocation and quota discipline",
+      "score": 13,
+      "weight": 20,
+      "evidence": "Ten seats, three daily new runs, thirty scheduled monthly runs and two packs/run; no per-account dollar allocation or monthly admin allocation observed."
+    },
+    {
+      "name": "Unit cost and full operating expense visibility",
+      "score": 11,
+      "weight": 20,
+      "evidence": "AdminFounder shows processing categories, not useful-pack cost, all-in infrastructure expense or founder/support time."
+    },
+    {
+      "name": "Commercial boundary and future billing readiness",
+      "score": 15,
+      "weight": 20,
+      "evidence": "Proposals explicitly non-billing; core.ts:90 disables checkout unless enabled; current ten-pack pass does not implement proposed monthly subscriptions."
+    }
+  ],
+  "role_score": 72,
+  "score_confidence": "medium",
+  "strengths": [
+    "Shared candidate/admin lock enforces a maximum $50 UTC-month reservation ceiling; cap can be lowered.",
+    "Unknown costs retain reservations; settled calls release only reserved-minus-actual and settlement is idempotent.",
+    "Supplied ledger reconciles: 0.740100=0.002344+0.511780+0.225976; amounts are application-metered, not invoice verified.",
+    "Dashboard separates actual, reserved, uncertain, candidate and admin categories and explains QA/erasure limitations.",
+    "Free pilot and future price proposals are distinguished; no revenue or willingness-to-pay inferred."
+  ],
+  "findings": [
+    {
+      "id": "FO-01",
+      "priority": "P2",
+      "category": "reconciliation",
+      "problem": "Held usage has no explicit operator resolution workflow or aging owner.",
+      "evidence": [
+        {
+          "type": "observed",
+          "path": ".tmp/20-role-review/root-budget-reconciliation.json",
+          "line": 8,
+          "detail": "One admin operation retains $0.225976 uncertain; actual remains unknown."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/jobvance-admin.ts",
+          "line": 16,
+          "detail": "Supported actions include snapshot/config/support/provider status, with no reconciliation action."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/INTEGRATED-JOB-LOOP-OPERATIONS.md",
+          "line": 36,
+          "detail": "Manual invoice instruction references candidate usage tables, omitting admin table."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "",
+          "line": 1,
+          "url": "https://openrouter.ai/docs/cookbook/administration/usage-accounting",
+          "detail": "Official documentation supports asynchronous usage lookup using a generation ID, if retained."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Create a manual-first both-table reconciliation register with age, owner, held amount, available provider reference, evidence and next review; retain unverifiable holds.",
+      "acceptance_criteria": [
+        "Fixture settlement updates monthly commitment exactly once.",
+        "Repeated resolution is harmless; missing provider evidence never releases a hold.",
+        "Month-end register covers candidate and admin operations, including no-reference uncertainty."
+      ],
+      "dependencies": [
+        "Named operator; future authorized access to provider aggregate usage, outside this audit."
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1.5
+      },
+      "cost_effect": "Small operator effort; releases capacity only after evidenced settlement.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "FO-02",
+      "priority": "P2",
+      "category": "fair-use",
+      "problem": "Count limits do not allocate the shared dollars among pilot accounts and admin work.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261011010000_job_loop_cloud.sql",
+          "line": 113,
+          "detail": "New-run limit is three per account per UTC day."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261011030000_job_loop_recurring.sql",
+          "line": 109,
+          "detail": "Scheduled limits are one daily and thirty monthly."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261012180814_jobvance_admin_platform.sql",
+          "line": 125,
+          "detail": "Admin enforces batch cap alongside global cap; monthly pool allocation is absent."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Test provisional participant/admin allocations and per-account soft warnings under the existing atomic $50 cap; treat allocation as a hypothesis.",
+      "acceptance_criteria": [
+        "Mixed-account/admin fixture respects selected allocations and $50 global ceiling.",
+        "Owner reallocations are explicit and audited.",
+        "Denial explains remaining rules/manual preparation."
+      ],
+      "dependencies": [
+        "Observed route/use patterns; chosen fair-use policy."
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Redistributes availability without raising expenditure ceiling.",
+      "pilot_required": false,
+      "confidence": "high"
+    },
+    {
+      "id": "FO-03",
+      "priority": "P2",
+      "category": "unit-economics",
+      "problem": "Processing totals cannot explain cost per useful approved/downloaded packet or assisted completion.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql",
+          "line": 88,
+          "detail": "Cost aggregates separate settled actual, reserved and uncertain; no useful-packet cohort cost."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/admin/AdminFounder.tsx",
+          "line": 59,
+          "detail": "Candidate erasure can remove details while committed ledger stays authoritative."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Use privacy-preserving monthly totals plus a pilot worksheet connecting completed/approved/downloaded outcomes, route, failures and assistance minutes, with denominator/erasure caveats.",
+      "acceptance_criteria": [
+        "Ten fictional journeys including failure/erasure produce explainable operational totals.",
+        "No generated packet counted as submitted.",
+        "QA/admin costs separated; no candidate text retained for finance."
+      ],
+      "dependencies": [
+        "Event definitions and privacy review."
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Modest weekly review cost; provides evidence for later price/allowance decisions.",
+      "pilot_required": false,
+      "confidence": "high"
+    },
+    {
+      "id": "FO-04",
+      "priority": "P2",
+      "category": "operating-expenses",
+      "problem": "The $50 processing limit is clear, but no consolidated infrastructure and founder-time envelope is supplied.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "docs/INTEGRATED-JOB-LOOP-OPERATIONS.md",
+          "line": 3,
+          "detail": "Ceiling excludes unrelated services, taxes and domain renewals."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/INTEGRATED-JOB-LOOP-OPERATIONS.md",
+          "line": 28,
+          "detail": "Daily owner support review is expected without a time budget."
+        },
+        {
+          "type": "unavailable",
+          "path": "",
+          "line": 1,
+          "detail": "Actual infrastructure/renewal amounts and founder support hours were not accessed."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "",
+          "line": 1,
+          "url": "https://supabase.com/docs/guides/platform/cost-control",
+          "detail": "Supabase documents that its spend cap covers selected usage items, distinct from an application ledger."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Maintain a dated owner-held expense/time worksheet, marking actual versus assumptions and renewal/review thresholds; make no service purchase.",
+      "acceptance_criteria": [
+        "Each service has an owner, amount or unknown marker and review/renewal date.",
+        "Track onboarding/support/operations hours separately from processing cash.",
+        "Scenario: ten users, twenty runs, two calls/run; assumed $0.03/$0.10 call gives $12/$40 candidate cost; $5 admin + $5 uncertainty gives $22/$50 committed, excluding paid search.",
+        "Founder scenario: 7.5h onboarding +10h support +4h operations=21.5h; assumed $30/h opportunity cost=$645; no profit forecast."
+      ],
+      "dependencies": [
+        "Owner-supplied aggregate expenses and time observations."
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1
+      },
+      "cost_effect": "Reveals cost outside processing ceiling; no infrastructure upgrade recommended.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "FO-05",
+      "priority": "P3",
+      "category": "future-billing",
+      "problem": "Proposed subscription allowances are not implemented by existing one-time ten-pack payment contract; this is deliberate deferral.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/subscription-plans.ts",
+          "line": 7,
+          "detail": "$15/20 packs and $29/30 runs/60 packs marked not ready and billing false."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/Workspace.tsx",
+          "line": 1003,
+          "detail": "Existing purchase control is Buy ten packs."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/paddle.ts",
+          "line": 18,
+          "detail": "Transaction validator requires subscription_id null."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/core.ts",
+          "line": 90,
+          "detail": "Billing configuration disabled unless explicit enabled flag."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Keep checkout off; create a future commercial specification and lifecycle test gate only when paid scope is authorized. Respect deferred licence/permit decision.",
+      "acceptance_criteria": [
+        "Future fixtures cover renewal/reset, cancellation, failed renewal, duplicate events, refunds and ledger reconciliation.",
+        "No automatic conversion from pilot.",
+        "Commercial scope and provider/merchant setup confirmed before any future activation."
+      ],
+      "dependencies": [
+        "Future paid scope authorization; selected entitlements; eligible merchant setup; no legal work or activation now."
+      ],
+      "effort_engineer_days": {
+        "low": 3,
+        "high": 6
+      },
+      "cost_effect": "No current revenue; future payment processing/support costs remain unknown.",
+      "pilot_required": false,
+      "confidence": "high"
+    }
+  ],
+  "open_questions": [
+    "Who owns weekly and UTC-month-close reconciliation across both candidate and admin usage?",
+    "What is the owner-approved cash envelope outside the AI/search cap and the available weekly support time?",
+    "What share of packets are approved/downloaded and reused for a second actual application, and at what assistance cost?",
+    "Which provisional allocation keeps one participant/admin batch from consuming other participants' access?"
+  ],
+  "do_not_build_now": [
+    "No paid checkout activation, licence/permit workaround or new legal advice.",
+    "No annual contracts, unlimited AI promises, paid acquisition or standalone finance platform.",
+    "No margin/profit projection from tiny metered sample or proposed $15/$29 prices."
+  ]
+}

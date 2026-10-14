@@ -1,0 +1,119 @@
+{
+  "role_id": "customer-support",
+  "role_title": "Customer Support",
+  "phase": "operations",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": true
+  },
+  "methods": [
+    "Independent source inspection of help, guest contact/receipt, private Job Loop support, admin queues, erasure and run-control contracts.",
+    "Read-only HTTP GET of https://jobvance.io/help and https://jobvance.io/contact: both 200, expected task/support wording present in initial HTML. No interactive production workflow was exercised.",
+    "npm run test:run -- src/__tests__/help-center.test.tsx src/__tests__/guest-support.test.tsx src/__tests__/lib/guest-support-boundary.test.ts --maxWorkers=4: 3 files, 30 tests passed.",
+    "Deterministic evaluation of HelpCenter topic data with its literal every-word filter for common support queries.",
+    "Read support/privacy/recovery sections of docs/INTEGRATED-JOB-LOOP-OPERATIONS.md; operational instructions treated as documentation, not proof of staff execution."
+  ],
+  "not_tested": [
+    "No live support submission, receipt lookup, administrative private record read, reply/status write, account sign-in or erasure.",
+    "No customer response-time, case quality, satisfaction, live interactive browser or actual authenticated download measurement.",
+    "No paid model/search/media calls, service activation, runtime fixes or external messages.",
+    "Current configured provider/Gmail/scheduler availability was not queried; UI/source capability contracts were reviewed."
+  ],
+  "criteria": [
+    {"name":"Task self-service","score":18,"weight":20,"evidence":"HelpCenter.tsx defines 12 task topics covering no CV, formats/OCR, evidence, approval, transfers, recovery and run availability; literal query gaps confirmed from its topic/filter data."},
+    {"name":"Accessible intake and expectations","score":18,"weight":20,"evidence":"GuestSupport.tsx:15-18 provides anonymous consented intake, downloadable private receipt, explicit 90-day expiry, no-email and no-response-time statements; public initial HTML verified."},
+    {"name":"Resolution and candidate feedback","score":11,"weight":20,"evidence":"Guest reply/readback implemented; LoopSupport.tsx:14 and job-loop-repository.ts:62 expose only original message/status, while AdminOperations.tsx:33-35 can only update private status."},
+    {"name":"Founder triage and escalation","score":14,"weight":20,"evidence":"Audited queues, versioned updates and run controls exist; operations instructions still name only private table, and AdminOperations.tsx:39-46 summary excludes guest queue."},
+    {"name":"Privacy-safe recovery","score":15,"weight":20,"evidence":"Loop erasure scope, temporary recovery limits and private message controls are explicit; full-account and interrupted-erasure operator completion checklist remains under-specified in operating instructions."}
+  ],
+  "role_score": 76,
+  "score_confidence": "medium",
+  "strengths": [
+    "Detailed public next-click instructions for all major candidate task families, with useful OCR/no-CV/manual fallback guidance.",
+    "Anonymous support has no signup/email requirement, explicit manual-review ownership, downloadable bearer receipt and honest expectations.",
+    "Guest receipt secret is hashed server-side; private messages are omitted from queue metadata/audit payloads and explicit staff reads are audited.",
+    "Source/approval/download invalidation and loop-versus-account deletion scope are communicated without guaranteeing recovery, job results or staff response times."
+  ],
+  "findings": [
+    {
+      "id":"CS-01","priority":"P1","category":"Resolution loop",
+      "problem":"Authenticated Job Loop support can be marked resolved without conveying an explanation or next step to the candidate. This is a source-confirmed implementation limitation, not an observed real-customer delivery failure.",
+      "evidence":[
+        {"type":"source-confirmed","path":"src/pages/LoopSupport.tsx","line":14,"detail":"Candidate receipt renders category, original message, status, reference and creation time; no administrator reply."},
+        {"type":"source-confirmed","path":"src/pages/admin/AdminOperations.tsx","line":33,"detail":"Private support action is status-only; guest inbox separately supports reply text."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-repository.ts","line":62,"detail":"Support snapshot selects id, category, message, status, created_at, with no reply field."},
+        {"type":"source-confirmed","path":"src/pages/GuestSupport.tsx","line":17,"detail":"Guest receipt holder can read the administrator reply, providing an existing pattern to reuse."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Add an owner-bound private support reply and updated timestamp through an additive schema/API/UI change, audited and versioned like guest support. Require a disposition before resolving.",
+      "acceptance_criteria":["Fictional authenticated candidate reads the founder's saved explanation and next action in their own receipt.","Another account cannot read or modify the request/reply.","Reply/status changes reject stale versions, are audited, and do not trigger email or a model call.","Resolve records a useful disposition rather than only changing status."],
+      "dependencies":["Additive support migration","Owner-bound snapshot/API schema","Admin and candidate UI","Targeted fictional ownership/readback checks"],
+      "effort_engineer_days":{"low":2,"high":4},
+      "cost_effect":"No new service, subscription or paid model cost; uses current database/admin UI.",
+      "pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"CS-02","priority":"P1","category":"Privacy escalation playbook",
+      "problem":"Whole-account erasure and interrupted loop-erasure completion are identified but lack an executable founder procedure. No actual failed erasure was observed.",
+      "evidence":[
+        {"type":"source-confirmed","path":"src/pages/LoopSupport.tsx","line":20,"detail":"Loop erase correctly retains sign-in and separate workspace records and directs account-wide requests to support."},
+        {"type":"source-confirmed","path":"docs/INTEGRATED-JOB-LOOP-OPERATIONS.md","line":28,"detail":"Instructions require separate account/workspace scope review but do not detail identity, inventory, completion readback or operator ownership."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-repository.ts","line":75,"detail":"Erasure begins by stopping/revoking loop processing, then lists/removes artifacts, then finishes; scan guard can require retry or owner support."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Write a founder-owned identity/scope/inventory/deletion/readback checklist covering separate workspace, storage, Auth, provider copies and retention; explicitly handle partial completion and communicate what remains. Guest receipt possession must not establish account ownership.",
+      "acceptance_criteria":["Fictional dry run covers loop-only and whole-account requests, verified account ownership and explicit requested scope.","Interrupted storage removal produces a tracked retry and no false completed-erasure response.","Completion records checked stores and explains remaining downloads/Gmail/provider/required-retention scope accurately.","Checklist requests no password, full CV or unnecessary identity material."],
+      "dependencies":["Founder ownership","Privacy/engineering review of actual stores and retention","Approved deletion tooling and fictional test account"],
+      "effort_engineer_days":{"low":1,"high":2},
+      "cost_effect":"No new subscription; reduces repeated manual investigation and unsafe ad hoc deletion.",
+      "pilot_required":true,"confidence":"medium"
+    },
+    {
+      "id":"CS-03","priority":"P2","category":"Self-service discovery",
+      "problem":"Literal every-word help search misses common support language and sign-in has no dedicated public help topic.",
+      "evidence":[
+        {"type":"source-confirmed","path":"src/pages/HelpCenter.tsx","line":199,"detail":"Search requires every whitespace-delimited word to occur in the topic's literal text."},
+        {"type":"observed","path":"src/pages/HelpCenter.tsx","line":205,"detail":"Deterministic evaluation of current topic data/filter: forgot password, login, evidence mismatch, cost hold and budget returned []; lost draft returned job-loop-review; scanned PDF returned uploads. This was local analysis, not live search UI."},
+        {"type":"source-confirmed","path":"src/pages/Auth.tsx","line":86,"detail":"Password reset already exists, including embedded free-check instructions that preserve the open check."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Add concise sign-in recovery guidance and a curated alias map for lost draft, login/password, evidence mismatch and budget/cost holds. Route to existing task instructions rather than building a chatbot.",
+      "acceptance_criteria":["Common tested phrases return the intended task first.","Lost draft prioritizes recovery, cost hold/budget prioritizes preparation controls, and evidence mismatch prioritizes source/fact review.","Scanned PDF still reaches uploads; all help remains readable without an account.","Sign-in guidance distinguishes configuration/network problems from password reset and does not request passwords."],
+      "dependencies":["Help content owner","Small search alias change","Bounded search regression checks"],
+      "effort_engineer_days":{"low":0.5,"high":1.5},
+      "cost_effect":"No paid search/chat service; expected support deflection is a hypothesis to validate in pilot.",
+      "pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"CS-04","priority":"P2","category":"Founder queue operations",
+      "problem":"The documented daily routine omits guest support, and the admin review total covers private requests only. This can make the founder's understanding of work incomplete; no ignored request or backlog was observed.",
+      "evidence":[
+        {"type":"source-confirmed","path":"docs/INTEGRATED-JOB-LOOP-OPERATIONS.md","line":28,"detail":"Daily instruction names Table Editor/job_loop_support_requests rather than current two-queue admin interface."},
+        {"type":"source-confirmed","path":"src/pages/admin/AdminOperations.tsx","line":39,"detail":"received and inReview counts derive from snapshot.operations.support; guest inbox is rendered separately."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261014020000_jobvance_guest_support.sql","line":61,"detail":"Guest list returns latest 100 unexpired receipts ordered by creation; no unresolved-age prioritization."},
+        {"type":"unavailable","detail":"No private queue history or founder routine was inspected; actual missed cases, response times and backlog are unknown."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Use one founder checklist at /admin/operations covering guest and private queues, separate unresolved counts/oldest age, owner/next-action/disposition and safe escalation. Prefer unresolved-first views over newest-only growth; keep private text outside analytics.",
+      "acceptance_criteria":["Daily internal checklist explicitly checks both guest and private queues without creating a public response-time guarantee.","Admin shows queue scope and separate received/in-review/oldest-unresolved indicators.","A fictional older unresolved guest case remains findable after newer resolved cases.","Founder's closure record includes actual action, candidate next step and completion evidence."],
+      "dependencies":["Founder cadence/ownership","Small admin metadata/query changes","No-private-text analytics policy"],
+      "effort_engineer_days":{"low":1,"high":2},
+      "cost_effect":"No recurring software expense; founder review time should be measured during the ten-person pilot.",
+      "pilot_required":true,"confidence":"high"
+    }
+  ],
+  "open_questions":[
+    "What founder review cadence and backup owner can actually be sustained? No public SLA should be added before staffing is known.",
+    "Does the founder currently answer private support through another explicitly authorized channel? None is represented in the reviewed private support contract.",
+    "Which account/workspace/provider retention obligations and approved erasure tools are operational today? The report does not make legal-compliance claims.",
+    "Which task phrases and support resolutions recur in the consenting ten-person pilot? Measure anonymized categories and successful recovery before adding automation."
+  ],
+  "do_not_build_now":[
+    "Live chat or an implied human availability/response guarantee.",
+    "A separate paid support chatbot or paid chat-service subscription.",
+    "Different support products or queues for each persona.",
+    "Automatic paid retries, provider switching or cap increases as a support workaround.",
+    "Promises to restore expired memory-only drafts, verify qualifications, submit applications or recall downloaded/Gmail copies."
+  ]
+}

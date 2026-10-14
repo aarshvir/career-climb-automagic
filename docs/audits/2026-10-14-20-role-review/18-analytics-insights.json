@@ -1,0 +1,140 @@
+{
+  "role_id": "analytics-insights",
+  "role_title": "Analytics & Insights",
+  "phase": "operations",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Independent examination of admin metric SQL, activity triggers, CvCheck guest/local workflow, Job Loop worker/contract, and founder dashboard; no peer reports read.",
+    "Read permitted aggregate live-service-baseline.json and root-budget-reconciliation.json, observed 2026-10-14; these do not supply a verified customer cohort.",
+    "Bounded existing test: npm run test:run -- src/__tests__/lib/jobvance-admin-migration.test.ts --maxWorkers=4; 1 file, 16 tests passed.",
+    "Delegated narrow read-only cost/trigger field verification, without reading other role reports or making runtime calls."
+  ],
+  "not_tested": [
+    "No live authenticated journey, candidate content or private user/account record inspected.",
+    "No new tracking, analytics installation, paid model/search calls, deployment or runtime change.",
+    "No usability participants, measured active minutes, actual browser download completion, willingness to pay, causal outcomes or provider invoice reconciliation."
+  ],
+  "criteria": [
+    {"name":"Truthful metric definitions and presentation","score":17,"weight":20,"evidence":"snapshot.sql:7–12,60–86 and AdminShared.tsx:18–27 expose source, denominator, small samples and untracked values; current-state versus historical task attainment remains incomplete."},
+    {"name":"First-task funnel coverage","score":10,"weight":20,"evidence":"CvCheck.tsx:265–329 completes the local guest workflow independently of saving; snapshot.sql:75–78 correctly labels guests untracked."},
+    {"name":"Cohort and human engagement measurement","score":10,"weight":20,"evidence":"snapshot.sql:29–31 excludes QA but not staff membership; :80–86 distinguishes candidate return from scheduled repetition, with retained-activity limits and no search lifecycle."},
+    {"name":"Usefulness and repeat-effort research","score":9,"weight":20,"evidence":"Approval and reuse paths exist in CvCheck.tsx:155–176,303–305; inspected event/contract definitions lack usefulness, active effort and search-status measures; ten-user paired research is not demonstrated."},
+    {"name":"Operating economics and decision readiness","score":15,"weight":20,"evidence":"AdminFounder.tsx:54–59 and supplied reconciliation distinguish committed, settled and uncertain costs; usage schema supports run attribution but no current cost per useful participant task."}
+  ],
+  "role_score": 61,
+  "score_confidence": "medium",
+  "strengths": [
+    "Unknown guests, download completion and revenue are not silently represented as zero or success.",
+    "Metrics carry definitions, sources, denominators and small-sample labels; 16 bounded admin migration tests pass.",
+    "Candidate versus Jobvance activity origin is implemented, and scheduled repetition is explicitly not proof of human return.",
+    "Shared monthly ledger retains uncertain reservations and includes real QA costs; founder presentation calls metered usage distinct from invoices."
+  ],
+  "findings": [
+    {
+      "id":"R18-01","priority":"P1","category":"cohort_integrity",
+      "problem":"QA exclusion does not establish a research cohort: normal-domain founder/operator/demo accounts are not automatically excluded, and gross account totals cannot be interpreted as customers.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/migrations/20261012181402_jobvance_admin_snapshot.sql","line":29,"detail":"Population filters use qa_fixture metadata and reserved domains, with no admin membership or research enrollment exclusion; repeated at lines 49 and 80."},
+        {"type":"observed","path":".tmp/20-role-review/live-service-baseline.json","line":628,"detail":"Permitted aggregate snapshot records 45 accounts, 42 profiles and one active pilot row; baseline explicitly cautions that unknown founder/test accounts are included."},
+        {"type":"inferred","path":"supabase/migrations/20261012181402_jobvance_admin_snapshot.sql","line":31,"detail":"An ordinary-domain staff account without QA metadata can be counted; actual live contamination was not inspected."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Introduce server-owned participant classification (participant, staff, demo, QA, unknown), exclude nonparticipants from research denominators, disclose unknowns and retain all operating costs. Use counts of accounts, research participants and capacity occupancy with separate labels.",
+      "acceptance_criteria":["Synthetic founder, operator, QA and participant fixtures yield one participant across signup, activation and return measures.","Unknown classification and exclusions appear beside denominators; costs include and separately disclose staff/QA usage.","Classification cannot grant administration access and is not inferred from free activity as proof of a customer."],
+      "dependencies":["Owner classification decisions","Server-owned cohort definition"],
+      "effort_engineer_days":{"low":0.5,"high":1.5},
+      "cost_effect":"Negligible storage/query cost; prevents misleading conversion and per-user cost calculations.","pilot_required":false,"confidence":"high"
+    },
+    {
+      "id":"R18-02","priority":"P1","category":"guest_task_coverage",
+      "problem":"The primary guest first-check task has no complete research denominator; the signup funnel cannot explain first-check abandonment or task success.",
+      "evidence":[
+        {"type":"source-confirmed","path":"src/pages/CvCheck.tsx","line":265,"detail":"CV confirmation, evidence comparison, approval and local export occur in component handlers through line 318; account saving is optional at lines 322–329."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261012181402_jobvance_admin_snapshot.sql","line":75,"detail":"Account-backed checks explicitly exclude guests; lines 77–78 return guest visits and browser download completion as null/untracked."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Offer optional research participation and a small milestone dictionary: task_started, cv_review_confirmed, evidence_shown, final_approved, export_requested, task_feedback, search_status_changed. Fields are schema version, random consented participant/task ID, ordinal, revision, timestamp, mode, actor/origin, bounded outcome/error and optional format/usefulness/active-minute bucket. Reuse existing server events. Do not collect document text, filenames, employer/title/URLs, email, free text, fingerprints or session replay; no silent identity stitching. Propose 30-day raw-event retention with withdrawal/deletion.",
+      "acceptance_criteria":["Consent off produces no new research requests and preserves the full check/export workflow.","Consent on records each logical task milestone/revision once; retry and rerender do not inflate it.","Payload allowlist rejects document content and identifiers outside the declared contract.","Guest research counts show consenting coverage and are never described as all-visitor conversion; export means requested, not browser completion."],
+      "dependencies":["Research consent copy","Bounded collector and retention/deletion contract","Task identity/deduplication"],
+      "effort_engineer_days":{"low":1,"high":3},
+      "cost_effect":"Can use a minimal first-party collector within existing infrastructure; no paid analytics platform required.","pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"R18-03","priority":"P1","category":"task_success_semantics",
+      "problem":"The current signup funnel gates approval/download on a fully completed run, although partial runs can produce packets; operational completeness and candidate task value need separate measures.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/migrations/20261012181402_jobvance_admin_snapshot.sql","line":53,"detail":"Funnel requires completed run, then cumulative evidence/completed/approved conditions at lines 57–65; state is currently retained, not immutable historical conversion."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-runtime.ts","line":257,"detail":"Packets are composed/uploaded and saved at lines 257–268; any partial/blocked/not_connected lane sets terminal run partial at line 271."},
+        {"type":"observed","path":".tmp/20-role-review/live-service-baseline.json","line":627,"detail":"Aggregate baseline has three partial runs and three prepared packets. Packet usefulness, approval and cohort membership are unknown; partial is not evidence of total failure."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Add task/packet success stages independent of optional lane completeness, joining milestone events to the same task/packet and revision. Keep current eligible approval readiness separate from historical attainment and display completed, partial, blocked and failed operational states alongside output counts.",
+      "acceptance_criteria":["A partial run with an eligible approved packet and export request contributes to task success without becoming a completed run.","A prepared or held packet alone is not task success.","Corrections/revocation update current readiness without silently rewriting the meaning of historical milestone counts; deletion/coverage limits remain visible.","Packet/task denominators cannot be satisfied by unrelated runs or packet approvals from the same account."],
+      "dependencies":["Task/packet identity","Existing exact-text approval authority","Separate current-state and milestone definitions"],
+      "effort_engineer_days":{"low":1,"high":2},
+      "cost_effect":"No added model calls; more accurate useful-output and per-task cost denominators.","pilot_required":false,"confidence":"high"
+    },
+    {
+      "id":"R18-04","priority":"P2","category":"human_return_and_search_lifecycle",
+      "problem":"Human return, recurring system output, pilot enrollment and search completion are different concepts; the current contract lacks a person-level search lifecycle.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/migrations/20261012181402_jobvance_admin_snapshot.sql","line":80,"detail":"Week-two return requires retained candidate action or account CV check; repeated completed preparation includes scheduled runs at lines 82–86; pilot activeUsers is enrollment occupancy at line 99."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261011030000_job_loop_recurring.sql","line":218,"detail":"Scheduled queues are jobvance actor, manual queues candidate; status and packet system events are separately classified."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-types.ts","line":6,"detail":"Application status includes offer/withdrawn per opportunity at line 47; profile/snapshot contract does not provide whole-search status."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Define active users with an explicit candidate-action allowlist and time window; retain separate system/scheduled output counts. Add optional user-reported searching/paused/accepted_role/stopped/unknown with effective date. Show original eligible return denominator and an explicitly labeled at-risk searching subset, retaining graduation/stop counts rather than treating every exit as churn.",
+      "acceptance_criteria":["Background-only scheduled runs never increase human active or return measures.","Pilot enrolled capacity is not labeled behavioral active users.","A per-vacancy offer does not automatically mark the person hired or successful.","Unknown and missing status remain visible; users can correct status and date; original cohort denominator stays available."],
+      "dependencies":["Candidate action allowlist","Optional lifecycle UI and provenance","Cohort classification"],
+      "effort_engineer_days":{"low":1,"high":2},
+      "cost_effect":"Small storage only; prevents reacting to healthy search completion as product failure.","pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"R18-05","priority":"P1","category":"usefulness_and_repeat_effort_research",
+      "problem":"Approval and repeat output do not establish usefulness, reduced effort, comprehension or customer outcomes; current evidence cannot validate the central reuse proposition.",
+      "evidence":[
+        {"type":"source-confirmed","path":"src/pages/CvCheck.tsx","line":303,"detail":"Approval verifies checked facts/privacy and validates the draft; no usefulness response or active-effort outcome is recorded in this handler."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261011030000_job_loop_recurring.sql","line":184,"detail":"Packet approval validates exact current text and records approved_at through line 195; it is a confirmation proxy, not independently observed full reading or benefit."},
+        {"type":"unavailable","detail":"No consented paired first/second-task observations, task times, usefulness ratings or verified customer outcomes supplied."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Run the existing ten-user pilot as consented paired research: existing CV plus two genuine vacancies, second task after 7–14 days. Record paused active minutes, factual corrections, assistance and four-choice usefulness (unusable/major rework/minor corrections/usable as is), then ask whether reuse helped. Report invited/enrolled/first complete/second eligible/second complete/matched pairs, withdrawals and missing answers. Compare within-person differences descriptively; treat task complexity and learning as confounds, with no causal, persona-ranking, pricing or significant A/B claims.",
+      "acceptance_criteria":["Each participant consents separately to research; core product use does not require participation.","Research sheet distinguishes enrolled participants from matched pairs and retains incomplete-task reasons.","Report includes raw count denominators, paired minute differences and descriptive median/range, not unsupported population precision.","Self-reported applications/interviews/offers are labeled as reports and never inferred from downloads or generated packets.","No time-saving benchmark, willingness-to-pay validation or causal outcome claim is published from this small paired exercise."],
+      "dependencies":["Research consent and facilitator","Two real participant-selected tasks","Minimal task feedback record"],
+      "effort_engineer_days":{"low":0.5,"high":1.5},
+      "cost_effect":"Founder research sessions plus minimal feedback storage; use existing rules route where appropriate and keep any separately consented calls within the existing US$50 ceiling.","pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"R18-06","priority":"P2","category":"useful_task_unit_cost",
+      "problem":"Monthly budget health is visible, but candidate cost per useful task is not; run-level operations and multiple packets require an explicit allocation and unresolved-cost policy.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/migrations/20261011010000_job_loop_cloud.sql","line":25,"detail":"Packets join to runs; usage at lines 39–47 joins run/operation with reserved, settled and uncertain states, not an independent full cost for every packet."},
+        {"type":"source-confirmed","path":"src/pages/admin/AdminFounder.tsx","line":54,"detail":"Dashboard displays monthly committed/actual/reserved/uncertain and candidate/admin split, with QA/deletion/invoice caveats through line 59, but no useful-task cost denominator."},
+        {"type":"observed","path":".tmp/20-role-review/root-budget-reconciliation.json","detail":"Permitted reconciliation: candidate actual $0.002344 + admin actual $0.511780 + uncertain reservation $0.225976 = committed ledger $0.740100. Application-metered amounts are not verified invoices."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-runtime.ts","line":156,"detail":"Download request activity has run/opportunity, not packet ID; recurring migration line 202 prunes each user's activity to 200 records, limiting historical exact packet denominators."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Extend the existing founder dashboard with candidate metered cost / eligible tasks reaching approval plus export request, together with numerator, denominator, coverage and unresolved reservations. Separate admin/review and QA costs, disclose allocation of discovery/shared run cost, and use the ledger for the budget ceiling rather than reconstructing it from erased details. Zero eligible tasks means unavailable unit cost.",
+      "acceptance_criteria":["Settled plus reserved/uncertain commitments reconcile to the authoritative month ledger, with explicit deletion/unmatched-detail coverage differences.","Uncertain actual cost stays unknown; settled amounts remain labeled application-metered rather than invoiced.","Every unit-cost row has matching scope/window, candidate cohort, task denominator and allocation rule; no double-counting a whole multi-packet run for each packet.","Dashboard holds one decision view: task activation, eligible packet approval, human return/search exits, paired effort/usefulness and useful-task cost/budget; current versus unknown is explicit."],
+      "dependencies":["R18-01 cohort definition","R18-02 task events","R18-03 task success semantics","Run-operation joins and ledger reconciliation"],
+      "effort_engineer_days":{"low":1,"high":2},
+      "cost_effect":"No added model calls or BI subscription; allows later model choices to consider useful output as well as metered spending.","pilot_required":true,"confidence":"high"
+    }
+  ],
+  "open_questions":[
+    "How many nonstaff people have knowingly enrolled in product research, versus account creation and pilot-capacity rows?",
+    "Which optional event/feedback retention period and withdrawal flow will the owner adopt before collecting research data?",
+    "Can two real tasks be scheduled for each pilot participant without excluding people whose search ends between tasks?",
+    "What candidate-observed outcome should define useful task completion beyond exact approval and an export request?"
+  ],
+  "do_not_build_now":[
+    "Warehouse, elaborate BI platform, cross-device attribution, session replay or fingerprinting.",
+    "A/B significance testing, persona conversion rankings or external time-saving benchmarks from ten people.",
+    "Automated hiring outcomes, inferred application submissions, or willingness-to-pay/revenue conclusions from free activity.",
+    "New paid model/search calls, tracking activation, services, checkout or production changes during this audit."
+  ]
+}

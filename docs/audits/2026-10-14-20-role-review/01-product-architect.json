@@ -1,0 +1,109 @@
+{
+  "role_id": "product-architect",
+  "role_title": "Product Architect",
+  "phase": "build",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": ["Verified git HEAD", "Read current route definitions, free-check and Loop components, shared actions/types, deterministic packet composition, run selection/reuse and admin metric SQL", "Compared implementation contracts with source; no prior audit grades or other role reports read"],
+  "not_tested": ["Live hosted journey", "Authenticated accounts or private candidate records", "Actual browser downloads", "Provider calls, scheduler execution and current service configuration", "Measured candidate time saving or willingness to pay"],
+  "criteria": [
+    {"name": "Shared journey and requirement completeness", "score": 17, "weight": 20, "evidence": "docs/INTEGRATED-JOB-LOOP-CONTRACT.md:5-26; src/lib/job-loop-audiences.ts:43-48 establish common requirements with persona acceptance variants."},
+    {"name": "First-value activation and continuity", "score": 12, "weight": 20, "evidence": "src/pages/CvCheck.tsx:322-337 saves separate checks/tracker records; src/lib/job-loop-api.ts:136-141 imports cv_documents only."},
+    {"name": "Repeat value and candidate effort", "score": 14, "weight": 20, "evidence": "supabase/functions/_shared/job-loop-runtime.ts:234-239 safely reuses packets; src/pages/JobLoop.tsx:404 requires record edits/rebuild; manual vacancy choice is absent from start_run."},
+    {"name": "Pilot learning and outcome definition", "score": 12, "weight": 20, "evidence": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql:59-86 defines honest proxies, but no paired candidate effort/usefulness measure was found in reviewed product contracts."},
+    {"name": "Product boundaries and bounded economics", "score": 17, "weight": 20, "evidence": "src/lib/subscription-plans.ts:17-18; supabase/functions/_shared/job-loop-providers.ts:9; integrated contract exclusions; older cloud/pilot scopes conflict with source."}
+  ],
+  "role_score": 72,
+  "score_confidence": "medium",
+  "strengths": ["One shared workflow with editable persona defaults and no invented credentials", "Free local first value without signup or metered model calls", "Exact-content approval and separate privacy/model/scheduling consent", "Unchanged current packets reuse without duplicate preparation/model requests", "Explicit ten-user, two-packet and shared $50 pilot bounds; customer payment disabled"],
+  "findings": [
+    {
+      "id": "PA-01", "priority": "P1", "category": "Activation continuity",
+      "problem": "A completed free check is stored separately from reusable Loop facts/opportunities and its tracker, creating re-entry at the first-to-repeat-value handoff.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "src/pages/CvCheck.tsx", "line": 327, "detail": "saveFreeCheck persists the reviewed check; saveTracker at 337 writes an application with an empty URL."},
+        {"type": "source-confirmed", "path": "src/lib/job-loop-api.ts", "line": 136, "detail": "loadLoopSavedCvs calls listCvDocuments; it does not load saved cv_checks."},
+        {"type": "source-confirmed", "path": "src/MvpApp.tsx", "line": 138, "detail": "/applications redirects to dashboard tracker, separate from Loop opportunities."},
+        {"type": "inferred", "path": "src/pages/JobLoop.tsx", "line": 378, "detail": "The absence of a saved-check/vacancy import implies manual re-entry; abandonment was not measured."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Add a reviewable Continue this application in Job Loop action importing the candidate-selected reviewed CV and vacancy with explicit private-storage consent and source linkage. Imported claims remain unconfirmed/unshareable. Link rather than destructively merge historical records.",
+      "acceptance_criteria": ["All three audience journeys preserve exactly the selected CV version and vacancy across sign-in", "An owner-bound import preview precedes storage and no external processing is implied", "Retried import yields one linked application and no duplicated facts", "Confirmed claims are reused for the second vacancy without copying the CV again"],
+      "dependencies": ["Owner-bound idempotent import action", "Additive relationship among check/opportunity/tracker records", "Auth recovery contract"],
+      "effort_engineer_days": {"low": 2, "high": 4},
+      "cost_effect": "No additional external model/search cost; reduces duplicated candidate input.",
+      "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "PA-02", "priority": "P1", "category": "Document composition and repeat effort",
+      "problem": "Loop provides no application-specific selection/order draft. Its review field is read-only, so changing composition requires global fact/record changes and rebuilding.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "src/pages/JobLoop.tsx", "line": 404, "detail": "CV factual review is readOnly and directs candidates to edit career facts then rebuild."},
+        {"type": "source-confirmed", "path": "supabase/functions/_shared/job-loop-types.ts", "line": 110, "detail": "Public action union includes claim save/withdraw and packet approval but no candidate composition draft."},
+        {"type": "source-confirmed", "path": "supabase/functions/_shared/job-loop-engine.ts", "line": 258, "detail": "Engine composes selected complete claims and preserves employment/education context at 261-276."},
+        {"type": "inferred", "path": "src/pages/JobLoop.tsx", "line": 404, "detail": "Candidate effort and inability to tailor emphasis locally are usability hypotheses; no observed abandonment claim."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Introduce a versioned per-opportunity draft of complete confirmed claim IDs and order, keeping factual edits in claim confirmation and preserving essential context. Bind approval to the selected composition.",
+      "acceptance_criteria": ["Candidate can shorten/reorder document B without editing the shared library or document A", "Selection changes invalidate B approval", "Context-preservation rules reject misleading omissions", "New factual prose cannot bypass source confirmation and disclosure review"],
+      "dependencies": ["Versioned composition hash", "Renderer and format readiness", "Existing immutable approval gates"],
+      "effort_engineer_days": {"low": 3, "high": 5},
+      "cost_effect": "Use deterministic selection/ordering before any optional paid model; no new service required.",
+      "pilot_required": true, "confidence": "medium"
+    },
+    {
+      "id": "PA-03", "priority": "P1", "category": "Candidate priority and bounded automation",
+      "problem": "A manual run chooses up to two eligible vacancies by system priority, with no explicit candidate vacancy IDs. A candidate with several vacancies cannot directly prioritize the urgent one.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "supabase/functions/_shared/job-loop-types.ts", "line": 118, "detail": "start_run accepts provider/model/consents but no selected opportunity IDs."},
+        {"type": "source-confirmed", "path": "supabase/functions/_shared/job-loop-runtime.ts", "line": 16, "detail": "Selection sorts manual first, saved first, then heuristic score and slices to LIMITS.packets."},
+        {"type": "source-confirmed", "path": "supabase/functions/_shared/job-loop-providers.ts", "line": 9, "detail": "Current cap is two packets, two queries and three daily runs."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Preview and explicitly choose 1-2 vacancies for manual preparation. Keep automatic ranking for separately opted-in schedules and preserve packet reuse.",
+      "acceptance_criteria": ["A candidate can prepare the third saved vacancy first", "Selected IDs are owner-validated and bound to run snapshot/idempotency", "Preview shows source, conditions and method; overflow is explicit", "Unchanged packets reuse without new model charges; two-packet cap remains server-enforced"],
+      "dependencies": ["Run request/snapshot schema", "Idempotency hash", "Capacity and ownership validation"],
+      "effort_engineer_days": {"low": 1.5, "high": 3},
+      "cost_effect": "Directs scarce paid calls toward chosen work; retains the shared ceiling.",
+      "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "PA-04", "priority": "P1", "category": "Pilot learning contract",
+      "problem": "Available milestones and run proxies cannot determine whether the second application is useful or requires less candidate effort. Reviewed contracts lack a paired task learning decision.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql", "line": 59, "detail": "Funnel measures accounts, profiles, evidence, completed runs, approvals and download-link requests."},
+        {"type": "source-confirmed", "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql", "line": 85, "detail": "Week-two return is a retained candidate action/check; repeated preparation includes scheduled runs and is not confirmed return."},
+        {"type": "unavailable", "path": "docs/INTEGRATED-JOB-LOOP-CONTRACT.md", "line": 11, "detail": "No measured candidate time, usefulness baseline or paired first/second-vacancy outcome was available in reviewed requirements. Other unreviewed research may exist."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Define a ten-user protocol comparing first and second distinct real vacancies within seven days, recording active candidate minutes, assistance, usable artifact, dated action and non-completion reason. Manual consented observation is sufficient initially.",
+      "acceptance_criteria": ["Each participant has first/repeat-task evidence or an explicit reason it is missing", "Report sample size and persona; do not aggregate into claimed hiring success", "Scheduled runs never count as candidate return", "Agree learning thresholds as hypotheses before examining results"],
+      "dependencies": ["Research owner", "Consent and observation definitions", "Baseline/repeat task schedule"],
+      "effort_engineer_days": {"low": 0.5, "high": 1.5},
+      "cost_effect": "No paid analytics service required; research time is additional to engineering estimate.",
+      "pilot_required": true, "confidence": "medium"
+    },
+    {
+      "id": "PA-05", "priority": "P2", "category": "Specification authority and audience boundary",
+      "problem": "Current implementation and older contracts disagree on run sizing and target pilot audience; the brief's MBA-applicant term also needs an explicit job-recruiting boundary.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "docs/CLOUD-JOB-LOOP-CONTRACT.md", "line": 9, "detail": "Older sizing assumption says five opportunities and three broad-search queries per run."},
+        {"type": "source-confirmed", "path": "supabase/functions/_shared/job-loop-providers.ts", "line": 9, "detail": "Current implementation declares two packets and two queries."},
+        {"type": "source-confirmed", "path": "docs/FREE-PILOT.md", "line": 3, "detail": "Document describes UAE professionals/coaches while current PilotLanding.tsx:58 includes university and MBA recruiting."},
+        {"type": "source-confirmed", "path": "src/lib/job-loop-audiences.ts", "line": 15, "detail": "MBA audience is students/alumni seeking roles during/after an MBA, rather than school admissions."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Make one dated route/capability/requirements matrix authoritative and mark superseded scope assumptions. State MBA job recruiting as the current scope; treat admissions as an explicit future scope decision.",
+      "acceptance_criteria": ["Public/help/spec material agrees on two-packet ten-user free pilot", "Configured, available and proposed capabilities are distinguished", "One shared journey has persona-specific evidence examples", "MBA admissions is explicitly excluded unless the owner respecifies it"],
+      "dependencies": ["Product-owner boundary decision", "Documentation ownership"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "Documentation/requirements work only; avoids expanding pilot scope and subscriptions.",
+      "pilot_required": false, "confidence": "high"
+    }
+  ],
+  "open_questions": ["Does MBA applicants mean job applicants during/after an MBA, as implemented, or admission applicants? The latter is outside the supplied real-vacancy task.", "Which researcher owns consented first/second-application observations and the decision to widen beyond ten users?", "Should application history be presented through one linked canonical view while preserving existing records?", "What candidate effort/usefulness threshold will justify optional paid model calls over rules preparation? These thresholds require research rather than invented claims."],
+  "do_not_build_now": ["Separate products for each persona", "MBA admissions essays", "Coach/institution portal", "Full interview or case coaching", "Employer submissions or recruiter sending", "Broad unauthorized scraping", "Paid checkout or automatic conversion", "ATS/hiring prediction scores", "New paid analytics or model services before paired-task pilot learning"]
+}

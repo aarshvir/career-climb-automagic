@@ -1,0 +1,83 @@
+{
+  "role_id": "database-architect",
+  "role_title": "Database Architect",
+  "phase": "build",
+  "snapshot": {"source_head":"e661c6493c30c88f2487800ff38aa10c46c9aae6","runtime_commit":"57713fb1cb15b29be8d6dc745e3c87bcb718c4af","live_checked":false},
+  "methods": ["Independent source inspection of migrations, RLS/grants, database RPCs, repository queries, worker/control operations, source/version contracts and SQL test coverage", "Verified local Git HEAD", "Ran synthetic in-memory PGlite erasure interleaving fixture twice; second execution contains explicit assertions; no external service calls"],
+  "not_tested": ["Production database, data, secrets or migrations", "Live product or deployed-schema parity", "Real PostgreSQL concurrent-session deadlock reproduction", "Production EXPLAIN plans, payload latency, backup/restore and cron execution", "Existing complete test suite; existing tests were inspected, not rerun"],
+  "criteria": [
+    {"name":"Tenant isolation and privilege boundaries","score":18,"weight":20,"evidence":"supabase/migrations/20261011010000_job_loop_cloud.sql:31,66-79,265-276; composite tenant ownership and service-only mutation/RPC boundaries"},
+    {"name":"Source facts and document authority","score":18,"weight":20,"evidence":"supabase/migrations/20261011010000_job_loop_cloud.sql:14-22,138-147,188-194; supabase/functions/_shared/job-loop-types.ts:57-66; snapshots, versions, exact approval and hashed artifact manifests"},
+    {"name":"Durable work, retries and cost ledger","score":17,"weight":20,"evidence":"supabase/migrations/20261011010000_job_loop_cloud.sql:20,47,219-229; supabase/migrations/20261011030000_job_loop_recurring.sql:140-159; idempotency and atomic shared ceiling"},
+    {"name":"Erasure and retention lifecycle","score":11,"weight":20,"evidence":"Isolated fixture reproduces new-run reactivation after begin_erase and retained private storage object after finish_erase; .tmp/20-role-review/03-database-architect/erase-interleave.mjs"},
+    {"name":"Query shape and operational maintainability","score":15,"weight":20,"evidence":"supabase/functions/_shared/job-loop-repository.ts:44-51,71-73; bounded lists fetch full snapshots/documents and filter recovery leases after limit"}
+  ],
+  "role_score":79,
+  "score_confidence":"medium",
+  "strengths": ["Owner RLS plus explicit grants and composite child-parent ownership FKs", "Run snapshots, profile/claim revisions and input hashes retain document lineage without requiring full normalization", "Exact reviewed text and content-addressed artifact hashes gate approval/download authority", "Shared UTC-month budget is transactionally reserved; uncertain calls are retained and erasure does not reopen spending", "Guest support has hashed private receipts, atomic quotas, expected-version staff updates and a 90-day cleanup function"],
+  "findings": [
+    {
+      "id":"DB-01","priority":"P1","category":"erasure concurrency",
+      "problem":"New run enrollment can reactivate an account during erasure, allowing a private artifact upload after the eraser's prefix scan. Final SQL erasure removes authority but can leave the object retained. This is not an observed public exposure.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/migrations/20261011030000_job_loop_recurring.sql","line":36,"detail":"Enrollment reactivates inactive seats; start_run invokes it at lines 47-51."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261011030000_job_loop_recurring.sql","line":233,"detail":"begin_erase deactivates/cancels existing state; storage insertion only requires active seat plus record at lines 247-256; finish_erase deletes SQL state at 257-269."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-repository.ts","line":75,"detail":"Scans prefix first, deletes collected objects, then calls finish_erase; no durable erasing fence or final rescan."},
+        {"type":"observed","path":".tmp/20-role-review/03-database-architect/erase-interleave.mjs","line":1,"detail":"Command: node .tmp/20-role-review/03-database-architect/erase-interleave.mjs. In-memory synthetic PGlite fixture asserts reactivated seat, zero records, zero runs, one storage object and private bucket after interleaving begin/start/upload/finish; exit 0."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Add durable erasing state/generation checked by every mutation, enrollment, scheduling, run/OAuth operation and storage insert. Keep fence through storage deletion plus final empty-prefix verification, and persist retry progress.",
+      "acceptance_criteria":["Two-session begin_erase/start_run/upload interleaving rejects new work and uploads", "Interrupted deletion retries reach empty storage prefix, no career/run/packet/connection records and inactive seat", "Committed shared budget is unchanged by erasure", "Explicit subsequent fresh enrollment is possible only after erasure completion"],
+      "dependencies":["Database migration", "Control/repository erasure contract", "Storage guard and synthetic concurrency regression"],
+      "effort_engineer_days":{"low":2,"high":4},
+      "cost_effect":"Reduces orphan storage and manual deletion support; requires no new service.","pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"DB-02","priority":"P2","category":"transaction lock ordering",
+      "problem":"Record mutation locks the record before updating runs, while phase commit locks the run before the record. Concurrent correction and commit can deadlock; actual production occurrence is unverified.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/migrations/20261011030000_job_loop_recurring.sql","line":168,"detail":"Current write_record locks account record at 169 and updates active runs at 175."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261011010000_job_loop_cloud.sql","line":137,"detail":"commit_phase locks run, then account record at 139."},
+        {"type":"inferred","path":"supabase/functions/_shared/job-loop-runtime.ts","line":95,"detail":"A factual edit can overlap worker phase commit. PostgreSQL can abort one transaction, causing a retry/error; no runtime incident claimed."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Standardize account/record-first serialization across mutation, start, commit, erase and approval functions; preserve stale-input and lease guards.",
+      "acceptance_criteria":["Real PostgreSQL two-connection correction/commit stress test records no SQLSTATE 40P01", "Concurrent correction still prevents publication of old facts", "CAS conflict remains actionable and retry does not duplicate packets or provider cost"],
+      "dependencies":["Function lock-order review", "Multi-connection PostgreSQL test harness"],
+      "effort_engineer_days":{"low":1,"high":2},
+      "cost_effect":"Reduces transient support and wasted worker execution; no paid dependency.","pilot_required":false,"confidence":"medium"
+    },
+    {
+      "id":"DB-03","priority":"P2","category":"query payload and access paths",
+      "problem":"Every snapshot fetch loads full bodies for 30 runs and 150 packets. Run snapshots are discarded in the public mapping; packet and usage owner-list indexes are absent. No measured latency failure is asserted.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-repository.ts","line":44,"detail":"select('*') list queries at 46-47; usage owner query at 48; publicRun mapping at 105-107 drops run snapshot."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261011010000_job_loop_cloud.sql","line":21,"detail":"Run snapshot and data allow 2 MB each; packet body allows 1 MB at 33. Existing run owner-date index at 24 does not cover packet listing."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-repository.ts","line":71,"detail":"recoverableRuns limits twenty before applying lease expiry in application memory."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Fetch summary projections and deterministic cursor pages, fetch full selected packet on demand, add measured owner/date and owner/run access indexes, and filter recoverable lease expiry before LIMIT.",
+      "acceptance_criteria":["Measure representative ten-user response bytes before/after", "EXPLAIN (ANALYZE, BUFFERS) confirms intended owner-list and recovery paths", "Cursor pages have no duplicates/omissions across identical timestamps", "Selected packet text, evidence and approval hashes remain identical"],
+      "dependencies":["Snapshot/UI contract", "Representative synthetic data", "Database index migration"],
+      "effort_engineer_days":{"low":1,"high":3},
+      "cost_effect":"Lowers database transfer, JSON decoding and refresh work; no distributed infrastructure required.","pilot_required":false,"confidence":"high"
+    },
+    {
+      "id":"DB-04","priority":"P2","category":"support durability",
+      "problem":"Signed-in support uses separate count and insert operations without an idempotency request ID; concurrent submissions can exceed quota and ambiguous retries duplicate requests.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-runtime.ts","line":80,"detail":"Counts prior requests at 81, checks limit at 82, then independently inserts at 83."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261011030000_job_loop_recurring.sql","line":26,"detail":"Support table has generated ID but no owner/request uniqueness."},
+        {"type":"source-confirmed","path":"supabase/migrations/20261014020000_jobvance_guest_support.sql","line":30,"detail":"Guest equivalent already serializes quota and replays same request at lines 31-42."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Use one service-only signed-in intake RPC with owner/request uniqueness, payload conflict checks and atomic daily quota, following the guest receipt implementation.",
+      "acceptance_criteria":["Ten parallel new requests for one account admit five", "Repeated owner/request creates one row", "Changed retry payload conflicts", "Other owners and browser roles cannot inspect privileged support intake"],
+      "dependencies":["Support API request-ID contract", "Atomic intake migration and fixture tests"],
+      "effort_engineer_days":{"low":0.5,"high":1.5},
+      "cost_effect":"Reduces duplicate staff work and unbounded retry writes.","pilot_required":false,"confidence":"high"
+    }
+  ],
+  "open_questions":["Are deployed migrations/grants identical to this reviewed source?", "Does the guest-support cleanup cron exist, run successfully and report failures?", "What restore evidence and storage/database recovery objectives exist?", "What are actual snapshot payloads and query plans with a ten-user month of data?", "What retention period should apply to full run source snapshots and expired OAuth states?"],
+  "do_not_build_now":["Sharding, table partitioning or warehouse", "Separate managed queue service", "Vector database for source facts", "Wholesale normalization of every claim before pilot learning", "Paid database services or production migrations during this audit"]
+}

@@ -1,0 +1,106 @@
+{
+  "role_id": "competitor-intelligence",
+  "role_title": "Competitor Intelligence",
+  "phase": "growth",
+  "snapshot": {"source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6", "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af", "live_checked": false},
+  "methods": ["Read REVIEW-BRIEF.md before inspecting evidence", "Independent current official public product/pricing checks on 2026-10-14 for Teal, Huntr, Jobscan, Rezi, Simplify and Careerflow", "Inspected actual current routing, guest check, reuse, packet provenance and approval source", "Reviewed existing competitor benchmark, design research and proposed pricing assets; no peer reports or earlier audit grades read"],
+  "not_tested": ["Authenticated competitor or Jobvance workflows", "No accounts, uploads, purchases, paid model/search calls, employer submissions or private page scraping", "UAE eligibility, regional checkout, taxes and offers", "Comparative task time, import/export fidelity, accessibility, privacy enforcement, ATS behavior and hiring outcomes", "Jobscan numeric rate and trial unavailable after pricing redirected to unreadable app plan", "Simplify+ numeric rate unavailable in inspected public text; public help collection retrieval failed"],
+  "criteria": [
+    {"name": "Primary-source freshness and claim discipline", "score": 17, "weight": 20, "evidence": "Fresh official checks on 2026-10-14 broadly corroborate docs/research/COMPETITOR-BENCHMARK.md; retrieval and checkout gaps remain explicit."},
+    {"name": "Shared-task and audience coverage", "score": 15, "weight": 20, "evidence": "Six relevant current alternatives considered; existing benchmark lacks Simplify and comparative task observations; src/lib/job-loop-audiences.ts covers all three audiences."},
+    {"name": "Demonstrated differentiation", "score": 10, "weight": 20, "evidence": "src/pages/CvCheck.tsx:50,176,386 and src/pages/JobLoop.tsx:404 establish reuse and approval mechanisms; no paired competitor advantage measured."},
+    {"name": "Competitive pricing/value readiness", "score": 12, "weight": 20, "evidence": "src/pages/ProductPage.tsx:172 labels proposed prices; Teal and Rezi display $29 subscriptions; willingness to pay and switching behavior untested."},
+    {"name": "Repeatable intelligence-to-decision process", "score": 9, "weight": 20, "evidence": "Dated benchmark/design/pricing assets exist, but inspected assets lack named refresh owner, change-trigger log and hypothesis falsification record."}
+  ],
+  "role_score": 63,
+  "score_confidence": "medium",
+  "strengths": ["Existing public research distinguishes advertised claims, observed presentation and untested behavior", "Current code provides source references, exact approval and explicit second-vacancy reuse", "Public pricing separates free pilot from disabled proposed paid offers", "Audience examples preserve academic, team and confidentiality context rather than inventing qualifications"],
+  "findings": [
+    {
+      "id": "CI-01", "priority": "P1", "category": "Differentiation validation",
+      "problem": "Source-linked facts and exact approval are plausible advantages, but no paired task evidence establishes that they reduce errors or effort relative to existing alternatives.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "src/pages/JobLoop.tsx", "line": 404, "detail": "Packet review exposes source revisions, stale holds, factual/disclosure approval and exact approved downloads."},
+        {"type": "source-confirmed", "path": "supabase/functions/_shared/job-loop-engine.ts", "line": 298, "detail": "Packet records profileRevision and claimVersions; this establishes a mechanism, not competitive superiority."},
+        {"type": "source-confirmed", "path": "docs/research/COMPETITOR-BENCHMARK.md", "line": 3, "detail": "Existing comparison explicitly excludes authenticated product tests."},
+        {"type": "observed", "url": "https://simplify.jobs/", "detail": "Official public page checked 2026-10-14 advertises profile reuse and line-by-line acceptance of tailored suggestions; authenticated provenance/correction behavior unknown."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Run a later consented paired study with identical CV/vacancy material on Jobvance, two close alternatives and the person's existing document workflow. Compare first application, second vacancy, corrected fact and withdrawn confidential detail. Treat differentiation as a hypothesis until tested.",
+      "acceptance_criteria": ["Predeclare rubric and equal task/materials before testing", "Report active minutes, assistance, retained corrections, material factual errors, usable exports and failed tasks with denominators", "Do not publish superiority or time-saving claims from marketing pages or unlike vendor scores"],
+      "dependencies": ["Consenting participants and lawful product access", "Fixed task rubric and artifact review", "Separate authorization for any later paid access"],
+      "effort_engineer_days": {"low": 2, "high": 4},
+      "cost_effect": "No audit spending. Planning estimate excludes recruitment and session time; any later competitor access cost must be agreed. Measure cost per useful approved artifact before expanding the pilot.",
+      "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "CI-02", "priority": "P2", "category": "Competitive coverage",
+      "problem": "The maintained comparison omits Simplify and may underweight the free breadth applicants already receive; generic reuse and tracking are not sufficient differentiation.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "docs/research/COMPETITOR-BENCHMARK.md", "line": 15, "detail": "Existing six-product shortlist includes Resume Worded; Simplify is absent from the matrix."},
+        {"type": "observed", "url": "https://simplify.jobs/", "detail": "Checked 2026-10-14: vendor advertises free matching, autofill and tracker plus profile reuse; quality, geography and reliability untested."},
+        {"type": "observed", "url": "https://huntr.co/pricing", "detail": "Checked 2026-10-14: free plan advertises unlimited base resumes, PDF export, two tailored resumes/packets, up to 100 tracked jobs and unlimited application autofills."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Add Simplify to the canonical maintained shortlist and compare input, review, export and employer handoff, keeping unknown cells explicit. Retain Resume Worded as an adjacent review-only reference when relevant rather than inflating a feature league table.",
+      "acceptance_criteria": ["Each row includes checked date, direct official source, free limits and advertised/tested/unknown labels", "No best-product ranking, unsupported absence claim or superiority badge", "Candidate existing Word/PDF workflow is included as a later task baseline"],
+      "dependencies": ["Research owner", "Canonical comparison document"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "Manual research only; no additional service or account required for the document update.",
+      "pilot_required": false, "confidence": "high"
+    },
+    {
+      "id": "CI-03", "priority": "P2", "category": "Pricing and switching value",
+      "problem": "The proposed $15/$29 prices have not been connected to an observed reason to switch from substantial free alternatives or established $29 subscriptions.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "src/pages/ProductPage.tsx", "line": 172, "detail": "Focus $15 and Job Loop $29 are correctly labelled proposed future tiers; checkout unavailable."},
+        {"type": "source-confirmed", "path": "docs/SUBSCRIPTION-PRICING-REVIEW.md", "line": 22, "detail": "Existing plan warns against annual/unlimited promises before repeated-use and useful-pack costs are measured."},
+        {"type": "observed", "url": "https://www.tealhq.com/pricing", "detail": "Checked 2026-10-14: unlimited free resumes/tracking; Teal+ $13/7 days, $29/30 days, $79/90 days; taxes/checkout not tested."},
+        {"type": "observed", "url": "https://www.rezi.ai/pricing", "detail": "Checked 2026-10-14: Pro $29/month and lifetime $149; one free resume and three PDF downloads; actual entitlements not exercised."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Following task tests, record current tools, switching objections, second-application use and nonbinding price preferences for useful reviewed output or a bounded search period. Separate stated preference from actual willingness to pay and paid conversion.",
+      "acceptance_criteria": ["Document reasons users prefer or reject Jobvance at proposed prices", "Separate nonbinding preference, free continuation and later paid conversion", "Keep checkout disabled and pilot terms accurate until commercial eligibility and billing checks are resolved"],
+      "dependencies": ["CI-01 task observations", "Commercial eligibility before charging", "Useful-pack cost measurement within shared ceiling"],
+      "effort_engineer_days": {"low": 0.5, "high": 1.5},
+      "cost_effect": "No audit charge or provider activation. Avoid unlimited commitments and annual subscriptions before costs and episodic demand are understood.",
+      "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "CI-04", "priority": "P2", "category": "Audience fit",
+      "problem": "Current persona examples are sensible, but comparative audience fit remains untested; average task results could hide different failure costs.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "src/lib/job-loop-audiences.ts", "line": 7, "detail": "Student path uses actual project, placement and activity material."},
+        {"type": "source-confirmed", "path": "src/lib/job-loop-audiences.ts", "line": 19, "detail": "MBA path separates own contribution from team results and addresses career applications, not admissions."},
+        {"type": "source-confirmed", "path": "src/lib/job-loop-audiences.ts", "line": 30, "detail": "Professional path highlights removing confidential details and reusing reviewed experience."},
+        {"type": "source-confirmed", "path": "src/pages/CvCheck.tsx", "line": 387, "detail": "A no-finished-CV route and factual starter outline already exist; do not report them missing."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Use shared task study fixtures for a student without a finished CV, an MBA career pivot/team result and a 5–10-year professional lateral move with a confidential metric. Report results separately without building three products.",
+      "acceptance_criteria": ["All three audiences complete the same core prepare/review/reuse workflow with relevant fixtures", "Report contextual factual errors and correction carryover per audience", "Clarify that MBA positioning concerns job seekers rather than admissions applications"],
+      "dependencies": ["CI-01 participants and rubric", "Public synthetic fixtures for rehearsal"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "Fixture preparation only in estimate; research sessions additional. No separate persona service or paid AI needed.",
+      "pilot_required": true, "confidence": "medium"
+    },
+    {
+      "id": "CI-05", "priority": "P2", "category": "Lean competitor watch",
+      "problem": "Useful dated research exists, but inspected assets lack a named owner and explicit change-to-decision process; volatile pricing and feature claims can drift across documents.",
+      "evidence": [
+        {"type": "source-confirmed", "path": "docs/research/COMPETITOR-BENCHMARK.md", "line": 3, "detail": "Dated 13 October snapshot with explicit limits, but no row-level next-check/decision owner template."},
+        {"type": "source-confirmed", "path": "docs/DESIGN-RESEARCH.md", "line": 20, "detail": "Design decisions already distinguish original presentation from borrowed vendor outcome claims; link this to a maintained claim record."},
+        {"type": "unavailable", "url": "https://www.jobscan.co/pricing", "detail": "On 2026-10-14 redirected to https://app.jobscan.co/plan with no readable pricing text; retrieval failure is not proof of missing pricing."},
+        {"type": "observed", "url": "https://www.careerflow.ai/#pricing", "detail": "On 2026-10-14 multiple billing blocks/offers present; monthly displays $23.99 Premium/$44.99 Plus, checkout eligibility not verified."}
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Use a manual monthly row template: vendor, task, official URL, date, advertised/tested/unknown, free limit, price/cadence/region, changed since, Jobvance consequence, owner and next check. Review before pricing/positioning releases and when free exports/autofill, provenance controls, deletion/AI terms or participant alternatives change. Install no bot.",
+      "acceptance_criteria": ["One owner and canonical matrix link benchmark/design/pricing assets", "Changes carry source, date, confidence and decision/no-action reason", "Unknown/contradictory official claims remain labelled instead of silently resolving to a convenient value"],
+      "dependencies": ["Product owner assignment", "Single canonical comparison source"],
+      "effort_engineer_days": {"low": 0.5, "high": 1},
+      "cost_effect": "No watch service subscription; planning assumption 30–45 minutes manual review monthly plus consequential change checks.",
+      "pilot_required": false, "confidence": "high"
+    }
+  ],
+  "open_questions": ["Does exact evidence-linked review measurably lower material factual errors or total effort against close alternatives?", "Do corrected or withdrawn facts stay removed in the next vacancy across tools?", "Which audience values this enough to switch and later pay?", "What are actual current Jobscan and Simplify+ checkout terms in target geographies?", "Are selected employer feeds suitable for target roles and locations? Public pages cannot establish this.", "Does a short search-period offer fit observed demand better than a recurring monthly subscription?"],
+  "do_not_build_now": ["No ongoing competitor bot or new paid services", "No auto-apply, recruiter outreach or broad job scraping to chase feature parity", "No opaque ATS scores or copied interview/time-saving multipliers", "No separate products for each persona or large template library without task evidence", "No annual or unlimited-AI commitments; preserve disabled checkout and $50 shared pilot ceiling", "No claimed moat, competitor safety verdict, UAE coverage or hiring improvement from public marketing pages"]
+}

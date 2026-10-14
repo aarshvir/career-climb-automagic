@@ -114,6 +114,7 @@ The frontend deployment, backend deployment and DNS cutover are separate changes
 
 ## Further documentation
 
+- [Twenty-role audit and prioritized product plan](docs/audits/2026-10-14-20-role-review/CONSOLIDATED-REVIEW.md) — 14 October 2026 review; recommendations remain backlog work unless separately recorded as implemented.
 - [Repair contract](docs/MVP-REPAIR-CONTRACT.md)
 - [Auth repair and redirect requirements](docs/AUTH-REPAIR.md)
 - [Backend deployment and verification limits](docs/MVP-BACKEND-DEPLOYMENT.md)

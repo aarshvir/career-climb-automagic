@@ -1,0 +1,317 @@
+{
+  "role_id": "email-marketing",
+  "role_title": "Email Marketing",
+  "phase": "growth",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Independent source and schema examination of authentication, pilot, privacy, support, Job Loop next actions and administration metrics.",
+    "Historical local outreach assets reviewed only as unsent assets; no peer or prior audit grades read.",
+    "Official Supabase SMTP and Gmail sender guidance read 2026-10-14.",
+    "Four recommendation-only email drafts checked with email-sequence analyzer: 75/100 heuristic copy score; no delivery or effectiveness claim."
+  ],
+  "not_tested": [
+    "Live browser/authenticated candidate flows",
+    "SMTP configuration, DNS authentication, received emails or inbox placement",
+    "Any private mailbox, actual subscriber data, provider dashboard or deliverability logs",
+    "No emails, drafts into accounts, subscriptions, paid calls or runtime mutations"
+  ],
+  "criteria": [
+    {
+      "name": "Permission boundaries and truthful expectations",
+      "score": 17,
+      "weight": 20,
+      "evidence": "PilotLanding110–129, ProductPage162–166 and JobLoopPanels74 clearly bound contact and processing."
+    },
+    {
+      "name": "Consent, preferences and suppression readiness",
+      "score": 7,
+      "weight": 20,
+      "evidence": "Auth149–169 has no lifecycle choice; bounded source/schema search found no lifecycle unsubscribe or suppression contract."
+    },
+    {
+      "name": "Task relevance and activation design",
+      "score": 14,
+      "weight": 20,
+      "evidence": "JobLoopPanels27–33 provides actionable states; lifecycle email implementation and candidate response are untested."
+    },
+    {
+      "name": "Transactional sender readiness",
+      "score": 10,
+      "weight": 20,
+      "evidence": "AuthContext100–118 uses supported SDK; AUTH-REPAIR31 leaves live delivery checks pending; no SMTP/DNS evidence inspected."
+    },
+    {
+      "name": "Repeat usefulness and measurement",
+      "score": 9,
+      "weight": 20,
+      "evidence": "Due dates and candidate actions exist; admin snapshot65,85–86 correctly limits metrics but has no email attribution."
+    }
+  ],
+  "role_score": 57,
+  "score_confidence": "medium",
+  "strengths": [
+    "No forced email capture for first value.",
+    "Pilot request explicitly remains unsent; support records do not claim email delivery.",
+    "Preparation consent, inbox connection and draft creation are separate and no employer send action is provided.",
+    "Next-step resolver, candidate due dates and candid metric definitions are a practical basis for a small lifecycle pilot."
+  ],
+  "findings": [
+    {
+      "id": "EMAIL-01",
+      "priority": "P1",
+      "category": "Permission and suppression",
+      "problem": "A future lifecycle send has no source-visible purpose-specific permission, unsubscribe or suppression contract; signup, pilot contact and preparation consent must not become mailing-list permission.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/Auth.tsx",
+          "line": 149,
+          "detail": "Signup captures account credentials; inspected form has no lifecycle email choice."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoopPanels.tsx",
+          "line": 74,
+          "detail": "Recurring consent authorizes rules-based preparation, not candidate email delivery."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/PilotLanding.tsx",
+          "line": 110,
+          "detail": "Pilot request remains in memory and is sent only by the candidate's chosen email app."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/ProductPage.tsx",
+          "line": 156,
+          "detail": "Inspected privacy content describes service processing but no email subscription lifecycle; bounded src/schema search found no newsletter suppression or unsubscribe implementation."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Before any optional lifecycle mail, add separate unchecked choices for onboarding help, dated-action reminders and occasional tips. Record purpose, address verification, timestamp, source and wording version. Keep operational auth separate. Implement signed unsubscribe without login, global optional-mail suppression, hard-bounce/complaint suppression and send-time rechecks. Never import historical coach prospects into this program.",
+      "acceptance_criteria": [
+        "Unconsented signup, draft request, Google sign-in and recurring preparation never enqueue optional mail.",
+        "Opt-out, complaint, hard bounce, erasure and duplicate webhook fixtures suppress queued optional sends; opt-out survives later sign-in.",
+        "Unsubscribe works without login; essential user-requested auth remains separately classified."
+      ],
+      "dependencies": [
+        "Owner-approved purpose and retention policy",
+        "Future mail transport decision",
+        "Account settings and suppression storage"
+      ],
+      "effort_engineer_days": {
+        "low": 2,
+        "high": 4
+      },
+      "cost_effect": "No expenditure now; small storage/engineering cost later; prevent unnecessary mail and a paid marketing platform during the ten-user pilot.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "EMAIL-02",
+      "priority": "P1",
+      "category": "Transactional readiness",
+      "problem": "Source-supported auth requests are not evidence of actual external confirmation/recovery delivery or sender authentication. Operational readiness remains unverified.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/contexts/AuthContext.tsx",
+          "line": 100,
+          "detail": "Signup calls supported Supabase SDK; password recovery at line118 requests /auth/reset."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/AUTH-REPAIR.md",
+          "line": 31,
+          "detail": "Document explicitly leaves live delivery and allowlisting as release checks."
+        },
+        {
+          "type": "unavailable",
+          "detail": "No SMTP settings, DNS verification, received headers or delivery logs inspected; no delivery test performed."
+        },
+        {
+          "type": "observed",
+          "url": "https://supabase.com/docs/guides/auth/auth-smtp",
+          "detail": "Official documentation read 2026-10-14: default SMTP is restricted, best effort, currently two messages/hour; advises separate auth/marketing streams and authentication."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Create an owner-run release checklist for authorized synthetic accounts: confirmation policy, recovery, expiry, resend throttles, redirects and provider events. Keep auth template, sender and reputation distinct from lifecycle promotions. Verify SPF/DKIM/DMARC and actual received headers before promising delivery; do not activate SMTP in this audit.",
+      "acceptance_criteria": [
+        "Document the configured confirmation policy and observed recovery outcome, including missing-message recovery guidance.",
+        "Authorized tests cover expired links, wrong browser, throttling, duplicate clicks and correct production redirect.",
+        "Evidence includes provider acceptance versus inbox receipt separately; no promotional CTA in auth templates."
+      ],
+      "dependencies": [
+        "Owner access to existing sender/DNS configuration",
+        "Explicit later delivery-test authorization",
+        "Auth/security owner"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1.5
+      },
+      "cost_effect": "Audit costs $0; future SMTP cost not priced or approved and is outside the $50 AI/search ceiling.",
+      "pilot_required": true,
+      "confidence": "medium"
+    },
+    {
+      "id": "EMAIL-03",
+      "priority": "P2",
+      "category": "Task-based activation",
+      "problem": "The product has useful next-step states but no source-visible email lifecycle that turns those states into timely, permissioned help. This is deferred readiness, not a broken existing delivery promise.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoopPanels.tsx",
+          "line": 27,
+          "detail": "Next-action selection distinguishes missing profile, unconfirmed facts, reviewable documents, first vacancy and repeat application."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/ProductPage.tsx",
+          "line": 150,
+          "detail": "First check works without signup; creating an account is optional for private saving."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Test the four recommendation-only drafts below with consenting pilot participants. Reuse the existing next-action resolver and suppress on task completion. Avoid collecting guest email merely to trigger abandonment mail.",
+      "acceptance_criteria": [
+        "Fixture journeys choose exactly one relevant task and CTA; completion cancels queued help.",
+        "Student examples preserve academic contributions; MBA/professional examples preserve truthful source facts.",
+        "Guest first check remains usable without email or account."
+      ],
+      "dependencies": [
+        "EMAIL-01",
+        "Validated event/state resolver",
+        "Pilot copy review"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Static copy and existing state reuse; no paid model generation or ESP purchase needed for draft testing.",
+      "pilot_required": false,
+      "confidence": "high"
+    },
+    {
+      "id": "EMAIL-04",
+      "priority": "P2",
+      "category": "Useful repeat reminders",
+      "problem": "Existing due dates and preparation schedules are distinct; converting every scheduled run into mail would create noise and could reveal a discreet job search.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoopPanels.tsx",
+          "line": 17,
+          "detail": "Due/upcoming actions use candidate-selected dates and exclude offer/rejected/withdrawn."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoopPanels.tsx",
+          "line": 74,
+          "detail": "Daily/weekdays/weekly scheduler consent is for preparation and has pause/cancel controls."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoop.tsx",
+          "line": 386,
+          "detail": "Profile offers discreetSearch preference."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Require a separate reminder choice, personal address confirmation, local send window and discreet-subject option. Aggregate one daily digest only when actionable; cap optional lifecycle mail to two/week initially. Recheck latest state at dispatch. Stop on search pause/end, revoked facts, erased data or withdrawn/closed tasks. Never auto-contact employers.",
+      "acceptance_criteria": [
+        "Timezone-boundary, duplicate-dispatch, completed-before-send and pause-before-send fixtures produce at most one appropriate notification.",
+        "No employer names, role details, CV attachments, private receipt tokens or source quotations appear in subjects or URLs.",
+        "A successful job-search exit stops reminders and is not counted as failed retention."
+      ],
+      "dependencies": [
+        "EMAIL-01",
+        "Candidate search-status/preference fields",
+        "Idempotent outbox"
+      ],
+      "effort_engineer_days": {
+        "low": 1.5,
+        "high": 3
+      },
+      "cost_effect": "Bounded message volume; $0 current activation; future mail charges separate from AI/search budget.",
+      "pilot_required": false,
+      "confidence": "high"
+    },
+    {
+      "id": "EMAIL-05",
+      "priority": "P2",
+      "category": "Measurement",
+      "problem": "Current product metrics provide activation evidence but cannot attribute optional email usefulness; automated completed runs must not be counted as candidate return.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql",
+          "line": 65,
+          "detail": "Download-request metric explicitly does not establish browser download completion."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql",
+          "line": 85,
+          "detail": "Week-two candidate return is distinct from repeat completed preparation, which includes schedules."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Log minimal purpose/template/task identifiers and eligible, suppressed, queued, provider-accepted, bounced, complained and unsubscribed outcomes. Associate a clicked message with the next meaningful candidate action in a declared seven-day window, without CV/employer data in tracking. Report counts and denominators; do not optimize opens or conduct A/B significance tests on ten people.",
+      "acceptance_criteria": [
+        "Report first approved document and voluntary second-vacancy preparation separately from automated runs.",
+        "One task completed after multiple clicks counts once; delivery acceptance is not an inbox or action claim.",
+        "Record complaints/opt-outs and contextual feedback alongside activation; no benchmark/conversion promises."
+      ],
+      "dependencies": [
+        "EMAIL-01",
+        "Minimal event retention policy",
+        "Future provider webhook verification"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Reuse existing database; no paid analytics suite or tracking pixel required.",
+      "pilot_required": false,
+      "confidence": "high"
+    }
+  ],
+  "open_questions": [
+    "Which existing sender, domain authentication and operational templates are configured? No secrets are needed in the report.",
+    "Do pilot participants want email, and which reminder purposes are worth receiving? Validate before implementation.",
+    "What sender identity, contact address, retention and recipient-jurisdiction requirements will the owner approve before optional sends?"
+  ],
+  "do_not_build_now": [
+    "No historical coach-prospect import, cold nurture, automatic contact or employer follow-ups.",
+    "No generic newsletter, daily scheduled-run announcements, upgrade/trial-expiry sequence, paid ESP purchase or new subscription.",
+    "No CV attachments or employer details in notifications; no open-rate target or claimed email conversion uplift.",
+    "No separate persona campaign stacks; reuse task states and short truthful examples."
+  ]
+}

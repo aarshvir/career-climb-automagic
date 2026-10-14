@@ -1,0 +1,92 @@
+{
+  "role_id": "security-auditor",
+  "role_title": "Security Auditor",
+  "phase": "build",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Independent local source review of identity, admin membership, service-role boundaries, RLS, private storage, manifests and signed links, guest receipts, model consent/payloads, provider fetching, parser bounds, logging, webhook signatures and scheduler credentials.",
+    "npx vitest run --config supabase/tests/vitest.backend.config.ts supabase/tests/jobvance-admin.test.ts supabase/tests/jobvance-guest-support-boundary.test.ts supabase/tests/jobvance-guest-support-migration.test.ts supabase/tests/job-loop-scheduler-ticket.test.ts supabase/tests/job-loop-cloud-sql.test.ts supabase/tests/paddle.test.ts --maxWorkers=4 — 6 files, 58 tests passed.",
+    "npx vitest run src/__tests__/lib/cv-extraction.test.ts src/__tests__/lib/candidate-openrouter-hosted.test.ts src/__tests__/lib/job-loop-api.test.ts --maxWorkers=4 — 3 files, 66 tests passed."
+  ],
+  "not_tested": [
+    "Published application or live infrastructure, configured MFA, deployed SQL grants/RLS, secret values, account data, production storage or logs.",
+    "Actual exploitation, resource-exhaustion payloads, destructive scanning, production ingress header normalization, signed-link revocation after issuance, operational retention jobs.",
+    "Complete dependency vulnerability assessment, every legacy route, external identity/provider configuration or compliance certification."
+  ],
+  "criteria": [
+    { "name": "Identity and privileged access", "score": 16, "weight": 20, "evidence": "auth.getUser plus fresh membership and SQL role rechecks; no admin assurance/step-up gate in jobvance-admin.ts:55-64." },
+    { "name": "Tenant isolation and private persistence", "score": 18, "weight": 20, "evidence": "Owner-scoped repository queries and restrictive storage policies; local PostgreSQL ownership/manifest tests passed; deployment unverified." },
+    { "name": "Documents and capability lifecycle", "score": 15, "weight": 20, "evidence": "Manifest hashes, path validation, 120-second signed URLs and bounded DOCX inflation; PDF extraction lacks an overall deadline/cumulative early text check." },
+    { "name": "External input, models and automation", "score": 18, "weight": 20, "evidence": "Fixed HTTPS providers, redirect rejection, bounded response readers, explicit sharing/model consent, output-ID allowlists and one-use dispatch ticket tests." },
+    { "name": "Abuse resistance and operational assurance", "score": 15, "weight": 20, "evidence": "Bounded bodies, safe server errors and allowlisted audit details; guest rate identity trusts deployment-specific headers and live controls unverified." }
+  ],
+  "role_score": 82,
+  "score_confidence": "medium",
+  "strengths": [
+    "No evidenced urgent data exposure or outsider admin bypass in examined source paths; this is not an absence-of-vulnerabilities guarantee.",
+    "Fresh private administrator membership with SQL revocation rechecks and restricted privileged RPC execution.",
+    "Private owner/packet/hash-bound artifacts and approval-gated signed-link issuance, including content hash verification.",
+    "High-entropy guest bearer receipts, server-side hashes, memory-only UI state, bounded intake and audited staff detail reads.",
+    "Eligible-claim-only model input, explicit provider-route consent, fixed endpoint fetching, bounded outputs and one-use scheduler tickets.",
+    "124 bounded security-relevant tests passed across 9 files, including local PostgreSQL isolation fixtures."
+  ],
+  "findings": [
+    {
+      "id": "SEC-01", "priority": "P1", "category": "privileged-session-hardening",
+      "problem": "A valid administrator bearer session plus active membership suffices for sensitive administration. Application-enforced MFA assurance and recent step-up are absent. This is a source-confirmed hardening gap; session theft and account compromise are hypothetical, not observed bypasses.",
+      "evidence": [
+        { "type": "source-confirmed", "path": "supabase/functions/_shared/jobvance-admin.ts", "line": 55, "detail": "authenticateAdmin verifies token and active UUID membership but only consumes user ID; no assurance/fresh-auth gate." },
+        { "type": "source-confirmed", "path": "supabase/migrations/20261012180814_jobvance_admin_platform.sql", "line": 77, "detail": "SQL assertion rechecks active owner/operator membership, without session assurance." },
+        { "type": "observed", "path": "supabase/tests/jobvance-admin.test.ts", "line": 13, "detail": "Existing fixture returning an ID without MFA assurance is accepted; bounded test file passed." }
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Require verified MFA assurance and recent reauthentication for sensitive administration actions, retain private membership checks, and document individual administrator enrollment/recovery.",
+      "acceptance_criteria": ["Valid lower-assurance administrator session cannot read private support details or change global settings.", "Verified stepped-up member succeeds and revoked membership still immediately fails on the next privileged operation.", "Assurance is verified by trusted identity/token validation rather than editable metadata or unverified decoding."],
+      "dependencies": ["Identity-provider assurance verification design", "Owner/operator MFA enrollment and recovery policy"],
+      "effort_engineer_days": { "low": 1, "high": 3 },
+      "cost_effect": "Small identity/operational effort; no model or search spend required.", "pilot_required": true, "confidence": "high"
+    },
+    {
+      "id": "SEC-02", "priority": "P2", "category": "untrusted-document-resource-bounds",
+      "problem": "PDF extraction enforces compressed bytes and page count but accumulates all page text before validating text length and lacks an application deadline/cancel path. Resource exhaustion is an untested hypothesis; a crash or malicious execution was not observed.",
+      "evidence": [
+        { "type": "source-confirmed", "path": "src/lib/cv-extraction.ts", "line": 51, "detail": "PDF task is created without an overall deadline; up to 100 pages are parsed and accumulated before validateCvText at line 74." },
+        { "type": "source-confirmed", "path": "src/lib/cv-docx.ts", "line": 14, "detail": "DOCX provides advertised/actual inflated XML byte limits and small compressed chunks, demonstrating a stronger existing resource-bound pattern." },
+        { "type": "observed", "path": "src/__tests__/lib/cv-extraction.test.ts", "line": 51, "detail": "Existing oversized and forged DOCX extraction tests pass; this does not prove PDF exhaustion resistance." }
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Enforce cumulative extracted text early and implement cancel/deadline with PDF task destruction and stale-result disposal.",
+      "acceptance_criteria": ["Synthetic over-budget PDF output stops before processing remaining pages.", "A slow mocked PDF task cancels within the application deadline and is destroyed.", "A normal subsequent upload succeeds and cancelled results never replace current input."],
+      "dependencies": ["PDF worker lifecycle", "Extraction UI state/cancellation wiring"],
+      "effort_engineer_days": { "low": 0.5, "high": 1.5 },
+      "cost_effect": "Negligible recurring cost; reduces client resource use.", "pilot_required": true, "confidence": "medium"
+    },
+    {
+      "id": "SEC-03", "priority": "P2", "category": "public-intake-abuse-trust-boundary",
+      "problem": "Guest support rate identity derives from preferred proxy headers. Whether deployed ingress overwrites attacker-supplied values was not verified; spoofing and resulting shared quota exhaustion are hypotheses, not confirmed runtime bugs.",
+      "evidence": [
+        { "type": "source-confirmed", "path": "supabase/functions/jobvance-guest-support/index.ts", "line": 11, "detail": "Rate-key input prefers cf-connecting-ip then the first x-forwarded-for value; HMAC hides the address but cannot authenticate header provenance." },
+        { "type": "source-confirmed", "path": "supabase/migrations/20261014020000_jobvance_guest_support.sql", "line": 37, "detail": "Limits are five creates/hour per rate hash and 100 creates/day globally." },
+        { "type": "unavailable", "detail": "No staging ingress/proxy-header normalization test or hosting configuration inspection was performed." }
+      ],
+      "impacted_personas": ["student", "mba", "professional"],
+      "recommendation": "Verify and document canonical ingress identity, ignore untrusted alternate headers, add inexpensive edge throttling/aggregate rejection visibility, and retain SQL limits and draft preservation.",
+      "acceptance_criteria": ["Staging requests with different spoofed headers retain the same rate identity for one canonical client.", "Per-client quotas hold under bounded concurrent creates.", "Blocked creates preserve drafts and do not prevent valid receipt reads.", "Global quota exhaustion is observable without logging IPs, message text or bearer codes."],
+      "dependencies": ["Staging access", "Hosting ingress/header normalization contract"],
+      "effort_engineer_days": { "low": 0.5, "high": 2 },
+      "cost_effect": "Usually negligible at pilot scale; verify any hosting feature charge before adoption.", "pilot_required": true, "confidence": "medium"
+    }
+  ],
+  "open_questions": [
+    "Is MFA already enforced externally for every administrator, and how are assurance and recovery controlled?",
+    "Does the actual edge ingress overwrite client-supplied cf-connecting-ip and x-forwarded-for values?",
+    "Do deployed grants/RLS match the reviewed migration set, including restrictive policies over legacy policies?",
+    "What is the verified behavior of already-issued 120-second signed links after packet revocation or account erasure? Immediate revocation was not established.",
+    "Are daily guest-support cleanup and scheduler dispatch jobs installed, monitored and executed in the deployed environment?"
+  ],
+  "do_not_build_now": ["Custom cryptography or a bespoke identity provider", "A full security operations platform or paid broad scanning infrastructure", "Additional file types/OCR without a bounded extraction design", "Higher guest-support quotas before establishing canonical ingress identity"]
+}

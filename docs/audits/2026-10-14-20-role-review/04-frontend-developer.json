@@ -1,0 +1,232 @@
+{
+  "role_id": "frontend-developer",
+  "role_title": "Frontend Developer",
+  "phase": "build",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Independent source tracing of MvpApp, CvCheck, AuthContext, check-draft, JobLoop, LoopPacketPreview, LoopWorkingDraft and document-loading boundaries.",
+    "Reviewed existing journey-test coverage without using prior audit reports.",
+    "Ran two targeted synthetic component observations with fictional data, maxWorkers=1; both passed. An initial launcher attempt was stopped before using the direct runner.",
+    "No runtime edits, network/account writes, services or private candidate data."
+  ],
+  "not_tested": [
+    "Live production routes or real authenticated accounts",
+    "Real browser keyboard/screen-reader operation",
+    "Mobile render/bundle performance measurement",
+    "Production OAuth timing or storage behavior across actual browser refresh",
+    "Live concurrent opportunity refresh reproduction"
+  ],
+  "criteria": [
+    {
+      "name": "State ownership and preservation",
+      "score": 11,
+      "weight": 20,
+      "evidence": "CvCheck 98/271 and JobLoop 93/287: two reproduced losses plus an omitted tracking-draft class despite explicit recovery machinery."
+    },
+    {
+      "name": "Async and authentication correctness",
+      "score": 16,
+      "weight": 20,
+      "evidence": "JobLoop 238/306 and LoopPacketPreview use owner/generation/hash/abort guards; CvCheck 98 ignores authLoading for recovery."
+    },
+    {
+      "name": "Accessible forms and navigation",
+      "score": 17,
+      "weight": 20,
+      "evidence": "CvCheck 136/228/379 associates validation and focus; JobLoop 60 provides labelled fields and help; real assistive-technology operation untested."
+    },
+    {
+      "name": "Component architecture and testability",
+      "score": 16,
+      "weight": 20,
+      "evidence": "Pure check-draft/evidence modules and journey tests; CvCheck 98–125 holds many coupled state values and transition functions duplicate resets."
+    },
+    {
+      "name": "Loading and render efficiency",
+      "score": 17,
+      "weight": 20,
+      "evidence": "MvpApp lazy route imports; cv-extraction 43–48 and document-export 44/65 dynamically load heavy libraries; no device profiling measured."
+    }
+  ],
+  "role_score": 77,
+  "score_confidence": "medium",
+  "strengths": [
+    "Lazy working routes and document libraries defer heavy loading.",
+    "Guest approval is bound to exact inputs; review and saving remain separate explicit actions.",
+    "Private Loop async work is guarded by owner, generation and packet hashes with abortable downloads.",
+    "Labelled controls, focus management, alerts/status and extensive journey tests provide a sound incremental base."
+  ],
+  "findings": [
+    {
+      "id": "FE-01",
+      "priority": "P1",
+      "category": "draft-recovery-authentication",
+      "problem": "An explicitly consented signed-in /check refresh draft is deleted while authentication is still loading, before the same owner is restored.",
+      "evidence": [
+        {
+          "type": "observed",
+          "path": ".tmp/20-role-review/04-frontend-developer/recovery.test.tsx",
+          "line": 18,
+          "detail": "Synthetic fictional-owner remount with user=null/loading=true removes recovery storage; resolving the same owner leaves the role empty. Assertion passed."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/contexts/AuthContext.tsx",
+          "line": 41,
+          "detail": "Session begins null while loading is true."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/CvCheck.tsx",
+          "line": 98,
+          "detail": "Recovery is read once from user?.id ?? null before auth settles; line 225 writes the initial state."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/check-draft.ts",
+          "line": 107,
+          "detail": "An owner mismatch causes stored recovery removal at line 108."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Delay owner-bound recovery hydration and retention writes until auth ownership is established, preserving immediate guest usage and owner isolation.",
+      "acceptance_criteria": [
+        "Delayed same-owner bootstrap restores the exact consented draft, step and page preference.",
+        "Different-owner bootstrap never exposes the retained draft.",
+        "Guest recovery remains usable and recovered approval stays cleared."
+      ],
+      "dependencies": [
+        "AuthContext loading contract",
+        "check-draft owner-aware hydration API"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "No paid services or model calls; protects completed user review work.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "FE-02",
+      "priority": "P1",
+      "category": "wizard-transition-data-loss",
+      "problem": "Navigating back to an unchanged vacancy and rechecking replaces final CV edits with source wording without confirmation or undo.",
+      "evidence": [
+        {
+          "type": "observed",
+          "path": ".tmp/20-role-review/04-frontend-developer/recovery.test.tsx",
+          "line": 27,
+          "detail": "Synthetic test edits the final CV, navigates to One vacancy without changing inputs, rechecks, and observes source text replacing the edit. Assertion passed."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/CvCheck.tsx",
+          "line": 271,
+          "detail": "runCheck substitutes sourceText for reviewedText and line 273 overwrites the working draft."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/CvCheck.tsx",
+          "line": 266,
+          "detail": "confirmCv also replaces reviewedText with sourceText; backward navigation is unrestricted at line 248."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Separate initial composition from evidence recomputation; preserve working final edits on unchanged backward/forward navigation and confirm source-triggered replacement with undo. Centralize related transitions in a small reducer or workflow hook.",
+      "acceptance_criteria": [
+        "Same-input setup navigation preserves exact final edits and confidentiality removals.",
+        "Source replacement requires explicit confirmation and offers undo.",
+        "Changed inputs invalidate approval, preview and save consent."
+      ],
+      "dependencies": [
+        "Guest reuse and source-update transitions",
+        "checkReviewKey approval binding"
+      ],
+      "effort_engineer_days": {
+        "low": 1.5,
+        "high": 3
+      },
+      "cost_effect": "No additional provider cost; reduces repeated editing and accidental return of removed wording.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "FE-03",
+      "priority": "P2",
+      "category": "tracking-draft-ownership",
+      "problem": "Existing-opportunity notes, dates and status edits are absent from unsaved-work detection and route recovery; server changes can remount their local editors.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoop.tsx",
+          "line": 93,
+          "detail": "OpportunityRow owns tracking edits in local useState; no dirty/draft callback is present."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoop.tsx",
+          "line": 287,
+          "detail": "hasUnsavedDraft covers profile, claims and new-opportunity fields only; retention at 289 omits existing tracking edits."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoop.tsx",
+          "line": 399,
+          "detail": "OpportunityRow key includes saved status, followUpAt and notes, so refreshed changes remount the editor."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/loop-draft-memory.ts",
+          "line": 3,
+          "detail": "LoopWorkingDraft has no existing-opportunity tracking draft collection."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Own dirty tracking drafts by stable opportunity ID in the parent recovery contract, include them in navigation protection, and reconcile refreshed rows while retaining fresh status attestation requirements.",
+      "acceptance_criteria": [
+        "Route return restores unsaved notes and date and requires fresh status attestation.",
+        "Account changes clear the tracking drafts.",
+        "A concurrent saved-record change does not silently overwrite dirty edits and offers explicit reconciliation."
+      ],
+      "dependencies": [
+        "LoopWorkingDraft schema",
+        "OpportunityRow draft/dirty callbacks"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "No additional backend storage required; consistent continuity within existing memory policy.",
+      "pilot_required": true,
+      "confidence": "high"
+    }
+  ],
+  "open_questions": [
+    "What authentication bootstrap latency occurs on actual /check refreshes in the supported browsers?",
+    "How often do pilot professionals leave the tracking editor to consult help or employer pages?",
+    "Which mobile devices establish an appropriate evidence-rendering performance budget?"
+  ],
+  "do_not_build_now": [
+    "Framework migration or a new global state platform.",
+    "Separate persona-specific CV forms.",
+    "New paid model/search integrations before continuity defects are fixed.",
+    "Broad extraction of every large component without transition-level acceptance tests."
+  ]
+}

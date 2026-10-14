@@ -1,0 +1,99 @@
+{
+  "role_id": "backend-developer",
+  "role_title": "Backend Developer",
+  "phase": "build",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Independent source inspection of engine, preparation, providers, repository, runtime, worker and cloud/recurring/lease migrations; no earlier grades or other role reports read.",
+    "npx vitest run supabase/tests/job-loop-process.test.ts supabase/tests/job-loop-replay.test.ts supabase/tests/job-loop-providers.test.ts supabase/tests/job-loop-claim-validation.test.ts supabase/tests/job-loop-recurring-sql.test.ts --maxWorkers=4: 5 files and 52 tests passed.",
+    "npx vitest run --config .tmp/20-role-review/05-backend-developer/vitest.config.ts --maxWorkers=1: 3 independent bounded local mock probes passed; no real network/provider calls.",
+    "Verified git HEAD matches the fixed source snapshot. Wrote only own report files and own temporary audit probes."
+  ],
+  "not_tested": [
+    "Live authenticated accounts, production tables, secrets, provider account state and paid requests.",
+    "Hosted worker/cron delivery, deployment configuration, real simultaneous PostgreSQL sessions and wall-clock crash recovery.",
+    "Complete suite, browser workflow and real editor/PDF/DOCX visual roundtrip."
+  ],
+  "criteria": [
+    {"name":"Source provenance and factual preparation","score":18,"weight":20,"evidence":"job-loop-engine.ts:94–144 enforces complete source passages and context; 254–298 composes packets from approved literal facts; claim validation subset passed."},
+    {"name":"Transactional state and exact approval authority","score":18,"weight":20,"evidence":"20261011030000_job_loop_recurring.sql:164–195 provides optimistic writes, invalidation and exact text approval; repository.ts:91–100 verifies content-addressed manifests."},
+    {"name":"Provider boundaries, idempotency and shared spending","score":16,"weight":20,"evidence":"Eligible-ID validation, bounded responses and reserve/settle replay inspected; local probe confirms definite rejection is nevertheless settled uncertain."},
+    {"name":"Scheduling, cancellation and worker recovery","score":17,"weight":20,"evidence":"Recurring SQL subset passed including admission, occurrence replay, daily/monthly limits and cancellation; hosted delivery is untested."},
+    {"name":"Artifact lifecycle and recoverability","score":13,"weight":20,"evidence":"Content digests and erasure storage fence are present; local mock proves zero deletion progress beyond10000 scanned entries; cancellation test retains orphan bytes."}
+  ],
+  "role_score":82,
+  "score_confidence":"medium",
+  "strengths":[
+    "Complete literal source passage and context validation prevent common attribution, negation and projected-result mutations.",
+    "Exact CV approval is bound to current inputs; withdrawn or edited facts revoke authority, while tracking metadata does not spuriously invalidate packets.",
+    "Storage uses private content-addressed manifests and digest verification before short-lived signed URLs.",
+    "Durable usage reservations, request IDs, occurrence IDs, leases and cancellation fences limit duplicate calls and late result publication.",
+    "Ten-user admission, shared hard monthly maximum and daily/scheduled-run limits are implemented in database operations."
+  ],
+  "findings":[
+    {
+      "id":"BACKEND-01","priority":"P2","category":"provider-metering-recovery",
+      "problem":"Known pre-provider OpenRouter rejections retain an uncertain reservation, artificially consuming the shared pilot budget despite the adapter classifying no model usage.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/functions/_shared/jobvance-openrouter.ts","line":63,"detail":"400/401/402/403/404/429 with error and without ID/usage throws ROUTER_REQUEST_REJECTED as known pre-provider rejection."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-runtime.ts","line":179,"detail":"Metered failure refunds only LOOP_SEARCH_NOT_CONFIGURED; every other error is settled uncertain."},
+        {"type":"observed","path":".tmp/20-role-review/05-backend-developer/probes.test.ts","line":29,"detail":"Mocked HTTP429 error-only response during an actual processLoopPhase calls settle(usageId,null,null,true); independent probe passed."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Classify definite no-usage rejections separately, settle them to zero and define explicit repaired-configuration retry eligibility while preserving conservative reservations for genuinely ambiguous calls.",
+      "acceptance_criteria":["Known pre-provider rejection fixtures release exactly their reservation without changing other operations.","Timeouts, missing/malformed usage and ambiguous outcomes retain reservations.","An explicitly retried repaired request creates at most one new authorized provider attempt; cached failure results cannot masquerade as successful model output."],
+      "dependencies":["Provider error taxonomy","Usage reserve/settle replay contract"],
+      "effort_engineer_days":{"low":1,"high":2},
+      "cost_effect":"Avoids artificial exhaustion of the shared allowance; requires no new service.",
+      "pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"BACKEND-02","priority":"P2","category":"artifact-lifecycle-erasure",
+      "problem":"Erasure scans all storage before deletion and throws after10000 entries, so larger accounts cannot make progress by retrying. Cancelled render uploads can also remain unreferenced without an inspected cleanup job.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-repository.ts","line":80,"detail":"Scanning throws LOOP_ERASURE_RETRY above10000 entries; removal starts only after complete scan at87."},
+        {"type":"observed","path":".tmp/20-role-review/05-backend-developer/probes.test.ts","line":20,"detail":"Two retries over10001 synthetic storage object rows both fail before any removal or finish RPC; probe passed."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-runtime.ts","line":266,"detail":"Artifact uploads precede fenced phase commit; a lost lease can reject publication after bytes exist."},
+        {"type":"observed","path":"supabase/tests/job-loop-process.test.ts","line":34,"detail":"Existing passing cancellation test asserts no packet publication and artifacts.size greater than zero. No orphan retention collector found in examined functions/migrations."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Implement bounded resumable deletion with persistent progress, plus safe reconciliation of unreferenced artifacts after a lease/grace period. Keep the inactive-owner storage insertion fence and retained spending commitments.",
+      "acceptance_criteria":["Accounts above10000 scanned entries finish erasure through bounded retries, each making progress.","Cancellation between upload and commit grants no download authority and orphan bytes are eventually removed.","Cleanup cannot remove another account's objects or active referenced artifacts.","Erasure retains actual and uncertain monthly spending commitments."],
+      "dependencies":["Storage enumeration semantics","Retention decision","Support recovery path"],
+      "effort_engineer_days":{"low":2,"high":4},
+      "cost_effect":"Bounds accumulated storage and support work; no claim that a production account currently exceeds the threshold.",
+      "pilot_required":true,"confidence":"high"
+    },
+    {
+      "id":"BACKEND-03","priority":"P2","category":"factual-preparation-contract",
+      "problem":"Question shape and claim IDs do not prevent model-authored interview questions from presupposing unsupported roles or achievements; such questions enter the packet evidence artifact.",
+      "evidence":[
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-providers.ts","line":101,"detail":"Validation checks interrogative syntax, bounds, selected IDs and digits; it does not bind titles/employers/attribution to claim text."},
+        {"type":"observed","path":".tmp/20-role-review/05-backend-developer/probes.test.ts","line":13,"detail":"Mocked question 'How did you lead the global merger team as managing director?' attached to coursework-only evidence returns error:null; probe passed."},
+        {"type":"source-confirmed","path":"supabase/functions/_shared/job-loop-runtime.ts","line":260,"detail":"Accepted model questions replace interview brief prompts and are appended to evidenceText at263. Literal CV facts remain separately protected."}
+      ],
+      "impacted_personas":["student","mba","professional"],
+      "recommendation":"Use deterministic questions around literal selected evidence, or let the model choose constrained template IDs plus approved claim IDs instead of authoring free-form factual presuppositions.",
+      "acceptance_criteria":["Invented employer/title/outcome/attribution fixtures cannot enter generated questions.","Selected claim IDs and revisions remain visible beside source quotations.","Literal CV facts remain unchanged and the packet still supports all three audiences."],
+      "dependencies":["Preparation question contract","Packet evidence renderer"],
+      "effort_engineer_days":{"low":1,"high":2},
+      "cost_effect":"Constrained templates can reduce generated output tokens.",
+      "pilot_required":true,"confidence":"high"
+    }
+  ],
+  "open_questions":[
+    "What retention period should apply to revoked packets, immutable run snapshots and uploaded bytes? The examined code establishes erasure but no automatic lifecycle policy.",
+    "Has an authorized hosted synthetic exercise demonstrated worker interruption, expired-lease recovery, schedule pause/cancel and download revocation? Local passing tests do not establish hosted delivery.",
+    "Record writes acquire record then run locks; phase commits acquire run then record locks. Is production deadlock telemetry present? Lock-order risk is source-inferred and was not reproduced in separate PostgreSQL sessions."
+  ],
+  "do_not_build_now":[
+    "Additional model/provider adapters before current error recovery is complete.",
+    "Paid recurring model calls or automatic employer submissions/outreach.",
+    "Separate backends for student, MBA and professional audiences.",
+    "Broader employer crawling without completing current lifecycle and recovery work."
+  ]
+}

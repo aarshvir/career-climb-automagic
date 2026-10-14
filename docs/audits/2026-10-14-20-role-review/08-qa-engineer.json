@@ -1,0 +1,277 @@
+{
+  "role_id": "08-qa-engineer",
+  "role_title": "QA Engineer",
+  "phase": "build",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": true
+  },
+  "methods": [
+    "Read-only source review of guest check, private save API, auth handoff, parser/export tests, Job Loop journey tests and CI workflows",
+    "Public CUA fictional guest journey through all six steps, PDF preview, approval, TXT prepared-link feedback, approval invalidation",
+    "390x844 browser viewport check, semantic labels/focus inspection, read-only DOM width measurement; override reset and tab closed",
+    "Bounded Vitest run 1: node node_modules/vitest/vitest.mjs run src/__tests__/cv-check-journey.test.tsx src/__tests__/auth/check-auth-handoff.test.tsx src/__tests__/lib/cv-extraction.test.ts src/__tests__/lib/document-export.test.ts --maxWorkers=4; 62/62 passed, 4 files,12.02s",
+    "Bounded Vitest run 2: node node_modules/vitest/vitest.mjs run src/__tests__/job-loop-journey.test.tsx src/__tests__/lib/free-check-api.test.ts src/__tests__/lib/check-draft.test.ts --maxWorkers=4;124/124 passed,3 files,13.48s"
+  ],
+  "not_tested": [
+    "Live authenticated accounts or private candidate data",
+    "Email delivery and real OAuth grants",
+    "Hosted owner-isolation script not rerun; document records11October result",
+    "Scheduler/provider execution and spending",
+    "Actual final browser download bytes",
+    "Safari/Firefox, screen readers, offline/slow devices",
+    "Production deployment status of secondary Pages workflow"
+  ],
+  "criteria": [
+    {
+      "name": "Core candidate journey",
+      "score": 18,
+      "weight": 20,
+      "evidence": "Observed six-step public fictional flow, cautious evidence, actual one-page PDF preview and approval invalidation; relevant component/parser/export subset passed."
+    },
+    {
+      "name": "Failure and recovery",
+      "score": 15,
+      "weight": 20,
+      "evidence": "Rejected save, malformed files, recovery consent, stale results and cancellation have meaningful tests; optional unresolved save has no application deadline and shares global busy state."
+    },
+    {
+      "name": "Guest/private boundaries",
+      "score": 18,
+      "weight": 20,
+      "evidence": "Public guest flow required no account; owner/idempotency and delayed-account-result tests passed; hosted boundaries were not independently rerun."
+    },
+    {
+      "name": "Mobile and accessibility",
+      "score": 16,
+      "weight": 20,
+      "evidence": "Observed390x844 approval step without horizontal overflow; labels and heading/error focus exposed; no screen-reader, zoom or browser matrix."
+    },
+    {
+      "name": "Release evidence and regression protection",
+      "score": 15,
+      "weight": 20,
+      "evidence": "CI includes lint/type/tests/Deno/build/hosting checks; no repeatable real-browser gate found; secondary Pages workflow swallows build failure and selects public after dist."
+    }
+  ],
+  "role_score": 82,
+  "score_confidence": "medium",
+  "strengths": [
+    "186 meaningful tests passed across7 selected files with maxWorkers4",
+    "Public fictional check completed through approval with exact PDF preview and TXT recovery link",
+    "Edits revoke approval and document assets",
+    "Real parser/export tests cover Unicode, malformed inputs, ZIP limits and approval ownership",
+    "Job Loop journey tests exercise stale account responses, packet revocation and transfer cancellation"
+  ],
+  "findings": [
+    {
+      "id": "QA-01",
+      "priority": "P2",
+      "category": "failure-recovery",
+      "problem": "An unresolved optional private save shares global busy state with approved local exports and navigation, and has no application deadline or cancellation path; the live occurrence was not reproduced.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/CvCheck.tsx",
+          "line": 323,
+          "detail": "save() sets global busy, awaits saveFreeCheck, and clears busy only in finally; download/back/reset controls also depend on busy."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/free-check-api.ts",
+          "line": 61,
+          "detail": "Owner check, lookup and insert/recovery await Supabase without an application deadline; configured client does not add a deadline."
+        },
+        {
+          "type": "inferred",
+          "path": "src/pages/CvCheck.tsx",
+          "line": 392,
+          "detail": "A never-settling transport can indefinitely prevent local exports despite the approved text already being available; no such live outage is claimed."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Separate account-save progress from local document readiness; add a bounded deadline and an uncertain-result recovery message while retaining the immutable request reference.",
+      "acceptance_criteria": [
+        "Never-settling account save does not prevent approved TXT/DOCX downloads or navigation",
+        "Deadline exits progress with an honest uncertain-save message",
+        "Retry preserves requestId and does not create duplicate snapshots",
+        "Late result after account/edit change remains suppressed"
+      ],
+      "dependencies": [
+        "Frontend/API owner",
+        "Existing immutable/idempotent save reference contract"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "No new vendor spend; reduces recovery friction and duplicate write risk.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "QA-02",
+      "priority": "P2",
+      "category": "release-quality",
+      "problem": "The secondary testcodex Pages workflow swallows build failure and selects public after dist, so it can upload static source assets instead of the built application. Execution and production impact remain unverified.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": ".github/workflows/deploy-testcodex-pages.yml",
+          "line": 34,
+          "detail": "npm run build || true permits continuation after a failed build."
+        },
+        {
+          "type": "source-confirmed",
+          "path": ".github/workflows/deploy-testcodex-pages.yml",
+          "line": 45,
+          "detail": "dist sets OUT, then existing public overwrites it; public exists in repository."
+        },
+        {
+          "type": "source-confirmed",
+          "path": ".github/workflows/deploy-testcodex-pages.yml",
+          "line": 64,
+          "detail": "Deployment depends on this workflow's build job, with no dependency on separate CI."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Make the Vite preview workflow fail closed and upload only validated dist; require its checks or retire it if obsolete.",
+      "acceptance_criteria": [
+        "Deliberate build failure produces no deployment",
+        "Successful artifact includes built index and all referenced assets",
+        "Testcodex route smoke validates the deployed artifact"
+      ],
+      "dependencies": [
+        "Repository workflow owner",
+        "Decision whether testcodex preview is still used"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1
+      },
+      "cost_effect": "No new service required; avoids misleading preview evidence.",
+      "pilot_required": false,
+      "confidence": "high"
+    },
+    {
+      "id": "QA-03",
+      "priority": "P2",
+      "category": "browser-coverage",
+      "problem": "The repeatable release gate does not establish actual browser downloads, deployed PDF worker assets or real auth redirect/storage handoffs; passing component tests replace those seams.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "vitest.config.ts",
+          "line": 9,
+          "detail": "Default test environment is jsdom; no browser test runner/config found in repository inventory."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/__tests__/cv-check-journey.test.tsx",
+          "line": 13,
+          "detail": "Auth/API and download functions are mocked; PDF preview is replaced by a synthetic blob."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/__tests__/auth/check-auth-handoff.test.tsx",
+          "line": 17,
+          "detail": "Auth provider and session exchange are replaced by controlled mocks."
+        },
+        {
+          "type": "observed",
+          "url": "https://jobvance.io/check",
+          "detail": "Live guest preparation and TXT recovery link worked in one browser; final saved download bytes and real auth handoff were not inspected."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Add one small synthetic browser smoke for the built deployment plus an explicitly authorized isolated fixture-account save/reopen handoff exercise.",
+      "acceptance_criteria": [
+        "Read back actual PDF/DOCX/TXT download bytes",
+        "Edit invalidates approval and export assets",
+        "Consented refresh restores draft with approval cleared",
+        "Denied OAuth return retains recoverable work",
+        "Record tested runtime commit and browser version with results"
+      ],
+      "dependencies": [
+        "Browser test runner",
+        "Isolated fictional fixtures",
+        "Authorization for hosted account-based QA when run"
+      ],
+      "effort_engineer_days": {
+        "low": 2,
+        "high": 4
+      },
+      "cost_effect": "Local/open-source runner can avoid recurring vendor costs; no model/search spend needed.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "QA-04",
+      "priority": "P2",
+      "category": "document-quality-evidence",
+      "problem": "Parser/export tests use generated simple documents and the same parser for round trips; they do not independently establish complex reading order or rendered PDF/Word layout.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/__tests__/lib/document-export.test.ts",
+          "line": 29,
+          "detail": "Arabic and Latin checks use extraction containment and page count; DOCX/PDF use text round trips rather than visual layout checks."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/__tests__/lib/cv-extraction.test.ts",
+          "line": 36,
+          "detail": "Fixtures are generated paragraphs/simple PDF text; no independent two-column or Word layout baseline was found in this test."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Introduce a small rights-cleared fictional corpus with human-reviewed expected reading order and visual PDF/Word checks; retain current unsupported-character fallback.",
+      "acceptance_criteria": [
+        "Student/MBA/professional examples retain dates, section headings and bullet ownership",
+        "Two-column source extraction is compared against an independent expected reading order",
+        "Mixed-script names are visually checked",
+        "Unsupported characters retain documented DOCX/TXT escape"
+      ],
+      "dependencies": [
+        "QA/designer",
+        "Word-compatible document reader",
+        "Rights-cleared fictional fixture set"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Existing readers and local fixtures suffice; no paid OCR or test service needed.",
+      "pilot_required": false,
+      "confidence": "medium"
+    }
+  ],
+  "open_questions": [
+    "Is testcodex Pages still an actively used preview or a retired workflow?",
+    "Which desktop/mobile browsers and assistive technologies are represented by the ten pilot users?",
+    "Who owns isolated hosted fixture-account lifecycle and cleanup authorization?"
+  ],
+  "do_not_build_now": [
+    "Large device farm or paid browser vendor",
+    "OCR service solely to expand upload acceptance",
+    "Broad new document-format/font coverage before pilot evidence",
+    "New paid AI/search integration for QA"
+  ]
+}

@@ -1,0 +1,38 @@
+# 13 — Product Launch Specialist
+
+**Score: 79/100; medium confidence.** Ready for a closely observed invite pilot after the operational checks below; readiness for broader distribution is not established. This score concerns launch execution, not whole-product quality or hiring outcomes.
+
+Reviewed source `e661c6493c30c88f2487800ff38aa10c46c9aae6`, runtime contract `57713fb1cb15b29be8d6dc745e3c87bcb718c4af`, public home/Job Loop/contact HTML and official channel rules on 14 October 2026. `/pilot` retrieval was unavailable; its findings are source-confirmed. No private data, email delivery, support submission, paid calls or production changes were exercised. Incidental earlier-review search snippets were excluded. Historical acquisition/delivery documents remain plans, not customer evidence.
+
+| Criterion | /20 | Evidence |
+|---|---:|---|
+| Promise and audience clarity | 18 | Home names CV + vacancy → review → download; fictional examples and manual submission are explicit. |
+| Destination and pilot admission | 16 | Guest first check and ten-seat cloud path exist; assisted-pilot email receipt/admission was not verified. |
+| Demonstration and launch assets | 18 | Source-controlled fictional demo, approval reset, safe export and written 90-second guide. |
+| Support, capacity and rollback | 15 | Named operator, private receipts, admin controls, shared ceiling and rollback instructions; operating cadence needs rehearsal. |
+| Learning and distribution gates | 12 | Account funnel definitions are candid, but guest completion and voluntary reuse require complementary research evidence. |
+
+The [public home](https://jobvance.io/) offers a free local check without an account. [Job Loop](https://jobvance.io/job-loop) discloses ten places, selected feeds, consented models, unavailable broad paid search/mailbox access and disabled checkout. Focused verification passed: `npm run test:run -- src/__tests__/pilot-landing.test.tsx src/__tests__/pilot-demo.test.tsx src/__tests__/guest-support.test.tsx --maxWorkers=4` — **3 files, 27 tests passed**. These establish neither live delivery nor usability.
+
+## Findings and actions
+
+**PL-01 · P1 — Give each invitation one current offer and destination.** `/pilot` describes an assisted two-direction research task and calls the richer workflow proposed (`PilotLanding.tsx:83,97,128`); home and `/job-loop` explain an available saved workflow (`ProductPage.tsx:146`; `JobLoopOverview.tsx:21–23`). Both can be accurate, yet an invite can leave the participant unsure whether they are testing software or receiving guided preparation. Add a short, dated pilot brief linking the actual first-check path, optional account path and agreed human assistance. **Accept:** a participant can state the input, deliverable, help offered and next action before starting. **Dependency:** founder chooses one task per invitation. **Effort:** 0.5–1 engineering day plus founder review. **Cost:** $0 services; reduces avoidable support.
+
+**PL-02 · P1 — Rehearse received request → agreed pilot.** The local draft does not reserve a session (`PilotLanding.tsx:108–120`; `pilot-request.ts:1`). It cannot establish mailbox reception or admission against remaining seats. Maintain a private intake register with received date, source, consent, agreed task/date and decision. **Accept:** owner-controlled rehearsal demonstrates reception and acknowledgment; copy/download fallback has clear instructions; QA and real seats are reconciled before invitations. **Dependencies:** mailbox ownership and current admin capacity. **Effort:** 0.25–0.75 day. **Cost:** $0 additional service; staff time only.
+
+**PL-03 · P1 — Measure usable completion and voluntary reuse.** Existing account metrics explicitly exclude complete guest tracking, distinguish requested download links from received files, and count scheduled runs in repetition (`ADMIN-PORTALS-GUIDE.md:25–34`). Do not interpret those counters as launch validation. Use a consented ten-person task sheet: persona, actual vacancy, approved export opened successfully, material correction, founder minutes, abandonment reason and self-initiated second task. **Accept:** every admitted participant has an outcome or documented missing observation; publish denominators and assistance; decide whether to expand after week two. A provisional gate is at least 6/10 opening a usable output and 4/10 voluntarily completing another relevant task, with no unresolved critical privacy/export incident. These are decision hypotheses, not market benchmarks. **Dependencies:** participant agreement and comparable tasks. **Effort:** 0.5–1 day; research time additional. **Cost:** $0 tooling; preserve the shared $50 UTC-month ceiling.
+
+**PL-04 · P2 — Rehearse guest support alongside account support.** [Contact](https://jobvance.io/contact) names the operator and correctly says receipt is storage, not review or a response-time promise. Guest replies exist (`GuestSupportInbox.tsx:11–14`), while the older operations guide's daily instruction targets account support (`INTEGRATED-JOB-LOOP-OPERATIONS.md:28`). Add guest queue review, absence cover and incident pause criteria to one current runbook. **Accept:** a fictional receipt receives an admin reply readable with its code; daily review is logged during pilot days; repeated failures pause expansion. **Dependencies:** owner availability; synthetic QA permission. **Effort:** 0.25–0.75 day. **Cost:** $0 software; manual coverage.
+
+**PL-05 · P2 — Prepare one reusable kit; release channels only after fit.** Keep a short factual description, icon, three fictional screenshots, captioned demo/transcript, limits, support destination and maker explanation. [Product Hunt's official checklist](https://www.producthunt.com/launch/preparing-for-launch) asks for a direct product URL and concise assets; its [guide](https://www.producthunt.com/launch) prohibits asking directly for upvotes. [Show HN](https://news.ycombinator.com/showhn.html) requires something usable and discourages signup barriers: point to `/check`, with maker availability, only after guest completion is verified. Their audiences are hypotheses, not proven acquisition channels. [BetaList's current FAQ](https://betalist.com/support) says all submissions are paid; exclude it under this scope despite potential early-stage [eligibility](https://betalist.com/criteria). **Accept:** one reviewed kit and one channel experiment at a time; no bulk listings, vote solicitation or invented proof. **Dependencies:** PL-01–04 and explicit later publication authorization. **Effort:** 0.5–1 day. **Cost:** $0 paid launch spend.
+
+## Staged launch sequence
+
+| Step | Owner | Input → output | Go / no-go |
+|---|---|---|---|
+| 1. Rehearse | Founder + QA | Current brief, fictional check/request/support → dated receipts and opened export | Go only when destination, reception, capacity and reply are verified. |
+| 2. Invite 3 | Founder | Consenting, task-qualified participants → observed first/second-task notes | Go when support is covered and severe blockers are resolved; no automated outreach. |
+| 3. Fill up to 10 | Founder + product researcher | First cohort evidence → week-two learning sheet and costs | Go within actual seats and allowance; hold if assistance hides product failure. |
+| 4. One broader experiment | Founder | Gate decision + reviewed kit → PH **or** eligible Show HN feedback | Go only with usable guest path, availability and authorized publication; evaluate qualified completion, not votes. |
+
+Do not build paid tiers, a directory-submission engine, separate persona products, referral rewards or more integrations to make the launch appear larger. First establish whether this shared preparation workflow earns repeat use.

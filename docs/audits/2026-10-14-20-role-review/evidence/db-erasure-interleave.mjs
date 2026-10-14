@@ -1,0 +1,24 @@
+import { PGlite } from '@electric-sql/pglite';
+import { readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import assert from 'node:assert/strict';
+const db = new PGlite();
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role BYPASSRLS;CREATE SCHEMA auth;CREATE SCHEMA storage;CREATE TABLE auth.users(id uuid PRIMARY KEY);CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT NULL::uuid$$;GRANT USAGE ON SCHEMA public,auth,storage TO anon,authenticated,service_role;CREATE TABLE storage.buckets(id text PRIMARY KEY,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);CREATE TABLE storage.objects(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),bucket_id text,name text);ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;GRANT ALL ON storage.objects TO anon,authenticated;`);
+for (const file of ['20261011010000_job_loop_cloud.sql','20261011020000_job_loop_revoke_all.sql','20261011030000_job_loop_recurring.sql']) await db.exec(await readFile(`supabase/migrations/${file}`,'utf8'));
+const user = randomUUID(), hash='a'.repeat(64);
+await db.query('INSERT INTO auth.users(id) VALUES($1)',[user]);
+await db.query('SELECT job_loop_write_record($1,0,$2,true)',[user,{profile:{name:'Fictional fixture'},claims:[],opportunities:[],inbox:[]}]);
+const start=()=>db.query("SELECT job_loop_start_run($1,$2,$3,$3,1,'rules','grounded-rules-v1','{}')",[user,randomUUID(),hash]);
+await start();
+await db.query('SELECT job_loop_begin_erase($1)',[user]);
+// Interleave a new request after the eraser has scanned the user's prefix.
+await start();
+assert.equal((await db.query('SELECT active FROM job_loop_pilot_users WHERE user_id=$1',[user])).rows[0].active,true);
+await db.query("INSERT INTO storage.objects(bucket_id,name) VALUES('job-loop-artifacts',$1)",[`${user}/${randomUUID()}/${hash}/txt`]);
+await db.query('SELECT job_loop_finish_erase($1)',[user]);
+assert.equal((await db.query('SELECT count(*)::int n FROM job_loop_records')).rows[0].n,0);
+assert.equal((await db.query('SELECT count(*)::int n FROM job_loop_runs')).rows[0].n,0);
+assert.equal((await db.query('SELECT count(*)::int n FROM storage.objects')).rows[0].n,1);
+assert.equal((await db.query("SELECT public FROM storage.buckets WHERE id='job-loop-artifacts'")).rows[0].public,false);
+console.log(JSON.stringify({scenario:'new run after begin erase; upload after prefix scan; finish erase',records:(await db.query('SELECT count(*)::int n FROM job_loop_records')).rows[0].n,runs:(await db.query('SELECT count(*)::int n FROM job_loop_runs')).rows[0].n,storage_objects_left:(await db.query('SELECT count(*)::int n FROM storage.objects')).rows[0].n}));
+await db.close();

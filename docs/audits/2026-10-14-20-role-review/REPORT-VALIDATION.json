@@ -1,0 +1,14 @@
+{
+  "roles": 20,
+  "criterion_scores": 100,
+  "original_findings": 88,
+  "packages": 19,
+  "all_finding_ids_mapped": true,
+  "each_finding_has_one_primary_package": true,
+  "score_totals_valid": true,
+  "snapshot_consistent": true,
+  "generated_utc": "2026-10-14T05:48:49.546599+00:00",
+  "runtime_changed": false,
+  "new_paid_calls": 0,
+  "dashboard_browser_validation": "Not performed: file URL was blocked by browser security policy; no workaround attempted. Markdown/CSV and static validation are the authoritative deliverables."
+}

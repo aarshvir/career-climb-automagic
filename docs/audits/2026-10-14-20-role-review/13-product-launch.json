@@ -1,0 +1,343 @@
+{
+  "role_id": "product-launch",
+  "role_title": "Product Launch Specialist",
+  "phase": "growth",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": true
+  },
+  "methods": [
+    "Read fixed source and implementation contracts, historical CUSTOMER-ACQUISITION-PLAN.md and PILOT-DELIVERY.md as plans only.",
+    "Read current public home, Job Loop and contact HTML with web reader on 2026-10-14; pilot retrieval was unavailable.",
+    "Checked current official Product Hunt, Show HN and BetaList rules on 2026-10-14.",
+    "Ran npm run test:run -- src/__tests__/pilot-landing.test.tsx src/__tests__/pilot-demo.test.tsx src/__tests__/guest-support.test.tsx --maxWorkers=4: 3 files and 27 tests passed.",
+    "Incidental earlier hardening-audit snippets returned by a broad search were excluded; independent conclusions use direct source/public evidence."
+  ],
+  "not_tested": [
+    "No authenticated/private customer journey or data inspected.",
+    "No email reception, live support creation/admin reply, pilot admission or actual user sessions tested.",
+    "No paid model/search calls, customer contacts, signup, publication or purchases.",
+    "No browser-interaction or full PDF/DOCX visual/download journey; web-reader HTML is not interaction verification.",
+    "No traffic, conversion, willingness-to-pay or hiring-outcome validation."
+  ],
+  "criteria": [
+    {
+      "name": "Promise and audience clarity",
+      "score": 18,
+      "weight": 20,
+      "evidence": "ProductPage.tsx:127-146 and observed https://jobvance.io/: clear free CV + vacancy review/download with fictional examples."
+    },
+    {
+      "name": "Destination and pilot admission",
+      "score": 16,
+      "weight": 20,
+      "evidence": "PilotLanding.tsx:108-120 intentionally prepares an unsent request; JobLoopOverview.tsx:21-23 discloses ten places; request receipt/admission untested."
+    },
+    {
+      "name": "Demonstration and launch assets",
+      "score": 18,
+      "weight": 20,
+      "evidence": "PilotDemo.tsx:26-51,121,168-178; public/pilot-demo-guide.txt; 27 focused pilot/demo/support tests passed."
+    },
+    {
+      "name": "Support, capacity and rollback",
+      "score": 15,
+      "weight": 20,
+      "evidence": "GuestSupport.tsx:15-18; GuestSupportInbox.tsx:11-14; ADMIN-PORTALS-GUIDE.md:13-40; live contact explains receipt limitations; operations rehearsal untested."
+    },
+    {
+      "name": "Learning and distribution gates",
+      "score": 12,
+      "weight": 20,
+      "evidence": "ADMIN-PORTALS-GUIDE.md:25-34 exposes guest/return coverage limits; historical pilot thresholds are plans, not real-user results; current channel fit remains a hypothesis."
+    }
+  ],
+  "role_score": 79,
+  "score_confidence": "medium",
+  "strengths": [
+    "Free guest entry leads with one concrete task and optional account saving.",
+    "Fictional demonstration preserves source contribution and projected-result qualifiers; approvals reset on changes.",
+    "Pilot and proposed pricing are distinguished from sales; ten seats and shared processing ceiling are explicit.",
+    "Named operator and private receipt/reply path allow support without signup; account metric limits are disclosed."
+  ],
+  "findings": [
+    {
+      "id": "PL-01",
+      "priority": "P1",
+      "category": "offer-destination",
+      "problem": "Assisted concept pilot and available saved workflow have different promises, so an invitation may not establish the task and assistance being tested.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/PilotLanding.tsx",
+          "line": 83,
+          "detail": "Assisted, prewritten research workflow; line 97 agrees a task over two weeks and line 128 calls richer demo proposed."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/ProductPage.tsx",
+          "line": 146,
+          "detail": "Home describes saved Job Loop as available in the free pilot."
+        },
+        {
+          "type": "observed",
+          "url": "https://jobvance.io/job-loop",
+          "detail": "Public Job Loop describes selected feeds, optional schedules and ten places."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Create a dated one-page pilot brief per invitation specifying input, one task, exact deliverable, optional cloud route and human assistance.",
+      "acceptance_criteria": [
+        "Participant can explain input, output, help offered and next action before starting.",
+        "Current /pilot, /check and /job-loop links distinguish demonstration, guest task and saved workflow."
+      ],
+      "dependencies": [
+        "Founder selects one test task and assistance boundary."
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1
+      },
+      "cost_effect": "$0 extra services; less avoidable support.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "PL-02",
+      "priority": "P1",
+      "category": "intake-admission",
+      "problem": "Unsent draft creation is not verified pilot reception, admission or session agreement.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/PilotLanding.tsx",
+          "line": 108,
+          "detail": "Draft does not register or reserve a session; lines 110-120 show memory-only draft and mailto/copy/download."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/pilot-request.ts",
+          "line": 1,
+          "detail": "Destination is contact@jobvance.io; no delivery result established."
+        },
+        {
+          "type": "unavailable",
+          "path": "docs/ADMIN-PORTALS-GUIDE.md",
+          "line": 18,
+          "detail": "Current pilot seat count, mailbox reception and admission operation were not exercised."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Rehearse owner-controlled reception and manual acknowledgment; use a minimal private intake register for received date, source, consent, agreed task/date and admission status.",
+      "acceptance_criteria": [
+        "Mailbox reception and manual acknowledgment demonstrated with owner-controlled test.",
+        "Copy/download fallback explains how to send; QA and real seats reconciled before invitation.",
+        "No draft-prepared count is reported as a received request."
+      ],
+      "dependencies": [
+        "Mailbox ownership",
+        "Current admin capacity view",
+        "Owner test authorization for later execution"
+      ],
+      "effort_engineer_days": {
+        "low": 0.25,
+        "high": 0.75
+      },
+      "cost_effect": "$0 tooling assumed; founder time only.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "PL-03",
+      "priority": "P1",
+      "category": "pilot-learning",
+      "problem": "Available account counters cannot establish complete guest completion, opened exports or voluntary second use.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "docs/ADMIN-PORTALS-GUIDE.md",
+          "line": 30,
+          "detail": "Funnel tracks requested links; lines 31-34 distinguish observed week-two actions, scheduled repetition and untracked guest/download coverage."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Use a consented ten-person outcome sheet for persona, actual task, opened approved export, material corrections, founder minutes, abandonment and self-initiated second task. Treat 6/10 usable completion and 4/10 voluntary repeat as provisional expansion hypotheses, not benchmarks.",
+      "acceptance_criteria": [
+        "All admitted participants have an observed outcome or documented missing observation.",
+        "Report denominators and assistance; verify exports were opened.",
+        "Week-two decision records no unresolved critical privacy/export incident, capacity and committed spend.",
+        "Scheduled runs do not substitute for voluntary return."
+      ],
+      "dependencies": [
+        "Participant consent",
+        "Comparable real tasks",
+        "Founder/researcher time"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1
+      },
+      "cost_effect": "$0 analytics service; keep all paid activity within shared $50 UTC-month ceiling.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "PL-04",
+      "priority": "P2",
+      "category": "support-operations",
+      "problem": "Guest receipt/reply UI exists, but current operating guide's daily triage instruction addresses account support; guest operating coverage is not verified.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/GuestSupport.tsx",
+          "line": 15,
+          "detail": "Named maintainer and receipt limitations, not a response-time promise."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/admin/GuestSupportInbox.tsx",
+          "line": 11,
+          "detail": "Open/update/reply exists; receipt holder reads reply without email."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/INTEGRATED-JOB-LOOP-OPERATIONS.md",
+          "line": 28,
+          "detail": "Daily instruction names job_loop_support_requests."
+        },
+        {
+          "type": "observed",
+          "url": "https://jobvance.io/contact",
+          "detail": "Live contact exposes anonymous receipt path and 90-day consent."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Add guest queue review, absence cover and incident pause criteria to one current runbook; rehearse synthetic receipt→administrator reply→holder read.",
+      "acceptance_criteria": [
+        "Fictional receipt reply is read using its code.",
+        "Daily queue review logged during pilot days.",
+        "Repeated failures pause expansion; whole-account requests use the separate scope."
+      ],
+      "dependencies": [
+        "Founder availability",
+        "Later synthetic QA permission"
+      ],
+      "effort_engineer_days": {
+        "low": 0.25,
+        "high": 0.75
+      },
+      "cost_effect": "No extra software; manual coverage.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "PL-05",
+      "priority": "P2",
+      "category": "distribution-readiness",
+      "problem": "No verified channel fit or real-user outcome justifies simultaneous directory distribution; BetaList is currently paid.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "url": "https://www.producthunt.com/launch/preparing-for-launch",
+          "detail": "Product Hunt checklist requires a direct product URL and concise assets."
+        },
+        {
+          "type": "source-confirmed",
+          "url": "https://news.ycombinator.com/showhn.html",
+          "detail": "Show HN expects a usable product, ideally without signup, and maker discussion."
+        },
+        {
+          "type": "source-confirmed",
+          "url": "https://betalist.com/support",
+          "detail": "BetaList support states all submissions require payment; checked 2026-10-14."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Prepare one factual kit: description, icon, fictional screenshots, captioned demo/transcript, limits, support link and maker explanation. After pilot gates, test Product Hunt or eligible Show HN sequentially; direct Show HN to /check. Exclude BetaList in current no-paid-launch scope.",
+      "acceptance_criteria": [
+        "One reviewed kit and one channel experiment at a time.",
+        "Maker available for discussion; no vote solicitation, bulk directories or fabricated proof.",
+        "Assess qualified completion and useful feedback rather than rank/votes.",
+        "No publication until separately authorized."
+      ],
+      "dependencies": [
+        "PL-01",
+        "PL-02",
+        "PL-03",
+        "PL-04",
+        "Later publication authorization"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1
+      },
+      "cost_effect": "$0 paid launch spend; BetaList excluded.",
+      "pilot_required": false,
+      "confidence": "high"
+    }
+  ],
+  "open_questions": [
+    "How many of ten seats are currently occupied by real participants versus QA accounts?",
+    "Does contact@jobvance.io receive incoming requests and who acknowledges them?",
+    "Which single task and human-assistance boundary will each invitation test?",
+    "Who covers guest support during founder absence?",
+    "What actual opened-output and voluntary-return evidence exists? None was inspected here."
+  ],
+  "do_not_build_now": [
+    "Paid checkout or tier entitlements as a launch prerequisite.",
+    "Directory-submission automation, paid launch packages or bulk listings.",
+    "Referral rewards, fabricated testimonials/counts/results or leaderboard tactics.",
+    "Separate products for each persona or more integrations to create launch spectacle."
+  ],
+  "launch_sequence": [
+    {
+      "step": 1,
+      "owner": "Founder + QA",
+      "input": "Current pilot brief and fictional CV/vacancy/request/support test",
+      "output": "Dated intake, opened export, capacity and reply evidence",
+      "go_no_go": "Go only when reception, task, capacity and reply are verified."
+    },
+    {
+      "step": 2,
+      "owner": "Founder",
+      "input": "Three consenting task-qualified participants",
+      "output": "First and second task notes",
+      "go_no_go": "Go only with support coverage and resolved severe blockers; manual invitations only when separately authorized."
+    },
+    {
+      "step": 3,
+      "owner": "Founder + product researcher",
+      "input": "First cohort results and current seats/spend",
+      "output": "Up to ten participants and week-two learning decision",
+      "go_no_go": "Go within actual capacity and allowance; hold if founder effort hides failure."
+    },
+    {
+      "step": 4,
+      "owner": "Founder",
+      "input": "Pilot gate decision and reviewed launch kit",
+      "output": "One Product Hunt or eligible Show HN feedback experiment",
+      "go_no_go": "Go with usable guest path, maker availability and later publication authorization; judge qualified completion."
+    }
+  ]
+}

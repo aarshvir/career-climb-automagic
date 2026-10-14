@@ -1,0 +1,294 @@
+{
+  "role_id": "bug-triage",
+  "role_title": "Bug Triage",
+  "phase": "operations",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Fresh source review of active error boundary, API wrappers, worker/runtime, admin portals and snapshot SQL.",
+    "Read current and legacy operational guides; no peer reports consulted.",
+    "Read permitted aggregate live-service baseline and root budget reconciliation; no private rows or logs retrieved.",
+    "Ran npm run test:run -- src/__tests__/lib/admin-api.test.ts supabase/tests/jobvance-admin.test.ts supabase/tests/job-loop-scheduler-ticket.test.ts --maxWorkers=4: 3 files and 24 tests passed."
+  ],
+  "not_tested": [
+    "Direct production browser/admin session or private production logs.",
+    "Production scheduler dispatch, failure injection, provider invoice reconciliation, restoration or rollback rehearsal.",
+    "Paid provider calls, incident response timing and real candidate reproduction."
+  ],
+  "criteria": [
+    {
+      "name": "Error signal coverage and safe correlation",
+      "score": 11,
+      "weight": 20,
+      "evidence": "job-loop-worker/index.ts:17,23 records exception type only; runtime.ts:87-89 has safe codes but no correlation reference; ErrorBoundary.tsx:27 logs full objects."
+    },
+    {
+      "name": "Diagnosis, reproduction and support intake",
+      "score": 13,
+      "weight": 20,
+      "evidence": "Selected audited support reads, versioned updates and account-change fencing exist; AdminRun exposes no reason or recovery class."
+    },
+    {
+      "name": "Severity, noise and actionable health",
+      "score": 12,
+      "weight": 20,
+      "evidence": "Partial status includes deliberate unavailable lanes; scheduler readiness is configuration-based and freshness has no documented operational threshold."
+    },
+    {
+      "name": "Containment, retry and spend safety",
+      "score": 17,
+      "weight": 20,
+      "evidence": "Scoped owner controls, durable runs, consent, idempotency and retained uncertain usage are source-confirmed; aggregate committed ledger reconciles."
+    },
+    {
+      "name": "Release, rollback and operator rehearsal",
+      "score": 12,
+      "weight": 20,
+      "evidence": "Integrated guide describes additive rollback and preservation, but OPERATIONS.md commands and provider/support guidance conflict with current admin guide; rehearsal unverified."
+    }
+  ],
+  "role_score": 65,
+  "score_confidence": "medium",
+  "strengths": [
+    "Support text opens only by explicit staff selection; reads and versioned writes are audited and private view state is cleared on close/account change.",
+    "Owner controls enforce optimistic configuration saves and identify key validity separately from successful model execution.",
+    "Uncertain paid calls retain reservations and are not silently retried; saved work survives dispatch failures.",
+    "A bounded local boundary check passed 24 tests; no complete-suite rerun was needed."
+  ],
+  "findings": [
+    {
+      "id": "BT-01",
+      "priority": "P1",
+      "category": "diagnostic-correlation",
+      "problem": "Safe error responses lose machine-readable context between candidate failures, worker failures and operator summaries; raw browser console objects are not a safe diagnostic contract.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/job-loop-worker/index.ts",
+          "line": 17,
+          "detail": "Asynchronous scheduler and stage catch handlers log only exception type; ordinary stage logging is also at line23."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/runtime.ts",
+          "line": 87,
+          "detail": "Known errors return code/message; unexpected errors retain only type and no event reference."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/job-loop-api.ts",
+          "line": 129,
+          "detail": "The client constructs a generic Error from public message text, discarding response code."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/components/ErrorBoundary.tsx",
+          "line": 27,
+          "detail": "Writes error and component errorInfo objects to browser console without an allowlisted diagnostic contract."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Create a minimal server-issued event reference and allowlisted operation, release, phase, error code, timestamp and recovery class. Persist safe coded run state. Offer explicit copy-diagnostics UI; exclude CV/vacancy text, email, full URLs, tokens, receipt secrets and arbitrary exception messages. Preserve the local check's no-silent-upload boundary.",
+      "acceptance_criteria": [
+        "A fictional failure can be joined from copied client reference to a worker event and authorized run summary.",
+        "Diagnostic privacy tests with canary CV text, emails, URLs and receipt secrets find none in copied or stored payloads.",
+        "Existing authorization, account-change fencing and support receipt secrecy continue to pass."
+      ],
+      "dependencies": [
+        "Shared API/run response schema",
+        "Support and failure UI",
+        "Redaction allowlist"
+      ],
+      "effort_engineer_days": {
+        "low": 2,
+        "high": 4
+      },
+      "cost_effect": "Engineering plus small bounded storage on the existing stack; no new service required.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "BT-02",
+      "priority": "P1",
+      "category": "severity-and-noise",
+      "problem": "Expected unavailable coverage and real execution faults share partial status; operator run summaries provide no safe cause, and completed/failed-only metrics cannot explain usable partial work.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/job-loop-runtime.ts",
+          "line": 214,
+          "detail": "Adds an explicitly blocked LinkedIn lane because no authorized integration exists; line271 makes any blocked/partial/not_connected lane produce overall partial."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/admin-types.ts",
+          "line": 35,
+          "detail": "AdminRun includes identity, status, phase, provider/model and dates, without diagnostic reason or recovery class."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql",
+          "line": 63,
+          "detail": "Completed preparation excludes partial, blocked and failed; lines37-38 and68-74 count only completed/failed for those labeled measures."
+        },
+        {
+          "type": "observed",
+          "path": ".tmp/20-role-review/live-service-baseline.json",
+          "line": 1,
+          "detail": "Permitted aggregate has three partial runs and prepared packets. This does not establish three incidents or their private causes."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Keep honest lane limits but add outcome dimensions for usable artifact, expected unavailable lane, retriable fault, input/consent hold and uncertain paid operation. Expose redacted reasons and actions in admin; do not count every partial as success.",
+      "acceptance_criteria": [
+        "Fictional manual success with unavailable LinkedIn, actual feed failure and uncertain model call produce distinct operator actions.",
+        "Admin shows partial/blocked reasons without source text or private messages.",
+        "Metric definitions distinguish prepared usable artifacts from full coverage and execution failure."
+      ],
+      "dependencies": [
+        "BT-01 reason codes",
+        "Run schema and snapshot SQL",
+        "Founder metric definitions"
+      ],
+      "effort_engineer_days": {
+        "low": 2,
+        "high": 3
+      },
+      "cost_effect": "Engineering only; reduces time wasted investigating expected limitations.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "BT-03",
+      "priority": "P2",
+      "category": "scheduler-health",
+      "problem": "Readiness is configuration-based; existing timestamps and queue counts require the founder to infer stale dispatch without a documented freshness rule.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/jobvance-admin.ts",
+          "line": 74,
+          "detail": "Scheduler ready checks enabled state, JOB_LOOP_ENABLED and required server configuration; message explicitly leaves future successful dispatch unverified."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/admin/AdminOperations.tsx",
+          "line": 47,
+          "detail": "Shows enabled/not-ready/paused state with due schedules and stale leases."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql",
+          "line": 98,
+          "detail": "Snapshot exposes last_dispatch_at, due schedules and stale leases; this is useful health input, not dispatch-success proof."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Add a simple existing-dashboard health rule when enabled and work is due: stale dispatch, repeated coded failures or increasing stale leases. Start with a hypothesis of three five-minute ticks and calibrate in pilot. Group repeats; keep paused, idle and expected unavailable states quiet.",
+      "acceptance_criteria": [
+        "Fixed-time tests distinguish paused, idle, stale, degraded and recovered states.",
+        "A repeated identical fault produces one grouped issue with occurrence count and last seen.",
+        "No incident is inferred solely from configuration readiness or a partial status."
+      ],
+      "dependencies": [
+        "Scheduler timestamps",
+        "BT-01/02 coded failures",
+        "Founder-agreed threshold"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Existing dashboard first; no paid monitoring or paging service needed.",
+      "pilot_required": false,
+      "confidence": "high"
+    },
+    {
+      "id": "BT-04",
+      "priority": "P2",
+      "category": "runbook-and-containment",
+      "problem": "Conflicting operational guides can direct a founder to obsolete commands or unsafe broad troubleshooting; containment and rollback procedures lack a verified end-to-end rehearsal.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "docs/OPERATIONS.md",
+          "line": 33,
+          "detail": "Legacy guide lists scripts absent from current package.json, including db:migrate, type-check and test:e2e, and recommends localStorage.clear for sessions."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/INTEGRATED-JOB-LOOP-OPERATIONS.md",
+          "line": 28,
+          "detail": "Directs daily support review through Table Editor; line34 describes paid adapters as unavailable despite current admin guide's configured paid route."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "docs/ADMIN-PORTALS-GUIDE.md",
+          "line": 15,
+          "detail": "Current portal supports selected audited message review; lines46-50 document owner controls and safe refresh on uncertain saves."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/jobvance-loop-config.ts",
+          "line": 10,
+          "detail": "Router toggle controls OpenRouter specifically; scheduler pause is not represented as a universal in-flight cancellation."
+        },
+        {
+          "type": "unavailable",
+          "detail": "No production restoration, scoped pause or rollback rehearsal was performed in this audit."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Redirect legacy docs to one current founder runbook. Describe scheduler pause, route-specific provider disablement, in-flight limits and uncertainty reconciliation. Rehearse preservation of drafts/history/holds, prior frontend rollback and compatible worker/schema readback using isolated fictional data. Require exact reviewed release artifact, relevant regressions and a fictional upload-approve-download smoke test before release. Limit automatic action to classification/deduplication and explicitly idempotent retries; no automatic patches, deploys, cap increases, approvals, erasure or uncertain-call replays.",
+      "acceptance_criteria": [
+        "Every documented script exists and provider/support instructions match the active product.",
+        "A founder can classify a synthetic bug, pause the right scope, preserve uncertain reservations and verify recovery without copying private text.",
+        "A saved frontend can be restored with additive schema compatibility; recurring work resumes only after worker/source/readback checks.",
+        "The incident record includes scope, evidence, owner, severity, reproduction, release, rollback condition and verification."
+      ],
+      "dependencies": [
+        "Exact release manifest",
+        "Isolated fixture environment",
+        "BT-01 reason codes"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Engineering only; avoids new platform cost and unsupported recovery-time promises.",
+      "pilot_required": true,
+      "confidence": "high"
+    }
+  ],
+  "open_questions": [
+    "Which recent partial runs contain usable approved artifacts versus an actual failed operation? Aggregate data cannot answer and no private rows were inspected.",
+    "Has the founder completed a fictional scoped pause/rollback/restore drill on the current contract?",
+    "Who owns daily triage and what response cadence can the pilot honestly sustain?",
+    "When can the retained uncertain administrative reservation be reconciled against provider records without assuming zero cost?"
+  ],
+  "do_not_build_now": [
+    "Sentry or another error platform solely for enterprise appearance; first define a redacted diagnostic contract.",
+    "Session replay, raw console uploads or collection of CV/vacancy text for debugging.",
+    "Autonomous patches/deploys, automatic cap increases, approval changes, erasure or uncertain paid-call retries.",
+    "Separate persona-specific triage products, a dedicated incident platform or 24/7 paging for a ten-user pilot."
+  ]
+}

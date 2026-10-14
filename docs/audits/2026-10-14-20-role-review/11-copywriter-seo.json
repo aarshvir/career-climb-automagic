@@ -1,0 +1,306 @@
+{
+  "role_id": "copywriter-seo",
+  "role_title": "Copywriter & SEO",
+  "phase": "growth",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": true
+  },
+  "methods": [
+    "Independent source examination of public copy, all 20 guide definitions, guide template, route manifest, prerender and hosting logic; no peer reports read.",
+    "Read-only HTTP checks: /, /guides, /guides/student-projects-on-cv, /guides/mba-career-pivot-cv, /for-career-switchers, /job-loop, /pilot, /loop, /robots.txt, /sitemap.xml, /guides/, /blog and an invented 404 route.",
+    "Official Google Search Central, Bing Webmaster Tools and OpenAI crawler documentation checked 2026-10-14."
+  ],
+  "not_tested": [
+    "Actual indexing, rankings, search impressions, clicks, AI citations and rich-result eligibility; owner console access unavailable.",
+    "Authenticated customer flows, traffic/retention/conversion outcomes, browser visual experience and Core Web Vitals.",
+    "Complete runtime suite, paid providers or customer data."
+  ],
+  "criteria": [
+    {
+      "name": "Honest and concrete capability claims",
+      "score": 19,
+      "weight": 20,
+      "evidence": "ProductPage.tsx:38-48,95-112,157-166 separates matching wording from qualifications, fictional demonstrations, optional consent and manual submission."
+    },
+    {
+      "name": "Audience relevance and message precision",
+      "score": 17,
+      "weight": 20,
+      "evidence": "job-loop-audiences.ts:5-35 covers student projects, MBA employment pivots and 5-10-year professionals including lateral moves; ProductPage.tsx:149 says MBA applicants."
+    },
+    {
+      "name": "Crawl, canonical and structured-data foundation",
+      "score": 19,
+      "weight": 20,
+      "evidence": "Observed initial HTML headings/canonicals; sitemap 38 routes; invented path404; /loop noindex; scripts/build-host-worker.mjs:104-131 and prerender manifest."
+    },
+    {
+      "name": "Content usefulness and connected journeys",
+      "score": 15,
+      "weight": 20,
+      "evidence": "CareerGuides.tsx:64-83 has structured takeaways, explicit sources and related guides; AudienceLanding.tsx:17-23 lacks task-guide links; end CTA generic."
+    },
+    {
+      "name": "Organic measurement and learning",
+      "score": 6,
+      "weight": 20,
+      "evidence": "20261012181402_jobvance_admin_snapshot.sql:77-78 marks guest visits/checks and browser download completion untracked; no owner search-console evidence."
+    }
+  ],
+  "role_score": 76,
+  "score_confidence": "medium",
+  "strengths": [
+    "Public copy explains the free accountless CV-to-vacancy task concretely and avoids fabricated outcomes, testimonials or qualification guarantees.",
+    "Distinct persona examples preserve academic context, personal contribution, projected versus measured results and employer confidentiality.",
+    "Manifest-driven prerender provides real public HTML, canonicals, sitemap, structured data, private noindex and genuine404 behavior.",
+    "20 guides have substantive task advice, fictional examples, sources, takeaways, related links and transparent AI-assistance disclosure."
+  ],
+  "findings": [
+    {
+      "id": "SEO-01",
+      "priority": "P1",
+      "category": "measurement",
+      "problem": "The no-account organic journey is not measured; registered-account milestones cannot establish guide-to-approved-download performance.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/migrations/20261012181402_jobvance_admin_snapshot.sql",
+          "line": 77,
+          "detail": "Guest visits/checks and download completion are explicitly untracked."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/CareerGuides.tsx",
+          "line": 25,
+          "detail": "Generic /check and /loop links carry no content-origin identifier."
+        },
+        {
+          "type": "unavailable",
+          "detail": "Search Console, Bing Webmaster Tools and crawler/attribution reports were not available."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Create an owner-reviewed weekly route report combining Google/Bing search metrics and a minimal privacy-reviewed first-party journey count. Exclude CV/vacancy content and freeform queries. Label download actions separately from delivery completion.",
+      "acceptance_criteria": [
+        "Dated baseline lists 38 public URLs, known indexed status where available, impressions/clicks and explicit unknowns.",
+        "One QA journey contributes once to guide-to-check, review-reached and approved-download-action stages; synthetic traffic excluded from customer metrics.",
+        "Named owner and privacy/data-retention decision; no raw candidate content captured."
+      ],
+      "dependencies": [
+        "Owner access to verified search properties",
+        "Privacy/retention decision",
+        "Shared metric owner"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Use existing/free reporting first; no required paid service. Engineering and ongoing review time only.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SEO-02",
+      "priority": "P2",
+      "category": "internal linking and activation",
+      "problem": "Audience pages do not link to task-relevant guides, while guide actions discard audience context and send informational saving traffic to the private workspace.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/AudienceLanding.tsx",
+          "line": 17,
+          "detail": "Audience journey contains check, Job Loop and sign-in actions but no task-specific guide links."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/CareerGuides.tsx",
+          "line": 25,
+          "detail": "All guide CTAs use /check and /loop."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Add two relevant guides on each audience page, preserve explicit audience in check links, and point explanatory saving CTA to /job-loop.",
+      "acceptance_criteria": [
+        "Each persona can reach its useful guide and accountless check with explicit stage preserved.",
+        "Explore saving leads to public explanation without unexpected sign-in.",
+        "Links are real anchors in initial public HTML."
+      ],
+      "dependencies": [
+        "Shared route conventions",
+        "Editorial guide selection"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1.5
+      },
+      "cost_effect": "No added vendor cost.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SEO-03",
+      "priority": "P2",
+      "category": "focused content strategy",
+      "problem": "The library provides prose but lacks a shared reusable evidence artifact; older repository growth plans describe obsolete dates and automation/outreach positioning.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/career-guides.ts",
+          "line": 5,
+          "detail": "Guide sections support paragraphs, bullets and fictional examples; no shared task worksheet representation."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "keyword-map.csv",
+          "line": 13,
+          "detail": "Legacy map describes automation/AI academy/outreach-oriented content."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "90-day-calendar.csv",
+          "line": 2,
+          "detail": "Calendar begins in2024 and proposes older content priorities."
+        },
+        {
+          "type": "inferred",
+          "detail": "A worked shared artifact could improve usefulness; this requires pilot observation, not a promised search gain."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Improve cv-job-description-evidence, student-projects-on-cv, mba-career-pivot-cv and reuse-second-application around one requirement/source/contribution/result/uncertainty/approved-wording/next-action worksheet. Add lateral-move evidence and replace the obsolete editorial plan.",
+      "acceptance_criteria": [
+        "One copyable worksheet and four completed fictional examples with current citations.",
+        "Student academic, MBA pivot and professional lateral-move variants preserve contribution/result boundaries.",
+        "Pilot readers can use the worksheet on one vacancy; record task usefulness and confusion without hiring/ranking claims.",
+        "Old keyword/calendar plan is marked superseded and replaced by a prioritized existing-URL map."
+      ],
+      "dependencies": [
+        "Editorial owner",
+        "Fictional fixtures",
+        "2-4 editorial days outside engineering estimate"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1.5
+      },
+      "cost_effect": "No model/search spend required; editorial time is the principal cost.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "SEO-04",
+      "priority": "P2",
+      "category": "editorial maintenance",
+      "problem": "Hardcoded global dates prevent accurate per-guide revision tracking after the next independent content update.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/career-guides.ts",
+          "line": 59,
+          "detail": "publish() assigns every guide publishedAt2026-10-13 and updatedAt2026-10-14."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/career-guides.ts",
+          "line": 28,
+          "detail": "One shared editorial source-check date."
+        },
+        {
+          "type": "observed",
+          "url": "https://jobvance.io/guides/mba-career-pivot-cv",
+          "detail": "Live MBA guide publishes these dates in BlogPosting JSON-LD."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Store dates per guide and retain an internal reviewer/source-check record and next-review trigger, particularly for official UAE guidance and changing product capabilities. Keep honest organization authorship.",
+      "acceptance_criteria": [
+        "A single guide edit changes only its dateModified and sitemap lastmod.",
+        "Unchanged guides retain their dates.",
+        "Each volatile source has a named maintenance owner and documented check; no invented expert credentials."
+      ],
+      "dependencies": [
+        "Editorial owner",
+        "Per-guide data migration"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1
+      },
+      "cost_effect": "No new vendor cost; small recurring editorial review effort.",
+      "pilot_required": false,
+      "confidence": "high"
+    },
+    {
+      "id": "SEO-05",
+      "priority": "P2",
+      "category": "message precision",
+      "problem": "For MBA applicants can imply admissions preparation although the destination supports employment during or after an MBA.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/ProductPage.tsx",
+          "line": 149,
+          "detail": "Home audience link says For MBA applicants."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/lib/job-loop-audiences.ts",
+          "line": 16,
+          "detail": "Destination describes search during/after MBA."
+        },
+        {
+          "type": "inferred",
+          "detail": "Admissions confusion is plausible but has not been observed in user research."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Use For MBA students and alumni consistently and keep examples/metadata focused on employment.",
+      "acceptance_criteria": [
+        "Three pilot readers correctly identify the supported employment task without explanation.",
+        "Navigation and landing-page terminology agree; no admissions promise."
+      ],
+      "dependencies": [
+        "Editorial approval"
+      ],
+      "effort_engineer_days": {
+        "low": 0.25,
+        "high": 0.5
+      },
+      "cost_effect": "No vendor cost.",
+      "pilot_required": true,
+      "confidence": "medium"
+    }
+  ],
+  "open_questions": [
+    "Who owns and can access verified Google Search Console and Bing Webmaster Tools properties?",
+    "Which guide entries actually generate search impressions or help pilot users complete a truthful application?",
+    "Who will own editorial source rechecks and the replacement of the2024 content calendar?"
+  ],
+  "do_not_build_now": [
+    "Twenty additional generic blogs or cloned persona workflows.",
+    "Keyword-stuffed ATS pages, fake experts/testimonials or promised hiring/search results.",
+    "Paid SEO tools, custom AI visibility percentages or special AI markup/files justified as ranking requirements."
+  ]
+}

@@ -1,0 +1,306 @@
+{
+  "role_id": "api-integrator",
+  "role_title": "API Integrator",
+  "phase": "build",
+  "snapshot": {
+    "source_head": "e661c6493c30c88f2487800ff38aa10c46c9aae6",
+    "runtime_commit": "57713fb1cb15b29be8d6dc745e3c87bcb718c4af",
+    "live_checked": false
+  },
+  "methods": [
+    "Independent local source examination of Supabase auth, route selection, OpenRouter/direct adapters, fixed employer feeds, Gmail OAuth/drafts, billing handlers and retired bridges",
+    "Read supplied .tmp/20-role-review/live-service-baseline.json only as aggregate infrastructure evidence",
+    "Read CLOUD-JOB-LOOP-ACCOUNTS.md and deployment/configuration sources as implementation claims, not live proof",
+    "Current official Google, Supabase and OpenRouter documentation consulted on 2026-10-14",
+    "Ran npm exec -- vitest run supabase/tests/job-loop-providers.test.ts supabase/tests/jobvance-openrouter.test.ts supabase/tests/paddle.test.ts supabase/tests/core.test.ts --maxWorkers=4: 4 files and 77 tests passed"
+  ],
+  "not_tested": [
+    "No authenticated browser or live connector execution",
+    "No secret/key values, candidate/account row content or private mailbox data read",
+    "No model/search calls, OAuth connection, new account, payment activation, sends or deployment",
+    "No external SMTP configuration/deliverability or Google verification state independently established",
+    "No merchant-approved live webhook, payment, refund or provider billing reconciliation exercised"
+  ],
+  "criteria": [
+    {
+      "name": "Identity and required account setup",
+      "score": 16,
+      "weight": 20,
+      "evidence": "Supabase PKCE client and explicit signup/reset errors; ordinary non-team address confirmation/recovery delivery remains unavailable evidence."
+    },
+    {
+      "name": "Discovery contracts and degraded operation",
+      "score": 17,
+      "weight": 20,
+      "evidence": "Fixed Greenhouse/Lever hosts, bounded reads, stable source IDs, per-source failure lanes and manual vacancy fallback; broad target coverage unverified."
+    },
+    {
+      "name": "Model routing and spend boundaries",
+      "score": 18,
+      "weight": 20,
+      "evidence": "Route-bound per-run consent, strict approved-claim-ID contract, bounded requests and shared reservation/settlement. Current route availability is not implied by a valid key."
+    },
+    {
+      "name": "Retry, idempotency and write safety",
+      "score": 16,
+      "weight": 20,
+      "evidence": "Run replay, stored usage results, retained uncertainty, durable Gmail draft claim and billing event replay controls; historical public receipts omit actual processing route."
+    },
+    {
+      "name": "Configuration truth and vendor lifecycle",
+      "score": 13,
+      "weight": 20,
+      "evidence": "Admin key validity status explicitly excludes funded-model proof; connected Gmail is row-derived; account instructions retain three-query/five-packet examples against two/two runtime limits."
+    }
+  ],
+  "role_score": 80,
+  "score_confidence": "medium",
+  "strengths": [
+    "Existing Supabase covers identity, records, private storage and execution without a second backend.",
+    "Provider/model/route consent is explicit; no silent provider substitution; paid response uncertainty retains reservations.",
+    "Employer discovery is limited and honest: fixed hosts, at most four configured boards, capped responses and per-source blocked/partial lanes.",
+    "Gmail uses encrypted owner-bound tokens, PKCE, one-use callback activation, user mailbox confirmation, approved attachment hashes and no send action.",
+    "Billing remains deliberately disabled; Paddle/Stripe raw-body signature and event replay contracts exist; retired bridges return HTTP410 in source.",
+    "Focused offline integration verification passed 77 tests."
+  ],
+  "findings": [
+    {
+      "id": "API-01",
+      "priority": "P1",
+      "category": "Integration receipt accuracy",
+      "problem": "Historical run labels derive the route from current model configuration, while publicRun drops the saved processingRoute; a later routing switch can mislabel the transport used for an older run.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/job-loop-runtime.ts",
+          "line": 139,
+          "detail": "Run consent persists processingRoute; runtime also enforces it before dispatch."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/job-loop-repository.ts",
+          "line": 107,
+          "detail": "publicRun emits provider and model but no saved processingRoute."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "src/pages/JobLoop.tsx",
+          "line": 365,
+          "detail": "History resolves a label from snapshot.models, reflecting current configuration."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/job-loop-providers.ts",
+          "line": 105,
+          "detail": "Loop result drops canonical model and requestId returned by callRouter at jobvance-openrouter.ts:71."
+        },
+        {
+          "type": "inferred",
+          "detail": "Changing routing after an earlier run can display a different historical transport; not reproduced against a live account."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Carry actual transport, canonical model and safe provider request reference into settled usage and public run receipts. Render history from its recorded receipt with an explicit unknown fallback for older records; never display current configuration as a historical fact.",
+      "acceptance_criteria": [
+        "Direct→OpenRouter→direct configuration changes leave earlier run labels unchanged.",
+        "Settled and uncertain attempts retain separate safe references and cost state without exposing keys or provider payloads.",
+        "Existing records without route metadata say route not recorded; no fabricated backfill."
+      ],
+      "dependencies": [
+        "Shared run/result/public response schema",
+        "Compatible old-record fallback",
+        "Focused replay/history regression test"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "No new service or paid call needed for implementation; future separately authorized synthetic acceptance should remain within the shared cap.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "API-02",
+      "priority": "P1",
+      "category": "Supabase auth delivery readiness",
+      "problem": "Email confirmation/password reset are exposed, but ordinary non-team pilot address delivery and recovery have no current independent acceptance evidence. Account totals do not establish delivery; no outage is asserted.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "src/contexts/AuthContext.tsx",
+          "line": 100,
+          "detail": "Email signup is implemented with a redirect; resetPasswordForEmail is called at line118."
+        },
+        {
+          "type": "unavailable",
+          "detail": "Current confirmation setting, allowed redirect list, custom SMTP state and non-team-address deliverability were not inspected."
+        },
+        {
+          "type": "observed",
+          "path": ".tmp/20-role-review/live-service-baseline.json",
+          "detail": "Supplied aggregate reports45 accounts, without signup delivery/recovery results; unknown QA/founder composition."
+        },
+        {
+          "type": "source-confirmed",
+          "url": "https://supabase.com/docs/guides/auth/auth-smtp",
+          "detail": "Official documentation checked2026-10-14 says the default mail service is limited to project-team addresses, currently two messages/hour, and calls for custom SMTP for other use cases."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Before widening invitations, have the owner record current email-confirmation, redirects and SMTP configuration without copying credentials. Reuse existing SMTP if required; configure sender domain and SMTP host/port/user/password in Supabase Auth. Later perform an explicitly authorized non-team invited-address signup/reset acceptance check.",
+      "acceptance_criteria": [
+        "A normal invited address can receive whichever confirmation/recovery messages the configured flow requires.",
+        "Valid links restore the correct private account; expired links explain recovery; redirect destinations are correct.",
+        "SMTP provider, owner, current quota and failure handling are documented without storing credentials in the repo."
+      ],
+      "dependencies": [
+        "Existing Supabase owner access",
+        "Sender domain/DNS and existing SMTP account if needed",
+        "Separately authorized acceptance recipient/mail delivery"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1.5
+      },
+      "cost_effect": "No second auth vendor. Existing SMTP may suffice; incremental provider cost is unverified and must be quoted separately from the AI/search cap.",
+      "pilot_required": true,
+      "confidence": "medium"
+    },
+    {
+      "id": "API-03",
+      "priority": "P2",
+      "category": "Configuration and cost documentation",
+      "problem": "The account guide retains three-query/five-packet cost and setup examples while runtime limits are two/two; OpenRouter is owner-admin-controlled and needs a separate clear setup path.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "docs/CLOUD-JOB-LOOP-ACCOUNTS.md",
+          "line": 61,
+          "detail": "Describes at most three basic queries; line80 illustrates five selections/three queries; line82 says up to five prepared roles and scheduler setup later."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/job-loop-providers.ts",
+          "line": 9,
+          "detail": "LIMITS is queries2, packets2, dailyRuns3, monthlyUsd50."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/jobvance-loop-config.ts",
+          "line": 10,
+          "detail": "OpenRouter enablement comes from validated private admin config, not an environment toggle alone."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/jobvance-openrouter.ts",
+          "line": 36,
+          "detail": "Key status explicitly states that model availability and funded usage require a separate bounded call."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Publish one dated operator matrix for required Supabase, optional direct model, optional OpenRouter, selected public boards, optional Tavily/Gmail and disabled billing. Derive limits from current constants/snapshot; distinguish configured, authenticated and bounded-call-verified states. Keep exact supported model/price checks dated rather than implying static catalog entries prove availability.",
+      "acceptance_criteria": [
+        "Guide query/packet examples match runtime2/2 and the$50 shared UTC-month cap.",
+        "OpenRouter setup identifies JOB_LOOP_OPENROUTER_API_KEY plus admin routerEnabled; direct routes identify their keys and paid API toggle.",
+        "One current guide links scheduler readiness and explains optional unavailable routes without requiring new accounts."
+      ],
+      "dependencies": [
+        "Operator/documentation owner",
+        "Runtime capability contract",
+        "Existing admin guide links"
+      ],
+      "effort_engineer_days": {
+        "low": 0.5,
+        "high": 1
+      },
+      "cost_effect": "Avoids unnecessary accounts/top-ups and obsolete usage estimates; no purchase required.",
+      "pilot_required": true,
+      "confidence": "high"
+    },
+    {
+      "id": "API-04",
+      "priority": "P2",
+      "category": "Optional Gmail token lifecycle",
+      "problem": "Connected status means a stored connection row; revoked/expired credentials do not persist a reconnect-required state. Generic mailbox failures can leave the connection labelled connected.",
+      "evidence": [
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/_shared/job-loop-runtime.ts",
+          "line": 64,
+          "detail": "Snapshot connected flag is derived from connection-row presence plus feature configuration."
+        },
+        {
+          "type": "source-confirmed",
+          "path": "supabase/functions/job-loop-oauth/gmail.ts",
+          "line": 38,
+          "detail": "All unsuccessful Google responses map to one mailbox-unavailable error; token refresh at lines74–85 does not persist reauthorization status."
+        },
+        {
+          "type": "inferred",
+          "detail": "Revoked or expired credentials could remain visually connected after a failed read. No live mailbox test performed."
+        },
+        {
+          "type": "source-confirmed",
+          "url": "https://developers.google.com/workspace/gmail/api/auth/scopes",
+          "detail": "Official scopes checked2026-10-14 classify readonly/compose as restricted; compose includes sending; server storage/transmission requires assessment subject to applicable exceptions."
+        },
+        {
+          "type": "source-confirmed",
+          "url": "https://developers.google.com/identity/protocols/oauth2#expiration",
+          "detail": "External Testing refresh tokens generally expire after seven days when Gmail scopes are requested."
+        }
+      ],
+      "impacted_personas": [
+        "student",
+        "mba",
+        "professional"
+      ],
+      "recommendation": "Before optional Gmail enablement, map invalid_grant/revocation to persisted needs_reauthorization; keep429/5xx transient, expose reconnect, retain uncertainty and never blindly retry draft writes. Keep Gmail disabled unless tester/public release gates are satisfied.",
+      "acceptance_criteria": [
+        "Revocation/expiry/tester-day-eight produces reconnect-required without claiming an inbox check.",
+        "Transient provider errors preserve the connection and show the last successful check separately.",
+        "Ambiguous draft creation still blocks duplicate writes and tells the owner to inspect Gmail."
+      ],
+      "dependencies": [
+        "Google Cloud project with Gmail API",
+        "Web OAuth client with exact Supabase /functions/v1/job-loop-oauth callback and jobvance.io/loop return",
+        "Consent screen/test users or required public verification/assessment",
+        "Server-only client ID/secret and32-byte encryption key; no account changes during audit"
+      ],
+      "effort_engineer_days": {
+        "low": 1,
+        "high": 2
+      },
+      "cost_effect": "Google verification/assessment effort and possible vendor charges are unquoted and outside the$50 AI/search cap. Deferring Gmail avoids this optional burden.",
+      "pilot_required": false,
+      "confidence": "high"
+    }
+  ],
+  "open_questions": [
+    "Is custom SMTP configured and have ordinary non-team pilot confirmation/reset journeys been accepted recently?",
+    "Which current enabled model routes have a dated bounded-call receipt, beyond the aggregate OpenAI-labelled usage row?",
+    "Does the operator intend a controlled Google tester pilot, public Gmail release, or continued manual Gmail use?",
+    "Which of the selected employer boards actually produces useful vacancies for the invited target roles/locations? Measure before adding sources.",
+    "Before future payment activation, are both intended webhook deployment and merchant/sandbox registration documented? The supplied active-function list omits current Paddle/Stripe webhook slugs."
+  ],
+  "do_not_build_now": [
+    "Do not add Auth0, SMS/Twilio authentication, a second Supabase backend or another identity layer for this pilot.",
+    "Do not open multiple new model accounts or paid search subscriptions; use rules/manual vacancies plus one optional funded route.",
+    "Do not add LinkedIn browser/session scraping, automatic applications or email-send actions.",
+    "Do not activate real-money Paddle/Stripe checkout. Current handlers/retired bridges do not establish merchant approval or live webhook configuration.",
+    "Do not fund public Gmail verification/security assessment merely to broaden the feature list; first validate demand.",
+    "Do not restore retired Make, email-provider or Lemon Squeezy bridges."
+  ]
+}
