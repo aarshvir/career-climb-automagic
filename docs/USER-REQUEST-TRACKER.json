@@ -196,6 +196,12 @@
       "instruction": "Remove repeated customer-facing AI presenter, fictional, sample, fake and dummy wording so Jobvance feels like a finished product (14 Oct latest steering).",
       "status_evidence": "Shipped v21 on Jobvance.io, source 7ef4816. All 38 public pages, sign-in and private analytics labels, pilot tour/download/request copy and five recorded guides cleaned up. 77 relevant tests, 38 rendered pages, 47 live-site checks and 15 media-byte checks passed. 24 video chapter frames reviewed. See COPY-POLISH-2026-10-14.md; internal fixtures/history retained.",
       "next_acceptance": "Preserve concise example attribution and accessible guide provenance. Existing reliability, original-loop parity and full presenter-quality goals remain separate open requirements."
+    },
+    {
+      "id": "RQ-31",
+      "instruction": "Reassess end to end after owner reports AI-generated feel, unclear flow and unnecessary student/MBA separation; identify other poor product decisions.",
+      "status_evidence": "Assessment delivered for v21: three separately assigned reviews, 40 finding entries consolidated into 21 issues, desktop/mobile live walkthrough and two locally reproduced lost-work defects. See audits/2026-10-14-usability-reset/ASSESSMENT.md. No application changes or production record writes in this assessment.",
+      "next_acceptance": "Prioritize work preservation, one application/home and consented continuation, then lower-effort review and a simpler front door. Validate unassisted first and second applications with novices. Do not equate passing technical checks or word removal with best-in-class usability."
     }
   ],
   "standing_constraints": [
@@ -254,5 +260,6 @@
     "Source rollback is not a demonstrated database/file restore.",
     "No current 95/98,99% effort,AI-authorship percentage or search-rank guarantee is claimed.",
     "No secret keys,private CV/email contents or provider credentials are stored here."
-  ]
+  ],
+  "latest_product_assessment": "audits/2026-10-14-usability-reset/ASSESSMENT.md"
 }

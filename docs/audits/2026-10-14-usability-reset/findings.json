@@ -1,0 +1,329 @@
+{
+  "reviewedDate": "2026-10-14",
+  "siteVersion": 21,
+  "applicationSource": "7ef48164bc7e9238809b4c199b3f136605ffaf56",
+  "documentationBaseline": "061b37528cb110097878798b92da9c8403f6eeaf",
+  "reviewers": 3,
+  "independentReportEntries": 40,
+  "consolidatedFindings": 21,
+  "appChangesMade": false,
+  "productionRecordMutations": false,
+  "paidCalls": 0,
+  "findings": [
+    {
+      "id": "U01",
+      "severity": "High",
+      "title": "Overlapping audience categories",
+      "evidence": [
+        "live",
+        "source"
+      ],
+      "reports": [
+        "PM-04",
+        "CD-02"
+      ],
+      "repairRelease": 4,
+      "status": "open"
+    },
+    {
+      "id": "U02",
+      "severity": "High",
+      "title": "Example selector silently changes onboarding",
+      "evidence": [
+        "live",
+        "source"
+      ],
+      "reports": [
+        "PM-05",
+        "CD-03",
+        "WF-10"
+      ],
+      "repairRelease": 4,
+      "status": "open"
+    },
+    {
+      "id": "U03",
+      "severity": "High",
+      "title": "Three application systems and inconsistent homes",
+      "evidence": [
+        "source"
+      ],
+      "reports": [
+        "PM-01",
+        "WF-01",
+        "WF-06"
+      ],
+      "repairRelease": 2,
+      "status": "open"
+    },
+    {
+      "id": "U04",
+      "severity": "High",
+      "title": "Inconsistent authentication continuation",
+      "evidence": [
+        "source",
+        "external-unverified"
+      ],
+      "reports": [
+        "PM-02",
+        "WF-11"
+      ],
+      "repairRelease": 2,
+      "status": "open"
+    },
+    {
+      "id": "U05",
+      "severity": "High",
+      "title": "No continued application after saving first check",
+      "evidence": [
+        "live",
+        "source"
+      ],
+      "reports": [
+        "PM-03",
+        "WF-01"
+      ],
+      "repairRelease": 2,
+      "status": "open"
+    },
+    {
+      "id": "U06",
+      "severity": "High",
+      "title": "Owned refresh draft lost during auth bootstrap",
+      "evidence": [
+        "local-reproduced"
+      ],
+      "reports": [
+        "WF-03"
+      ],
+      "repairRelease": 1,
+      "status": "open"
+    },
+    {
+      "id": "U07",
+      "severity": "High",
+      "title": "Final edits lost on unchanged-vacancy recheck",
+      "evidence": [
+        "local-reproduced"
+      ],
+      "reports": [
+        "WF-02"
+      ],
+      "repairRelease": 1,
+      "status": "open"
+    },
+    {
+      "id": "U08",
+      "severity": "Medium",
+      "title": "Uneven six-screen task grouping",
+      "evidence": [
+        "live",
+        "source",
+        "judgement"
+      ],
+      "reports": [
+        "PM-07",
+        "CD-05"
+      ],
+      "repairRelease": 3,
+      "status": "open"
+    },
+    {
+      "id": "U09",
+      "severity": "High",
+      "title": "Passage-by-passage fact administration",
+      "evidence": [
+        "source"
+      ],
+      "reports": [
+        "PM-08",
+        "WF-04"
+      ],
+      "repairRelease": 3,
+      "status": "open"
+    },
+    {
+      "id": "U10",
+      "severity": "High",
+      "title": "Private document requires source edits and rebuild",
+      "evidence": [
+        "source"
+      ],
+      "reports": [
+        "PM-09",
+        "WF-05"
+      ],
+      "repairRelease": 3,
+      "status": "open"
+    },
+    {
+      "id": "U11",
+      "severity": "High",
+      "title": "No direct preparation action on a saved vacancy",
+      "evidence": [
+        "source"
+      ],
+      "reports": [
+        "WF-08"
+      ],
+      "repairRelease": 2,
+      "status": "open"
+    },
+    {
+      "id": "U12",
+      "severity": "Medium",
+      "title": "PDF preview resets approval without a clear finish order",
+      "evidence": [
+        "live",
+        "source"
+      ],
+      "reports": [],
+      "repairRelease": 3,
+      "status": "open"
+    },
+    {
+      "id": "U13",
+      "severity": "High",
+      "title": "Tailoring contribution and product promise need alignment",
+      "evidence": [
+        "source",
+        "judgement"
+      ],
+      "reports": [
+        "PM-06",
+        "CD-04",
+        "WF-07"
+      ],
+      "repairRelease": 3,
+      "status": "open"
+    },
+    {
+      "id": "U14",
+      "severity": "Medium",
+      "title": "Operator infrastructure exposed to candidates",
+      "evidence": [
+        "live",
+        "source"
+      ],
+      "reports": [
+        "PM-10",
+        "CD-06",
+        "WF-07"
+      ],
+      "repairRelease": 3,
+      "status": "open"
+    },
+    {
+      "id": "U15",
+      "severity": "High",
+      "title": "Current discovery coverage needs narrower expectations",
+      "evidence": [
+        "live"
+      ],
+      "reports": [
+        "CD-11"
+      ],
+      "repairRelease": 3,
+      "status": "open"
+    },
+    {
+      "id": "U16",
+      "severity": "Medium",
+      "title": "Unavailable tiers and legacy credit dead end",
+      "evidence": [
+        "source",
+        "account-balance-unverified"
+      ],
+      "reports": [
+        "PM-12",
+        "WF-09"
+      ],
+      "repairRelease": 4,
+      "status": "open"
+    },
+    {
+      "id": "U17",
+      "severity": "Medium",
+      "title": "Research-request funnel competes with product access",
+      "evidence": [
+        "source"
+      ],
+      "reports": [
+        "PM-11",
+        "CD-12"
+      ],
+      "repairRelease": 4,
+      "status": "open"
+    },
+    {
+      "id": "U18",
+      "severity": "Medium",
+      "title": "Repeated defensive and generated-sounding voice",
+      "evidence": [
+        "live",
+        "source",
+        "judgement"
+      ],
+      "reports": [
+        "PM-13",
+        "CD-07",
+        "CD-13"
+      ],
+      "repairRelease": 4,
+      "status": "open"
+    },
+    {
+      "id": "U19",
+      "severity": "Medium",
+      "title": "Miniature proof and generic repeated visual hierarchy",
+      "evidence": [
+        "live",
+        "judgement"
+      ],
+      "reports": [
+        "CD-04",
+        "CD-14"
+      ],
+      "repairRelease": 4,
+      "status": "open"
+    },
+    {
+      "id": "U20",
+      "severity": "Medium",
+      "title": "Help and presenter formats add learning overhead",
+      "evidence": [
+        "source",
+        "frame-observation",
+        "judgement"
+      ],
+      "reports": [
+        "PM-14",
+        "CD-08",
+        "CD-09",
+        "CD-10"
+      ],
+      "repairRelease": 4,
+      "status": "open"
+    },
+    {
+      "id": "U21",
+      "severity": "Medium",
+      "title": "Blank-CV, import and support fallback gaps",
+      "evidence": [
+        "source",
+        "external-unverified"
+      ],
+      "reports": [
+        "WF-12"
+      ],
+      "repairRelease": 3,
+      "status": "open"
+    }
+  ],
+  "limits": [
+    "Heuristic reviews are not real customer studies.",
+    "Two draft defects were reproduced locally with mocked network/auth boundaries.",
+    "Fresh signup, actual file delivery, paid model processing and background execution were not certified.",
+    "No AI-detector percentage or forced consolidated score is assigned."
+  ]
+}

@@ -1,0 +1,44 @@
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import CvCheck from '@/pages/CvCheck';
+import { clearCheckRecovery, rememberCheckRecovery, readCheckRecovery } from '@/lib/check-draft';
+vi.unmock('react-router-dom');
+const state = vi.hoisted(() => ({ user: null as null | { id: string; email: string }, loading: false }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => state }));
+vi.mock('@/pages/Auth', () => ({ default: () => <div>Account form</div> }));
+vi.mock('@/lib/free-check-api', () => ({ saveFreeCheck: vi.fn(), listFreeChecks: vi.fn(async () => []), deleteFreeCheck: vi.fn() }));
+vi.mock('@/lib/workspace-api', () => ({ addApplication: vi.fn() }));
+const source = 'Alex Example\nEXPERIENCE\n• Prepared monthly stakeholder reports using Excel.\n• Supported a transformation pilot across five units.\n• Facilitated weekly workstream meetings.\nSKILLS\nExcel, Power BI\nEDUCATION\nBachelor of Business Administration';
+const vacancy = 'Responsibilities\n• Prepare monthly stakeholder reports using Excel.\n• Lead a transformation programme.\nRequirements\n• PMP certification required.\n• At least five years of transformation experience.';
+const tree = () => <MemoryRouter initialEntries={['/check']}><CvCheck /></MemoryRouter>;
+beforeEach(() => { vi.clearAllMocks(); state.user = null; state.loading = false; sessionStorage.clear(); clearCheckRecovery(); });
+afterEach(() => { cleanup(); sessionStorage.clear(); clearCheckRecovery(); });
+describe('read-only usability audit reproductions: assertions record current defects', () => {
+  it('owner-scoped refresh recovery is discarded before the saved sign-in resolves', async () => {
+    rememberCheckRecovery({ draft: { jobTitle: 'Transformation Manager', company: '', sourceText: source, reviewedText: source, jobDescription: vacancy }, step: 5, cvReady: true, filename: '', ownerId: 'owner-a', pageTarget: 2 }, true);
+    state.loading = true;
+    const view = render(tree());
+    expect(screen.getByLabelText('Target role')).toHaveValue('');
+    await act(async () => { state.user = { id: 'owner-a', email: 'owner@example.test' }; state.loading = false; view.rerender(tree()); });
+    expect(screen.getByLabelText('Target role')).toHaveValue('');
+    expect(readCheckRecovery('owner-a')?.value.draft.sourceText).toBe('');
+  });
+  it('checking an unchanged vacancy again silently removes final review edits', () => {
+    render(tree());
+    fireEvent.change(screen.getByLabelText('Target role'), { target: { value: 'Transformation Manager' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to your CV' }));
+    fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: source } });
+    fireEvent.click(screen.getByRole('button', { name: 'Use this reviewed CV text' }));
+    fireEvent.change(screen.getByLabelText('Vacancy description'), { target: { value: vacancy } });
+    fireEvent.click(screen.getByRole('button', { name: 'Check these inputs' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review my CV & questions' }));
+    const edited = source + '\nI built a reporting checklist for weekly review.';
+    fireEvent.change(screen.getByLabelText('Your CV to review'), { target: { value: edited } });
+    fireEvent.click(screen.getByRole('button', { name: 'One vacancy' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Check these inputs' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review my CV & questions' }));
+    expect(screen.getByLabelText('Your CV to review')).not.toHaveValue(edited);
+    expect(screen.getByLabelText('Your CV to review')).toHaveValue(source);
+  });
+});

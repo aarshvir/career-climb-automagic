@@ -1,0 +1,57 @@
+{
+  "site": "https://jobvance.io",
+  "date": "2026-10-14",
+  "browser": "Chrome",
+  "session": "Existing authenticated owner session; identity excluded",
+  "viewports": [
+    {
+      "width": 1905,
+      "height": 904
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "temporaryViewportReset": true,
+  "observations": [
+    {
+      "id": "L01",
+      "finding": "Home defaults to student example and primary CTA /check?audience=student"
+    },
+    {
+      "id": "L02",
+      "finding": "Professional test CV still shown University student guidance"
+    },
+    {
+      "id": "L03",
+      "finding": "Owned saved free-check list exists; Loop home shows zero setup progress and asks to import CV"
+    },
+    {
+      "id": "L04",
+      "finding": "TXT action produces requested toast and prepared-file link; actual delivery unverified in this session"
+    },
+    {
+      "id": "L05",
+      "finding": "PDF preview successfully generates one-page layout"
+    },
+    {
+      "id": "L06",
+      "finding": "Preview after prior approval clears confirmations and disables approved downloads until reapproved"
+    },
+    {
+      "id": "L07",
+      "finding": "Loop home lists three employer boards and says web search not configured"
+    },
+    {
+      "id": "L08",
+      "finding": "One unexplained step3 to step2 return; retry succeeds; cause unconfirmed"
+    }
+  ],
+  "accountWrites": 0,
+  "cloudRunsStarted": 0,
+  "messagesSent": 0,
+  "newAccountsCreated": 0,
+  "testDocument": "Locally entered text marked PRODUCT REVIEW TEST RECORD; no private CV used",
+  "privateScreenshotsPublished": false
+}

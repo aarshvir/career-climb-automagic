@@ -52,6 +52,8 @@ Dates below are the originating turn dates in UTC. The six-step and other earlie
 | RQ-29 | Don't miss instructions from the last three days (14 Oct 05:57). | **This tracker and three independent reconciliations created.** | Every resumed task reads this ledger and latest release receipt, then updates requirement-level evidence without silently dropping pending work. |
 | RQ-30 | Remove repeated customer-facing “AI presenter”, “fictional”, “sample”, “fake” and “dummy” labels so the product feels finished (14 Oct latest steering). | **Shipped v21, source `7ef4816`.** All 38 public pages and five recordings cleaned up; 77 tests, 47 live-site checks and 15 media-byte checks passed, with source/caption/geometry checks and 24 chapter-frame inspections. See [copy release note](COPY-POLISH-2026-10-14.md). | Preserve concise example attribution and accessible guide provenance. Existing reliability, original-loop parity and full presenter-quality goals remain separately open. Internal fixtures and historical reports are not public product copy. |
 
+| RQ-31 | Reassess the unclear, generated-feeling product and unnecessary student/MBA split; identify other poor product decisions. | **Assessment delivered for v21:** three separate reviews, 21 consolidated findings, live desktop/mobile walkthrough and two locally reproduced lost-work defects. [Assessment](audits/2026-10-14-usability-reset/ASSESSMENT.md). No runtime fixes made by this assessment. | Protect work, unify one application/home, reduce review effort and simplify the front door; validate actual unassisted first and second applications. Technical passes and copy cleanup do not establish usability. |
+
 ## Earlier standing scope and constraints
 
 | ID | Standing instruction | Current treatment |
@@ -66,6 +68,8 @@ Dates below are the originating turn dates in UTC. The six-step and other earlie
 | SC-08 | High quality, 95/98 scores, 99% effort saving, human writing and search leadership targets. | Retain the owner's quality goals while reporting actual bounded evidence, missingness and current scores. Numeric calculations remain deterministic/tested. |
 
 ## Current open work that must survive handoff
+
+Read the latest [product-judgement assessment](audits/2026-10-14-usability-reset/ASSESSMENT.md) before another interface expansion. Its four repair slices guide the existing backlog; it does not create 21 independent feature projects.
 
 1. **JV-01:** fix reproduced authentication-bootstrap draft loss and unchanged-input backward-navigation CV edit loss; protect tracking drafts and independent exports.
 2. **JV-02:** durable erasure/generation fence, bounded deletion progress, late-upload/orphan cleanup and whole-account scope runbook. The reproduced retention race is not evidence of public disclosure.

@@ -1,0 +1,7 @@
+import { defineConfig } from 'vitest/config';
+import { fileURLToPath } from 'node:url';
+export default defineConfig({
+  oxc: { jsx: { runtime: 'automatic' } },
+  test: { include: ['.tmp/usability-workflow.test.tsx'], environment: 'jsdom', setupFiles: ['./src/test-utils/setup.ts'], globals: true },
+  resolve: { alias: { '@': fileURLToPath(new URL('../src', import.meta.url)) } },
+});
