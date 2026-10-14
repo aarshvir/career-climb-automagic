@@ -2,6 +2,7 @@ import { ApiError } from './core.ts';
 import type { adminClient } from './runtime.ts';
 import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
 import { digest } from './job-loop-providers.ts';
+import { eraseLoopArtifacts } from './job-loop-erasure.ts';
 
 export type LoopAdmin = ReturnType<typeof adminClient>;
 export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
@@ -23,6 +24,10 @@ const ERRORS: [string, number, string][] = [
   ['LOOP_SCHEDULE_INVALID',422,'The recurring settings could not be saved. Choose a valid timezone and future time.'],
   ['LOOP_DAILY_SCHEDULE_LIMIT',429,'One scheduled preparation has already run today. Your next scheduled occurrence remains available.'],
   ['LOOP_MONTHLY_SCHEDULE_LIMIT',429,'This pilot includes up to thirty scheduled preparations per account per calendar month.'],
+  ['LOOP_ERASURE_IN_PROGRESS',409,'Your Job Loop is being erased. Continue erasure before making another change.'],
+  ['LOOP_ERASURE_RETRY',503,'Preparation is stopped and documents are revoked. Continue erasure to remove the remaining files.'],
+  ['LOOP_ERASURE_STALE',409,'This erasure attempt is no longer current. Refresh before continuing.'],
+  ['LOOP_ARTIFACT_UNAUTHORIZED',409,'This preparation no longer has permission to store a document. Start or resume the current run.'],
 ];
 export function loopDatabaseError(error: { message?: string } | null): void {
   if (!error) return; for (const [code,status,message] of ERRORS) if (error.message?.includes(code)) throw new ApiError(status,code,message);
@@ -73,24 +78,16 @@ export class LoopRepository {
     return (data??[]).filter(item=>!item.lease_until||Date.parse(item.lease_until)<Date.now()) as RunRow[];
   }
   async eraseArtifacts(userId:string) {
-    await this.rpc('job_loop_begin_erase',{p_user:userId});
-    const folders=[userId];const paths:string[]=[];let scanned=0;
-    while(folders.length){const prefix=folders.shift()!;let offset=0;
-      for(;;){const {data,error}=await this.admin.storage.from('job-loop-artifacts').list(prefix,{limit:1000,offset});loopDatabaseError(error);
-        for(const item of data??[]){if(++scanned>10000)throw new ApiError(503,'LOOP_ERASURE_RETRY','Preparation is stopped and documents are revoked. Erasure needs another retry or owner support.');
-          const path=`${prefix}/${item.name}`;if(!path.startsWith(`${userId}/`)||path.split('/').some(part=>part==='..'||!part||part.includes('\\')))throw new ApiError(503,'LOOP_ERASURE_PATH','A private storage path could not be safely erased.');
-          if(item.id)paths.push(path);else folders.push(path);
-        }
-        if((data?.length??0)<1000)break;offset+=1000;
-      }
-    }
-    for(let index=0;index<paths.length;index+=100){const {error}=await this.admin.storage.from('job-loop-artifacts').remove(paths.slice(index,index+100));loopDatabaseError(error);}
-    await this.rpc('job_loop_finish_erase',{p_user:userId});
+    await eraseLoopArtifacts({rpc:<T>(name:string,args:Record<string,unknown>)=>this.rpc<T>(name,args),remove:paths=>this.admin.storage.from('job-loop-artifacts').remove(paths)},userId);
   }
   settle(id: string, actual: number | null, result: unknown, uncertain = false) { return this.rpc<UsageRow>('job_loop_settle',{p_usage:id,p_actual:actual,p_result:result,p_uncertain:uncertain}); }
-  async upload(userId: string, packetId: string, key: string, bytes: Uint8Array, mimeType: string): Promise<string> {
+  async upload(run: RunRow, packetId: string, key: string, bytes: Uint8Array, mimeType: string): Promise<string> {
     if (!['pdf','docx','txt','report','letter'].includes(key) || bytes.byteLength>5242880) throw new ApiError(422,'LOOP_ARTIFACT_INVALID','The generated artifact cannot be stored.');
-    const hash=await digest(bytes);const path=`${userId}/${packetId}/${hash}/${key}`; const {error}=await this.admin.storage.from('job-loop-artifacts').upload(path,bytes,{contentType:mimeType.split(';')[0],upsert:false});
+    if(!run.lease_token)throw new ApiError(409,'LOOP_ARTIFACT_UNAUTHORIZED','This stage no longer owns its preparation lease.');
+    const hash=await digest(bytes);const path=`${run.user_id}/${packetId}/${hash}/${key}`;
+    const authorized=await this.rpc<string>('job_loop_authorize_artifact',{p_user:run.user_id,p_run:run.id,p_lease:run.lease_token,p_packet:packetId,p_hash:hash,p_key:key});
+    if(authorized!==path)throw new ApiError(503,'LOOP_ARTIFACT_UNAUTHORIZED','The private artifact authorization did not match this document.');
+    const {error}=await this.admin.storage.from('job-loop-artifacts').upload(path,bytes,{contentType:mimeType.split(';')[0],upsert:false});
     if(error){const existing=await this.admin.storage.from('job-loop-artifacts').download(path);if(existing.error||!existing.data||await digest(new Uint8Array(await existing.data.arrayBuffer()))!==hash)loopDatabaseError(error);}return path;
   }
   async signedArtifact(userId: string, packet: LoopPacket, key: string): Promise<string> {

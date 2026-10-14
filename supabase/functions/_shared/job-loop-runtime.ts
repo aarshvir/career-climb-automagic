@@ -66,6 +66,13 @@ export async function getLoopSnapshot(repo:LoopRepository,userId:string,env:Loop
 }
 export async function controlLoop(repo:LoopRepository,userId:string,action:LoopAction,env:LoopEnv,fetcher:LoopFetch=fetch):Promise<LoopResponse> {
   if(action.action==='get')return {snapshot:await getLoopSnapshot(repo,userId,env)};
+  // A retry must reach cleanup without first upserting a record through the
+  // active-owner fence. Read a fresh empty snapshot only after verified finish.
+  if(action.action==='erase_loop'||action.action==='erase_self'){
+    if(!action.confirmErase)throw new ApiError(400,'LOOP_ERASE_CONFIRMATION','Confirm erasing the private record and generated documents.');
+    await repo.eraseArtifacts(userId);
+    return {snapshot:await getLoopSnapshot(repo,userId,env),message:'Your Job Loop record, schedules, documents and mailbox connection were erased. Your sign-in account and separately saved workspace CVs remain; drafts already created in Gmail remain there.'};
+  }
   const row=await repo.record(userId);const data=structuredClone(row.data);
   const finish=async(message?:string):Promise<LoopResponse>=>({snapshot:await getLoopSnapshot(repo,userId,env),...(message?{message}:{})});
   if(action.action==='save_schedule'){
@@ -82,10 +89,6 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     if((recent.data?.length??0)>=5)throw new ApiError(429,'LOOP_SUPPORT_LIMIT','Five requests have already been recorded today. Your existing requests remain visible.');
     const inserted=await repo.admin.from('job_loop_support_requests').insert({user_id:userId,category:action.category,message:action.message});loopDatabaseError(inserted.error);
     return finish('Your request was saved privately with a receipt. It has not yet been reviewed; no response time is promised.');
-  }
-  if(action.action==='erase_loop'||action.action==='erase_self'){
-    if(!action.confirmErase)throw new ApiError(400,'LOOP_ERASE_CONFIRMATION','Confirm erasing the private record and generated documents.');await repo.eraseArtifacts(userId);
-    return finish('Your Job Loop record, schedules, documents and mailbox connection were erased. Your sign-in account and separately saved workspace CVs remain; drafts already created in Gmail remain there.');
   }
   if(action.action==='save_profile'){
     if(!action.saveConsent)throw new ApiError(400,'LOOP_STORAGE_CONSENT','Choose private record saving explicitly.');
@@ -263,7 +266,7 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
       packet.evidenceText+='\n\nINTERVIEW PREPARATION — FACTUAL PROMPTS, NOT PERFORMANCE SCORING\n'+packet.interviewBrief.map(item=>`${item.title}\n${item.prompt}\nSource: ${item.sourceQuote}\nEvidence IDs: ${item.evidenceClaimIds.join(', ')||'vacancy/conditions only'}`).join('\n\n');
       if(opportunity.source==='web_search'&&opportunity.verification==='unverified'){packet.holdReasons.push('The employer and complete vacancy are unverified. Add confirmed source text before using this packet.');packet.status='held';}
       const rendered=await renderPacket({packet,profile});packet.pageCount=rendered.pageCount;packet.formatStatus=rendered.packet.formatStatus;packet.holdReasons=[...new Set([...packet.holdReasons,...rendered.holdReasons])];if(packet.holdReasons.length)packet.status='held';
-      const artifacts=await Promise.all(Object.entries(rendered.artifacts).map(async([key,value])=>{const path=await repo.upload(run.user_id,packet.id,key,value.bytes,value.mimeType);return [key,{path,sha256:value.sha256,byteSize:value.byteSize}] as const;}));packet.artifacts=Object.fromEntries(artifacts);
+      const artifacts=await Promise.all(Object.entries(rendered.artifacts).map(async([key,value])=>{const path=await repo.upload(run,packet.id,key,value.bytes,value.mimeType);return [key,{path,sha256:value.sha256,byteSize:value.byteSize}] as const;}));packet.artifacts=Object.fromEntries(artifacts);
       state.packetIds!.push(packet.id);state.messages!.push(packet.status==='held'?'A packet is held for its listed source/document checks.':'A source-backed packet is ready for your review.');
       await repo.commit(run,run.phase+1,'running',state,[packet]);return true;
     }

@@ -1,17 +1,27 @@
 {
+  "hashAlgorithms": {
+    "artifact": "sha256-bytes",
+    "source": "sha256-utf8-lf-no-bom",
+    "migration": "sha256-utf8-lf-no-bom"
+  },
+  "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
+  "externalImport": "https://esm.sh/@supabase/supabase-js@2.57.4",
+  "externalPackages": [
+    "npm:jspdf@4.2.1",
+    "npm:docx@9.9.0"
+  ],
   "bundles": [
     {
-      "artifact": "docs/supabase-loop-ui/job-loop-control.js",
-      "sha256": "f089e6c86f61fee1e5ab2509dc88f26bc0d144ff2c024a69af86c705175a3e28",
-      "bytes": 57407,
       "function": "job-loop-control",
+      "artifact": "docs/supabase-loop-ui/job-loop-control.js",
+      "sha256": "34288945f5ae19c9664850af753a9fa87d6c02ea4808d0f9db11fd02aa97b346",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
           "path": "src/lib/admin-types.ts"
         },
         {
-          "sha256": "d66f1fe3a9798b3a2fac78237458c2b3be0f3358ba3ad1dc204caac19ca61100",
+          "sha256": "264c4e0e6b5ab011f1a932de641d97ffe9c1a39080aaf37485d951b4aaf93a68",
           "path": "src/lib/employer-discovery.ts"
         },
         {
@@ -43,6 +53,10 @@
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
+          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "path": "supabase/functions/_shared/job-loop-erasure.ts"
+        },
+        {
           "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc",
           "path": "supabase/functions/_shared/job-loop-preparation.ts"
         },
@@ -55,11 +69,11 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "c8930e2711c22c2706a818cfa51cafc7eab280b739f0c0dff4fe1279a296c33d",
+          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "783a4e347763e23d246da6cd6d6969b1c120eb2d99db7d544c1f0b4a4e4d7cfa",
+          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -154,20 +168,20 @@
           "sha256": "42a308ee1c6fd66cec652c1e0784236c9f06dfc15c87b747afa4a2c920cab644",
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
-      ]
+      ],
+      "bytes": 58974
     },
     {
-      "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
-      "sha256": "e7a9b51bda6836bc673d18e42879f93a7ebc8f40110cb451d95d990d1b4ce9a9",
-      "bytes": 1088752,
       "function": "job-loop-worker",
+      "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
+      "sha256": "c7e16eff91a189ad0da9a5d9155e2ed16ee7f1b1a25d98c4a57a81a071cca496",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
           "path": "src/lib/admin-types.ts"
         },
         {
-          "sha256": "d66f1fe3a9798b3a2fac78237458c2b3be0f3358ba3ad1dc204caac19ca61100",
+          "sha256": "264c4e0e6b5ab011f1a932de641d97ffe9c1a39080aaf37485d951b4aaf93a68",
           "path": "src/lib/employer-discovery.ts"
         },
         {
@@ -199,6 +213,10 @@
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
+          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "path": "supabase/functions/_shared/job-loop-erasure.ts"
+        },
+        {
           "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc",
           "path": "supabase/functions/_shared/job-loop-preparation.ts"
         },
@@ -211,11 +229,11 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "c8930e2711c22c2706a818cfa51cafc7eab280b739f0c0dff4fe1279a296c33d",
+          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "783a4e347763e23d246da6cd6d6969b1c120eb2d99db7d544c1f0b4a4e4d7cfa",
+          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -310,20 +328,20 @@
           "sha256": "42a308ee1c6fd66cec652c1e0784236c9f06dfc15c87b747afa4a2c920cab644",
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
-      ]
+      ],
+      "bytes": 1090080
     },
     {
-      "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
-      "sha256": "3a5438432df656467dec8503bad00c54a4cbd3e1ac1ea0d3fee1f123b466b4fe",
-      "bytes": 15293,
       "function": "job-loop-oauth",
+      "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
+      "sha256": "8fddc43a4cde8bcff8aea0e18e9253e6f2c84abe12712f390ae8a934ef45a69d",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
           "path": "src/lib/admin-types.ts"
         },
         {
-          "sha256": "d66f1fe3a9798b3a2fac78237458c2b3be0f3358ba3ad1dc204caac19ca61100",
+          "sha256": "264c4e0e6b5ab011f1a932de641d97ffe9c1a39080aaf37485d951b4aaf93a68",
           "path": "src/lib/employer-discovery.ts"
         },
         {
@@ -355,6 +373,10 @@
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
+          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "path": "supabase/functions/_shared/job-loop-erasure.ts"
+        },
+        {
           "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc",
           "path": "supabase/functions/_shared/job-loop-preparation.ts"
         },
@@ -367,11 +389,11 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "c8930e2711c22c2706a818cfa51cafc7eab280b739f0c0dff4fe1279a296c33d",
+          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "783a4e347763e23d246da6cd6d6969b1c120eb2d99db7d544c1f0b4a4e4d7cfa",
+          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -466,20 +488,20 @@
           "sha256": "42a308ee1c6fd66cec652c1e0784236c9f06dfc15c87b747afa4a2c920cab644",
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
-      ]
+      ],
+      "bytes": 16810
     },
     {
+      "function": "jobvance-admin",
       "artifact": "docs/supabase-loop-ui/jobvance-admin.js",
       "sha256": "dfb621c08804f7c1d90f9a3bab54ff7caa1d5c564608d43c7600f7c9d4750bc2",
-      "bytes": 10981,
-      "function": "jobvance-admin",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
           "path": "src/lib/admin-types.ts"
         },
         {
-          "sha256": "d66f1fe3a9798b3a2fac78237458c2b3be0f3358ba3ad1dc204caac19ca61100",
+          "sha256": "264c4e0e6b5ab011f1a932de641d97ffe9c1a39080aaf37485d951b4aaf93a68",
           "path": "src/lib/employer-discovery.ts"
         },
         {
@@ -511,6 +533,10 @@
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
+          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "path": "supabase/functions/_shared/job-loop-erasure.ts"
+        },
+        {
           "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc",
           "path": "supabase/functions/_shared/job-loop-preparation.ts"
         },
@@ -523,11 +549,11 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "c8930e2711c22c2706a818cfa51cafc7eab280b739f0c0dff4fe1279a296c33d",
+          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "783a4e347763e23d246da6cd6d6969b1c120eb2d99db7d544c1f0b4a4e4d7cfa",
+          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -622,20 +648,20 @@
           "sha256": "42a308ee1c6fd66cec652c1e0784236c9f06dfc15c87b747afa4a2c920cab644",
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
-      ]
+      ],
+      "bytes": 10981
     },
     {
+      "function": "jobvance-review-worker",
       "artifact": "docs/supabase-loop-ui/jobvance-review-worker.js",
       "sha256": "f32179a391ccc4d1893f9571f68fc90124af664a5cd6b43ca2c22a1b9984716e",
-      "bytes": 21246,
-      "function": "jobvance-review-worker",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
           "path": "src/lib/admin-types.ts"
         },
         {
-          "sha256": "d66f1fe3a9798b3a2fac78237458c2b3be0f3358ba3ad1dc204caac19ca61100",
+          "sha256": "264c4e0e6b5ab011f1a932de641d97ffe9c1a39080aaf37485d951b4aaf93a68",
           "path": "src/lib/employer-discovery.ts"
         },
         {
@@ -667,6 +693,10 @@
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
+          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "path": "supabase/functions/_shared/job-loop-erasure.ts"
+        },
+        {
           "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc",
           "path": "supabase/functions/_shared/job-loop-preparation.ts"
         },
@@ -679,11 +709,11 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "c8930e2711c22c2706a818cfa51cafc7eab280b739f0c0dff4fe1279a296c33d",
+          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "783a4e347763e23d246da6cd6d6969b1c120eb2d99db7d544c1f0b4a4e4d7cfa",
+          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -778,20 +808,20 @@
           "sha256": "42a308ee1c6fd66cec652c1e0784236c9f06dfc15c87b747afa4a2c920cab644",
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
-      ]
+      ],
+      "bytes": 21246
     },
     {
+      "function": "jobvance-guest-support",
       "artifact": "docs/supabase-loop-ui/jobvance-guest-support.js",
       "sha256": "d2faa1698b41d6d823e8530388743d8a70eb45184f0c0b37150b1192a7fcd0dc",
-      "bytes": 5327,
-      "function": "jobvance-guest-support",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
           "path": "src/lib/admin-types.ts"
         },
         {
-          "sha256": "d66f1fe3a9798b3a2fac78237458c2b3be0f3358ba3ad1dc204caac19ca61100",
+          "sha256": "264c4e0e6b5ab011f1a932de641d97ffe9c1a39080aaf37485d951b4aaf93a68",
           "path": "src/lib/employer-discovery.ts"
         },
         {
@@ -823,6 +853,10 @@
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
+          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "path": "supabase/functions/_shared/job-loop-erasure.ts"
+        },
+        {
           "sha256": "3ebe7edcb09fab417c470b085be79e3a20c1103c2b5888b2cb1df89e6593becc",
           "path": "supabase/functions/_shared/job-loop-preparation.ts"
         },
@@ -835,11 +869,11 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "c8930e2711c22c2706a818cfa51cafc7eab280b739f0c0dff4fe1279a296c33d",
+          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "783a4e347763e23d246da6cd6d6969b1c120eb2d99db7d544c1f0b4a4e4d7cfa",
+          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -934,10 +968,10 @@
           "sha256": "42a308ee1c6fd66cec652c1e0784236c9f06dfc15c87b747afa4a2c920cab644",
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
-      ]
+      ],
+      "bytes": 5327
     }
   ],
-  "externalImport": "https://esm.sh/@supabase/supabase-js@2.57.4",
   "migrations": [
     {
       "sha256": "a3312c82e04f7f8ffa8486aca3ba03eedeb583edec2614b7590ad5e7fe4baba9",
@@ -974,16 +1008,10 @@
     {
       "sha256": "40e6f1f30581f5ad90f8220b7eb90750051aea293060174081944345f1ef6aeb",
       "path": "supabase/migrations/20261013190000_job_loop_provider_lease.sql"
+    },
+    {
+      "sha256": "b5c1ea5f84a176d1b1301d0899804266587490228b519d4c97e9902b0d1d68f6",
+      "path": "supabase/migrations/20261014101107_job_loop_durable_erasure.sql"
     }
-  ],
-  "externalPackages": [
-    "npm:jspdf@4.2.1",
-    "npm:docx@9.9.0"
-  ],
-  "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
-  "hashAlgorithms": {
-    "artifact": "sha256-bytes",
-    "migration": "sha256-utf8-lf-no-bom",
-    "source": "sha256-utf8-lf-no-bom"
-  }
+  ]
 }

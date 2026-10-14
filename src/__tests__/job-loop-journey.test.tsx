@@ -7,6 +7,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LoopClaim, LoopPacket, LoopProfile, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
+import { LoopServiceError } from '@/lib/loop-service-error';
 vi.unmock('react-router-dom');
 const mocks = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string } | null, call: vi.fn(), cvs: vi.fn(), download: vi.fn(), preview: vi.fn(), saveBlob: vi.fn(), extract: vi.fn() }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: mocks.user }) }));
@@ -286,6 +287,98 @@ describe('private PDF preview transfer lifecycle',()=>{
 });
 
 describe('support receipts and scoped self-service erasure', () => {
+  it.each(['LOOP_ERASURE_IN_PROGRESS', 'LOOP_ERASURE_RETRY'])('keeps confirmed erasure reachable after a %s get failure without automatically erasing on page visit', async code => {
+    let erased = false;
+    mocks.call.mockImplementation(async (_id, action) => {
+      if (action.action === 'get' && !erased) throw new LoopServiceError('Private cleanup needs another confirmed attempt.', code);
+      if (action.action === 'erase_loop') {
+        erased = true;
+        current = { ...snapshot(), recordVersion: 0, profile: null, claims: [], packets: [] };
+      }
+      return { snapshot: current };
+    });
+    render(tree());
+    expect(await screen.findByRole('heading', { name: 'Finish erasing your Job Loop' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Prepare today’s applications' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Reviewed source CV or career record')).not.toBeInTheDocument();
+    expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_loop')).toBe(false);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Review remaining erasure' }));
+    const continuation = screen.getByRole('button', { name: 'Continue erasing Job Loop data' });
+    expect(continuation).toBeDisabled();
+    await user.type(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope'), 'DELETE JOB LOOP');
+    expect(continuation).toBeDisabled();
+    await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/));
+    await user.click(continuation);
+
+    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'erase_loop', confirmErase: true }));
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument());
+    expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'erase_loop')).toHaveLength(1);
+    expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_self')).toBe(false);
+  });
+  it('hides a previously loaded private snapshot when refreshing reports pending erasure', async () => {
+    render(tree());
+    await openTab('Career record');
+    expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue(cv);
+    mocks.call.mockRejectedValueOnce(new LoopServiceError('Remaining private documents still need cleanup.', 'LOOP_ERASURE_IN_PROGRESS'));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Refresh records' }));
+
+    expect(await screen.findByRole('heading', { name: 'Finish erasing your Job Loop' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Reviewed source CV or career record')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('CV text for factual review')).not.toBeInTheDocument();
+    expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_loop')).toBe(false);
+    expect(screen.getByRole('button', { name: 'Review remaining erasure' })).toBeEnabled();
+  });
+  it('retains the typed scope after a partial erasure batch and permits a deliberate continuation', async () => {
+    let attempts = 0;
+    mocks.call.mockImplementation(async (_id, action) => {
+      if (action.action === 'erase_loop') {
+        attempts++;
+        if (attempts === 1) throw new LoopServiceError('A cleanup batch completed; more documents remain.', 'LOOP_ERASURE_RETRY');
+        current = { ...snapshot(), recordVersion: 0, profile: null, claims: [], packets: [] };
+      }
+      return { snapshot: current };
+    });
+    render(tree());
+    await openTab('Help & privacy');
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Review Job Loop erasure' }));
+    await user.type(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope'), 'DELETE JOB LOOP');
+    await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/));
+    await user.click(screen.getByRole('button', { name: 'Erase my Job Loop data' }));
+
+    expect(await screen.findByRole('heading', { name: 'Finish erasing your Job Loop' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope')).toHaveValue('DELETE JOB LOOP');
+    expect(screen.getByLabelText(/I understand this removes my Job Loop data/)).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Continue erasing Job Loop data' })).toBeEnabled();
+    expect(screen.queryByLabelText('Reviewed source CV or career record')).not.toBeInTheDocument();
+    expect(attempts).toBe(1);
+
+    await user.click(screen.getByRole('button', { name: 'Continue erasing Job Loop data' }));
+    await waitFor(() => expect(attempts).toBe(2));
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument());
+    expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_self')).toBe(false);
+  });
+  it('does not open erasure recovery for a new owner when a previous owner’s delayed get fails', async () => {
+    let rejectOld!: (error: Error) => void;
+    mocks.call.mockImplementation((ownerId, action) => ownerId === 'owner-a' && action.action === 'get'
+      ? new Promise((_resolve, reject) => { rejectOld = reject; })
+      : Promise.resolve({ snapshot: current }));
+    const view = render(tree());
+    await waitFor(() => expect(rejectOld).toBeDefined());
+    await act(async () => {
+      mocks.user = { id: 'owner-b' };
+      current = { ...snapshot(), profile: null, claims: [], packets: [] };
+      view.rerender(tree());
+    });
+    await screen.findByRole('button', { name: /Import or paste my CV/ });
+    await act(async () => { rejectOld(new LoopServiceError('OWNER_A_PRIVATE_ERASURE_STATE', 'LOOP_ERASURE_IN_PROGRESS')); });
+
+    expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument();
+    expect(screen.queryByText('OWNER_A_PRIVATE_ERASURE_STATE')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Review remaining erasure' })).not.toBeInTheDocument();
+    expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_loop')).toBe(false);
+  });
   it('stores a private request with an actual service receipt and an unreviewed status', async () => {
     current.support = []; mocks.call.mockImplementation(async (_id, action) => { if (action.action === 'request_support') current.support = [{ id: 'synthetic-receipt-a', category: action.category, message: action.message, status: 'received', createdAt: profile.updatedAt }]; return { snapshot: current }; });
     render(tree()); await openTab('Help & privacy'); const user = userEvent.setup(); await user.type(screen.getByLabelText('What do you need help with?'), 'Synthetic download problem; no real personal data.');

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowRight, CalendarClock, Check, ClipboardList, Download, FileText, Loader2, LockKeyhole, Mail, Play, RefreshCw, ShieldCheck, Square, UserRound, Settings2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { callJobLoop, getLoopDownload, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopGmailUrl } from '@/lib/job-loop-api';
+import { loopErasureNeedsContinuation } from '@/lib/loop-service-error';
 import { extractCvText, validateCvText } from '@/lib/cv-extraction';
 import { downloadBlob } from '@/lib/document-download';
 import type { CvDocument } from '@/lib/cv-database';
@@ -103,6 +104,7 @@ export default function JobLoop() {
   const route = useLocation();
   const initialAudience = useRef(validLoopAudience(new URLSearchParams(route.search).get('audience')) ?? 'student');
   const [tab, setTab] = useState<Tab>('today'), [snapshotState, setSnapshot] = useState<LoopSnapshot | null>(null), [loadedOwner, setLoadedOwner] = useState<string | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState('');
+  const [erasureOwner, setErasureOwner] = useState<string | null>(null);
   const [profile, setProfile] = useState<LoopProfileInput>(() => blankProfile(initialAudience.current)), [profileDirty, setProfileDirty] = useState(false), [saveConsent, setSaveConsent] = useState(false), [cvs, setCvs] = useState<CvDocument[]>([]), [cvError, setCvError] = useState('');
   const [lists, setLists] = useState(() => listInputs(blankProfile(initialAudience.current)));
   const [suggestions, setSuggestions] = useState<{ key: string; value: LoopClaimInput }[]>([]), [newClaimKey, setNewClaimKey] = useState(0), [dirtyClaims, setDirtyClaims] = useState<Set<string>>(new Set());
@@ -117,11 +119,12 @@ export default function JobLoop() {
   const [gmailTicket, setGmailTicket] = useState(returnedGmailTicket), [gmailPreview, setGmailPreview] = useState<NonNullable<LoopResponse['gmailPreview']> | null>(null), [previewOwner, setPreviewOwner] = useState<string | null>(null), [mailboxConfirmed, setMailboxConfirmed] = useState(false), [previewBusy, setPreviewBusy] = useState(false), [ticketExpired, setTicketExpired] = useState(false);
   const ticketOwner = useRef(user?.id ?? null);
   const snapshot = loadedOwner === user?.id ? snapshotState : null;
+  const erasurePending = !!user && erasureOwner === user.id;
   const owner = useRef(user?.id ?? null), mounted = useRef(true), generation = useRef(0), serial = useRef(0), busyRef = useRef(''), profileDirtyRef = useRef(false), formRevision = useRef(0), selectedRef = useRef<string | null>(null), packetHashRef = useRef<string | null>(null), snapshotRef = useRef(snapshot), startReference = useRef<{ key: string; id: string } | null>(null), draftReference = useRef<{ key: string; id: string } | null>(null);
   owner.current = user?.id ?? null; busyRef.current = busy; profileDirtyRef.current = profileDirty; selectedRef.current = selectedId; snapshotRef.current = snapshot;
   const applySnapshot = useCallback((next: LoopSnapshot, resetProfile = false) => {
     if (snapshotRef.current && snapshotRef.current.recordVersion > next.recordVersion) return;
-    setSnapshot(next); setLoadedOwner(owner.current);
+    setSnapshot(next); setLoadedOwner(owner.current); setErasureOwner(null);
     if (resetProfile || !profileDirtyRef.current) { const value = next.profile ? { ...next.profile } : blankProfile(initialAudience.current); setProfile(value); setLists(listInputs(value)); }
     if (resetProfile) { setProfileDirty(false); profileDirtyRef.current = false; setSaveConsent(false); copiedHeaderRef.current = { name: '', contactLine: '' }; }
   }, []);
@@ -130,7 +133,7 @@ export default function JobLoop() {
     const atGeneration = generation.current, ticket = ++serial.current;
     if (!quiet) { setLoading(true); setError(''); }
     try { const result = await callJobLoop(id, { action: 'get' }); if (mounted.current && owner.current === id && generation.current === atGeneration && serial.current === ticket && result.snapshot) { applySnapshot(result.snapshot); setError(''); } }
-    catch (failure) { if (mounted.current && owner.current === id && generation.current === atGeneration && serial.current === ticket) setError(failure instanceof Error ? failure.message : 'Your Job Loop could not be loaded.'); }
+    catch (failure) { if (mounted.current && owner.current === id && generation.current === atGeneration && serial.current === ticket) { setError(failure instanceof Error ? failure.message : 'Your Job Loop could not be loaded.'); if(loopErasureNeedsContinuation(failure)){setErasureOwner(id);setSnapshot(null);setLoadedOwner(null);snapshotRef.current=null;} } }
     finally { if (mounted.current && owner.current === id && generation.current === atGeneration && serial.current === ticket) setLoading(false); }
   }, [applySnapshot]);
   const downloadTransfer = useRef<AbortController | null>(null);
@@ -139,6 +142,7 @@ export default function JobLoop() {
   useEffect(() => { clearGmailFragment(); }, []);
   useEffect(() => {
     downloadTransfer.current?.abort();
+    setErasureOwner(null);
     generation.current++; serial.current++; formRevision.current++; setSnapshot(null); setLoadedOwner(null); snapshotRef.current = null; setProfile(blankProfile(initialAudience.current)); setLists(listInputs(blankProfile(initialAudience.current))); setProfileDirty(false); profileDirtyRef.current = false; setSaveConsent(false); setCvs([]); setCvError(''); setSuggestions([]); setDirtyClaims(new Set()); setSelectedId(null); setReviewedText(''); setFacts(false); setDisclosure(false); setRecipientConsent(false); setMethod('rules'); setModel('grounded-rules-v1'); setModelConsent(false); setInboxConsent(false); setGmailReadConsent(false); setGmailDraftConsent(false); setBusy(''); setNotice(''); setError(''); setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setContact({ name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: false, inExistingThread: false }); startReference.current = null; draftReference.current = null;
     if (ticketOwner.current && ticketOwner.current !== user?.id) { setGmailTicket(''); setGmailPreview(null); setPreviewOwner(null); setMailboxConfirmed(false); setPreviewBusy(false); }
     ticketOwner.current = user?.id ?? null;
@@ -238,6 +242,7 @@ export default function JobLoop() {
   async function perform(action: LoopAction, success?: string, resetProfile = false): Promise<LoopResponse | null> {
     const id = owner.current; if (!id || busyRef.current) return null;
     const atGeneration = generation.current; ++serial.current; busyRef.current = action.action; setBusy(action.action); setError(''); setNotice('');
+    if(action.action==='erase_loop'||action.action==='erase_self'){setErasureOwner(id);setSnapshot(null);setLoadedOwner(null);snapshotRef.current=null;downloadTransfer.current?.abort();}
     try {
       const result = await callJobLoop(id, action);
       if (!mounted.current || owner.current !== id || generation.current !== atGeneration) return null;
@@ -250,7 +255,7 @@ export default function JobLoop() {
       if (['save_profile', 'save_claim', 'withdraw_claim', 'add_opportunity'].includes(action.action)) { setModelConsent(false); setInboxConsent(false); }
       if (result.message || success) setNotice(result.message || success || '');
       return result;
-    } catch (failure) { if (mounted.current && owner.current === id && generation.current === atGeneration) setError(failure instanceof Error ? failure.message : 'This action could not be completed.'); return null; }
+    } catch (failure) { if (mounted.current && owner.current === id && generation.current === atGeneration) { setError(failure instanceof Error ? failure.message : 'This action could not be completed.'); if(loopErasureNeedsContinuation(failure)){setErasureOwner(id);setSnapshot(null);setLoadedOwner(null);snapshotRef.current=null;} } return null; }
     finally { if (mounted.current && owner.current === id && generation.current === atGeneration) { busyRef.current = ''; setBusy(''); } }
   }
   async function readFile(file?: File) {
@@ -350,7 +355,8 @@ export default function JobLoop() {
     {!user ? <section className="jl-panel"><h2>{gmailTicket ? 'Sign in to confirm the returned mailbox' : 'Start with one application review.'}</h2>{gmailTicket ? <><p>Keep this tab open. Sign in to the account that started this connection in another tab, then return here to confirm the mailbox.</p><p>The return ticket is held only in this page’s memory. Mailbox access is not activated by this return.</p><div className="jl-actions"><Link className="jl-button jl-button--primary" to="/auth?next=%2Floop" target="_blank" rel="noopener noreferrer">Sign in in another tab</Link><button className="jl-button" type="button" disabled={typeof retryConnection !== 'function'} onClick={() => retryConnection?.()}>Check sign-in again</button><button className="jl-button" type="button" onClick={cancelMailboxConfirmation}>Cancel mailbox confirmation</button></div></> : <><p>Bring your CV and a vacancy to the free check. You can review your first application without an account. Sign in when you want a private career record, reusable facts and tracking.</p><div className="jl-actions"><Link className="jl-button jl-button--primary" to={`/check?audience=${profile.audience}`}>Prepare my first application</Link><Link className="jl-button" to="/auth?next=%2Floop">Sign in to my saved Job Loop</Link></div></>}</section> : <div className="jl-layout"><aside className="jl-sidebar"><nav aria-label="Job Loop sections">{tabs.map(item => <button type="button" key={item.id} aria-pressed={tab === item.id} onClick={() => setTab(item.id)}><item.icon size={18} aria-hidden="true" />{item.label}</button>)}</nav><div className="jl-sidebar-note"><LockKeyhole size={18} aria-hidden="true" /><p>Private record. Reviewed outputs. No automatic sends or applications.</p></div><button type="button" className="jl-button jl-button--quiet" disabled={!!busy || loading} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />Refresh records</button></aside>
       <div className="jl-content">{loading && <p role="status" className="jl-loading"><Loader2 size={18} aria-hidden="true" />Loading your private records…</p>}{busy && <p role="status" className="jl-loading"><Loader2 size={18} aria-hidden="true" />Working on your request…</p>}{error && <div role="alert" className="jl-alert"><p>{error}</p><p>Saved records are not replaced by an empty example. Refresh to confirm the current state.</p></div>}{notice && <p role="status" className="jl-notice">{notice}</p>}
       {gmailTicket && <section className="jl-panel jl-mailbox-confirmation" aria-labelledby="jl-mailbox-confirm-title"><p className="jl-eyebrow">RETURNED MAILBOX NEEDS YOUR CONFIRMATION</p><h2 id="jl-mailbox-confirm-title">Confirm the returned Gmail mailbox</h2><p>The return ticket was removed from the address bar and remains only in this page’s memory. Leaving this page cancels this confirmation. Nothing is connected automatically.</p>{previewBusy && <p role="status">Checking the account-bound mailbox preview…</p>}{gmailPreview && previewOwner === user.id && <><p className="jl-mailbox-identity"><Mail size={18} aria-hidden="true" />{gmailPreview.email || 'Mailbox identity could not be established'}</p><p>Permissions: mailbox reading{gmailPreview.allowDrafts ? ' and explicitly requested draft creation' : ' only'}. Jobvance uses recruitment-message queries after separate run consent. Google’s draft permission also allows sending at the permission level; Jobvance provides no send action.</p><p className="jl-help">Confirmation expires {date(gmailPreview.expiresAt)}. You can disconnect later; existing Gmail drafts are not deleted.</p>{ticketExpired && <p className="jl-warning">This confirmation has expired. Cancel and reconnect from your own account.</p>}<Consent checked={mailboxConfirmed} onChange={setMailboxConfirmed} disabled={!!busy || ticketExpired || !gmailPreview.email}>This is my intended mailbox, and I confirm the displayed permissions for my Jobvance account.</Consent><button type="button" className="jl-button jl-button--primary" disabled={!!busy || !mailboxConfirmed || ticketExpired || !gmailPreview.email || !snapshot?.capabilities.gmailRead} onClick={() => void confirmMailbox()}>Confirm this mailbox</button></>}<button type="button" className="jl-button" disabled={!!busy} onClick={cancelMailboxConfirmation}>Cancel mailbox confirmation</button></section>}
-      {!snapshot && !loading && <section className="jl-panel"><h2>The Job Loop service is being configured or is unavailable.</h2><p>We could not confirm its current records or capabilities. The existing free check and workspace remain available.</p><div className="jl-actions"><button type="button" className="jl-button" disabled={!!busy} onClick={() => void refresh()}>Retry Job Loop</button><Link className="jl-button" to="/dashboard">Open existing workspace</Link></div></section>}
+      {erasurePending && <section className="jl-panel" aria-label="Erasure progress"><h2>Finish erasing your Job Loop</h2><p>Erasure has not been confirmed complete. Continue to check and remove remaining Job Loop data. An active erasure request keeps new preparation and uploads stopped until its files are gone.</p><p>You can close this page and continue later with the same account. Your sign-in account and separate workspace records are outside this erasure.</p></section>}
+      {!snapshot && !loading && !erasurePending && <section className="jl-panel"><h2>The Job Loop service is being configured or is unavailable.</h2><p>We could not confirm its current records or capabilities. The existing free check and workspace remain available.</p><div className="jl-actions"><button type="button" className="jl-button" disabled={!!busy} onClick={() => void refresh()}>Retry Job Loop</button><Link className="jl-button" to="/dashboard">Open existing workspace</Link></div></section>}
       {hasUnsavedDraft && <p className="jl-unsaved-notice">You have unsaved edits. Career record, claim and new-vacancy drafts remain in this tab’s memory for up to 30 minutes, including when switching pages. Refresh, closing this tab or changing accounts clears them.</p>}
       {snapshot && tab === 'today' && <>
         <LoopWorkspaceOverview snapshot={snapshot} onOpen={(section, packetId) => { setTab(section); if (packetId) setSelectedId(packetId); if (section === 'today') window.requestAnimationFrame(() => { const heading = document.getElementById('jl-prepare-heading'); heading?.scrollIntoView?.({ block: 'start', behavior: 'auto' }); heading?.focus(); }); }} />
@@ -407,8 +413,8 @@ export default function JobLoop() {
       </>}
       {snapshot && tab === 'settings' && <>
         <LoopSupportForm snapshot={snapshot} busy={!!busy} perform={perform} />
-        <LoopErasure busy={!!busy} perform={perform} onErased={() => { clearLoopWorkingDraft(); setClaimDrafts({}); setSuggestions([]); setDirtyClaims(new Set()); setNewClaimKey(current => current + 1); setSelectedId(null); setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setFacts(false); setDisclosure(false); setRecipientConsent(false); setModelConsent(false); setInboxConsent(false); setTab('today'); }} />
       </>}
+      {((snapshot && tab === 'settings') || erasurePending) && <LoopErasure busy={!!busy} continuing={erasurePending} perform={perform} onErased={() => { clearLoopWorkingDraft(); setClaimDrafts({}); setSuggestions([]); setDirtyClaims(new Set()); setNewClaimKey(current => current + 1); setSelectedId(null); setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setFacts(false); setDisclosure(false); setRecipientConsent(false); setModelConsent(false); setInboxConsent(false); setTab('today'); }} />}
       </div></div>}
     <p className="jl-page-footnote"><ShieldCheck size={14} aria-hidden="true" />No automated sends or applications. Claims remain user-attested. <Link to="/privacy">Privacy</Link> · <Link to="/dashboard">Existing workspace</Link></p>
   </main>;

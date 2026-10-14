@@ -16,7 +16,7 @@ function harness(){
     record:vi.fn(async(user:string)=>{expect(user).toBe(owner);return structuredClone(record);}),
     collections:vi.fn(async()=>({runs:[],packets:packets.map(data=>({id:data.id,user_id:owner,input_version:1,status:data.status,data})),usage:[],connection:null})),
     commit:vi.fn(async(active:RunRow,phase:number,status:RunRow['status'],state:RunState,values:LoopPacket[]=[],opportunities:LoopOpportunity[]=[])=>{if(cancelledBeforeCommit||active.lease_token!==run.lease_token||record.input_version!==active.input_version)throw new ApiError(409,'LOOP_LEASE_LOST','cancelled');run.phase=phase;run.status=status;run.data=structuredClone(state);run.lease_token=null;packets.push(...structuredClone(values));record.data.opportunities.push(...opportunities);return structuredClone(run);}),
-    upload:vi.fn(async(user:string,packet:string,key:string,bytes:Uint8Array)=>{const path=`${user}/${packet}/${await digest(bytes)}/${key}`;artifacts.set(path,bytes);return path;}),
+    upload:vi.fn(async(active:RunRow,packet:string,key:string,bytes:Uint8Array)=>{const path=`${active.user_id}/${packet}/${await digest(bytes)}/${key}`;artifacts.set(path,bytes);return path;}),
     reserve:vi.fn(()=>{throw new Error('A disabled paid provider must never be reached.');}),
   };
   return {repo:mock as unknown as LoopRepository,mock,record,run,packets,artifacts,cancelAtCommit:()=>{cancelledBeforeCommit=true;}};

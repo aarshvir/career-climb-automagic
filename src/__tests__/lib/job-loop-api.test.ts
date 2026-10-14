@@ -6,6 +6,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: 
 vi.mock('@/lib/cv-documents', () => ({ listCvDocuments: sdk.cvs }));
 import { callJobLoop, getLoopDownload, getLoopPreview, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl, LOOP_ARTIFACT_TIMEOUT_MS, LOOP_ARTIFACT_MAX_BYTES } from '@/lib/job-loop-api';
 import { validateAction as validateControlInput } from '../../../supabase/functions/_shared/job-loop-engine';
+import { LoopServiceError } from '@/lib/loop-service-error';
 
 beforeEach(() => {
   vi.clearAllMocks(); vi.stubEnv('VITE_SUPABASE_URL', 'https://qa.supabase.co');
@@ -67,6 +68,47 @@ describe('cloud loop API privacy and owner boundaries', () => {
     await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('still being configured');
     sdk.invoke.mockResolvedValue({ data: null, error: { message: 'SYNTHETIC_PRIVATE_DEBUG', context: new Response(JSON.stringify({ error: 'A configured processing allowance is unavailable.' }), { status: 503 }) } });
     await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('configured processing allowance');
+  });
+  it.each(['LOOP_ERASURE_IN_PROGRESS', 'LOOP_ERASURE_RETRY'])('preserves safe %s recovery codes after checking the owner again', async code => {
+    sdk.invoke.mockResolvedValue({ data: null, error: {
+      message: 'SYNTHETIC_PRIVATE_DEBUG',
+      context: new Response(JSON.stringify({ error: 'Your Job Loop cleanup needs another confirmed attempt.', code, debug: 'SYNTHETIC_PRIVATE_DEBUG' }), { status: 409 }),
+    } });
+    const failure = await callJobLoop('owner-a', { action: 'get' }).catch(error => error);
+    expect(failure).toBeInstanceOf(LoopServiceError);
+    expect(failure).toMatchObject({ message: 'Your Job Loop cleanup needs another confirmed attempt.', code });
+    expect(failure.message).not.toContain('SYNTHETIC_PRIVATE_DEBUG');
+    expect(sdk.getUser).toHaveBeenCalledTimes(3);
+  });
+  it('preserves an erasure retry code in a validated service error response as well as HTTP errors', async () => {
+    sdk.invoke.mockResolvedValue({ data: { error: 'Private cleanup still has documents to remove.', code: 'LOOP_ERASURE_RETRY' }, error: null });
+    const failure = await callJobLoop('owner-a', { action: 'erase_loop', confirmErase: true }).catch(error => error);
+    expect(failure).toBeInstanceOf(LoopServiceError);
+    expect(failure).toMatchObject({ message: 'Private cleanup still has documents to remove.', code: 'LOOP_ERASURE_RETRY' });
+  });
+  it.each([
+    'ERASURE_IN_PROGRESS', 'LOOP_ERASURE_RETRY\nPRIVATE_DEBUG', 'LOOP_<script>', 'LOOP_' + 'A'.repeat(81), { debug: 'PRIVATE_DEBUG' },
+  ])('does not promote an invalid public error code into recovery state: %j', async code => {
+    sdk.invoke.mockResolvedValue({ data: null, error: { context: new Response(JSON.stringify({ error: 'This operation needs review.', code }), { status: 503 }) } });
+    const failure = await callJobLoop('owner-a', { action: 'get' }).catch(error => error);
+    expect(failure).toBeInstanceOf(LoopServiceError);
+    expect(failure.code).toBeNull();
+    expect(failure.message).toBe('This operation needs review.');
+  });
+  it('suppresses a previous owner\'s erasure error when ownership changes while its public payload is being read', async () => {
+    sdk.invoke.mockResolvedValue({ data: null, error: { context: new Response(JSON.stringify({
+      error: 'OWNER_A_PRIVATE_ERASURE_MESSAGE', code: 'LOOP_ERASURE_IN_PROGRESS',
+    }), { status: 409 }) } });
+    sdk.getUser.mockResolvedValueOnce({ data: { user: { id: 'owner-a' } }, error: null })
+      .mockResolvedValueOnce({ data: { user: { id: 'owner-a' } }, error: null })
+      .mockResolvedValueOnce({ data: { user: { id: 'owner-b' } }, error: null });
+    const failure = await callJobLoop('owner-a', { action: 'get' }).catch(error => error);
+    expect(failure).toBeInstanceOf(Error);
+    expect(failure).not.toBeInstanceOf(LoopServiceError);
+    expect(failure.message).toContain('account changed');
+    expect(failure.message).not.toContain('OWNER_A_PRIVATE_ERASURE_MESSAGE');
+    expect(failure.code).toBeUndefined();
+    expect(sdk.getUser).toHaveBeenCalledTimes(3);
   });
   it('does not surface raw exceptions thrown by SDK or auth initialization', async () => {
     sdk.invoke.mockRejectedValue(new Error('SYNTHETIC_PRIVATE_DEBUG'));

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { readAuthSession } from '@/utils/authSession';
 import { listCvDocuments } from '@/lib/cv-documents';
 import { safeDocumentFilename } from '@/lib/document-download';
+import { LoopServiceError } from './loop-service-error';
 import type { LoopAction, LoopResponse } from '../../supabase/functions/_shared/job-loop-types';
 
 export type { LoopAction, LoopResponse, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
@@ -110,6 +111,10 @@ function publicFailure(payload: unknown, fallback: string): string {
 }
 
 /** No caller-supplied owner, endpoints, API secrets, or pricing cross this boundary. */
+function serviceFailure(payload: unknown, fallback: string): LoopServiceError {
+  const code = payload && typeof payload === 'object' && 'code' in payload && typeof payload.code === 'string' && /^LOOP_[A-Z_]{1,80}$/.test(payload.code) ? payload.code : null;
+  return new LoopServiceError(publicFailure(payload, fallback), code);
+}
 export async function callJobLoop(userId: string, action: LoopAction): Promise<LoopResponse> {
   // This repository disables strictNullChecks, which makes Zod's inferred
   // properties optional in TypeScript. Runtime schemas still require every field.
@@ -126,11 +131,11 @@ export async function callJobLoop(userId: string, action: LoopAction): Promise<L
     const response = (error as { context?: unknown }).context;
     const payload = response instanceof Response ? await response.clone().json().catch(() => null) : null;
     await requireLoopOwner(userId);
-    throw new Error(publicFailure(payload, fallback));
+    throw serviceFailure(payload, fallback);
   }
   const parsed = responseSchema.safeParse(data);
   if (!parsed.success || (action.action === 'get' && !parsed.data.snapshot)) throw new Error(fallback);
-  if (parsed.data.error) throw new Error(parsed.data.error.slice(0, 400));
+  if (parsed.data.error) throw serviceFailure(parsed.data, fallback);
   return parsed.data as LoopResponse;
 }
 export async function loadLoopSavedCvs(userId: string) {

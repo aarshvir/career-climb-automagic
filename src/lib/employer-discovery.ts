@@ -160,7 +160,7 @@ function readPayRanges(description: string): PayRange[] {
     if (periods.length !== 1) continue;
     const prefix = new RegExp(`\\b(${CURRENCIES})\\s*[$€£]?\\s*${AMOUNT}(?:\\s*[-–—]\\s*(?:(${CURRENCIES})\\s*[$€£]?\\s*)?${AMOUNT})?`, 'gi');
     const suffix = new RegExp(`${AMOUNT}(?:\\s*[-–—]\\s*${AMOUNT})?\\s*(${CURRENCIES})\\b`, 'gi');
-    const values = [...clause.matchAll(prefix)].map(match => ({ index: match.index ?? 0, currency: match[1].toUpperCase(), secondCurrency: match[3]?.toUpperCase(), first: match[2], second: match[4] }));
+    const values: { index: number; currency: string; secondCurrency: string | undefined; first: string; second: string | undefined }[] = [...clause.matchAll(prefix)].map(match => ({ index: match.index ?? 0, currency: match[1].toUpperCase(), secondCurrency: match[3]?.toUpperCase(), first: match[2], second: match[4] }));
     if (!values.length) values.push(...[...clause.matchAll(suffix)].map(match => ({ index: match.index ?? 0, currency: match[3].toUpperCase(), secondCurrency: undefined, first: match[1], second: match[2] })));
     for (const value of values) {
       if (value.secondCurrency && value.secondCurrency !== value.currency) continue;

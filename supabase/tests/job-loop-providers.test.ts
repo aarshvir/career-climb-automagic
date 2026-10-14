@@ -3,7 +3,7 @@ import { describe,it,expect,vi } from 'vitest';
 import { modelOptions,prepareModelRequest,callModel,searchTavily,readEmployerFeed,employerFeeds,safePublicUrl,UncertainProviderCall,digest } from '../functions/_shared/job-loop-providers.ts';
 import { encryptJson,decryptJson,callbackUrl,returnUrl,gmailConfigured,completeGmail,previewGmailTicket } from '../functions/job-loop-oauth/gmail.ts';
 import { authenticateWorker,selectPreparationOpportunities,validateControlInput,controlLoop,packetInputHash } from '../functions/_shared/job-loop-runtime.ts';
-import { LoopRepository,type LoopAdmin } from '../functions/_shared/job-loop-repository.ts';
+import { LoopRepository,type LoopAdmin,type RunRow } from '../functions/_shared/job-loop-repository.ts';
 import type { LoopClaim,LoopOpportunity,LoopProfile } from '../functions/_shared/job-loop-types.ts';
 const env=(values:Record<string,string>={})=>(name:string)=>values[name];
 const configured=env({JOB_LOOP_PAID_APIS_ENABLED:'true',JOB_LOOP_ANTHROPIC_API_KEY:'fixture-only',OPENAI_API_KEY:'fixture-only',JOB_LOOP_MOONSHOT_API_KEY:'fixture-only',JOB_LOOP_MOONSHOT_INPUT_USD_PER_MILLION:'0.6',JOB_LOOP_MOONSHOT_OUTPUT_USD_PER_MILLION:'2.5',JOB_LOOP_TAVILY_API_KEY:'fixture-only'});
@@ -75,8 +75,10 @@ describe('cloud runtime/privacy boundaries',()=>{
   });
   it('stores immutable content-addressed bytes and denies a changed approved manifest',async()=>{
     const blobs=new Map<string,Uint8Array>();const upload=vi.fn(async(path:string,bytes:Uint8Array,options:{upsert:boolean})=>{expect(options.upsert).toBe(false);if(blobs.has(path))return {error:{message:'duplicate'}};blobs.set(path,bytes);return {error:null};});const download=vi.fn(async(path:string)=>({data:blobs.has(path)?new Blob([blobs.get(path)!]):null,error:null}));const signed=vi.fn(async(path:string)=>({data:{signedUrl:`https://storage.example.com/${path}`},error:null}));
-    const admin={storage:{from:()=>({upload,download,createSignedUrl:signed})}} as unknown as LoopAdmin;const repo=new LoopRepository(admin);const a=new TextEncoder().encode('approved original'),b=new TextEncoder().encode('late stale render');
-    const first=await repo.upload('owner','packet','txt',a,'text/plain');const stale=await repo.upload('owner','packet','txt',b,'text/plain');expect(first).not.toBe(stale);expect(blobs.get(first)).toEqual(a);
+    const rpc=vi.fn(async(name:string,args:Record<string,unknown>)=>{expect(name).toBe('job_loop_authorize_artifact');expect(args.p_lease).toBe('fixture-lease');return {data:`${args.p_user}/${args.p_packet}/${args.p_hash}/${args.p_key}`,error:null};});
+    const admin={rpc,storage:{from:()=>({upload,download,createSignedUrl:signed})}} as unknown as LoopAdmin;const repo=new LoopRepository(admin);const a=new TextEncoder().encode('approved original'),b=new TextEncoder().encode('late stale render');
+    const active={user_id:'owner',id:'fixture-run',lease_token:'fixture-lease'} as RunRow;
+    const first=await repo.upload(active,'packet','txt',a,'text/plain');const stale=await repo.upload(active,'packet','txt',b,'text/plain');expect(first).not.toBe(stale);expect(blobs.get(first)).toEqual(a);expect(rpc).toHaveBeenCalledTimes(2);
     const packet={id:'packet',artifacts:{txt:{path:first,sha256:await digest(a),byteSize:a.length}}} as Parameters<LoopRepository['signedArtifact']>[1];expect(await repo.signedArtifact('owner',packet,'txt')).toContain(first);blobs.set(first,b);await expect(repo.signedArtifact('owner',packet,'txt')).rejects.toThrow(/manifest/);
   });
   it('returns callback-only sealed activation ticket without storing mailbox tokens or pollable pending metadata',async()=>{
