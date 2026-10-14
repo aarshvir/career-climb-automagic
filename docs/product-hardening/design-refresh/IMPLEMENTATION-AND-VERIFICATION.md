@@ -50,3 +50,13 @@ Semantic matching remains bounded English wording analysis; review questions are
 The remotely pushed tag jobvance-before-design-refresh-2026-10-14 points to runtime 18 commit 012b669385d3046d4f3676e0d7d8df8ecd1db623. Hosted saved version 18 is appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_9ae190abd5008191a5f6fbb221e79a28. Re-deploy that saved version to restore the prior public runtime. No database migration is needed for this refresh. The earlier v14 rollback remains available as well.
 
 Publication identity and exact archive hashes are recorded in the accompanying release receipt after deployment.
+
+## Published release
+
+Version 19 was published successfully on 14 October 2026 at 05:01:00 UTC (09:01 Dubai), from source commit 57713fb1cb15b29be8d6dc745e3c87bcb718c4af. Saved version: appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_81b7e57381c081918f91c0ee3acb601e. Deployment: appgdep_6acf0c74eb3881919631b9a0035a402b.
+
+Actual Jobvance.io verification passed 886 fresh HTTP checks with zero hard failures, including all 38 HTML pages, all 20 current guide headings/openings and 34 changed assets. Thirteen guide titles changed; seven retained their original titles. Both self-hosted fonts and the SVG favicon match exact build hashes. Existing media proof was reused without a media download.
+
+The live browser shows the new headline and loaded Manrope font. The 390×844 opening view has no horizontal overflow and its primary button ends at y474; example metadata/status text is now 12px. Professional selection changes the example and free-check destination. Desktop and phone screenshots are retained with the receipt. Temporary viewport overrides were reset.
+
+Source and exact archive remain on GitHub and in jobvance-repair-evidence. The compressed source-upload archive SHA-256 is CADFAB67EE895DFFC41E069A84E7138F685FB037DEBEC9577C7B54E993EDBEB8. Native canonical tar SHA-256 is 060cc5215f2fbd8b6391389f6a9a789a9786e8733a520361497491a5a9f09854. The compressed hosted worker is 2,769,914 bytes.
