@@ -1,7 +1,7 @@
 {
   "source": "src/lib/walkthroughs.ts",
-  "sourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
-  "exportedAt": "2026-10-14T03:51:43.614Z",
+  "sourceSha256": "72fb126a4900d9371183f804152620033b9626ceb7126ec7aacd731cb47bb2b0",
+  "exportedAt": "2026-10-14T06:17:19.393Z",
   "timingStatus": "planned; not measured render timings",
   "id": "source-review",
   "title": "Explain your contribution accurately",
@@ -30,7 +30,7 @@
           }
         ],
         "action": "Inspect the full passage",
-        "note": "All people, work and numbers in this example are fictional."
+        "note": "Keep the project context with the figures."
       }
     },
     {
@@ -54,7 +54,7 @@
           }
         ],
         "action": "Check the context",
-        "note": "Do not relabel this fictional course project as employment."
+        "note": "Keep a course project distinct from employment."
       }
     },
     {

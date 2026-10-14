@@ -4,7 +4,7 @@
   "tutorialId": "first-check",
   "title": "Your first CV check",
   "file": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\first-check.mp4",
-  "sha256": "0567ecdbec7121367f25ea2269614dc87eb7340ce19fd7eef4191eaa91d677ab",
+  "sha256": "68a1738e2dc11a85da86815df881c1ad6fd7417a8f4609d5ca497c282f9f58bd",
   "durationSeconds": 111.275,
   "sourcePresenterSha256": "279f35c9c9498309557734b06c9365734214bc5e0ca5a0e006796ac05a9915b5",
   "screens": [
@@ -15,7 +15,24 @@
       "sourceOrigin": "http://127.0.0.1:8381/check",
       "fictionalLocalService": false,
       "demonstrationData": "fictional",
-      "sha256": "e3ab78b3ca6eddd94ad8e6cf097724447cb07fed6c7b8afc15a3f9fec4590e78"
+      "sha256": "94d5ff1aea640f256eb040f92003103da54075af01084be335bc55a14290d9e4",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "normalizedFramePath": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\.composition\\first-check-normalized\\000.png",
+      "normalizedFrameSha256": "abec294930ace35d5c6dfbb71046663c312a124724979a0589d787d99d051ec6",
+      "normalization": {
+        "cropLeftPixels": 300,
+        "cropWidthPixels": 1290,
+        "cropHeightPixels": 904,
+        "fitMethod": "preserve aspect ratio, decrease to even dimensions, center pad",
+        "fullCapturedHeightRetained": true
+      }
     },
     {
       "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\02-cv.jpg",
@@ -24,7 +41,24 @@
       "sourceOrigin": "http://127.0.0.1:8381/check",
       "fictionalLocalService": false,
       "demonstrationData": "fictional",
-      "sha256": "56e1bc3bc846073edd59ac1b23ed2fbc45511eb2971db6bf8c4d0a76aa875580"
+      "sha256": "c53c1096a8422f61e95366c1e2412f090524dcf0ec7aa2559e2b1311a8181ef4",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "normalizedFramePath": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\.composition\\first-check-normalized\\001.png",
+      "normalizedFrameSha256": "24fd33770c20b37a970099122cdbaa8b5766b0ef76d82fe37f2d93edf96147e7",
+      "normalization": {
+        "cropLeftPixels": 300,
+        "cropWidthPixels": 1290,
+        "cropHeightPixels": 904,
+        "fitMethod": "preserve aspect ratio, decrease to even dimensions, center pad",
+        "fullCapturedHeightRetained": true
+      }
     },
     {
       "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\03-vacancy.jpg",
@@ -33,7 +67,24 @@
       "sourceOrigin": "http://127.0.0.1:8381/check",
       "fictionalLocalService": false,
       "demonstrationData": "fictional",
-      "sha256": "69f962a745144d23fb9b5cdcbd7a85ddbf92f15d7316696a7ac786dfd035b8c4"
+      "sha256": "c19aee013bc27158827a3e0500155ef2a67b8b4f7896d1a980d8396eed3d3609",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "normalizedFramePath": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\.composition\\first-check-normalized\\002.png",
+      "normalizedFrameSha256": "29f0b46e1c7ab0ff3c0ddbce7692efb5889cf289cbfc701daaebaad6c35bd59a",
+      "normalization": {
+        "cropLeftPixels": 300,
+        "cropWidthPixels": 1290,
+        "cropHeightPixels": 904,
+        "fitMethod": "preserve aspect ratio, decrease to even dimensions, center pad",
+        "fullCapturedHeightRetained": true
+      }
     },
     {
       "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\04-evidence-source.jpg",
@@ -42,7 +93,24 @@
       "sourceOrigin": "http://127.0.0.1:8381/check",
       "fictionalLocalService": false,
       "demonstrationData": "fictional",
-      "sha256": "db83cc5dda4e2cc18e61535ec71b1460a564f757c51c2efc16d9e881ea593b3a"
+      "sha256": "db71a09c3520f9f3d7ac34f81953112e2d99c1c636d1e65b5e4d06be37b39a7f",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "normalizedFramePath": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\.composition\\first-check-normalized\\003.png",
+      "normalizedFrameSha256": "a94a2986b0283613c40daacf8f6eaccd2991b62290fbdf4ce37f88dcee08dc2f",
+      "normalization": {
+        "cropLeftPixels": 300,
+        "cropWidthPixels": 1290,
+        "cropHeightPixels": 904,
+        "fitMethod": "preserve aspect ratio, decrease to even dimensions, center pad",
+        "fullCapturedHeightRetained": true
+      }
     },
     {
       "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\05-review.jpg",
@@ -51,7 +119,24 @@
       "sourceOrigin": "http://127.0.0.1:8381/check",
       "fictionalLocalService": false,
       "demonstrationData": "fictional",
-      "sha256": "f13127bf0c99a8d4092547e197a8683f090c9ed89391798667059e80279a4d04"
+      "sha256": "507617c0416b7a6cf417b8b3a9e1e8f96ea25a97fb65b2b74cdb07c4f8b64f42",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "normalizedFramePath": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\.composition\\first-check-normalized\\004.png",
+      "normalizedFrameSha256": "6771868f7c0e720c33b6c21d891d418b32f6e11e33a3c67cb9466b00a31cee54",
+      "normalization": {
+        "cropLeftPixels": 300,
+        "cropWidthPixels": 1290,
+        "cropHeightPixels": 904,
+        "fitMethod": "preserve aspect ratio, decrease to even dimensions, center pad",
+        "fullCapturedHeightRetained": true
+      }
     },
     {
       "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\06-pdf-controls.jpg",
@@ -61,7 +146,24 @@
       "fictionalLocalService": false,
       "demonstrationData": "fictional",
       "limitations": "PDF preview/file download completion not independently captured; actual controls and TXT request are shown.",
-      "sha256": "9da98a911ef3b704b9b06de1e0d8352c5baf333886e3c63612f21f220289e9bf"
+      "sha256": "644b44e59d752721f35cec14a8d3e533289f1fd64ba29c7c1d263fb1b8f0a8cd",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "normalizedFramePath": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\.composition\\first-check-normalized\\005.png",
+      "normalizedFrameSha256": "3b595fa5ea16383a18b4e351f89f7b83f7cae95a0aa399aa933f76ac7bc7ed29",
+      "normalization": {
+        "cropLeftPixels": 300,
+        "cropWidthPixels": 1290,
+        "cropHeightPixels": 904,
+        "fitMethod": "preserve aspect ratio, decrease to even dimensions, center pad",
+        "fullCapturedHeightRetained": true
+      }
     },
     {
       "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\06-approve-checks.jpg",
@@ -71,7 +173,24 @@
       "fictionalLocalService": false,
       "demonstrationData": "fictional",
       "limitations": "PDF preview/file download completion not independently captured; actual controls and TXT request are shown.",
-      "sha256": "2fc489679b76d354ee619f03e4fd32ae153b510a5190edf077bbe527dddfb96c"
+      "sha256": "ad8883d979749fb16bdbeea9ab628f35ef21f006a43d72dab4b5109a9ddbae97",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "normalizedFramePath": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\.composition\\first-check-normalized\\006.png",
+      "normalizedFrameSha256": "2ffa6ee7e8481139cc8826c6bbe25add5c6668196bcaf4c674d62f77d8913f59",
+      "normalization": {
+        "cropLeftPixels": 300,
+        "cropWidthPixels": 1290,
+        "cropHeightPixels": 904,
+        "fitMethod": "preserve aspect ratio, decrease to even dimensions, center pad",
+        "fullCapturedHeightRetained": true
+      }
     },
     {
       "path": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\screens\\06-approved-download.jpg",
@@ -81,7 +200,24 @@
       "fictionalLocalService": false,
       "demonstrationData": "fictional",
       "limitations": "PDF preview/file download completion not independently captured; actual controls and TXT request are shown.",
-      "sha256": "c55b350c3ce7c269906d15e688bb90420031f6ecf0d3bda36f104284ac93a575"
+      "sha256": "3af35cbf0ddb9c797cb8044ed186adbd1f692c74e679c1f104ee17fe42059a2b",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "normalizedFramePath": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\docs\\product-hardening\\tutorial-assets\\videos\\.composition\\first-check-normalized\\007.png",
+      "normalizedFrameSha256": "58b96e28bb792add9d4c7ffc050a3f84218a2ea6caaad9b0bb6ee0baeb6a1411",
+      "normalization": {
+        "cropLeftPixels": 300,
+        "cropWidthPixels": 1290,
+        "cropHeightPixels": 904,
+        "fitMethod": "preserve aspect ratio, decrease to even dimensions, center pad",
+        "fullCapturedHeightRetained": true
+      }
     }
   ],
   "chapters": [
@@ -143,11 +279,22 @@
     "nativeControlsSafeAreaPixels": 180,
     "screenCapturedHeightRetained": true
   },
+  "screenPresentation": {
+    "normalizedFrameDimensions": {
+      "width": 1040,
+      "height": 696
+    },
+    "normalizationBeforeConcat": true,
+    "screenTopPixels": 88,
+    "screenBottomPixels": 784,
+    "captionBandTopPixels": 784,
+    "screenCaptionOverlapPixels": 0
+  },
   "paidApiCalls": 0,
   "commercialComponentsReviewed": true,
   "finalPlaybackReviewed": false,
-  "bytes": 4122965,
-  "currentHelpSourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
+  "bytes": 3812903,
+  "currentHelpSourceSha256": "72fb126a4900d9371183f804152620033b9626ceb7126ec7aacd731cb47bb2b0",
   "measuredContainerDurationSeconds": 111.275,
   "mediaFormat": {
     "width": 1920,
@@ -160,6 +307,9 @@
   "verification": {
     "fullDecodePassed": true,
     "transcriptExact": true,
+    "sourceScreenHashesMatch": true,
+    "normalizedScreensConsistent": true,
+    "screenCaptionOverlapPixels": 0,
     "currentHelpNarrationMatches": true,
     "currentHelpChapterMetadataMatches": true,
     "captionWordsMatchTranscript": true,
@@ -173,8 +323,8 @@
     "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing"
   },
   "reviewStatus": "ready",
-  "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
-  "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+  "verifiedAt": "2026-10-14T06:36:04.832040+00:00",
+  "presenterDisclosure": "The presenter and voice were generated for this guide. Product screens use an example career record; no customer account is shown.",
   "limitations": [
     "Narrated product-screen still montage, not a continuous screen recording.",
     "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",

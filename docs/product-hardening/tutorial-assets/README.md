@@ -4,11 +4,11 @@ The five ready films and their measured chapter timing are listed in `production
 
 Use **measured chapter starts from the production manifest** for seeking. The original help scene durations are planning estimates and are longer than the actual speech. Video and caption URLs are assigned by the publishing task; this producer manifest does not assert public hosting.
 
-`contentKind` is `screen_walkthrough`: actual browser capture stills with an actual speaking AI portrait, not continuous screen recordings. Job Loop scenes retain a fictional local-service disclosure. They establish no real account, cloud execution, employer application or email. The first film shows real PDF controls and an approved TXT request, without independently captured browser export completion. The presenter has generated mouth motion with mostly static head/eyes.
+`contentKind` is `screen_walkthrough`: actual browser capture stills with a generated speaking portrait, not continuous screen recordings. Job Loop scenes retain an example-application product-tour label. They establish no real account, cloud execution, employer application or email. The first film shows real PDF controls and an approved TXT request, without independently captured browser export completion. The presenter has generated mouth motion with mostly static head/eyes.
 
 `LOCAL-MODEL-LICENSES.md` and `notices/` retain the actual model cards, pinned revisions/hashes, package versions and installed license notices. No weights/runtime binaries are redistributed. No HeyGen footage is included; provider draft metadata/proof is private under ignored `.sites-runtime/avatar-production/internal/`.
 
-## Caption and narration repair, 14 October 2026
+## Earlier caption and narration repair, 14 October 2026
 
 All five films were recomposed with 54 px captions (previously 32 px), at most two lines, a separate dark caption band and a 180 px bottom margin for native playback controls. The compositor retains the full captured screen height and keeps the presenter separate from the product UI. Fine UI text is best read fullscreen or alongside the written steps; English VTT captions and exact narration transcripts remain included.
 
@@ -28,3 +28,11 @@ Run `prepare-scripts.mjs` with the project's Node/TypeScript runtime to export c
 6. After that inspection, `finalize_media.py --approve-visual-review` writes the ready producer handoff. Its record deliberately distinguishes frame/decoder verification from uninterrupted human viewing.
 
 Working audio, presenter sources, models, environment and review frames are ignored under `.sites-runtime/avatar-production/`, `.sites-runtime/avatar-models/` and `.sites-runtime/avatar-venv/`. Final files are outside the website's small Worker bundle; the publishing task can host them at stable owner-controlled media paths.
+
+## Product-tour copy refresh, 14 October 2026
+
+The current owner request removes repeated placeholder wording from the product experience. All 35 source-screen captures were refreshed from the actual local application UI using created-for-tour career records. The videos now use **Example application walkthrough** and **Video guide** as their foreground labels. Product-tour examples remain identifiable, and generated-presenter information remains available with the video details and in the provenance records. No real customer record, employer result or successful cloud run has been added.
+
+The `job-loop-start` narration now says “In this MBA example”. Its exact speech, timed captions and speaking-portrait footage were regenerated using the existing local runtime and cached models. Its measured duration is 95.15 seconds. The other four films retain their existing narration. The refresh uses no paid APIs, new model downloads or private candidate uploads.
+
+Frame inspection also found incomplete form framing and mixed screenshot heights. The corrected composition normalizes the captured screen sequence before concatenation and fits the full captured height above the caption band. These edits change video layout rather than covering source text or drawing invented product controls. Current hashes, checks and the precise review scope are recorded in `COPY-REFRESH-VERIFICATION-2026-10-14.json` and `production-manifest.json`.

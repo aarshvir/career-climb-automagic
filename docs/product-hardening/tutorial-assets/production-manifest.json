@@ -15,13 +15,13 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
+      "verifiedAt": "2026-10-14T06:36:04.832040+00:00",
       "durationSeconds": 111.275,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.mp4",
-          "sha256": "0567ecdbec7121367f25ea2269614dc87eb7340ce19fd7eef4191eaa91d677ab",
-          "bytes": 4122965
+          "sha256": "68a1738e2dc11a85da86815df881c1ad6fd7417a8f4609d5ca497c282f9f58bd",
+          "bytes": 3812903
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.vtt",
@@ -35,13 +35,13 @@
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.jpg",
-          "sha256": "05dad121a42d3b17e5e94c325f955f3d2fd4073256c444efba5c80ec9bb37675",
-          "bytes": 73492
+          "sha256": "09c66fa70b946bbb632f57a12d245da2ab77493afed42a4cbada7d9b53bf152d",
+          "bytes": 67304
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/first-check.json",
-          "sha256": "8c77119f8bd76faf90805d2e08f07092f143d21ebf80d8564a9bc422ed1f585c",
-          "bytes": 8236
+          "sha256": "83c9478ee4f0f14990e63240cae63450b1b1d9a12b7b9aca564a8ac7621f81bd",
+          "bytes": 14659
         }
       },
       "mediaFormat": {
@@ -108,7 +108,7 @@
         "nativeControlsSafeAreaPixels": 180,
         "screenCapturedHeightRetained": true
       },
-      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "presenterDisclosure": "The presenter and voice were generated for this guide. Product screens use an example career record; no customer account is shown.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
@@ -123,33 +123,33 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
-      "durationSeconds": 95.625,
+      "verifiedAt": "2026-10-14T06:36:04.832040+00:00",
+      "durationSeconds": 95.14999999999999,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.mp4",
-          "sha256": "ef32125719e46d7d2a9133ec4b54dd61e2f74d64962939c60cb2d530dcda8a80",
-          "bytes": 3495551
+          "sha256": "70078dfcbd3bc5f265c5d42ca5db7b2f591be46c0856c6a9b6373f0d869c6272",
+          "bytes": 3224197
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.vtt",
-          "sha256": "8fd2ebe1e798761a5e7ab13f5f4292e2a08c640e076879690024d7aeed829581",
-          "bytes": 2136
+          "sha256": "ba0af033a9406ba121336667fd815710f844e70a4e04d6f742f1f2802f7a9504",
+          "bytes": 2126
         },
         "transcript": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.txt",
-          "sha256": "63c8745c4e6e1d3baed41921297b5aff9c901758a7c31c79ea0bd5ee1dc60773",
-          "bytes": 1394
+          "sha256": "40c2a4042536526e741b5e91c9704a4a802b8caf15791a7673423ceb3b05449b",
+          "bytes": 1384
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.jpg",
-          "sha256": "6a7b0b59aee0c47b58f969f22ad8b92b5b41efc09d2807d0e1bd7553a6e57624",
-          "bytes": 78389
+          "sha256": "5b8f1e4f37950130bcd7a9beb857b8543f55e8c4ca04886960fc7f3ce1a91a4c",
+          "bytes": 79330
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.json",
-          "sha256": "ce07a4e1bfdd4f2cc0a85a5693bc0da8b8ae1495fc7ad118d371b911718ac0db",
-          "bytes": 7102
+          "sha256": "277cdebafa64e5da148cb163788b8e8ae1f6f02de1f2246306dcb4a955a04619",
+          "bytes": 12801
         }
       },
       "mediaFormat": {
@@ -187,13 +187,13 @@
           "stageId": "loop-record-facts",
           "title": "Choose the fact\u2019s real context",
           "startSeconds": 51.25,
-          "durationSeconds": 23.825
+          "durationSeconds": 23.35
         },
         {
           "id": "next",
           "stageId": "loop-opportunities",
           "title": "Add the vacancy you want",
-          "startSeconds": 75.075,
+          "startSeconds": 74.6,
           "durationSeconds": 20.55
         }
       ],
@@ -209,7 +209,7 @@
         "nativeControlsSafeAreaPixels": 180,
         "screenCapturedHeightRetained": true
       },
-      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "presenterDisclosure": "The presenter and voice were generated for this guide. Product screens use an example career record; no customer account is shown.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
@@ -223,13 +223,13 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
+      "verifiedAt": "2026-10-14T06:36:04.832040+00:00",
       "durationSeconds": 78.425,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.mp4",
-          "sha256": "1054ec524925e21cf683cd8b6c5162d0b6049da4b7b6e92d9dd7047211ebf2d0",
-          "bytes": 2836844
+          "sha256": "40b4684899c7fe039c33315a23643e96d8603c920eb062989a93ef17c56e2b41",
+          "bytes": 2632554
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.vtt",
@@ -243,13 +243,13 @@
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.jpg",
-          "sha256": "0c7531a31b2bde852272f386d4649e8ec0ee1f388595dedcacd0ae6dee4a11c7",
-          "bytes": 88969
+          "sha256": "098bd58f79d3d0787e892abaa495986eb2b6a627541fc4a5c2088d3f6ab3d1ea",
+          "bytes": 86332
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/source-review.json",
-          "sha256": "90b910bfcd546384a7f98b0225ef3f1c833f081222f73e0eb4bfc1829017d6ec",
-          "bytes": 5514
+          "sha256": "72c83f1c2da15eb1c794881096caeb20ee86efe002d5c59373107716ce197028",
+          "bytes": 8945
         }
       },
       "mediaFormat": {
@@ -302,7 +302,7 @@
         "nativeControlsSafeAreaPixels": 180,
         "screenCapturedHeightRetained": true
       },
-      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "presenterDisclosure": "The presenter and voice were generated for this guide. Product screens use an example career record; no customer account is shown.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
@@ -316,13 +316,13 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
+      "verifiedAt": "2026-10-14T06:36:04.832040+00:00",
       "durationSeconds": 75.30000000000001,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.mp4",
-          "sha256": "0877754c4f363d3e98d466a26e43d002df3cab2cf8e5fa8bf91ddc3827542b9b",
-          "bytes": 2744980
+          "sha256": "f4846feb3ee1fb57911eb4ac75bc9d16309ac172c7231a17ebb51dbc0e4c9241",
+          "bytes": 2545092
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.vtt",
@@ -336,13 +336,13 @@
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.jpg",
-          "sha256": "744f7ae001423d71cc01c617ebbf2399ba30520d47ed6af22f7a617dfdd49c95",
-          "bytes": 81944
+          "sha256": "5b1c55848ada993a541b6f13c4e206df84f673619c76a68dda1d1832d6be92e8",
+          "bytes": 75520
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/another-application.json",
-          "sha256": "7c3f2b64cc3a3c416dd3b7ae97f0f75f49c15798c1b1ca35589efbeb845028af",
-          "bytes": 6094
+          "sha256": "1995db18dd548e84be500feae9735e9b9619eb28a8474c4ec70707dfcd21006f",
+          "bytes": 10307
         }
       },
       "mediaFormat": {
@@ -395,7 +395,7 @@
         "nativeControlsSafeAreaPixels": 180,
         "screenCapturedHeightRetained": true
       },
-      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "presenterDisclosure": "The presenter and voice were generated for this guide. Product screens use an example career record; no customer account is shown.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",
@@ -409,13 +409,13 @@
       "contentKind": "screen_walkthrough",
       "usesFictionalData": true,
       "hasBurnedCaptions": true,
-      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
+      "verifiedAt": "2026-10-14T06:36:04.832040+00:00",
       "durationSeconds": 115.37499999999999,
       "files": {
         "video": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.mp4",
-          "sha256": "f1a723c509b155251b0c711085a6d76402bb994dff25a98e280cef2a889f4a17",
-          "bytes": 4241939
+          "sha256": "443faebeb8a4d13790dcf21c0437fce0b8d3f61660091e8ff98c3ea4ccf53d32",
+          "bytes": 3913708
         },
         "captions": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.vtt",
@@ -429,13 +429,13 @@
         },
         "poster": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.jpg",
-          "sha256": "8bfd607335eea5352d2a3c5ac31cbc844c24eda12044fde72f7157f8a360e5d1",
-          "bytes": 79238
+          "sha256": "6dc0fcc9ad461a12bc42ece1274b984d3b98ca31d7b21edc2fff2a6fd93f82de",
+          "bytes": 72555
         },
         "provenance": {
           "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.json",
-          "sha256": "a0fead26641942d29a03b89760830adbfd7466a9c2b0d7163712182b23021a1a",
-          "bytes": 8239
+          "sha256": "2cfe35d3a69168b27083d1e54dd28ddb9065de5c23dc3a2d1484c6c4dde08619",
+          "bytes": 15502
         }
       },
       "mediaFormat": {
@@ -495,7 +495,7 @@
         "nativeControlsSafeAreaPixels": 180,
         "screenCapturedHeightRetained": true
       },
-      "presenterDisclosure": "AI presenter \u2014 an original fictional person. Generated mouth motion; mostly static head and eyes.",
+      "presenterDisclosure": "The presenter and voice were generated for this guide. Product screens use an example career record; no customer account is shown.",
       "limitations": [
         "Narrated product-screen still montage, not a continuous screen recording.",
         "Job Loop is an explicitly fictional local service with no real account, cloud run or application.",

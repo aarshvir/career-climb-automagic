@@ -1,0 +1,762 @@
+{
+  "version": 1,
+  "verifiedAt": "2026-10-14T06:36:34.835263+00:00",
+  "scope": "Five current product walkthroughs; source captures, narration, captions, layout and published-asset handoff. This is not a production service capability audit.",
+  "foregroundLabels": [
+    "Example application walkthrough",
+    "Video guide"
+  ],
+  "paidApiCalls": 0,
+  "newModelDownloads": 0,
+  "privateCandidateUploads": 0,
+  "sourceCaptureCountRefreshed": 35,
+  "uniqueSourceCapturesUsed": 32,
+  "normalizedFrameRecords": 33,
+  "geometry": {
+    "normalizedFrameDimensions": {
+      "width": 1040,
+      "height": 696
+    },
+    "normalizationBeforeConcat": true,
+    "screenTopPixels": 88,
+    "screenBottomPixels": 784,
+    "captionBandTopPixels": 784,
+    "screenCaptionOverlapPixels": 0
+  },
+  "validation": {
+    "fullDecoderCheckVideoCount": 5,
+    "currentNarrationAndTranscriptExactVideoCount": 5,
+    "captionWordsTimesAndTwoLineLimitsCheckedVideoCount": 5,
+    "sourceCaptureHashesAndNormalizedGeometryCheckedVideoCount": 5,
+    "captionAndTranscriptForbiddenWordMatches": 0,
+    "manifestSizesAndHashesMatch": true,
+    "chapterFramesReviewed": 24,
+    "independentChapterFramesReviewed": 10,
+    "independentScope": "first-check (6 chapters) and another-application (4 chapters)",
+    "otherFrameReviewScope": "job-loop-start (5), source-review (4), controls-and-recovery (5)",
+    "visualFindings": "Old foreground labels absent; shown UI and captions relevant; corrected source, vacancy, coverage and memory framing; Save opportunity fully above caption band.",
+    "uninterruptedHumanPlaybackClaimed": false,
+    "independentAudioOrLipSyncQualityAuditClaimed": false
+  },
+  "narrationUpdate": {
+    "tutorialId": "job-loop-start",
+    "exactNewPhrase": "In this MBA example",
+    "method": "Existing local Kokoro narration and MuseTalk speaking-portrait pipeline, cached models only",
+    "durationSeconds": 95.15
+  },
+  "localRenderRetries": "Two encodes initially exhausted local resources under five parallel processes. Both passed after capped-thread retries; no paid service was used.",
+  "remainingMediaLimits": [
+    "Product-screen still montage, not a continuous screen recording.",
+    "Generated presenter and narration; mostly static head and eyes.",
+    "Product tour uses example career records and an isolated local Job Loop service, not a customer account or proof of live cloud execution.",
+    "No employer application, email or payment was sent.",
+    "Caption timings use model token predictions and measured audio samples.",
+    "Fine UI text is best viewed fullscreen or with the written walkthrough.",
+    "Actual PDF controls and an approved TXT request are shown; completed browser export was not independently captured."
+  ],
+  "sources": [
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/01-role.jpg",
+      "sha256": "94d5ff1aea640f256eb040f92003103da54075af01084be335bc55a14290d9e4",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/02-cv.jpg",
+      "sha256": "c53c1096a8422f61e95366c1e2412f090524dcf0ec7aa2559e2b1311a8181ef4",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/03-vacancy.jpg",
+      "sha256": "c19aee013bc27158827a3e0500155ef2a67b8b4f7896d1a980d8396eed3d3609",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/04-evidence-source.jpg",
+      "sha256": "db71a09c3520f9f3d7ac34f81953112e2d99c1c636d1e65b5e4d06be37b39a7f",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/05-review.jpg",
+      "sha256": "507617c0416b7a6cf417b8b3a9e1e8f96ea25a97fb65b2b74cdb07c4f8b64f42",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/06-approve-checks.jpg",
+      "sha256": "ad8883d979749fb16bdbeea9ab628f35ef21f006a43d72dab4b5109a9ddbae97",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/06-approved-download.jpg",
+      "sha256": "3af35cbf0ddb9c797cb8044ed186adbd1f692c74e679c1f104ee17fe42059a2b",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/06-pdf-controls.jpg",
+      "sha256": "644b44e59d752721f35cec14a8d3e533289f1fd64ba29c7c1d263fb1b8f0a8cd",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/another-application--loop-reuse.jpg",
+      "sha256": "79a7ccb19765084518e24141925e8e77e2d117d2fdf468d16f054a03759d453f",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 848
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/another-application--new-check-cv.jpg",
+      "sha256": "a1554f54f7d9deb046a4590d1e17b065174afa39010731354ec7c0fd28d43300",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/another-application--new-check.jpg",
+      "sha256": "9d41c2593f66d50cd70df6ea2d53ecc98ee59c8136ad27b555c235589c45526a",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/another-application--preserve.jpg",
+      "sha256": "c0a883e66ca4ab7ced8fa074d6e9536d6996d13f3291e13d90ccbc37e07ba435",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/another-application--tracking.jpg",
+      "sha256": "5e0b3a917089454f62c1d58d7da3ccde1d07a5a44fcfc3067097c8d037f1f9a8",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--coverage-outputs.jpg",
+      "sha256": "c5a3ed4ef27abae37ada7903d2cee24972493c8047f64b5e28fbbb1e8a6d6349",
+      "originalDimensions": {
+        "width": 1890,
+        "height": 842
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--coverage.jpg",
+      "sha256": "a4b4731903b566760ab53dac37612b6566c0c473e78f37fdc5ce9f32bd2b22fc",
+      "originalDimensions": {
+        "width": 1890,
+        "height": 842
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--loop-memory-return.jpg",
+      "sha256": "17168440c8ac10da2a472ae763c87957baa06a4132786f6c455704c92dbe9489",
+      "originalDimensions": {
+        "width": 1890,
+        "height": 897
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--loop-memory.jpg",
+      "sha256": "17168440c8ac10da2a472ae763c87957baa06a4132786f6c455704c92dbe9489",
+      "originalDimensions": {
+        "width": 1890,
+        "height": 897
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--manual-control.jpg",
+      "sha256": "1eb44dd28c10738b15a2635d97e1eaa296b5289e270bd5d1989c972c3a4af3ff",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--manual.jpg",
+      "sha256": "1eb44dd28c10738b15a2635d97e1eaa296b5289e270bd5d1989c972c3a4af3ff",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--optional-gmail.jpg",
+      "sha256": "8cc34e69fb59c3701faeef8102a7623c45600957dcc07381666a7b7aa53255e6",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--optional.jpg",
+      "sha256": "40d92ec0a0ea328c7c2a91dfe3beff65bd4bb752398e35412a43642a5d2802a2",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/controls-and-recovery--recovery.jpg",
+      "sha256": "59012489b3628248c868b2879413c89c3b9d7539768de1e6dc4ed6735f02518e",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/job-loop-start--details-name.jpg",
+      "sha256": "95591ff86a15523d868d7594ff2a0d45d10aae320ed4f7803f4d7eae25ac17d3",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/job-loop-start--details.jpg",
+      "sha256": "cf4c80e13b12a6a6b2fd85b21c8754becf3517bcba3bc0574061b914cb182da9",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/job-loop-start--facts.jpg",
+      "sha256": "46820a787e343a014473546b379dfc063aa8c864b83ca486b821b0364ff8093d",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/job-loop-start--next.jpg",
+      "sha256": "79a7ccb19765084518e24141925e8e77e2d117d2fdf468d16f054a03759d453f",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 848
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/job-loop-start--open.jpg",
+      "sha256": "24b7715c4f22d5c09028a96afbd9afc9dcafc0741ee477619ff2db23746ca264",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/job-loop-start--source.jpg",
+      "sha256": "4f12ffdca25449c87b3db83235cdef2796941f82cf5c1f639c134c33c2057837",
+      "originalDimensions": {
+        "width": 1890,
+        "height": 897
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/source-review--clear.jpg",
+      "sha256": "e47b95a304311df4a82b0f3d96f84717608e1cdd00e0ccb1213026acf0c3a118",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/source-review--complete.jpg",
+      "sha256": "f840c16820877e035e3afa35419265d0c9913f20e3bbf8d6b2b3b8d28d6aa04f",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/source-review--context.jpg",
+      "sha256": "f02f2d905c9a678ab4ea2e1285be849918bd667e4d6ba9923ca933df90a26a63",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    },
+    {
+      "path": "docs/product-hardening/tutorial-assets/screens/source-review--contribution.jpg",
+      "sha256": "46820a787e343a014473546b379dfc063aa8c864b83ca486b821b0364ff8093d",
+      "originalDimensions": {
+        "width": 1905,
+        "height": 904
+      },
+      "normalizedFrameDimensions": {
+        "width": 1040,
+        "height": 696
+      },
+      "fullCapturedHeightRetained": true
+    }
+  ],
+  "videos": [
+    {
+      "tutorialId": "first-check",
+      "durationSeconds": 111.275,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.mp4",
+          "sha256": "68a1738e2dc11a85da86815df881c1ad6fd7417a8f4609d5ca497c282f9f58bd",
+          "bytes": 3812903
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.vtt",
+          "sha256": "4a81e3f922e1c92e06e460d1286079989febb9e67071bca85b30fd3ecda1c46a",
+          "bytes": 2405
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.txt",
+          "sha256": "26e19df81e5f9e027b472e8c3666a7a45ed6fcc0cb1a4ba8ef19ed6d2d0003d9",
+          "bytes": 1562
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.jpg",
+          "sha256": "09c66fa70b946bbb632f57a12d245da2ab77493afed42a4cbada7d9b53bf152d",
+          "bytes": 67304
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/first-check.json",
+          "sha256": "83c9478ee4f0f14990e63240cae63450b1b1d9a12b7b9aca564a8ac7621f81bd",
+          "bytes": 14659
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "verification": {
+        "fullDecodePassed": true,
+        "transcriptExact": true,
+        "sourceScreenHashesMatch": true,
+        "normalizedScreensConsistent": true,
+        "screenCaptionOverlapPixels": 0,
+        "currentHelpNarrationMatches": true,
+        "currentHelpChapterMetadataMatches": true,
+        "captionWordsMatchTranscript": true,
+        "captionTimesValid": true,
+        "captionMaximumLines": 2,
+        "captionCueCount": 25,
+        "chapterFramesExportedForVisualReview": true,
+        "chapterFramesVisuallyReviewed": true,
+        "sourceScreensVisuallyReviewed": true,
+        "captionSafeAreaVisuallyReviewed": true,
+        "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing"
+      }
+    },
+    {
+      "tutorialId": "job-loop-start",
+      "durationSeconds": 95.14999999999999,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.mp4",
+          "sha256": "70078dfcbd3bc5f265c5d42ca5db7b2f591be46c0856c6a9b6373f0d869c6272",
+          "bytes": 3224197
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.vtt",
+          "sha256": "ba0af033a9406ba121336667fd815710f844e70a4e04d6f742f1f2802f7a9504",
+          "bytes": 2126
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.txt",
+          "sha256": "40c2a4042536526e741b5e91c9704a4a802b8caf15791a7673423ceb3b05449b",
+          "bytes": 1384
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.jpg",
+          "sha256": "5b8f1e4f37950130bcd7a9beb857b8543f55e8c4ca04886960fc7f3ce1a91a4c",
+          "bytes": 79330
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/job-loop-start.json",
+          "sha256": "277cdebafa64e5da148cb163788b8e8ae1f6f02de1f2246306dcb4a955a04619",
+          "bytes": 12801
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "verification": {
+        "fullDecodePassed": true,
+        "transcriptExact": true,
+        "sourceScreenHashesMatch": true,
+        "normalizedScreensConsistent": true,
+        "screenCaptionOverlapPixels": 0,
+        "currentHelpNarrationMatches": true,
+        "currentHelpChapterMetadataMatches": true,
+        "captionWordsMatchTranscript": true,
+        "captionTimesValid": true,
+        "captionMaximumLines": 2,
+        "captionCueCount": 22,
+        "chapterFramesExportedForVisualReview": true,
+        "chapterFramesVisuallyReviewed": true,
+        "sourceScreensVisuallyReviewed": true,
+        "captionSafeAreaVisuallyReviewed": true,
+        "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing"
+      }
+    },
+    {
+      "tutorialId": "source-review",
+      "durationSeconds": 78.425,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.mp4",
+          "sha256": "40b4684899c7fe039c33315a23643e96d8603c920eb062989a93ef17c56e2b41",
+          "bytes": 2632554
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.vtt",
+          "sha256": "9c524df70d32cbd5a016087f923369039152174ce349178e49bbf3e00348c2ee",
+          "bytes": 1726
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.txt",
+          "sha256": "803b564b395b797f757dd0d2682e64f7c80021d7a007b3a2ba6086fbbca681f9",
+          "bytes": 1153
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.jpg",
+          "sha256": "098bd58f79d3d0787e892abaa495986eb2b6a627541fc4a5c2088d3f6ab3d1ea",
+          "bytes": 86332
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/source-review.json",
+          "sha256": "72c83f1c2da15eb1c794881096caeb20ee86efe002d5c59373107716ce197028",
+          "bytes": 8945
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "verification": {
+        "fullDecodePassed": true,
+        "transcriptExact": true,
+        "sourceScreenHashesMatch": true,
+        "normalizedScreensConsistent": true,
+        "screenCaptionOverlapPixels": 0,
+        "currentHelpNarrationMatches": true,
+        "currentHelpChapterMetadataMatches": true,
+        "captionWordsMatchTranscript": true,
+        "captionTimesValid": true,
+        "captionMaximumLines": 2,
+        "captionCueCount": 17,
+        "chapterFramesExportedForVisualReview": true,
+        "chapterFramesVisuallyReviewed": true,
+        "sourceScreensVisuallyReviewed": true,
+        "captionSafeAreaVisuallyReviewed": true,
+        "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing"
+      }
+    },
+    {
+      "tutorialId": "another-application",
+      "durationSeconds": 75.30000000000001,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.mp4",
+          "sha256": "f4846feb3ee1fb57911eb4ac75bc9d16309ac172c7231a17ebb51dbc0e4c9241",
+          "bytes": 2545092
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.vtt",
+          "sha256": "f36c24757960bd94f71dd4371aaa4bf08ea0792dd33a923f9b8d445cc0025538",
+          "bytes": 1641
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.txt",
+          "sha256": "080971071d4184030c8b1821df0fc3e717945f44f4427c2127521a48a3ff01f9",
+          "bytes": 1102
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.jpg",
+          "sha256": "5b1c55848ada993a541b6f13c4e206df84f673619c76a68dda1d1832d6be92e8",
+          "bytes": 75520
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/another-application.json",
+          "sha256": "1995db18dd548e84be500feae9735e9b9619eb28a8474c4ec70707dfcd21006f",
+          "bytes": 10307
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "verification": {
+        "fullDecodePassed": true,
+        "transcriptExact": true,
+        "sourceScreenHashesMatch": true,
+        "normalizedScreensConsistent": true,
+        "screenCaptionOverlapPixels": 0,
+        "currentHelpNarrationMatches": true,
+        "currentHelpChapterMetadataMatches": true,
+        "captionWordsMatchTranscript": true,
+        "captionTimesValid": true,
+        "captionMaximumLines": 2,
+        "captionCueCount": 16,
+        "chapterFramesExportedForVisualReview": true,
+        "chapterFramesVisuallyReviewed": true,
+        "sourceScreensVisuallyReviewed": true,
+        "captionSafeAreaVisuallyReviewed": true,
+        "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing"
+      }
+    },
+    {
+      "tutorialId": "controls-and-recovery",
+      "durationSeconds": 115.37499999999999,
+      "files": {
+        "video": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.mp4",
+          "sha256": "443faebeb8a4d13790dcf21c0437fce0b8d3f61660091e8ff98c3ea4ccf53d32",
+          "bytes": 3913708
+        },
+        "captions": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.vtt",
+          "sha256": "6379d254cb47ebd3d4942302304d99047bc00163cdd000afe8c58ff13506f6f8",
+          "bytes": 2604
+        },
+        "transcript": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.txt",
+          "sha256": "198a502de4c060ab7023ac6d9c1de9b1813ba5010a8f8ab94e99c7cf3144791e",
+          "bytes": 1726
+        },
+        "poster": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.jpg",
+          "sha256": "6dc0fcc9ad461a12bc42ece1274b984d3b98ca31d7b21edc2fff2a6fd93f82de",
+          "bytes": 72555
+        },
+        "provenance": {
+          "path": "docs/product-hardening/tutorial-assets/videos/controls-and-recovery.json",
+          "sha256": "2cfe35d3a69168b27083d1e54dd28ddb9065de5c23dc3a2d1484c6c4dde08619",
+          "bytes": 15502
+        }
+      },
+      "mediaFormat": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "25/1",
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "mimeType": "video/mp4"
+      },
+      "verification": {
+        "fullDecodePassed": true,
+        "transcriptExact": true,
+        "sourceScreenHashesMatch": true,
+        "normalizedScreensConsistent": true,
+        "screenCaptionOverlapPixels": 0,
+        "currentHelpNarrationMatches": true,
+        "currentHelpChapterMetadataMatches": true,
+        "captionWordsMatchTranscript": true,
+        "captionTimesValid": true,
+        "captionMaximumLines": 2,
+        "captionCueCount": 26,
+        "chapterFramesExportedForVisualReview": true,
+        "chapterFramesVisuallyReviewed": true,
+        "sourceScreensVisuallyReviewed": true,
+        "captionSafeAreaVisuallyReviewed": true,
+        "reviewScope": "full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing"
+      }
+    }
+  ]
+}

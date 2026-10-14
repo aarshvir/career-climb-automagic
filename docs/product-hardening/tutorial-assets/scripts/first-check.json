@@ -1,7 +1,7 @@
 {
   "source": "src/lib/walkthroughs.ts",
-  "sourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
-  "exportedAt": "2026-10-14T03:51:43.611Z",
+  "sourceSha256": "72fb126a4900d9371183f804152620033b9626ceb7126ec7aacd731cb47bb2b0",
+  "exportedAt": "2026-10-14T06:17:19.389Z",
   "timingStatus": "planned; not measured render timings",
   "id": "first-check",
   "title": "Your first CV check",
@@ -30,7 +30,7 @@
           },
           {
             "label": "Company (optional)",
-            "value": "Example Company — fictional"
+            "value": "Consulting practice"
           }
         ],
         "action": "Continue to your CV",
@@ -70,7 +70,7 @@
         "fields": [
           {
             "label": "Vacancy description",
-            "value": "Fictional posting: Graduate analyst. Support survey analysis, prepare clear charts and explain the findings. Review the listed location, qualifications and closing date."
+            "value": "Graduate analyst. Support survey analysis, prepare clear charts and explain the findings. Review the listed location, qualifications and closing date."
           }
         ],
         "action": "Check these inputs",
@@ -98,7 +98,7 @@
           }
         ],
         "action": "Review my CV & questions",
-        "note": "Fictional comparison. Team context stays in the source passage."
+        "note": "Team context stays in the source passage."
       }
     },
     {
@@ -138,7 +138,7 @@
           },
           {
             "label": "Final CV preview — review before approval",
-            "value": "Complete fictional CV text to read. No preview artifact has been generated in this tutorial."
+            "value": "Read every page of your CV preview before approving it."
           }
         ],
         "action": "Approve this CV",

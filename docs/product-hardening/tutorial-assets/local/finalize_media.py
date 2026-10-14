@@ -24,7 +24,8 @@ def main():
         file = folder / f'{id}.mp4'
         data = json.loads(file.with_suffix('.json').read_text(encoding='utf8'))
         checks = data.get('verification', {})
-        for check in ['fullDecodePassed', 'transcriptExact', 'currentHelpNarrationMatches',
+        for check in ['fullDecodePassed', 'transcriptExact', 'sourceScreenHashesMatch',
+                      'normalizedScreensConsistent', 'currentHelpNarrationMatches',
                       'currentHelpChapterMetadataMatches', 'captionWordsMatchTranscript', 'captionTimesValid']:
             if checks.get(check) is not True:
                 raise ValueError(f'Missing verification: {id}/{check}')
@@ -37,7 +38,7 @@ def main():
         data['verification']['sourceScreensVisuallyReviewed'] = True
         data['verification']['captionSafeAreaVisuallyReviewed'] = True
         data['verification']['reviewScope'] = 'full decoder playback + timed caption/transcript checks + visual chapter-frame/source-screen/caption-safe-area review; not uninterrupted human viewing'
-        data['presenterDisclosure'] = 'AI presenter — an original fictional person. Generated mouth motion; mostly static head and eyes.'
+        data['presenterDisclosure'] = 'The presenter and voice were generated for this guide. Product screens use an example career record; no customer account is shown.'
         data['limitations'] = ['Narrated product-screen still montage, not a continuous screen recording.',
                                'Job Loop is an explicitly fictional local service with no real account, cloud run or application.',
                                'Caption timing uses model token predictions and measured audio samples.',

@@ -28,6 +28,29 @@ def main():
     results = []
     for movie in sorted(videos.glob('*.mp4')):
         record = json.loads(movie.with_suffix('.json').read_text(encoding='utf8'))
+        layout = record.get('screenPresentation', {})
+        normalized_size = {'width': 1040, 'height': 696}
+        if (layout.get('normalizedFrameDimensions') != normalized_size
+                or layout.get('normalizationBeforeConcat') is not True
+                or layout.get('screenTopPixels') != 88
+                or layout.get('screenBottomPixels') != 784
+                or layout.get('captionBandTopPixels') != 784
+                or layout.get('screenCaptionOverlapPixels') != 0):
+            raise ValueError(f'Captured screen overlaps captions or lacks consistent pre-concat sizing: {movie.name}')
+        if not record.get('screens'):
+            raise ValueError(f'No captured source screens recorded: {movie.name}')
+        for screen in record['screens']:
+            capture, normalized = Path(screen['path']), Path(screen['normalizedFramePath'])
+            if hashlib.sha256(capture.read_bytes()).hexdigest() != screen['sha256']:
+                raise ValueError(f'Source screen changed after composition: {capture.name}')
+            if (screen.get('normalizedFrameDimensions') != normalized_size
+                    or screen.get('normalization', {}).get('fullCapturedHeightRetained') is not True
+                    or hashlib.sha256(normalized.read_bytes()).hexdigest() != screen['normalizedFrameSha256']):
+                raise ValueError(f'Normalized frame changed or lost captured height: {capture.name}')
+            normalized_probe = json.loads(run('ffprobe', '-v', 'error', '-select_streams', 'v:0',
+                                             '-show_entries', 'stream=width,height', '-of', 'json', str(normalized)))
+            if normalized_probe.get('streams', [{}])[0] != normalized_size:
+                raise ValueError(f'Inconsistent normalized frame dimensions: {capture.name}')
         chapters = json.loads((audio / movie.stem / f'{movie.stem}-chapters.json').read_text(encoding='utf8'))
         expected = '\n\n'.join(c['narration'] for c in chapters['chapters'])
         current_script = json.loads((Path(args.scripts_root) / f'{movie.stem}.json').read_text(encoding='utf8'))
@@ -77,6 +100,9 @@ def main():
                        'mediaFormat': {'width': video['width'], 'height': video['height'], 'fps': video['avg_frame_rate'],
                                        'videoCodec': video['codec_name'], 'audioCodec': sound['codec_name'], 'mimeType': 'video/mp4'},
                        'verification': {'fullDecodePassed': True, 'transcriptExact': True,
+                                        'sourceScreenHashesMatch': True,
+                                        'normalizedScreensConsistent': True,
+                                        'screenCaptionOverlapPixels': 0,
                                         'currentHelpNarrationMatches': True,
                                         'currentHelpChapterMetadataMatches': True,
                                         'captionWordsMatchTranscript': True, 'captionTimesValid': True,

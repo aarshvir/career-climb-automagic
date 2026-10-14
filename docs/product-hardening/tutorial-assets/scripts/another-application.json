@@ -1,7 +1,7 @@
 {
   "source": "src/lib/walkthroughs.ts",
-  "sourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
-  "exportedAt": "2026-10-14T03:51:43.615Z",
+  "sourceSha256": "72fb126a4900d9371183f804152620033b9626ceb7126ec7aacd731cb47bb2b0",
+  "exportedAt": "2026-10-14T06:17:19.394Z",
   "timingStatus": "planned; not measured render timings",
   "id": "another-application",
   "title": "Prepare your next application",
@@ -46,7 +46,7 @@
         "fields": [
           {
             "label": "Target role",
-            "value": "Business analyst — fictional new target"
+            "value": "Business analyst"
           },
           {
             "label": "Company (optional)",
@@ -78,7 +78,7 @@
           }
         ],
         "action": "Save opportunity",
-        "note": "This fictional storyboard creates no application document."
+        "note": "Open your workspace to prepare the next document."
       }
     },
     {

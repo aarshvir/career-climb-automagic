@@ -1,7 +1,7 @@
 {
   "source": "src/lib/walkthroughs.ts",
-  "sourceSha256": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
-  "exportedAt": "2026-10-14T03:51:43.617Z",
+  "sourceSha256": "72fb126a4900d9371183f804152620033b9626ceb7126ec7aacd731cb47bb2b0",
+  "exportedAt": "2026-10-14T06:17:19.396Z",
   "timingStatus": "planned; not measured render timings",
   "id": "controls-and-recovery",
   "title": "Stay in control of preparation and recovery",
@@ -49,11 +49,11 @@
         "section": "Run history & source coverage",
         "fields": [
           {
-            "label": "Fictional lane A",
+            "label": "Employer careers page",
             "value": "Completed: illustrative source check only."
           },
           {
-            "label": "Fictional lane B",
+            "label": "Additional source",
             "value": "Unavailable: no coverage should be inferred."
           }
         ],
@@ -74,11 +74,11 @@
         "fields": [
           {
             "label": "Optional recurring preparation",
-            "value": "Not enabled in this fictional demo."
+            "value": "Not enabled in this tour."
           },
           {
             "label": "Optional Gmail access",
-            "value": "Not connected in this fictional demo."
+            "value": "Not connected in this tour."
           }
         ],
         "action": "Read permissions before choosing",
