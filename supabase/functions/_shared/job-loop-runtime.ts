@@ -8,6 +8,7 @@ import { LIMITS, RULES_MODEL, digest, stableUuid, modelOptions, modelConfigurati
 import { beginGmail, createGmailDraft, gmailConfigured, readRecruitmentInbox,previewGmailTicket,finalizeGmailTicket } from '../job-loop-oauth/gmail.ts';
 import type { LoopAction, LoopClaim, LoopLane, LoopOpportunity, LoopResponse, LoopSnapshot } from './job-loop-types.ts';
 import { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
+import { generationBoundAction } from './job-loop-request.ts';
 export { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
 
 export function validateControlInput(value: unknown): LoopAction {
@@ -58,36 +59,47 @@ export async function dispatchWorker(runId:string,env:LoopEnv,fetcher:LoopFetch=
   const response=await fetcher(endpoint.href,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${env('SUPABASE_SERVICE_ROLE_KEY')}`,'x-job-loop-secret':env('JOB_LOOP_WORKER_SECRET')??env('SUPABASE_SERVICE_ROLE_KEY')!},body:JSON.stringify({runId}),signal:AbortSignal.timeout(10000),redirect:'error'});
   if(!response.ok)throw new ApiError(503,'LOOP_WORKER_UNAVAILABLE','The run is saved, but the background worker could not be reached. Resume this run.');
 }
-export async function getLoopSnapshot(repo:LoopRepository,userId:string,env:LoopEnv):Promise<LoopSnapshot> {
+export async function getLoopSnapshot(repo:LoopRepository,userId:string,env:LoopEnv,expectedGeneration?:number,initialize=false):Promise<LoopSnapshot> {
   let cap=50;try{cap=configuredUsageCap(env);}catch{/* Paid choices fail closed in modelOptions; the private record remains readable. */}
-  const [record,collections,operations]=await Promise.all([repo.record(userId),repo.collections(userId),repo.operationalSnapshot(userId,cap)]);
+  if(expectedGeneration===undefined&&!initialize){
+    const lifecycle=await repo.erasureStatus(userId);
+    if(lifecycle.state==='erasing')throw new ApiError(409,'LOOP_ERASURE_IN_PROGRESS','Your Job Loop is being erased. Continue erasure before making another change.');
+    if(lifecycle.state!=='active')throw new ApiError(409,'LOOP_REQUEST_STALE','Your Job Loop was erased. Refresh before continuing.');
+    expectedGeneration=lifecycle.generation;
+  }
+  const record=await repo.record(userId,expectedGeneration,initialize);
+  const [collections,operations]=await Promise.all([repo.collections(userId),repo.operationalSnapshot(userId,cap)]);
+  await repo.assertGeneration(userId,record.lifecycle_generation);
   const available=workerEnabled(env);const gmailReady=gmailConfigured(env);const connected=!!collections.connection;
-  return {recordVersion:Number(record.version),profile:record.data.profile,claims:record.data.claims,opportunities:record.data.opportunities,runs:collections.runs.map(run=>publicRun(run,collections.usage)),packets:collections.packets.map(row=>({...row.data,status:row.status})),inbox:collections.runs.find(run=>run.data.inbox)?.data.inbox??record.data.inbox,models:modelOptions(env),capabilities:{cloudWorker:available,rulesEngine:available,webSearch:searchReady(env),gmailRead:gmailReady,gmailDrafts:gmailReady,monthlyUsageCapUsd:cap,dailyRunLimit:LIMITS.dailyRuns,scheduler:available&&operations.scheduler.ready,packetsPerRun:LIMITS.packets},gmail:{connected:gmailReady&&connected,email:gmailReady?collections.connection?.email??null:null,allowDrafts:gmailReady&&!!collections.connection?.allow_drafts,status:!gmailReady?'Mailbox integration is not configured.':connected?collections.connection?.allow_drafts?'Connected with read and draft permission.':'Connected read-only. Reconnect to request draft permission.':'Not connected. Google sign-in is separate.'},schedule:operations.schedule,activity:operations.activity,support:operations.support as LoopSnapshot['support'],budget:{month:String(operations.budget.month),capUsd:Number(operations.budget.capUsd),committedUsd:Number(operations.budget.committedUsd),remainingUsd:Number(operations.budget.remainingUsd),scope:'shared_ai_search',maxPilotUsers:10},pilot:{enrolled:operations.budget.enrolled===true,activeUsers:Number(operations.budget.activeUsers),maxUsers:10},recurringReady:available&&operations.scheduler.ready,employerSources:employerFeeds(env).map(feed=>({provider:feed.provider,board:feed.board,company:feed.company??feed.board}))};
+  return {lifecycleGeneration:record.lifecycle_generation,recordVersion:Number(record.version),profile:record.data.profile,claims:record.data.claims,opportunities:record.data.opportunities,runs:collections.runs.map(run=>publicRun(run,collections.usage)),packets:collections.packets.map(row=>({...row.data,status:row.status})),inbox:collections.runs.find(run=>run.data.inbox)?.data.inbox??record.data.inbox,models:modelOptions(env),capabilities:{cloudWorker:available,rulesEngine:available,webSearch:searchReady(env),gmailRead:gmailReady,gmailDrafts:gmailReady,monthlyUsageCapUsd:cap,dailyRunLimit:LIMITS.dailyRuns,scheduler:available&&operations.scheduler.ready,packetsPerRun:LIMITS.packets},gmail:{connected:gmailReady&&connected,email:gmailReady?collections.connection?.email??null:null,allowDrafts:gmailReady&&!!collections.connection?.allow_drafts,status:!gmailReady?'Mailbox integration is not configured.':connected?collections.connection?.allow_drafts?'Connected with read and draft permission.':'Connected read-only. Reconnect to request draft permission.':'Not connected. Google sign-in is separate.'},schedule:operations.schedule,activity:operations.activity,support:operations.support as LoopSnapshot['support'],budget:{month:String(operations.budget.month),capUsd:Number(operations.budget.capUsd),committedUsd:Number(operations.budget.committedUsd),remainingUsd:Number(operations.budget.remainingUsd),scope:'shared_ai_search',maxPilotUsers:10},pilot:{enrolled:operations.budget.enrolled===true,activeUsers:Number(operations.budget.activeUsers),maxUsers:10},recurringReady:available&&operations.scheduler.ready,employerSources:employerFeeds(env).map(feed=>({provider:feed.provider,board:feed.board,company:feed.company??feed.board}))};
 }
 export async function controlLoop(repo:LoopRepository,userId:string,action:LoopAction,env:LoopEnv,fetcher:LoopFetch=fetch):Promise<LoopResponse> {
-  if(action.action==='get')return {snapshot:await getLoopSnapshot(repo,userId,env)};
+  if(action.action==='get'){
+    const lifecycle=await repo.erasureStatus(userId);
+    if(lifecycle.state==='erasing')return {erasureGeneration:lifecycle.generation};
+    return {snapshot:await getLoopSnapshot(repo,userId,env,undefined,true)};
+  }
   // A retry must reach cleanup without first upserting a record through the
   // active-owner fence. Read a fresh empty snapshot only after verified finish.
   if(action.action==='erase_loop'||action.action==='erase_self'){
     if(!action.confirmErase)throw new ApiError(400,'LOOP_ERASE_CONFIRMATION','Confirm erasing the private record and generated documents.');
-    await repo.eraseArtifacts(userId);
-    return {snapshot:await getLoopSnapshot(repo,userId,env),message:'Your Job Loop record, schedules, documents and mailbox connection were erased. Your sign-in account and separately saved workspace CVs remain; drafts already created in Gmail remain there.'};
+    await repo.eraseArtifacts(userId,action.expectedGeneration!);
+    return {snapshot:await getLoopSnapshot(repo,userId,env,undefined,true),message:'Your Job Loop record, schedules, documents and mailbox connection were erased. Your sign-in account and separately saved workspace CVs remain; drafts already created in Gmail remain there.'};
   }
-  const row=await repo.record(userId);const data=structuredClone(row.data);
-  const finish=async(message?:string):Promise<LoopResponse>=>({snapshot:await getLoopSnapshot(repo,userId,env),...(message?{message}:{})});
+  if(generationBoundAction(action.action))await repo.assertGeneration(userId,action.expectedGeneration);
+  const row=await repo.record(userId,action.expectedGeneration);const data=structuredClone(row.data);
+  const finish=async(message?:string):Promise<LoopResponse>=>({snapshot:await getLoopSnapshot(repo,userId,env,action.expectedGeneration),...(message?{message}:{})});
   if(action.action==='save_schedule'){
     configuredUsageCap(env);if(!action.recurringConsent)throw new ApiError(400,'LOOP_RECURRING_CONSENT','Explicitly enable recurring preparation.');
     if(!data.profile||!eligibleLoopClaims(data.profile,data.claims).length)throw new ApiError(422,'LOOP_CLAIMS_REQUIRED','Save your target and confirm at least one shareable fact before scheduling.');
     if(action.schedule.provider==='rules'){if(action.schedule.model!==RULES_MODEL)throw new ApiError(400,'LOOP_MODEL_INVALID','Choose the current rules preparation method.');}
     else throw new ApiError(422,'LOOP_SCHEDULE_MODEL_UNAVAILABLE','Recurring preparation currently uses the rules method. Start a manual run to explicitly select a model and review its processing route.');
     const scheduler=await repo.rpc<{ready:boolean}>('job_loop_scheduler_state',{});if(!scheduler.ready)throw new ApiError(503,'LOOP_SCHEDULER_UNAVAILABLE','Recurring dispatch is not connected yet. Manual preparation remains available.');
-    await repo.rpc('job_loop_save_schedule',{p_user:userId,p_expected:action.expectedScheduleVersion,p_settings:action.schedule,p_next:nextScheduledInstant(action.schedule)});return finish('Recurring preparation is enabled. You can pause or cancel it here; sending remains your choice.');
+    await repo.rpc('job_loop_save_schedule_bound',{p_user:userId,p_generation:action.expectedGeneration,p_expected:action.expectedScheduleVersion,p_settings:action.schedule,p_next:nextScheduledInstant(action.schedule)});return finish('Recurring preparation is enabled. You can pause or cancel it here; sending remains your choice.');
   }
-  if(action.action==='pause_schedule'||action.action==='cancel_schedule'){await repo.rpc('job_loop_schedule_action',{p_user:userId,p_expected:action.expectedScheduleVersion,p_action:action.action==='pause_schedule'?'paused':'cancelled'});return finish();}
+  if(action.action==='pause_schedule'||action.action==='cancel_schedule'){await repo.rpc('job_loop_schedule_action_bound',{p_user:userId,p_generation:action.expectedGeneration,p_expected:action.expectedScheduleVersion,p_action:action.action==='pause_schedule'?'paused':'cancelled'});return finish();}
   if(action.action==='request_support'){
-    const recent=await repo.admin.from('job_loop_support_requests').select('id').eq('user_id',userId).gte('created_at',new Date(Date.now()-86400000).toISOString());loopDatabaseError(recent.error);
-    if((recent.data?.length??0)>=5)throw new ApiError(429,'LOOP_SUPPORT_LIMIT','Five requests have already been recorded today. Your existing requests remain visible.');
-    const inserted=await repo.admin.from('job_loop_support_requests').insert({user_id:userId,category:action.category,message:action.message});loopDatabaseError(inserted.error);
+    await repo.rpc('job_loop_request_support',{p_user:userId,p_generation:action.expectedGeneration,p_category:action.category,p_message:action.message});
     return finish('Your request was saved privately with a receipt. It has not yet been reviewed; no response time is promised.');
   }
   if(action.action==='save_profile'){
@@ -139,7 +151,7 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     // honest retry just because the background worker found or refreshed jobs.
     if(existing&&!await canReplayPreparation(existing,data,action))throw new ApiError(409,'LOOP_REQUEST_CONFLICT','This request reference belongs to different career facts, original vacancy facts or processing choices. Start a new request.');
     if(!existing){if(action.provider==='rules'){if(action.model!==RULES_MODEL)throw new ApiError(400,'LOOP_MODEL_INVALID','Use the declared rules engine model.');}else{if(!action.modelConsent)throw new ApiError(400,'LOOP_MODEL_CONSENT','Allow the selected provider to process eligible claims and vacancy text explicitly.');const config=modelConfiguration(action.provider,action.model,env);if((config.transport??'direct')!==(action.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','The processing route changed. Refresh and explicitly review the named provider route before starting.');}}
-    const run=existing??await repo.rpc<RunRow>('job_loop_start_run',{p_user:userId,p_request:action.requestId,p_request_hash:requestHash,p_input_hash:inputHash,p_expected:row.version,p_provider:action.provider,p_model:action.model,p_consents:{model:action.modelConsent,inbox:action.inboxConsent,...(action.provider!=='rules'?{processingRoute:action.processingRoute??'direct'}:{})}});
+    const run=existing??await repo.rpc<RunRow>('job_loop_start_run_bound',{p_user:userId,p_generation:action.expectedGeneration,p_request:action.requestId,p_request_hash:requestHash,p_input_hash:inputHash,p_expected:row.version,p_provider:action.provider,p_model:action.model,p_consents:{model:action.modelConsent,inbox:action.inboxConsent,...(action.provider!=='rules'?{processingRoute:action.processingRoute??'direct'}:{})}});
     let message=existing?'This request already has a saved run. Its current status is shown below; no second run was started.':'The run is saved and continues in the background.';try{if(['queued','running'].includes(run.status))await dispatchWorker(run.id,env,fetcher);}catch{message='The run is saved. The worker could not be reached; resume this run to continue.';}
     return {...await finish(message),runId:run.id};
   }
@@ -164,13 +176,13 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     if(packet.data.holdReasons.length||!packet.data.artifacts.pdf)throw new ApiError(422,'LOOP_PREVIEW_UNAVAILABLE','An exact PDF preview is not available for this packet. Review the literal text and format warnings.');
     return {url:await repo.signedArtifact(userId,packet.data,'pdf'),filename:`jobvance-${packet.id}-preview.pdf`};
   }
-  if(action.action==='gmail_connect')return {url:await beginGmail(repo,userId,action.allowDrafts,env)};
-  if(action.action==='gmail_preview')return {gmailPreview:await previewGmailTicket(repo,userId,action.ticket,env)};
-  if(action.action==='gmail_finalize'){if(!action.confirmMailbox)throw new ApiError(400,'LOOP_GMAIL_CONFIRMATION','Confirm the displayed mailbox identity and permissions.');await finalizeGmailTicket(repo,userId,action.ticket,env);return finish('The displayed mailbox was explicitly connected to your account.');}
-  if(action.action==='gmail_disconnect'){const removed=await repo.admin.from('job_loop_connections').delete().eq('user_id',userId);loopDatabaseError(removed.error);const states=await repo.admin.from('job_loop_oauth_states').delete().eq('user_id',userId);loopDatabaseError(states.error);return finish('Mailbox disconnected. Previously created drafts remain in your Gmail account.');}
+  if(action.action==='gmail_connect')return {url:await beginGmail(repo,userId,action.allowDrafts,env,action.expectedGeneration!)};
+  if(action.action==='gmail_preview')return {gmailPreview:await previewGmailTicket(repo,userId,action.ticket,env,action.expectedGeneration!)};
+  if(action.action==='gmail_finalize'){if(!action.confirmMailbox)throw new ApiError(400,'LOOP_GMAIL_CONFIRMATION','Confirm the displayed mailbox identity and permissions.');await finalizeGmailTicket(repo,userId,action.ticket,env,action.expectedGeneration!);return finish('The displayed mailbox was explicitly connected to your account.');}
+  if(action.action==='gmail_disconnect'){await repo.rpc('job_loop_disconnect_gmail',{p_user:userId,p_generation:action.expectedGeneration});return finish('Mailbox disconnected. Previously created drafts remain in your Gmail account.');}
   if(action.action==='gmail_create_draft'){
     if(!action.confirmRecipientAndAttachment)throw new ApiError(400,'LOOP_DRAFT_CONSENT','Confirm the exact recipient and attachment first.');const packet=await repo.packet(userId,action.packetId);
-    if(packet.status!=='approved')throw new ApiError(409,'LOOP_APPROVAL_REQUIRED','Approve the packet before creating a draft.');return finish(await createGmailDraft(repo,userId,packet.data,action.requestId,env,fetcher));
+    if(packet.status!=='approved')throw new ApiError(409,'LOOP_APPROVAL_REQUIRED','Approve the packet before creating a draft.');return finish(await createGmailDraft(repo,userId,packet.data,action.requestId,env,fetcher,action.expectedGeneration!));
   }
   throw new ApiError(400,'LOOP_INVALID_ACTION','Unsupported loop operation.');
 }
@@ -212,7 +224,7 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
   if(!profile){await repo.commit(run,run.phase,'blocked',{...state,nextAction:'Save a reviewed career record.'});return false;}
   try{
     if(run.phase===0){
-      if(run.consents.inbox&&gmailConfigured(env)){try{const inbox=await readRecruitmentInbox(repo,run.user_id,env,fetcher);state.inbox=inbox.signals;state.lanes!.push(lane('Recruitment inbox','partial',inbox.signals.length,`Bounded seven-day metadata/snippet triage${inbox.truncated?'; additional or unread messages remain':''}. Role receipts are unconfirmed; no applied status was inferred. Contextual reply drafts and existing-thread replies remain manual in Gmail.`));}catch{state.lanes!.push(lane('Recruitment inbox','not_connected',0,'Mailbox read was unavailable. No inbox check is claimed.'));}}
+      if(run.consents.inbox&&gmailConfigured(env)){try{const inbox=await readRecruitmentInbox(repo,run.user_id,env,fetcher,run.lifecycle_generation);state.inbox=inbox.signals;state.lanes!.push(lane('Recruitment inbox','partial',inbox.signals.length,`Bounded seven-day metadata/snippet triage${inbox.truncated?'; additional or unread messages remain':''}. Role receipts are unconfirmed; no applied status was inferred. Contextual reply drafts and existing-thread replies remain manual in Gmail.`));}catch{state.lanes!.push(lane('Recruitment inbox','not_connected',0,'Mailbox read was unavailable. No inbox check is claimed.'));}}
       else state.lanes!.push(lane('Recruitment inbox',run.consents.inbox?'not_connected':'not_run',0,run.consents.inbox?'Mailbox access is not configured or connected.':'Mailbox processing was not requested.'));
       state.lanes!.push(lane('LinkedIn inbox and browser sources','blocked',0,'No authorized hosted LinkedIn integration is connected. Use your own account and add source text manually.'));
       await repo.commit(run,1,'running',state);return true;

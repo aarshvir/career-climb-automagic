@@ -1,4 +1,5 @@
 import { ApiError, uuid } from './core.ts';
+import { validLoopGeneration } from './job-loop-request.ts';
 
 export interface LoopErasureAdapter {
   rpc<T>(name: string, args: Record<string, unknown>): Promise<T>;
@@ -29,9 +30,10 @@ function checkedPaths(value: unknown, owner: string): string[] {
  * independently verifies an empty prefix before allowing finish to commit.
  * No browser-supplied cursor, whole-prefix scan or shrinking-list offset is used.
  */
-export async function eraseLoopArtifacts(adapter: LoopErasureAdapter, userId: string): Promise<void> {
+export async function eraseLoopArtifacts(adapter: LoopErasureAdapter, userId: string, expectedGeneration: number): Promise<void> {
   const owner = uuid(userId, 'Account');
-  const begun = await adapter.rpc<unknown>('job_loop_begin_erase', { p_user: owner });
+  if(!validLoopGeneration(expectedGeneration))throw new ApiError(409,'LOOP_REQUEST_GENERATION_REQUIRED','Refresh Jobvance before confirming erasure.');
+  const begun = await adapter.rpc<unknown>('job_loop_begin_erase', { p_user: owner, p_expected_generation:expectedGeneration });
   const generation = begun && typeof begun === 'object' && !Array.isArray(begun)
     ? (begun as { generation?: unknown }).generation : undefined;
   if (typeof generation !== 'number' || !Number.isSafeInteger(generation) || generation < 1) throw retry();

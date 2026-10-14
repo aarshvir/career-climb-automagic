@@ -10,11 +10,15 @@ const owner='11111111-1111-4111-a111-111111111111',runId='22222222-2222-4222-a22
 function assert(value:unknown,message:string):asserts value{if(!value)throw new Error(message);}
 function setup(){for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
 let writeFailure=false;
+let lifecycle:{state:'active'|'erasing'|'erased';generation:number}={state:'active',generation:0};
 const record:import('../functions/_shared/job-loop-repository.ts').RecordRow={user_id:owner,version:0,input_version:0,data:{profile:null,claims:[],opportunities:[],inbox:[]},updated_at:'2026-10-11T00:00:00Z'};
 globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
   const url=new URL(input instanceof Request?input.url:String(input));const body=typeof init?.body==='string'?JSON.parse(init.body):null;calls.push({url:url.href,body});
   if(url.hostname!=='supabase.fixture.invalid')throw new Error('A real or paid endpoint is blocked in this test.');
   if(url.pathname==='/auth/v1/user'){if(new Headers(init?.headers).get('Authorization')!=='Bearer fixture-user')return Response.json({error:'invalid'},{status:401});return Response.json({id:owner,aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-10-11T00:00:00Z'});}
+  if(url.pathname==='/rest/v1/rpc/job_loop_erasure_status'){assert(body?.p_user===owner,'Lifecycle read binds authenticated owner.');return Response.json(lifecycle);}
+  if(url.pathname==='/rest/v1/rpc/job_loop_assert_generation'){assert(body?.p_user===owner,'Generation guard binds authenticated owner.');return body?.p_generation===lifecycle.generation?Response.json(null):Response.json({message:'LOOP_REQUEST_STALE'},{status:400});}
+  if(['/rest/v1/rpc/job_loop_open_record','/rest/v1/rpc/job_loop_read_record'].includes(url.pathname)){assert(body?.p_user===owner,'Atomic record read binds authenticated owner.');return Response.json({...record,lifecycle_generation:lifecycle.generation});}
   if(url.pathname==='/rest/v1/job_loop_records'){assert(url.searchParams.get('user_id')===`eq.${owner}`||body?.user_id===owner,'Every record query binds the authenticated owner.');return init?.method==='POST'?new Response(null,{status:201}):Response.json(record);}
   if(['/rest/v1/job_loop_runs','/rest/v1/job_loop_packets','/rest/v1/job_loop_usage','/rest/v1/job_loop_connections','/rest/v1/job_loop_schedules','/rest/v1/job_loop_activity','/rest/v1/job_loop_support_requests'].includes(url.pathname)){assert(url.searchParams.get('user_id')===`eq.${owner}`,'Collection must bind owner.');return Response.json([]);}
   if(url.pathname==='/rest/v1/rpc/job_loop_budget_snapshot'){assert(body?.p_user===owner&&body?.p_cap_micros===50000000,'Budget read binds the authenticated owner and ceiling.');return Response.json({month:'2026-10',capUsd:50,committedUsd:0,remainingUsd:50,scope:'shared_ai_search',maxPilotUsers:10,enrolled:false,activeUsers:0,maxUsers:10});}
@@ -35,6 +39,20 @@ Deno.test('control rejects absent/invalid identity and caller-supplied owner bef
 });
 Deno.test('snapshot remains available with no model/mail/search keys and no paid calls',async()=>{
   setup();const response=await handlers[0](req({action:'get'}));assert(response.status===200,'Authenticated snapshot succeeds.');const body=await response.json();assert(body.snapshot.recordVersion===0,'Initial real record version.');assert(body.snapshot.capabilities.rulesEngine===true&&body.snapshot.capabilities.dailyRunLimit===3,'Rules capability and cap declared.');assert(body.snapshot.models.every((model:{ready:boolean})=>!model.ready),'No paid model is claimed ready.');assert(body.snapshot.gmail.connected===false,'Sign-in is not mailbox connection.');assert(calls.every(call=>call.url.startsWith('https://supabase.fixture.invalid/')),'Only fixture persistence/auth calls.');
+});
+Deno.test('actual handler rejects stale or generationless permission intents before opening a new workspace',async()=>{
+  setup();lifecycle={state:'active',generation:2};
+  const response=await handlers[0](req({action:'gmail_disconnect',expectedGeneration:0}));const body=await response.json();
+  assert(response.status===409&&body.code==='LOOP_REQUEST_STALE','Old disconnect cannot affect a fresh workspace.');
+  assert(!calls.some(call=>/job_loop_open_record|job_loop_disconnect_gmail/.test(call.url)),'Rejected intent neither opens nor mutates records.');
+  calls.length=0;const legacy=await handlers[0](req({action:'erase_loop',confirmErase:true}));
+  assert(legacy.status===400,'Old generationless erase requires a refreshed interface.');assert(calls.every(call=>call.url.includes('/auth/v1/user')),'Legacy erase never reaches persistence.');
+  lifecycle={state:'active',generation:0};
+});
+Deno.test('erasure-only read is refresh-safe and never activates or deletes a candidate record',async()=>{
+  setup();lifecycle={state:'erasing',generation:1};const response=await handlers[0](req({action:'get'}));const body=await response.json();
+  assert(response.status===200&&body.erasureGeneration===1&&!body.snapshot,'Authenticated continuation gets the exact erasure generation.');
+  assert(!calls.some(call=>/job_loop_open_record|begin_erase|storage/.test(call.url)),'A continuation read performs no activation or deletion.');lifecycle={state:'active',generation:0};
 });
 Deno.test('actual handler distinguishes correctable source/context 422, database 503 and a valid claim save',async()=>{
   setup();const quote='Bachelor of Business Administration completed at Generated QA University in 2026.',context='Generated QA University | 2026';

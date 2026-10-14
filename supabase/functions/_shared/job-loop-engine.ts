@@ -1,6 +1,7 @@
 import type { LoopAction, LoopAssessment, LoopClaim, LoopClaimInput, LoopContact, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopProfileInput } from './job-loop-types.ts';
 import { normalizeFollowUp, validateScheduleInput } from './job-loop-schedule.ts';
 import { readDiscoveryMinimumExperience } from '../../../src/lib/employer-discovery.ts';
+import { generationBoundAction, validLoopGeneration } from './job-loop-request.ts';
 
 const CLAIM_KINDS = ['employment', 'internship', 'academic_project', 'personal_project', 'volunteering', 'education', 'skill'] as const;
 const STATUSES = ['saved', 'prepared', 'applied', 'interview', 'offer', 'rejected', 'withdrawn'] as const;
@@ -147,7 +148,9 @@ export function validateAction(value: unknown): LoopAction {
     get: [], save_profile: ['expectedVersion', 'profile', 'saveConsent'], suggest_claims: [], save_claim: ['expectedVersion', 'id', 'claim'], withdraw_claim: ['expectedVersion', 'id'], add_opportunity: ['expectedVersion', 'opportunity'], update_opportunity: ['expectedVersion', 'id', 'status', 'followUpAt', 'notes'], start_run: ['requestId', 'provider', 'model', 'modelConsent', 'inboxConsent','processingRoute'], resume_run: ['runId'], cancel_run: ['runId'], approve_packet: ['packetId', 'inputHash', 'reviewedText', 'confirmFacts', 'confirmDisclosure'], download: ['packetId', 'format'], preview_packet: ['packetId','inputHash'], save_schedule:['expectedScheduleVersion','schedule','recurringConsent'], pause_schedule:['expectedScheduleVersion'],cancel_schedule:['expectedScheduleVersion'],erase_loop:['confirmErase'],erase_self:['confirmErase'],request_support:['category','message'], gmail_connect: ['allowDrafts'], gmail_preview: ['ticket'], gmail_finalize: ['ticket', 'confirmMailbox'], gmail_disconnect: [], gmail_create_draft: ['packetId', 'requestId', 'confirmRecipientAndAttachment'],
   };
   if (typeof action !== 'string' || !Object.prototype.hasOwnProperty.call(keys, action)) fail('Unsupported action. Sending and application submission are unavailable.');
+  if (generationBoundAction(action)) keys[action].push('expectedGeneration');
   const a = obj(value, ['action', ...keys[action]]);
+  if (generationBoundAction(action) && !validLoopGeneration(a.expectedGeneration)) fail('Refresh Jobvance before continuing. This action needs the current workspace lifetime.');
   if (keys[action].some(key => !(key === 'id' && action === 'save_claim') && !(key === 'processingRoute' && action === 'start_run') && !Object.prototype.hasOwnProperty.call(a, key))) fail('An action is missing required inputs.');
   if ('expectedVersion' in a) version(a.expectedVersion);
   if ('expectedScheduleVersion' in a) version(a.expectedScheduleVersion);

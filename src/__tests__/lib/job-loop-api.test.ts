@@ -18,12 +18,12 @@ afterEach(() => { vi.useRealTimers();vi.restoreAllMocks(); vi.unstubAllEnvs(); v
 
 describe('cloud loop API privacy and owner boundaries', () => {
   it('keeps the paid route consent across browser parsing and server action validation',async()=>{
-    const action={action:'start_run',requestId:'00000000-0000-4000-8000-000000000001',provider:'openai',model:'gpt-6.1-sol',modelConsent:true,inboxConsent:false,processingRoute:'openrouter'} as const;
+    const action={action:'start_run',expectedGeneration:0,requestId:'00000000-0000-4000-8000-000000000001',provider:'openai',model:'gpt-6.1-sol',modelConsent:true,inboxConsent:false,processingRoute:'openrouter'} as const;
     sdk.invoke.mockImplementationOnce(async(_name,options)=>{expect(validateControlInput(options.body)).toEqual(action);return{data:{message:'Synthetic action confirmed'},error:null};});
     await callJobLoop('owner-a',action);expect(sdk.invoke).toHaveBeenCalledWith('job-loop-control',{body:action});
   });
   it('keeps the existing rules action valid without any external route',async()=>{
-    const action={action:'start_run',requestId:'00000000-0000-4000-8000-000000000001',provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false} as const;
+    const action={action:'start_run',expectedGeneration:0,requestId:'00000000-0000-4000-8000-000000000001',provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false} as const;
     sdk.invoke.mockImplementationOnce(async(_name,options)=>{expect(validateControlInput(options.body)).toEqual(action);return{data:{message:'Synthetic action confirmed'},error:null};});
     await callJobLoop('owner-a',action);
   });
@@ -32,17 +32,17 @@ describe('cloud loop API privacy and owner boundaries', () => {
     sdk.invoke.mockResolvedValueOnce({data:{snapshot},error:null});const result=await callJobLoop('owner-a',{action:'get'});expect(result.snapshot?.models[0].transport).toBe('openrouter');
   });
   it('strips unknown owner/endpoint/pricing fields instead of forwarding them', async () => {
-    const action = { action: 'start_run', requestId: '00000000-0000-4000-8000-000000000001', provider: 'rules', model: 'grounded-rules-v1', modelConsent: false, inboxConsent: false } as const;
+    const action = { action: 'start_run',expectedGeneration:0, requestId: '00000000-0000-4000-8000-000000000001', provider: 'rules', model: 'grounded-rules-v1', modelConsent: false, inboxConsent: false } as const;
     await callJobLoop('owner-a', { ...action, userId: 'owner-b', endpoint: 'https://untrusted.invalid', price: 0 } as unknown as LoopAction);
     expect(sdk.invoke).toHaveBeenCalledWith('job-loop-control', { body: action });
   });
   it.each([
-    { action: 'start_run', requestId: '00000000-0000-4000-8000-000000000001', provider: 'openai', model: 'configured-test-model', modelConsent: false, inboxConsent: false },
+    { action: 'start_run',expectedGeneration:0, requestId: '00000000-0000-4000-8000-000000000001', provider: 'openai', model: 'configured-test-model', modelConsent: false, inboxConsent: false },
     { action: 'approve_packet', packetId: 'packet-a', inputHash: 'hash-a', reviewedText: 'Synthetic CV', confirmFacts: true, confirmDisclosure: false },
-    { action: 'gmail_create_draft', packetId: 'packet-a', requestId: '00000000-0000-4000-8000-000000000001', confirmRecipientAndAttachment: false },
-    { action: 'gmail_finalize', ticket: 'synthetic-sealed-ticket', confirmMailbox: false },
-    { action: 'save_schedule', expectedScheduleVersion:0, schedule:{cadence:'daily',timezone:'Asia/Dubai',localTime:'08:30',weeklyDay:null,provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false}, recurringConsent:false },
-    { action: 'erase_loop', confirmErase:false },
+    { action: 'gmail_create_draft',expectedGeneration:0, packetId: 'packet-a', requestId: '00000000-0000-4000-8000-000000000001', confirmRecipientAndAttachment: false },
+    { action: 'gmail_finalize',expectedGeneration:0, ticket: 'synthetic-sealed-ticket', confirmMailbox: false },
+    { action: 'save_schedule',expectedGeneration:0, expectedScheduleVersion:0, schedule:{cadence:'daily',timezone:'Asia/Dubai',localTime:'08:30',weeklyDay:null,provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false}, recurringConsent:false },
+    { action: 'erase_loop',expectedGeneration:0, confirmErase:false },
   ])('blocks missing contextual consent before any account or control request', async action => {
     await expect(callJobLoop('owner-a', action as LoopAction)).rejects.toThrow();
     expect(sdk.session).not.toHaveBeenCalled(); expect(sdk.invoke).not.toHaveBeenCalled();
@@ -82,7 +82,7 @@ describe('cloud loop API privacy and owner boundaries', () => {
   });
   it('preserves an erasure retry code in a validated service error response as well as HTTP errors', async () => {
     sdk.invoke.mockResolvedValue({ data: { error: 'Private cleanup still has documents to remove.', code: 'LOOP_ERASURE_RETRY' }, error: null });
-    const failure = await callJobLoop('owner-a', { action: 'erase_loop', confirmErase: true }).catch(error => error);
+    const failure = await callJobLoop('owner-a', { action: 'erase_loop',expectedGeneration:0, confirmErase: true }).catch(error => error);
     expect(failure).toBeInstanceOf(LoopServiceError);
     expect(failure).toMatchObject({ message: 'Private cleanup still has documents to remove.', code: 'LOOP_ERASURE_RETRY' });
   });

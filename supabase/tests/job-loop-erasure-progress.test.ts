@@ -24,6 +24,7 @@ function fixture(count: number) {
     calls.push({ name, args });
     expect(args.p_user).toBe(owner);
     if (name === 'job_loop_begin_erase') {
+      expect(args.p_expected_generation).toBe(0);
       fence = true;
       return { generation } as T;
     }
@@ -66,7 +67,7 @@ describe('bounded, owner-bound Job Loop storage erasure', () => {
     let attempts = 0;
     while (!h.completed() && attempts < 12) {
       const before = h.ownedCount(), callStart = h.calls.length, removeStart = h.remove.mock.calls.length;
-      try { await eraseLoopArtifacts(h.adapter, owner); }
+      try { await eraseLoopArtifacts(h.adapter, owner, 0); }
       catch (error) {
         expect(error).toMatchObject({ status: 503, code: 'LOOP_ERASURE_RETRY' });
         expect(h.fenced()).toBe(true);
@@ -90,7 +91,7 @@ describe('bounded, owner-bound Job Loop storage erasure', () => {
 
   it.each([0, 199, 200, 1000])('finishes %i objects in one bounded call, including a completely full final batch', async count => {
     const h = fixture(count);
-    await eraseLoopArtifacts(h.adapter, owner);
+    await eraseLoopArtifacts(h.adapter, owner, 0);
     expect(h.completed()).toBe(true);
     expect(h.ownedCount()).toBe(0);
     expect(h.objects.has(path(0, other))).toBe(true);
@@ -107,13 +108,13 @@ describe('bounded, owner-bound Job Loop storage erasure', () => {
       for (const selected of paths.slice(0, 35)) h.objects.delete(selected);
       return { error: new Error('Synthetic storage interruption after partial deletion') };
     });
-    await expect(eraseLoopArtifacts(h.adapter, owner)).rejects.toMatchObject({ status: 503, code: 'LOOP_ERASURE_RETRY' });
+    await expect(eraseLoopArtifacts(h.adapter, owner, 0)).rejects.toMatchObject({ status: 503, code: 'LOOP_ERASURE_RETRY' });
     expect(h.ownedCount()).toBe(665);
     expect(h.progress()).toBe(100);
     expect(h.completed()).toBe(false);
     expect(h.fenced()).toBe(true);
     expect(h.calls.some(call => call.name === 'job_loop_finish_erase')).toBe(false);
-    await eraseLoopArtifacts(h.adapter, owner);
+    await eraseLoopArtifacts(h.adapter, owner, 0);
     expect(h.completed()).toBe(true);
     expect(h.ownedCount()).toBe(0);
     expect(h.objects).toEqual(new Set([path(0, other)]));
@@ -124,7 +125,7 @@ describe('bounded, owner-bound Job Loop storage erasure', () => {
   it('keeps the fence without progress or finish when Storage throws', async () => {
     const h = fixture(20);
     h.remove.mockRejectedValueOnce(new Error('Synthetic network timeout'));
-    await expect(eraseLoopArtifacts(h.adapter, owner)).rejects.toMatchObject({ status: 503, code: 'LOOP_ERASURE_RETRY' });
+    await expect(eraseLoopArtifacts(h.adapter, owner, 0)).rejects.toMatchObject({ status: 503, code: 'LOOP_ERASURE_RETRY' });
     expect(h.ownedCount()).toBe(20);
     expect(h.fenced()).toBe(true);
     expect(h.progress()).toBe(0);
@@ -138,7 +139,7 @@ describe('bounded, owner-bound Job Loop storage erasure', () => {
   ])('rejects a malicious or non-owned path before removing any object in its batch: %s', async badPath => {
     const h = fixture(1);
     h.returnBatch([path(0), badPath]);
-    await expect(eraseLoopArtifacts(h.adapter, owner)).rejects.toMatchObject({ status: 503, code: 'LOOP_ERASURE_PATH' });
+    await expect(eraseLoopArtifacts(h.adapter, owner, 0)).rejects.toMatchObject({ status: 503, code: 'LOOP_ERASURE_PATH' });
     expect(h.remove).not.toHaveBeenCalled();
     expect(h.fenced()).toBe(true);
     expect(h.completed()).toBe(false);
@@ -152,7 +153,7 @@ describe('bounded, owner-bound Job Loop storage erasure', () => {
   ])('fails closed on an invalid bounded batch response', async ({ response }) => {
     const h = fixture(1);
     h.returnBatch(response);
-    await expect(eraseLoopArtifacts(h.adapter, owner)).rejects.toMatchObject({ status: 503 });
+    await expect(eraseLoopArtifacts(h.adapter, owner, 0)).rejects.toMatchObject({ status: 503 });
     expect(h.remove).not.toHaveBeenCalled();
     expect(h.completed()).toBe(false);
     expect(h.fenced()).toBe(true);
@@ -160,7 +161,7 @@ describe('bounded, owner-bound Job Loop storage erasure', () => {
 
   it.each([0, -1, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])('refuses an unusable generation before requesting paths', async generation => {
     const h = fixture(1); h.returnGeneration(generation);
-    await expect(eraseLoopArtifacts(h.adapter, owner)).rejects.toMatchObject({ status: 503, code: 'LOOP_ERASURE_RETRY' });
+    await expect(eraseLoopArtifacts(h.adapter, owner, 0)).rejects.toMatchObject({ status: 503, code: 'LOOP_ERASURE_RETRY' });
     expect(h.calls).toHaveLength(1);
     expect(h.remove).not.toHaveBeenCalled();
     expect(h.fenced()).toBe(true);
@@ -168,7 +169,7 @@ describe('bounded, owner-bound Job Loop storage erasure', () => {
 
   it('rejects a non-UUID owner before calling privileged cleanup', async () => {
     const h = fixture(1);
-    await expect(eraseLoopArtifacts(h.adapter, `${owner}/../${other}`)).rejects.toMatchObject({ status: 400, code: 'INVALID_INPUT' });
+    await expect(eraseLoopArtifacts(h.adapter, `${owner}/../${other}`, 0)).rejects.toMatchObject({ status: 400, code: 'INVALID_INPUT' });
     expect(h.calls).toHaveLength(0);
     expect(h.remove).not.toHaveBeenCalled();
   });

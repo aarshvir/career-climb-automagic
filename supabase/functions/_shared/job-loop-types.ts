@@ -94,6 +94,7 @@ export interface LoopModelOption {
   inputUsdPerMillion: number; outputUsdPerMillion: number;
 }
 export interface LoopSnapshot {
+  lifecycleGeneration?: number;
   recordVersion: number; profile: LoopProfile | null; claims: LoopClaim[];
   opportunities: LoopOpportunity[]; runs: LoopRun[]; packets: LoopPacket[]; inbox: LoopInboxSignal[];
   models: LoopModelOption[];
@@ -107,7 +108,7 @@ export interface LoopSnapshot {
   employerSources?: { provider: string; company: string; board: string }[];
   support?: { id: string; category: 'help'|'privacy'|'bug'; message: string; status: 'received'|'in_review'|'resolved'; createdAt: string }[];
 }
-export type LoopAction =
+export type LoopAction = (
   | { action: 'get' }
   | { action: 'save_profile'; expectedVersion: number; profile: LoopProfileInput; saveConsent: boolean }
   | { action: 'suggest_claims' }
@@ -129,5 +130,5 @@ export type LoopAction =
   | { action: 'gmail_preview'; ticket: string }
   | { action: 'gmail_finalize'; ticket: string; confirmMailbox: boolean }
   | { action: 'gmail_disconnect' }
-  | { action: 'gmail_create_draft'; packetId: string; requestId: string; confirmRecipientAndAttachment: boolean };
-export type LoopResponse = { snapshot?: LoopSnapshot; runId?: string; suggestions?: LoopClaimInput[]; url?: string; filename?: string; message?: string; error?: string; code?: string; gmailPreview?: { email: string | null; allowDrafts: boolean; expiresAt: string } };
+  | { action: 'gmail_create_draft'; packetId: string; requestId: string; confirmRecipientAndAttachment: boolean }) & { expectedGeneration?: number };
+export type LoopResponse = { snapshot?: LoopSnapshot; erasureGeneration?: number; runId?: string; suggestions?: LoopClaimInput[]; url?: string; filename?: string; message?: string; error?: string; code?: string; gmailPreview?: { email: string | null; allowDrafts: boolean; expiresAt: string } };

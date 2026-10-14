@@ -4,6 +4,8 @@ import { readAuthSession } from '@/utils/authSession';
 import { listCvDocuments } from '@/lib/cv-documents';
 import { safeDocumentFilename } from '@/lib/document-download';
 import { LoopServiceError } from './loop-service-error';
+import { generationBoundAction, validLoopGeneration } from '../../supabase/functions/_shared/job-loop-request';
+export { boundLoopAction } from '../../supabase/functions/_shared/job-loop-request';
 import type { LoopAction, LoopResponse } from '../../supabase/functions/_shared/job-loop-types';
 
 export type { LoopAction, LoopResponse, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
@@ -24,6 +26,7 @@ const opportunitySchema = z.object({ title: short, company: short, location: sho
 const scheduleSchema=z.object({cadence:z.enum(['daily','weekdays','weekly']),timezone:z.string().min(1).max(100),localTime:z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/),weeklyDay:z.number().int().min(0).max(6).nullable(),provider:z.union([provider,z.literal('rules')]),model:short,modelConsent:z.boolean(),inboxConsent:z.boolean()});
 const laneSchema = z.object({ name: short, status: z.enum(['completed', 'partial', 'blocked', 'not_connected', 'not_run']), count: z.number().int().nonnegative(), checkedAt: short, message: text });
 const snapshotSchema = z.object({
+  lifecycleGeneration: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional(),
   recordVersion: z.number().int().nonnegative(), profile: profileSchema.extend({ revision: z.number().int().nonnegative(), updatedAt: short }).nullable(),
   claims: z.array(claimSchema.extend({ id, revision: z.number().int().nonnegative(), status: z.enum(['active', 'withdrawn']), createdAt: short })).max(1000),
   opportunities: z.array(opportunitySchema.extend({ id, source: z.enum(['manual', 'employer_api', 'web_search']), sourceKey: short, checkedAt: short,
@@ -54,7 +57,7 @@ const snapshotSchema = z.object({
   support:z.array(z.object({id,category:z.enum(['help','privacy','bug']),message:z.string().max(2000),status:z.enum(['received','in_review','resolved']),createdAt:short})).max(20).optional(),
   recurringReady:z.boolean().optional(),employerSources:z.array(z.object({provider:short,company:short,board:short})).max(4).optional(),
 });
-const responseSchema = z.object({ snapshot: snapshotSchema.optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
+const responseSchema = z.object({ snapshot: snapshotSchema.optional(), erasureGeneration: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
   url: z.string().max(8000).optional(), filename: short.optional(), message: text.optional(), error: text.optional(), code: short.optional(),
   gmailPreview: z.object({ email: short.nullable(), allowDrafts: z.boolean(), expiresAt: short }).optional() });
 const version = z.number().int().nonnegative();
@@ -116,9 +119,12 @@ function serviceFailure(payload: unknown, fallback: string): LoopServiceError {
   return new LoopServiceError(publicFailure(payload, fallback), code);
 }
 export async function callJobLoop(userId: string, action: LoopAction): Promise<LoopResponse> {
+  const expectedGeneration = action.expectedGeneration;
+  if (generationBoundAction(action.action) && !validLoopGeneration(expectedGeneration)) throw new Error('Refresh Jobvance before continuing. Your saved work is retained.');
   // This repository disables strictNullChecks, which makes Zod's inferred
   // properties optional in TypeScript. Runtime schemas still require every field.
   action = actionSchema.parse(action) as LoopAction;
+  if (generationBoundAction(action.action)) action = { ...action, expectedGeneration };
   assertConsent(action);
   await requireLoopOwner(userId);
   const fallback = action.action === 'get' ? 'The Job Loop service is still being configured or could not be reached. Your free CV check and existing workspace remain available.' : 'This action could not be confirmed. Refresh your Job Loop before retrying.';
@@ -134,7 +140,7 @@ export async function callJobLoop(userId: string, action: LoopAction): Promise<L
     throw serviceFailure(payload, fallback);
   }
   const parsed = responseSchema.safeParse(data);
-  if (!parsed.success || (action.action === 'get' && !parsed.data.snapshot)) throw new Error(fallback);
+  if (!parsed.success || (action.action === 'get' && !parsed.data.snapshot && parsed.data.erasureGeneration === undefined)) throw new Error(fallback);
   if (parsed.data.error) throw serviceFailure(parsed.data, fallback);
   return parsed.data as LoopResponse;
 }

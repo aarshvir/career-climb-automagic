@@ -3,11 +3,12 @@ import type { adminClient } from './runtime.ts';
 import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
 import { digest } from './job-loop-providers.ts';
 import { eraseLoopArtifacts } from './job-loop-erasure.ts';
+import { validLoopGeneration } from './job-loop-request.ts';
 
 export type LoopAdmin = ReturnType<typeof adminClient>;
 export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
-export interface RecordRow { user_id: string; version: number; input_version: number; data: CareerRecord; updated_at: string }
-export interface RunRow { id: string; user_id: string; request_id: string; request_hash: string; input_hash: string; input_version: number; snapshot: CareerRecord; provider: LoopRun['provider']; model: string; consents: { model: boolean; inbox: boolean; processingRoute?: 'direct' | 'openrouter' }; data: RunState; status: LoopRun['status']; phase: number; lease_token: string | null; lease_until: string | null; created_at: string; finished_at: string | null }
+export interface RecordRow { user_id: string; version: number; input_version: number; lifecycle_generation?: number; data: CareerRecord; updated_at: string }
+export interface RunRow { id: string; user_id: string; request_id: string; request_hash: string; input_hash: string; input_version: number; lifecycle_generation?: number; snapshot: CareerRecord; provider: LoopRun['provider']; model: string; consents: { model: boolean; inbox: boolean; processingRoute?: 'direct' | 'openrouter' }; data: RunState; status: LoopRun['status']; phase: number; lease_token: string | null; lease_until: string | null; created_at: string; finished_at: string | null }
 export interface RunState { lanes?: LoopRun['lanes']; messages?: string[]; nextAction?: string; opportunityIds?: string[]; packetIds?: string[]; reusedPacketIds?:string[]; opportunities?: LoopOpportunity[]; inbox?: LoopInboxSignal[] }
 export interface UsageRow { id: string; reserved_micros: number; actual_micros: number | null; status: 'reserved' | 'settled' | 'uncertain'; result: unknown; is_new: boolean }
 export interface PacketRow { id: string; user_id: string; input_version: number; status: LoopPacket['status']; data: LoopPacket }
@@ -28,6 +29,10 @@ const ERRORS: [string, number, string][] = [
   ['LOOP_ERASURE_RETRY',503,'Preparation is stopped and documents are revoked. Continue erasure to remove the remaining files.'],
   ['LOOP_ERASURE_STALE',409,'This erasure attempt is no longer current. Refresh before continuing.'],
   ['LOOP_ARTIFACT_UNAUTHORIZED',409,'This preparation no longer has permission to store a document. Start or resume the current run.'],
+  ['LOOP_REQUEST_GENERATION_REQUIRED',409,'Refresh Jobvance before continuing. This action needs the current workspace lifetime.'],
+  ['LOOP_REQUEST_STALE',409,'Your Job Loop was erased or restarted. Refresh it and review this action again.'],
+  ['LOOP_SUPPORT_LIMIT',429,'Five requests have already been recorded today. Your existing requests remain visible.'],
+  ['LOOP_GMAIL_NOT_CONNECTED',403,'Connect Gmail with the required read or draft permission first.'],
 ];
 export function loopDatabaseError(error: { message?: string } | null): void {
   if (!error) return; for (const [code,status,message] of ERRORS) if (error.message?.includes(code)) throw new ApiError(status,code,message);
@@ -36,10 +41,18 @@ export function loopDatabaseError(error: { message?: string } | null): void {
 export class LoopRepository {
   constructor(public admin: LoopAdmin) {}
   async rpc<T>(name: string, args: Record<string, unknown>): Promise<T> { const { data,error } = await this.admin.rpc(name,args); loopDatabaseError(error); return data as T; }
-  async record(userId: string): Promise<RecordRow> {
-    const inserted = await this.admin.from('job_loop_records').upsert({ user_id:userId },{ onConflict:'user_id',ignoreDuplicates:true }); loopDatabaseError(inserted.error);
-    const { data,error } = await this.admin.from('job_loop_records').select('*').eq('user_id',userId).single(); loopDatabaseError(error); if (!data) throw new ApiError(503,'LOOP_PERSISTENCE_FAILED','Your record could not be opened.'); return data as RecordRow;
+  async record(userId: string, expectedGeneration?: number, initialize = false): Promise<RecordRow> {
+    if(expectedGeneration!==undefined)return this.rpc<RecordRow>('job_loop_read_record',{p_user:userId,p_generation:expectedGeneration});
+    if(initialize)return this.rpc<RecordRow>('job_loop_open_record',{p_user:userId});
+    const {data,error}=await this.admin.from('job_loop_records').select('*').eq('user_id',userId).maybeSingle();loopDatabaseError(error);
+    if(!data)throw new ApiError(404,'LOOP_NOT_FOUND','That Job Loop record is no longer available. Refresh before continuing.');
+    return data as RecordRow;
   }
+  async assertGeneration(userId:string,generation:unknown):Promise<void> {
+    if(!validLoopGeneration(generation))throw new ApiError(409,'LOOP_REQUEST_GENERATION_REQUIRED','Refresh Jobvance before continuing. This action needs the current workspace lifetime.');
+    await this.rpc('job_loop_assert_generation',{p_user:userId,p_generation:generation});
+  }
+  erasureStatus(userId:string) { return this.rpc<{state:'active'|'erasing'|'erased';generation:number}>('job_loop_erasure_status',{p_user:userId}); }
   write(userId: string, expected: number, data: CareerRecord, inputsChanged: boolean) { return this.rpc<RecordRow>('job_loop_write_record',{ p_user:userId,p_expected:expected,p_data:data,p_inputs_changed:inputsChanged }); }
   async run(userId: string, id: string): Promise<RunRow> {
     const { data,error } = await this.admin.from('job_loop_runs').select('*').eq('user_id',userId).eq('id',id).maybeSingle(); loopDatabaseError(error); if (!data) throw new ApiError(404,'LOOP_NOT_FOUND','That run is unavailable in your account.'); return data as RunRow;
@@ -77,8 +90,8 @@ export class LoopRepository {
     const {data,error}=await this.admin.from('job_loop_runs').select('*').in('status',['queued','running']).order('created_at',{ascending:true}).limit(20);loopDatabaseError(error);
     return (data??[]).filter(item=>!item.lease_until||Date.parse(item.lease_until)<Date.now()) as RunRow[];
   }
-  async eraseArtifacts(userId:string) {
-    await eraseLoopArtifacts({rpc:<T>(name:string,args:Record<string,unknown>)=>this.rpc<T>(name,args),remove:paths=>this.admin.storage.from('job-loop-artifacts').remove(paths)},userId);
+  async eraseArtifacts(userId:string,expectedGeneration:number) {
+    await eraseLoopArtifacts({rpc:<T>(name:string,args:Record<string,unknown>)=>this.rpc<T>(name,args),remove:paths=>this.admin.storage.from('job-loop-artifacts').remove(paths)},userId,expectedGeneration);
   }
   settle(id: string, actual: number | null, result: unknown, uncertain = false) { return this.rpc<UsageRow>('job_loop_settle',{p_usage:id,p_actual:actual,p_result:result,p_uncertain:uncertain}); }
   async upload(run: RunRow, packetId: string, key: string, bytes: Uint8Array, mimeType: string): Promise<string> {

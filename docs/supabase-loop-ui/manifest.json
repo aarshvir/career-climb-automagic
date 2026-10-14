@@ -1,20 +1,10 @@
 {
-  "hashAlgorithms": {
-    "artifact": "sha256-bytes",
-    "source": "sha256-utf8-lf-no-bom",
-    "migration": "sha256-utf8-lf-no-bom"
-  },
-  "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
   "externalImport": "https://esm.sh/@supabase/supabase-js@2.57.4",
-  "externalPackages": [
-    "npm:jspdf@4.2.1",
-    "npm:docx@9.9.0"
-  ],
   "bundles": [
     {
-      "function": "job-loop-control",
+      "bytes": 60974,
+      "sha256": "f45a87e3dd6bfb51421088589bd447a208d1707c20cb003100ad77c460ab5611",
       "artifact": "docs/supabase-loop-ui/job-loop-control.js",
-      "sha256": "34288945f5ae19c9664850af753a9fa87d6c02ea4808d0f9db11fd02aa97b346",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -49,11 +39,11 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "aa987bcbe5d08c425d4923242f72073ac7feb69b2a5fa63589d9eb9f7c1dc91b",
+          "sha256": "836a436ec98b77fa3572a7ff82b3e3af44058045bb8a6d9f0f79969b287ffa2d",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
-          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "sha256": "1a110bddb19838bd1721c3f079b6f7f87e18013515cac458712590f0dba6804a",
           "path": "supabase/functions/_shared/job-loop-erasure.ts"
         },
         {
@@ -69,11 +59,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
+          "sha256": "447f5b4ff18cbe9af4d7019fd6f64ba0bd5b71c935638e94b8718457f9db5629",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
+          "sha256": "eea7993ec3297b85d02a89a923f284fa36ac17416ab215d887547b159dc5651d",
+          "path": "supabase/functions/_shared/job-loop-request.ts"
+        },
+        {
+          "sha256": "8a75c5df88d33303b143abe2ee9431958b8db77c82078319cb2742132061e168",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -85,7 +79,7 @@
           "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts"
         },
         {
-          "sha256": "7909d1f97a66f17a50889b53f21181e2c37c3ef496ab33b9b8f4a0d6bf30faa0",
+          "sha256": "8ded9c23c8af9971b7fe48ee2c69ecbf1cd8df0437692c8b9f591b668c108c14",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -137,7 +131,7 @@
           "path": "supabase/functions/job-loop-worker/index.ts"
         },
         {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
+          "sha256": "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
           "path": "supabase/functions/job-loop-oauth/gmail.ts"
         },
         {
@@ -169,12 +163,12 @@
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
       ],
-      "bytes": 58974
+      "function": "job-loop-control"
     },
     {
-      "function": "job-loop-worker",
+      "bytes": 1091146,
+      "sha256": "7b3c3becf4c34aff3f6d51baee3a5a8e4e5a16d16268c565030d9074b14dfadc",
       "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
-      "sha256": "c7e16eff91a189ad0da9a5d9155e2ed16ee7f1b1a25d98c4a57a81a071cca496",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -209,11 +203,11 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "aa987bcbe5d08c425d4923242f72073ac7feb69b2a5fa63589d9eb9f7c1dc91b",
+          "sha256": "836a436ec98b77fa3572a7ff82b3e3af44058045bb8a6d9f0f79969b287ffa2d",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
-          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "sha256": "1a110bddb19838bd1721c3f079b6f7f87e18013515cac458712590f0dba6804a",
           "path": "supabase/functions/_shared/job-loop-erasure.ts"
         },
         {
@@ -229,11 +223,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
+          "sha256": "447f5b4ff18cbe9af4d7019fd6f64ba0bd5b71c935638e94b8718457f9db5629",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
+          "sha256": "eea7993ec3297b85d02a89a923f284fa36ac17416ab215d887547b159dc5651d",
+          "path": "supabase/functions/_shared/job-loop-request.ts"
+        },
+        {
+          "sha256": "8a75c5df88d33303b143abe2ee9431958b8db77c82078319cb2742132061e168",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -245,7 +243,7 @@
           "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts"
         },
         {
-          "sha256": "7909d1f97a66f17a50889b53f21181e2c37c3ef496ab33b9b8f4a0d6bf30faa0",
+          "sha256": "8ded9c23c8af9971b7fe48ee2c69ecbf1cd8df0437692c8b9f591b668c108c14",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -297,7 +295,7 @@
           "path": "supabase/functions/job-loop-worker/index.ts"
         },
         {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
+          "sha256": "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
           "path": "supabase/functions/job-loop-oauth/gmail.ts"
         },
         {
@@ -329,12 +327,12 @@
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
       ],
-      "bytes": 1090080
+      "function": "job-loop-worker"
     },
     {
-      "function": "job-loop-oauth",
+      "bytes": 18135,
+      "sha256": "753c2f5959b230e18ee31ca116841108ceb315d9c9cd558e8458b7815da9b453",
       "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
-      "sha256": "8fddc43a4cde8bcff8aea0e18e9253e6f2c84abe12712f390ae8a934ef45a69d",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -369,11 +367,11 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "aa987bcbe5d08c425d4923242f72073ac7feb69b2a5fa63589d9eb9f7c1dc91b",
+          "sha256": "836a436ec98b77fa3572a7ff82b3e3af44058045bb8a6d9f0f79969b287ffa2d",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
-          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "sha256": "1a110bddb19838bd1721c3f079b6f7f87e18013515cac458712590f0dba6804a",
           "path": "supabase/functions/_shared/job-loop-erasure.ts"
         },
         {
@@ -389,11 +387,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
+          "sha256": "447f5b4ff18cbe9af4d7019fd6f64ba0bd5b71c935638e94b8718457f9db5629",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
+          "sha256": "eea7993ec3297b85d02a89a923f284fa36ac17416ab215d887547b159dc5651d",
+          "path": "supabase/functions/_shared/job-loop-request.ts"
+        },
+        {
+          "sha256": "8a75c5df88d33303b143abe2ee9431958b8db77c82078319cb2742132061e168",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -405,7 +407,7 @@
           "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts"
         },
         {
-          "sha256": "7909d1f97a66f17a50889b53f21181e2c37c3ef496ab33b9b8f4a0d6bf30faa0",
+          "sha256": "8ded9c23c8af9971b7fe48ee2c69ecbf1cd8df0437692c8b9f591b668c108c14",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -457,7 +459,7 @@
           "path": "supabase/functions/job-loop-worker/index.ts"
         },
         {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
+          "sha256": "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
           "path": "supabase/functions/job-loop-oauth/gmail.ts"
         },
         {
@@ -489,12 +491,12 @@
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
       ],
-      "bytes": 16810
+      "function": "job-loop-oauth"
     },
     {
-      "function": "jobvance-admin",
-      "artifact": "docs/supabase-loop-ui/jobvance-admin.js",
+      "bytes": 10981,
       "sha256": "dfb621c08804f7c1d90f9a3bab54ff7caa1d5c564608d43c7600f7c9d4750bc2",
+      "artifact": "docs/supabase-loop-ui/jobvance-admin.js",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -529,11 +531,11 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "aa987bcbe5d08c425d4923242f72073ac7feb69b2a5fa63589d9eb9f7c1dc91b",
+          "sha256": "836a436ec98b77fa3572a7ff82b3e3af44058045bb8a6d9f0f79969b287ffa2d",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
-          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "sha256": "1a110bddb19838bd1721c3f079b6f7f87e18013515cac458712590f0dba6804a",
           "path": "supabase/functions/_shared/job-loop-erasure.ts"
         },
         {
@@ -549,11 +551,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
+          "sha256": "447f5b4ff18cbe9af4d7019fd6f64ba0bd5b71c935638e94b8718457f9db5629",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
+          "sha256": "eea7993ec3297b85d02a89a923f284fa36ac17416ab215d887547b159dc5651d",
+          "path": "supabase/functions/_shared/job-loop-request.ts"
+        },
+        {
+          "sha256": "8a75c5df88d33303b143abe2ee9431958b8db77c82078319cb2742132061e168",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -565,7 +571,7 @@
           "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts"
         },
         {
-          "sha256": "7909d1f97a66f17a50889b53f21181e2c37c3ef496ab33b9b8f4a0d6bf30faa0",
+          "sha256": "8ded9c23c8af9971b7fe48ee2c69ecbf1cd8df0437692c8b9f591b668c108c14",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -617,7 +623,7 @@
           "path": "supabase/functions/job-loop-worker/index.ts"
         },
         {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
+          "sha256": "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
           "path": "supabase/functions/job-loop-oauth/gmail.ts"
         },
         {
@@ -649,12 +655,12 @@
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
       ],
-      "bytes": 10981
+      "function": "jobvance-admin"
     },
     {
-      "function": "jobvance-review-worker",
-      "artifact": "docs/supabase-loop-ui/jobvance-review-worker.js",
+      "bytes": 21246,
       "sha256": "f32179a391ccc4d1893f9571f68fc90124af664a5cd6b43ca2c22a1b9984716e",
+      "artifact": "docs/supabase-loop-ui/jobvance-review-worker.js",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -689,11 +695,11 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "aa987bcbe5d08c425d4923242f72073ac7feb69b2a5fa63589d9eb9f7c1dc91b",
+          "sha256": "836a436ec98b77fa3572a7ff82b3e3af44058045bb8a6d9f0f79969b287ffa2d",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
-          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "sha256": "1a110bddb19838bd1721c3f079b6f7f87e18013515cac458712590f0dba6804a",
           "path": "supabase/functions/_shared/job-loop-erasure.ts"
         },
         {
@@ -709,11 +715,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
+          "sha256": "447f5b4ff18cbe9af4d7019fd6f64ba0bd5b71c935638e94b8718457f9db5629",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
+          "sha256": "eea7993ec3297b85d02a89a923f284fa36ac17416ab215d887547b159dc5651d",
+          "path": "supabase/functions/_shared/job-loop-request.ts"
+        },
+        {
+          "sha256": "8a75c5df88d33303b143abe2ee9431958b8db77c82078319cb2742132061e168",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -725,7 +735,7 @@
           "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts"
         },
         {
-          "sha256": "7909d1f97a66f17a50889b53f21181e2c37c3ef496ab33b9b8f4a0d6bf30faa0",
+          "sha256": "8ded9c23c8af9971b7fe48ee2c69ecbf1cd8df0437692c8b9f591b668c108c14",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -777,7 +787,7 @@
           "path": "supabase/functions/job-loop-worker/index.ts"
         },
         {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
+          "sha256": "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
           "path": "supabase/functions/job-loop-oauth/gmail.ts"
         },
         {
@@ -809,12 +819,12 @@
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
       ],
-      "bytes": 21246
+      "function": "jobvance-review-worker"
     },
     {
-      "function": "jobvance-guest-support",
-      "artifact": "docs/supabase-loop-ui/jobvance-guest-support.js",
+      "bytes": 5327,
       "sha256": "d2faa1698b41d6d823e8530388743d8a70eb45184f0c0b37150b1192a7fcd0dc",
+      "artifact": "docs/supabase-loop-ui/jobvance-guest-support.js",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -849,11 +859,11 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "aa987bcbe5d08c425d4923242f72073ac7feb69b2a5fa63589d9eb9f7c1dc91b",
+          "sha256": "836a436ec98b77fa3572a7ff82b3e3af44058045bb8a6d9f0f79969b287ffa2d",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
-          "sha256": "290033ee4c0dc116eaad3c643dffe8ccf5152a7d38990900df83234cdb9c9783",
+          "sha256": "1a110bddb19838bd1721c3f079b6f7f87e18013515cac458712590f0dba6804a",
           "path": "supabase/functions/_shared/job-loop-erasure.ts"
         },
         {
@@ -869,11 +879,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "9dce1f80cbc2076813cdea63078d96bac342489b097c590846c9045ee8dae8f3",
+          "sha256": "447f5b4ff18cbe9af4d7019fd6f64ba0bd5b71c935638e94b8718457f9db5629",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "2c442e45ff790e62b16e0884043f22293aca79ab5762d7803a1c2fe49335b08e",
+          "sha256": "eea7993ec3297b85d02a89a923f284fa36ac17416ab215d887547b159dc5651d",
+          "path": "supabase/functions/_shared/job-loop-request.ts"
+        },
+        {
+          "sha256": "8a75c5df88d33303b143abe2ee9431958b8db77c82078319cb2742132061e168",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -885,7 +899,7 @@
           "path": "supabase/functions/_shared/job-loop-scheduler-ticket.ts"
         },
         {
-          "sha256": "7909d1f97a66f17a50889b53f21181e2c37c3ef496ab33b9b8f4a0d6bf30faa0",
+          "sha256": "8ded9c23c8af9971b7fe48ee2c69ecbf1cd8df0437692c8b9f591b668c108c14",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -937,7 +951,7 @@
           "path": "supabase/functions/job-loop-worker/index.ts"
         },
         {
-          "sha256": "ea55b09c933f264a72a546af1636b647ace73eb98e0fa5679ef66192284532b6",
+          "sha256": "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
           "path": "supabase/functions/job-loop-oauth/gmail.ts"
         },
         {
@@ -969,9 +983,14 @@
           "path": "supabase/functions/jobvance-guest-support/index.ts"
         }
       ],
-      "bytes": 5327
+      "function": "jobvance-guest-support"
     }
   ],
+  "hashAlgorithms": {
+    "source": "sha256-utf8-lf-no-bom",
+    "migration": "sha256-utf8-lf-no-bom",
+    "artifact": "sha256-bytes"
+  },
   "migrations": [
     {
       "sha256": "a3312c82e04f7f8ffa8486aca3ba03eedeb583edec2614b7590ad5e7fe4baba9",
@@ -1012,6 +1031,15 @@
     {
       "sha256": "b5c1ea5f84a176d1b1301d0899804266587490228b519d4c97e9902b0d1d68f6",
       "path": "supabase/migrations/20261014101107_job_loop_durable_erasure.sql"
+    },
+    {
+      "sha256": "0c26383d11f63d63f3606927a2166acc9658223eb7b88db353c9343f7c7b4ffd",
+      "path": "supabase/migrations/20261014131351_job_loop_request_generation.sql"
     }
+  ],
+  "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
+  "externalPackages": [
+    "npm:jspdf@4.2.1",
+    "npm:docx@9.9.0"
   ]
 }

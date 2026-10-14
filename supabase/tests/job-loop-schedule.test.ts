@@ -26,8 +26,8 @@ describe('recurring schedule and grounded preparation boundaries',()=>{
   });
   it('fails closed on invalid schedule consent, timezone, privileged fields and an increased paid budget',()=>{
     expect(()=>validateScheduleInput({...schedule,timezone:'MadeUp/Zone'})).toThrow(/timezone/);expect(()=>validateScheduleInput({...schedule,provider:'openai',modelConsent:false})).toThrow(/permission/);
-    expect(()=>validateControlInput({action:'save_schedule',expectedScheduleVersion:0,schedule,recurringConsent:false})).toThrow(/permission/);
-    expect(()=>validateControlInput({action:'save_schedule',expectedScheduleVersion:0,schedule:{...schedule,userId:'forged'},recurringConsent:true})).toThrow(/unsupported/);
+    expect(()=>validateControlInput({action:'save_schedule',expectedGeneration:0,expectedScheduleVersion:0,schedule,recurringConsent:false})).toThrow(/permission/);
+    expect(()=>validateControlInput({action:'save_schedule',expectedGeneration:0,expectedScheduleVersion:0,schedule:{...schedule,userId:'forged'},recurringConsent:true})).toThrow(/unsupported/);
     const env=(name:string)=>({JOB_LOOP_MONTHLY_CAP_USD:'51',JOB_LOOP_PAID_APIS_ENABLED:'true',OPENAI_API_KEY:'fixture-only'}[name]);
     expect(()=>configuredUsageCap(env)).toThrow(/at most US\$50/);expect(modelOptions(env).every(item=>!item.ready)).toBe(true);expect(configuredUsageCap(name=>name==='JOB_LOOP_MONTHLY_CAP_USD'?'5':undefined)).toBe(5);
   });

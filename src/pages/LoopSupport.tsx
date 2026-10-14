@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { ArrowRight, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { callJobLoop } from '@/lib/job-loop-api';
+import { boundLoopAction } from '../../supabase/functions/_shared/job-loop-request';
 import GuestSupport from './GuestSupport';
 import type { LoopAction, LoopResponse, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
 
@@ -25,7 +26,7 @@ export default function SupportContact() {
   owner.current = user?.id;
   const [snapshot, setSnapshot] = useState<LoopSnapshot | null>(null), [loadedOwner, setLoadedOwner] = useState<string | null>(null), [busy, setBusy] = useState(false), [error, setError] = useState('');
   useEffect(() => { let active = true; const current = ++generation.current, account = user?.id; setSnapshot(null); setLoadedOwner(null); setError(''); setBusy(false); if (account) void callJobLoop(account, { action: 'get' }).then(result => { if (active && owner.current === account && generation.current === current && result.snapshot) { setSnapshot(result.snapshot); setLoadedOwner(account); } }).catch(failure => { if (active && owner.current === account) setError(failure instanceof Error ? failure.message : 'Support requests could not be loaded.'); }); return () => { active = false; }; }, [user?.id]);
-  async function perform(action: LoopAction): Promise<LoopResponse | null> { const account = owner.current, current = generation.current; if (!account || busy) return null; setBusy(true); setError(''); try { const result = await callJobLoop(account, action); if (account !== owner.current || current !== generation.current) return null; if (result.snapshot) { setSnapshot(result.snapshot); setLoadedOwner(account); } return result; } catch (failure) { if (owner.current === account) setError(failure instanceof Error ? failure.message : 'This request could not be confirmed.'); return null; } finally { if (owner.current === account && current === generation.current) setBusy(false); } }
+  async function perform(action: LoopAction): Promise<LoopResponse | null> { const account = owner.current, current = generation.current; if (!account || busy) return null; setBusy(true); setError(''); try { const result = await callJobLoop(account, boundLoopAction(action, snapshot?.lifecycleGeneration)); if (account !== owner.current || current !== generation.current) return null; if (result.snapshot) { setSnapshot(result.snapshot); setLoadedOwner(account); } return result; } catch (failure) { if (owner.current === account) setError(failure instanceof Error ? failure.message : 'This request could not be confirmed.'); return null; } finally { if (owner.current === account && current === generation.current) setBusy(false); } }
   if (!user) return <GuestSupport />;
-  return <div className="job-loop-support-contact">{error && <p className="jl-alert" role="alert">{error}</p>}<LoopSupportForm key={user.id} snapshot={loadedOwner === user.id ? snapshot : null} busy={busy} perform={perform} /></div>;
+  return <div className="job-loop-support-contact">{error && <p className="jl-alert" role="alert">{error}</p>}<LoopSupportForm key={`${user.id}:${snapshot?.lifecycleGeneration}`} snapshot={loadedOwner === user.id ? snapshot : null} busy={busy} perform={perform} /></div>;
 }

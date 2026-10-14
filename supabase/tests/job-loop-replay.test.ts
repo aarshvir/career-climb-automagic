@@ -8,7 +8,7 @@ import type {LoopAction,LoopClaim,LoopOpportunity,LoopProfile} from '../function
 
 const owner='11111111-1111-4111-a111-111111111111',id='22222222-2222-4222-a222-222222222222';
 const choice={provider:'rules' as const,model:'grounded-rules-v1',modelConsent:false,inboxConsent:false};
-const action:Extract<LoopAction,{action:'start_run'}>={action:'start_run',requestId:id,...choice};
+const action:Extract<LoopAction,{action:'start_run'}>={action:'start_run',expectedGeneration:0,requestId:id,...choice};
 const env=(name:string)=>({SUPABASE_URL:'https://fixture.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'fictional-service-only',JOB_LOOP_EMPLOYER_FEEDS:'[]'}[name]);
 const profile:LoopProfile={audience:'student',name:'Fictional QA candidate',contactLine:'',targetTitles:['Graduate Operations Analyst'],locations:['Dubai'],experienceYears:null,languages:[],pageTarget:1,discreetSearch:true,sourceText:'Academic project\nFictional operations project\nBuilt a dashboard for a fictional university operations project.',excludedTerms:[],compensation:{currency:'',period:'monthly',minimum:null},revision:1,updatedAt:'2026-10-12T00:00:00Z'};
 const claim:LoopClaim={id:'confirmed-project',revision:1,status:'active',createdAt:profile.updatedAt,sourceKind:'cv_passage',sourceQuote:'Built a dashboard for a fictional university operations project.',phrasing:'Built a dashboard for a fictional university operations project.',context:'Fictional operations project',kind:'academic_project',resultStatus:'not_measured',confirmed:true,shareable:true};
@@ -18,9 +18,9 @@ const auto={...vacancy,id:'44444444-4444-4444-a444-444444444444',source:'employe
 async function fixture(){
   const inputHash=await fingerprintLoopInputs(profile,[claim],[vacancy]),legacyHash=await digest(JSON.stringify([choice.provider,choice.model,false,false,inputHash]));
   const run:RunRow={id,user_id:owner,request_id:id,request_hash:legacyHash,input_hash:inputHash,input_version:1,snapshot:structuredClone(record),provider:'rules',model:choice.model,consents:{model:false,inbox:false},data:{lanes:[],messages:[],packetIds:[]},status:'completed',phase:7,lease_token:null,lease_until:null,created_at:profile.updatedAt,finished_at:'2026-10-12T01:00:00Z'};
-  const row:RecordRow={user_id:owner,version:2,input_version:1,data:{...structuredClone(record),opportunities:[{...vacancy,checkedAt:'2026-10-12T01:00:00Z'},auto]},updated_at:'2026-10-12T01:00:00Z'};
+  const row:RecordRow={lifecycle_generation:0,user_id:owner,version:2,input_version:1,data:{...structuredClone(record),opportunities:[{...vacancy,checkedAt:'2026-10-12T01:00:00Z'},auto]},updated_at:'2026-10-12T01:00:00Z'};
   const rpc=vi.fn(async()=>{throw Error('A completed replay must not create or dispatch another run.');});
-  const repo={record:vi.fn(async()=>structuredClone(row)),requestRun:vi.fn(async(user:string,request:string)=>{expect(user).toBe(owner);expect(request).toBe(id);return structuredClone(run);}),rpc,
+  const repo={assertGeneration:vi.fn(async(user:string,generation:number)=>{expect(user).toBe(owner);expect(generation).toBe(0);}),erasureStatus:vi.fn(async()=>({state:'active',generation:0})),record:vi.fn(async()=>structuredClone(row)),requestRun:vi.fn(async(user:string,request:string)=>{expect(user).toBe(owner);expect(request).toBe(id);return structuredClone(run);}),rpc,
     collections:vi.fn(async()=>({runs:[run],packets:[],usage:[],connection:null})),operationalSnapshot:vi.fn(async()=>({schedule:null,activity:[],support:[],scheduler:{ready:false},budget:{month:'2026-10',capUsd:50,committedUsd:0,remainingUsd:50,enrolled:true,activeUsers:1}}))} as unknown as LoopRepository;
   return {repo,row,run,rpc};
 }

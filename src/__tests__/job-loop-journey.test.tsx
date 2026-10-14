@@ -6,7 +6,7 @@ import { StrictMode } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LoopClaim, LoopPacket, LoopProfile, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
-import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
+import { clearLoopWorkingDraft, recoverLoopWorkingDraft } from '@/lib/loop-draft-memory';
 import { LoopServiceError } from '@/lib/loop-service-error';
 vi.unmock('react-router-dom');
 const mocks = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string } | null, call: vi.fn(), cvs: vi.fn(), download: vi.fn(), preview: vi.fn(), saveBlob: vi.fn(), extract: vi.fn() }));
@@ -21,7 +21,7 @@ const StandardURL = URL;
 const profile: LoopProfile = { audience: 'student', name: 'Fictional Casey', contactLine: '', targetTitles: ['Graduate analyst'], locations: ['Remote'], experienceYears: null, languages: [], pageTarget: 1, discreetSearch: false, sourceText: cv, excludedTerms: [], compensation: { currency: '', period: 'annual', minimum: null }, revision: 1, updatedAt: '2026-10-11T00:00:00Z' };
 const claim: LoopClaim = { id: 'claim-a', revision: 1, status: 'active', createdAt: profile.updatedAt, sourceKind: 'cv_passage', sourceQuote: cv, phrasing: cv, context: 'Fictional university project', kind: 'academic_project', resultStatus: 'not_measured', confirmed: true, shareable: true };
 const packet: LoopPacket = { id: 'packet-a', runId: 'run-a', opportunityId: 'opportunity-a', title: 'Graduate analyst', company: 'Fictional company', inputHash: 'exact-server-hash', profileRevision: 1, claimVersions: { 'claim-a': 1 }, cvText: cv, evidenceText: 'Fictional source claim-a, revision 1.', coverLetterText: '', connectionNote: '', messageText: '', emailSubject: '', emailBody: '', contact: null, assessment: { score: 60, method: 'Named relevance heuristic', components: { role: 20, evidence: 20, constraints: 20 }, gaps: ['Professional experience is not established by a project.'], flags: [], claimIds: ['claim-a'] }, status: 'review_required', holdReasons: [], pageCount: 1, createdAt: profile.updatedAt, approvedAt: null, model: { provider: 'rules', model: 'grounded-rules-v1', method: 'Source-based composition' }, artifacts: {} };
-const snapshot = (): LoopSnapshot => ({ recordVersion: 1, profile: { ...profile }, claims: [{ ...claim }], opportunities: [], runs: [], packets: [], inbox: [], models: [], capabilities: { cloudWorker: true, rulesEngine: true, webSearch: false, gmailRead: false, gmailDrafts: false, monthlyUsageCapUsd: 50, dailyRunLimit: 1 }, gmail: { connected: false, email: null, status: 'Not connected', allowDrafts: false } });
+const snapshot = (): LoopSnapshot => ({ lifecycleGeneration: 0, recordVersion: 1, profile: { ...profile }, claims: [{ ...claim }], opportunities: [], runs: [], packets: [], inbox: [], models: [], capabilities: { cloudWorker: true, rulesEngine: true, webSearch: false, gmailRead: false, gmailDrafts: false, monthlyUsageCapUsd: 50, dailyRunLimit: 1 }, gmail: { connected: false, email: null, status: 'Not connected', allowDrafts: false } });
 let current: LoopSnapshot;
 function tree(path = '/loop') { return <HelmetProvider><MemoryRouter initialEntries={[path]}><JobLoop /></MemoryRouter></HelmetProvider>; }
 async function openTab(label: string) { await userEvent.setup().click(await screen.findByRole('button', { name: label })); }
@@ -93,7 +93,7 @@ describe('cloud loop consent and accurate capabilities', () => {
     current.capabilities.scheduler = true; current.schedule = null; render(tree()); const user = userEvent.setup();
     const enable = await screen.findByRole('button', { name: 'Enable recurring preparation' }); expect(enable).toBeDisabled();
     await user.click(screen.getByLabelText(/I opt into recurring source-based preparation/)); await user.click(enable);
-    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'save_schedule', expectedScheduleVersion: 0, schedule: { cadence: 'weekdays', timezone: 'Asia/Dubai', localTime: '08:00', weeklyDay: null, provider: 'rules', model: 'grounded-rules-v1', modelConsent: false, inboxConsent: false }, recurringConsent: true }));
+    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'save_schedule', expectedGeneration: 0, expectedScheduleVersion: 0, schedule: { cadence: 'weekdays', timezone: 'Asia/Dubai', localTime: '08:00', weeklyDay: null, provider: 'rules', model: 'grounded-rules-v1', modelConsent: false, inboxConsent: false }, recurringConsent: true }));
   });
   it('requires private-saving consent and keeps target text usable without local persistence', async () => {
     const store = vi.spyOn(Storage.prototype, 'setItem'); render(tree()); await openTab('Career record'); const user = userEvent.setup();
@@ -287,13 +287,13 @@ describe('private PDF preview transfer lifecycle',()=>{
 });
 
 describe('support receipts and scoped self-service erasure', () => {
-  it.each(['LOOP_ERASURE_IN_PROGRESS', 'LOOP_ERASURE_RETRY'])('keeps confirmed erasure reachable after a %s get failure without automatically erasing on page visit', async code => {
+  it.each([1, 7])('keeps confirmed erasure reachable from generation %s without automatically erasing on page visit', async generation => {
     let erased = false;
     mocks.call.mockImplementation(async (_id, action) => {
-      if (action.action === 'get' && !erased) throw new LoopServiceError('Private cleanup needs another confirmed attempt.', code);
+      if (action.action === 'get' && !erased) return { erasureGeneration: generation };
       if (action.action === 'erase_loop') {
         erased = true;
-        current = { ...snapshot(), recordVersion: 0, profile: null, claims: [], packets: [] };
+        current = { ...snapshot(), lifecycleGeneration: generation + 1, recordVersion: 3, profile: null, claims: [], packets: [] };
       }
       return { snapshot: current };
     });
@@ -311,7 +311,7 @@ describe('support receipts and scoped self-service erasure', () => {
     await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/));
     await user.click(continuation);
 
-    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'erase_loop', confirmErase: true }));
+    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'erase_loop', expectedGeneration: generation, confirmErase: true }));
     await waitFor(() => expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument());
     expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'erase_loop')).toHaveLength(1);
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_self')).toBe(false);
@@ -320,7 +320,7 @@ describe('support receipts and scoped self-service erasure', () => {
     render(tree());
     await openTab('Career record');
     expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue(cv);
-    mocks.call.mockRejectedValueOnce(new LoopServiceError('Remaining private documents still need cleanup.', 'LOOP_ERASURE_IN_PROGRESS'));
+    mocks.call.mockResolvedValueOnce({ erasureGeneration: 1 });
     await userEvent.setup().click(screen.getByRole('button', { name: 'Refresh records' }));
 
     expect(await screen.findByRole('heading', { name: 'Finish erasing your Job Loop' })).toBeInTheDocument();
@@ -335,7 +335,7 @@ describe('support receipts and scoped self-service erasure', () => {
       if (action.action === 'erase_loop') {
         attempts++;
         if (attempts === 1) throw new LoopServiceError('A cleanup batch completed; more documents remain.', 'LOOP_ERASURE_RETRY');
-        current = { ...snapshot(), recordVersion: 0, profile: null, claims: [], packets: [] };
+        current = { ...snapshot(), lifecycleGeneration: 2, recordVersion: 3, profile: null, claims: [], packets: [] };
       }
       return { snapshot: current };
     });
@@ -357,6 +357,7 @@ describe('support receipts and scoped self-service erasure', () => {
     await user.click(screen.getByRole('button', { name: 'Continue erasing Job Loop data' }));
     await waitFor(() => expect(attempts).toBe(2));
     await waitFor(() => expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument());
+    expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'erase_loop').map(([, action]) => action.expectedGeneration)).toEqual([0, 0]);
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_self')).toBe(false);
   });
   it('does not open erasure recovery for a new owner when a previous owner’s delayed get fails', async () => {
@@ -384,7 +385,7 @@ describe('support receipts and scoped self-service erasure', () => {
     render(tree()); await openTab('Help & privacy'); const user = userEvent.setup(); await user.type(screen.getByLabelText('What do you need help with?'), 'Synthetic download problem; no real personal data.');
     await user.click(screen.getByRole('button', { name: 'Save private support request' }));
     expect(await screen.findByText(/Reference synthetic-receipt-a/)).toBeInTheDocument(); expect(screen.getByText('received')).toBeInTheDocument();
-    expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'request_support', category: 'help', message: 'Synthetic download problem; no real personal data.' });
+    expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'request_support', expectedGeneration: 0, category: 'help', message: 'Synthetic download problem; no real personal data.' });
   });
   it('requires a typed scope and explicit confirmation before erasing only Job Loop data', async () => {
     render(tree()); await openTab('Help & privacy'); const user = userEvent.setup();
@@ -393,7 +394,7 @@ describe('support receipts and scoped self-service erasure', () => {
     const erase = screen.getByRole('button', { name: 'Erase my Job Loop data' }); expect(erase).toBeDisabled();
     await user.type(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope'), 'DELETE JOB LOOP'); expect(erase).toBeDisabled();
     await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/)); await user.click(erase);
-    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'erase_loop', confirmErase: true }));
+    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'erase_loop', expectedGeneration: 0, confirmErase: true }));
     expect(mocks.call.mock.calls.some(([,action]) => action.action === 'erase_self')).toBe(false);
   });
   it('keeps a follow-up as a calendar date instead of inventing a UTC noon deadline', async () => {
@@ -414,7 +415,7 @@ describe('browser-only Gmail return confirmation', () => {
     expect(window.location.hash).toBe(''); expect(mocks.call).not.toHaveBeenCalled();
     await act(async () => { mocks.user = { id: 'owner-a' }; view.rerender(tree()); });
     expect(await screen.findByText('fictional-mailbox@example.test')).toBeInTheDocument();
-    expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'gmail_preview', ticket: 'synthetic-sealed-ticket' });
+    expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'gmail_preview', expectedGeneration: 0, ticket: 'synthetic-sealed-ticket' });
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'gmail_finalize')).toBe(false);
   });
   it('survives StrictMode replay, clears the fragment and requires mailbox confirmation before activation', async () => {
@@ -427,7 +428,7 @@ describe('browser-only Gmail return confirmation', () => {
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'gmail_finalize')).toBe(false);
     expect(screen.getByRole('button', { name: 'Confirm this mailbox' })).toBeDisabled(); const user = userEvent.setup();
     await user.click(screen.getByLabelText(/This is my intended mailbox/)); await user.click(screen.getByRole('button', { name: 'Confirm this mailbox' }));
-    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'gmail_finalize', ticket, confirmMailbox: true }));
+    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'gmail_finalize', expectedGeneration: 0, ticket, confirmMailbox: true }));
     expect(store).not.toHaveBeenCalled();
   });
   it('suppresses a delayed mailbox identity when the signed-in account changes', async () => {
@@ -452,5 +453,140 @@ describe('browser-only Gmail return confirmation', () => {
     current.packets = [{ ...packet, status: 'approved', contact: { name: 'Fictional Recruiter', title: 'Recruiter', email: 'recruiter@example.test', sourceUrl: 'https://example.test/source', sourceQuote: 'Fictional public source', confirmedByUser: true, inExistingThread: false }, emailBody: 'Fictional unsent email' }];
     render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByLabelText(/I checked the recipient, reviewed the message/));
     expect(screen.getByRole('button', { name: 'Create Gmail draft' })).toBeDisabled(); expect(mocks.call.mock.calls.some(([, action]) => action.action === 'gmail_create_draft')).toBe(false);
+  });
+});
+
+describe('same-owner Job Loop lifetime changes', () => {
+  it('does not restore an older lifetime draft when the same owner returns to a newly created workspace', async () => {
+    current.lifecycleGeneration = 7;
+    const view = render(tree());
+    await openTab('Career record');
+    const user = userEvent.setup();
+    await user.clear(screen.getByLabelText('Target roles'));
+    await user.click(screen.getByLabelText('Target roles'));
+    await user.paste('OLD_LIFETIME_ROUTE_DRAFT');
+    expect(recoverLoopWorkingDraft('owner-a', 7)).not.toBeNull();
+    view.unmount();
+
+    current = { ...snapshot(), lifecycleGeneration: 9, recordVersion: 3,
+      profile: { ...profile, targetTitles: ['Fresh workspace target'] } };
+    render(tree());
+    await openTab('Career record');
+
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Fresh workspace target');
+    expect(screen.queryByDisplayValue('OLD_LIFETIME_ROUTE_DRAFT')).not.toBeInTheDocument();
+    expect(recoverLoopWorkingDraft('owner-a', 9)).toBeNull();
+    expect(screen.getByLabelText(/Save this reviewed text and profile privately/)).not.toBeChecked();
+    expect(mocks.call.mock.calls.some(([, action]) => action.action === 'save_profile')).toBe(false);
+  });
+
+  it('clears unsent support text and an earlier erasure confirmation when a fresh active lifetime is loaded', async () => {
+    current.lifecycleGeneration = 7;
+    render(tree());
+    await openTab('Help & privacy');
+    const user = userEvent.setup();
+    await user.click(screen.getByLabelText('What do you need help with?'));
+    await user.paste('OLD_LIFETIME_UNSENT_SUPPORT_MESSAGE');
+    await user.selectOptions(screen.getByLabelText('Request type'), 'privacy');
+    await user.click(screen.getByRole('button', { name: 'Review Job Loop erasure' }));
+    await user.type(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope'), 'DELETE JOB LOOP');
+    await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/));
+    expect(screen.getByRole('button', { name: 'Erase my Job Loop data' })).toBeEnabled();
+
+    current = { ...snapshot(), lifecycleGeneration: 9, recordVersion: 3 };
+    await user.click(screen.getByRole('button', { name: 'Refresh records' }));
+    await waitFor(() => expect(screen.getByLabelText('What do you need help with?')).toHaveValue(''));
+    expect(screen.getByLabelText('Request type')).toHaveValue('help');
+    expect(screen.queryByLabelText('Type DELETE JOB LOOP to confirm this scope')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Review Job Loop erasure' }));
+    expect(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope')).toHaveValue('');
+    expect(screen.getByLabelText(/I understand this removes my Job Loop data/)).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'Erase my Job Loop data' })).toBeDisabled();
+    expect(mocks.call.mock.calls.some(([, action]) => ['request_support', 'erase_loop'].includes(action.action))).toBe(false);
+  });
+
+  it('clears old source and claim edits plus storage, model and inbox consent when a fresh lifetime is loaded', async () => {
+    current.lifecycleGeneration = 7;
+    current.models = [{ provider: 'openai', model: 'configured-gpt-fixture', label: 'Configured local model fixture', ready: true, inputUsdPerMillion: 1, outputUsdPerMillion: 1 }];
+    current.gmail = { connected: true, email: 'local-mailbox@example.test', status: 'Connected', allowDrafts: false };
+    current.capabilities.gmailRead = true;
+    render(tree());
+    const user = userEvent.setup();
+    await screen.findByRole('button', { name: 'Prepare today’s applications' });
+    await user.selectOptions(screen.getByLabelText('Preparation provider'), 'openai');
+    await user.click(screen.getByLabelText(/Allow this run’s active, confirmed and shareable/));
+    await user.click(screen.getByLabelText(/For this run, check the connected recruitment messages/));
+    await openTab('Career record');
+    const source = screen.getByLabelText('Reviewed source CV or career record');
+    const sourceDetails = source.closest('details')!;
+    if (!sourceDetails.open) await user.click(sourceDetails.querySelector('summary')!);
+    await user.clear(source);
+    await user.click(source);
+    await user.paste(cv + '\nOLD_UNSAVED_SOURCE_WORDING');
+    await user.click(screen.getByText(/Developed Python reports for a fictional university project using synthetic data\. Assisted/, { selector: 'summary' }));
+    const wording = screen.getAllByLabelText('Wording I can substantiate').find(element => (element as HTMLTextAreaElement).value === cv)!;
+    await user.clear(wording);
+    await user.click(wording);
+    await user.paste('OLD_UNSAVED_CLAIM_WORDING from a previous workspace lifetime.');
+    await user.click(screen.getByLabelText(/Save this reviewed text and profile privately/));
+    expect(recoverLoopWorkingDraft('owner-a', 7)).not.toBeNull();
+
+    const freshSource = 'Fresh workspace source record. Prepared reporting notes for a different reviewed university project. No previous workspace text is retained.';
+    current = { ...current, lifecycleGeneration: 9, recordVersion: 3,
+      profile: { ...profile, name: 'Fresh workspace fixture', sourceText: freshSource },
+      claims: [{ ...claim, id: 'fresh-claim', sourceQuote: freshSource, phrasing: freshSource, context: 'Fresh university project' }], packets: [], opportunities: [] };
+    await user.click(screen.getByRole('button', { name: 'Refresh records' }));
+
+    await waitFor(() => expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue(freshSource));
+    expect(screen.getAllByLabelText('Wording I can substantiate').every(element => !(element as HTMLTextAreaElement).value.includes('OLD_UNSAVED_CLAIM_WORDING'))).toBe(true);
+    expect(screen.getByLabelText(/Save this reviewed text and profile privately/)).not.toBeChecked();
+    expect(recoverLoopWorkingDraft('owner-a', 9)).toBeNull();
+    await openTab('Today');
+    expect(screen.getByLabelText(/Allow this run’s active, confirmed and shareable/)).not.toBeChecked();
+    expect(screen.getByLabelText(/For this run, check the connected recruitment messages/)).not.toBeChecked();
+    expect(mocks.call.mock.calls.some(([, action]) => ['save_profile', 'save_claim', 'start_run'].includes(action.action))).toBe(false);
+  });
+
+  it('starts a new request reference with the new generation rather than reusing an uncertain earlier request', async () => {
+    current.lifecycleGeneration = 7;
+    let starts = 0;
+    mocks.call.mockImplementation(async (_id, action) => {
+      if (action.action === 'start_run' && ++starts === 1) throw new LoopServiceError('Local uncertain preparation fixture.', 'LOOP_PROVIDER_UNCERTAIN');
+      return { snapshot: current };
+    });
+    render(tree());
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Prepare today’s applications' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('uncertain preparation');
+    current = { ...snapshot(), lifecycleGeneration: 9, recordVersion: 3 };
+    await user.click(screen.getByRole('button', { name: 'Refresh records' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Prepare today’s applications' })).toBeEnabled());
+    await user.click(screen.getByRole('button', { name: 'Prepare today’s applications' }));
+
+    await waitFor(() => expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'start_run')).toHaveLength(2));
+    const requests = mocks.call.mock.calls.filter(([, action]) => action.action === 'start_run').map(([, action]) => action);
+    expect(requests.map(action => action.expectedGeneration)).toEqual([7, 9]);
+    expect(requests[0].requestId).not.toBe(requests[1].requestId);
+  });
+
+  it('ignores a delayed mailbox preview from an earlier lifetime of the same signed-in account', async () => {
+    current.lifecycleGeneration = 7;
+    current.capabilities.gmailRead = true;
+    window.history.replaceState(null, '', '/loop#gmail_ticket=local-previous-lifetime-ticket');
+    let finishPreview!: (result: unknown) => void;
+    mocks.call.mockImplementation(async (_id, action) => action.action === 'gmail_preview'
+      ? new Promise(resolve => { finishPreview = resolve; }) : { snapshot: current });
+    render(tree());
+    await waitFor(() => expect(finishPreview).toBeDefined());
+    expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'gmail_preview', ticket: 'local-previous-lifetime-ticket', expectedGeneration: 7 });
+    current = { ...snapshot(), lifecycleGeneration: 9, recordVersion: 3, profile: null, claims: [], packets: [] };
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Refresh records' }));
+    await screen.findByRole('button', { name: /Import or paste my CV/ });
+    await act(async () => { finishPreview({ gmailPreview: { email: 'OLD_LIFETIME_MAILBOX@example.test', allowDrafts: true, expiresAt: new Date(Date.now() + 60000).toISOString() } }); });
+
+    expect(screen.queryByText('OLD_LIFETIME_MAILBOX@example.test')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Confirm this mailbox' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Confirm the returned Gmail mailbox' })).not.toBeInTheDocument();
+    expect(mocks.call.mock.calls.some(([, action]) => action.action === 'gmail_finalize')).toBe(false);
   });
 });
