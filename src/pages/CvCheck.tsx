@@ -102,7 +102,7 @@ export default function CvCheck() {
 
 function CheckSessionPending({ failed = false }: { failed?: boolean }) {
   const { retryConnection } = useAuth();
-  return <main className="cv-check-page"><p role="status">{failed ? 'Your sign-in could not be restored. Your stored draft has been kept. Try again to open it safely.' : 'Restoring your session and draft…'}</p>{failed && <Button type="button" variant="outline" onClick={retryConnection}>Retry sign-in recovery</Button>}</main>;
+  return <main className="cv-check-page"><Helmet><title>{checkMeta.title}</title><meta name="description" content={checkMeta.description} /><link rel="canonical" href="https://jobvance.io/check" /></Helmet><div className="check-intro"><div><h1>Check your CV against one vacancy.</h1><p className="check-intro-description">See the requirements beside your experience. Review the wording before you download.</p></div></div><p role="status">{failed ? 'Your sign-in could not be restored. Try again to open this check safely.' : 'Restoring your session and draft…'}</p>{failed && <Button type="button" variant="outline" onClick={retryConnection}>Retry sign-in recovery</Button>}</main>;
 }
 
 function CvCheckWorkspace() {
