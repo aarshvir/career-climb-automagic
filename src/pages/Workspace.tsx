@@ -51,6 +51,7 @@ import {
   type ApplicationStatus,
 } from "@/lib/workspace-api";
 import "./Workspace.css";
+import { clearTrackingDraft, pruneTrackingApplications, registerTrackingDraftOwner, sameTrackingDraft, trackingDraftAuthority, trackingDraftIdentity, trackingDraftScope, useTrackingDraft, type TrackingDraft, type TrackingDraftScope } from '@/lib/tracking-draft-memory';
 
 type Tab = "cv" | "tailor" | "tracker" | "billing";
 const tabs: { id: Tab; label: string; icon: typeof FileText }[] = [
@@ -67,17 +68,26 @@ const sectionDetails: Record<Tab, { title: string; description: string; breadcru
 };
 const dateLabel = (value: string) => new Date(value).toLocaleDateString();
 
-function TrackerRow({
+export function TrackerRow({
   item,
   run,
+  scope,
 }: {
   item: TrackedApplication;
   run: (task: () => Promise<unknown>, message: string) => Promise<boolean>;
+  scope: TrackingDraftScope;
 }) {
-  const [notes, setNotes] = useState(item.notes ?? "");
-  const [followUp, setFollowUp] = useState(
-    item.follow_up_at?.slice(0, 10) ?? "",
-  );
+  const { draft, edit, recovered, current, baseline, acknowledge } = useTrackingDraft(scope, { status: item.status, notes: item.notes ?? '', followUp: item.follow_up_at?.slice(0, 10) ?? '' });
+  const [attested, setAttested] = useState(false);
+  useEffect(() => { setAttested(false); }, [item.status]);
+  const changedStatus = draft.status !== item.status;
+  async function save(submitted: TrackingDraft, freshSelection = false) {
+    if (submitted.status !== item.status && !freshSelection && !attested) return;
+    const submittedBaseline = { ...baseline.current };
+    const ok = await run(() => updateApplication(item, { ...(freshSelection || submitted.status !== item.status ? { status: submitted.status as ApplicationStatus } : {}), notes: submitted.notes, follow_up_at: submitted.followUp ? new Date(`${submitted.followUp}T12:00:00Z`).toISOString() : null }), freshSelection ? 'Application status saved.' : 'Notes and reminder saved.');
+    if (ok) { acknowledge(submitted, submittedBaseline); if (sameTrackingDraft(current.current, submitted)) setAttested(false); }
+    else setAttested(false);
+  }
   const url = safeEmployerUrl(item.job_url);
   return (
     <Card className="ws-card ws-tracker-card">
@@ -108,20 +118,8 @@ function TrackerRow({
             <select
               aria-label={`Status for ${item.job_title}`}
               className="block min-h-11 w-full rounded-md border bg-background p-2"
-              value={item.status}
-              onChange={(e) =>
-                void run(
-                  () =>
-                    updateApplication(item, {
-                      status: e.target.value as ApplicationStatus,
-                      notes,
-                      follow_up_at: followUp
-                        ? new Date(`${followUp}T12:00:00Z`).toISOString()
-                        : null,
-                    }),
-                  "Application status saved.",
-                )
-              }
+              value={draft.status}
+              onChange={(e) => { const submitted = { ...current.current, status: e.target.value }; edit({ status: submitted.status }); setAttested(false); void save(submitted, true); }}
             >
               {applicationStatuses.map((s) => (
                 <option key={s} value={s}>
@@ -134,38 +132,30 @@ function TrackerRow({
             Follow-up date
             <Input
               type="date"
-              value={followUp}
-              onChange={(e) => setFollowUp(e.target.value)}
+              value={draft.followUp}
+              onChange={(e) => edit({ followUp: e.target.value })}
             />
           </label>
         </div>
         <label className="block space-y-2 text-sm">
           Notes
           <Textarea
-            value={notes}
+            value={draft.notes}
             maxLength={5000}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={(e) => edit({ notes: e.target.value })}
             placeholder="Interview details, next action, or a reminder"
           />
         </label>
+        {recovered && <p className="text-sm text-muted-foreground">Unsaved tracking edits were restored from this tab. Review them before saving.</p>}
+        {changedStatus && <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={attested} onChange={event => setAttested(event.target.checked)} />I report this status myself. Opening or preparing an application does not submit it.</label>}
         <div className="ws-actions">
           <Button
             size="sm"
             variant="outline"
-            onClick={() =>
-              void run(
-                () =>
-                  updateApplication(item, {
-                    notes,
-                    follow_up_at: followUp
-                      ? new Date(`${followUp}T12:00:00Z`).toISOString()
-                      : null,
-                  }),
-                "Notes and reminder saved.",
-              )
-            }
+            disabled={changedStatus && !attested}
+            onClick={() => void save({ ...current.current })}
           >
-            Save notes & date
+            {changedStatus ? 'Save tracking update' : 'Save notes & date'}
           </Button>
           <Button
             size="sm"
@@ -179,7 +169,7 @@ function TrackerRow({
                 void run(
                   () => deleteApplication(item),
                   "Tracker entry deleted.",
-                );
+                ).then(ok => { if (ok) clearTrackingDraft(scope); });
             }}
           >
             <Trash2 size={15} className="mr-2" />
@@ -192,7 +182,9 @@ function TrackerRow({
 }
 
 export default function Workspace() {
-  const { user, loading } = useAuth();
+  const { user, loading, authError } = useAuth();
+  if (!loading && !authError) registerTrackingDraftOwner(user?.id ?? null);
+  const trackingAuthority = user ? trackingDraftAuthority(user.id) : -1;
   const client = useQueryClient();
   const [params, setParams] = useSearchParams();
   const tab = tabs.some((t) => t.id === params.get("tab"))
@@ -212,6 +204,9 @@ export default function Workspace() {
     [error, setError] = useState(""),
     [notice, setNotice] = useState("");
   const lock = useRef(false);
+  const operationOwner = useRef(user?.id ?? null), operationRevision = useRef(0), operationMounted = useRef(true);
+  operationOwner.current = user?.id ?? null;
+  useEffect(() => { operationMounted.current = true; return () => { operationMounted.current = false; operationRevision.current++; }; }, []);
   const packRequest = useRef(crypto.randomUUID());
   const checkoutRequest = useRef(crypto.randomUUID());
   const [checkoutAttempted, setCheckoutAttempted] = useState(false);
@@ -228,8 +223,10 @@ export default function Workspace() {
     retry: 1,
   });
   const data = query.data;
+  useEffect(() => { if (user && !loading && !authError && data) pruneTrackingApplications('workspace', user.id, data.applications.filter(item => item.user_id === user.id).map(item => item.id)); }, [user?.id, loading, authError, data?.applications]);
   const selected = data?.packs.find((p) => p.id === selectedId);
   useEffect(() => {
+    operationRevision.current++; lock.current = false; setBusy(false);
     setFile(null);
     setCvText("");
     setResumeId("");
@@ -238,7 +235,7 @@ export default function Workspace() {
     setConfirmed(false);
     setError("");
     setNotice("");
-  }, [user?.id]);
+  }, [user?.id, trackingAuthority]);
   useEffect(() => {
     if (data?.cvs.length && !resumeId) setResumeId(data.cvs[0].id);
   }, [data?.cvs, resumeId]);
@@ -270,25 +267,28 @@ export default function Workspace() {
     message: string,
   ): Promise<boolean> {
     if (lock.current) return false;
+    const account = operationOwner.current, revision = operationRevision.current, authority = account ? trackingDraftAuthority(account) : -1;
+    const current = () => operationMounted.current && operationOwner.current === account && operationRevision.current === revision && !!account && trackingDraftAuthority(account) === authority;
     lock.current = true;
     setBusy(true);
     setError("");
     setNotice("");
     try {
       await task();
-      await client.invalidateQueries({ queryKey: ["workspace", user?.id] });
+      if (!current()) return false;
+      await client.invalidateQueries({ queryKey: ["workspace", account] });
+      if (!current()) return false;
       setNotice(message);
       return true;
     } catch (e) {
-      setError(
+      if (current()) setError(
         e instanceof Error
           ? e.message
           : "The task could not be completed. Please retry.",
       );
       return false;
     } finally {
-      lock.current = false;
-      setBusy(false);
+      if (current()) { lock.current = false; setBusy(false); }
     }
   }
   function choosePack(pack: ApplicationPack) {
@@ -934,11 +934,12 @@ export default function Workspace() {
                 CV pack.
               </p>
             )}
-            {data?.applications.map((item) => (
+            {data?.applications.filter(item => item.user_id === user.id).map((item) => (
               <TrackerRow
-                key={item.id}
+                key={trackingDraftIdentity(trackingDraftScope('workspace', user.id, item.id))}
                 item={item}
                 run={run}
+                scope={trackingDraftScope('workspace', user.id, item.id)}
               />
             ))}
             </div></div>

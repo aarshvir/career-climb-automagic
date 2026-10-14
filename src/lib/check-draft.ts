@@ -8,7 +8,8 @@ export type CheckAudience = 'student' | 'mba' | 'professional';
 export function checkAudience(value: unknown): CheckAudience | null {
   return value === 'student' || value === 'mba' || value === 'professional' ? value : null;
 }
-export type CheckRecovery = { draft: CheckDraft; step: number; cvReady: boolean; filename: string; ownerId: string | null; pageTarget: 1 | 2; reuseMode?: boolean; audience?: CheckAudience; reviewStarted?: boolean };
+export type CheckSaveReference = { requestId: string; reviewKey: string };
+export type CheckRecovery = { draft: CheckDraft; step: number; cvReady: boolean; filename: string; ownerId: string | null; pageTarget: 1 | 2; reuseMode?: boolean; audience?: CheckAudience; reviewStarted?: boolean; saveReference?: CheckSaveReference };
 let inMemoryRecovery: { value: CheckRecovery; expiresAt: number } | null = null;
 export type CheckDraft = {
   jobTitle: string; company: string; sourceText: string; reviewedText: string; jobDescription: string;
@@ -80,10 +81,13 @@ function boundedRecovery(value: unknown): CheckRecovery | null {
   if (pageTarget !== 1 && pageTarget !== 2) return null;
   if (item.reuseMode !== undefined && typeof item.reuseMode !== 'boolean') return null;
   if (item.reviewStarted !== undefined && typeof item.reviewStarted !== 'boolean') return null;
+  if (item.saveReference !== undefined && (!item.saveReference || typeof item.saveReference !== 'object'
+    || typeof item.saveReference.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.saveReference.requestId)
+    || typeof item.saveReference.reviewKey !== 'string' || item.saveReference.reviewKey.length > 500000)) return null;
   if (item.audience !== undefined && !checkAudience(item.audience)) return null;
   if (item.reuseMode && ![1, 4, 5, 6].includes(item.step)) return null;
   for (const [key, limit] of [['jobTitle', 200], ['company', 200], ['sourceText', 60000], ['reviewedText', 60000], ['jobDescription', 20000]] as const) if (typeof item.draft[key] !== 'string' || item.draft[key].length > limit) return null;
-  return { draft: { jobTitle: item.draft.jobTitle, company: item.draft.company, sourceText: item.draft.sourceText, reviewedText: item.draft.reviewedText, jobDescription: item.draft.jobDescription }, step: item.step, cvReady: item.cvReady, filename: item.filename, ownerId: item.ownerId, pageTarget, ...(item.reuseMode === undefined ? {} : { reuseMode: item.reuseMode }), ...(item.audience === undefined ? {} : { audience: item.audience }), ...(item.reviewStarted === undefined ? {} : { reviewStarted: item.reviewStarted }) };
+  return { draft: { jobTitle: item.draft.jobTitle, company: item.draft.company, sourceText: item.draft.sourceText, reviewedText: item.draft.reviewedText, jobDescription: item.draft.jobDescription }, step: item.step, cvReady: item.cvReady, filename: item.filename, ownerId: item.ownerId, pageTarget, ...(item.reuseMode === undefined ? {} : { reuseMode: item.reuseMode }), ...(item.audience === undefined ? {} : { audience: item.audience }), ...(item.reviewStarted === undefined ? {} : { reviewStarted: item.reviewStarted }), ...(item.saveReference ? { saveReference: { requestId: item.saveReference.requestId, reviewKey: item.saveReference.reviewKey } } : {}) };
 }
 
 /** Browser memory preserves route navigation; tab storage is used only after explicit consent. */

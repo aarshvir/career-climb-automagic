@@ -20,22 +20,28 @@ describe("the original career guide library", () => {
     }
   });
 
-  it("keeps examples visibly fictional, related links valid and source references traceable", () => {
+  it("identifies worked examples, keeps related links valid and source references traceable", () => {
     const domains = new Set(["careerservices.fas.harvard.edu", "capd.mit.edu", "ocs.yale.edu", "www.linkedin.com", "u.ae", "www.federalerp.gov.ae", "support.greenhouse.io", "support.microsoft.com", "jobvance.io"]);
     for (const guide of careerGuides) {
       const examples = guide.sections.filter(section => section.example);
       expect(examples.length, guide.slug).toBeGreaterThanOrEqual(1);
-      for (const section of examples) expect(section.example?.label).toMatch(/fictional/i);
+      for (const section of examples) {
+        expect(section.example?.label).toMatch(/^(?:(?:worked|planning) example|example outreach draft)$/i);
+        expect(section.example?.text.trim().length, guide.slug).toBeGreaterThan(80);
+      }
       expect(new Set(guide.relatedSlugs).size).toBe(guide.relatedSlugs.length);
       expect(guide.relatedSlugs.length).toBeGreaterThanOrEqual(2);
       for (const slug of guide.relatedSlugs) {
         expect(slug).not.toBe(guide.slug);
         expect(getCareerGuide(slug), `${guide.slug} → ${slug}`).toBeDefined();
       }
+      expect(guide.sources.length, guide.slug).toBeGreaterThan(0);
       expect(new Set(guide.sources.map(source => source.id)).size).toBe(guide.sources.length);
       for (const source of guide.sources) {
         const url = new URL(source.url);
         expect(url.protocol).toBe("https:");
+        expect(url.username).toBe("");
+        expect(url.password).toBe("");
         expect(domains.has(url.hostname), source.url).toBe(true);
         expect(source.title.length).toBeGreaterThan(10);
       }
@@ -51,8 +57,15 @@ describe("the original career guide library", () => {
     const text = JSON.stringify(careerGuides);
     expect(text).not.toMatch(/(?:guaranteed interviews|100% ATS|beat any ATS|undetectable AI|trusted by \d|customers hired)/i);
     expect(editorialPolicy.publisher).toBe("Jobvance Editorial");
-    expect(editorialPolicy.disclosure).toMatch(/AI assistance/);
-    expect(editorialPolicy.disclosure).toMatch(/no individual career adviser or legal expert is claimed/);
+    expect(editorialPolicy.researchedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(Number.isFinite(Date.parse(editorialPolicy.researchedAt))).toBe(true);
+    expect(editorialPolicy.disclosure).toMatch(/practical checklists, worked examples and published sources/i);
+    expect(editorialPolicy.disclosure).toMatch(/general application guidance/i);
+    expect(editorialPolicy.disclosure).toMatch(/rather than individual career or legal advice/i);
+    expect(editorialPolicy.approach).toMatch(/separate published source facts from our practical suggestions/i);
+    expect(editorialPolicy.approach).toMatch(/worked examples illustrate the advice; they are not customer case studies/i);
+    expect(editorialPolicy.approach).toMatch(/connected features depend on setup/i);
+    expect(editorialPolicy.approach).toMatch(/you review documents and submit applications yourself/i);
   });
 
   it("returns no fabricated article for an unknown or missing slug", () => {

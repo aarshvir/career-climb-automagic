@@ -3,6 +3,7 @@ import type { User, Session } from '@supabase/supabase-js';
 import { configurationError, supabase } from '@/integrations/supabase/client';
 import { clearUserAuthCache, getGoogleOAuthOptions, isInIframe, getEnvironmentType } from '@/utils/authUtils';
 import { readAuthSession } from '@/utils/authSession';
+import { setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
 
 interface AuthResult { error?: string }
 interface SignUpResult extends AuthResult { requiresEmailConfirmation?: boolean }
@@ -54,6 +55,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!active) return;
       authRevision += 1;
+      // Revoke old draft writers before React unmounts the previous owner's UI.
+      setTrackingDraftOwner(nextSession?.user.id ?? null);
       setSession(nextSession);
       setAuthError(null);
       setLoading(false);
@@ -61,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initialRevision = authRevision;
     void readAuthSession().then(nextSession => {
       if (!active || authRevision !== initialRevision) return;
+      setTrackingDraftOwner(nextSession?.user.id ?? null);
       setSession(nextSession);
       setAuthError(null);
     }).catch(() => {
@@ -89,6 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) return { error: error.message };
       if (!data.session) return { error: 'Sign-in did not complete. Please try again.' };
+      setTrackingDraftOwner(data.session.user.id);
       setSession(data.session);
       setAuthError(null);
       return {};
@@ -105,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         options: { emailRedirectTo: getGoogleOAuthOptions().redirectTo },
       });
       if (error) return { error: error.message };
-      if (data.session) { setSession(data.session); setAuthError(null); }
+      if (data.session) { setTrackingDraftOwner(data.session.user.id); setSession(data.session); setAuthError(null); }
       return { requiresEmailConfirmation: !data.session };
     } catch (error) {
       return { error: authMessage(error, 'Account creation failed. Please try again.') };
@@ -134,10 +139,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = useCallback(async () => {
-    if (configurationError) { setSession(null); return; }
+    if (configurationError) { setTrackingDraftOwner(null); setSession(null); return; }
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) throw error;
     clearUserAuthCache(session?.user.id);
+    setTrackingDraftOwner(null);
     setSession(null);
     setAuthError(null);
   }, [session]);

@@ -1,0 +1,36 @@
+// ARCHIVED HISTORICAL OBSERVATION — NOT A CURRENT RELEASE ASSERTION
+// Original path: supabase/tests/job-loop-erasure-fencing.test.ts
+// Source baseline: 84ce5f3b619e01506c5a108b2cd560362787f74c
+// This exact case deliberately uses fixture() WITHOUT the durable-erasure
+// migration, and asserts the obsolete retained-object defect. That behavior
+// is not a current-platform expectation and must not enter active discovery.
+//
+// Manual forensic reproduction only, if specifically needed later:
+// 1. Read the original test file at the baseline above in an isolated disposable
+//    checkout to obtain fixture(), account(), start(), store() and imports.
+// 2. Use local synthetic PGlite schemas only; fixture() applies the cloud,
+//    revoke-all, recurring and provider-lease migrations, not durable erasure.
+// 3. Put this case in that isolated harness and select only its exact test title.
+//    Never run it against hosted Supabase, real users or candidate objects.
+// 4. Keep this .txt file outside test discovery. Do not restore it to release
+//    acceptance; the active file retains the corrected migration/fencing cases.
+// No historical receipt or production source was changed by this archive.
+
+  it('reproduces the historical enroll-after-begin race leaving a private artifact after relational erasure', async () => {
+    const historical = await fixture();
+    try {
+      const user = await account(historical);
+      await start(historical, user);
+      await historical.query('SELECT job_loop_begin_erase($1)', [user]);
+      // This is the problematic ordering: another request reactivates the owner
+      // after a storage-prefix scan, before relational erasure finishes.
+      await start(historical, user);
+      await store(historical, user);
+      await historical.query('SELECT job_loop_finish_erase($1)', [user]);
+
+      expect((await historical.query('SELECT * FROM job_loop_records')).rows).toHaveLength(0);
+      expect((await historical.query('SELECT * FROM job_loop_runs')).rows).toHaveLength(0);
+      expect((await historical.query('SELECT * FROM storage.objects')).rows).toHaveLength(1);
+      expect((await historical.query<{ public: boolean }>("SELECT public FROM storage.buckets WHERE id='job-loop-artifacts'")).rows[0].public).toBe(false);
+    } finally { await historical.close(); }
+  }, 30000);

@@ -74,12 +74,17 @@ describe('cloud loop literal evidence and approvals', () => {
     await expect(composePacket({ profile, claims: [...claims, claims[0]], opportunity, runId: 'run-1' })).rejects.toThrow(/Repeated claim/);
   });
   it('bounds Gmail tickets without granting owner or mailbox confirmation authority', () => {
-    expect(validateAction({ action: 'gmail_preview', ticket: 'fictional-encrypted-ticket' })).toEqual({ action: 'gmail_preview', ticket: 'fictional-encrypted-ticket' });
-    expect(validateAction({ action: 'gmail_finalize', ticket: 'fictional-encrypted-ticket', confirmMailbox: false })).toEqual({ action: 'gmail_finalize', ticket: 'fictional-encrypted-ticket', confirmMailbox: false });
-    for (const ticket of ['', '   ', 1, 'x'.repeat(16001)]) expect(() => validateAction({ action: 'gmail_preview', ticket })).toThrow();
-    expect(() => validateAction({ action: 'gmail_finalize', ticket: 'fictional-encrypted-ticket', confirmMailbox: 'true' })).toThrow(/explicit true\/false/);
-    expect(() => validateAction({ action: 'gmail_finalize', ticket: 'fictional-encrypted-ticket' })).toThrow(/missing required/);
-    expect(() => validateAction({ action: 'gmail_preview', ticket: 'fictional-encrypted-ticket', userId: 'forged-owner' })).toThrow(/privileged/);
+    for (const expectedGeneration of [0,7]) {
+      expect(validateAction({ action: 'gmail_preview', ticket: 'fictional-encrypted-ticket', expectedGeneration })).toEqual({ action: 'gmail_preview', ticket: 'fictional-encrypted-ticket', expectedGeneration });
+      expect(validateAction({ action: 'gmail_finalize', ticket: 'fictional-encrypted-ticket', confirmMailbox: false, expectedGeneration })).toEqual({ action: 'gmail_finalize', ticket: 'fictional-encrypted-ticket', confirmMailbox: false, expectedGeneration });
+    }
+    for (const ticket of ['', '   ', 1, 'x'.repeat(16001)]) expect(() => validateAction({ action: 'gmail_preview', ticket, expectedGeneration:7 })).toThrow();
+    expect(() => validateAction({ action: 'gmail_finalize', ticket: 'fictional-encrypted-ticket', confirmMailbox: 'true', expectedGeneration:7 })).toThrow(/explicit true\/false/);
+    expect(() => validateAction({ action: 'gmail_finalize', ticket: 'fictional-encrypted-ticket', expectedGeneration:7 })).toThrow(/missing required/);
+    for (const action of ['gmail_preview','gmail_finalize']) for (const expectedGeneration of [undefined,-1,'7',Number.NaN]) {
+      expect(() => validateAction({ action,ticket:'fictional-encrypted-ticket',...(action==='gmail_finalize'?{confirmMailbox:true}:{}),...(expectedGeneration===undefined?{}:{expectedGeneration}) })).toThrow(/current workspace lifetime/);
+    }
+    expect(() => validateAction({ action: 'gmail_preview', ticket: 'fictional-encrypted-ticket', userId: 'forged-owner', expectedGeneration:7 })).toThrow(/privileged/);
     expect(() => validateAction({ action: '../gmail_finalize', ticket: 'fictional-encrypted-ticket', confirmMailbox: true })).toThrow(/Unsupported/);
     expect(() => validateAction('{"action":"gmail_preview","ticket":"fictional-encrypted-ticket"}')).toThrow();
     expect(() => validateAction([{ action: 'gmail_preview', ticket: 'fictional-encrypted-ticket' }])).toThrow();

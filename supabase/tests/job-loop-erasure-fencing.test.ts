@@ -110,24 +110,9 @@ afterEach(async () => {
 });
 
 describe('JV-02 erasure fencing in real PostgreSQL', () => {
-  it('reproduces the historical enroll-after-begin race leaving a private artifact after relational erasure', async () => {
-    const historical = await fixture();
-    try {
-      const user = await account(historical);
-      await start(historical, user);
-      await historical.query('SELECT job_loop_begin_erase($1)', [user]);
-      // This is the problematic ordering: another request reactivates the owner
-      // after a storage-prefix scan, before relational erasure finishes.
-      await start(historical, user);
-      await store(historical, user);
-      await historical.query('SELECT job_loop_finish_erase($1)', [user]);
+  // Pre-fence defect observation is archived under docs/audits/2026-10-14-navigation-save/;
+  // active acceptance below asserts the corrected durable fencing behavior.
 
-      expect((await historical.query('SELECT * FROM job_loop_records')).rows).toHaveLength(0);
-      expect((await historical.query('SELECT * FROM job_loop_runs')).rows).toHaveLength(0);
-      expect((await historical.query('SELECT * FROM storage.objects')).rows).toHaveLength(1);
-      expect((await historical.query<{ public: boolean }>("SELECT public FROM storage.buckets WHERE id='job-loop-artifacts'")).rows[0].public).toBe(false);
-    } finally { await historical.close(); }
-  }, 30000);
 
   it('refuses enrollment, new preparation, schedules and record changes while erasure is in progress', async () => {
     const user = await account(db);
