@@ -8,10 +8,13 @@
     "dating": "Turn start timestamps; earlier standing instructions carried forward."
   },
   "application_baseline": {
-    "version": 20,
-    "source_commit": "91cc092f470598623eb0f0c4e852c2e25eb5fe2e",
-    "live_checks": 44,
-    "live_failures": 0
+    "version": 21,
+    "source_commit": "7ef48164bc7e9238809b4c199b3f136605ffaf56",
+    "live_checks": 47,
+    "live_failures": 0,
+    "media_checks": 15,
+    "media_failures": 0,
+    "receipt": "../jobvance-repair-evidence/copy-polish-release-receipt.json"
   },
   "requirements": [
     {
@@ -173,7 +176,7 @@
     {
       "id": "RQ-27",
       "instruction": "Push all completed work to GitHub and make website live (11 Oct and 14 Oct 05:44).",
-      "status_evidence": "**Application source and 20-role audit pushed; v20 live.** GitHub source `91cc092`;44 HTTP checks, zero failures. Latest source reports are documentation, not implemented fixes.",
+      "status_evidence": "Application source, 20-role audit and completed copy/media fixes pushed to GitHub; v21 live. Source 7ef4816 passed 47 live-site and 15 remote-media checks. This copy release does not finish the 19-package implementation plan.",
       "next_acceptance": "Keep later tested source/tracker on GitHub. Research/prospect files in the sibling research folder are local deliverables, not automatically part of the application repository; never sweep private CV/email/environment folders into a push."
     },
     {
@@ -191,8 +194,8 @@
     {
       "id": "RQ-30",
       "instruction": "Remove repeated customer-facing AI presenter, fictional, sample, fake and dummy wording so Jobvance feels like a finished product (14 Oct latest steering).",
-      "status_evidence": "Implemented and validated; publication pending. Polished all 38 public pages, sign-in and private analytics labels, pilot tour/download/request copy and five recorded guides. 77 relevant tests passed before final release validation. All 24 video chapter frames reviewed; source/timing/caption/geometry checks passed. See COPY-POLISH-2026-10-14.md. Internal fixtures and historical evidence retained.",
-      "next_acceptance": "Publish tested polished public copy and refreshed media, retain concise example attribution and accessible generated-guide provenance, verify no legacy labels remain in active customer pages. Do not turn example records into claimed customer outcomes."
+      "status_evidence": "Shipped v21 on Jobvance.io, source 7ef4816. All 38 public pages, sign-in and private analytics labels, pilot tour/download/request copy and five recorded guides cleaned up. 77 relevant tests, 38 rendered pages, 47 live-site checks and 15 media-byte checks passed. 24 video chapter frames reviewed. See COPY-POLISH-2026-10-14.md; internal fixtures/history retained.",
+      "next_acceptance": "Preserve concise example attribution and accessible guide provenance. Existing reliability, original-loop parity and full presenter-quality goals remain separate open requirements."
     }
   ],
   "standing_constraints": [
