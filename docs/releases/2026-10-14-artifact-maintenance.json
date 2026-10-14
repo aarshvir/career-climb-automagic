@@ -1,0 +1,322 @@
+{
+  "releasedAt": "2026-10-14T16:29:02.460154+00:00",
+  "site": "https://jobvance.io",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "version": 25,
+  "sourceCommit": "7a7af403bd62ea6d10bf056b68a67c5e5cbfe9de",
+  "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_c52692c89a088191861721d9e6cfc762",
+  "deploymentId": "appgdep_6acfadb3ba308191893c13fa8466091f",
+  "status": "succeeded",
+  "nativeDeployment": {
+    "id": "appgdep_6acfadb3ba308191893c13fa8466091f",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_c52692c89a088191861721d9e6cfc762",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-14T16:29:02.460154+00:00"
+  },
+  "artifact": {
+    "path": "../jobvance-repair-evidence/artifact-maintenance-2026-10-14.tar.gz",
+    "sha256": "7946959ac1b19ee2a430882b428285e3a4ee64ab949a870d63963ee563a5ba88",
+    "bytes": 4687204,
+    "tarMembers": 131,
+    "forbiddenMembers": [],
+    "savedArchive": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000141881f48d631902994ea7cd",
+      "content_hash": "sha256:670cede0463d044690edf02225d0beff286a9c62b2c06c5c15a84b6525f334b1",
+      "size_bytes": 14438400,
+      "file_count": 123
+    }
+  },
+  "sourceArchive": {
+    "path": "../jobvance-repair-evidence/artifact-maintenance-source-7a7af40.zip",
+    "bytes": 29318373,
+    "sha256": "0fa2e2b46c525a2e67959e487cb23350124052abf4ac1306b98a5cc2170c9692"
+  },
+  "backend": {
+    "projectId": "gvftdfriujrkpptdueyb",
+    "migrations": [
+      {
+        "version": "20261014162709",
+        "name": "job_loop_terminal_artifact_gc"
+      },
+      {
+        "version": "20261014162711",
+        "name": "job_loop_artifact_maintenance_dispatch"
+      }
+    ],
+    "localMigrations": [
+      {
+        "path": "supabase/migrations/20261014161126_job_loop_terminal_artifact_gc.sql",
+        "sha256": "4abfb13414316c19fed62f90a00787944ad9586733f48df8de60bfdece4074f6"
+      },
+      {
+        "path": "supabase/migrations/20261014161304_job_loop_artifact_maintenance_dispatch.sql",
+        "sha256": "2a2fc131f901f25cb9a7a1031150d8373e55742081cc28f63c9938cd770e2b27"
+      }
+    ],
+    "functions": [
+      {
+        "name": "job-loop-control",
+        "id": "76fd913b-ada8-4234-b7ac-f589bc034ad2",
+        "version": 14,
+        "status": "ACTIVE",
+        "verify_jwt": false,
+        "sourceReadbackExact": true,
+        "artifactSha256": "bd5682c6247ff710a28443f89727003c5b8ff40b086bb1e9d0802707a7f3c2a3"
+      },
+      {
+        "name": "job-loop-worker",
+        "id": "1bd00daf-f44b-478a-bf9b-91d227a2bc61",
+        "version": 11,
+        "status": "ACTIVE",
+        "verify_jwt": false,
+        "sourceReadbackExact": true,
+        "artifactSha256": "7fdd86844786a80193149338ed5ce93f6d211ac8f2961b94f9f8592c59461adc"
+      },
+      {
+        "name": "job-loop-oauth",
+        "id": "417596a5-058d-4cb3-9b96-9be131818faa",
+        "version": 5,
+        "status": "ACTIVE",
+        "verify_jwt": false,
+        "sourceReadbackExact": true,
+        "artifactSha256": "35000dea77f38dfe6a82357c6a3a1435a7e0487f4ab690098b595709043b1bf5"
+      }
+    ],
+    "disabledGateReadback": {
+      "enabled": false,
+      "allowed_owners": 0,
+      "last_dispatch_at": null,
+      "disabled_dispatch_result": null,
+      "tombstones": 0,
+      "issued_tickets": 0,
+      "installed_clock": 1
+    },
+    "functionPrivileges": [
+      {
+        "signature": "job_loop_authorize_artifact_pre_gc(uuid,uuid,uuid,uuid,text,text)",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": false
+      },
+      {
+        "signature": "job_loop_gc_canonical_path(uuid,text)",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": false
+      },
+      {
+        "signature": "job_loop_gc_claim(uuid,integer)",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": true
+      },
+      {
+        "signature": "job_loop_gc_consume_ticket(uuid)",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": true
+      },
+      {
+        "signature": "job_loop_gc_dispatch()",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": true
+      },
+      {
+        "signature": "job_loop_gc_finish(uuid,bigint,uuid,text[])",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": true
+      },
+      {
+        "signature": "job_loop_gc_issue_ticket()",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": true
+      },
+      {
+        "signature": "job_loop_gc_referenced(text)",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": false
+      },
+      {
+        "signature": "job_loop_packet_gc_guard()",
+        "proconfig": [
+          "search_path=\"\""
+        ],
+        "anon_execute": false,
+        "browser_execute": false,
+        "service_execute": false
+      }
+    ],
+    "tablePrivileges": [
+      {
+        "relname": "job_loop_artifact_grants",
+        "relrowsecurity": true,
+        "anon_select": false,
+        "browser_select": false,
+        "service_select": true,
+        "service_insert": false,
+        "service_update": false,
+        "service_delete": false
+      },
+      {
+        "relname": "job_loop_artifact_tombstones",
+        "relrowsecurity": true,
+        "anon_select": false,
+        "browser_select": false,
+        "service_select": true,
+        "service_insert": false,
+        "service_update": false,
+        "service_delete": false
+      },
+      {
+        "relname": "job_loop_gc_config",
+        "relrowsecurity": true,
+        "anon_select": false,
+        "browser_select": false,
+        "service_select": true,
+        "service_insert": false,
+        "service_update": false,
+        "service_delete": false
+      },
+      {
+        "relname": "job_loop_gc_dispatch_tickets",
+        "relrowsecurity": true,
+        "anon_select": false,
+        "browser_select": false,
+        "service_select": false,
+        "service_insert": false,
+        "service_update": false,
+        "service_delete": false
+      }
+    ],
+    "securityAdvisors": [
+      {
+        "name": "rls_enabled_no_policy",
+        "level": "INFO",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+      },
+      {
+        "name": "anon_security_definer_function_executable",
+        "level": "WARN",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable"
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "level": "WARN",
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "level": "WARN",
+        "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+      }
+    ],
+    "unauthenticatedControlStatus": 401,
+    "unauthenticatedMaintenanceStatus": 401,
+    "noCodeOAuthStatus": 303
+  },
+  "validation": {
+    "vitest": {
+      "tests": 153,
+      "files": 10,
+      "failures": 0
+    },
+    "denoBundledHandlers": {
+      "tests": 10,
+      "failures": 0,
+      "hermetic": true,
+      "nonemptyStorageHttpMock": true
+    },
+    "nativePostgres": {
+      "tests": 6,
+      "failures": 0,
+      "version": "17.11",
+      "actualSeparateBackends": true,
+      "observedBlocking": true,
+      "clusterStopped": true,
+      "noOwnedPostgresProcessesRemain": true,
+      "receipt": "audits/2026-10-14-artifact-gc-native.json",
+      "harness": "scripts/test-artifact-gc-postgres.mjs",
+      "harnessSha256": "394a3891dedbb09b7c9631bf20e79e4eaf73b15af0fae4a30effd5cc40bf3162",
+      "storageMetadataSubstitute": true
+    },
+    "typescript": "passed",
+    "hostingGroups": 12,
+    "publicPages": 38,
+    "guideArticles": 20,
+    "externalPrerenderRequests": 0,
+    "compressedWorkerBytes": 2765666,
+    "compressedLimitBytes": 3145728,
+    "liveHttp": {
+      "checks": 51,
+      "failures": 0,
+      "receipt": "../jobvance-repair-evidence/artifact-maintenance-live-check.json",
+      "trackedReceipt": "releases/2026-10-14-artifact-maintenance-live-check.json"
+    },
+    "reviewers": 3
+  },
+  "rollback": {
+    "tag": "jobvance-before-artifact-maintenance-2026-10-14",
+    "source": "3a60799c743d65450a1aaa6ed7f5e9a82a28105b",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_aa06994779488191a4cc71ce5f423172",
+    "privateBeforeSources": "../jobvance-repair-evidence/artifact-maintenance-before-*",
+    "caution": "After a claim is issued retain permanent tombstones and authorization/Storage/packet fences: an in-flight delete cannot be recalled. v24 runtime can be restored with additive fences retained and collection disabled; do not drop fences or older v23/v24 guards. Source restore is not database/file restore."
+  },
+  "remaining": [
+    "Collection remains disabled with an empty owner allowlist; it is not enabled for actual candidates.",
+    "Actual isolated Supabase Storage/S3 upload/delete/readback and hosted dispatch execution remain unverified.",
+    "Whole-account erasure and coordinated restore rehearsal remain open.",
+    "JV-01 tracking/source-replacement/save/export and shared application workflow repairs remain open.",
+    "Production signup/full OAuth, native export delivery, unassisted customer journeys and target scores not newly certified."
+  ],
+  "constraints": {
+    "realCandidateFilesDeleted": false,
+    "productionGcClaims": 0,
+    "productionGcEnabled": false,
+    "allowedProductionOwners": 0,
+    "paidAiSearchCalls": false,
+    "purchases": false,
+    "adsOutreachEmailsEmployerSubmissions": false,
+    "checkoutEnabled": false,
+    "freePilotMaxUsers": 10,
+    "sharedAiSearchUtcMonthCapUsd": 50
+  }
+}
+

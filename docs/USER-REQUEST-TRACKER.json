@@ -8,24 +8,33 @@
     "dating": "Turn start timestamps; earlier standing instructions carried forward."
   },
   "application_baseline": {
-    "version": 24,
-    "source_commit": "5f1912c73f10eea3e0a7f577394263c55f5c3008",
+    "version": 25,
+    "source_commit": "7a7af403bd62ea6d10bf056b68a67c5e5cbfe9de",
     "live_checks": 51,
     "live_failures": 0,
-    "receipt": "../jobvance-repair-evidence/request-generation-release-receipt.json",
-    "tracked_receipt": "releases/2026-10-14-request-generation.json",
-    "tests": 315,
-    "test_files": 17,
-    "deno_handler_tests": 8,
-    "backend_migration": {
-      "version": "20261014133523",
-      "name": "job_loop_request_generation"
-    },
+    "receipt": "../jobvance-repair-evidence/artifact-maintenance-release-receipt.json",
+    "tracked_receipt": "releases/2026-10-14-artifact-maintenance.json",
+    "tests": 153,
+    "test_files": 10,
+    "deno_handler_tests": 10,
+    "native_postgres_checks": 6,
+    "backend_migrations": [
+      {
+        "version": "20261014162709",
+        "name": "job_loop_terminal_artifact_gc"
+      },
+      {
+        "version": "20261014162711",
+        "name": "job_loop_artifact_maintenance_dispatch"
+      }
+    ],
     "backend_functions": {
-      "job-loop-control": 13,
-      "job-loop-worker": 10,
-      "job-loop-oauth": 4
-    }
+      "job-loop-control": 14,
+      "job-loop-worker": 11,
+      "job-loop-oauth": 5
+    },
+    "production_collection_enabled": false,
+    "allowed_owners": 0
   },
   "requirements": [
     {
@@ -139,7 +148,7 @@
     {
       "id": "RQ-19",
       "instruction": "Keep a rollback to the current moment (13 Oct 16:53; later publishing).",
-      "status_evidence": "**Frontend/source rollback preserved; private data restore unproven.** Saved v19 and remote tag `jobvance-before-audit-publication-2026-10-14`, plus earlier v14/v18 fallbacks. v23 retains saved frontend v22, tag jobvance-before-durable-erasure-2026-10-14 and exact prior edge/schema source backups. Backend rollback needs coordinated review; the old worker cannot safely be restored alone against the new storage guard. v24 preserves saved v23, tag jobvance-before-request-fencing-2026-10-14 and exact pre-change native handler/function sources; bound RPCs require coordinated rollback.",
+      "status_evidence": "**Frontend/source rollback preserved; private data restore unproven.** Saved v19 and remote tag `jobvance-before-audit-publication-2026-10-14`, plus earlier v14/v18 fallbacks. v23 retains saved frontend v22, tag jobvance-before-durable-erasure-2026-10-14 and exact prior edge/schema source backups. Backend rollback needs coordinated review; the old worker cannot safely be restored alone against the new storage guard. v24 preserves saved v23, tag jobvance-before-request-fencing-2026-10-14 and exact pre-change native handler/function sources; bound RPCs require coordinated rollback. v25 preserves saved v24 and tag jobvance-before-artifact-maintenance-2026-10-14; permanent tombstones/path fences must survive rollback once claims exist.",
       "next_acceptance": "JV-08 isolated database/file restore and coordinated rollback rehearsal, preserving erasure generations/version floors and actual/uncertain commitments. A frontend version or Git tag is not a data restore."
     },
     {
@@ -211,7 +220,7 @@
     {
       "id": "RQ-31",
       "instruction": "Reassess end to end after owner reports AI-generated feel, unclear flow and unnecessary student/MBA separation; identify other poor product decisions.",
-      "status_evidence": "**Partial implementation after v21 assessment.** U06/U07 fixed in v22; v23 adds durable Loop erasure fencing, bounded cleanup and refresh-safe continuation. See [work preservation](WORK-PRESERVATION-RELEASE-2026-10-14.md) and [retention release](DURABLE-ERASURE-RELEASE-2026-10-14.md). Other 19 consolidated usability findings remain open; the audience split/shared journey has not been redesigned by these reliability repairs. v24 also prevents stale same-owner permissions, source/claim/vacancy drafts, support messages and erasure confirmations from being adopted after fresh setup. Its 315 relevant tests/eight Deno/51 HTTP checks are bounded reliability evidence, not completion of the other 19 usability findings.",
+      "status_evidence": "**Partial implementation after v21 assessment.** U06/U07 fixed in v22; v23 adds durable Loop erasure fencing, bounded cleanup and refresh-safe continuation. See [work preservation](WORK-PRESERVATION-RELEASE-2026-10-14.md) and [retention release](DURABLE-ERASURE-RELEASE-2026-10-14.md). Other 19 consolidated usability findings remain open; the audience split/shared journey has not been redesigned by these reliability repairs. v24 also prevents stale same-owner permissions, source/claim/vacancy drafts, support messages and erasure confirmations from being adopted after fresh setup. Its 315 relevant tests/eight Deno/51 HTTP checks are bounded reliability evidence, not completion of the other 19 usability findings. v25 adds gated artifact-maintenance safeguards and six real isolated PostgreSQL concurrency checks. Collection stays disabled/empty allowlist pending actual Storage acceptance; this does not resolve the remaining clarity/audience/workflow findings.",
       "next_acceptance": "Finish remaining JV-02 retention scope, remaining JV-01 navigation/save/export behavior and the shared application/home, lower-effort review and simpler entry. Validate actual unassisted first/second applications and opened exports; technical passes do not establish usability."
     }
   ],
@@ -310,7 +319,27 @@
       "edge_control_version": 12,
       "edge_worker_version": 9,
       "unchanged_media_validation": "../jobvance-repair-evidence/copy-polish-release-receipt.json"
+    },
+    {
+      "version": 24,
+      "source_commit": "5f1912c73f10eea3e0a7f577394263c55f5c3008",
+      "live_checks": 51,
+      "live_failures": 0,
+      "receipt": "../jobvance-repair-evidence/request-generation-release-receipt.json",
+      "tracked_receipt": "releases/2026-10-14-request-generation.json",
+      "tests": 315,
+      "test_files": 17,
+      "deno_handler_tests": 8,
+      "backend_migration": {
+        "version": "20261014133523",
+        "name": "job_loop_request_generation"
+      },
+      "backend_functions": {
+        "job-loop-control": 13,
+        "job-loop-worker": 10,
+        "job-loop-oauth": 4
+      }
     }
   ],
-  "latest_implementation_release": "REQUEST-GENERATION-RELEASE-2026-10-14.md"
+  "latest_implementation_release": "ARTIFACT-MAINTENANCE-RELEASE-2026-10-14.md"
 }

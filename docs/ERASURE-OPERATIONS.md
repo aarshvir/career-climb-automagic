@@ -46,3 +46,9 @@ Whole-account completion needs scope-specific receipts and readback, not a filen
 After erasure and fresh setup, an old tab must refresh and review its action again. Never substitute the newest generation and automatically retry an old schedule, processing permission, mailbox operation, support message or erasure intent. Current erasure continuation is an authenticated read followed by a fresh explicit confirmation; the read itself does not delete anything. An old generation cannot erase a freshly initialized record.
 
 The v24 bound control/worker/OAuth routines and table grants must remain coordinated. A saved frontend or Git tag does not undo those backend changes or restore records/files. Keep the exact pre-change native backups and rehearse coordinated restore in isolation before promising recovery.
+
+## Terminal artifact maintenance (v25)
+
+Collection is implemented but disabled, with no owner allowlist. The hourly clock issues no HTTP request in that state. Before activation, verify a dedicated synthetic account and exact Storage inventory; never use a real candidate as a test. Claims exclude all resumable runs and every packet reference. Permanent opaque path tombstones remain after Loop erasure to stop delayed deletes affecting a fresh lifetime. Those markers contain no CV text or file bytes.
+
+Once any claim exists, keep tombstones and the authorization, Storage and packet fences even if reverting the worker or disabling maintenance. A network delete already in flight cannot be recalled. See [release limits and rollback](ARTIFACT-MAINTENANCE-RELEASE-2026-10-14.md). Actual Storage/S3 acceptance and whole-account restore are still unfinished.

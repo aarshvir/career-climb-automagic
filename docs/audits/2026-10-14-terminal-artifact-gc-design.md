@@ -1,5 +1,7 @@
 # Bounded collection of unreferenced terminal-run artifacts
 
+**Historical design.** Implemented by [v25](../ARTIFACT-MAINTENANCE-RELEASE-2026-10-14.md) with production collection disabled and an empty owner allowlist. The original observations below describe the pre-implementation baseline, not current missing code.
+
 Design only, 14 October 2026. Inspected v23 source `b9b21bba1e90eaefbac31d97fa55f35bb5d77c96`. No collector has been implemented or enabled by this report. No candidate records, storage objects or production accounts were modified during this review.
 
 ## Scope
