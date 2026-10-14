@@ -59,4 +59,4 @@ Actual Jobvance.io verification passed 886 fresh HTTP checks with zero hard fail
 
 The live browser shows the new headline and loaded Manrope font. The 390×844 opening view has no horizontal overflow and its primary button ends at y474; example metadata/status text is now 12px. Professional selection changes the example and free-check destination. Desktop and phone screenshots are retained with the receipt. Temporary viewport overrides were reset.
 
-Source and exact archive remain on GitHub and in jobvance-repair-evidence. The compressed source-upload archive SHA-256 is CADFAB67EE895DFFC41E069A84E7138F685FB037DEBEC9577C7B54E993EDBEB8. Native canonical tar SHA-256 is 060cc5215f2fbd8b6391389f6a9a789a9786e8733a520361497491a5a9f09854. The compressed hosted worker is 2,769,914 bytes.
+Source is on GitHub; the exact build archive and source ZIP are in jobvance-repair-evidence. The compressed build archive SHA-256 is CADFAB67EE895DFFC41E069A84E7138F685FB037DEBEC9577C7B54E993EDBEB8. Native canonical tar SHA-256 is 060cc5215f2fbd8b6391389f6a9a789a9786e8733a520361497491a5a9f09854. The compressed hosted worker is 2,769,914 bytes.
