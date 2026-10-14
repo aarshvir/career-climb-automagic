@@ -2,6 +2,8 @@
 
 Reviewed 14 October 2026. Live application: version 21, application source `7ef48164bc7e9238809b4c199b3f136605ffaf56`; documentation checkout `061b37528cb110097878798b92da9c8403f6eeaf`.
 
+> Follow-up: [version 22 work-preservation release](../../WORK-PRESERVATION-RELEASE-2026-10-14.md) fixes U06/U07 with correct regressions and release readback. This assessment and its independent reports preserve the original v21 observations; the other 19 consolidated findings remain open.
+
 ## Verdict
 
 The student/MBA separation is an avoidable product decision in this implementation. Both use the same underlying application workflow. MBA-specific examples can be useful after importing experience, but a person should not need to classify themselves by degree before understanding the product. Experienced MBA candidates also overlap with working professionals.

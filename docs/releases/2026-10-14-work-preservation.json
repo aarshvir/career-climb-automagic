@@ -1,0 +1,94 @@
+{
+  "releasedAt": "2026-10-14T07:26:31.458914+00:00",
+  "site": "https://jobvance.io",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "version": 22,
+  "sourceCommit": "6f11154d0023902077f967acba9d1f9dfc7ad83b",
+  "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_787f3ab567a081918a93369da14ff7ce",
+  "deploymentId": "appgdep_6acf2e907fcc8191932b52bd5ff7acd8",
+  "status": "succeeded",
+  "nativeDeployment": {
+    "id": "appgdep_6acf2e907fcc8191932b52bd5ff7acd8",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_787f3ab567a081918a93369da14ff7ce",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-14T07:26:31.458914+00:00"
+  },
+  "savedArchive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_0000000063ec81f5b5a5d399ba76ac14",
+    "content_hash": "sha256:d76e5a3d407eb54cc7dbd7e1073db0daf2281425e91a7bfc7efa74496899ad58",
+    "size_bytes": 14428160,
+    "file_count": 123
+  },
+  "localArchive": "C:/Users/user/OneDrive/Documents/Projects/Job CV linkedin/jobvance-repair-evidence/work-preservation-2026-10-14.tar.gz",
+  "localArchiveMetadata": {
+    "sha256": "f89e2cc7123e3f6ede6f4d0d35a1bdaf526ccb88dbb16f497e1d41e18af3cba6",
+    "bytes": 4683089,
+    "members": 131,
+    "forbiddenPaths": []
+  },
+  "sourceZip": "../jobvance-repair-evidence/work-preservation-source-6f11154.zip",
+  "rollback": {
+    "sourceTag": "jobvance-before-work-preservation-2026-10-14",
+    "sourceCommit": "a26ddb58f20e77da2a6ee2ebcacbc739cdefb52d",
+    "runtimeSourceCommit": "7ef48164bc7e9238809b4c199b3f136605ffaf56",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_5d0de25c6b0c819186f6c9657846ddd5",
+    "priorVersionReferencesPreserved": true,
+    "databaseFileRestoreRehearsed": false
+  },
+  "validation": {
+    "tests": 150,
+    "testFiles": 8,
+    "newRegressions": 17,
+    "typescript": "passed",
+    "renderedPublicPages": 38,
+    "guideArticles": 20,
+    "prerenderExternalRequests": 0,
+    "hostingCheckGroups": 12,
+    "compressedWorkerBytes": 2763206,
+    "liveSiteChecks": 49,
+    "liveSiteFailures": 0,
+    "liveCheckEvidence": "../jobvance-repair-evidence/work-preservation-live-check.json",
+    "independentReviewers": 3,
+    "paidCalls": 0
+  },
+  "scope": "JV-01 / U06-U07: resolved-auth draft hydration and owner-bound persistence; exact final CV edits/removals preserved through rechecks and unchanged source confirmation; blank-final review marker; revision/owner-bound operation cleanup. No database or media changes.",
+  "independentReview": {
+    "newTestFiles": [
+      "src/__tests__/cv-check-work-preservation.test.tsx",
+      "src/__tests__/cv-check-review-state.test.tsx",
+      "src/__tests__/cv-check-operation-owner.test.tsx"
+    ],
+    "findingsCorrected": [
+      "Blank final recovery rendered no editor",
+      "Explicit reset during extraction could retain busy state",
+      "Failed auth followed by same-owner recovery could retain busy state"
+    ],
+    "finalConclusion": "No remaining release-blocking finding within bounded JV-01 local review."
+  },
+  "limits": [
+    "Local auth/extraction/PDF/save boundaries are mocked; this is not a fresh production signup/OAuth test.",
+    "Live checks verify deployed HTTP bytes/headers, including the built CV-check JavaScript/CSS. They do not establish unassisted customer success or native browser download delivery.",
+    "JV-01 remains partial: tracking draft navigation, deliberate source replacement undo and stalled optional-save/export independence remain open.",
+    "JV-02 durable erasure fencing and bounded cleanup remain priority; no real candidate data was erased.",
+    "The prior v21 media checks remain historical validation of unchanged immutable media; media was not re-audited in this release.",
+    "No database/file restore was performed; no 95/98 score or AI-detector/SEO result is claimed."
+  ],
+  "productionRecordMutations": false,
+  "paidApiCalls": 0,
+  "outreachSent": 0,
+  "automationContextUpdated": true,
+  "sourceZipMetadata": {
+    "sha256": "339c8456309dffe8e496f2ad6e03fb0bd10466d67c24aa6852e576df5ce1b2e2",
+    "bytes": 29193989
+  }
+}

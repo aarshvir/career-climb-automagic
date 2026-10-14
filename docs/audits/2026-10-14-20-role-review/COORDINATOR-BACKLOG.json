@@ -28,6 +28,14 @@
         "FE-03",
         "QA-01",
         "UX-04"
+      ],
+      "implementation_status": "partial: U06/U07 work-preservation repair shipped in v22; package not complete",
+      "implementation_evidence": "../../WORK-PRESERVATION-RELEASE-2026-10-14.md",
+      "remaining_acceptance": [
+        "Tracking-note/date navigation with fresh attestation",
+        "Explicit undo for arbitrary source replacement",
+        "Stalled optional save cannot block approved local export; ambiguous retry keeps request identity",
+        "Production auth/OAuth and actual unassisted candidate/export acceptance beyond controlled mocks"
       ]
     },
     {

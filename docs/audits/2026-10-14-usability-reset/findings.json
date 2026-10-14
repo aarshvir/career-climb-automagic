@@ -97,7 +97,9 @@
         "WF-03"
       ],
       "repairRelease": 1,
-      "status": "open"
+      "status": "resolved in v22 within local regression and deployed HTTP readback scope",
+      "assessmentStatus": "open",
+      "resolutionEvidence": "../../WORK-PRESERVATION-RELEASE-2026-10-14.md"
     },
     {
       "id": "U07",
@@ -110,7 +112,9 @@
         "WF-02"
       ],
       "repairRelease": 1,
-      "status": "open"
+      "status": "resolved in v22 within local regression and deployed HTTP readback scope",
+      "assessmentStatus": "open",
+      "resolutionEvidence": "../../WORK-PRESERVATION-RELEASE-2026-10-14.md"
     },
     {
       "id": "U08",
@@ -325,5 +329,17 @@
     "Two draft defects were reproduced locally with mocked network/auth boundaries.",
     "Fresh signup, actual file delivery, paid model processing and background execution were not certified.",
     "No AI-detector percentage or forced consolidated score is assigned."
+  ],
+  "postAssessmentRuntimeReleases": [
+    {
+      "version": 22,
+      "source": "6f11154d0023902077f967acba9d1f9dfc7ad83b",
+      "resolvedFindings": [
+        "U06",
+        "U07"
+      ],
+      "evidence": "../../WORK-PRESERVATION-RELEASE-2026-10-14.md",
+      "remainingFindings": 19
+    }
   ]
 }
