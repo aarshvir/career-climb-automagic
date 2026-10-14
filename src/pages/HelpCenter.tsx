@@ -93,7 +93,21 @@ export const helpTopics: HelpTopic[] = [
       { label: 'Optional preferences and privacy boundaries', help: 'Page preference, actual languages, exclusions and compensation can wait. Leave unknown experience or pay unknown.' },
     ],
     notes: ['Saving privately does not activate AI, mailbox reading, recurring runs or employer submission. Unchanged confirmed facts can be reused for the next vacancy.'],
-    action: { label: 'Open my Job Loop workspace', to: '/loop' }, related: [{ label: 'Confirm useful facts', id: 'job-loop-facts' }],
+    action: { label: 'Open my Job Loop workspace', to: '/loop' }, related: [{ label: 'Reuse a saved CV check', id: 'continue-saved-check' }, { label: 'Confirm useful facts', id: 'job-loop-facts' }],
+  },
+  {
+    id: 'continue-saved-check', category: 'Job Loop', title: 'Continue a saved CV check in Job Loop',
+    summary: 'Reuse the CV and vacancy from a check saved in your account. You choose what to copy before changing either draft.',
+    steps: [
+      'In the free check, save your approved CV to your account, then select Continue this saved check in Job Loop. You can also open Career record in Job Loop and select Choose a saved CV check.',
+      'Choose the saved check. Reviewed final CV is selected by default. Open Read the exact CV text to copy and Read the full saved vacancy to inspect both.',
+      'If you need the original CV instead, select Original source CV instead, review its text and confirm that choice. It may include details you removed from the final CV.',
+      'If you already have a CV or vacancy draft open, read the replacement summary and confirm only if you want to replace those drafts. Select Use this saved check.',
+      'Review the copied source in Career record, continue with that text and check your name, target roles and locations. Choose private saving separately, then save the career record and confirm the facts you want to reuse.',
+      'Open Opportunities to review the copied vacancy. Add the actual employer vacancy link and any missing company or location before saving the opportunity.',
+    ],
+    notes: ['Copying a saved check does not save either draft, start preparation, approve documents or send anything to a model. Existing profile details and target preferences stay in place; a blank target role can be filled from the selected check.', 'Replacing a vacancy clears its previous link, location and recruiter details so they cannot be attached to a different job. Before saving or leaving, use the on-page restore option if you need the previous local drafts. Sharing and contact confirmations must be reviewed again.'],
+    action: { label: 'Open Job Loop', to: '/loop' }, related: [{ label: 'Set up your career record', id: 'job-loop-start' }, { label: 'Check the vacancy', id: 'job-loop-vacancies' }],
   },
   {
     id: 'job-loop-facts', category: 'Job Loop', title: 'Review the experience saved in your career record',

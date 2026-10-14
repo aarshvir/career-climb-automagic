@@ -12,7 +12,7 @@ function showHelp() { return render(<MemoryRouter initialEntries={['/help']}><He
 describe('task-focused public help', () => {
   it('renders every required anchor and complete steps without sign-in', () => {
     const { container } = showHelp();
-    const ids = ['job-loop-start', 'job-loop-facts', 'job-loop-vacancies', 'job-loop-review', 'job-loop-controls', 'no-cv', 'first-check', 'uploads', 'source-line-removal', 'second-application', 'privacy', 'recovery'];
+    const ids = ['continue-saved-check', 'job-loop-start', 'job-loop-facts', 'job-loop-vacancies', 'job-loop-review', 'job-loop-controls', 'no-cv', 'first-check', 'uploads', 'source-line-removal', 'second-application', 'privacy', 'recovery'];
     expect(helpTopics).toHaveLength(ids.length);
     for (const id of ids) {
       const section = container.querySelector(`#${id}`);
@@ -20,7 +20,7 @@ describe('task-focused public help', () => {
       expect(section?.querySelectorAll('.hc-steps li').length).toBeGreaterThanOrEqual(4);
     }
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('What would you like to get done?');
-    expect(screen.getByRole('status')).toHaveTextContent('12 topics');
+    expect(screen.getByRole('status')).toHaveTextContent('13 topics');
     expect(screen.queryByRole('link', { name: /sign up/i })).not.toBeInTheDocument();
     for (const path of ['/check', '/job-loop', '/loop', '/contact', '/guides', '/walkthroughs']) expect(container.querySelector(`a[href="${path}"]`)).toBeInTheDocument();
     const navigation = screen.getByRole('navigation', { name: 'Help topics on this page' });
@@ -57,7 +57,7 @@ describe('task-focused public help', () => {
     for (const link of screen.getAllByRole('link', { name: 'Contact Jobvance' })) expect(link).toHaveAttribute('href', '/contact');
     await user.click(screen.getAllByRole('button', { name: 'Show all topics' })[0]);
     expect(screen.getByRole('searchbox')).toHaveValue('');
-    expect(screen.getByRole('status')).toHaveTextContent('12 topics');
+    expect(screen.getByRole('status')).toHaveTextContent('13 topics');
   });
 
   it('states the distinct local, recovery, source and approval limits', () => {

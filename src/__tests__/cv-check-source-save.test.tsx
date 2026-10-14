@@ -136,4 +136,16 @@ describe('bounded source replacement and optional-save repair', () => {
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
     expect(mocks.save.mock.calls[1][1].requestId).not.toBe(previousId);
   });
+  it('links an owned approved saved snapshot to explicit Loop review, without importing or tracking it', async () => {
+    const id = 'afe62064-a331-4ce6-9e51-2849e091ba54';
+    mocks.list.mockResolvedValue([{ id, user_id: 'owner-a', request_id: id, job_title: 'Reporting analyst', company: 'Example employer', job_description: vacancy, original_text: source, reviewed_text: finalText, method_version: 'fixture-method', status: 'approved', created_at: '2026-10-15T00:00:00Z', updated_at: '2026-10-15T00:00:00Z' }]);
+    const view = render(tree());
+    const link = await screen.findByRole('link', { name: 'Continue this saved check in Job Loop' });
+    expect(link).toHaveAttribute('href', `/loop?fromCheck=${id}`);
+    expect(mocks.save).not.toHaveBeenCalled(); expect(mocks.tracker).not.toHaveBeenCalled();
+    mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' };
+    mocks.list.mockResolvedValue([]); view.rerender(tree());
+    await waitFor(() => expect(screen.queryByRole('link', { name: 'Continue this saved check in Job Loop' })).not.toBeInTheDocument());
+  });
+
 });

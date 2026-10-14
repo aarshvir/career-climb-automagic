@@ -29,6 +29,7 @@ vi.mock('@/components/ui/toaster', () => ({ Toaster: () => null }));
 vi.mock('@/components/ui/sonner', () => ({ Toaster: () => null }));
 vi.mock('@/pages/ProductPage', () => ({ default: () => <p>Public page</p> }));
 vi.mock('@/pages/Workspace', () => ({ default: () => <WorkspaceDestination /> }));
+vi.mock('@/pages/JobLoop', () => ({ default: () => <WorkspaceDestination /> }));
 
 function WorkspaceDestination() {
   const location = useLocation();
@@ -119,4 +120,25 @@ describe('protected legacy workspace return through real app routes', () => {
     await finishEmail(view);
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/dashboard$/);
   });
+  it('preserves a saved-check selector through email sign-in without carrying its text', async () => {
+    const path = '/loop?fromCheck=afe62064-a331-4ce6-9e51-2849e091ba54';
+    const view = open(path);
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    expect(new URLSearchParams(window.location.search).get('next')).toBe(path);
+    await finishEmail(view);
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(path);
+    expect(sessionStorage.length).toBe(0); expect(localStorage.length).toBe(0);
+  });
+  it('preserves a saved-check selector through the Google callback once', async () => {
+    const path = '/loop?fromCheck=afe62064-a331-4ce6-9e51-2849e091ba54';
+    const view = open(path);
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Continue with Google' }));
+    expect(JSON.parse(sessionStorage.getItem('jobvance_account_return_v1')!).path).toBe(path);
+    view.unmount(); state.user = owner;
+    open('/auth/callback?code=synthetic-return-code');
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(path);
+    expect(sessionStorage.getItem('jobvance_account_return_v1')).toBeNull();
+  });
+
 });

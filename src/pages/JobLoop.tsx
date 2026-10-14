@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, CalendarClock, Check, ClipboardList, Download, FileText, Loader2, LockKeyhole, Mail, Play, RefreshCw, ShieldCheck, Square, UserRound, Settings2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,9 @@ import { copyLoopSourceDetails } from '@/lib/loop-source-intake';
 import { LoopActivity, LoopDiscoverySources, LoopSchedule, LoopWorkspaceOverview } from './JobLoopPanels';
 import { LoopErasure, LoopSupportForm } from './LoopSupport';
 import LoopPacketPreview from './LoopPacketPreview';
+import LoopSavedCheckImport, { usableSavedCheck, type SavedCheckScope, type SavedCheckVersion } from './LoopSavedCheckImport';
+import { readSavedCheckContinuation, savedCheckContinuationPath } from '@/lib/saved-check-continuation';
+import type { FreeCvCheck } from '@/lib/free-check-api';
 import { loopDateLabel, loopFollowUpDue } from '@/lib/loop-calendar';
 import { clearLoopWorkingDraft, recoverLoopWorkingDraft, retainLoopWorkingDraft, type LoopClaimDraft } from '@/lib/loop-draft-memory';
 import type { LoopAction, LoopApplicationStatus, LoopClaim, LoopClaimInput, LoopContact, LoopOpportunity, LoopPacket, LoopProfileInput, LoopProviderId, LoopResponse, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
@@ -30,6 +33,7 @@ const statuses: LoopApplicationStatus[] = ['saved', 'prepared', 'applied', 'inte
 const display = (value: string) => value.replace(/_/g, ' ');
 const split = (value: string) => value.split(/[\n,]/).map(item => item.trim()).filter(Boolean);
 const listInputs = (profile: LoopProfileInput) => ({ targets: profile.targetTitles.join('\n'), locations: profile.locations.join('\n'), languages: profile.languages.join(', '), excluded: profile.excludedTerms.join('\n') });
+type SavedCheckBackup = { profile: LoopProfileInput; profileDirty: boolean; lists: ReturnType<typeof listInputs>; detailsReady: boolean; copiedHeader: { name: string; contactLine: string }; suggestions: { key: string; value: LoopClaimInput }[]; opportunity: { title: string; company: string; location: string; jobUrl: string; description: string; withContact: boolean; contact: LoopContact } };
 const date = loopDateLabel;
 const activeRun = (snapshot: LoopSnapshot) => snapshot.runs.some(run => run.status === 'queued' || run.status === 'running');
 const packetSourcesCurrent = (packet: LoopPacket, snapshot: LoopSnapshot) => packet.status !== 'revoked' && !!snapshot.profile && packet.profileRevision === snapshot.profile.revision && Object.keys(packet.claimVersions).length > 0 && Object.entries(packet.claimVersions).every(([id, revision]) => snapshot.claims.some(claim => claim.id === id && claim.revision === revision && claim.status === 'active' && claim.confirmed && claim.shareable));
@@ -109,6 +113,7 @@ export default function JobLoop() {
   if (!authLoading && !authError) registerTrackingDraftOwner(user?.id ?? null);
   const trackingAuthority = user ? trackingDraftAuthority(user.id) : -1;
   const route = useLocation();
+  const navigate = useNavigate();
   const initialAudience = useRef(validLoopAudience(new URLSearchParams(route.search).get('audience')) ?? 'student');
   const [tab, setTab] = useState<Tab>('today'), [snapshotState, setSnapshot] = useState<LoopSnapshot | null>(null), [loadedOwner, setLoadedOwner] = useState<string | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const [erasureOwner, setErasureOwner] = useState<string | null>(null);
@@ -124,6 +129,9 @@ export default function JobLoop() {
   const [method, setMethod] = useState('rules'), [model, setModel] = useState('grounded-rules-v1'), [modelConsent, setModelConsent] = useState(false), [inboxConsent, setInboxConsent] = useState(false), [gmailReadConsent, setGmailReadConsent] = useState(false), [gmailDraftConsent, setGmailDraftConsent] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null), [reviewedText, setReviewedText] = useState(''), [facts, setFacts] = useState(false), [disclosure, setDisclosure] = useState(false), [recipientConsent, setRecipientConsent] = useState(false);
   const [gmailTicket, setGmailTicket] = useState(returnedGmailTicket), [gmailPreview, setGmailPreview] = useState<NonNullable<LoopResponse['gmailPreview']> | null>(null), [previewOwner, setPreviewOwner] = useState<string | null>(null), [mailboxConfirmed, setMailboxConfirmed] = useState(false), [previewBusy, setPreviewBusy] = useState(false), [ticketExpired, setTicketExpired] = useState(false);
+  const [savedCheckIntent, setSavedCheckIntent] = useState<{ id: string; scope: SavedCheckScope } | null>(null);
+  const [savedCheckUndo, setSavedCheckUndo] = useState<{ scope: SavedCheckScope; recordVersion: number; before: SavedCheckBackup } | null>(null), [restoreImportConfirmed, setRestoreImportConfirmed] = useState(false);
+  const importAuthReady = useRef(!authLoading && !authError); importAuthReady.current = !authLoading && !authError;
   const ticketOwner = useRef(user?.id ?? null);
   const snapshot = loadedOwner === user?.id ? snapshotState : null;
   const erasurePending = !!user && erasureOwner === user.id;
@@ -134,10 +142,12 @@ export default function JobLoop() {
     const previous = lifecycleGeneration.current;
     if (previous !== undefined && next.lifecycleGeneration !== undefined && next.lifecycleGeneration < previous) return;
     if (snapshotRef.current && snapshotRef.current.recordVersion > next.recordVersion) return;
+    if (snapshotRef.current && snapshotRef.current.recordVersion !== next.recordVersion) { setSavedCheckUndo(null); setRestoreImportConfirmed(false); }
     const recovered = previous === undefined && next.lifecycleGeneration !== undefined && owner.current
       ? recoverLoopWorkingDraft(owner.current, next.lifecycleGeneration) : null;
     if (previous !== undefined && next.lifecycleGeneration !== undefined && next.lifecycleGeneration !== previous) {
       generation.current++; serial.current++; formRevision.current++; downloadTransfer.current?.abort();
+      setSavedCheckIntent(null); setSavedCheckUndo(null); setRestoreImportConfirmed(false);
       clearLoopWorkingDraft(); startReference.current = null; draftReference.current = null;
       setProfileDirty(false); profileDirtyRef.current = false; resetProfile = true;
       setSuggestions([]); setClaimDrafts({}); setDirtyClaims(new Set()); setDetailsReady(false);
@@ -173,7 +183,16 @@ export default function JobLoop() {
   useEffect(() => { mounted.current = true; return clearMount; }, [clearMount]);
   useEffect(() => { clearGmailFragment(); }, []);
   useEffect(() => {
+    const id = readSavedCheckContinuation(route.search);
+    if (!id) return;
+    if (erasurePending) { setSavedCheckIntent(null); navigate('/loop', { replace: true }); return; }
+    if (!user || authLoading || authError || !snapshot || !Number.isSafeInteger(snapshot.lifecycleGeneration) || snapshot.lifecycleGeneration! < 0) return;
+    setSavedCheckIntent({ id, scope: { ownerId: user.id, generation: snapshot.lifecycleGeneration!, authority: trackingAuthority } });
+    setTab('record'); navigate('/loop', { replace: true });
+  }, [route.search, user?.id, authLoading, authError, snapshot?.lifecycleGeneration, erasurePending, trackingAuthority, navigate]);
+  useEffect(() => {
     downloadTransfer.current?.abort();
+    setSavedCheckIntent(null); setSavedCheckUndo(null); setRestoreImportConfirmed(false);
     setErasureOwner(null);
     lifecycleGeneration.current = undefined; erasureGeneration.current = undefined; confirmationGeneration.current = undefined;
     generation.current++; serial.current++; formRevision.current++; setSnapshot(null); setLoadedOwner(null); snapshotRef.current = null; setProfile(blankProfile(initialAudience.current)); setLists(listInputs(blankProfile(initialAudience.current))); setProfileDirty(false); profileDirtyRef.current = false; setSaveConsent(false); setCvs([]); setCvError(''); setSuggestions([]); setDirtyClaims(new Set()); setSelectedId(null); setReviewedText(''); setFacts(false); setDisclosure(false); setRecipientConsent(false); setMethod('rules'); setModel('grounded-rules-v1'); setModelConsent(false); setInboxConsent(false); setGmailReadConsent(false); setGmailDraftConsent(false); setBusy(''); setNotice(''); setError(''); setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setContact({ name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: false, inExistingThread: false }); startReference.current = null; draftReference.current = null;
@@ -234,12 +253,47 @@ export default function JobLoop() {
   }
   function markDirty(key: string, dirty: boolean) { setDirtyClaims(current => { const next = new Set(current); if (dirty) next.add(key); else next.delete(key); return next; }); if (!dirty) retainClaimDraft(key, null); setFacts(false); setDisclosure(false); setRecipientConsent(false); }
   function retainClaimDraft(key: string, draft: LoopClaimDraft | null) { setClaimDrafts(current => { const next = { ...current }; if (draft) next[key] = draft; else delete next[key]; return next; }); }
-  function importSource(sourceText: string) {
+  function importSource(sourceText: string, preserveDetails = false) {
     const copied = copyLoopSourceDetails(sourceText);
-    const copyName = !profile.name.trim() || !!copiedHeaderRef.current.name && profile.name === copiedHeaderRef.current.name;
-    const copyContact = !profile.contactLine.trim() || !!copiedHeaderRef.current.contactLine && profile.contactLine === copiedHeaderRef.current.contactLine;
+    const copyName = !preserveDetails && (!profile.name.trim() || !!copiedHeaderRef.current.name && profile.name === copiedHeaderRef.current.name);
+    const copyContact = !preserveDetails && (!profile.contactLine.trim() || !!copiedHeaderRef.current.contactLine && profile.contactLine === copiedHeaderRef.current.contactLine);
     editProfile({ sourceText, ...(copyName ? { name: copied.name } : {}), ...(copyContact ? { contactLine: copied.contactLine } : {}) });
     copiedHeaderRef.current = { name: copyName ? copied.name : '', contactLine: copyContact ? copied.contactLine : '' };
+  }
+  const savedCheckDraftKey = JSON.stringify([profile, lists, detailsReady, suggestions, claimDrafts, [...dirtyClaims], title, company, location, jobUrl, description, withContact, contact]);
+  const savedCheckNeedsReplacement = !!(profile.sourceText || title || company || location || jobUrl || description || withContact || Object.values(contact).some(Boolean));
+  const savedCheckCopyHeader = !snapshot?.profile && !profileDirty && !profile.name.trim() && !profile.contactLine.trim();
+  const savedCheckBlocked = dirtyClaims.size > 0 || Object.keys(claimDrafts).length > 0 ? 'Save or discard your claim edits before copying a saved check.' : '';
+  useEffect(() => { setRestoreImportConfirmed(false); }, [savedCheckDraftKey]);
+  function savedCheckScopeCurrent(scope: SavedCheckScope) {
+    return mounted.current && importAuthReady.current && scope.authority >= 0 && owner.current === scope.ownerId && trackingDraftAuthority(scope.ownerId) === scope.authority
+      && lifecycleGeneration.current === scope.generation && snapshotRef.current?.lifecycleGeneration === scope.generation;
+  }
+  function clearImportConsents() {
+    setSaveConsent(false); setFacts(false); setDisclosure(false); setRecipientConsent(false); setModelConsent(false); setInboxConsent(false); setGmailReadConsent(false); setGmailDraftConsent(false);
+  }
+  function useSavedCheck(check: FreeCvCheck, version: SavedCheckVersion, scope: SavedCheckScope, replacementKey: string | null): boolean {
+    if (busyRef.current || savedCheckBlocked || !savedCheckScopeCurrent(scope) || !usableSavedCheck(check, scope.ownerId)
+      || (savedCheckNeedsReplacement && replacementKey !== savedCheckDraftKey) || !snapshotRef.current) return false;
+    const sourceText = version === 'final' ? check.reviewed_text : check.original_text;
+    try { validateCvText(sourceText); } catch { setError('This saved CV needs readable text before it can be copied.'); return false; }
+    const before: SavedCheckBackup = structuredClone({ profile, profileDirty, lists, detailsReady, copiedHeader: copiedHeaderRef.current, suggestions, opportunity: { title, company, location, jobUrl, description, withContact, contact } });
+    setSavedCheckUndo({ scope: { ...scope }, recordVersion: snapshotRef.current.recordVersion, before }); setRestoreImportConfirmed(false);
+    importSource(sourceText, !savedCheckCopyHeader);
+    if (!profile.targetTitles.length && !lists.targets.trim()) { editProfile({ targetTitles: [check.job_title] }); setLists(current => ({ ...current, targets: check.job_title })); }
+    setTitle(check.job_title); setCompany(check.company); setDescription(check.job_description); setLocation(''); setJobUrl(''); setWithContact(false);
+    setContact({ name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: false, inExistingThread: false });
+    clearImportConsents(); setSavedCheckIntent(null); setTab('record'); setError('');
+    setNotice('Saved check copied into your local CV and vacancy drafts. Review and save each separately; add the employer’s real vacancy link. Nothing was submitted or sent to a model.');
+    return true;
+  }
+  function undoSavedCheckImport() {
+    if (!savedCheckUndo || !restoreImportConfirmed || busyRef.current || !savedCheckScopeCurrent(savedCheckUndo.scope) || snapshotRef.current?.recordVersion !== savedCheckUndo.recordVersion || savedCheckBlocked) return;
+    const before = savedCheckUndo.before; formRevision.current++;
+    setProfile(before.profile); setLists(before.lists); setProfileDirty(before.profileDirty); profileDirtyRef.current = before.profileDirty; setDetailsReady(before.detailsReady); copiedHeaderRef.current = before.copiedHeader;
+    setSuggestions(before.suggestions.map(item => ({ ...item, value: { ...item.value, confirmed: false, shareable: false } })));
+    setTitle(before.opportunity.title); setCompany(before.opportunity.company); setLocation(before.opportunity.location); setJobUrl(before.opportunity.jobUrl); setDescription(before.opportunity.description); setWithContact(before.opportunity.withContact); setContact({ ...before.opportunity.contact, confirmedByUser: false });
+    clearImportConsents(); setSavedCheckUndo(null); setRestoreImportConfirmed(false); setError(''); setNotice('Your previous local CV and vacancy draft are restored. Review sharing and contact confirmations again before saving.');
   }
   function reviewSource() {
     try {
@@ -269,6 +323,7 @@ export default function JobLoop() {
     try { action = boundLoopAction(action, erasureGeneration.current ?? snapshotRef.current?.lifecycleGeneration); }
     catch(failure) { setError(failure instanceof Error ? failure.message : 'Refresh Jobvance before continuing.'); return null; }
     const atGeneration = generation.current; ++serial.current; busyRef.current = action.action; setBusy(action.action); setError(''); setNotice('');
+    if (['save_profile', 'save_claim', 'withdraw_claim', 'add_opportunity', 'erase_loop', 'erase_self'].includes(action.action)) { setSavedCheckUndo(null); setRestoreImportConfirmed(false); }
     if(action.action==='erase_loop'||action.action==='erase_self'){erasureGeneration.current=action.expectedGeneration;setErasureOwner(id);setSnapshot(null);setLoadedOwner(null);snapshotRef.current=null;downloadTransfer.current?.abort();}
     try {
       const result = await callJobLoop(id, action);
@@ -379,9 +434,14 @@ export default function JobLoop() {
   const latestRun = snapshot?.runs[0], due = snapshot?.opportunities.filter(item => loopFollowUpDue(item.followUpAt) && !['rejected', 'withdrawn', 'offer'].includes(item.status)) ?? [];
   const models = snapshot?.models.filter(option => option.ready) ?? [];
   const unavailableMethods = snapshot ? (['anthropic', 'openai', 'moonshot'] as const).filter(id => !models.some(option => option.provider === id)).map(id => providerNames[id]) : [];
+  const savedImportScope = user && !authLoading && !authError && trackingAuthority >= 0 && snapshot && Number.isSafeInteger(snapshot.lifecycleGeneration) && snapshot.lifecycleGeneration! >= 0
+    ? { ownerId: user.id, generation: snapshot.lifecycleGeneration!, authority: trackingAuthority } : null;
+  const importIntentId = savedCheckIntent && savedImportScope && savedCheckIntent.scope.ownerId === savedImportScope.ownerId && savedCheckIntent.scope.authority === savedImportScope.authority && savedCheckIntent.scope.generation === savedImportScope.generation ? savedCheckIntent.id : null;
+  const requestedSavedCheck = readSavedCheckContinuation(route.search);
+  const savedCheckSignIn = `/auth?next=${encodeURIComponent(requestedSavedCheck ? savedCheckContinuationPath(requestedSavedCheck)! : '/loop')}`;
   return <main className="job-loop-page"><Helmet><title>Your Job Loop | Jobvance</title><meta name="robots" content="noindex,follow" /></Helmet>
     <header className="jl-page-heading"><div><p className="jl-eyebrow">YOUR JOB LOOP · FREE PILOT</p><h1>Prepare your next application.</h1><p>Bring your CV and a real vacancy. Reuse confirmed facts to prepare a document you review, then track your next action.</p><div className="jl-context-help"><Link to="/job-loop">What is Job Loop?</Link><Link to="/walkthroughs">Follow a walkthrough</Link></div></div><Link to={`/check?audience=${profile.audience}`} className="jl-text-link">Open the free CV check <ArrowRight size={16} aria-hidden="true" /></Link></header>
-    {!user ? <section className="jl-panel"><h2>{gmailTicket ? 'Sign in to confirm the returned mailbox' : 'Start with one application review.'}</h2>{gmailTicket ? <><p>Keep this tab open. Sign in to the account that started this connection in another tab, then return here to confirm the mailbox.</p><p>The return ticket is held only in this page’s memory. Mailbox access is not activated by this return.</p><div className="jl-actions"><Link className="jl-button jl-button--primary" to="/auth?next=%2Floop" target="_blank" rel="noopener noreferrer">Sign in in another tab</Link><button className="jl-button" type="button" disabled={typeof retryConnection !== 'function'} onClick={() => retryConnection?.()}>Check sign-in again</button><button className="jl-button" type="button" onClick={cancelMailboxConfirmation}>Cancel mailbox confirmation</button></div></> : <><p>Bring your CV and a vacancy to the free check. You can review your first application without an account. Sign in when you want a private career record, reusable facts and tracking.</p><div className="jl-actions"><Link className="jl-button jl-button--primary" to={`/check?audience=${profile.audience}`}>Prepare my first application</Link><Link className="jl-button" to="/auth?next=%2Floop">Sign in to my saved Job Loop</Link></div></>}</section> : <div className="jl-layout"><aside className="jl-sidebar"><nav aria-label="Job Loop sections">{tabs.map(item => <button type="button" key={item.id} aria-pressed={tab === item.id} onClick={() => setTab(item.id)}><item.icon size={18} aria-hidden="true" />{item.label}</button>)}</nav><div className="jl-sidebar-note"><LockKeyhole size={18} aria-hidden="true" /><p>Private record. Reviewed outputs. No automatic sends or applications.</p></div><button type="button" className="jl-button jl-button--quiet" disabled={!!busy || loading} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />Refresh records</button></aside>
+    {!user ? <section className="jl-panel"><h2>{gmailTicket ? 'Sign in to confirm the returned mailbox' : requestedSavedCheck ? 'Sign in to continue your saved CV check' : 'Start with one application review.'}</h2>{gmailTicket ? <><p>Keep this tab open. Sign in to the account that started this connection in another tab, then return here to confirm the mailbox.</p><p>The return ticket is held only in this page’s memory. Mailbox access is not activated by this return.</p><div className="jl-actions"><Link className="jl-button jl-button--primary" to="/auth?next=%2Floop" target="_blank" rel="noopener noreferrer">Sign in in another tab</Link><button className="jl-button" type="button" disabled={typeof retryConnection !== 'function'} onClick={() => retryConnection?.()}>Check sign-in again</button><button className="jl-button" type="button" onClick={cancelMailboxConfirmation}>Cancel mailbox confirmation</button></div></> : requestedSavedCheck ? <><p>Sign in to the account that saved this check. Review the CV and vacancy before choosing what to copy into Job Loop.</p><Link className="jl-button jl-button--primary" to={savedCheckSignIn}>Sign in to review this saved check</Link></> : <><p>Bring your CV and a vacancy to the free check. You can review your first application without an account. Sign in when you want a private career record, reusable facts and tracking.</p><div className="jl-actions"><Link className="jl-button jl-button--primary" to={`/check?audience=${profile.audience}`}>Prepare my first application</Link><Link className="jl-button" to={savedCheckSignIn}>Sign in to my saved Job Loop</Link></div></>}</section> : <div className="jl-layout"><aside className="jl-sidebar"><nav aria-label="Job Loop sections">{tabs.map(item => <button type="button" key={item.id} aria-pressed={tab === item.id} onClick={() => setTab(item.id)}><item.icon size={18} aria-hidden="true" />{item.label}</button>)}</nav><div className="jl-sidebar-note"><LockKeyhole size={18} aria-hidden="true" /><p>Private record. Reviewed outputs. No automatic sends or applications.</p></div><button type="button" className="jl-button jl-button--quiet" disabled={!!busy || loading} onClick={() => void refresh()}><RefreshCw size={15} aria-hidden="true" />Refresh records</button></aside>
       <div className="jl-content">{loading && <p role="status" className="jl-loading"><Loader2 size={18} aria-hidden="true" />Loading your private records…</p>}{busy && <p role="status" className="jl-loading"><Loader2 size={18} aria-hidden="true" />Working on your request…</p>}{error && <div role="alert" className="jl-alert"><p>{error}</p><p>Saved records are not replaced by an empty example. Refresh to confirm the current state.</p></div>}{notice && <p role="status" className="jl-notice">{notice}</p>}
       {gmailTicket && <section className="jl-panel jl-mailbox-confirmation" aria-labelledby="jl-mailbox-confirm-title"><p className="jl-eyebrow">RETURNED MAILBOX NEEDS YOUR CONFIRMATION</p><h2 id="jl-mailbox-confirm-title">Confirm the returned Gmail mailbox</h2><p>The return ticket was removed from the address bar and remains only in this page’s memory. Leaving this page cancels this confirmation. Nothing is connected automatically.</p>{previewBusy && <p role="status">Checking the account-bound mailbox preview…</p>}{gmailPreview && previewOwner === user.id && <><p className="jl-mailbox-identity"><Mail size={18} aria-hidden="true" />{gmailPreview.email || 'Mailbox identity could not be established'}</p><p>Permissions: mailbox reading{gmailPreview.allowDrafts ? ' and explicitly requested draft creation' : ' only'}. Jobvance uses recruitment-message queries after separate run consent. Google’s draft permission also allows sending at the permission level; Jobvance provides no send action.</p><p className="jl-help">Confirmation expires {date(gmailPreview.expiresAt)}. You can disconnect later; existing Gmail drafts are not deleted.</p>{ticketExpired && <p className="jl-warning">This confirmation has expired. Cancel and reconnect from your own account.</p>}<Consent checked={mailboxConfirmed} onChange={setMailboxConfirmed} disabled={!!busy || ticketExpired || !gmailPreview.email}>This is my intended mailbox, and I confirm the displayed permissions for my Jobvance account.</Consent><button type="button" className="jl-button jl-button--primary" disabled={!!busy || !mailboxConfirmed || ticketExpired || !gmailPreview.email || !snapshot?.capabilities.gmailRead} onClick={() => void confirmMailbox()}>Confirm this mailbox</button></>}<button type="button" className="jl-button" disabled={!!busy} onClick={cancelMailboxConfirmation}>Cancel mailbox confirmation</button></section>}
       {erasurePending && <section className="jl-panel" aria-label="Erasure progress"><h2>Finish erasing your Job Loop</h2><p>Erasure has not been confirmed complete. Continue to check and remove remaining Job Loop data. An active erasure request keeps new preparation and uploads stopped until its files are gone.</p><p>You can close this page and continue later with the same account. Your sign-in account and separate workspace records are outside this erasure.</p></section>}
@@ -405,6 +465,8 @@ export default function JobLoop() {
         </details></>}
       </>}
       {snapshot && <div className="jl-tab-panel" hidden={tab !== 'record'}>
+        {savedImportScope && <LoopSavedCheckImport key={`${savedImportScope.ownerId}:${savedImportScope.authority}:${savedImportScope.generation}`} scope={savedImportScope} intentId={importIntentId} busy={!!busy} blockedReason={savedCheckBlocked} draftKey={savedCheckDraftKey} needsReplacement={savedCheckNeedsReplacement} copyHeader={savedCheckCopyHeader} isCurrent={savedCheckScopeCurrent} onUse={useSavedCheck} onClose={() => setSavedCheckIntent(null)} />}
+        {savedCheckUndo && savedCheckScopeCurrent(savedCheckUndo.scope) && savedCheckUndo.recordVersion === snapshot.recordVersion && <section className="jl-panel" aria-label="Restore the draft before saved-check import"><h2>Restore your previous draft</h2><p>The previous CV and vacancy draft are kept only on this page, until you save, leave or saved records change. Restoring replaces edits made since the copy; sharing confirmations stay cleared.</p><details><summary>Review the draft to restore</summary><p>{savedCheckUndo.before.opportunity.title || 'No vacancy title'} · {savedCheckUndo.before.opportunity.company || 'No company'}</p><pre>{savedCheckUndo.before.profile.sourceText}</pre><pre>{savedCheckUndo.before.opportunity.description}</pre></details><Consent checked={restoreImportConfirmed} onChange={setRestoreImportConfirmed} disabled={!!busy || !!savedCheckBlocked}>Replace my current local CV and vacancy fields with the previous draft.</Consent><button type="button" className="jl-button" disabled={!!busy || !!savedCheckBlocked || !restoreImportConfirmed} onClick={undoSavedCheckImport}>Undo saved-check import</button>{savedCheckBlocked && <p className="jl-help">{savedCheckBlocked}</p>}</section>}
         <section className="jl-panel jl-source-setup"><p className="jl-eyebrow">SET UP ONCE · REUSE FOR EACH VACANCY</p><h2>{snapshot.profile ? 'Your career record is saved.' : 'Start with the CV you already have.'}</h2><p>{snapshot.profile ? `Saved revision ${snapshot.profile.revision}. Your source text, target roles and confirmed facts can be reused for the next application.` : 'Import or paste your CV, check a few details, then confirm facts copied from it. You do not need to rebuild your CV in a form.'}</p>
           <div className="jl-record-context"><p><strong>{loopAudienceContent[profile.audience].label}</strong> · {loopAudienceContent[profile.audience].recordHint}</p><Link className="jl-text-link" to="/help#job-loop-start">Help with the first step <ArrowRight size={14} aria-hidden="true" /></Link></div>
           <form onSubmit={event => void saveProfile(event)} className="jl-profile-form"><fieldset className="jl-form-fields" disabled={!!busy}>

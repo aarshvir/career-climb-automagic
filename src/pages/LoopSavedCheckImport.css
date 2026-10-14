@@ -1,0 +1,13 @@
+.jl-saved-check,
+.jl-saved-check select,
+.jl-saved-check fieldset {
+  min-width: 0;
+  min-inline-size: 0;
+  max-width: 100%;
+}
+
+.jl-saved-check fieldset label {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+}

@@ -76,7 +76,7 @@ describe('neutral homepage start', () => {
       for (const start of starts) expect(start).toHaveAttribute('href', '/check');
     }
     expect(screen.getByText(/There is no separate student or professional setup to choose/)).toBeInTheDocument();
-    expect(screen.getByText(/Saved free checks do not transfer into it automatically yet/)).toBeInTheDocument();
+    expect(screen.getByText(/Start with your CV or choose a saved CV check/)).toBeInTheDocument();
   });
 });
 
