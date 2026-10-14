@@ -4,6 +4,7 @@ import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopPac
 import { digest } from './job-loop-providers.ts';
 import { eraseLoopArtifacts } from './job-loop-erasure.ts';
 import { validLoopGeneration } from './job-loop-request.ts';
+import { collectLoopArtifacts } from './job-loop-artifact-gc.ts';
 
 export type LoopAdmin = ReturnType<typeof adminClient>;
 export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
@@ -92,6 +93,9 @@ export class LoopRepository {
   }
   async eraseArtifacts(userId:string,expectedGeneration:number) {
     await eraseLoopArtifacts({rpc:<T>(name:string,args:Record<string,unknown>)=>this.rpc<T>(name,args),remove:paths=>this.admin.storage.from('job-loop-artifacts').remove(paths)},userId,expectedGeneration);
+  }
+  collectTerminalArtifacts() {
+    return collectLoopArtifacts({rpc:<T>(name:string,args:Record<string,unknown>)=>this.rpc<T>(name,args),remove:paths=>this.admin.storage.from('job-loop-artifacts').remove(paths)});
   }
   settle(id: string, actual: number | null, result: unknown, uncertain = false) { return this.rpc<UsageRow>('job_loop_settle',{p_usage:id,p_actual:actual,p_result:result,p_uncertain:uncertain}); }
   async upload(run: RunRow, packetId: string, key: string, bytes: Uint8Array, mimeType: string): Promise<string> {

@@ -1,0 +1,154 @@
+{
+  "url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-5-windows-x64-binaries.zip",
+  "bytes": 381531864,
+  "sha256": "80379b2c04d51c30225532e0ae04509899141e9957ed096fe749d7fd9df8f82f",
+  "provenance": [
+    "https://www.postgresql.org/download/windows/",
+    "https://www.enterprisedb.com/download-postgresql-binaries",
+    "https://github.com/EnterpriseDB/edb-installers/issues/731",
+    "https://www.postgresql.org/about/licence/"
+  ],
+  "root": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\.tmp\\isolated-pg-e7ff9108-68c3-403c-9090-b8d2901dc688",
+  "startedAt": "2026-10-14T16:19:37.457Z",
+  "checks": [
+    {
+      "name": "claim serializes against packet publication and rejects the newly closed path",
+      "passed": true,
+      "startedAt": "2026-10-14T16:19:45.215Z",
+      "distinctBackendPids": [
+        23152,
+        10324
+      ],
+      "observedBlockingPids": [
+        23152
+      ],
+      "rejectedCode": "LOOP_ARTIFACT_UNAUTHORIZED"
+    },
+    {
+      "name": "publication holds the owner lock so collection skips it and later preserves its held packet reference",
+      "passed": true,
+      "startedAt": "2026-10-14T16:19:45.370Z",
+      "distinctBackendPids": [
+        13372,
+        33548
+      ],
+      "heldPacketReferencePreserved": true
+    },
+    {
+      "name": "the real worker commit RPC holds the owner lock and its saved artifact remains excluded from collection",
+      "passed": true,
+      "startedAt": "2026-10-14T16:19:45.494Z",
+      "distinctBackendPids": [
+        21932,
+        34316
+      ],
+      "publicationRpc": "job_loop_commit_phase",
+      "heldPacketReferencePreserved": true
+    },
+    {
+      "name": "an in-progress erasure owner lock makes collection skip without creating a tombstone",
+      "passed": true,
+      "startedAt": "2026-10-14T16:19:45.602Z",
+      "distinctBackendPids": [
+        34092,
+        4188
+      ],
+      "erasureGeneration": 1,
+      "noStorageDeletion": true
+    },
+    {
+      "name": "competing collectors use distinct backends and never claim the same path",
+      "passed": true,
+      "startedAt": "2026-10-14T16:19:45.815Z",
+      "distinctBackendPids": [
+        39484,
+        13920
+      ],
+      "observedBlockingPids": [
+        39484
+      ],
+      "nonOverlappingClaims": true
+    },
+    {
+      "name": "a claimed path stays closed after erasure and fresh same-owner enrollment",
+      "passed": true,
+      "startedAt": "2026-10-14T16:19:45.969Z",
+      "distinctBackendPids": [
+        32440,
+        31928
+      ],
+      "originalGeneration": 0,
+      "freshGeneration": 2,
+      "rejectedCode": "LOOP_ARTIFACT_UNAUTHORIZED"
+    }
+  ],
+  "limitations": [
+    "PostgreSQL SQL and concurrent sessions are native; storage.objects and cron/net transport are explicit local fixture substitutes.",
+    "This is not Supabase Storage, S3 byte deletion, hosted pg_net/cron, or production validation.",
+    "The vendor repository publishes the ZIP digest; no detached publisher signature was located."
+  ],
+  "archiveVerifiedAt": "2026-10-14T16:19:37.702Z",
+  "extraction": {
+    "entries": 22033,
+    "extracted": 3016,
+    "expandedBytes": 1002085601
+  },
+  "port": 62073,
+  "dataDirectory": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\.tmp\\isolated-pg-e7ff9108-68c3-403c-9090-b8d2901dc688\\data-4e5412bb-c357-4129-a50d-376b94ee9665",
+  "harnessSha256": "394a3891dedbb09b7c9631bf20e79e4eaf73b15af0fae4a30effd5cc40bf3162",
+  "nativeBinaries": {
+    "initdb": "d385519a50d2cd5e143e86c2c10acfe0d44d3039d714c8211b804011bca2409f",
+    "pg_ctl": "9885ac53af9d67c76c1ddde87c19e6b15539d7c482bca70cd5ead5dad0b7ce3c",
+    "postgres": "f5dbfd059f8088b9511a02fc014e659369996fc7d3e88e47658b1cfa2fbb02d2",
+    "psql": "c290c7f0a3335f290f8c18011a1e5afa03ee3cdd628697a5f3e767e5f1d3d10d"
+  },
+  "version": "postgres (PostgreSQL) 17.11",
+  "migrations": [
+    {
+      "name": "20261011010000_job_loop_cloud.sql",
+      "sha256": "a3312c82e04f7f8ffa8486aca3ba03eedeb583edec2614b7590ad5e7fe4baba9"
+    },
+    {
+      "name": "20261011020000_job_loop_revoke_all.sql",
+      "sha256": "fd1394246f2591cfacf504f8e41e4d4e56f05c5fc17fd3a29a479dbbb648c1e2"
+    },
+    {
+      "name": "20261011030000_job_loop_recurring.sql",
+      "sha256": "d1e5fc6d31805e8b3abd28ab1058cb7df00a69aafa2e9622ac31e04d866ce188"
+    },
+    {
+      "name": "20261013190000_job_loop_provider_lease.sql",
+      "sha256": "40e6f1f30581f5ad90f8220b7eb90750051aea293060174081944345f1ef6aeb"
+    },
+    {
+      "name": "20261014101107_job_loop_durable_erasure.sql",
+      "sha256": "b5c1ea5f84a176d1b1301d0899804266587490228b519d4c97e9902b0d1d68f6"
+    },
+    {
+      "name": "20261014131351_job_loop_request_generation.sql",
+      "sha256": "0c26383d11f63d63f3606927a2166acc9658223eb7b88db353c9343f7c7b4ffd"
+    },
+    {
+      "name": "20261014161126_job_loop_terminal_artifact_gc.sql",
+      "sha256": "4abfb13414316c19fed62f90a00787944ad9586733f48df8de60bfdece4074f6"
+    }
+  ],
+  "passed": true,
+  "backendPids": [
+    38144,
+    23152,
+    10324,
+    13372,
+    33548,
+    21932,
+    34316,
+    34092,
+    4188,
+    39484,
+    13920,
+    32440,
+    31928
+  ],
+  "clusterStopped": true,
+  "finishedAt": "2026-10-14T16:19:46.562Z"
+}

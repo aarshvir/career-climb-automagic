@@ -10,11 +10,19 @@ const owner='11111111-1111-4111-a111-111111111111',runId='22222222-2222-4222-a22
 function assert(value:unknown,message:string):asserts value{if(!value)throw new Error(message);}
 function setup(){for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
 let writeFailure=false;
+let maintenanceTicketValid=false;
+let maintenanceFile=false,maintenanceClaimed=false,maintenanceRemoved=false;
+let maintenanceToken='';
+const maintenancePath=`${owner}/33333333-3333-4333-a333-333333333333/${'a'.repeat(64)}/txt`;
 let lifecycle:{state:'active'|'erasing'|'erased';generation:number}={state:'active',generation:0};
 const record:import('../functions/_shared/job-loop-repository.ts').RecordRow={user_id:owner,version:0,input_version:0,data:{profile:null,claims:[],opportunities:[],inbox:[]},updated_at:'2026-10-11T00:00:00Z'};
 globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
   const url=new URL(input instanceof Request?input.url:String(input));const body=typeof init?.body==='string'?JSON.parse(init.body):null;calls.push({url:url.href,body});
   if(url.hostname!=='supabase.fixture.invalid')throw new Error('A real or paid endpoint is blocked in this test.');
+  if(url.pathname==='/rest/v1/rpc/job_loop_gc_consume_ticket'){assert(body?.p_ticket==='a2d317db-7aac-4444-a074-489ef031d278','Maintenance consumes only its dedicated credential.');const valid=maintenanceTicketValid;maintenanceTicketValid=false;return Response.json(valid);}
+  if(url.pathname==='/rest/v1/rpc/job_loop_gc_claim'){assert(body?.p_limit===200&&typeof body.p_token==='string','Maintenance uses a server-bounded claim.');if(maintenanceFile&&!maintenanceClaimed){maintenanceClaimed=true;maintenanceToken=body.p_token;return Response.json([{user_id:owner,path:maintenancePath,generation:0,token:body.p_token}]);}return Response.json([]);}
+  if(url.pathname==='/storage/v1/object/job-loop-artifacts'){assert(init?.method==='DELETE'&&JSON.stringify(body?.prefixes)===JSON.stringify([maintenancePath]),'Storage removal uses the fixed bucket and exact server-claimed path.');maintenanceRemoved=true;return Response.json([{name:maintenancePath}]);}
+  if(url.pathname==='/rest/v1/rpc/job_loop_gc_finish'){assert(maintenanceRemoved&&body?.p_user===owner&&body.p_generation===0&&body.p_token===maintenanceToken&&JSON.stringify(body.p_paths)===JSON.stringify([maintenancePath]),'Exact claim is settled only after Storage response.');maintenanceFile=false;return Response.json(1);}
   if(url.pathname==='/auth/v1/user'){if(new Headers(init?.headers).get('Authorization')!=='Bearer fixture-user')return Response.json({error:'invalid'},{status:401});return Response.json({id:owner,aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-10-11T00:00:00Z'});}
   if(url.pathname==='/rest/v1/rpc/job_loop_erasure_status'){assert(body?.p_user===owner,'Lifecycle read binds authenticated owner.');return Response.json(lifecycle);}
   if(url.pathname==='/rest/v1/rpc/job_loop_assert_generation'){assert(body?.p_user===owner,'Generation guard binds authenticated owner.');return body?.p_generation===lifecycle.generation?Response.json(null):Response.json({message:'LOOP_REQUEST_STALE'},{status:400});}
@@ -72,6 +80,27 @@ Deno.test('worker rejects candidate credentials and returns accepted while owned
 Deno.test('worker denies body owner injection and OAuth cannot choose an arbitrary return target',async()=>{
   setup();assert((await handlers[1](req({runId,userId:owner},'Bearer fixture-service-only'))).status===400,'Worker accepts runId only.');assert(calls.length===0,'No forged worker persistence.');
   const response=await handlers[2](new Request('https://edge.fixture.invalid?return_url=https://evil.example.com'));assert(response.status===303,'Missing code returns fixed application route.');assert(response.headers.get('Location')==='https://jobvance.fixture.invalid/loop?gmail=unavailable','Return target is operator configured, never caller supplied.');assert(calls.length===0,'No OAuth exchange without state/code.');
+});
+Deno.test('maintenance is purpose-ticket-only and runs with preparation disabled without provider or Storage calls',async()=>{
+  setup();Deno.env.set('JOB_LOOP_ENABLED','false');
+  for(const authority of ['Bearer fixture-user','Bearer fixture-service-only']){assert((await handlers[1](req({action:'artifact_gc'},authority))).status===401,'Candidate and ordinary worker credentials cannot authorize maintenance.');}
+  assert(calls.length===0,'Rejected authorities never reach persistence.');
+  const maintenance=(body:unknown)=>new Request('https://edge.fixture.invalid',{method:'POST',headers:{'Content-Type':'application/json','x-job-loop-maintenance-ticket':'a2d317db-7aac-4444-a074-489ef031d278'},body:JSON.stringify(body)});
+  maintenanceTicketValid=true;
+  assert((await handlers[1](maintenance({action:'artifact_gc',userId:owner}))).status===400,'Owner overrides rejected before consuming a ticket.');assert(calls.length===0,'No forged collection reaches persistence.');
+  assert((await handlers[1](maintenance({action:'artifact_gc'}))).status===202,'Dedicated maintenance accepted independently of preparation readiness.');
+  await Promise.all(pending);assert(calls.some(call=>call.url.endsWith('/rpc/job_loop_gc_claim')),'Bounded claim executed.');
+  assert(calls.every(call=>/\/rpc\/job_loop_gc_(consume_ticket|claim)$/.test(new URL(call.url).pathname)),'No model, search, mailbox, preparation, or Storage requests for an empty/disabled collection.');
+  assert((await handlers[1](maintenance({action:'artifact_gc'}))).status===401,'A consumed ticket cannot replay.');
+});
+Deno.test('actual maintenance handler composes a validated claim, exact Storage HTTP removal and guarded settlement',async()=>{
+  setup();Deno.env.set('JOB_LOOP_ENABLED','false');maintenanceTicketValid=true;maintenanceFile=true;maintenanceClaimed=false;maintenanceRemoved=false;
+  const response=await handlers[1](new Request('https://edge.fixture.invalid',{method:'POST',headers:{'Content-Type':'application/json','x-job-loop-maintenance-ticket':'a2d317db-7aac-4444-a074-489ef031d278'},body:JSON.stringify({action:'artifact_gc'})}));
+  assert(response.status===202,'Dedicated maintenance accepted.');await Promise.all(pending);
+  assert(maintenanceRemoved&&!maintenanceFile,'Fixture HTTP removal and exact bound settlement completed.');
+  assert(calls.filter(call=>call.url.includes('/storage/')).length===1&&calls.filter(call=>call.url.endsWith('/rpc/job_loop_gc_finish')).length===1,'One exact removal and one guarded settlement.');
+  assert(calls.every(call=>call.url.includes('/rpc/job_loop_gc_')||call.url.endsWith('/storage/v1/object/job-loop-artifacts')),'No candidate preparation, model, search, email or other bucket request.');
+  maintenanceFile=false;maintenanceClaimed=false;maintenanceRemoved=false;
 });
 Deno.test('actual Deno phase composes and renders grounded student artifacts without provider calls',async()=>{
   setup();const {processLoopPhase}=await import('../functions/_shared/job-loop-runtime.ts');const {digest}=await import('../functions/_shared/job-loop-providers.ts');
