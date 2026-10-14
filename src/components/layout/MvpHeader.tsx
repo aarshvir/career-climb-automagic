@@ -8,7 +8,7 @@ import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 
 export function Brand() {
   return <Link to="/" className="jv-brand" aria-label="Jobvance home">
-    <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 17h4v-4h4V9h5M13 5h6v6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+    <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 4h7l4 4v9a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M13 4v5h5M13 12v4a2 2 0 0 1-4 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
     <span>jobvance<span style={{color:"var(--jv-blue)"}}>.</span></span>
   </Link>;
 }

@@ -20,16 +20,16 @@ afterEach(cleanup);
 describe('audience entry points', () => {
   it.each(['student', 'mba', 'professional'] as const)('offers first value without sign-in for %s', audience => {
     render(page(audience));
-    const start = screen.getByRole('link', { name: 'Check my CV for free' });
+    const start = screen.getByRole('link', { name: 'Check my CV against a job' });
     expect(start).toHaveAttribute('href', `/check?audience=${audience}`);
     expect(screen.getByRole('link', { name: /See how Job Loop works/ })).toHaveAttribute('href', '/job-loop');
-    expect(screen.getByRole('link', { name: /Build my career record/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
+    expect(screen.getByRole('link', { name: /Sign in to save my experience/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].title);
     expect(screen.getByText('Fictional illustration')).toBeInTheDocument();
   });
   it('opens the selected private setup for a signed-in candidate', () => {
     account.user = { id: 'fictional-owner' }; render(page('professional'));
-    expect(screen.getByRole('link', { name: 'Open my Job Loop' })).toHaveAttribute('href', '/loop?audience=professional');
+    expect(screen.getByRole('link', { name: 'Open my saved applications' })).toHaveAttribute('href', '/loop?audience=professional');
   });
   it('uses editable preferences without inferring employment years, titles or claims', () => {
     for (const audience of ['student','mba','professional'] as const) {
@@ -57,14 +57,10 @@ describe('free pilot and proposed subscriptions', () => {
 });
 
 describe('published draft privacy guidance', () => {
-  it('explains that guest refresh recovery needs permission and is separate from account saving', () => {
+  it('links the concise guest privacy explanation to the full storage choices', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
-    const guidance = screen.getByText(/Your unsaved check can return when you visit another page/);
-    expect(guidance).toHaveTextContent(/Refresh recovery requires your permission/);
-    expect(guidance).toHaveTextContent(/30 minutes after your last change/);
-    expect(guidance).toHaveTextContent(/Without that permission, refreshing clears the draft/);
-    expect(guidance).toHaveTextContent(/Account saving is a separate choice/);
-    expect(screen.queryByText(/Unsaved checks are held in memory and cleared when the page closes or refreshes/)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'How your CV is handled' })).toHaveAttribute('href', '/privacy');
+    expect(screen.getByText(/Your free check runs on your device/)).toHaveTextContent(/Sign in when you want to save an approved version privately/);
   });
   it('publishes the consented tab-storage exposure and requires renewed approval after restoration', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);

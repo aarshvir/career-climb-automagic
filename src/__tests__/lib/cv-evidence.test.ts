@@ -307,6 +307,43 @@ describe('literal CV evidence comparison', () => {
     expect(report.omittedSections.map(item => item.vacancyQuote)).toContain('Private healthcare.');
   });
 
+  it.each([
+    'Responsibilities and requirements:',
+    'RESPONSIBILITIES & QUALIFICATIONS',
+    'What you’ll do / qualifications:',
+    "What you'll do and requirements:",
+    'Qualifications:',
+  ])('keeps the section heading %s out of findings and reopens requirement parsing', heading => {
+    const vacancy = `Benefits\nPrivate healthcare.\n${heading}\n• Prepare stakeholder reports.\n• SQL required.`;
+    const report = analyzeCvEvidence('EXPERIENCE\nPrepared stakeholder reports.\nSKILLS\nSQL', vacancy);
+
+    expect(report.requirements.map(item => item.vacancyQuote)).toEqual(['Prepare stakeholder reports.', 'SQL required.']);
+    expect(report.summary).toEqual({ total: 2, direct: 2, partial: 0, missing: 0, review: 0 });
+    expect(report.omittedSections.map(item => item.vacancyQuote)).toContain(heading);
+    for (const span of [...report.requirements, ...report.omittedSections]) expect(vacancy.slice(span.start, span.end)).toBe(span.vacancyQuote);
+  });
+
+  it('keeps inline criteria after a combined heading, including when following a wrapped bullet', () => {
+    const vacancy = 'Requirements\n• Prepare stakeholder reports and\n  Excel forecasts.\n  Responsibilities and requirements: SQL required.';
+    const report = analyzeCvEvidence('Prepared stakeholder reports and Excel forecasts.\nSKILLS\nSQL', vacancy);
+
+    expect(report.requirements.map(item => item.vacancyQuote)).toEqual(['Prepare stakeholder reports and\n  Excel forecasts.', 'SQL required.']);
+    expect(report.omittedSections.map(item => item.vacancyQuote)).toContain('Responsibilities and requirements:');
+    for (const span of [...report.requirements, ...report.omittedSections]) expect(vacancy.slice(span.start, span.end)).toBe(span.vacancyQuote);
+  });
+
+  it.each([
+    'Responsibilities include stakeholder reporting and SQL analysis.',
+    "What you'll do includes stakeholder reporting and SQL analysis.",
+    'Qualifications and SQL analysis experience are required.',
+  ])('retains the actual criterion %s rather than treating its opening words as a heading', criterion => {
+    const report = analyzeCvEvidence('Prepared stakeholder reporting and SQL analysis.', criterion);
+
+    expect(report.requirements.map(item => item.vacancyQuote)).toEqual([criterion]);
+    expect(report.summary.total).toBe(1);
+    expect(report.omittedSections).toEqual([]);
+  });
+
   it('caps comparison at forty and preserves every overflow clause with a clear note', () => {
     const vacancy = 'Requirements\n' + Array.from({ length: 45 }, (_, i) => `• SQL required for item ${i + 1}.`).join('\n');
     const report = analyzeCvEvidence('Skills: SQL', vacancy);

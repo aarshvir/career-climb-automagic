@@ -16,7 +16,7 @@ function readyAsset(patch: Partial<WalkthroughVideoAsset> = {}): WalkthroughVide
 describe('honest interactive walkthroughs', () => {
   it('shows a fictional storyboard and full script without pretending a video exists', () => {
     const { container } = showWalkthrough();
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('See the next step.');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Watch how to use Jobvance.');
     expect(screen.getByRole('status')).toHaveTextContent('Step 1 of 6: Choose one target role');
     expect(screen.getByText('FICTIONAL DEMO')).toBeInTheDocument();
     expect(screen.getByText(/not a live form/)).toBeInTheDocument();

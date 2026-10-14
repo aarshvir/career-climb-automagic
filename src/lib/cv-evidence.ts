@@ -53,7 +53,10 @@ type Line = Span & { text: string; line: number; newline: string };
 type Section = 'experience' | 'internships' | 'volunteering' | 'personal_projects' | 'skills' | 'education' | 'credentials' | 'projects' | 'other';
 type Passage = EvidencePassage & { section: Section; terms: string[]; negative: boolean; pending: boolean; weakened: boolean; sourceSpan: Span; sourceLine: number; sourceQuote: string };
 
-const REQUIRED_HEADING = /^(?:requirements?|qualifications?|essential(?: criteria| requirements)?|desirable(?: criteria| requirements)?|responsibilities|key responsibilities|duties|what (?:you(?:'|’)ll do|you will do|you bring|we need|we(?:'|’)re looking for)|about you|your (?:role|responsibilities|profile)|skills(?: and experience)?|experience(?: and qualifications)?)(?:\s*:|\s*$)/i;
+const REQUIRED_HEADING_LABEL = /(?:requirements?|qualifications?|essential(?: criteria| requirements)?|desirable(?: criteria| requirements)?|responsibilities|key responsibilities|duties|what (?:you(?:'|’)ll do|you will do|you bring|we need|we(?:'|’)re looking for)|about you|your (?:role|responsibilities|profile)|skills(?: and experience)?|experience(?: and qualifications)?)/.source;
+// Combine only known section labels. Prose such as "Responsibilities include SQL"
+// must remain a requirement, while a colon's following criteria are parsed separately.
+const REQUIRED_HEADING = new RegExp(`^${REQUIRED_HEADING_LABEL}(?:\\s*(?:and|&|/)\\s*${REQUIRED_HEADING_LABEL})*(?:\\s*:|\\s*$)`, 'i');
 const OTHER_HEADING = /^(?:about (?:us|the company|our company)|company (?:overview|description)|who we are|benefits|perks|what we offer|salary|compensation|how to apply|application process|equal opportunit(?:y|ies)|our values)(?:\s*:|\s*$)/i;
 const MANDATORY = /\b(?:must|required|mandatory|essential|need to|minimum|at least)\b/i;
 const UNSUPPORTED_SCRIPT = /[\u0400-\u052f]|[\u0600-\u06ff]|[\u0900-\u097f]|[\u3040-\u30ff]|[\u3400-\u9fff]|[\uac00-\ud7af]/u;

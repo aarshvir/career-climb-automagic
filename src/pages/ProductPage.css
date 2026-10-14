@@ -8,16 +8,16 @@
 .product-pricing--three .product-plan ul { min-height:153px; }
 @media(max-width:850px) { .product-pricing.product-pricing--three { grid-template-columns:1fr; } .product-pricing--three .product-plan ul { min-height:0; } .product-pilot-pricing { flex-direction:column; align-items:flex-start; padding:23px; } }
 .product-page {
-  --product-blue: #2850df;
-  --product-ink: #172338;
-  --product-paper: #f7f8fa;
-  --product-muted: #566176;
-  --product-line: #dce1e9;
-  --product-lavender: #edeef9;
-  --product-lime: #d7ef89;
+  --product-blue: var(--jv-blue);
+  --product-ink: var(--jv-ink);
+  --product-paper: var(--jv-paper);
+  --product-muted: #58635d;
+  --product-line: #d9ded3;
+  --product-lavender: #edf2e7;
+  --product-lime: #e2eeaf;
   color: var(--product-ink);
   background: var(--product-paper);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Manrope", "Segoe UI", sans-serif;
   overflow-wrap: anywhere;
 }
 .product-how-loop { padding-bottom:30px; }
@@ -29,7 +29,7 @@
 .product-page h1, .product-page h2, .product-page h3, .product-page p, .product-page figure { margin: 0; }
 .product-page h1, .product-page h2 { font-weight: 600; letter-spacing: -.055em; }
 .product-page h2 { font-size: clamp(32px, 3.7vw, 48px); line-height: 1.08; }
-.product-page em { font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.055em; }
+.product-page em { font-family: inherit; font-style: normal; font-weight: 700; letter-spacing: -.055em; }
 .product-page a, .product-page button, .product-page summary { -webkit-tap-highlight-color: transparent; }
 .product-page a:focus-visible, .product-page button:focus-visible, .product-page summary:focus-visible { outline: 3px solid var(--product-blue); outline-offset: 5px; border-radius: 4px; }
 .product-page a { text-underline-offset: 4px; }
@@ -135,7 +135,7 @@
 .product-page .product-final-section h2 { position: relative; z-index: 1; max-width: 790px; margin-top: 26px; font-size: clamp(42px, 5.5vw, 74px); }
 .product-page .product-final-actions { position: relative; z-index: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 29px; margin-top: 35px; }
 .product-page .product-final-actions > span { color: #e0e7ff; font-size: 12px; line-height: 1.75; }
-.product-page .product-final-arrow { position: absolute; right: 0; top: 30px; color: #5a77e8; font-size: 290px; font-family: Arial, Helvetica, sans-serif; font-weight: 400; line-height: .9; pointer-events: none; }
+.product-page .product-final-arrow { position: absolute; right: 0; top: 30px; color: #5a77e8; font-size: 290px; font-family: "Manrope", "Segoe UI", sans-serif; font-weight: 400; line-height: .9; pointer-events: none; }
 .product-page .product-final-section a:focus-visible { outline-color: var(--product-lime); }
 
 /* Audience choices are real local controls; they do not create a saved profile. */

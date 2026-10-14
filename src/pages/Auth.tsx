@@ -104,8 +104,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   return (
     <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
       {!embedded && <aside className="ap-account-story" aria-labelledby={`${fieldId}-story`}>
-        <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> YOUR CAREER, IN YOUR WORDS</p>
-        <h2 id={`${fieldId}-story`}>Your next step.<br /><span>A clearer story.</span></h2>
+        <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> SAVE YOUR WORK FOR THE NEXT APPLICATION</p>
+        <h2 id={`${fieldId}-story`}>Keep your CVs and applications <span>together.</span></h2>
         <p className="ap-story-description">Bring your actual experience to the next role. Review your wording, keep your versions, and decide what to share.</p>
         <div className="ap-document-scene" aria-label="Illustration of a fictional CV review">
           <div className="ap-document-back" aria-hidden="true" />

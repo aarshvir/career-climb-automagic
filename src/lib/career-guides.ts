@@ -57,20 +57,20 @@ export function careerGuideWordCount(guide: Pick<CareerGuide, "summary" | "secti
   ])].join(" ").trim().split(/\s+/).filter(Boolean).length;
 }
 function publish(guide: GuideDraft): CareerGuide {
-  return { ...guide, publishedAt: "2026-10-13", updatedAt: "2026-10-13", readingMinutes: Math.max(1, Math.ceil(careerGuideWordCount(guide) / 200)) };
+  return { ...guide, publishedAt: "2026-10-13", updatedAt: "2026-10-14", readingMinutes: Math.max(1, Math.ceil(careerGuideWordCount(guide) / 200)) };
 }
 
 export const careerGuides: CareerGuide[] = [
   publish({
     slug: "cv-job-description-evidence",
     title: "Compare your CV with a job description using evidence",
-    description: "Build a requirement-to-evidence check that reveals gaps without inventing experience or turning shared words into a hiring prediction.",
+    description: "Compare a job description with your CV, choose relevant examples and identify the details to add before applying.",
     audience: "All applicants", category: "CV evidence",
-    summary: "A useful CV comparison tells you which experience supports a vacancy, which details need clarification, and which requirements remain unanswered. Start with the employer's words and your actual record. The goal is a better decision and a truthful document, not a score to chase.",
+    summary: "Put the job description beside your CV and work through the requirements one at a time. This guide shows how to find relevant examples, clarify your contribution and decide what to add or change before preparing the application.",
     takeaways: ["Separate skills, experience and employer conditions.", "Connect each claim to an actual passage.", "Review gaps before rewriting."],
     sections: [
       { heading: "Break the vacancy into decisions", paragraphs: [
-        "Read the full vacancy once before editing. Then capture separate requirements: the work to be done, tools used, required experience, qualifications, location, schedule and application deadline. A sentence such as 'lead weekly reporting and support budget preparation' contains two different responsibilities. Keeping them separate prevents an example of supporting budgets from becoming evidence of leading reporting.",
+        "Read the full vacancy once before editing. Then list its requirements: the work to be done, tools used, experience, qualifications, location, schedule and deadline. A sentence such as 'lead weekly reporting and support budget preparation' describes two responsibilities. Separating them makes it easier to choose a specific example for each.",
         "Mark whether the employer describes a requirement as essential, preferred or unclear. Preserve that wording rather than choosing for them. Visa status, work location and deadlines are decisions to verify; they do not need achievement bullets. Keep the source URL and the date you checked it alongside your notes."
       ] },
       { heading: "Find the passage before changing the phrase", paragraphs: [
@@ -93,53 +93,53 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "student-projects-on-cv",
-    title: "Show student projects without calling them work experience",
-    description: "Turn coursework, internships and activities into clear CV evidence while keeping academic projects and your own contribution accurately labelled.",
+    title: "How to describe student projects on your CV",
+    description: "Choose relevant student projects, describe your contribution and turn coursework, internships and activities into clear CV entries.",
     audience: "Students", category: "CV evidence",
-    summary: "A student CV does not need invented employment to be useful. Projects, internships, volunteering and activities can show how you work. The task is to describe their setting, your contribution and the output clearly, so an employer can judge the relevance without mistaking classroom work for professional experience.",
+    summary: "Projects, internships and activities can show an employer how you work. Start with the tasks you completed and the things you produced, then choose examples that fit the vacancy. This guide helps you write clear entries for coursework, placements, volunteering and student activities.",
     takeaways: ["Name the academic or extracurricular setting.", "Explain your contribution within a team.", "Show outputs and limitations together."],
     sections: [
       { heading: "Inventory work you can explain", paragraphs: [
-        "List three to five activities that involved a real task: a research assignment, society event, coding project, laboratory exercise, internship or part-time job. For each, record when it happened, who was involved, what you personally did and what you produced. Keep the messy inventory separate from the CV; it is a source record, not a finished document.",
-        "MIT's career guidance includes projects and unpaid activities among possible resume experiences. That does not make them equivalent to the employer's required years of professional work. Choose an honest heading such as 'Academic projects', 'Internship experience' or 'Leadership and activities', and preserve that context in the entry itself."
+        "List three to five activities that involved a specific task: a research assignment, society event, coding project, laboratory exercise, internship or part-time job. For each, note when it happened, who was involved, what you did and what you produced. These notes give you material to choose from before polishing the CV.",
+        "MIT's career guidance includes projects and unpaid activities among possible resume experiences. Use headings such as 'Academic projects', 'Internship experience' or 'Leadership and activities' to help the reader understand where the work happened. Include the project name, organisation or activity and the dates alongside your contribution."
       ], sourceIds: ["mit-projects"] },
       { heading: "Choose the project for the vacancy", paragraphs: [
         "A relevant project answers a question about the role. For a reporting internship, explain how you cleaned a dataset, checked assumptions and presented findings. For a customer-facing role, a society event may show enquiry handling and coordination. The project title alone rarely explains that connection; the action underneath it does.",
-        "Avoid pasting the entire module description into the CV. Select the work you can discuss in detail, then remove unrelated technical steps. If the project used a synthetic dataset or simulated client brief, say so. A realistic simulation is still a simulation, even when the final presentation looked like a consulting engagement."
+        "Choose the part of the project that matters for this vacancy, then explain it in a few lines. For a data role, the cleaning method or modelling choice may be useful; for an event role, focus on planning and coordination. Include a short context note if you used a synthetic dataset or simulated client brief."
       ] },
       { heading: "Make team contribution visible", paragraphs: [
         "Use 'built', 'tested', 'coordinated' or 'analysed' only for the part you performed. If a teammate built the model and you prepared the presentation, the presentation is your evidence. You can mention the team's broader output while separating it from your action. This gives interviewers an accurate route into the work.",
         "Check whether numbers describe your work, the team or a forecast. A proposed cost reduction in a business case was not achieved by an employer. A mark may demonstrate assessed academic performance, but it does not establish customer impact. Keep each result tied to the setting where it happened."
-      ], example: { label: "Fictional example", text: "Academic project, retail demand analysis: 'Cleaned a public sample dataset in Python and compared two forecasting approaches for a four-person coursework team; presented model limitations in the final assessment.' This shows a specific contribution. It does not claim the student managed a retailer's live forecasting operation." } },
+      ], example: { label: "Fictional example", text: "Academic project, retail demand analysis: 'Cleaned a public sample dataset in Python and compared two forecasting approaches for a four-person coursework team; presented model limitations in the final assessment.' The entry gives the reader a task, a tool, a team context and a contribution to ask about." } },
       { heading: "Keep a small proof folder", paragraphs: [
         "Save a clean project summary, permitted screenshots, your contribution notes and a link to code or a portfolio if useful. Check sharing permissions before adding the link to a CV. A private university folder that requires a student login will not help an external reader, and a public folder may reveal teammates' details.",
         "Do not upload assessment answers or team material you lack permission to share. A short explanation of the task and your method can be enough. Remove personal records from datasets. If you cannot show the original deliverable, prepare a separate, clearly labelled demonstration using invented data rather than exposing private information."
       ] },
       { heading: "Test the entry aloud", paragraphs: [
         "Read each project bullet and explain it without looking at notes. You should be able to describe the task, your choices, a difficulty and the output. If a bullet contains a tool you only watched someone else use, revise the claim. Interview preparation can expose inaccuracies before an application leaves your hands.",
-        "Finish with a vacancy check: which requirement does each entry support, and which remains unanswered? Jobvance's student CV check can help organise that review. Bring the project context with the text, approve the wording yourself, and leave requirements for professional experience visible where academic work does not satisfy them."
+        "Finish with a vacancy check: which requirement does each entry support, and where would another example help? Jobvance's student CV check can help organise that review. Read the wording beside the job description, choose the most relevant entries and approve the CV you want to send. Check any required professional experience separately."
       ] }
     ], sources: [SOURCES.mitProjects], relatedSlugs: ["academic-qualifications-uae-cv", "interview-stories-from-cv", "cv-job-description-evidence"]
   }),
   publish({
     slug: "mba-career-pivot-cv",
-    title: "Build an MBA career-pivot CV with a credible bridge",
-    description: "Connect previous employment with MBA learning for a new role, keeping case studies, team work and forecasts distinct from delivered business results.",
+    title: "How to adapt your CV for an MBA career pivot",
+    description: "Choose a target role, connect your previous work with its responsibilities and show where MBA projects add relevant experience.",
     audience: "MBA candidates", category: "Career direction",
-    summary: "An MBA can add knowledge and opportunities, but the degree does not explain a career pivot by itself. A credible application shows the work you have already done, the new direction you are choosing and the evidence connecting them. Keep prior employment, academic projects and future ambitions separate.",
+    summary: "Your previous work and MBA projects can give you several ways to explain a career move. Start with the responsibilities of the role you want, then choose the examples that connect your experience to that work. This guide walks through that choice and how to show it on your CV.",
     takeaways: ["Define the next role's actual work.", "Build the bridge from specific past actions.", "Label MBA projects and proposed outcomes."],
     sections: [
       { heading: "Choose a direction before choosing wording", paragraphs: [
-        "Write a one-sentence target that names a function and the work you want to do. 'Business role in Dubai' leaves too many decisions unresolved. 'Operations analysis focused on process reporting and improvement' gives you a way to evaluate vacancies. It is a working hypothesis; revise it when real role descriptions show that your assumptions were wrong.",
-        "Compare two or three vacancies in that direction. Identify recurring responsibilities, then separate them from company-specific tools and eligibility conditions. Do not infer that every role with 'strategy' in its title has the same work. Your CV should respond to the vacancy you are applying for, not the broad prestige of a function."
+        "Write a one-sentence target that names a function and the work you want to do. For example, 'operations analysis focused on process reporting and improvement' gives you more to work with than 'a business role in Dubai'. Use it to compare vacancies and refine the direction as you learn more about the roles.",
+        "Compare two or three vacancies in that direction. Identify recurring responsibilities, then separate them from company-specific tools and eligibility conditions. Job titles can cover different work, so read the responsibilities of each role. Use the actual vacancy to decide which examples should lead your CV and which can sit further down."
       ] },
       { heading: "Create a bridge from previous employment", paragraphs: [
         "Map prior actions to the new responsibilities without renaming your old job. A supply-chain coordinator may have evidence of analysis, stakeholder updates and process documentation. Those actions can support an analyst application, while the original title and dates remain accurate. Yale's career guidance describes a professional resume as selectively emphasising relevant experience and transferable skills.",
-        "For each bridge, ask what still differs. Producing internal reports does not prove external-client consulting. Coordinating a schedule does not prove programme ownership. A useful explanation includes the transferable action and the new context you are still learning. This is more credible than declaring that your previous role was effectively the target role."
+        "For each connection, name the experience you can bring and the context you would be learning. Preparing internal reports, for example, can show analysis and communication relevant to consulting. Explain the reports, the audience and your part in the work, then consider what you would need to learn about working with external clients."
       ], sourceIds: ["yale-transition"] },
       { heading: "Use MBA evidence for the right claim", paragraphs: [
-        "An MBA project can show structured research, financial modelling, synthesis or presentation. Name whether it was a case exercise, independent project, student consulting engagement or employer-sponsored assignment. If an external organisation was involved, clarify the permitted description and your own role. Do not use 'consultant' as an employment title merely because a course included a consulting-style task.",
-        "Describe the status of recommendations. A modelled return is a forecast, a pilot is a test, and an accepted presentation is not a implemented transformation. Keep prior workplace outcomes and academic outputs in separate entries. Readers should not have to guess which organisation benefited or whether the proposal ever left the classroom."
+        "An MBA project can show structured research, financial modelling, synthesis or presentation. Give it a clear setting: a case exercise, independent project, student consulting engagement or employer-sponsored assignment. If an external organisation was involved, check how you may describe it. Use an 'MBA projects' heading and explain your role within the team.",
+        "Describe the status of recommendations. A modelled return is a forecast, a pilot is a test, and an accepted presentation is not an implemented transformation. Keep prior workplace outcomes and academic outputs in separate entries. Readers should not have to guess which organisation benefited or whether the proposal ever left the classroom."
       ], example: { label: "Fictional example", text: "A former procurement coordinator applies for an operations analyst role. Employment evidence: 'Prepared supplier performance reports for quarterly reviews.' MBA evidence: 'Compared inventory scenarios in a team case project and presented a proposed replenishment policy.' The proposed policy is not described as a delivered cost saving." } },
       { heading: "Write a short pivot explanation", paragraphs: [
         "Use three linked ideas in a cover-letter paragraph: your relevant prior action, what the MBA added, and why this vacancy is a sensible next step. Avoid saying the degree makes you ready for every responsibility. Name the work that interests you and one or two examples supporting it. The reader can then judge the connection.",
@@ -154,13 +154,13 @@ export const careerGuides: CareerGuide[] = [
   publish({
     slug: "confidential-career-switch",
     title: "Plan a confidential job search alongside your current job",
-    description: "Separate search activity, work information and public visibility while preparing a career move without assuming any platform guarantees secrecy.",
+    description: "Plan your contact details, application documents and profile visibility for a job search alongside your current role.",
     audience: "Working professionals", category: "Privacy & troubleshooting",
-    summary: "A discreet career move starts with a sharing plan. Decide what you can disclose, where you will prepare applications and how recruiters should contact you. Settings can reduce exposure, but they cannot give complete control over who learns about a search. Treat each document and conversation as a deliberate disclosure.",
+    summary: "Plan where you will prepare applications, which contact details you will use and what you want recruiters to see. A few decisions made before you start can make a discreet job search easier to manage alongside your current role. Begin with a shareable CV and a way to keep track of who has received it.",
     takeaways: ["Use personal contact details and permitted information.", "Check visibility settings and their limits.", "Confirm references and availability deliberately."],
     sections: [
       { heading: "Separate personal search activity", paragraphs: [
-        "Use an email address and phone number you control for applications. Choose a preparation time and device consistent with your employer's policies. Do not copy internal reports into personal storage simply because they would help you write stronger bullets. Your search notes can describe an action without containing the original confidential record.",
+        "Use an email address and phone number you control for applications. Choose a preparation time and device that fit your employer's policies. For your CV, write a shareable description of the work you did, using your own notes rather than moving confidential reports into personal storage.",
         "Make a small list of contact preferences: suitable calling windows, personal email, and whether an initial message is preferable to an unexpected call. Share these where appropriate with a recruiter. Keep the wording practical. A request for discretion explains your preference, but it cannot prevent a recipient from forwarding information or contacting someone else."
       ] },
       { heading: "Review public visibility deliberately", paragraphs: [
@@ -184,9 +184,9 @@ export const careerGuides: CareerGuide[] = [
   publish({
     slug: "role-filtering-before-applying",
     title: "Filter roles before spending time on an application",
-    description: "Use a practical shortlist with essential conditions, evidence questions and time costs to choose which vacancies deserve a full application review.",
+    description: "Create a manageable job shortlist by checking responsibilities, essential conditions and the time each application needs.",
     audience: "All applicants", category: "Career direction",
-    summary: "A useful shortlist protects attention. It keeps roles that are worth reviewing and records why others are paused or excluded. Start with the work and the conditions, then assess the evidence you can offer. The aim is a manageable next action, not a precise ranking of your chances.",
+    summary: "Before rewriting your CV, decide which vacancies deserve a closer look. Check the work, the practical conditions and the experience you can offer. A short note explaining why you want to apply, ask a question or move on will help you pick the next application.",
     takeaways: ["Check essential conditions before tailoring.", "Separate unknowns from clear mismatches.", "Choose a next action for each saved role."],
     sections: [
       { heading: "Define a small search brief", paragraphs: [
@@ -214,9 +214,9 @@ export const careerGuides: CareerGuide[] = [
   publish({
     slug: "verify-job-listing-source",
     title: "Verify a job listing before sharing your CV",
-    description: "Trace a vacancy to a credible source, check its destination and preserve what you verified before sharing documents or preparing an application.",
+    description: "Find the original vacancy, check the employer and application destination, and save the details you have confirmed.",
     audience: "All applicants", category: "UAE job search",
-    summary: "A convincing job post is a lead to investigate. Before giving it your attention or personal information, establish who is recruiting, where the application goes and whether the role is still available. A useful verification note captures the source and the unresolved questions instead of calling a vacancy 'verified' after one superficial check.",
+    summary: "Before sharing your CV, find out who is recruiting, where the application goes and whether the role is still listed. Start with the employer or agency, then check the vacancy details and contact instructions. Keep the original link and any questions you still need answered with your application notes.",
     takeaways: ["Trace the role to an employer or identifiable agency.", "Check the application destination separately.", "Keep unresolved questions visible."],
     sections: [
       { heading: "Start with the originating organisation", paragraphs: [
@@ -243,10 +243,10 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "achievements-without-numbers",
-    title: "Write credible CV achievements when you have no numbers",
-    description: "Describe useful actions, scope and deliverables without inventing percentages, financial impact or results that you cannot substantiate.",
+    title: "How to write CV achievements without numbers",
+    description: "Write specific CV bullets using the task, your actions, the scope of your work and what you produced.",
     audience: "All applicants", category: "CV evidence",
-    summary: "You can write a useful CV bullet without a percentage. A clear action, a defined task and a credible output may explain your contribution better than an invented metric. Start with what you know, distinguish it from what you infer and choose language you can defend in a conversation.",
+    summary: "You can write a useful CV bullet without a percentage. Describe the task, what you did and who used the result. This guide shows how to find those details in everyday work and turn them into examples you can explain in an interview.",
     takeaways: ["Describe the action, context and output.", "Use numbers only when their basis is clear.", "Keep estimates and forecasts labelled."],
     sections: [
       { heading: "Recover the task behind the job title", paragraphs: [
@@ -273,14 +273,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "first-application-pack",
-    title: "Prepare your first application pack without extra paperwork",
-    description: "Assemble one vacancy-specific CV, required answers and an optional message, with a clear review checklist before you submit anything.",
+    title: "What to include in your first job application",
+    description: "Use the employer’s instructions to prepare your CV, application answers and any other documents the role requires.",
     audience: "All applicants", category: "Application workflow",
-    summary: "An application pack is the set of materials one employer actually requests. It can be small: an approved CV, a few form answers and a message if needed. Build it around one verified vacancy. Keeping optional documents optional reduces work and gives you more time to review the pieces that matter.",
+    summary: "Start with what the employer asks for: a CV, the application questions and any requested documents. Keep them together for one vacancy, then review the details before submitting. This guide helps you work out what to prepare and what can wait.",
     takeaways: ["Read the employer's requested materials first.", "Prepare one role-specific packet.", "Approve the exact files you will submit."],
     sections: [
       { heading: "Capture the instructions in one place", paragraphs: [
-        "Open the employer's application page and record the role reference, deadline, accepted files and required questions. Check whether a cover letter, portfolio or qualification document is mandatory, optional or absent. Do not create an elaborate bundle because a generic job-search checklist says every application needs the same documents.",
+        "Open the employer's application page and note the role reference, deadline, accepted files and required questions. Check whether a cover letter, portfolio or qualification document is mandatory or optional. Use that list as your checklist, so you spend your preparation time on the materials this employer needs.",
         "Write a short completion list for this role. Include practical tasks such as checking a portfolio link or confirming the time zone of a deadline. If a requirement is unclear, resolve it before preparing the wrong document. Keep the employer's instructions beside your working files so they do not get lost between browser tabs."
       ] },
       { heading: "Establish your factual source record", paragraphs: [
@@ -303,14 +303,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "reuse-second-application",
-    title: "Reuse your career record for a second application",
-    description: "Carry confirmed facts into another role while reviewing its requirements, attachments and message separately to avoid copying the wrong claims.",
+    title: "How to reuse your CV for a second application",
+    description: "Use your reviewed experience as a starting point, then adapt the examples, documents and message for another vacancy.",
     audience: "All applicants", category: "Application workflow",
-    summary: "Your second application should benefit from the first without becoming a copy of it. Reuse confirmed facts and useful evidence. Review the new vacancy's requirements, emphasis and submission instructions from the beginning. The reusable asset is your truthful career record; each application remains a separate decision and version.",
+    summary: "Keep the dates, qualifications and experience you have already checked. For the next vacancy, choose the examples that matter most and review the employer’s submission instructions. Reusing that work gives you a starting point while keeping each application specific to the role.",
     takeaways: ["Reuse facts rather than employer-specific assumptions.", "Compare what changed between vacancies.", "Keep separate approved versions and receipts."],
     sections: [
       { heading: "Separate stable facts from role decisions", paragraphs: [
-        "Stable facts include employment dates, qualification status, your contribution and completed outputs. Role decisions include which examples lead, how you explain a pivot and which documents the employer requests. Keep these in separate notes. Otherwise a decision made for one vacancy can quietly become a supposed fact in the next.",
+        "Employment dates, qualifications, your contribution and completed work can carry into the next application. The order of your examples, the emphasis and the requested documents may change. Keep a reviewed record of the facts alongside your notes for each vacancy, so you can update the application without checking the same details from scratch.",
         "After the first application, correct the career record if review exposed a missing detail. Preserve important boundaries such as supporting versus leading, academic versus professional work, and projected versus achieved results. Reuse those confirmed facts in the second packet. Do not make the record more senior because the new vacancy has a more senior title."
       ] },
       { heading: "Read the second vacancy from the source", paragraphs: [
@@ -333,14 +333,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "cv-pdf-or-docx",
-    title: "Choose PDF or DOCX for the actual application portal",
-    description: "Follow the employer's file instructions, inspect exported documents and check extracted form fields instead of assuming one CV format always wins.",
+    title: "Should you send your CV as PDF or DOCX?",
+    description: "Choose a CV format from the employer’s upload instructions, check the exported file and review any fields filled by the portal.",
     audience: "All applicants", category: "Application workflow",
-    summary: "Choose the format the employer requests. When both PDF and DOCX are accepted, inspect your exported documents and use the version that presents your text reliably in that application. Neither extension guarantees a successful parse, a favourable assessment or an interview. The final check belongs to the actual file and portal.",
+    summary: "Check the employer’s upload instructions first. If both PDF and DOCX are accepted, open each exported file and choose the one that presents your CV clearly in that application. Then review any form fields filled from the document before you submit.",
     takeaways: ["Follow the current application instructions.", "Inspect the exported file and selectable text.", "Review auto-filled fields after uploading."],
     sections: [
       { heading: "Read the upload rules before exporting", paragraphs: [
-        "Look for accepted extensions, maximum size and any employer preference. Save those instructions with the role. If the application requires DOCX, provide DOCX rather than trying to persuade the form to accept a PDF. If it specifies a separate portfolio link, do not embed a large portfolio into the CV unless requested.",
+        "Look for accepted file types, maximum size and any employer preference, and save those instructions with the role. Export a copy in the requested format. Check whether portfolios or other materials have their own upload fields or link fields, so the CV contains the material intended for it.",
         "Greenhouse documents support for several candidate file formats, including PDF and DOCX. That is information about one system, not a rule for every employer. An organisation may use another platform or configure a different process. The instructions visible in the application you are completing should guide your choice."
       ], sourceIds: ["greenhouse-formats"] },
       { heading: "Check the real exported file", paragraphs: [
@@ -363,14 +363,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "cv-check-no-fit-percentage",
-    title: "Why a CV check should not promise a fit percentage",
-    description: "Interpret wording comparisons as review prompts, understand their limits and make application choices without treating a score as an interview forecast.",
+    title: "How to review a CV match score",
+    description: "Look beyond a CV match percentage to check the examples, missing details and job requirements behind it.",
     audience: "All applicants", category: "CV evidence",
-    summary: "A percentage can look precise while hiding what was measured. Shared words between a CV and a vacancy do not establish qualification, eligibility or hiring likelihood. Use a CV check to inspect evidence and identify questions. Make your decision from the underlying passages, the employer's conditions and your actual experience.",
+    summary: "If a CV tool gives you a match score, look at the comparison behind the number. Which requirements have a relevant example, and which need more detail? This guide helps you use the underlying text to review your application and understand what a percentage leaves out.",
     takeaways: ["Ask what a result measures.", "Inspect the passage behind each finding.", "Separate document review from hiring decisions."],
     sections: [
       { heading: "Identify the question the check can answer", paragraphs: [
-        "A text comparison can help answer whether wording in a vacancy has a related passage in your CV. It may also flag unclear ownership or a missing example. It cannot observe the employer's applicant pool, interview assessment or all eligibility checks. Those limits matter when a tool presents its output with confident language.",
+        "Start with the question you need answered: which requirements in this vacancy can I support with my experience? A text comparison can help you find related passages and missing examples. Read those passages before acting on a score, then check the responsibilities and eligibility conditions in the original vacancy.",
         "Jobvance's free check shows findings such as direct wording found, related passage, no passage found and manual review needed. These labels describe a document comparison. Read the method explanation and the passages rather than turning the counts into a percentage of qualification. A direct match remains something you need to verify."
       ], sourceIds: ["jobvance-workflow"] },
       { heading: "Watch for the same words doing different work", paragraphs: [
@@ -393,14 +393,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "application-tracking-follow-up",
-    title: "Track applications and follow up from real events",
-    description: "Use clear preparation and submission states, record the CV version and set follow-ups from employer instructions rather than arbitrary reminders.",
+    title: "How to track applications and plan follow-ups",
+    description: "Record each application, keep its CV version and confirmation, and choose a follow-up date from the employer’s instructions.",
     audience: "All applicants", category: "Application workflow",
-    summary: "An application tracker should tell you what happened and what to do next. Keep preparation separate from submission, preserve the document version and use the employer's stated process for follow-ups. A quiet inbox is an unresolved state, not proof that the application failed or that another message will improve it.",
+    summary: "Keep the vacancy, the CV you sent and the next action together. Record when you submit, add the employer’s reply or portal update, and set a follow-up date when the process calls for one. A useful tracker should let you return to an application without reconstructing what happened.",
     takeaways: ["Record submission only when it is confirmed.", "Keep each employer's version and reference.", "Follow the stated timeline and channel."],
     sections: [
       { heading: "Choose states that describe observable events", paragraphs: [
-        "Use a short set of states such as saved, preparing, ready, submitted, interview, closed and withdrawn. Add a separate note for uncertainty. A downloaded CV belongs under preparation; it should not be marked submitted. A portal confirmation or sent application email provides a stronger basis for a submission record.",
+        "Use a short set of states such as saved, preparing, ready, submitted, interview, closed and withdrawn. Keep a downloaded CV under preparation until you submit it. Then save the portal confirmation or sent application email with the record, along with any next step or uncertainty you want to return to.",
         "Avoid too many states that you cannot consistently distinguish. The tracker is there to reduce repeated checking. For each active application, keep the employer, role, source, reference, submitted date and next action. If a detail is unknown, write that explicitly rather than filling it with an assumption to make the row look complete."
       ] },
       { heading: "Preserve the exact packet", paragraphs: [
@@ -423,14 +423,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "interview-stories-from-cv",
-    title: "Turn CV evidence into interview stories you can defend",
-    description: "Prepare concise stories about your actions, choices and outcomes while preserving team contribution, academic context and uncertain results.",
+    title: "Turn your CV into clear interview stories",
+    description: "Choose examples from your CV and prepare concise interview answers about the situation, your actions and the outcome.",
     audience: "All applicants", category: "CV evidence",
-    summary: "An interview story expands a CV claim into a sequence a listener can follow. Explain the situation, your responsibility, your actions and what happened. Keep the story tied to the evidence you submitted. You should be able to discuss a decision and a limitation without expanding your contribution under pressure.",
+    summary: "Start with a CV bullet and build the story an interviewer may ask you to explain. Set out the situation, what you needed to do, the choices you made and what happened next. A small collection of examples will help you prepare for different questions using experience you already know.",
     takeaways: ["Prepare stories from the submitted CV.", "Make your own action distinct from the team's.", "Practise follow-up questions and limitations."],
     sections: [
       { heading: "Choose a small evidence bank", paragraphs: [
-        "Select four or five experiences that cover different kinds of work: solving a problem, coordinating people, learning something, handling a setback and producing a useful output. Use the CV version submitted to this employer. The story bank should explain real evidence, not invent polished answers for hypothetical achievements.",
+        "Choose four or five experiences that cover different kinds of work: solving a problem, coordinating people, learning something, handling a setback and producing a useful result. Use the CV version you sent to this employer. For each example, note your part, a decision you made and a detail that helps explain the outcome.",
         "Students can use a coursework or activity example when the question permits it, with that context clear. MBA candidates can distinguish prior employment from case work. Professionals can choose an example whose details are permitted to share. Start with work you know well enough to explain the choices, not only the final result."
       ] },
       { heading: "Build a clear sequence", paragraphs: [
@@ -454,13 +454,13 @@ export const careerGuides: CareerGuide[] = [
   publish({
     slug: "job-search-time-plan",
     title: "Make a job-search plan that fits a busy week",
-    description: "Set a realistic application budget, separate sourcing from review and use a weekly reset to keep a career move manageable alongside work or study.",
+    description: "Make room for finding roles, preparing applications and following up alongside work, classes and other commitments.",
     audience: "Working professionals", category: "Application workflow",
-    summary: "A job search alongside work or study needs a capacity plan. Give sourcing, application review and follow-up their own time. Choose a volume you can complete accurately, then adjust from what actually happened. The schedule below is an editorial example, not a productivity promise or a recommended number of applications for everyone.",
+    summary: "Give finding roles, reviewing applications and following up their own place in your week. Start with the time you can reliably spare, then decide how much you can prepare carefully. Use the example plan below as a starting point and adjust it around work, study and what you learn from your search.",
     takeaways: ["Budget time before choosing application volume.", "Separate finding roles from preparing packets.", "Finish review before starting more drafts."],
     sections: [
       { heading: "Find the time you can reliably protect", paragraphs: [
-        "Look at the coming week, including work, classes, travel and personal responsibilities. Identify a few realistic blocks rather than filling every free evening. A plan that depends on perfect energy after a long working day is fragile. Choose one preparation block where you can read carefully and one shorter block for checking updates.",
+        "Look at the coming week, including work, classes, travel and personal responsibilities. Choose a few blocks you can realistically protect. Leave time to read a CV carefully as well as shorter periods for checking updates. A plan that fits your normal week is easier to return to when an application takes longer than expected.",
         "Treat the first week as a trial. Record approximately how long sourcing, evidence review and submission take. These observations are about your process, not a general benchmark. If an employer requires a lengthy assessment, plan that separately. Do not hide it inside the time you allocated for a simple CV submission."
       ] },
       { heading: "Separate sourcing from preparation", paragraphs: [
@@ -513,10 +513,10 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "uae-job-search-sources",
-    title: "Build a UAE job search from sources you can check",
-    description: "Organise employer pages, public-sector portals and other job leads into a UAE search process with visible source coverage and verification limits.",
+    title: "Where to look for jobs in the UAE",
+    description: "Build a UAE job-source list from employer careers pages, official portals, recruitment agencies and job boards.",
     audience: "All applicants", category: "UAE job search",
-    summary: "A UAE job search benefits from a source list, not a claim that one service covers every vacancy. Use official public-sector routes where relevant, employer careers pages and identifiable recruitment sources. Trace individual roles to their application destination and check eligibility separately. A source is a starting point for verification, not a guarantee of an open or suitable job.",
+    summary: "Build a short list of places to check for roles in the UAE: employer careers pages, relevant public-sector portals, recruitment agencies and job boards. Record where each vacancy came from and where you will apply. This guide helps you organise those sources and check the details of individual roles.",
     takeaways: ["Keep a short list of sources by purpose.", "Verify each role and application destination.", "Separate source coverage from eligibility."],
     sections: [
       { heading: "Separate the kinds of sources", paragraphs: [
@@ -543,14 +543,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "academic-qualifications-uae-cv",
-    title: "State academic qualifications accurately in a UAE application",
-    description: "Distinguish awarded degrees, expected graduation, short courses and attestation questions without implying credentials or recognition you do not hold.",
+    title: "How to list qualifications on a UAE CV",
+    description: "List completed degrees, expected graduation and short courses clearly, and check any qualification requirements in a UAE vacancy.",
     audience: "Students", category: "UAE job search",
-    summary: "Your education section should let a reader understand what you have completed and what remains in progress. Keep the institution, qualification name and dates accurate. For UAE roles, review any stated certification, attestation or professional-registration requirements separately. Writing a degree clearly on a CV does not establish that all employment procedures are complete.",
+    summary: "Make your education section easy to read by listing the qualification, institution and completion date or expected graduation. Keep short courses and professional credentials clear too. For UAE applications, use the vacancy to identify any additional certification, attestation or registration questions you need to check.",
     takeaways: ["Distinguish awarded and in-progress qualifications.", "Keep short courses separate from degrees and licences.", "Verify attestation requirements through official sources."],
     sections: [
       { heading: "Use the qualification's actual name", paragraphs: [
-        "Write the degree and institution as they appear in your records, with a clear location when useful. If the name is unfamiliar to the intended reader, add a brief explanation that you can substantiate. Do not substitute a more recognisable qualification that you were not awarded. Translation and interpretation should preserve the meaning rather than upgrade it.",
+        "Write the degree and institution as they appear in your records, with a location when useful. If the name is unfamiliar to the reader, add a brief explanation alongside the official name. A translation should preserve the qualification you hold, so the reader can understand it and compare it with the vacancy’s requirements.",
         "Keep joint degrees, specialisations and honours accurate. A concentration is not a separate degree unless it was awarded as one. If you use an abbreviation, consider whether an external reader will understand it. Clear wording helps the employer evaluate the record and reduces inconsistency between the CV and application form."
       ] },
       { heading: "Make completion status explicit", paragraphs: [
@@ -573,14 +573,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "cancelled-partial-job-loop-runs",
-    title: "Understand a cancelled or partial Job Loop run",
-    description: "Read the run history, distinguish completed outputs from unfinished preparation and decide whether to review, resume or ask for help.",
+    title: "What to do when Job Loop preparation stops",
+    description: "Find the status of a partial, cancelled or interrupted preparation run and decide whether to review, resume or ask for help.",
     audience: "All applicants", category: "Privacy & troubleshooting",
-    summary: "A preparation run can stop before every step finishes. A partial, blocked, failed or cancelled state needs inspection rather than an assumption that everything succeeded or disappeared. Start with the recorded status, source checks and outputs. Decide what is useful, what remains unresolved and whether the next action is review, resume or support.",
+    summary: "If preparation stops or only some documents are ready, open the run history to see what finished and what needs attention. You may be able to review a completed document, resolve an issue and resume, or cancel the remaining work. Start with the recorded status and the message beside it.",
     takeaways: ["Read the recorded status and messages.", "Review existing outputs independently.", "Distinguish cancelling a run from cancelling a schedule."],
     sections: [
       { heading: "Inspect the current record first", paragraphs: [
-        "Open Run history and source coverage in your Job Loop and read the status, phase and messages. Check which source lanes report completion and which report a problem. If the interface has not confirmed the latest action, refresh the records before interpreting the outcome. A button click is a request; the recorded state is the evidence you need.",
+        "Open Run history and source coverage in Job Loop and read the status, current step and messages. Check which sources completed and which need attention. If you have just selected an action, refresh the records to see its result before deciding what to do next.",
         "Write down the specific unfinished step. It may concern a source, configuration, a budget stop or preparation. Avoid reducing every interruption to 'the app failed'. A precise observation helps you decide whether there is useful output to review and gives support a clearer description if you need assistance."
       ], sourceIds: ["jobvance-workflow"] },
       { heading: "Separate run completion from packet approval", paragraphs: [
@@ -604,9 +604,9 @@ export const careerGuides: CareerGuide[] = [
   publish({
     slug: "cv-upload-failure-checklist",
     title: "Fix a CV upload failure one step at a time",
-    description: "Check supported format, file size, readable text and document access, then recover with a clean copy or a precise support request.",
+    description: "Resolve a CV upload problem by checking the error message, file type, size and readable text.",
     audience: "All applicants", category: "Privacy & troubleshooting",
-    summary: "An upload failure is a document or process problem to diagnose. Read the exact message, preserve your original file and change one factor at a time. A supported extension does not guarantee that the file contains readable text. Use a clean copy and inspect the extracted content before continuing with a CV review.",
+    summary: "Keep your original CV and read the upload message first. Then check the file type, size and whether its text can be selected or copied. This checklist helps you try a clean copy, paste the text instead, or give support the details needed to investigate.",
     takeaways: ["Read the exact error before retrying.", "Preserve the original and inspect readable text.", "Ask for help with minimal sensitive information."],
     sections: [
       { heading: "Check the limits of the service you are using", paragraphs: [
@@ -633,14 +633,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "truthful-recruiter-drafts",
-    title: "Write recruiter messages that stay true to your evidence",
-    description: "Prepare a concise, unsent recruiter draft using a verified contact, the real role and specific evidence without invented referrals or inflated claims.",
+    title: "How to write a recruiter message about a job",
+    description: "Write a short message with the role, a relevant example from your experience and a clear request for a checked contact.",
     audience: "All applicants", category: "Application workflow",
-    summary: "A recruiter message should make one clear request and give a truthful reason to consider it. Verify the recipient, name the relevant role and choose a specific example from your actual record. Keep the draft separate from sending. A polished message is only useful when its facts, destination and purpose are right.",
+    summary: "Name the role you are writing about, give one relevant example from your experience and make a clear request. Check the contact and the employer’s instructions before sending. This guide walks through a short draft you can adapt for a specific vacancy or recruitment question.",
     takeaways: ["Verify the contact and role before drafting.", "Use one specific, defensible example.", "Review recipients and send deliberately."],
     sections: [
       { heading: "Establish a legitimate reason to write", paragraphs: [
-        "Start with the role or recruitment process you are asking about. Read the listing's contact instructions and use the stated channel where possible. If a person is named, verify their association with the organisation from an appropriate public source. Do not invent an email address from a naming pattern or treat a plausible address as confirmed.",
+        "Start with the role or recruitment process you want to ask about. Read the listing’s contact instructions and use the stated channel where possible. If a person is named, check their connection with the organisation through an appropriate public source. When you cannot confirm an address, return to the employer’s published contact route.",
         "An existing conversation provides context, but check its current recipients before replying. If you have no named contact, an employer's application route may be the right next step. A message to an unrelated employee is not automatically more useful than a complete application. Choose the channel based on the evidence you have, not a promise of privileged access."
       ] },
       { heading: "State the request and connection briefly", paragraphs: [

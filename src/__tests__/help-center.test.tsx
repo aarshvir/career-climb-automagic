@@ -36,7 +36,7 @@ describe('task-focused public help', () => {
     expect(screen.getByText(/Renaming the extension does not convert/)).toBeInTheDocument();
     await user.clear(screen.getByRole('searchbox'));
     await user.type(screen.getByRole('searchbox'), 'four-person MBA');
-    expect(screen.getByRole('heading', { name: 'Review facts without losing context or overstating your part' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Review the experience saved in your career record' })).toBeInTheDocument();
     expect(searchHelpTopics('25%')).toHaveLength(1);
     expect(searchHelpTopics('upload').some(topic => topic.id === 'uploads')).toBe(true);
     expect(searchHelpTopics('no CV')[0].id).toBe('no-cv');
@@ -66,7 +66,7 @@ describe('task-focused public help', () => {
     expect(upload).toHaveTextContent('PDF, DOCX or UTF-8 TXT');
     expect(upload).toHaveTextContent('5 MB');
     expect(upload).toHaveTextContent('does not perform OCR');
-    expect(container.querySelector('#recovery')).toHaveTextContent('Recovered claim and contact confirmations are reset');
+    expect(container.querySelector('#recovery')).toHaveTextContent('Recovered confirmations for facts and contact details are reset');
     expect(container.querySelector('#recovery')).toHaveTextContent('Keep my draft in this tab across refresh');
     expect(container.querySelector('#job-loop-review')).toHaveTextContent('open this exact PDF in a new tab');
     expect(container.querySelector('#second-application')).toHaveTextContent('Saved or prepared does not mean applied');
@@ -79,7 +79,7 @@ describe('task-focused public help', () => {
     const { container } = showHelp();
     await user.type(screen.getByRole('searchbox'), 'scanned');
     expect(container.querySelector('#first-check')).toBeNull();
-    await user.click(screen.getByRole('link', { name: /One CV, one vacancy/ }));
+    await user.click(screen.getByRole('link', { name: /Check your CV against a job/ }));
     expect(screen.getByRole('searchbox')).toHaveValue('');
     expect(container.querySelector('#first-check')).toBeInTheDocument();
   });

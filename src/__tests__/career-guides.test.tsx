@@ -16,7 +16,7 @@ function renderPage(path = "/guides") {
 describe("public career guides", () => {
   it("shows the full library, labelled filters and a free first action", () => {
     renderPage();
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("A clearer next step");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Practical help for your next application.");
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
     expect(screen.getByLabelText("Search the guides")).toHaveAttribute("type", "search");
     expect(screen.getByLabelText("Your stage")).toHaveValue("all");
@@ -33,9 +33,9 @@ describe("public career guides", () => {
     await user.tab();
     expect(screen.getByLabelText("Your stage")).toHaveFocus();
     await user.selectOptions(screen.getByLabelText("Your stage"), "Students");
-    expect(screen.getByRole("link", { name: "Show student projects without calling them work experience" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "How to describe student projects on your CV" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Compare your CV with a job description using evidence" })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Build an MBA career-pivot CV with a credible bridge" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: careerGuides.find(guide => guide.slug === "mba-career-pivot-cv")!.title })).not.toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("Your task"), "UAE job search");
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
   });

@@ -32,6 +32,10 @@ async function toReview(initialSource = source) {
   fireEvent.click(screen.getByRole("button", { name: "Review my CV & questions" }));
 }
 async function toApproval() { await toReview(); fireEvent.click(screen.getByRole("button", { name: "Recheck my changes & continue" })); fireEvent.click(screen.getByText("Evidence from your final CV — review the findings")); }
+function openSourceReviewControls() {
+  const summary = screen.getByText('Reuse these edits later (optional)');
+  if (!summary.closest('details')!.open) fireEvent.click(summary);
+}
 function approve() {
   fireEvent.click(screen.getByLabelText(/I reviewed the complete CV and vacancy/));
   fireEvent.click(screen.getByLabelText(/Both my source CV and final CV are safe/));
@@ -142,6 +146,8 @@ describe("six-step free CV check", () => {
     const confidential = source + '\nConfidential example client reference: PROJECT-ALPHA-FICTIONAL';
     const storage = vi.spyOn(Storage.prototype, 'setItem'), fetch = vi.spyOn(globalThis, 'fetch');
     show(); await toReview(confidential);
+    expect(screen.getByText('Reuse these edits later (optional)').closest('details')).not.toHaveAttribute('open');
+    openSourceReviewControls();
     fireEvent.change(screen.getByLabelText('Your CV to review'), { target: { value: source } });
     fireEvent.click(screen.getByRole('button', { name: 'Keep these edits in my reusable source' }));
     expect(readCheckRecovery(null)!.value.draft).toMatchObject({ sourceText: source, reviewedText: source, jobDescription: vacancy });
@@ -168,6 +174,7 @@ describe("six-step free CV check", () => {
     const edited = `${field.value}\nVerified new contribution added during review.`;
     fireEvent.change(field, { target: { value: edited } });
     fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' })); approve();
+    openSourceReviewControls();
     fireEvent.click(screen.getByText('Choose source lines to remove'));
     expect(screen.getByRole('link', { name: 'How source-line removal works' })).toHaveAttribute('href', '/help#source-line-removal');
     const lineLabel = `Remove source line ${source.split('\n').length + 1}`;
@@ -191,6 +198,7 @@ describe("six-step free CV check", () => {
     expect(changed.sourceText).toBe(`${source}\nVerified source contribution to keep.`);
     expect(changed.reviewedText).toBe(edited.replace(`${privateLine}\n`, ''));
     expect(screen.getByLabelText('Your CV to review')).toHaveValue(changed.reviewedText);
+    openSourceReviewControls();
     expect(screen.getByRole('button', { name: 'Undo source-line removal' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' })); approve();
     fireEvent.change(screen.getByLabelText('CV version for another vacancy'), { target: { value: choice } });
@@ -212,6 +220,7 @@ describe("six-step free CV check", () => {
     await waitFor(() => expect(screen.getByTitle('Exact PDF preview before approval')).toBeInTheDocument()); approve();
     fireEvent.click(screen.getByLabelText('Keep my draft in this tab across refresh'));
     fireEvent.click(screen.getByLabelText(/Save these reviewed texts privately/));
+    openSourceReviewControls();
     fireEvent.click(screen.getByText('Choose source lines to remove'));
     fireEvent.click(screen.getByLabelText(`Remove source line ${source.split('\n').length + 1}`));
     fireEvent.click(screen.getByRole('button', { name: 'Preview selected line removals' })); fireEvent.click(screen.getByRole('button', { name: 'Remove selected lines' }));
@@ -219,6 +228,7 @@ describe("six-step free CV check", () => {
     expect(sessionStorage.getItem('jobvance_check_recovery_v1')).not.toContain('previousSource');
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:synthetic-reviewed-cv');
     expect(screen.getByLabelText('Your CV to review')).not.toHaveValue(edited);
+    openSourceReviewControls();
     fireEvent.click(screen.getByRole('button', { name: 'Undo source-line removal' }));
     expect(screen.getByRole('heading', { name: 'Your review' })).toHaveFocus();
     expect(readCheckRecovery('account-a')!.value.draft).toMatchObject({ sourceText: initial, reviewedText: edited });
@@ -239,6 +249,7 @@ describe("six-step free CV check", () => {
     mocks.list.mockResolvedValue([record]); show();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Open saved check' })).toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: 'Open saved check' }));
+    openSourceReviewControls();
     fireEvent.click(screen.getByText('Choose source lines to remove'));
     fireEvent.click(screen.getByLabelText(`Remove source line ${source.split('\n').length + 1}`));
     fireEvent.click(screen.getByRole('button', { name: 'Preview selected line removals' })); fireEvent.click(screen.getByRole('button', { name: 'Remove selected lines' }));
@@ -254,8 +265,10 @@ describe("six-step free CV check", () => {
     fireEvent.change(screen.getByLabelText('Your CV to review'), { target: { value: source } });
     fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' })); approve();
     fireEvent.click(screen.getByLabelText('Keep my draft in this tab across refresh'));
+    openSourceReviewControls();
     fireEvent.click(screen.getByRole('button', { name: 'Keep these edits in my reusable source' }));
     expect(sessionStorage.getItem('jobvance_check_recovery_v1')).not.toContain('PROJECT-ALPHA-FICTIONAL');
+    openSourceReviewControls();
     expect(screen.getByRole('button', { name: 'Undo source update' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
@@ -480,6 +493,8 @@ describe("six-step free CV check", () => {
   it("runs a real evidence check and permits a guest TXT only after review without quota, storage or network writes", async () => {
     const storage = vi.spyOn(Storage.prototype, "setItem"), fetch = vi.spyOn(globalThis, "fetch");
     show(); await toApproval();
+    expect(screen.getByText('Reuse these edits later (optional)').closest('details')).not.toHaveAttribute('open');
+    expect(screen.getByRole('button', { name: 'Keep these edits in my reusable source' })).not.toBeVisible();
     expect(screen.getByRole("button", { name: "Download TXT" })).toBeDisabled();
     expect(screen.getByText("Lead a transformation programme.")).toBeInTheDocument();
     const leadershipFinding = screen.getByRole("article", { name: "Vacancy finding: Lead a transformation programme." });
@@ -524,7 +539,7 @@ describe("six-step free CV check", () => {
     expect(mocks.save).not.toHaveBeenCalled();
     fireEvent.click(screen.getByLabelText(/Save these reviewed texts privately/));
     fireEvent.click(screen.getByRole("button", { name: "Save approved check to my account" }));
-    await waitFor(() => expect(screen.getByText("Saved privately in your account. No pack credit was used.")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Saved privately in your account for free.")).toBeInTheDocument());
     expect(mocks.save).toHaveBeenCalledWith("account-a", expect.objectContaining({ originalText: source, approved: true, jobDescription: vacancy }));
     expect(mocks.tracker).not.toHaveBeenCalled();
   });
