@@ -1,0 +1,32 @@
+{
+  "baseline": {
+    "site_version": 25,
+    "runtime_source": "7a7af403bd62ea6d10bf056b68a67c5e5cbfe9de",
+    "documentation_head": "fe55436e2f5c51d2d8a15ead4e19c7a7e8675fcf"
+  },
+  "fresh_observations": [
+    {
+      "surface": "Sites read-only metadata",
+      "result": "Version25 active and public on https://jobvance.io."
+    },
+    {
+      "surface": "Chrome homepage after explicit reload",
+      "result": "Current Example application wording present. Students selected by default; primary CTA /check?audience=student. Distinct student, MBA and professional examples/cards remain."
+    },
+    {
+      "surface": "Chrome /check new tab, no form changes",
+      "result": "Six stages visible. Initial screen asks role and optional company before CV and vacancy. Optional draft recovery. Signed-in saved-check CV reuse controls exist; private record details excluded from this report."
+    },
+    {
+      "surface": "Desktop screenshot",
+      "result": "Legible green/cream hierarchy; substantial space and nested product example. Visual quality is an expert judgment, not a measured customer response."
+    }
+  ],
+  "excluded_or_uncertain": [
+    "Web search fetch returned stale wording that contradicted fresh reload and exact v25 source; excluded as current copy evidence.",
+    "Attempted viewport override did not change observed width (1920), then reset; no new mobile screenshot acceptance is claimed.",
+    "No CV was entered; no check, tracker, account, cloud run or candidate record was created or changed.",
+    "No fresh signup, OAuth continuation, opened export, second application, actual object deletion or paid model call was executed in this assessment.",
+    "No real customers or analytics were observed; synthetic grades do not establish conversion, retention, NPS, revenue or demand."
+  ]
+}

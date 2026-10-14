@@ -1,0 +1,2945 @@
+{
+  "type": "independent product/customer-value projection over an explicitly synthetic 100-profile panel",
+  "reviewer": "Product and customer-value lens; source-based assessment, no other reviewer grades consulted",
+  "assessed_at": "2026-10-14",
+  "runtime": {
+    "site_version": 25,
+    "source": "7a7af403bd62ea6d10bf056b68a67c5e5cbfe9de",
+    "checkout": "fe55436e2f5c51d2d8a15ead4e19c7a7e8675fcf",
+    "runtime_diff_from_release": "No src or supabase/functions diff in git inspection"
+  },
+  "input_sha256": "02370714a30f420710b03aa8a518bbf9ab4c385a714692efecd2268a95e5e65c",
+  "method": {
+    "name": "Transparent task-group base plus explicit profile modifiers",
+    "formula": "For each dimension d: score = clamp(0,100,segment_base[d] + sum(applicable_modifier[d])). overall = sum(score[d] × supplied_weight[d]) / 100. Per-profile overall is unrounded exact arithmetic on integer scores and percentage weights.",
+    "dimension_weights": {
+      "understand_value": 10,
+      "get_started": 10,
+      "first_application_value": 20,
+      "effort_saved": 20,
+      "return_second_application": 15,
+      "trust_control": 10,
+      "interface_help": 10,
+      "operational_reliability": 5
+    },
+    "anchors": {
+      "0–19": "task blocked",
+      "20–39": "major capability absent or workaround",
+      "40–59": "useful pieces but substantial friction",
+      "60–74": "useful with moderate gaps",
+      "75–89": "coherent path with limited friction",
+      "90–100": "exceptional, repeatedly evidenced performance"
+    },
+    "reference_profile": "Desktop, readable PDF or DOCX, already has a real vacancy, 20 minutes, medium digital confidence, first-time, ordinary privacy. Segment base represents the goal; profile attributes apply once. All profiles request second-vacancy work, so no additional yes/no modifier is applied.",
+    "uncertainty": "Integer dimensions are ordinal expert judgments, not measurements. Two-decimal arithmetic makes the formula reproducible, not the underlying judgments precise. Small score/rank differences should not be interpreted as meaningful; changing defensible base judgments can shift the result by several points.",
+    "independence": "One authored product lens, not 100 independent people, model responses, sessions or observed tasks. No conversion, NPS, purchase, interview or employment predictions.",
+    "reliability_treatment": "77 is a bounded favorable technical-evidence judgment shared by profiles: v22 preservation, v23–25 fencing, tests/native concurrency/readback are credited. Hosted signup/OAuth/download delivery and provider output quality remain unknown; they are not asserted failed or passed. The 100 profiles are evaluated independently of pilot capacity; they were not admitted as 100 simultaneous cloud users."
+  },
+  "assumptions": [
+    "Panel contains 88 readable CV/text profiles, six scanned PDFs and six without CV; this is a scenario assumption, not traffic measurement.",
+    "Each profile is scored against its actual stated goal. Existing free second-vacancy reuse receives credit; missing check-to-Loop shared continuity is a different limitation.",
+    "Unknown current seats, configured provider/feed availability and external account behavior are neither invented nor reported as outages.",
+    "Free checks need no model and no account. Payment integration remains pending; no purchase-flow penalty is assigned to a free task.",
+    "Technical controls cannot by themselves demonstrate writing quality, customer demand, saved minutes or premium visual quality. No new screenshots/videos, production accounts or browser sessions were used.",
+    "U06/U07 are resolved within v22 regression scope and are not included as current defects. v23–25 backend repairs are explicitly credited.",
+    "The historical usability findings file was used only to locate hypotheses, then current source/release evidence was inspected. Past grades and other current reviewers were not consulted."
+  ],
+  "evidence": [
+    {
+      "id": "P01",
+      "path": "src/pages/ProductPage.tsx",
+      "lines": [
+        124,
+        140
+      ],
+      "finding": "Clear free on-device CV + vacancy > review > download primary proposition; no account/card gate. Example selector defaults to student and changes the CTA audience parameter."
+    },
+    {
+      "id": "P02",
+      "path": "src/pages/ProductPage.tsx",
+      "lines": [
+        51,
+        78,
+        135,
+        150
+      ],
+      "finding": "Student/MBA/professional audience variants overlap, while examples and CTA guidance share selection state. This is a conceptual choice rather than a required difference in the core task."
+    },
+    {
+      "id": "P03",
+      "path": "src/pages/CvCheck.tsx",
+      "lines": [
+        25,
+        414,
+        418,
+        419,
+        420,
+        421,
+        422
+      ],
+      "finding": "Six clear named stages, original passages, editable final text, separate evidence report, approval and free PDF/DOCX/TXT exports. Role/company occupy the initial stage; vacancy text must be pasted."
+    },
+    {
+      "id": "P04",
+      "path": "src/lib/cv-evidence.ts",
+      "lines": [
+        456,
+        457,
+        466,
+        474,
+        475,
+        483,
+        489,
+        500
+      ],
+      "finding": "Free checker is deterministic English-text comparison. Automatic editing ranks original bullets only within safely bounded experience blocks; it does not broadly rewrite, coach or translate career-switch narratives."
+    },
+    {
+      "id": "P05",
+      "path": "src/lib/cv-extraction.ts",
+      "lines": [
+        1,
+        10,
+        23,
+        33,
+        42,
+        46,
+        73
+      ],
+      "finding": "Readable PDF, DOCX and TXT import is implemented with 5MB/60,000-character limits. Scanned PDFs explicitly require external OCR or pasted readable text; OCR is absent."
+    },
+    {
+      "id": "P06",
+      "path": "src/pages/CvCheck.tsx",
+      "lines": [
+        417
+      ],
+      "finding": "No-CV users have a factual starter outline and help link, then write/paste their own career material; there is no guided blank-to-complete CV builder."
+    },
+    {
+      "id": "P07",
+      "path": "src/pages/CvCheck.tsx",
+      "lines": [
+        183,
+        196,
+        292,
+        296,
+        298,
+        299,
+        423
+      ],
+      "finding": "Free-check second-vacancy reuse exists, with source/final choice, collapsed input flow and undo. Unchanged source confirmation and rechecks preserve existing final edits after v22. Do not score reuse as missing."
+    },
+    {
+      "id": "P08",
+      "path": "src/pages/CvCheck.tsx",
+      "lines": [
+        350,
+        355,
+        361,
+        365,
+        424,
+        425
+      ],
+      "finding": "Saving persists free-check source/final/vacancy separately; tracking independently stores role/company with an empty job URL. Saving does not create a shared Loop career record/application object."
+    },
+    {
+      "id": "P09",
+      "path": "src/pages/JobLoop.tsx",
+      "lines": [
+        401,
+        405,
+        406,
+        407,
+        410,
+        411,
+        412,
+        415,
+        417,
+        420,
+        421
+      ],
+      "finding": "Cloud Loop imports CV text and core details, then asks users to confirm reusable passages one at a time. Owned saved CV import is present; direct adoption of the approved free-check object is absent."
+    },
+    {
+      "id": "P10",
+      "path": "src/pages/JobLoop.tsx",
+      "lines": [
+        72,
+        83,
+        85,
+        86,
+        87,
+        89,
+        90,
+        91,
+        92
+      ],
+      "finding": "Each claim has evidence category, source quote/context, substantiated wording, result status and two confirmations. Guided mode copies passages, but confirmation remains passage-by-passage rather than exception-based."
+    },
+    {
+      "id": "P11",
+      "path": "src/pages/JobLoop.tsx",
+      "lines": [
+        95,
+        98,
+        99,
+        389,
+        390,
+        391,
+        426,
+        427,
+        432
+      ],
+      "finding": "Vacancy entry, manual tracking, run controls and output review are separate views. Opportunity row has no direct prepare-this-vacancy action. Packet CV text is read-only and corrections require source edit/rebuild."
+    },
+    {
+      "id": "P12",
+      "path": "src/pages/JobLoopPanels.tsx",
+      "lines": [
+        21,
+        27,
+        35,
+        36,
+        37,
+        39,
+        40,
+        41,
+        42,
+        46,
+        54,
+        57,
+        59
+      ],
+      "finding": "Loop has a visible progress path, concrete next action and recorded activity. Capability/provider/budget and source configuration remain visible. Cloud preparation is limited to ten pilot accounts; no evidence that seats are currently full."
+    },
+    {
+      "id": "P13",
+      "path": "src/pages/JobLoopOverview.tsx",
+      "lines": [
+        16,
+        19,
+        21,
+        23,
+        24
+      ],
+      "finding": "Public Loop page leads to free check, explains reusable work, selected employer feeds and private setup. Discovery is bounded, not whole-market UAE job coverage."
+    },
+    {
+      "id": "P14",
+      "path": "src/components/layout/MvpHeader.tsx",
+      "lines": [
+        15,
+        26,
+        27,
+        34
+      ],
+      "finding": "Signed-in header goes to /loop; normal sign-in has a separate destination convention."
+    },
+    {
+      "id": "P15",
+      "path": "src/lib/account-return.ts",
+      "lines": [
+        3,
+        4,
+        10,
+        11,
+        14,
+        21
+      ],
+      "finding": "Explicit Loop continuation is supported; ordinary account destination defaults to /dashboard. This does not establish that signup/OAuth currently fails."
+    },
+    {
+      "id": "P16",
+      "path": "src/pages/Workspace.tsx",
+      "lines": [
+        56,
+        57,
+        59,
+        60,
+        63,
+        64,
+        65,
+        66
+      ],
+      "finding": "Existing workspace separately exposes Your CVs, application packs, Applications and Packs & payments. Combined with free-check records and Loop, this fragments saved work across three concepts."
+    },
+    {
+      "id": "P17",
+      "path": "src/pages/CvCheck.tsx",
+      "lines": [
+        315,
+        318,
+        336,
+        337,
+        341,
+        350,
+        351,
+        353,
+        422
+      ],
+      "finding": "Exact PDF preview is a useful safeguard but resets approval; download and optional save share a busy flag. A pending optional save can temporarily block local exports."
+    },
+    {
+      "id": "P18",
+      "path": "src/lib/check-draft.ts",
+      "lines": [
+        89,
+        94,
+        95,
+        125,
+        130,
+        131,
+        132
+      ],
+      "finding": "Draft recovery has explicit tab-storage consent, owner binding, approval fingerprint and a separate consented Google handoff. Recovery is bounded rather than promised permanent."
+    },
+    {
+      "id": "P19",
+      "path": "src/pages/Walkthroughs.tsx",
+      "lines": [
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        66,
+        67,
+        69,
+        70,
+        72
+      ],
+      "finding": "Task-specific recorded videos, presenter overlay support, captions, chapters, interactive steps and transcript/failure fallback exist in source. Current playback quality and avatar realism were not re-evaluated."
+    },
+    {
+      "id": "P20",
+      "path": "docs/WORK-PRESERVATION-RELEASE-2026-10-14.md",
+      "lines": [
+        3,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        31,
+        35
+      ],
+      "finding": "U06/U07 fixed in v22 within local regression and deployed-readback scope; draft preservation and edit protection credited. General source replacement undo, tracking navigation and save/export separation remain partial."
+    },
+    {
+      "id": "P21",
+      "path": "docs/REQUEST-GENERATION-RELEASE-2026-10-14.md",
+      "lines": [
+        3,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        20,
+        22,
+        24
+      ],
+      "finding": "v24 adds lifecycle-bound requests, mailbox state/refresh protection, no-activation reads, retained budget commitments and regression evidence. Backend reliability improvements are credited, not re-reported as unfixed defects."
+    },
+    {
+      "id": "P22",
+      "path": "docs/ARTIFACT-MAINTENANCE-RELEASE-2026-10-14.md",
+      "lines": [
+        3,
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        18,
+        20,
+        28,
+        32,
+        34,
+        36
+      ],
+      "finding": "v25 release/readback, bounded closed-path collection and six native PostgreSQL concurrency cases strengthen reliability evidence. Production collection stays disabled; hosted Storage acceptance, whole-account/restore rehearsal, fresh signup/full OAuth and unassisted candidate success remain unknown."
+    },
+    {
+      "id": "P23",
+      "path": "src/pages/ProductPage.tsx",
+      "lines": [
+        38,
+        39,
+        40,
+        41,
+        44,
+        45,
+        47,
+        48
+      ],
+      "finding": "FAQ explains free access, formats, externally completed applications, current availability and limits. Paid tiers are proposals; absence of payment integration is not a penalty for the current free task."
+    }
+  ],
+  "segment_base_scores": {
+    "final_year": {
+      "understand_value": 80,
+      "get_started": 83,
+      "first_application_value": 76,
+      "effort_saved": 69,
+      "return_second_application": 62,
+      "trust_control": 88,
+      "interface_help": 76,
+      "operational_reliability": 77
+    },
+    "recent_graduate": {
+      "understand_value": 80,
+      "get_started": 83,
+      "first_application_value": 76,
+      "effort_saved": 67,
+      "return_second_application": 60,
+      "trust_control": 88,
+      "interface_help": 75,
+      "operational_reliability": 77
+    },
+    "mba": {
+      "understand_value": 78,
+      "get_started": 81,
+      "first_application_value": 68,
+      "effort_saved": 60,
+      "return_second_application": 58,
+      "trust_control": 88,
+      "interface_help": 73,
+      "operational_reliability": 77
+    },
+    "busy_same_function": {
+      "understand_value": 79,
+      "get_started": 82,
+      "first_application_value": 74,
+      "effort_saved": 63,
+      "return_second_application": 61,
+      "trust_control": 88,
+      "interface_help": 74,
+      "operational_reliability": 77
+    },
+    "busy_switcher": {
+      "understand_value": 77,
+      "get_started": 80,
+      "first_application_value": 64,
+      "effort_saved": 55,
+      "return_second_application": 55,
+      "trust_control": 88,
+      "interface_help": 72,
+      "operational_reliability": 77
+    },
+    "urgent_search": {
+      "understand_value": 77,
+      "get_started": 81,
+      "first_application_value": 71,
+      "effort_saved": 59,
+      "return_second_application": 55,
+      "trust_control": 87,
+      "interface_help": 72,
+      "operational_reliability": 77
+    },
+    "uae_relocation": {
+      "understand_value": 75,
+      "get_started": 79,
+      "first_application_value": 65,
+      "effort_saved": 54,
+      "return_second_application": 55,
+      "trust_control": 87,
+      "interface_help": 72,
+      "operational_reliability": 77
+    },
+    "career_return": {
+      "understand_value": 77,
+      "get_started": 80,
+      "first_application_value": 66,
+      "effort_saved": 57,
+      "return_second_application": 56,
+      "trust_control": 88,
+      "interface_help": 73,
+      "operational_reliability": 77
+    },
+    "mobile_constraint": {
+      "understand_value": 79,
+      "get_started": 82,
+      "first_application_value": 73,
+      "effort_saved": 64,
+      "return_second_application": 59,
+      "trust_control": 88,
+      "interface_help": 74,
+      "operational_reliability": 77
+    },
+    "privacy_constraint": {
+      "understand_value": 79,
+      "get_started": 82,
+      "first_application_value": 73,
+      "effort_saved": 59,
+      "return_second_application": 58,
+      "trust_control": 89,
+      "interface_help": 74,
+      "operational_reliability": 77
+    }
+  },
+  "segment_base_rationale": {
+    "final_year": "Project/internship evidence and the free first application fit this goal well; unsupported blank-CV cases are adjusted separately.",
+    "recent_graduate": "First document and manual tracking are useful, but multiple applications expose separate saved-check, tracker and Loop records.",
+    "mba": "Preserving project context is useful; translating prior work and MBA projects into a changed function still needs substantial personal editing.",
+    "busy_same_function": "Reusable facts, recurring preparation and tracking can save work; setup/review and three saved-work concepts limit the time-saving proposition.",
+    "busy_switcher": "Transferable-story development is materially more demanding than local wording comparison/reordering; Loop source changes require rebuild.",
+    "urgent_search": "Useful free preparation, but multiple urgent applications magnify entry/review overhead, pilot constraints and fragmented follow-up.",
+    "uae_relocation": "The product does not establish comprehensive UAE vacancy discovery, visa/eligibility reasoning or relocation-specific service. Discovery modifier applies when explicitly required.",
+    "career_return": "Source-grounded material and editing help, but a career-break narrative and targeting strategy remain largely manual.",
+    "mobile_constraint": "Neutral task base for preparing an application; phone effort is applied once through actual device modifier, not double-counted for segment label.",
+    "privacy_constraint": "Privacy boundary task receives strong source/approval credit; redaction/rebuild friction limits saved effort. Device/input/time modifiers remain separate."
+  },
+  "profile_modifiers": [
+    {
+      "id": "mobile",
+      "condition": {
+        "device": "mobile"
+      },
+      "delta": {
+        "get_started": -3,
+        "first_application_value": -2,
+        "effort_saved": -4,
+        "return_second_application": -3,
+        "interface_help": -5
+      },
+      "rationale": "Long source/final editors, pasted vacancy and passage review demand more effort on a phone. No browser failure is asserted.",
+      "evidence": [
+        "P03",
+        "P09",
+        "P10",
+        "P11"
+      ]
+    },
+    {
+      "id": "short_time",
+      "condition": {
+        "time_budget_minutes": 10
+      },
+      "delta": {
+        "get_started": -4,
+        "first_application_value": -3,
+        "effort_saved": -5,
+        "interface_help": -2
+      },
+      "rationale": "A six-stage review plus separate reusable-fact setup fits a ten-minute window poorly. This is an ordinal effort judgment, not a timed session.",
+      "evidence": [
+        "P03",
+        "P09",
+        "P10",
+        "P17"
+      ]
+    },
+    {
+      "id": "more_time",
+      "condition": {
+        "time_budget_minutes": 40
+      },
+      "delta": {
+        "get_started": 1,
+        "first_application_value": 2,
+        "effort_saved": 2,
+        "interface_help": 1
+      },
+      "rationale": "More review time improves fit for a manual evidence-led workflow; does not claim completion probability.",
+      "evidence": [
+        "P03",
+        "P10"
+      ]
+    },
+    {
+      "id": "low_confidence",
+      "condition": {
+        "digital_confidence": "low"
+      },
+      "delta": {
+        "get_started": -5,
+        "first_application_value": -3,
+        "effort_saved": -4,
+        "interface_help": -5
+      },
+      "rationale": "Source/final distinction, model/run/claim concepts and fragmented homes require more interpretation despite help.",
+      "evidence": [
+        "P08",
+        "P10",
+        "P11",
+        "P12",
+        "P16"
+      ]
+    },
+    {
+      "id": "high_confidence",
+      "condition": {
+        "digital_confidence": "high"
+      },
+      "delta": {
+        "get_started": 2,
+        "first_application_value": 2,
+        "effort_saved": 2,
+        "interface_help": 2
+      },
+      "rationale": "A confident user is better equipped to use current editing and capability controls; no measured behavior is implied.",
+      "evidence": [
+        "P03",
+        "P10",
+        "P12"
+      ]
+    },
+    {
+      "id": "returning",
+      "condition": {
+        "product_familiarity": "returning after first check"
+      },
+      "delta": {
+        "understand_value": 3,
+        "get_started": 2,
+        "first_application_value": 1,
+        "interface_help": 1
+      },
+      "rationale": "Previous exposure helps comprehension. Existing free-check reuse is credited; familiarity alone does not repair cross-system continuity.",
+      "evidence": [
+        "P07",
+        "P08",
+        "P16"
+      ]
+    },
+    {
+      "id": "paste",
+      "condition": {
+        "cv_input": "pasted text"
+      },
+      "delta": {
+        "get_started": 2,
+        "effort_saved": 2
+      },
+      "rationale": "Bypasses file import and format recovery.",
+      "evidence": [
+        "P05"
+      ]
+    },
+    {
+      "id": "scan",
+      "condition": {
+        "cv_input": "scanned PDF"
+      },
+      "delta": {
+        "get_started": -24,
+        "first_application_value": -12,
+        "effort_saved": -18,
+        "interface_help": -4
+      },
+      "rationale": "External OCR or manual pasted transcription is needed. Error/help is explicit; this is a documented capability gap, not an asserted extraction bug.",
+      "evidence": [
+        "P05"
+      ]
+    },
+    {
+      "id": "no_cv",
+      "condition": {
+        "cv_input": "no existing CV"
+      },
+      "delta": {
+        "get_started": -14,
+        "first_application_value": -9,
+        "effort_saved": -12,
+        "interface_help": -4
+      },
+      "rationale": "A starter outline exists, but user must author factual source material; guided full CV construction is absent.",
+      "evidence": [
+        "P06"
+      ]
+    },
+    {
+      "id": "discovery",
+      "condition": {
+        "job_source": "needs discovery"
+      },
+      "delta": {
+        "understand_value": -2,
+        "get_started": -4,
+        "first_application_value": -9,
+        "effort_saved": -9,
+        "return_second_application": -5,
+        "interface_help": -2
+      },
+      "rationale": "Main free path requires a vacancy; cloud selected feeds and optional search do not establish complete relevant-job discovery. Manual job sourcing remains work. Configured feed or provider outages are not assumed.",
+      "evidence": [
+        "P03",
+        "P11",
+        "P12",
+        "P13"
+      ]
+    },
+    {
+      "id": "high_privacy",
+      "condition": {
+        "privacy_priority": "high"
+      },
+      "delta": {
+        "trust_control": 1,
+        "effort_saved": -2,
+        "interface_help": -1
+      },
+      "rationale": "Local checking and scoped sharing align with privacy needs, while redaction/correction and repeated approvals add effort.",
+      "evidence": [
+        "P10",
+        "P11",
+        "P18",
+        "P21",
+        "P22"
+      ]
+    }
+  ],
+  "aggregates": {
+    "count": 100,
+    "overall_mean": 67.78,
+    "overall_median": 68.4,
+    "minimum": 46.6,
+    "maximum": 77.65,
+    "dimension_means": {
+      "understand_value": 78.92,
+      "get_started": 76.42,
+      "first_application_value": 66.27,
+      "effort_saved": 54.41,
+      "return_second_application": 56.24,
+      "trust_control": 88.19,
+      "interface_help": 70.04,
+      "operational_reliability": 77
+    },
+    "segments": [
+      {
+        "segment": "final_year",
+        "count": 15,
+        "overall_mean": 71.42,
+        "dimension_means": {
+          "understand_value": 80.47,
+          "get_started": 77.93,
+          "first_application_value": 71.33,
+          "effort_saved": 62.13,
+          "return_second_application": 59.87,
+          "trust_control": 88.2,
+          "interface_help": 72.4,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "recent_graduate",
+        "count": 15,
+        "overall_mean": 70.71,
+        "dimension_means": {
+          "understand_value": 80.47,
+          "get_started": 77.87,
+          "first_application_value": 71.47,
+          "effort_saved": 60.13,
+          "return_second_application": 58.07,
+          "trust_control": 88.2,
+          "interface_help": 71.73,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "mba",
+        "count": 10,
+        "overall_mean": 66.56,
+        "dimension_means": {
+          "understand_value": 78.6,
+          "get_started": 75.3,
+          "first_application_value": 63,
+          "effort_saved": 52.6,
+          "return_second_application": 55.9,
+          "trust_control": 88.2,
+          "interface_help": 69.9,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "busy_same_function",
+        "count": 20,
+        "overall_mean": 69.52,
+        "dimension_means": {
+          "understand_value": 79.55,
+          "get_started": 77.5,
+          "first_application_value": 69.65,
+          "effort_saved": 56.6,
+          "return_second_application": 59,
+          "trust_control": 88.2,
+          "interface_help": 70.45,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "busy_switcher",
+        "count": 15,
+        "overall_mean": 64.53,
+        "dimension_means": {
+          "understand_value": 77.47,
+          "get_started": 75.73,
+          "first_application_value": 59.93,
+          "effort_saved": 48.8,
+          "return_second_application": 52.87,
+          "trust_control": 88.2,
+          "interface_help": 68.67,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "urgent_search",
+        "count": 5,
+        "overall_mean": 65.33,
+        "dimension_means": {
+          "understand_value": 77.4,
+          "get_started": 74.4,
+          "first_application_value": 64.8,
+          "effort_saved": 49.8,
+          "return_second_application": 52.4,
+          "trust_control": 87.2,
+          "interface_help": 68,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "uae_relocation",
+        "count": 5,
+        "overall_mean": 60.64,
+        "dimension_means": {
+          "understand_value": 74.2,
+          "get_started": 73,
+          "first_application_value": 54.4,
+          "effort_saved": 41.8,
+          "return_second_application": 49.4,
+          "trust_control": 87.2,
+          "interface_help": 67,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "career_return",
+        "count": 5,
+        "overall_mean": 64.78,
+        "dimension_means": {
+          "understand_value": 77.4,
+          "get_started": 74,
+          "first_application_value": 60.4,
+          "effort_saved": 49.2,
+          "return_second_application": 53.4,
+          "trust_control": 88.2,
+          "interface_help": 70.4,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "mobile_constraint",
+        "count": 5,
+        "overall_mean": 67.29,
+        "dimension_means": {
+          "understand_value": 79.4,
+          "get_started": 76.2,
+          "first_application_value": 67,
+          "effort_saved": 54.4,
+          "return_second_application": 54,
+          "trust_control": 88.2,
+          "interface_help": 66.8,
+          "operational_reliability": 77
+        }
+      },
+      {
+        "segment": "privacy_constraint",
+        "count": 5,
+        "overall_mean": 66.36,
+        "dimension_means": {
+          "understand_value": 79.4,
+          "get_started": 75.6,
+          "first_application_value": 66,
+          "effort_saved": 48.2,
+          "return_second_application": 55.4,
+          "trust_control": 90,
+          "interface_help": 68.6,
+          "operational_reliability": 77
+        }
+      }
+    ],
+    "input_mix": {
+      "scanned PDF": 6,
+      "no existing CV": 6,
+      "pasted text": 29,
+      "readable PDF": 30,
+      "DOCX": 29
+    }
+  },
+  "profiles": [
+    {
+      "id": "S001",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 81,
+        "get_started": 45,
+        "first_application_value": 48,
+        "effort_saved": 27,
+        "return_second_application": 54,
+        "trust_control": 89,
+        "interface_help": 58,
+        "operational_reliability": 77
+      },
+      "overall": 54.25,
+      "applied_modifiers": [
+        "mobile",
+        "short_time",
+        "low_confidence",
+        "returning",
+        "scan",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S002",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 69,
+        "first_application_value": 67,
+        "effort_saved": 57,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 72,
+        "operational_reliability": 77
+      },
+      "overall": 68.85,
+      "applied_modifiers": [
+        "no_cv"
+      ]
+    },
+    {
+      "id": "S003",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 88,
+        "first_application_value": 80,
+        "effort_saved": 75,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 79,
+        "operational_reliability": 77
+      },
+      "overall": 77.65,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S004",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 83,
+        "get_started": 76,
+        "first_application_value": 71,
+        "effort_saved": 60,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 70,
+        "operational_reliability": 77
+      },
+      "overall": 71.05,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S005",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 76,
+        "first_application_value": 65,
+        "effort_saved": 56,
+        "return_second_application": 54,
+        "trust_control": 88,
+        "interface_help": 69,
+        "operational_reliability": 77
+      },
+      "overall": 67.25,
+      "applied_modifiers": [
+        "mobile",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S006",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 88,
+        "first_application_value": 80,
+        "effort_saved": 73,
+        "return_second_application": 62,
+        "trust_control": 89,
+        "interface_help": 78,
+        "operational_reliability": 77
+      },
+      "overall": 77.25,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "paste",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S007",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 83,
+        "get_started": 76,
+        "first_application_value": 71,
+        "effort_saved": 60,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 70,
+        "operational_reliability": 77
+      },
+      "overall": 71.05,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S008",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 83,
+        "first_application_value": 76,
+        "effort_saved": 69,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 76,
+        "operational_reliability": 77
+      },
+      "overall": 74.85,
+      "applied_modifiers": []
+    },
+    {
+      "id": "S009",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 81,
+        "first_application_value": 69,
+        "effort_saved": 62,
+        "return_second_application": 54,
+        "trust_control": 88,
+        "interface_help": 72,
+        "operational_reliability": 77
+      },
+      "overall": 70.05,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "paste",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S010",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 83,
+        "get_started": 76,
+        "first_application_value": 71,
+        "effort_saved": 60,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 70,
+        "operational_reliability": 77
+      },
+      "overall": 71.05,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S011",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 83,
+        "first_application_value": 76,
+        "effort_saved": 67,
+        "return_second_application": 62,
+        "trust_control": 89,
+        "interface_help": 75,
+        "operational_reliability": 77
+      },
+      "overall": 74.45,
+      "applied_modifiers": [
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S012",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 88,
+        "first_application_value": 80,
+        "effort_saved": 75,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 79,
+        "operational_reliability": 77
+      },
+      "overall": 77.65,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S013",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 81,
+        "get_started": 69,
+        "first_application_value": 60,
+        "effort_saved": 47,
+        "return_second_application": 54,
+        "trust_control": 88,
+        "interface_help": 63,
+        "operational_reliability": 77
+      },
+      "overall": 63.45,
+      "applied_modifiers": [
+        "mobile",
+        "short_time",
+        "low_confidence",
+        "returning",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S014",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 83,
+        "first_application_value": 76,
+        "effort_saved": 69,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 76,
+        "operational_reliability": 77
+      },
+      "overall": 74.85,
+      "applied_modifiers": []
+    },
+    {
+      "id": "S015",
+      "segment": "final_year",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 88,
+        "first_application_value": 80,
+        "effort_saved": 75,
+        "return_second_application": 62,
+        "trust_control": 88,
+        "interface_help": 79,
+        "operational_reliability": 77
+      },
+      "overall": 77.65,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S016",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 81,
+        "get_started": 81,
+        "first_application_value": 68,
+        "effort_saved": 56,
+        "return_second_application": 55,
+        "trust_control": 89,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 69.3,
+      "applied_modifiers": [
+        "returning",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S017",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 86,
+        "first_application_value": 80,
+        "effort_saved": 71,
+        "return_second_application": 60,
+        "trust_control": 88,
+        "interface_help": 78,
+        "operational_reliability": 77
+      },
+      "overall": 76.25,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S018",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 50,
+        "first_application_value": 58,
+        "effort_saved": 40,
+        "return_second_application": 60,
+        "trust_control": 88,
+        "interface_help": 64,
+        "operational_reliability": 77
+      },
+      "overall": 60.65,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "scan"
+      ]
+    },
+    {
+      "id": "S019",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 83,
+        "get_started": 82,
+        "first_application_value": 75,
+        "effort_saved": 63,
+        "return_second_application": 57,
+        "trust_control": 88,
+        "interface_help": 71,
+        "operational_reliability": 77
+      },
+      "overall": 72.4,
+      "applied_modifiers": [
+        "mobile",
+        "returning"
+      ]
+    },
+    {
+      "id": "S020",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 82,
+        "first_application_value": 71,
+        "effort_saved": 62,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 76,
+        "operational_reliability": 77
+      },
+      "overall": 71.1,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S021",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 60,
+        "first_application_value": 61,
+        "effort_saved": 44,
+        "return_second_application": 60,
+        "trust_control": 89,
+        "interface_help": 63,
+        "operational_reliability": 77
+      },
+      "overall": 63.05,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "no_cv",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S022",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 83,
+        "get_started": 85,
+        "first_application_value": 77,
+        "effort_saved": 67,
+        "return_second_application": 60,
+        "trust_control": 88,
+        "interface_help": 76,
+        "operational_reliability": 77
+      },
+      "overall": 74.85,
+      "applied_modifiers": [
+        "returning"
+      ]
+    },
+    {
+      "id": "S023",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 83,
+        "first_application_value": 78,
+        "effort_saved": 67,
+        "return_second_application": 57,
+        "trust_control": 88,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 73.8,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S024",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 72,
+        "first_application_value": 61,
+        "effort_saved": 51,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 66,
+        "operational_reliability": 77
+      },
+      "overall": 64.9,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "paste",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S025",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 83,
+        "get_started": 85,
+        "first_application_value": 77,
+        "effort_saved": 67,
+        "return_second_application": 60,
+        "trust_control": 88,
+        "interface_help": 76,
+        "operational_reliability": 77
+      },
+      "overall": 74.85,
+      "applied_modifiers": [
+        "returning"
+      ]
+    },
+    {
+      "id": "S026",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 86,
+        "first_application_value": 80,
+        "effort_saved": 69,
+        "return_second_application": 60,
+        "trust_control": 89,
+        "interface_help": 77,
+        "operational_reliability": 77
+      },
+      "overall": 75.85,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S027",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 73,
+        "first_application_value": 68,
+        "effort_saved": 56,
+        "return_second_application": 57,
+        "trust_control": 88,
+        "interface_help": 63,
+        "operational_reliability": 77
+      },
+      "overall": 67.6,
+      "applied_modifiers": [
+        "mobile",
+        "short_time",
+        "low_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S028",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 81,
+        "get_started": 81,
+        "first_application_value": 68,
+        "effort_saved": 58,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 74,
+        "operational_reliability": 77
+      },
+      "overall": 69.7,
+      "applied_modifiers": [
+        "returning",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S029",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 86,
+        "first_application_value": 80,
+        "effort_saved": 71,
+        "return_second_application": 60,
+        "trust_control": 88,
+        "interface_help": 78,
+        "operational_reliability": 77
+      },
+      "overall": 76.25,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S030",
+      "segment": "recent_graduate",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 76,
+        "first_application_value": 70,
+        "effort_saved": 60,
+        "return_second_application": 60,
+        "trust_control": 88,
+        "interface_help": 68,
+        "operational_reliability": 77
+      },
+      "overall": 70.05,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S031",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 82,
+        "first_application_value": 64,
+        "effort_saved": 53,
+        "return_second_application": 53,
+        "trust_control": 89,
+        "interface_help": 74,
+        "operational_reliability": 77
+      },
+      "overall": 67.6,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "returning",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S032",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 72,
+        "first_application_value": 62,
+        "effort_saved": 51,
+        "return_second_application": 58,
+        "trust_control": 88,
+        "interface_help": 66,
+        "operational_reliability": 77
+      },
+      "overall": 65.55,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence"
+      ]
+    },
+    {
+      "id": "S033",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 80,
+        "first_application_value": 66,
+        "effort_saved": 58,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 68,
+        "operational_reliability": 77
+      },
+      "overall": 68.3,
+      "applied_modifiers": [
+        "mobile",
+        "paste"
+      ]
+    },
+    {
+      "id": "S034",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 81,
+        "get_started": 86,
+        "first_application_value": 73,
+        "effort_saved": 64,
+        "return_second_application": 58,
+        "trust_control": 88,
+        "interface_help": 77,
+        "operational_reliability": 77
+      },
+      "overall": 73.15,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S035",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 76,
+        "get_started": 44,
+        "first_application_value": 41,
+        "effort_saved": 24,
+        "return_second_application": 53,
+        "trust_control": 88,
+        "interface_help": 60,
+        "operational_reliability": 77
+      },
+      "overall": 51.6,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "scan",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S036",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 83,
+        "first_application_value": 68,
+        "effort_saved": 60,
+        "return_second_application": 58,
+        "trust_control": 89,
+        "interface_help": 72,
+        "operational_reliability": 77
+      },
+      "overall": 70.35,
+      "applied_modifiers": [
+        "paste",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S037",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 81,
+        "get_started": 83,
+        "first_application_value": 71,
+        "effort_saved": 60,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 72,
+        "operational_reliability": 77
+      },
+      "overall": 70.7,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S038",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 72,
+        "first_application_value": 62,
+        "effort_saved": 51,
+        "return_second_application": 58,
+        "trust_control": 88,
+        "interface_help": 66,
+        "operational_reliability": 77
+      },
+      "overall": 65.55,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence"
+      ]
+    },
+    {
+      "id": "S039",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 76,
+        "get_started": 79,
+        "first_application_value": 59,
+        "effort_saved": 53,
+        "return_second_application": 53,
+        "trust_control": 88,
+        "interface_help": 71,
+        "operational_reliability": 77
+      },
+      "overall": 65.6,
+      "applied_modifiers": [
+        "paste",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S040",
+      "segment": "mba",
+      "scores": {
+        "understand_value": 81,
+        "get_started": 72,
+        "first_application_value": 64,
+        "effort_saved": 52,
+        "return_second_application": 58,
+        "trust_control": 88,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 67.15,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "returning",
+        "no_cv"
+      ]
+    },
+    {
+      "id": "S041",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 71,
+        "first_application_value": 60,
+        "effort_saved": 43,
+        "return_second_application": 56,
+        "trust_control": 89,
+        "interface_help": 65,
+        "operational_reliability": 77
+      },
+      "overall": 63.35,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S042",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 81,
+        "first_application_value": 72,
+        "effort_saved": 61,
+        "return_second_application": 58,
+        "trust_control": 88,
+        "interface_help": 69,
+        "operational_reliability": 77
+      },
+      "overall": 70.85,
+      "applied_modifiers": [
+        "mobile",
+        "paste"
+      ]
+    },
+    {
+      "id": "S043",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 85,
+        "first_application_value": 78,
+        "effort_saved": 67,
+        "return_second_application": 61,
+        "trust_control": 88,
+        "interface_help": 77,
+        "operational_reliability": 77
+      },
+      "overall": 74.9,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S044",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 82,
+        "get_started": 75,
+        "first_application_value": 69,
+        "effort_saved": 54,
+        "return_second_application": 61,
+        "trust_control": 88,
+        "interface_help": 68,
+        "operational_reliability": 77
+      },
+      "overall": 68.9,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S045",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 80,
+        "first_application_value": 65,
+        "effort_saved": 56,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 72,
+        "operational_reliability": 77
+      },
+      "overall": 68.15,
+      "applied_modifiers": [
+        "paste",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S046",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 82,
+        "first_application_value": 76,
+        "effort_saved": 61,
+        "return_second_application": 58,
+        "trust_control": 89,
+        "interface_help": 71,
+        "operational_reliability": 77
+      },
+      "overall": 72.05,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S047",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 82,
+        "get_started": 75,
+        "first_application_value": 69,
+        "effort_saved": 54,
+        "return_second_application": 61,
+        "trust_control": 88,
+        "interface_help": 68,
+        "operational_reliability": 77
+      },
+      "overall": 68.9,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S048",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 84,
+        "first_application_value": 74,
+        "effort_saved": 65,
+        "return_second_application": 61,
+        "trust_control": 88,
+        "interface_help": 74,
+        "operational_reliability": 77
+      },
+      "overall": 73.3,
+      "applied_modifiers": [
+        "paste"
+      ]
+    },
+    {
+      "id": "S049",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 81,
+        "first_application_value": 69,
+        "effort_saved": 58,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 75,
+        "operational_reliability": 77
+      },
+      "overall": 69.75,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S050",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 82,
+        "get_started": 72,
+        "first_application_value": 67,
+        "effort_saved": 50,
+        "return_second_application": 58,
+        "trust_control": 88,
+        "interface_help": 63,
+        "operational_reliability": 77
+      },
+      "overall": 66.45,
+      "applied_modifiers": [
+        "mobile",
+        "short_time",
+        "low_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S051",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 84,
+        "first_application_value": 74,
+        "effort_saved": 63,
+        "return_second_application": 61,
+        "trust_control": 89,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 72.9,
+      "applied_modifiers": [
+        "paste",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S052",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 61,
+        "first_application_value": 66,
+        "effort_saved": 49,
+        "return_second_application": 61,
+        "trust_control": 88,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 66.1,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "scan"
+      ]
+    },
+    {
+      "id": "S053",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 71,
+        "first_application_value": 60,
+        "effort_saved": 45,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 66,
+        "operational_reliability": 77
+      },
+      "overall": 63.75,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S054",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 81,
+        "first_application_value": 72,
+        "effort_saved": 61,
+        "return_second_application": 58,
+        "trust_control": 88,
+        "interface_help": 69,
+        "operational_reliability": 77
+      },
+      "overall": 70.85,
+      "applied_modifiers": [
+        "mobile",
+        "paste"
+      ]
+    },
+    {
+      "id": "S055",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 85,
+        "first_application_value": 78,
+        "effort_saved": 67,
+        "return_second_application": 61,
+        "trust_control": 88,
+        "interface_help": 77,
+        "operational_reliability": 77
+      },
+      "overall": 74.9,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S056",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 82,
+        "get_started": 75,
+        "first_application_value": 69,
+        "effort_saved": 52,
+        "return_second_application": 61,
+        "trust_control": 89,
+        "interface_help": 67,
+        "operational_reliability": 77
+      },
+      "overall": 68.5,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S057",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 80,
+        "first_application_value": 65,
+        "effort_saved": 56,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 72,
+        "operational_reliability": 77
+      },
+      "overall": 68.15,
+      "applied_modifiers": [
+        "paste",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S058",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 82,
+        "first_application_value": 76,
+        "effort_saved": 63,
+        "return_second_application": 58,
+        "trust_control": 88,
+        "interface_help": 72,
+        "operational_reliability": 77
+      },
+      "overall": 72.45,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S059",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 82,
+        "get_started": 61,
+        "first_application_value": 60,
+        "effort_saved": 42,
+        "return_second_application": 61,
+        "trust_control": 88,
+        "interface_help": 64,
+        "operational_reliability": 77
+      },
+      "overall": 62.9,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning",
+        "no_cv"
+      ]
+    },
+    {
+      "id": "S060",
+      "segment": "busy_same_function",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 84,
+        "first_application_value": 74,
+        "effort_saved": 65,
+        "return_second_application": 61,
+        "trust_control": 88,
+        "interface_help": 74,
+        "operational_reliability": 77
+      },
+      "overall": 73.3,
+      "applied_modifiers": [
+        "paste"
+      ]
+    },
+    {
+      "id": "S061",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 75,
+        "first_application_value": 54,
+        "effort_saved": 40,
+        "return_second_application": 47,
+        "trust_control": 89,
+        "interface_help": 65,
+        "operational_reliability": 77
+      },
+      "overall": 60.4,
+      "applied_modifiers": [
+        "mobile",
+        "returning",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S062",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 83,
+        "first_application_value": 68,
+        "effort_saved": 59,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 75,
+        "operational_reliability": 77
+      },
+      "overall": 69.8,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S063",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 73,
+        "first_application_value": 58,
+        "effort_saved": 48,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 65,
+        "operational_reliability": 77
+      },
+      "overall": 63.6,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S064",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 82,
+        "first_application_value": 65,
+        "effort_saved": 55,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 68.4,
+      "applied_modifiers": [
+        "returning"
+      ]
+    },
+    {
+      "id": "S065",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 76,
+        "first_application_value": 57,
+        "effort_saved": 46,
+        "return_second_application": 47,
+        "trust_control": 88,
+        "interface_help": 68,
+        "operational_reliability": 77
+      },
+      "overall": 62.2,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S066",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 73,
+        "first_application_value": 58,
+        "effort_saved": 46,
+        "return_second_application": 55,
+        "trust_control": 89,
+        "interface_help": 64,
+        "operational_reliability": 77
+      },
+      "overall": 63.2,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "paste",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S067",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 82,
+        "first_application_value": 65,
+        "effort_saved": 55,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 68.4,
+      "applied_modifiers": [
+        "returning"
+      ]
+    },
+    {
+      "id": "S068",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 83,
+        "first_application_value": 68,
+        "effort_saved": 59,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 75,
+        "operational_reliability": 77
+      },
+      "overall": 69.8,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S069",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 40,
+        "first_application_value": 35,
+        "effort_saved": 15,
+        "return_second_application": 47,
+        "trust_control": 88,
+        "interface_help": 54,
+        "operational_reliability": 77
+      },
+      "overall": 46.6,
+      "applied_modifiers": [
+        "mobile",
+        "short_time",
+        "low_confidence",
+        "scan",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S070",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 82,
+        "first_application_value": 65,
+        "effort_saved": 55,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 68.4,
+      "applied_modifiers": [
+        "returning"
+      ]
+    },
+    {
+      "id": "S071",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 83,
+        "first_application_value": 68,
+        "effort_saved": 57,
+        "return_second_application": 55,
+        "trust_control": 89,
+        "interface_help": 74,
+        "operational_reliability": 77
+      },
+      "overall": 69.4,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S072",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 73,
+        "first_application_value": 58,
+        "effort_saved": 48,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 65,
+        "operational_reliability": 77
+      },
+      "overall": 63.6,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S073",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 75,
+        "first_application_value": 54,
+        "effort_saved": 42,
+        "return_second_application": 47,
+        "trust_control": 88,
+        "interface_help": 66,
+        "operational_reliability": 77
+      },
+      "overall": 60.8,
+      "applied_modifiers": [
+        "mobile",
+        "returning",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S074",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 83,
+        "first_application_value": 68,
+        "effort_saved": 59,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 75,
+        "operational_reliability": 77
+      },
+      "overall": 69.8,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence"
+      ]
+    },
+    {
+      "id": "S075",
+      "segment": "busy_switcher",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 73,
+        "first_application_value": 58,
+        "effort_saved": 48,
+        "return_second_application": 55,
+        "trust_control": 88,
+        "interface_help": 65,
+        "operational_reliability": 77
+      },
+      "overall": 63.6,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S076",
+      "segment": "urgent_search",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 82,
+        "first_application_value": 67,
+        "effort_saved": 52,
+        "return_second_application": 50,
+        "trust_control": 88,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 67.25,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "returning",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S077",
+      "segment": "urgent_search",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 72,
+        "first_application_value": 65,
+        "effort_saved": 50,
+        "return_second_application": 55,
+        "trust_control": 87,
+        "interface_help": 65,
+        "operational_reliability": 77
+      },
+      "overall": 65.2,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence"
+      ]
+    },
+    {
+      "id": "S078",
+      "segment": "urgent_search",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 67,
+        "first_application_value": 62,
+        "effort_saved": 47,
+        "return_second_application": 55,
+        "trust_control": 87,
+        "interface_help": 68,
+        "operational_reliability": 77
+      },
+      "overall": 63.8,
+      "applied_modifiers": [
+        "no_cv"
+      ]
+    },
+    {
+      "id": "S079",
+      "segment": "urgent_search",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 83,
+        "first_application_value": 74,
+        "effort_saved": 59,
+        "return_second_application": 52,
+        "trust_control": 87,
+        "interface_help": 71,
+        "operational_reliability": 77
+      },
+      "overall": 70.35,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S080",
+      "segment": "urgent_search",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 68,
+        "first_application_value": 56,
+        "effort_saved": 41,
+        "return_second_application": 50,
+        "trust_control": 87,
+        "interface_help": 63,
+        "operational_reliability": 77
+      },
+      "overall": 60.05,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S081",
+      "segment": "uae_relocation",
+      "scores": {
+        "understand_value": 76,
+        "get_started": 70,
+        "first_application_value": 51,
+        "effort_saved": 36,
+        "return_second_application": 50,
+        "trust_control": 88,
+        "interface_help": 63,
+        "operational_reliability": 77
+      },
+      "overall": 58.45,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning",
+        "paste",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S082",
+      "segment": "uae_relocation",
+      "scores": {
+        "understand_value": 73,
+        "get_started": 75,
+        "first_application_value": 56,
+        "effort_saved": 45,
+        "return_second_application": 50,
+        "trust_control": 87,
+        "interface_help": 70,
+        "operational_reliability": 77
+      },
+      "overall": 62.05,
+      "applied_modifiers": [
+        "discovery"
+      ]
+    },
+    {
+      "id": "S083",
+      "segment": "uae_relocation",
+      "scores": {
+        "understand_value": 73,
+        "get_started": 75,
+        "first_application_value": 58,
+        "effort_saved": 45,
+        "return_second_application": 47,
+        "trust_control": 87,
+        "interface_help": 68,
+        "operational_reliability": 77
+      },
+      "overall": 61.8,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S084",
+      "segment": "uae_relocation",
+      "scores": {
+        "understand_value": 76,
+        "get_started": 70,
+        "first_application_value": 51,
+        "effort_saved": 38,
+        "return_second_application": 50,
+        "trust_control": 87,
+        "interface_help": 64,
+        "operational_reliability": 77
+      },
+      "overall": 58.85,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning",
+        "paste",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S085",
+      "segment": "uae_relocation",
+      "scores": {
+        "understand_value": 73,
+        "get_started": 75,
+        "first_application_value": 56,
+        "effort_saved": 45,
+        "return_second_application": 50,
+        "trust_control": 87,
+        "interface_help": 70,
+        "operational_reliability": 77
+      },
+      "overall": 62.05,
+      "applied_modifiers": [
+        "discovery"
+      ]
+    },
+    {
+      "id": "S086",
+      "segment": "career_return",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 54,
+        "first_application_value": 46,
+        "effort_saved": 28,
+        "return_second_application": 51,
+        "trust_control": 89,
+        "interface_help": 67,
+        "operational_reliability": 77
+      },
+      "overall": 55.1,
+      "applied_modifiers": [
+        "returning",
+        "scan",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S087",
+      "segment": "career_return",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 82,
+        "first_application_value": 68,
+        "effort_saved": 59,
+        "return_second_application": 53,
+        "trust_control": 88,
+        "interface_help": 71,
+        "operational_reliability": 77
+      },
+      "overall": 69,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "paste"
+      ]
+    },
+    {
+      "id": "S088",
+      "segment": "career_return",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 71,
+        "first_application_value": 60,
+        "effort_saved": 48,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 66,
+        "operational_reliability": 77
+      },
+      "overall": 64.05,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence"
+      ]
+    },
+    {
+      "id": "S089",
+      "segment": "career_return",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 82,
+        "first_application_value": 67,
+        "effort_saved": 57,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 74,
+        "operational_reliability": 77
+      },
+      "overall": 69.45,
+      "applied_modifiers": [
+        "returning"
+      ]
+    },
+    {
+      "id": "S090",
+      "segment": "career_return",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 81,
+        "first_application_value": 61,
+        "effort_saved": 54,
+        "return_second_application": 51,
+        "trust_control": 88,
+        "interface_help": 74,
+        "operational_reliability": 77
+      },
+      "overall": 66.3,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "paste",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S091",
+      "segment": "mobile_constraint",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 80,
+        "first_application_value": 67,
+        "effort_saved": 53,
+        "return_second_application": 51,
+        "trust_control": 89,
+        "interface_help": 70,
+        "operational_reliability": 77
+      },
+      "overall": 67.4,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "returning",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S092",
+      "segment": "mobile_constraint",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 70,
+        "first_application_value": 65,
+        "effort_saved": 51,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 62,
+        "operational_reliability": 77
+      },
+      "overall": 65.35,
+      "applied_modifiers": [
+        "mobile",
+        "short_time",
+        "low_confidence"
+      ]
+    },
+    {
+      "id": "S093",
+      "segment": "mobile_constraint",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 81,
+        "first_application_value": 71,
+        "effort_saved": 62,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 69,
+        "operational_reliability": 77
+      },
+      "overall": 70.55,
+      "applied_modifiers": [
+        "mobile",
+        "paste"
+      ]
+    },
+    {
+      "id": "S094",
+      "segment": "mobile_constraint",
+      "scores": {
+        "understand_value": 82,
+        "get_started": 84,
+        "first_application_value": 76,
+        "effort_saved": 64,
+        "return_second_application": 56,
+        "trust_control": 88,
+        "interface_help": 73,
+        "operational_reliability": 77
+      },
+      "overall": 72.95,
+      "applied_modifiers": [
+        "mobile",
+        "more_time",
+        "high_confidence",
+        "returning"
+      ]
+    },
+    {
+      "id": "S095",
+      "segment": "mobile_constraint",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 66,
+        "first_application_value": 56,
+        "effort_saved": 42,
+        "return_second_application": 51,
+        "trust_control": 88,
+        "interface_help": 60,
+        "operational_reliability": 77
+      },
+      "overall": 60.2,
+      "applied_modifiers": [
+        "mobile",
+        "short_time",
+        "low_confidence",
+        "discovery"
+      ]
+    },
+    {
+      "id": "S096",
+      "segment": "privacy_constraint",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 73,
+        "first_application_value": 59,
+        "effort_saved": 41,
+        "return_second_application": 53,
+        "trust_control": 90,
+        "interface_help": 65,
+        "operational_reliability": 77
+      },
+      "overall": 62.6,
+      "applied_modifiers": [
+        "short_time",
+        "low_confidence",
+        "returning",
+        "paste",
+        "discovery",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S097",
+      "segment": "privacy_constraint",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 68,
+        "first_application_value": 64,
+        "effort_saved": 45,
+        "return_second_application": 58,
+        "trust_control": 90,
+        "interface_help": 69,
+        "operational_reliability": 77
+      },
+      "overall": 64.95,
+      "applied_modifiers": [
+        "no_cv",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S098",
+      "segment": "privacy_constraint",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 85,
+        "first_application_value": 77,
+        "effort_saved": 61,
+        "return_second_application": 58,
+        "trust_control": 90,
+        "interface_help": 76,
+        "operational_reliability": 77
+      },
+      "overall": 73.15,
+      "applied_modifiers": [
+        "more_time",
+        "high_confidence",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S099",
+      "segment": "privacy_constraint",
+      "scores": {
+        "understand_value": 82,
+        "get_started": 74,
+        "first_application_value": 66,
+        "effort_saved": 46,
+        "return_second_application": 55,
+        "trust_control": 90,
+        "interface_help": 62,
+        "operational_reliability": 77
+      },
+      "overall": 65.3,
+      "applied_modifiers": [
+        "mobile",
+        "short_time",
+        "low_confidence",
+        "returning",
+        "paste",
+        "high_privacy"
+      ]
+    },
+    {
+      "id": "S100",
+      "segment": "privacy_constraint",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 78,
+        "first_application_value": 64,
+        "effort_saved": 48,
+        "return_second_application": 53,
+        "trust_control": 90,
+        "interface_help": 71,
+        "operational_reliability": 77
+      },
+      "overall": 65.8,
+      "applied_modifiers": [
+        "discovery",
+        "high_privacy"
+      ]
+    }
+  ],
+  "top_problems": [
+    {
+      "priority": 1,
+      "title": "One application has three possible homes",
+      "consequence": "A completed free check does not become a directly continued Loop application. Account destinations and legacy workspace concepts make returning users locate/rebuild context.",
+      "action": "Create one application record/home and explicitly continue the approved check there; preserve free-check reuse and current privacy/approval boundaries.",
+      "evidence": [
+        "P07",
+        "P08",
+        "P09",
+        "P14",
+        "P15",
+        "P16"
+      ]
+    },
+    {
+      "priority": 2,
+      "title": "Preparation requires fact administration before the promised time saving",
+      "consequence": "Repeated source/category/result/sharing review makes busy professionals and switchers do substantial setup; final cloud wording corrections require career-record rebuild.",
+      "action": "Propose grouped facts from the imported CV, review high-risk exceptions and edit a source-linked document in context with preserved provenance.",
+      "evidence": [
+        "P09",
+        "P10",
+        "P11"
+      ]
+    },
+    {
+      "priority": 3,
+      "title": "Current tailoring contribution is smaller than the main promise suggests",
+      "consequence": "Local evidence comparison and safe bullet reordering are useful, but new-function positioning and CV creation remain manual; an unchanged CV can feel like little value.",
+      "action": "Show the exact proposed edit and why it helps, offer source-grounded alternatives with an inspectable diff, and measure useful accepted edits before stronger promises.",
+      "evidence": [
+        "P01",
+        "P04",
+        "P06",
+        "P11"
+      ]
+    },
+    {
+      "priority": 4,
+      "title": "Choosing a vacancy still does not directly prepare that application",
+      "consequence": "Users save an opportunity then move to generic run controls and output review. Discovery need groups first need a real job, not another preparation screen.",
+      "action": "Add a clear prepare-this-vacancy action, reuse imported target details, show selected source coverage before setup, and retain manual posting entry.",
+      "evidence": [
+        "P11",
+        "P12",
+        "P13"
+      ]
+    },
+    {
+      "priority": 5,
+      "title": "The finish sequence makes users interpret implementation state",
+      "consequence": "PDF preview clears approval; optional save shares the download busy gate; six screens, duplicate full text reviews and provider/budget explanations add thought.",
+      "action": "Order finish as edit → actual preview → approve → download, isolate optional save state and put infrastructure detail behind service-status help.",
+      "evidence": [
+        "P03",
+        "P12",
+        "P17"
+      ]
+    },
+    {
+      "priority": 6,
+      "title": "Audience choice and help should clarify tasks instead of creating categories",
+      "consequence": "Student and MBA examples overlap, selection changes CTA context, and phone/low-confidence users face long editors. Existing video/help assets do not prove unassisted usability.",
+      "action": "Use one common start and adapt examples after relevant experience is known; contextual help at friction points, with short task clips and a reduced phone review path.",
+      "evidence": [
+        "P02",
+        "P03",
+        "P19"
+      ]
+    }
+  ],
+  "recommended_validation": "After one shared application continuation and grouped review are implemented, observe a small consented group completing first and second applications on desktop/phone; record task success, interruptions, edits accepted, active effort and source-quality errors. Re-score from that evidence rather than forcing a target."
+}

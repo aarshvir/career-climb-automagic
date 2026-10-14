@@ -1,0 +1,2210 @@
+{
+  "type": "expert scenario projection; not 100 users or 100 browser sessions",
+  "baseline": {
+    "site_version": 25,
+    "source": "7a7af403bd62ea6d10bf056b68a67c5e5cbfe9de"
+  },
+  "profiles": 100,
+  "reviewers": 3,
+  "weights": {
+    "understand_value": 10,
+    "get_started": 10,
+    "first_application_value": 20,
+    "effort_saved": 20,
+    "return_second_application": 15,
+    "trust_control": 10,
+    "interface_help": 10,
+    "operational_reliability": 5
+  },
+  "overall": 64.65466666666667,
+  "dimension_scores": {
+    "understand_value": 75.67333333333333,
+    "get_started": 72.75333333333333,
+    "first_application_value": 65.02333333333333,
+    "effort_saved": 46.91,
+    "return_second_application": 57.72666666666667,
+    "trust_control": 85.31666666666666,
+    "interface_help": 65.84666666666666,
+    "operational_reliability": 73
+  },
+  "reviewer_overalls": {
+    "product": 67.779,
+    "comprehension": 64.295,
+    "workflow": 61.89
+  },
+  "groups": [
+    {
+      "segment": "final_year",
+      "label": "Final-year students with a CV",
+      "count": 15,
+      "overall": 67.67888888888889
+    },
+    {
+      "segment": "recent_graduate",
+      "label": "Recent graduates",
+      "count": 15,
+      "overall": 67.91
+    },
+    {
+      "segment": "mba",
+      "label": "MBA applicants with prior work",
+      "count": 10,
+      "overall": 64.23833333333333
+    },
+    {
+      "segment": "busy_same_function",
+      "label": "Busy professionals: next role in the same function",
+      "count": 20,
+      "overall": 66.68833333333333
+    },
+    {
+      "segment": "busy_switcher",
+      "label": "Busy professionals: changing function",
+      "count": 15,
+      "overall": 61.68111111111111
+    },
+    {
+      "segment": "urgent_search",
+      "label": "Applicants recently out of work",
+      "count": 5,
+      "overall": 61.89333333333333
+    },
+    {
+      "segment": "uae_relocation",
+      "label": "Applicants targeting UAE relocation",
+      "count": 5,
+      "overall": 56.20666666666667
+    },
+    {
+      "segment": "career_return",
+      "label": "Applicants returning after a break",
+      "count": 5,
+      "overall": 62.156666666666666
+    },
+    {
+      "segment": "mobile_constraint",
+      "label": "Applicants mainly using a phone",
+      "count": 5,
+      "overall": 63.92333333333333
+    },
+    {
+      "segment": "privacy_constraint",
+      "label": "Applicants handling confidential experience",
+      "count": 5,
+      "overall": 61.873333333333335
+    }
+  ],
+  "sensitivity": {
+    "readable_cv_and_known_vacancy": 67.92994350282486
+  },
+  "ratings": [
+    {
+      "id": "S001",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 75.66666666666667,
+        "get_started": 48,
+        "first_application_value": 43.666666666666664,
+        "effort_saved": 20.333333333333332,
+        "return_second_application": 48,
+        "trust_control": 85.33333333333333,
+        "interface_help": 55,
+        "operational_reliability": 73
+      },
+      "overall": 50.05,
+      "reviewer_overall": {
+        "product": 54.25,
+        "comprehension": 51.1,
+        "workflow": 44.8
+      }
+    },
+    {
+      "id": "S002",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 77.33333333333333,
+        "get_started": 65,
+        "first_application_value": 61.666666666666664,
+        "effort_saved": 46.666666666666664,
+        "return_second_application": 59.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 67.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 63.75,
+      "reviewer_overall": {
+        "product": 68.85,
+        "comprehension": 62.75,
+        "workflow": 59.65
+      }
+    },
+    {
+      "id": "S003",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 78.66666666666667,
+        "get_started": 84.66666666666667,
+        "first_application_value": 78.33333333333333,
+        "effort_saved": 65.66666666666667,
+        "return_second_application": 66,
+        "trust_control": 85.33333333333333,
+        "interface_help": 74.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 74.65,
+      "reviewer_overall": {
+        "product": 77.65,
+        "comprehension": 75.3,
+        "workflow": 71.0
+      }
+    },
+    {
+      "id": "S004",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 77.33333333333333,
+        "get_started": 73.66666666666667,
+        "first_application_value": 68,
+        "effort_saved": 51.666666666666664,
+        "return_second_application": 60.666666666666664,
+        "trust_control": 85,
+        "interface_help": 67,
+        "operational_reliability": 73
+      },
+      "overall": 66.98333333333333,
+      "reviewer_overall": {
+        "product": 71.05,
+        "comprehension": 66.45,
+        "workflow": 63.45
+      }
+    },
+    {
+      "id": "S005",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 75.66666666666667,
+        "get_started": 72,
+        "first_application_value": 62,
+        "effort_saved": 46,
+        "return_second_application": 55,
+        "trust_control": 85.33333333333333,
+        "interface_help": 64.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 63.26666666666667,
+      "reviewer_overall": {
+        "product": 67.25,
+        "comprehension": 64.0,
+        "workflow": 58.55
+      }
+    },
+    {
+      "id": "S006",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 78.66666666666667,
+        "get_started": 84.33333333333333,
+        "first_application_value": 78.33333333333333,
+        "effort_saved": 63.333333333333336,
+        "return_second_application": 66,
+        "trust_control": 85.66666666666667,
+        "interface_help": 73.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 74.11666666666667,
+      "reviewer_overall": {
+        "product": 77.25,
+        "comprehension": 74.8,
+        "workflow": 70.3
+      }
+    },
+    {
+      "id": "S007",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 77.33333333333333,
+        "get_started": 73.66666666666667,
+        "first_application_value": 68,
+        "effort_saved": 51.666666666666664,
+        "return_second_application": 60.666666666666664,
+        "trust_control": 85,
+        "interface_help": 67,
+        "operational_reliability": 73
+      },
+      "overall": 66.98333333333333,
+      "reviewer_overall": {
+        "product": 71.05,
+        "comprehension": 66.45,
+        "workflow": 63.45
+      }
+    },
+    {
+      "id": "S008",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 77.33333333333333,
+        "get_started": 79.33333333333333,
+        "first_application_value": 74,
+        "effort_saved": 60.333333333333336,
+        "return_second_application": 63.666666666666664,
+        "trust_control": 85.33333333333333,
+        "interface_help": 72,
+        "operational_reliability": 73
+      },
+      "overall": 71.46666666666665,
+      "reviewer_overall": {
+        "product": 74.85,
+        "comprehension": 71.75,
+        "workflow": 67.8
+      }
+    },
+    {
+      "id": "S009",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 77.33333333333333,
+        "first_application_value": 66.33333333333333,
+        "effort_saved": 51.333333333333336,
+        "return_second_application": 57.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 67,
+        "operational_reliability": 73
+      },
+      "overall": 66.45,
+      "reviewer_overall": {
+        "product": 70.05,
+        "comprehension": 67.55,
+        "workflow": 61.75
+      }
+    },
+    {
+      "id": "S010",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 77.33333333333333,
+        "get_started": 73.66666666666667,
+        "first_application_value": 68,
+        "effort_saved": 51.666666666666664,
+        "return_second_application": 60.666666666666664,
+        "trust_control": 85,
+        "interface_help": 67,
+        "operational_reliability": 73
+      },
+      "overall": 66.98333333333333,
+      "reviewer_overall": {
+        "product": 71.05,
+        "comprehension": 66.45,
+        "workflow": 63.45
+      }
+    },
+    {
+      "id": "S011",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 77.33333333333333,
+        "get_started": 79,
+        "first_application_value": 74,
+        "effort_saved": 58,
+        "return_second_application": 63.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 71.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 70.93333333333334,
+      "reviewer_overall": {
+        "product": 74.45,
+        "comprehension": 71.25,
+        "workflow": 67.1
+      }
+    },
+    {
+      "id": "S012",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 78.66666666666667,
+        "get_started": 84.66666666666667,
+        "first_application_value": 78.33333333333333,
+        "effort_saved": 65.66666666666667,
+        "return_second_application": 66,
+        "trust_control": 85.33333333333333,
+        "interface_help": 74.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 74.65,
+      "reviewer_overall": {
+        "product": 77.65,
+        "comprehension": 75.3,
+        "workflow": 71.0
+      }
+    },
+    {
+      "id": "S013",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 75.66666666666667,
+        "get_started": 66.33333333333333,
+        "first_application_value": 56,
+        "effort_saved": 37.333333333333336,
+        "return_second_application": 52,
+        "trust_control": 85,
+        "interface_help": 59.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 58.78333333333333,
+      "reviewer_overall": {
+        "product": 63.45,
+        "comprehension": 58.7,
+        "workflow": 54.2
+      }
+    },
+    {
+      "id": "S014",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 77.33333333333333,
+        "get_started": 79.33333333333333,
+        "first_application_value": 74,
+        "effort_saved": 60.333333333333336,
+        "return_second_application": 63.666666666666664,
+        "trust_control": 85.33333333333333,
+        "interface_help": 72,
+        "operational_reliability": 73
+      },
+      "overall": 71.46666666666665,
+      "reviewer_overall": {
+        "product": 74.85,
+        "comprehension": 71.75,
+        "workflow": 67.8
+      }
+    },
+    {
+      "id": "S015",
+      "segment": "final_year",
+      "segment_label": "Final-year students with a CV",
+      "scores": {
+        "understand_value": 78.66666666666667,
+        "get_started": 84.66666666666667,
+        "first_application_value": 78.33333333333333,
+        "effort_saved": 65.66666666666667,
+        "return_second_application": 66,
+        "trust_control": 85.33333333333333,
+        "interface_help": 74.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 74.65,
+      "reviewer_overall": {
+        "product": 77.65,
+        "comprehension": 75.3,
+        "workflow": 71.0
+      }
+    },
+    {
+      "id": "S016",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 78,
+        "first_application_value": 66.33333333333333,
+        "effort_saved": 50,
+        "return_second_application": 59.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 70,
+        "operational_reliability": 73
+      },
+      "overall": 67.13333333333333,
+      "reviewer_overall": {
+        "product": 69.3,
+        "comprehension": 69.45,
+        "workflow": 62.65
+      }
+    },
+    {
+      "id": "S017",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 78.66666666666667,
+        "get_started": 83,
+        "first_application_value": 78.66666666666667,
+        "effort_saved": 65,
+        "return_second_application": 65.66666666666667,
+        "trust_control": 85.33333333333333,
+        "interface_help": 74,
+        "operational_reliability": 73
+      },
+      "overall": 74.33333333333334,
+      "reviewer_overall": {
+        "product": 76.25,
+        "comprehension": 76.25,
+        "workflow": 70.5
+      }
+    },
+    {
+      "id": "S018",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 74,
+        "get_started": 52.666666666666664,
+        "first_application_value": 54.333333333333336,
+        "effort_saved": 36,
+        "return_second_application": 54.333333333333336,
+        "trust_control": 85,
+        "interface_help": 61.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 57.2,
+      "reviewer_overall": {
+        "product": 60.65,
+        "comprehension": 58.45,
+        "workflow": 52.5
+      }
+    },
+    {
+      "id": "S019",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 80.66666666666667,
+        "get_started": 79,
+        "first_application_value": 73.66666666666667,
+        "effort_saved": 58.666666666666664,
+        "return_second_application": 62.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 67.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 70.7,
+      "reviewer_overall": {
+        "product": 72.4,
+        "comprehension": 72.6,
+        "workflow": 67.1
+      }
+    },
+    {
+      "id": "S020",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 79,
+        "first_application_value": 69,
+        "effort_saved": 54.666666666666664,
+        "return_second_application": 60,
+        "trust_control": 85.33333333333333,
+        "interface_help": 72,
+        "operational_reliability": 73
+      },
+      "overall": 68.71666666666665,
+      "reviewer_overall": {
+        "product": 71.1,
+        "comprehension": 71.05,
+        "workflow": 64.0
+      }
+    },
+    {
+      "id": "S021",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 74,
+        "get_started": 56,
+        "first_application_value": 54.333333333333336,
+        "effort_saved": 34.666666666666664,
+        "return_second_application": 54,
+        "trust_control": 85.33333333333333,
+        "interface_help": 60.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 57.15,
+      "reviewer_overall": {
+        "product": 63.05,
+        "comprehension": 56.05,
+        "workflow": 52.35
+      }
+    },
+    {
+      "id": "S022",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 80.66666666666667,
+        "get_started": 82.33333333333333,
+        "first_application_value": 76,
+        "effort_saved": 62.666666666666664,
+        "return_second_application": 65.33333333333333,
+        "trust_control": 85.33333333333333,
+        "interface_help": 72.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 73.28333333333333,
+      "reviewer_overall": {
+        "product": 74.85,
+        "comprehension": 75.15,
+        "workflow": 69.85
+      }
+    },
+    {
+      "id": "S023",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 78.66666666666667,
+        "get_started": 79.66666666666667,
+        "first_application_value": 76.33333333333333,
+        "effort_saved": 61,
+        "return_second_application": 62.666666666666664,
+        "trust_control": 85.33333333333333,
+        "interface_help": 68.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 71.75,
+      "reviewer_overall": {
+        "product": 73.8,
+        "comprehension": 73.7,
+        "workflow": 67.75
+      }
+    },
+    {
+      "id": "S024",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 72.33333333333333,
+        "get_started": 68.33333333333333,
+        "first_application_value": 57,
+        "effort_saved": 41.666666666666664,
+        "return_second_application": 52.666666666666664,
+        "trust_control": 85,
+        "interface_help": 63.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 60.21666666666666,
+      "reviewer_overall": {
+        "product": 64.9,
+        "comprehension": 60.65,
+        "workflow": 55.1
+      }
+    },
+    {
+      "id": "S025",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 80.66666666666667,
+        "get_started": 82.33333333333333,
+        "first_application_value": 76,
+        "effort_saved": 62.666666666666664,
+        "return_second_application": 65.33333333333333,
+        "trust_control": 85.33333333333333,
+        "interface_help": 72.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 73.28333333333333,
+      "reviewer_overall": {
+        "product": 74.85,
+        "comprehension": 75.15,
+        "workflow": 69.85
+      }
+    },
+    {
+      "id": "S026",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 78.66666666666667,
+        "get_started": 82.66666666666667,
+        "first_application_value": 78.66666666666667,
+        "effort_saved": 62.666666666666664,
+        "return_second_application": 65.66666666666667,
+        "trust_control": 85.66666666666667,
+        "interface_help": 73.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 73.8,
+      "reviewer_overall": {
+        "product": 75.85,
+        "comprehension": 75.75,
+        "workflow": 69.8
+      }
+    },
+    {
+      "id": "S027",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 74,
+        "get_started": 69,
+        "first_application_value": 64.33333333333333,
+        "effort_saved": 48,
+        "return_second_application": 55.333333333333336,
+        "trust_control": 85,
+        "interface_help": 60.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 63.25,
+      "reviewer_overall": {
+        "product": 67.6,
+        "comprehension": 63.3,
+        "workflow": 58.85
+      }
+    },
+    {
+      "id": "S028",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 79,
+        "get_started": 78.33333333333333,
+        "first_application_value": 66.33333333333333,
+        "effort_saved": 52.333333333333336,
+        "return_second_application": 59.666666666666664,
+        "trust_control": 85.33333333333333,
+        "interface_help": 70.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 67.66666666666666,
+      "reviewer_overall": {
+        "product": 69.7,
+        "comprehension": 69.95,
+        "workflow": 63.35
+      }
+    },
+    {
+      "id": "S029",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 78.66666666666667,
+        "get_started": 83,
+        "first_application_value": 78.66666666666667,
+        "effort_saved": 65,
+        "return_second_application": 65.66666666666667,
+        "trust_control": 85.33333333333333,
+        "interface_help": 74,
+        "operational_reliability": 73
+      },
+      "overall": 74.33333333333334,
+      "reviewer_overall": {
+        "product": 76.25,
+        "comprehension": 76.25,
+        "workflow": 70.5
+      }
+    },
+    {
+      "id": "S030",
+      "segment": "recent_graduate",
+      "segment_label": "Recent graduates",
+      "scores": {
+        "understand_value": 74,
+        "get_started": 72.33333333333333,
+        "first_application_value": 66.66666666666667,
+        "effort_saved": 52,
+        "return_second_application": 58.333333333333336,
+        "trust_control": 85,
+        "interface_help": 65.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 65.83333333333334,
+      "reviewer_overall": {
+        "product": 70.05,
+        "comprehension": 65.85,
+        "workflow": 61.6
+      }
+    },
+    {
+      "id": "S031",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 77.66666666666667,
+        "get_started": 78.66666666666667,
+        "first_application_value": 66.33333333333333,
+        "effort_saved": 47.666666666666664,
+        "return_second_application": 58.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 69.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 66.38333333333333,
+      "reviewer_overall": {
+        "product": 67.6,
+        "comprehension": 68.05,
+        "workflow": 63.5
+      }
+    },
+    {
+      "id": "S032",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 71.33333333333333,
+        "get_started": 67.66666666666667,
+        "first_application_value": 62.333333333333336,
+        "effort_saved": 44.333333333333336,
+        "return_second_application": 55,
+        "trust_control": 85,
+        "interface_help": 62.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 61.9,
+      "reviewer_overall": {
+        "product": 65.55,
+        "comprehension": 60.9,
+        "workflow": 59.25
+      }
+    },
+    {
+      "id": "S033",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 74.66666666666667,
+        "get_started": 74.66666666666667,
+        "first_application_value": 67.66666666666667,
+        "effort_saved": 52,
+        "return_second_application": 57,
+        "trust_control": 85.33333333333333,
+        "interface_help": 63.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 65.93333333333334,
+      "reviewer_overall": {
+        "product": 68.3,
+        "comprehension": 66.1,
+        "workflow": 63.4
+      }
+    },
+    {
+      "id": "S034",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 79.33333333333333,
+        "get_started": 83,
+        "first_application_value": 76,
+        "effort_saved": 60.333333333333336,
+        "return_second_application": 64.33333333333333,
+        "trust_control": 85.33333333333333,
+        "interface_help": 72,
+        "operational_reliability": 73
+      },
+      "overall": 72.53333333333333,
+      "reviewer_overall": {
+        "product": 73.15,
+        "comprehension": 73.75,
+        "workflow": 70.7
+      }
+    },
+    {
+      "id": "S035",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 69.66666666666667,
+        "get_started": 45.666666666666664,
+        "first_application_value": 40.333333333333336,
+        "effort_saved": 19.333333333333332,
+        "return_second_application": 45.333333333333336,
+        "trust_control": 85,
+        "interface_help": 56.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 48.08333333333333,
+      "reviewer_overall": {
+        "product": 51.6,
+        "comprehension": 48.6,
+        "workflow": 44.05
+      }
+    },
+    {
+      "id": "S036",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 74.66666666666667,
+        "get_started": 77.66666666666667,
+        "first_application_value": 70,
+        "effort_saved": 53.666666666666664,
+        "return_second_application": 60,
+        "trust_control": 85.66666666666667,
+        "interface_help": 68,
+        "operational_reliability": 73
+      },
+      "overall": 67.98333333333333,
+      "reviewer_overall": {
+        "product": 70.35,
+        "comprehension": 68.15,
+        "workflow": 65.45
+      }
+    },
+    {
+      "id": "S037",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 79.33333333333333,
+        "get_started": 79.66666666666667,
+        "first_application_value": 73.66666666666667,
+        "effort_saved": 56.333333333333336,
+        "return_second_application": 61.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 66.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 69.95,
+      "reviewer_overall": {
+        "product": 70.7,
+        "comprehension": 71.2,
+        "workflow": 67.95
+      }
+    },
+    {
+      "id": "S038",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 71.33333333333333,
+        "get_started": 67.66666666666667,
+        "first_application_value": 62.333333333333336,
+        "effort_saved": 44.333333333333336,
+        "return_second_application": 55,
+        "trust_control": 85,
+        "interface_help": 62.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 61.9,
+      "reviewer_overall": {
+        "product": 65.55,
+        "comprehension": 60.9,
+        "workflow": 59.25
+      }
+    },
+    {
+      "id": "S039",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 73,
+        "get_started": 74,
+        "first_application_value": 60.333333333333336,
+        "effort_saved": 45.666666666666664,
+        "return_second_application": 54.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 66.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 62.9,
+      "reviewer_overall": {
+        "product": 65.6,
+        "comprehension": 63.45,
+        "workflow": 59.65
+      }
+    },
+    {
+      "id": "S040",
+      "segment": "mba",
+      "segment_label": "MBA applicants with prior work",
+      "scores": {
+        "understand_value": 79.33333333333333,
+        "get_started": 68.66666666666667,
+        "first_application_value": 63.666666666666664,
+        "effort_saved": 46.666666666666664,
+        "return_second_application": 60,
+        "trust_control": 85.33333333333333,
+        "interface_help": 67.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 64.81666666666666,
+      "reviewer_overall": {
+        "product": 67.15,
+        "comprehension": 64.75,
+        "workflow": 62.55
+      }
+    },
+    {
+      "id": "S041",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 67.66666666666667,
+        "first_application_value": 58.333333333333336,
+        "effort_saved": 34.666666666666664,
+        "return_second_application": 55.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 61.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 59.6,
+      "reviewer_overall": {
+        "product": 63.35,
+        "comprehension": 57.9,
+        "workflow": 57.55
+      }
+    },
+    {
+      "id": "S042",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 76,
+        "first_application_value": 71.66666666666667,
+        "effort_saved": 53.333333333333336,
+        "return_second_application": 61.333333333333336,
+        "trust_control": 85.66666666666667,
+        "interface_help": 64,
+        "operational_reliability": 73
+      },
+      "overall": 68.08333333333334,
+      "reviewer_overall": {
+        "product": 70.85,
+        "comprehension": 66.65,
+        "workflow": 66.75
+      }
+    },
+    {
+      "id": "S043",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 81.33333333333333,
+        "first_application_value": 78.33333333333333,
+        "effort_saved": 60,
+        "return_second_application": 66.66666666666667,
+        "trust_control": 85.66666666666667,
+        "interface_help": 71.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 72.98333333333333,
+      "reviewer_overall": {
+        "product": 74.9,
+        "comprehension": 72.15,
+        "workflow": 71.9
+      }
+    },
+    {
+      "id": "S044",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 72,
+        "first_application_value": 68,
+        "effort_saved": 47.333333333333336,
+        "return_second_application": 61.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 64.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 65.75,
+      "reviewer_overall": {
+        "product": 68.9,
+        "comprehension": 63.6,
+        "workflow": 64.75
+      }
+    },
+    {
+      "id": "S045",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 75.33333333333333,
+        "first_application_value": 64.33333333333333,
+        "effort_saved": 47,
+        "return_second_application": 58.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 67.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 65.05,
+      "reviewer_overall": {
+        "product": 68.15,
+        "comprehension": 64.0,
+        "workflow": 63.0
+      }
+    },
+    {
+      "id": "S046",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 77.66666666666667,
+        "first_application_value": 76,
+        "effort_saved": 53.666666666666664,
+        "return_second_application": 63.666666666666664,
+        "trust_control": 86,
+        "interface_help": 65.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 69.86666666666667,
+      "reviewer_overall": {
+        "product": 72.05,
+        "comprehension": 69.1,
+        "workflow": 68.45
+      }
+    },
+    {
+      "id": "S047",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 72,
+        "first_application_value": 68,
+        "effort_saved": 47.333333333333336,
+        "return_second_application": 61.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 64.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 65.75,
+      "reviewer_overall": {
+        "product": 68.9,
+        "comprehension": 63.6,
+        "workflow": 64.75
+      }
+    },
+    {
+      "id": "S048",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 79.33333333333333,
+        "first_application_value": 74,
+        "effort_saved": 57.333333333333336,
+        "return_second_application": 64.33333333333333,
+        "trust_control": 85.66666666666667,
+        "interface_help": 69.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 70.66666666666667,
+      "reviewer_overall": {
+        "product": 73.3,
+        "comprehension": 69.2,
+        "workflow": 69.5
+      }
+    },
+    {
+      "id": "S049",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.33333333333333,
+        "get_started": 77.33333333333333,
+        "first_application_value": 68.66666666666667,
+        "effort_saved": 49.666666666666664,
+        "return_second_application": 61,
+        "trust_control": 85.66666666666667,
+        "interface_help": 69.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 67.36666666666667,
+      "reviewer_overall": {
+        "product": 69.75,
+        "comprehension": 66.95,
+        "workflow": 65.4
+      }
+    },
+    {
+      "id": "S050",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 68.66666666666667,
+        "first_application_value": 65.66666666666667,
+        "effort_saved": 43.333333333333336,
+        "return_second_application": 58.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 59,
+        "operational_reliability": 73
+      },
+      "overall": 63.16666666666667,
+      "reviewer_overall": {
+        "product": 66.45,
+        "comprehension": 61.05,
+        "workflow": 62.0
+      }
+    },
+    {
+      "id": "S051",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 79,
+        "first_application_value": 74,
+        "effort_saved": 55,
+        "return_second_application": 64.33333333333333,
+        "trust_control": 86,
+        "interface_help": 68.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 70.13333333333334,
+      "reviewer_overall": {
+        "product": 72.9,
+        "comprehension": 68.7,
+        "workflow": 68.8
+      }
+    },
+    {
+      "id": "S052",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 63.333333333333336,
+        "first_application_value": 66,
+        "effort_saved": 45.333333333333336,
+        "return_second_application": 62.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 67.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 64.78333333333335,
+      "reviewer_overall": {
+        "product": 66.1,
+        "comprehension": 65.05,
+        "workflow": 63.2
+      }
+    },
+    {
+      "id": "S053",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 68,
+        "first_application_value": 58.333333333333336,
+        "effort_saved": 37,
+        "return_second_application": 55.666666666666664,
+        "trust_control": 85.33333333333333,
+        "interface_help": 62.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 60.13333333333334,
+      "reviewer_overall": {
+        "product": 63.75,
+        "comprehension": 58.4,
+        "workflow": 58.25
+      }
+    },
+    {
+      "id": "S054",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 76,
+        "first_application_value": 71.66666666666667,
+        "effort_saved": 53.333333333333336,
+        "return_second_application": 61.333333333333336,
+        "trust_control": 85.66666666666667,
+        "interface_help": 64,
+        "operational_reliability": 73
+      },
+      "overall": 68.08333333333334,
+      "reviewer_overall": {
+        "product": 70.85,
+        "comprehension": 66.65,
+        "workflow": 66.75
+      }
+    },
+    {
+      "id": "S055",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 81.33333333333333,
+        "first_application_value": 78.33333333333333,
+        "effort_saved": 60,
+        "return_second_application": 66.66666666666667,
+        "trust_control": 85.66666666666667,
+        "interface_help": 71.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 72.98333333333333,
+      "reviewer_overall": {
+        "product": 74.9,
+        "comprehension": 72.15,
+        "workflow": 71.9
+      }
+    },
+    {
+      "id": "S056",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 71.66666666666667,
+        "first_application_value": 68,
+        "effort_saved": 45,
+        "return_second_application": 61.333333333333336,
+        "trust_control": 85.66666666666667,
+        "interface_help": 63.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 65.21666666666667,
+      "reviewer_overall": {
+        "product": 68.5,
+        "comprehension": 63.1,
+        "workflow": 64.05
+      }
+    },
+    {
+      "id": "S057",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 75.33333333333333,
+        "first_application_value": 64.33333333333333,
+        "effort_saved": 47,
+        "return_second_application": 58.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 67.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 65.05,
+      "reviewer_overall": {
+        "product": 68.15,
+        "comprehension": 64.0,
+        "workflow": 63.0
+      }
+    },
+    {
+      "id": "S058",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 78,
+        "get_started": 78,
+        "first_application_value": 76,
+        "effort_saved": 56,
+        "return_second_application": 63.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 66.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 70.4,
+      "reviewer_overall": {
+        "product": 72.45,
+        "comprehension": 69.6,
+        "workflow": 69.15
+      }
+    },
+    {
+      "id": "S059",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 57.666666666666664,
+        "first_application_value": 55.666666666666664,
+        "effort_saved": 33.666666666666664,
+        "return_second_application": 57,
+        "trust_control": 85.33333333333333,
+        "interface_help": 60,
+        "operational_reliability": 73
+      },
+      "overall": 58.03333333333333,
+      "reviewer_overall": {
+        "product": 62.9,
+        "comprehension": 54.6,
+        "workflow": 56.6
+      }
+    },
+    {
+      "id": "S060",
+      "segment": "busy_same_function",
+      "segment_label": "Busy professionals: next role in the same function",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 79.33333333333333,
+        "first_application_value": 74,
+        "effort_saved": 57.333333333333336,
+        "return_second_application": 64.33333333333333,
+        "trust_control": 85.66666666666667,
+        "interface_help": 69.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 70.66666666666667,
+      "reviewer_overall": {
+        "product": 73.3,
+        "comprehension": 69.2,
+        "workflow": 69.5
+      }
+    },
+    {
+      "id": "S061",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 75.33333333333333,
+        "get_started": 70,
+        "first_application_value": 54.666666666666664,
+        "effort_saved": 33,
+        "return_second_application": 50.666666666666664,
+        "trust_control": 86,
+        "interface_help": 60.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 57.94999999999999,
+      "reviewer_overall": {
+        "product": 60.4,
+        "comprehension": 57.8,
+        "workflow": 55.65
+      }
+    },
+    {
+      "id": "S062",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 78.33333333333333,
+        "first_application_value": 69.33333333333333,
+        "effort_saved": 52,
+        "return_second_application": 59.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 69.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 67.73333333333333,
+      "reviewer_overall": {
+        "product": 69.8,
+        "comprehension": 67.15,
+        "workflow": 66.25
+      }
+    },
+    {
+      "id": "S063",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 67.66666666666667,
+        "first_application_value": 57.333333333333336,
+        "effort_saved": 39,
+        "return_second_application": 52.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 61.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 59.23333333333333,
+      "reviewer_overall": {
+        "product": 63.6,
+        "comprehension": 56.75,
+        "workflow": 57.35
+      }
+    },
+    {
+      "id": "S064",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 77.66666666666667,
+        "first_application_value": 66.66666666666667,
+        "effort_saved": 49.666666666666664,
+        "return_second_application": 59.333333333333336,
+        "trust_control": 85.66666666666667,
+        "interface_help": 68.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 66.68333333333334,
+      "reviewer_overall": {
+        "product": 68.4,
+        "comprehension": 66.05,
+        "workflow": 65.6
+      }
+    },
+    {
+      "id": "S065",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 73.33333333333333,
+        "get_started": 71,
+        "first_application_value": 57.333333333333336,
+        "effort_saved": 37.666666666666664,
+        "return_second_application": 51,
+        "trust_control": 85.66666666666667,
+        "interface_help": 62.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 59.53333333333333,
+      "reviewer_overall": {
+        "product": 62.2,
+        "comprehension": 59.4,
+        "workflow": 57.0
+      }
+    },
+    {
+      "id": "S066",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 67.33333333333333,
+        "first_application_value": 57.333333333333336,
+        "effort_saved": 36.666666666666664,
+        "return_second_application": 52.333333333333336,
+        "trust_control": 85.66666666666667,
+        "interface_help": 60.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 58.7,
+      "reviewer_overall": {
+        "product": 63.2,
+        "comprehension": 56.25,
+        "workflow": 56.65
+      }
+    },
+    {
+      "id": "S067",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 77.66666666666667,
+        "first_application_value": 66.66666666666667,
+        "effort_saved": 49.666666666666664,
+        "return_second_application": 59.333333333333336,
+        "trust_control": 85.66666666666667,
+        "interface_help": 68.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 66.68333333333334,
+      "reviewer_overall": {
+        "product": 68.4,
+        "comprehension": 66.05,
+        "workflow": 65.6
+      }
+    },
+    {
+      "id": "S068",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 78.33333333333333,
+        "first_application_value": 69.33333333333333,
+        "effort_saved": 52,
+        "return_second_application": 59.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 69.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 67.73333333333333,
+      "reviewer_overall": {
+        "product": 69.8,
+        "comprehension": 67.15,
+        "workflow": 66.25
+      }
+    },
+    {
+      "id": "S069",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 68.66666666666667,
+        "get_started": 40.666666666666664,
+        "first_application_value": 33,
+        "effort_saved": 8.666666666666666,
+        "return_second_application": 39.666666666666664,
+        "trust_control": 85.33333333333333,
+        "interface_help": 50,
+        "operational_reliability": 73
+      },
+      "overall": 42.4,
+      "reviewer_overall": {
+        "product": 46.6,
+        "comprehension": 41.6,
+        "workflow": 39.0
+      }
+    },
+    {
+      "id": "S070",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 77.66666666666667,
+        "first_application_value": 66.66666666666667,
+        "effort_saved": 49.666666666666664,
+        "return_second_application": 59.333333333333336,
+        "trust_control": 85.66666666666667,
+        "interface_help": 68.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 66.68333333333334,
+      "reviewer_overall": {
+        "product": 68.4,
+        "comprehension": 66.05,
+        "workflow": 65.6
+      }
+    },
+    {
+      "id": "S071",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 78,
+        "first_application_value": 69.33333333333333,
+        "effort_saved": 49.666666666666664,
+        "return_second_application": 59.666666666666664,
+        "trust_control": 86,
+        "interface_help": 69,
+        "operational_reliability": 73
+      },
+      "overall": 67.2,
+      "reviewer_overall": {
+        "product": 69.4,
+        "comprehension": 66.65,
+        "workflow": 65.55
+      }
+    },
+    {
+      "id": "S072",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 67.66666666666667,
+        "first_application_value": 57.333333333333336,
+        "effort_saved": 39,
+        "return_second_application": 52.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 61.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 59.23333333333333,
+      "reviewer_overall": {
+        "product": 63.6,
+        "comprehension": 56.75,
+        "workflow": 57.35
+      }
+    },
+    {
+      "id": "S073",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 75.33333333333333,
+        "get_started": 70.33333333333333,
+        "first_application_value": 54.666666666666664,
+        "effort_saved": 35.333333333333336,
+        "return_second_application": 50.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 61,
+        "operational_reliability": 73
+      },
+      "overall": 58.48333333333333,
+      "reviewer_overall": {
+        "product": 60.8,
+        "comprehension": 58.3,
+        "workflow": 56.35
+      }
+    },
+    {
+      "id": "S074",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 78.33333333333333,
+        "first_application_value": 69.33333333333333,
+        "effort_saved": 52,
+        "return_second_application": 59.666666666666664,
+        "trust_control": 85.66666666666667,
+        "interface_help": 69.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 67.73333333333333,
+      "reviewer_overall": {
+        "product": 69.8,
+        "comprehension": 67.15,
+        "workflow": 66.25
+      }
+    },
+    {
+      "id": "S075",
+      "segment": "busy_switcher",
+      "segment_label": "Busy professionals: changing function",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 67.66666666666667,
+        "first_application_value": 57.333333333333336,
+        "effort_saved": 39,
+        "return_second_application": 52.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 61.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 59.23333333333333,
+      "reviewer_overall": {
+        "product": 63.6,
+        "comprehension": 56.75,
+        "workflow": 57.35
+      }
+    },
+    {
+      "id": "S076",
+      "segment": "urgent_search",
+      "segment_label": "Applicants recently out of work",
+      "scores": {
+        "understand_value": 78.33333333333333,
+        "get_started": 79,
+        "first_application_value": 66.66666666666667,
+        "effort_saved": 43.666666666666664,
+        "return_second_application": 56.333333333333336,
+        "trust_control": 84.66666666666667,
+        "interface_help": 69.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 65.3,
+      "reviewer_overall": {
+        "product": 67.25,
+        "comprehension": 66.65,
+        "workflow": 62.0
+      }
+    },
+    {
+      "id": "S077",
+      "segment": "urgent_search",
+      "segment_label": "Applicants recently out of work",
+      "scores": {
+        "understand_value": 72,
+        "get_started": 68,
+        "first_application_value": 62.666666666666664,
+        "effort_saved": 40.333333333333336,
+        "return_second_application": 52.666666666666664,
+        "trust_control": 84,
+        "interface_help": 62.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 60.81666666666666,
+      "reviewer_overall": {
+        "product": 65.2,
+        "comprehension": 59.5,
+        "workflow": 57.75
+      }
+    },
+    {
+      "id": "S078",
+      "segment": "urgent_search",
+      "segment_label": "Applicants recently out of work",
+      "scores": {
+        "understand_value": 75.33333333333333,
+        "get_started": 62.333333333333336,
+        "first_application_value": 58,
+        "effort_saved": 37,
+        "return_second_application": 53.333333333333336,
+        "trust_control": 84.33333333333333,
+        "interface_help": 64.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 59.28333333333333,
+      "reviewer_overall": {
+        "product": 63.8,
+        "comprehension": 57.95,
+        "workflow": 56.1
+      }
+    },
+    {
+      "id": "S079",
+      "segment": "urgent_search",
+      "segment_label": "Applicants recently out of work",
+      "scores": {
+        "understand_value": 80,
+        "get_started": 80,
+        "first_application_value": 74,
+        "effort_saved": 52.333333333333336,
+        "return_second_application": 59,
+        "trust_control": 84.33333333333333,
+        "interface_help": 66.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 68.86666666666667,
+      "reviewer_overall": {
+        "product": 70.35,
+        "comprehension": 69.8,
+        "workflow": 66.45
+      }
+    },
+    {
+      "id": "S080",
+      "segment": "urgent_search",
+      "segment_label": "Applicants recently out of work",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 64,
+        "first_application_value": 53,
+        "effort_saved": 30,
+        "return_second_application": 47,
+        "trust_control": 84,
+        "interface_help": 60.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 55.2,
+      "reviewer_overall": {
+        "product": 60.05,
+        "comprehension": 54.3,
+        "workflow": 51.25
+      }
+    },
+    {
+      "id": "S081",
+      "segment": "uae_relocation",
+      "segment_label": "Applicants targeting UAE relocation",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 66,
+        "first_application_value": 48.333333333333336,
+        "effort_saved": 25.333333333333332,
+        "return_second_application": 46.666666666666664,
+        "trust_control": 83.66666666666667,
+        "interface_help": 59.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 53.31666666666667,
+      "reviewer_overall": {
+        "product": 58.45,
+        "comprehension": 50.85,
+        "workflow": 50.65
+      }
+    },
+    {
+      "id": "S082",
+      "segment": "uae_relocation",
+      "segment_label": "Applicants targeting UAE relocation",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 70.33333333333333,
+        "first_application_value": 54.333333333333336,
+        "effort_saved": 35,
+        "return_second_application": 49.666666666666664,
+        "trust_control": 83.66666666666667,
+        "interface_help": 65,
+        "operational_reliability": 73
+      },
+      "overall": 57.9,
+      "reviewer_overall": {
+        "product": 62.05,
+        "comprehension": 56.35,
+        "workflow": 55.3
+      }
+    },
+    {
+      "id": "S083",
+      "segment": "uae_relocation",
+      "segment_label": "Applicants targeting UAE relocation",
+      "scores": {
+        "understand_value": 71.66666666666667,
+        "get_started": 70.66666666666667,
+        "first_application_value": 56.333333333333336,
+        "effort_saved": 35,
+        "return_second_application": 49,
+        "trust_control": 83.66666666666667,
+        "interface_help": 62,
+        "operational_reliability": 73
+      },
+      "overall": 58.06666666666667,
+      "reviewer_overall": {
+        "product": 61.8,
+        "comprehension": 57.05,
+        "workflow": 55.35
+      }
+    },
+    {
+      "id": "S084",
+      "segment": "uae_relocation",
+      "segment_label": "Applicants targeting UAE relocation",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 66.33333333333333,
+        "first_application_value": 48.333333333333336,
+        "effort_saved": 27.666666666666668,
+        "return_second_application": 46.666666666666664,
+        "trust_control": 83.33333333333333,
+        "interface_help": 60,
+        "operational_reliability": 73
+      },
+      "overall": 53.85,
+      "reviewer_overall": {
+        "product": 58.85,
+        "comprehension": 51.35,
+        "workflow": 51.35
+      }
+    },
+    {
+      "id": "S085",
+      "segment": "uae_relocation",
+      "segment_label": "Applicants targeting UAE relocation",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 70.33333333333333,
+        "first_application_value": 54.333333333333336,
+        "effort_saved": 35,
+        "return_second_application": 49.666666666666664,
+        "trust_control": 83.66666666666667,
+        "interface_help": 65,
+        "operational_reliability": 73
+      },
+      "overall": 57.9,
+      "reviewer_overall": {
+        "product": 62.05,
+        "comprehension": 56.35,
+        "workflow": 55.3
+      }
+    },
+    {
+      "id": "S086",
+      "segment": "career_return",
+      "segment_label": "Applicants returning after a break",
+      "scores": {
+        "understand_value": 75.33333333333333,
+        "get_started": 55.333333333333336,
+        "first_application_value": 46,
+        "effort_saved": 25,
+        "return_second_application": 50.333333333333336,
+        "trust_control": 85.66666666666667,
+        "interface_help": 62.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 53.3,
+      "reviewer_overall": {
+        "product": 55.1,
+        "comprehension": 54.85,
+        "workflow": 49.95
+      }
+    },
+    {
+      "id": "S087",
+      "segment": "career_return",
+      "segment_label": "Applicants returning after a break",
+      "scores": {
+        "understand_value": 75,
+        "get_started": 76.66666666666667,
+        "first_application_value": 68.33333333333333,
+        "effort_saved": 52,
+        "return_second_application": 57.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 65.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 66.55,
+      "reviewer_overall": {
+        "product": 69.0,
+        "comprehension": 66.5,
+        "workflow": 64.15
+      }
+    },
+    {
+      "id": "S088",
+      "segment": "career_return",
+      "segment_label": "Applicants returning after a break",
+      "scores": {
+        "understand_value": 70.33333333333333,
+        "get_started": 66,
+        "first_application_value": 58.666666666666664,
+        "effort_saved": 40.333333333333336,
+        "return_second_application": 53,
+        "trust_control": 85,
+        "interface_help": 62.333333333333336,
+        "operational_reliability": 73
+      },
+      "overall": 59.76666666666667,
+      "reviewer_overall": {
+        "product": 64.05,
+        "comprehension": 58.05,
+        "workflow": 57.2
+      }
+    },
+    {
+      "id": "S089",
+      "segment": "career_return",
+      "segment_label": "Applicants returning after a break",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 77.66666666666667,
+        "first_application_value": 68,
+        "effort_saved": 52.333333333333336,
+        "return_second_application": 60,
+        "trust_control": 85.33333333333333,
+        "interface_help": 69.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 67.65,
+      "reviewer_overall": {
+        "product": 69.45,
+        "comprehension": 67.65,
+        "workflow": 65.85
+      }
+    },
+    {
+      "id": "S090",
+      "segment": "career_return",
+      "segment_label": "Applicants returning after a break",
+      "scores": {
+        "understand_value": 73.33333333333333,
+        "get_started": 76,
+        "first_application_value": 61,
+        "effort_saved": 45.666666666666664,
+        "return_second_application": 54.666666666666664,
+        "trust_control": 85.33333333333333,
+        "interface_help": 68.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 63.51666666666666,
+      "reviewer_overall": {
+        "product": 66.3,
+        "comprehension": 63.85,
+        "workflow": 60.4
+      }
+    },
+    {
+      "id": "S091",
+      "segment": "mobile_constraint",
+      "segment_label": "Applicants mainly using a phone",
+      "scores": {
+        "understand_value": 79.66666666666667,
+        "get_started": 77,
+        "first_application_value": 65.33333333333333,
+        "effort_saved": 45.666666666666664,
+        "return_second_application": 57.333333333333336,
+        "trust_control": 85.33333333333333,
+        "interface_help": 65.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 65.18333333333334,
+      "reviewer_overall": {
+        "product": 67.4,
+        "comprehension": 65.35,
+        "workflow": 62.8
+      }
+    },
+    {
+      "id": "S092",
+      "segment": "mobile_constraint",
+      "segment_label": "Applicants mainly using a phone",
+      "scores": {
+        "understand_value": 73.33333333333333,
+        "get_started": 66,
+        "first_application_value": 61.333333333333336,
+        "effort_saved": 42.333333333333336,
+        "return_second_application": 53.666666666666664,
+        "trust_control": 84.66666666666667,
+        "interface_help": 58.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 60.7,
+      "reviewer_overall": {
+        "product": 65.35,
+        "comprehension": 58.2,
+        "workflow": 58.55
+      }
+    },
+    {
+      "id": "S093",
+      "segment": "mobile_constraint",
+      "segment_label": "Applicants mainly using a phone",
+      "scores": {
+        "understand_value": 76.66666666666667,
+        "get_started": 76.33333333333333,
+        "first_application_value": 69,
+        "effort_saved": 54,
+        "return_second_application": 58.666666666666664,
+        "trust_control": 85,
+        "interface_help": 64.66666666666667,
+        "operational_reliability": 73
+      },
+      "overall": 67.31666666666666,
+      "reviewer_overall": {
+        "product": 70.55,
+        "comprehension": 65.95,
+        "workflow": 65.45
+      }
+    },
+    {
+      "id": "S094",
+      "segment": "mobile_constraint",
+      "segment_label": "Applicants mainly using a phone",
+      "scores": {
+        "understand_value": 81.33333333333333,
+        "get_started": 81.33333333333333,
+        "first_application_value": 75,
+        "effort_saved": 58.333333333333336,
+        "return_second_application": 63,
+        "trust_control": 85,
+        "interface_help": 68,
+        "operational_reliability": 73
+      },
+      "overall": 71.33333333333333,
+      "reviewer_overall": {
+        "product": 72.95,
+        "comprehension": 71.05,
+        "workflow": 70.0
+      }
+    },
+    {
+      "id": "S095",
+      "segment": "mobile_constraint",
+      "segment_label": "Applicants mainly using a phone",
+      "scores": {
+        "understand_value": 71.66666666666667,
+        "get_started": 62,
+        "first_application_value": 51.666666666666664,
+        "effort_saved": 32,
+        "return_second_application": 48,
+        "trust_control": 84.66666666666667,
+        "interface_help": 56.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 55.08333333333333,
+      "reviewer_overall": {
+        "product": 60.2,
+        "comprehension": 53.0,
+        "workflow": 52.05
+      }
+    },
+    {
+      "id": "S096",
+      "segment": "privacy_constraint",
+      "segment_label": "Applicants handling confidential experience",
+      "scores": {
+        "understand_value": 74,
+        "get_started": 68,
+        "first_application_value": 54.333333333333336,
+        "effort_saved": 32.666666666666664,
+        "return_second_application": 50.666666666666664,
+        "trust_control": 86.33333333333333,
+        "interface_help": 61,
+        "operational_reliability": 73
+      },
+      "overall": 57.58333333333334,
+      "reviewer_overall": {
+        "product": 62.6,
+        "comprehension": 56.55,
+        "workflow": 53.6
+      }
+    },
+    {
+      "id": "S097",
+      "segment": "privacy_constraint",
+      "segment_label": "Applicants handling confidential experience",
+      "scores": {
+        "understand_value": 75.66666666666667,
+        "get_started": 61.666666666666664,
+        "first_application_value": 57.666666666666664,
+        "effort_saved": 36.666666666666664,
+        "return_second_application": 55,
+        "trust_control": 86.66666666666667,
+        "interface_help": 63.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 59.53333333333333,
+      "reviewer_overall": {
+        "product": 64.95,
+        "comprehension": 57.75,
+        "workflow": 55.9
+      }
+    },
+    {
+      "id": "S098",
+      "segment": "privacy_constraint",
+      "segment_label": "Applicants handling confidential experience",
+      "scores": {
+        "understand_value": 77,
+        "get_started": 79.66666666666667,
+        "first_application_value": 74.33333333333333,
+        "effort_saved": 54.333333333333336,
+        "return_second_application": 61.666666666666664,
+        "trust_control": 86.66666666666667,
+        "interface_help": 70.33333333333333,
+        "operational_reliability": 73
+      },
+      "overall": 70.0,
+      "reviewer_overall": {
+        "product": 73.15,
+        "comprehension": 70.0,
+        "workflow": 66.85
+      }
+    },
+    {
+      "id": "S099",
+      "segment": "privacy_constraint",
+      "segment_label": "Applicants handling confidential experience",
+      "scores": {
+        "understand_value": 75.66666666666667,
+        "get_started": 68.66666666666667,
+        "first_application_value": 61.666666666666664,
+        "effort_saved": 39,
+        "return_second_application": 53.333333333333336,
+        "trust_control": 86.33333333333333,
+        "interface_help": 57.666666666666664,
+        "operational_reliability": 73
+      },
+      "overall": 60.61666666666667,
+      "reviewer_overall": {
+        "product": 65.3,
+        "comprehension": 59.2,
+        "workflow": 57.35
+      }
+    },
+    {
+      "id": "S100",
+      "segment": "privacy_constraint",
+      "segment_label": "Applicants handling confidential experience",
+      "scores": {
+        "understand_value": 74,
+        "get_started": 72,
+        "first_application_value": 60.333333333333336,
+        "effort_saved": 40,
+        "return_second_application": 53.666666666666664,
+        "trust_control": 86.66666666666667,
+        "interface_help": 66,
+        "operational_reliability": 73
+      },
+      "overall": 61.63333333333334,
+      "reviewer_overall": {
+        "product": 65.8,
+        "comprehension": 61.55,
+        "workflow": 57.55
+      }
+    }
+  ],
+  "limitations": [
+    "Purposive hypothetical mix, not measured audience proportions.",
+    "Three separately assigned contexts using the same underlying model.",
+    "Group bases and profile modifiers are judgments, not measured probabilities.",
+    "Increasing synthetic profile count does not increase statistical confidence.",
+    "No conversion, retention, NPS, hiring outcome, revenue or actual demand estimate.",
+    "No statistical confidence interval; reviewer spread shows judgment disagreement only."
+  ]
+}
