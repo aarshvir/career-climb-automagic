@@ -1,0 +1,223 @@
+{
+  "audit_id": "cycle2-student-independent",
+  "persona": "University student applying for graduate/intern roles with coursework and short-internship evidence, limited time and no polished CV",
+  "started_at": "2026-10-14T03:28:16.118Z",
+  "observations_ended_at": "2026-10-14T03:37:21Z",
+  "source_check_ended_at": "2026-10-14T03:37:21Z",
+  "origin": "http://127.0.0.1:8383",
+  "browser": {
+    "name": "Chrome",
+    "browser_id": "3",
+    "tab_id": "1385099311",
+    "own_tab": true,
+    "viewport_override": false
+  },
+  "independence": {
+    "prior_audits_read": false,
+    "implementation_reports_read": false,
+    "target_grade_supplied": false,
+    "peer_results_read": false,
+    "fictional_inputs_only": true,
+    "signed_in": false,
+    "saved_candidate_records_read": false,
+    "live_support_called": false,
+    "paid_models_called": false,
+    "runtime_source_edited": false,
+    "committed": false,
+    "deployed": false
+  },
+  "rubric": {
+    "scale": "0–100",
+    "dimensions": 10,
+    "weight_per_dimension": 0.1,
+    "overall": 83.5,
+    "scores": {
+      "clarity": 89,
+      "activation": 86,
+      "form_effort": 82,
+      "evidence_quality": 66,
+      "workflow_completeness": 85,
+      "reuse_time_saving": 90,
+      "help_walkthroughs": 89,
+      "ui_accessibility": 86,
+      "trust_privacy": 80,
+      "reliability": 82
+    },
+    "interpretation": "Observed guest student journey; limitations and material findings are explicitly recorded."
+  },
+  "findings": [
+    {
+      "id": "S1",
+      "severity": "P2",
+      "title": "Explicitly academic work receives a direct professional-experience finding",
+      "evidence_type": [
+        "browser",
+        "source"
+      ],
+      "task": "Use original source from student.md and boundary vacancy C; inspect professional Power BI requirement.",
+      "expected": "Related/manual review with preserved academic context; this passage must not establish professional experience.",
+      "actual": "Direct wording found quotes the class-project passage including 'This was academic work, not professional employment.' No academic tag appears; summary has two direct and zero review findings.",
+      "acceptance": "Recognize coursework/class/academic section context and attached disclaimers; explicit professional/commercial/employment requirement cannot be direct using only academic evidence. Preserve specific quote; generic task may still be direct with academic context; real employment remains usable.",
+      "source_refs": [
+        "src/lib/cv-evidence.ts:245",
+        "src/lib/cv-evidence.ts:289",
+        "src/lib/cv-evidence.ts:407"
+      ],
+      "screenshot": "evidence/student-professional-academic.jpg"
+    },
+    {
+      "id": "S2",
+      "severity": "P3",
+      "title": "Generic team overlap produces unhelpful partial task match",
+      "evidence_type": [
+        "browser",
+        "source"
+      ],
+      "task": "Check vacancy B with sanitized source plus added methods example; inspect 'Create charts for a small research team.'",
+      "expected": "No partial task support based solely on 'team'; no passage/manual review unless useful task/object evidence exists.",
+      "actual": "Related passage and 'CV covers part' cite coordinating coding-club workshops with a team of two volunteers.",
+      "acceptance": "Exact fixture no longer treats team alone as partial task evidence; real chart-creation and specific tool/object evidence remain discoverable.",
+      "source_refs": [
+        "src/lib/cv-evidence.ts:364",
+        "src/lib/cv-evidence.ts:428"
+      ]
+    },
+    {
+      "id": "S3",
+      "severity": "P3",
+      "title": "Student guidance is lost on help return while draft survives",
+      "evidence_type": [
+        "browser",
+        "source"
+      ],
+      "task": "Start /check?audience=student via homepage, reach review, visit help/walkthroughs, return via header Free CV check at /check.",
+      "expected": "Restore selected audience guidance with current draft or expose a convenient audience selector.",
+      "actual": "Sanitized CV and vacancy restore, but University student guidance panel disappears.",
+      "acceptance": "Retain student guidance for same active draft across help return and consented refresh without changing facts or assigning it to unrelated new checks.",
+      "source_refs": [
+        "src/pages/CvCheck.tsx:96",
+        "src/pages/CvCheck.tsx:97"
+      ]
+    }
+  ],
+  "observed_successes": [
+    "Homepage student CTA to first six-step check",
+    "No finished CV short-facts guidance",
+    "Malformed PDF returns clear recovery message and paste controls",
+    "Expected degree and internship wording preserved",
+    "Tableau absence and two-year SQL duration not invented",
+    "Source-line preview/removal/undo/reapply on confidential fictional line",
+    "Confirmed added example and explicit reusable source update",
+    "PDF preview generated status:1page within selected2page max; exact-preview iframe/link present",
+    "Approval gates downloads/reuse",
+    "PDF and TXT download requests and named fallback links",
+    "Approved final reuse contains sanitized source and added example",
+    "Undo new application restores prior review and clears approval",
+    "Help search scanned=>1topic",
+    "Walkthrough recording loaded, interactive steps and transcript opened",
+    "Help return restores draft and clears approval",
+    "Opted-in refresh restores sanitized draft",
+    "Second vacancy uses four steps without retyping CV and reaches own unchecked approval"
+  ],
+  "unverified": [
+    "Actual downloaded bytes/file completion",
+    "Every generated PDF glyph/page layout",
+    "DOCX reader compatibility",
+    "Valid PDF/DOCX extraction",
+    "5MB and character-boundary cases",
+    "Real scanned PDF OCR",
+    "Full video narration/caption playback",
+    "Mobile and screen-reader behavior",
+    "Full keyboard-only flow",
+    "Account saving and cross-account isolation",
+    "Live support/CORS and cloud preparation",
+    "Paid AI, email and employer submission"
+  ],
+  "tool_limits": [
+    "Initial navigation timeouts recovered via own Chrome tab; not scored as product defects",
+    "TXT waitForEvent(download) timed out after15000ms; fallback downloadMedia rejected blob download as unsupported; exact default Downloads filename absent",
+    "Full-page screenshot capture timed out; viewport screenshot saved successfully"
+  ],
+  "tests_run": [],
+  "source_drift": {
+    "observed": false,
+    "initial_baseline_at": "2026-10-14T03:28:25Z",
+    "final_hash_check_at": "2026-10-14T03:37:21Z",
+    "note": "Eight initial baseline hashes match end; four additional source files matched between secondary inspection and final check. This report applies to these hashes."
+  },
+  "source_hashes": [
+    {
+      "path": "src/pages/CvCheck.tsx",
+      "sha256": "4F3A60652EF5AC763CA89E530876B2AFAB6482FFA671AFA21BA7364612D7F51C",
+      "initial_baseline": true,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/lib/cv-evidence.ts",
+      "sha256": "CCFC9575CF9A49842811B68C1DADDD8C0205EBCC313A3189AA4715B8F8E9DF12",
+      "initial_baseline": true,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/lib/cv-documents.ts",
+      "sha256": "60C7460AC8348B050E65AA3313D6DC19BA725DC331114B7A0258AD563B3549FA",
+      "initial_baseline": true,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/lib/check-draft.ts",
+      "sha256": "CF799C117BE996409CD2010D7E8BF322547171B7E46F883A9A7213D53E261484",
+      "initial_baseline": true,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/pages/HelpCenter.tsx",
+      "sha256": "8EB438757F876640BB3A8F6F2C3E7A1D4FEB9D9CD5E70AE458B58AD62B712919",
+      "initial_baseline": true,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/pages/Walkthroughs.tsx",
+      "sha256": "B462C788723C86484BC173ABD96BC76B5EF588DF822399DBF4B1EF994C5F0DDE",
+      "initial_baseline": true,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/lib/walkthroughs.ts",
+      "sha256": "2ECDF8338B59FDFA617C935ADFDB1F5314C668797461D9E5C97609C47E6A7963",
+      "initial_baseline": true,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/pages/PilotLanding.tsx",
+      "sha256": "5139B515746830DF16BC69427276BF441B2D7B4E37C9861CE23E2E0DB908B2D6",
+      "initial_baseline": true,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/lib/document-download.ts",
+      "sha256": "9663CE05A0E21704CCFE37FC5B8AC1A323B6E46860F0FBEE845FCD744F2A5710",
+      "initial_baseline": false,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/lib/document-export.ts",
+      "sha256": "DBC2A36471BB657648C9B660B71B1520A51511EAFD2B0C3EF6FF17BA2F64E683",
+      "initial_baseline": false,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/lib/cv-extraction.ts",
+      "sha256": "7AC949832AC5ABEB4E36DF6A852347224D08BC9E4DE0C8A90EDC2C929C7322DB",
+      "initial_baseline": false,
+      "matched_at_final_check": true
+    },
+    {
+      "path": "src/pages/ProductPage.tsx",
+      "sha256": "A945404F59236521D082C040AFF9E1E0536146B4863A4A2586E304913A4BFADC",
+      "initial_baseline": false,
+      "matched_at_final_check": true
+    }
+  ],
+  "report": "student.md"
+}

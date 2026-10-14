@@ -1,0 +1,149 @@
+{
+  "audit_id": "cycle2-student-recheck-v4",
+  "kind": "targeted_fix_verification",
+  "started_at": "2026-10-14T03:50:56Z",
+  "ended_at": "2026-10-14T03:53:41Z",
+  "origin": "http://127.0.0.1:8383",
+  "browser": {
+    "name": "Chrome",
+    "tool_browser_id": "1",
+    "tab_id": "1385099322",
+    "own_tab": true,
+    "viewport_changed": false,
+    "other_tabs_operated": false
+  },
+  "initial_report": "student.md",
+  "initial_report_modified": false,
+  "initial_json_modified": false,
+  "initial_score": 83.5,
+  "score_revised": false,
+  "new_score": null,
+  "overall_result": "All three exact findings resolved in observed browser fixtures; specific chart positive countercase preserved.",
+  "checks": [
+    {
+      "id": "S1",
+      "status": "pass_exact_fixture",
+      "evidence_type": "browser",
+      "source_fixture": "Original15-line source and boundary vacancyC in initial report",
+      "requirement": "Professional experience creating Power BI dashboards is required.",
+      "quote": "Created a Power BI dashboard for the class project and presented findings to four classmates. This was academic work, not professional employment.",
+      "observed_status": "Related passage — review needed",
+      "context": "Line7 · From your reviewed source CV · Project / academic evidence",
+      "explanation": "The related source includes academic, project or volunteer work. It does not establish the professional employment experience requested. Keep its context visible.",
+      "summary": {
+        "total": 2,
+        "direct": 0,
+        "related": 2,
+        "missing": 0,
+        "manual": 0
+      },
+      "screenshot": "evidence/student-v4-professional-academic.jpg"
+    },
+    {
+      "id": "S2",
+      "status": "pass_exact_fixture",
+      "evidence_type": "browser",
+      "source_fixture": "Original sanitized source plus addedmethods example915characters; exact vacancyB",
+      "requirement": "Create charts for a small research team.",
+      "observed_status": "No passage found",
+      "irrelevant_workshop_quote_present": false
+    },
+    {
+      "id": "S2-positive",
+      "status": "pass",
+      "evidence_type": "browser",
+      "source_append": "ACADEMIC PROJECT\nCreated charts for a small research team using simulated survey data in a university project.",
+      "requirement": "Create charts for a small research team.",
+      "observed_status": "Direct wording found",
+      "quote": "Created charts for a small research team using simulated survey data in a university project.",
+      "line": 19,
+      "academic_label_preserved": true,
+      "professional_experience_limitation_preserved": true
+    },
+    {
+      "id": "S3-help-return",
+      "status": "pass_exact_route",
+      "evidence_type": "browser",
+      "route": [
+        "Homepage student CTA",
+        "review",
+        "Help",
+        "header Free CV check at generic /check"
+      ],
+      "guidance": "University student",
+      "draft_returned": true
+    },
+    {
+      "id": "S3-consented-refresh",
+      "status": "pass",
+      "evidence_type": "browser",
+      "route": "Generic /check after explicitly enabling refresh recovery",
+      "guidance_survived": true,
+      "current_cv_and_vacancy_returned": true,
+      "recovery_on": true,
+      "screenshot": "evidence/student-v4-recovered-audience.jpg"
+    },
+    {
+      "id": "S3-clear",
+      "status": "pass",
+      "evidence_type": "browser",
+      "route": [
+        "Clear & start again",
+        "Clear current check"
+      ],
+      "step": 1,
+      "target_role_blank": true,
+      "company_blank": true,
+      "student_guidance_absent": true,
+      "recovery_consent_off": true
+    }
+  ],
+  "independence": {
+    "fictional_only": true,
+    "signed_in": false,
+    "saved_candidates_read": false,
+    "service_writes": false,
+    "paid_models": false,
+    "live_support": false,
+    "email": false,
+    "runtime_edits": false,
+    "commits": false,
+    "deployments": false,
+    "tests_run": []
+  },
+  "source_drift": false,
+  "source_hashes": [
+    {
+      "path": "src/lib/cv-evidence.ts",
+      "sha256": "C1D09F00F9BC452C09ABC51938B3F3C2C879981DB10E8482FDB5C0AD4B337884",
+      "start_end_match": true
+    },
+    {
+      "path": "src/pages/CvCheck.tsx",
+      "sha256": "21CC4035208CE26238ED13A5C4850EA45EAC2AA5A48C575D3B1F263970D701E8",
+      "start_end_match": true
+    },
+    {
+      "path": "src/lib/check-draft.ts",
+      "sha256": "0533755A60B0EB3D7759BF8DC1575709BA4981510A626E7951137733C1AE2789",
+      "start_end_match": true
+    }
+  ],
+  "secondary_source": [
+    "Evidence methodv4",
+    "Coursework/class context",
+    "Professional-experience limitation",
+    "Audience in recovery state"
+  ],
+  "unverified": [
+    "All possible wording/heading variants",
+    "Account-owner transitions",
+    "Expiry and storage denial",
+    "Downloaded files",
+    "Valid document extraction",
+    "Mobile accessibility",
+    "Narration/caption playback",
+    "Cloud actions"
+  ],
+  "report": "student-recheck-v4.md"
+}

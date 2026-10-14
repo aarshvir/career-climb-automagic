@@ -3,6 +3,7 @@ import type { AdminAction, AdminResponse, AdminSnapshot, AdminSupport, AdminSupp
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge, Empty, Panel, WindowNote } from './AdminShared';
 import { readable, shortId, utc } from './admin-format';
+import GuestSupportInbox from './GuestSupportInbox';
 
 type RunAction = (action: AdminAction) => Promise<AdminResponse | void>;
 function SupportRow({ receipt, busy, onAction }: { receipt: AdminSupport; busy: boolean; onAction: RunAction }) {
@@ -40,6 +41,7 @@ export default function AdminOperations({ snapshot, busy, onAction }: { snapshot
   const inReview = support.filter(row => row.status === 'in_review').length;
   const resolved = support.filter(row => row.status === 'resolved').length;
   return <>
+    <GuestSupportInbox key={snapshot.actor.id} actorId={snapshot.actor.id} />
     <div className="admin-overview-strip">
       <div><span>Support requiring review</span><strong>{received + inReview}</strong><p>{received} received · {inReview} in review in the retained queue</p></div>
       <div><span>Scheduler</span><strong className="admin-status-value">{scheduler.enabled ? scheduler.ready ? 'Enabled' : 'Not ready' : 'Paused'}</strong><p>{scheduler.dueSchedules} due · {scheduler.staleLeases} stale leases</p></div>

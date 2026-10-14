@@ -1,15 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LoopAction } from '../../../supabase/functions/_shared/job-loop-types';
-const sdk = vi.hoisted(() => ({ session: vi.fn(), getUser: vi.fn(), invoke: vi.fn(), cvs: vi.fn() }));
+const sdk = vi.hoisted(() => ({ session: vi.fn(), getUser: vi.fn(), invoke: vi.fn(), cvs: vi.fn(), onAuthStateChange: vi.fn(), unsubscribe: vi.fn() }));
 vi.mock('@/utils/authSession', () => ({ readAuthSession: sdk.session }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: sdk.getUser }, functions: { invoke: sdk.invoke } } }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: sdk.getUser, onAuthStateChange: sdk.onAuthStateChange }, functions: { invoke: sdk.invoke } } }));
 vi.mock('@/lib/cv-documents', () => ({ listCvDocuments: sdk.cvs }));
-import { callJobLoop, getLoopDownload, getLoopPreview, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl,LOOP_ARTIFACT_TIMEOUT_MS } from '@/lib/job-loop-api';
+import { callJobLoop, getLoopDownload, getLoopPreview, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl, LOOP_ARTIFACT_TIMEOUT_MS, LOOP_ARTIFACT_MAX_BYTES } from '@/lib/job-loop-api';
 import { validateAction as validateControlInput } from '../../../supabase/functions/_shared/job-loop-engine';
 
 beforeEach(() => {
   vi.clearAllMocks(); vi.stubEnv('VITE_SUPABASE_URL', 'https://qa.supabase.co');
   sdk.session.mockResolvedValue({ user: { id: 'owner-a' } }); sdk.getUser.mockResolvedValue({ data: { user: { id: 'owner-a' } }, error: null });
+  sdk.onAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: sdk.unsubscribe } } });
   sdk.invoke.mockResolvedValue({ data: { message: 'Synthetic action confirmed' }, error: null });
 });
 afterEach(() => { vi.useRealTimers();vi.restoreAllMocks(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
@@ -89,17 +90,144 @@ describe('cloud loop API privacy and owner boundaries', () => {
   });
 });
 describe('private document and OAuth destinations', () => {
+  it.each(['session', 'getUser', 'invoke'] as const)('bounds a stalled %s prerequisite before requesting document bytes', async stage => {
+    vi.useFakeTimers(); sdk[stage].mockImplementationOnce(() => new Promise(() => {}));
+    vi.stubGlobal('fetch', vi.fn());
+    const pending = getLoopDownload('owner-a', 'packet-a', 'pdf');
+    const rejected = expect(pending).rejects.toThrow('timed out');
+    await vi.advanceTimersByTimeAsync(LOOP_ARTIFACT_TIMEOUT_MS); await rejected;
+    expect(fetch).not.toHaveBeenCalled(); expect(sdk.unsubscribe).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it('ignores a late timed-out link and permits a fresh successful retry', async () => {
+    vi.useFakeTimers();
+    let finish!: (result: unknown) => void;
+    sdk.invoke.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const url = 'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf';
+    const fetcher = vi.fn().mockResolvedValue(new Response(new Uint8Array([37, 80, 68, 70]))); vi.stubGlobal('fetch', fetcher);
+    const pending = getLoopPreview('owner-a', 'packet-a', 'a'.repeat(64));
+    const rejected = expect(pending).rejects.toThrow('timed out');
+    await vi.waitFor(() => expect(sdk.invoke).toHaveBeenCalledOnce());
+    await vi.advanceTimersByTimeAsync(LOOP_ARTIFACT_TIMEOUT_MS); await rejected;
+    finish({ data: { url: url + '?token=late', filename: 'fixture.pdf' }, error: null });
+    await vi.advanceTimersByTimeAsync(0); expect(fetcher).not.toHaveBeenCalled();
+    sdk.invoke.mockResolvedValueOnce({ data: { url: url + '?token=fresh', filename: 'fixture.pdf' }, error: null });
+    expect((await getLoopPreview('owner-a', 'packet-a', 'a'.repeat(64))).blob.size).toBe(4);
+    expect(fetcher).toHaveBeenCalledOnce(); expect(fetcher.mock.calls[0][0]).toBe(url + '?token=fresh');
+    expect(sdk.unsubscribe).toHaveBeenCalledTimes(2);
+  });
   it.each(['headers','body'])('releases a stalled private %s transfer before a minute without losing owner checks',async(stage)=>{
     vi.useFakeTimers();
     sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.txt?token=synthetic',filename:'fixture.txt'},error:null});
-    const response=new Response('Fictional text');
-    if(stage==='body')vi.spyOn(response,'blob').mockImplementation(()=>new Promise(()=>{}));
+    const cancel=vi.fn();
+    const response=new Response(new ReadableStream<Uint8Array>({start(stream){stream.enqueue(new Uint8Array([65]));},cancel}));
     const fetcher=vi.fn((_url:unknown,_options:RequestInit)=>stage==='headers'?new Promise<Response>(()=>{}):Promise.resolve(response));vi.stubGlobal('fetch',fetcher);
     const pending=getLoopDownload('owner-a','packet-a','txt');const rejected=expect(pending).rejects.toThrow(/timed out/);
     await vi.waitFor(()=>expect(fetcher).toHaveBeenCalledOnce());
     expect(LOOP_ARTIFACT_TIMEOUT_MS).toBeLessThan(60000);
     await vi.advanceTimersByTimeAsync(LOOP_ARTIFACT_TIMEOUT_MS+1);await rejected;
     expect(fetcher.mock.calls[0][1].signal?.aborted).toBe(true);
+    if(stage==='body')expect(cancel).toHaveBeenCalledOnce();
+    expect(sdk.unsubscribe).toHaveBeenCalledOnce();
+  });
+  it.each([undefined, '1'])('stops an actual oversized streamed body when its declared length is %s', async contentLength => {
+    sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.txt?token=synthetic',filename:'fixture.txt'},error:null});
+    const cancel=vi.fn();let bytesOffered=0;
+    const stream=new ReadableStream<Uint8Array>({
+      pull(controller){const size=bytesOffered<LOOP_ARTIFACT_MAX_BYTES?1024*1024:1;bytesOffered+=size;controller.enqueue(new Uint8Array(size));},
+      cancel,
+    },{highWaterMark:0});
+    const headers=contentLength?{'content-length':contentLength}:undefined;
+    const fetcher=vi.fn(async(_url:unknown,_options:RequestInit)=>new Response(stream,{headers}));vi.stubGlobal('fetch',fetcher);
+    await expect(getLoopDownload('owner-a','packet-a','txt')).rejects.toThrow('exceeds the download limit');
+    expect(bytesOffered).toBe(LOOP_ARTIFACT_MAX_BYTES+1);expect(cancel).toHaveBeenCalledOnce();
+    expect(fetcher.mock.calls[0][1].signal?.aborted).toBe(true);expect(sdk.unsubscribe).toHaveBeenCalledOnce();
+  });
+  it('cancels before reading an oversized declared response',async()=>{
+    sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.txt?token=synthetic',filename:'fixture.txt'},error:null});
+    const pull=vi.fn(),cancel=vi.fn();
+    vi.stubGlobal('fetch',vi.fn(async()=>new Response(new ReadableStream<Uint8Array>({pull,cancel},{highWaterMark:0}),{headers:{'content-length':String(LOOP_ARTIFACT_MAX_BYTES+1)}})));
+    await expect(getLoopDownload('owner-a','packet-a','txt')).rejects.toThrow('exceeds the download limit');
+    expect(pull).not.toHaveBeenCalled();expect(cancel).toHaveBeenCalledOnce();
+  });
+  it('returns complete streamed bytes at the limit with the original content type',async()=>{
+    sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf?token=synthetic',filename:'fixture.pdf'},error:null});
+    let sent=false;
+    const stream=new ReadableStream<Uint8Array>({pull(controller){if(sent){controller.close();return;}sent=true;const chunk=new Uint8Array(LOOP_ARTIFACT_MAX_BYTES);chunk[0]=37;chunk[chunk.length-1]=70;controller.enqueue(chunk);}},{highWaterMark:0});
+    vi.stubGlobal('fetch',vi.fn(async()=>new Response(stream,{headers:{'content-type':'application/pdf'}})));
+    const result=await getLoopDownload('owner-a','packet-a','pdf');
+    expect(result.blob.size).toBe(LOOP_ARTIFACT_MAX_BYTES);expect(result.blob.type).toBe('application/pdf');
+    const bytes=new Uint8Array(await new Promise<ArrayBuffer>((resolve,reject)=>{const file=new FileReader();file.onload=()=>resolve(file.result as ArrayBuffer);file.onerror=()=>reject(file.error);file.readAsArrayBuffer(result.blob);}));
+    expect(bytes[0]).toBe(37);expect(bytes[bytes.length-1]).toBe(70);
+    expect(sdk.getUser).toHaveBeenCalledTimes(3);expect(sdk.unsubscribe).toHaveBeenCalledOnce();
+  });
+  it.each(['owner-b',null])('immediately cancels an unfinished body when the authenticated owner becomes %s',async nextOwner=>{
+    sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf?token=synthetic',filename:'fixture.pdf'},error:null});
+    const cancel=vi.fn(),pull=vi.fn();
+    const stream=new ReadableStream<Uint8Array>({start(controller){controller.enqueue(new Uint8Array([37,80,68,70]));},pull,cancel});
+    const fetcher=vi.fn(async(_url:unknown,_options:RequestInit)=>new Response(stream));vi.stubGlobal('fetch',fetcher);
+    const pending=getLoopPreview('owner-a','packet-a','hash-a');const rejected=expect(pending).rejects.toThrow('account changed');
+    await vi.waitFor(()=>expect(stream.locked).toBe(true));
+    const nextSession=nextOwner?{user:{id:nextOwner}}:null;
+    sdk.session.mockResolvedValue(nextSession);sdk.getUser.mockResolvedValue({data:{user:nextSession?.user??null},error:null});
+    sdk.onAuthStateChange.mock.calls[0][0](nextOwner?'SIGNED_IN':'SIGNED_OUT',nextSession);
+    await rejected;expect(cancel).toHaveBeenCalledOnce();expect(fetcher.mock.calls[0][1].signal?.aborted).toBe(true);
+    expect(sdk.unsubscribe).toHaveBeenCalledOnce();expect(stream.locked).toBe(false);
+  });
+  it('keeps the transfer alive for an auth refresh of the same owner',async()=>{
+    sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf?token=synthetic',filename:'fixture.pdf'},error:null});
+    let body!:ReadableStreamDefaultController<Uint8Array>;
+    const stream=new ReadableStream<Uint8Array>({start(controller){body=controller;}});
+    const fetcher=vi.fn(async(_url:unknown,_options:RequestInit)=>new Response(stream));vi.stubGlobal('fetch',fetcher);
+    const pending=getLoopPreview('owner-a','packet-a','hash-a');
+    await vi.waitFor(()=>expect(stream.locked).toBe(true));
+    sdk.onAuthStateChange.mock.calls[0][0]('TOKEN_REFRESHED',{user:{id:'owner-a'}});
+    expect(fetcher.mock.calls[0][1].signal?.aborted).toBe(false);
+    body.enqueue(new Uint8Array([37,80,68,70]));body.close();expect((await pending).blob.size).toBe(4);
+  });
+  it.each(['headers','body'])('immediately settles caller cancellation during %s, without waiting for the deadline',async(stage)=>{
+    sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf?token=synthetic',filename:'fixture.pdf'},error:null});
+    const controller=new AbortController(),cancel=vi.fn();
+    const stream=new ReadableStream<Uint8Array>({cancel});
+    const fetcher=vi.fn((_url:unknown,_options:RequestInit)=>stage==='headers'?new Promise<Response>(()=>{}):Promise.resolve(new Response(stream)));vi.stubGlobal('fetch',fetcher);
+    const pending=getLoopDownload('owner-a','packet-a','pdf',controller.signal);const rejected=expect(pending).rejects.toMatchObject({name:'AbortError'});
+    await vi.waitFor(()=>{expect(fetcher).toHaveBeenCalledOnce();if(stage==='body')expect(stream.locked).toBe(true);});
+    controller.abort();await rejected;
+    expect(fetcher.mock.calls[0][1].signal?.aborted).toBe(true);if(stage==='body')expect(cancel).toHaveBeenCalledOnce();
+    expect(sdk.unsubscribe).toHaveBeenCalledOnce();
+  });
+  it('never requests a link for a caller that already cancelled',async()=>{
+    const controller=new AbortController();controller.abort();vi.stubGlobal('fetch',vi.fn());
+    await expect(getLoopDownload('owner-a','packet-a','pdf',controller.signal)).rejects.toMatchObject({name:'AbortError'});
+    expect(sdk.invoke).not.toHaveBeenCalled();expect(fetch).not.toHaveBeenCalled();expect(sdk.onAuthStateChange).not.toHaveBeenCalled();
+  });
+  it('prevents a late signed link from starting a download after caller cancellation',async()=>{
+    let finish!:(result:unknown)=>void;sdk.invoke.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;}));
+    const controller=new AbortController();vi.stubGlobal('fetch',vi.fn());
+    const pending=getLoopDownload('owner-a','packet-a','pdf',controller.signal);const rejected=expect(pending).rejects.toMatchObject({name:'AbortError'});
+    await vi.waitFor(()=>expect(sdk.invoke).toHaveBeenCalledOnce());controller.abort();await rejected;
+    finish({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf?token=late',filename:'fixture.pdf'},error:null});
+    await vi.waitFor(()=>expect(sdk.getUser).toHaveBeenCalledTimes(2));expect(fetch).not.toHaveBeenCalled();expect(sdk.unsubscribe).toHaveBeenCalledOnce();
+  });
+  it('uses one deadline across delayed headers and an unfinished body',async()=>{
+    vi.useFakeTimers();
+    sdk.invoke.mockResolvedValue({data:{url:'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf?token=synthetic',filename:'fixture.pdf'},error:null});
+    const cancel=vi.fn();const stream=new ReadableStream<Uint8Array>({cancel});
+    let headers!:(response:Response)=>void;
+    const fetcher=vi.fn(()=>new Promise<Response>(resolve=>{headers=resolve;}));vi.stubGlobal('fetch',fetcher);
+    const pending=getLoopDownload('owner-a','packet-a','pdf');const rejected=expect(pending).rejects.toThrow('timed out');
+    await vi.waitFor(()=>expect(fetcher).toHaveBeenCalledOnce());
+    await vi.advanceTimersByTimeAsync(40000);headers(new Response(stream));
+    await vi.advanceTimersByTimeAsync(1);expect(stream.locked).toBe(true);expect(cancel).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(5000);await rejected;expect(cancel).toHaveBeenCalledOnce();
+  });
+  it('requests a fresh signed link after an expired-link failure',async()=>{
+    const path='https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf';
+    sdk.invoke.mockResolvedValueOnce({data:{url:path+'?token=expired',filename:'fixture.pdf'},error:null}).mockResolvedValueOnce({data:{url:path+'?token=fresh',filename:'fixture.pdf'},error:null});
+    const fetcher=vi.fn().mockResolvedValueOnce(new Response('Expired',{status:403})).mockResolvedValueOnce(new Response(new Uint8Array([37,80,68,70])));vi.stubGlobal('fetch',fetcher);
+    await expect(getLoopDownload('owner-a','packet-a','pdf')).rejects.toThrow('Request a fresh link');
+    expect((await getLoopDownload('owner-a','packet-a','pdf')).blob.size).toBe(4);
+    expect(fetcher.mock.calls.map(call=>call[0])).toEqual([path+'?token=expired',path+'?token=fresh']);expect(sdk.invoke).toHaveBeenCalledTimes(2);expect(sdk.unsubscribe).toHaveBeenCalledTimes(2);
   });
   it.each(['http://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf?token=fixture', 'https://untrusted.invalid/storage/v1/object/sign/job-loop-artifacts/owner-a/file.pdf', 'https://qa.supabase.co/storage/v1/object/sign/cv-documents/owner-a/file.pdf', 'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-b/file.pdf', 'https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/%2Fother/file.pdf'])('rejects an unsafe document destination', url => {
     expect(() => safeLoopDownloadUrl(url, 'owner-a')).toThrow();

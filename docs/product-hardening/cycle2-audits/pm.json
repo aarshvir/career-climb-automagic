@@ -1,0 +1,123 @@
+{
+  "audit": "cycle2-independent-product-manager",
+  "assessmentStage": "frozen_initial",
+  "overallScore": 87.4,
+  "weighting": "ten dimensions, equal 0.1 weight",
+  "scoreMeaning": "Bounded free-pilot product/usability assessment; no market, ranking, usage, customer-outcome or production-scale validation claim.",
+  "independence": {
+    "previousAuditGradesRead": false,
+    "otherAgentReportsRead": false,
+    "requestedScoreTarget": null,
+    "privateMarketingLabExcluded": true
+  },
+  "provenance": {
+    "repository": "C:/Users/user/OneDrive/Documents/Projects/Job CV linkedin/jobvance-independent",
+    "guestPreview": "http://127.0.0.1:8383",
+    "gitBase": "9682cd1bbf776be6d2e74b023766fcd4c9056022",
+    "uncommittedCandidateChangesPresent": true,
+    "startUtc": "2026-10-14T03:30:12.386Z",
+    "endUtc": "2026-10-14T03:35:25.187Z",
+    "timezone": "Asia/Dubai",
+    "browser": "Own IAB tab 1, browser 2",
+    "normalViewport": {"width": 1280, "height": 720},
+    "browserScopedViewportChanged": false,
+    "sourceAndBuildDrift": false,
+    "manifestScope": ["src", "public", "scripts", "dist"],
+    "startHashManifest": ".tmp/pm-audit-start-sha256.txt",
+    "endHashManifest": ".tmp/pm-audit-end-sha256.txt",
+    "bothManifestSha256": "3053AFB306DDF9AD080F16C519F1293DCE210104666CF45FB4BDE4D27BD830D8",
+    "fileSha256": {
+      "src/lib/cv-evidence.ts": "CCFC9575CF9A49842811B68C1DADDD8C0205EBCC313A3189AA4715B8F8E9DF12",
+      "src/pages/CvCheck.tsx": "4F3A60652EF5AC763CA89E530876B2AFAB6482FFA671AFA21BA7364612D7F51C",
+      "src/pages/JobLoop.tsx": "70946927B2011748B98DE9DB65DC026AA10B71EC10D07892634360794710F722",
+      "src/pages/GuestSupport.tsx": "9F6E0B9D5C0BF9E041CB3AE79AFBC34C7BA5864A0570D13846725CE5B9C38E5D",
+      "src/pages/HelpCenter.tsx": "8EB438757F876640BB3A8F6F2C3E7A1D4FEB9D9CD5E70AE458B58AD62B712919",
+      "src/pages/Walkthroughs.tsx": "B462C788723C86484BC173ABD96BC76B5EF588DF822399DBF4B1EF994C5F0DDE",
+      "src/lib/walkthroughs.ts": "2ECDF8338B59FDFA617C935ADFDB1F5314C668797461D9E5C97609C47E6A7963",
+      "src/pages/ProductPage.tsx": "A945404F59236521D082C040AFF9E1E0536146B4863A4A2586E304913A4BFADC",
+      "src/pages/JobLoopOverview.tsx": "F308C7B706EECEFB4841059DC094279CE5C5B87E3589F0CF1BD1A7324697BA08",
+      "dist/.prerender/manifest.json": "82D7F78002C336D3DBE486D018855FE3C1783A19FDD7C88F83914B164B22EF75"
+    }
+  },
+  "scores": [
+    {"dimension": "clarity", "score": 88, "weight": 0.1, "reason": "Shared CV/vacancy/review task and optional account are clear; career-switcher framing narrows the busy-professional audience in places."},
+    {"dimension": "activation", "score": 90, "weight": 0.1, "reason": "Guest evidence before account/card; role and two texts sufficient; starter path for no finished CV. Six steps still require substantial reading."},
+    {"dimension": "form effort", "score": 87, "weight": 0.1, "reason": "Employer optional; second application has four steps with combined role/vacancy entry. Private three-detail setup and copied-fact review were source-inspected, not operated authenticated."},
+    {"dimension": "evidence quality", "score": 78, "weight": 0.1, "reason": "Literal quotes, line references and conservative qualification/negation/duration treatment; reproduced ownership and academic-context cases incorrectly escape review queue."},
+    {"dimension": "workflow completeness", "score": 89, "weight": 0.1, "reason": "Guest evidence/edit/approval/actual TXT export/repeat exercised; stored tracking and output completion have separate supplied hosted evidence."},
+    {"dimension": "reuse/time-saving", "score": 90, "weight": 0.1, "reason": "Explicit source/final choice, cleared vacancy/approval, inspectable reused CV, four-step repeat and source maintenance controls. No measured real-world time claim."},
+    {"dimension": "help/walkthroughs", "score": 91, "weight": 0.1, "reason": "Public searchable task help, current control names, five task walkthroughs with transcripts and recorded media; receipt support explains limits. Full video playback/live submission not performed."},
+    {"dimension": "UI/accessibility", "score": 86, "weight": 0.1, "reason": "Clear normal-desktop hierarchy, labels, text statuses, skip link and heading focus; no document overflow. No full assistive-technology/mobile/zoom/contrast audit."},
+    {"dimension": "trust/privacy", "score": 90, "weight": 0.1, "reason": "Device check, temporary recovery, private save, factual/privacy approval and manual employer submission are separate; live enforcement has supplied service evidence."},
+    {"dimension": "reliability", "score": 85, "weight": 0.1, "reason": "Guest journey stable and TXT completed after initial browser startup. PDF receipt/gate worked but IAB inline PDF blank. Cloud rules/support supported separately; scale/paid/mail reliability unverified."}
+  ],
+  "directlyObserved": [
+    "Shared guest first-check task with student guidance and plain-text no-CV route",
+    "Seven mixed-career findings including manual negation/pending-MBA/numeric-result review and no experience-years sum",
+    "Complete source wording retained through editable review and accuracy/privacy approval",
+    "One-page current PDF receipt and exact blob preview link; blank IAB inline frame not counted as rendered-page proof",
+    "Approved-final default reuse with cleared vacancy and approval, inspectable text and four-step repeat",
+    "Draft returned after public help/contact/walkthrough/auth navigation",
+    "Fresh approval enabled TXT/DOCX while unpreviewed PDF remained disabled",
+    "Actual TXT download completed with all synthetic wording and without evidence questions",
+    "Public searchable help, current task walkthroughs, transcript links and first-check media readyState 4, duration 111.275 seconds",
+    "Public no-signup private support receipt form and consent; no form submission",
+    "Private-loop offer disclosed bounded pilot, disabled checkout and unavailable broad paid search/mail; CTA reached auth boundary"
+  ],
+  "txtExport": {
+    "path": "C:/Users/user/Downloads/CV-Operations analyst.txt",
+    "sha256": "C3DD5C8EB2990391D9D65C586CC0D7E08860539350A124D9CFF52BC1D2C2A808",
+    "syntheticOnly": true,
+    "sourceWordingPreserved": true
+  },
+  "issues": [
+    {
+      "id": "PM-01",
+      "severity": "P2",
+      "title": "Supported team development is promoted out of the review queue",
+      "route": "/check",
+      "source": "src/lib/cv-evidence.ts: analyzeRequirement direct-status branch",
+      "reproduction": ["Enter Operations analyst; paste shared CV and two-requirement vacancy fixtures", "Continue to The evidence", "Develop Python reports is Direct wording found beside Supported a team that developed Python reports", "Select Focus on review questions; passage is hidden"],
+      "actual": "Generic own-contribution reminder accompanies green direct status; no review question is retained.",
+      "impact": "Shared review shortcut treats support of another team's development like personally performing the requested task. Quotes and generic no-verification caveat remain intact; no fabricated output was found.",
+      "minimumFix": "Retain ownership/contribution review for support/assistance/observation whose nested action supplies requested development.",
+      "acceptance": ["Exact support fixture yields partial/manual status and explicit own-contribution question", "It remains visible in Focus on review questions", "Personally developed positive fixture may remain direct", "Neither quote is rewritten and existing negation/credential safeguards remain"]
+    },
+    {
+      "id": "PM-02",
+      "severity": "P2",
+      "title": "Qualified academic project can be treated as professional experience",
+      "route": "/check",
+      "source": "src/lib/cv-evidence.ts: cvPassages context classification and professional-experience guard",
+      "reproduction": ["Use shared fixtures", "Professional experience building Excel dashboards is Direct wording found beside Built Excel dashboards for a university supply-chain project", "No academic badge/project explanation is shown", "Focus on review questions hides it"],
+      "actual": "Subject-qualified university project is contextKind unspecified; professional-experience requirement receives direct status.",
+      "impact": "Academic context survives in raw quote but does not remain in actionable review queue, undermining the product's promised academic/professional distinction.",
+      "minimumFix": "Recognize explicit qualified academic-project context conservatively and retain professional-employment questions for academic/project or uncertain evidence.",
+      "acceptance": ["Exact professional-experience fixture is partial/manual with academic/project label and professional-employment explanation", "It remains in review filter", "University project, university supply-chain project, MBA consulting project and headed project examples retain complete context", "Plain capability may remain relevant with project label; clear employment is not incorrectly academic"]
+    }
+  ],
+  "fixture": {
+    "role": "Operations analyst",
+    "cv": "Alex Example\nOperations analyst | 2017–2025\nSupported a team that developed Python reports for operations planning.\nCoordinated weekly meetings with finance stakeholders.\nBuilt Excel dashboards for a university supply-chain project.\nMBA candidate, expected graduation 2027.\nCustomer service volunteer, 2024.\nNo direct experience managing employees.\nEstimated annual savings of $50,000 in a classroom case study; the recommendation was not implemented.",
+    "vacancy": "Operations Analyst\nRequirements:\nProfessional experience building Excel dashboards.\nDevelop Python reports for operations planning.",
+    "observedSummary": {"direct": 2, "partial": 0, "missing": 0, "review": 0},
+    "reviewOnlyMessage": "Nothing else in this view. Read the full job description before you approve your CV."
+  },
+  "suppliedIntegrationEvidence": [
+    {"path": "docs/INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json", "sha256": "E50B0FF0897F99F731EF3B9EA341E664B8CAFFFED2BD909DA3A37749603AC512", "kind": "75 hosted rules-only synthetic checks", "browserObservedByThisReviewer": false, "paidCalls": 0, "sentMessages": 0, "applicationSubmissions": 0, "coverage": ["fictional source/claims/manual vacancy", "actual PDF/DOCX/TXT/report/letter bytes", "approval", "owner isolation", "repeat/tracking", "scheduler dispatch/pause/cancel/withdrawal"]},
+    {"path": "../jobvance-repair-evidence/cycle2-guest-support-live.json", "sha256": "1DCA723B46C2AAF7082D8A718006D73AC761CF9D906DDCC852A45A36F5C4F108", "kind": "9 actual HTTP checks on tagged fictional support receipt", "browserObservedByThisReviewer": false, "finishedAt": "2026-10-14T03:28:39.365Z", "paidCalls": 0, "sends": 0, "coverage": ["anonymous create/secret receipt read", "wrong-secret denial", "idempotent retry/conflicting retry", "invalid type/origin denial", "anonymous-admin denial", "forged-header gateway rejection"]}
+  ],
+  "additionalParentSuppliedEvidence": "Candidate control11/worker8 unchanged; guest-support1/admin3 deployed and migration applied; actual SQL service-only access/RLS/daily retention and administrator operations limited to tagged fictional receipt. Not independently rerun here.",
+  "initialHtml": {
+    "currentDistOnly": true,
+    "routesChecked": ["/", "/job-loop", "/help", "/walkthroughs", "/contact"],
+    "allMappedPrerendersHaveOneH1AndRealContent": true,
+    "allHaveRouteCanonical": true,
+    "clientShellNotMisreadAsPublicPrerender": true,
+    "hostingDeliveryOrIndexRankingTested": false
+  },
+  "unverified": ["Authenticated browser journey", "Full PDF/DOCX content and visual layout", "Full tutorial playback/audio comprehension", "Live support submission by reviewer", "Broad/paid discovery", "Live mailbox integration", "Paid model processing", "Recovery expiry", "Mobile, full keyboard/screen-reader/zoom/contrast accessibility", "Real user outcomes", "Production scale", "Hosting delivery, crawl/index/rank/traffic"],
+  "actionsPerformed": {"runtimeEdits": false, "commit": false, "deployment": false, "signup": false, "paidCalls": 0, "sends": 0, "employerSubmissions": 0, "realRecordWrites": 0, "liveSupportWrites": 0},
+  "startupNote": "Initial IAB navigate timed out; a single explicit follow-up rendered the homepage. No repeated journey failure; not classified as proven production defect.",
+  "laterRecheckPolicy": "Keep these initial scores and observations unchanged; record any fix/retest separately."
+}

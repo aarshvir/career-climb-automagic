@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkReviewKey, clearRetainedCheck, readRetainedCheck, retainCheckForGoogle, takeCheckAuthReturn, takeRetainedCheck, validateCheckDraft, clearCheckRecovery, readCheckRecovery, rememberCheckRecovery, draftForAnotherVacancy, keepReviewedEditsInSource, CheckDraftValidationError, type CheckDraft } from '@/lib/check-draft';
+import { checkReviewKey, clearRetainedCheck, readRetainedCheck, retainCheckForGoogle, takeCheckAuthReturn, takeRetainedCheck, validateCheckDraft, clearCheckRecovery, readCheckRecovery, rememberCheckRecovery, draftForAnotherVacancy, keepReviewedEditsInSource, checkSourceLines, removeSelectedSourceLines, CheckDraftValidationError, type CheckDraft } from '@/lib/check-draft';
 
 const DRAFT_KEY = 'jobvance_check_oauth_draft_v1';
 const RETURN_KEY = 'jobvance_check_oauth_return_v1';
@@ -14,6 +14,39 @@ beforeEach(() => { clearCheckRecovery(); sessionStorage.clear(); localStorage.cl
 afterEach(() => { vi.restoreAllMocks(); sessionStorage.clear(); localStorage.clear(); });
 
 describe('a second vacancy has its own inputs and approval', () => {
+  it('removes deliberately selected source spans and identical complete final lines while preserving every retained character', () => {
+    const privateLine = '  FICTIONAL PRIVATE REF <PROJECT-ALPHA>  ';
+    const sourceText = `  ${cv}\r\n\r\n${privateLine}\rVerified source wording.  \n\n\n\n`;
+    const reviewedText = `Verified reviewed wording.  \r${privateLine}\n${cv}\r\n${privateLine}\r\n${privateLine} (edited passage to review)\n`;
+    const original = { ...draft, sourceText, reviewedText }, snapshot = JSON.stringify(original), storage = vi.spyOn(Storage.prototype, 'setItem');
+    const lines = checkSourceLines(sourceText);
+    expect(lines[2]).toMatchObject({ number: 3, text: privateLine });
+    const next = removeSelectedSourceLines(original, [3]);
+    expect(next.sourceText).toBe(`  ${cv}\r\n\r\nVerified source wording.  \n\n\n\n`);
+    expect(next.reviewedText).toBe(`Verified reviewed wording.  \r${cv}\r\n${privateLine} (edited passage to review)\n`);
+    expect(next.reviewedText).toContain('(edited passage to review)');
+    expect(draftForAnotherVacancy(next, 'source').sourceText).toBe(next.sourceText);
+    expect(draftForAnotherVacancy(next, 'reviewed').sourceText).toBe(next.reviewedText);
+    expect(checkReviewKey(next, 'method-v1')).not.toBe(checkReviewKey(original, 'method-v1'));
+    expect(JSON.stringify(original)).toBe(snapshot); expect(storage).not.toHaveBeenCalled();
+  });
+  it('keeps source and reviewed CV text literal through validation, source adoption and reuse', () => {
+    const text = `  ${cv}\r\n\tLiteral candidate wording.  \r\n\n\n\n`;
+    const literal = { ...draft, sourceText: text, reviewedText: text };
+    expect(validateCheckDraft(literal)).toEqual(literal);
+    expect(keepReviewedEditsInSource({ ...literal, sourceText: cv }).sourceText).toBe(text);
+    expect(draftForAnotherVacancy(literal, 'source').sourceText).toBe(text);
+    expect(draftForAnotherVacancy(literal, 'reviewed').sourceText).toBe(text);
+  });
+  it.each([[], [0], [2], [1.5], [Number.NaN]].map(selected => ({ selected })))('rejects invalid source-line selections $selected', ({ selected }) => {
+    expect(() => removeSelectedSourceLines(draft, selected)).toThrow('Choose source lines to remove.');
+  });
+  it('refuses removal that leaves unreadable source or current CV text without changing the input', () => {
+    const original = { ...draft, sourceText: `${cv}\nPrivate fixture`, reviewedText: `Private fixture\nshort` }, snapshot = JSON.stringify(original);
+    expect(() => removeSelectedSourceLines(original, [1])).toThrow(/Too little readable CV text/);
+    expect(() => removeSelectedSourceLines(original, [2])).toThrow(/Too little readable CV text/);
+    expect(JSON.stringify(original)).toBe(snapshot);
+  });
   it('copies reviewed removals to the reusable source while preserving surrounding facts and leaving the earlier record intact', () => {
     const original = { ...draft, sourceText: cv + '\nConfidential fictional reference PROJECT-ALPHA.', reviewedText: cv };
     const snapshot = JSON.stringify(original), storage = vi.spyOn(Storage.prototype, 'setItem');
@@ -45,6 +78,22 @@ describe('a second vacancy has its own inputs and approval', () => {
 });
 
 describe('guest checking defaults to no CV storage', () => {
+  it('keeps only the explicitly selected audience with the owner-bound temporary draft', () => {
+    const value = { draft, step: 5, cvReady: true, filename: '', ownerId: 'account-a', pageTarget: 2 as const, audience: 'student' as const };
+    const storage = vi.spyOn(Storage.prototype, 'setItem');
+    rememberCheckRecovery(value, false, NOW);
+    expect(readCheckRecovery('account-a', NOW + 1)?.value.audience).toBe('student');
+    expect(storage).not.toHaveBeenCalled();
+    rememberCheckRecovery(value, true, NOW);
+    expect(JSON.parse(sessionStorage.getItem(RECOVERY_KEY)!).value.audience).toBe('student');
+    expect(readCheckRecovery('account-b', NOW + 1)).toBeNull();
+    clearCheckRecovery();
+    expect(readCheckRecovery('account-a', NOW + 1)).toBeNull();
+  });
+  it.each(['administrator', 'Student', null, ['student']])('rejects unsupported recovered audience %s', audience => {
+    sessionStorage.setItem(RECOVERY_KEY, JSON.stringify({ version: 1, value: { draft, step: 1, cvReady: true, filename: '', ownerId: null, pageTarget: 2, audience }, expiresAt: NOW + TTL }));
+    expect(readCheckRecovery(null, NOW + 1)).toBeNull();
+  });
   it('preserves the explicit reuse path with owner-bound consent while stripping approval and undo data', () => {
     const value = { draft, step: 1, cvReady: true, filename: '', ownerId: 'account-a', pageTarget: 1 as const, reuseMode: true, approved: true, previousApplication: draft };
     rememberCheckRecovery(value, true, NOW);

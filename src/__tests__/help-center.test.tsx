@@ -12,7 +12,7 @@ function showHelp() { return render(<MemoryRouter initialEntries={['/help']}><He
 describe('task-focused public help', () => {
   it('renders every required anchor and complete steps without sign-in', () => {
     const { container } = showHelp();
-    const ids = ['job-loop-start', 'job-loop-facts', 'job-loop-vacancies', 'job-loop-review', 'job-loop-controls', 'no-cv', 'first-check', 'uploads', 'second-application', 'privacy', 'recovery'];
+    const ids = ['job-loop-start', 'job-loop-facts', 'job-loop-vacancies', 'job-loop-review', 'job-loop-controls', 'no-cv', 'first-check', 'uploads', 'source-line-removal', 'second-application', 'privacy', 'recovery'];
     expect(helpTopics).toHaveLength(ids.length);
     for (const id of ids) {
       const section = container.querySelector(`#${id}`);
@@ -20,7 +20,7 @@ describe('task-focused public help', () => {
       expect(section?.querySelectorAll('.hc-steps li').length).toBeGreaterThanOrEqual(4);
     }
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('What would you like to get done?');
-    expect(screen.getByRole('status')).toHaveTextContent('11 topics');
+    expect(screen.getByRole('status')).toHaveTextContent('12 topics');
     expect(screen.queryByRole('link', { name: /sign up/i })).not.toBeInTheDocument();
     for (const path of ['/check', '/job-loop', '/loop', '/contact', '/guides', '/walkthroughs']) expect(container.querySelector(`a[href="${path}"]`)).toBeInTheDocument();
     const navigation = screen.getByRole('navigation', { name: 'Help topics on this page' });
@@ -40,20 +40,24 @@ describe('task-focused public help', () => {
     expect(searchHelpTopics('25%')).toHaveLength(1);
     expect(searchHelpTopics('upload').some(topic => topic.id === 'uploads')).toBe(true);
     expect(searchHelpTopics('no CV')[0].id).toBe('no-cv');
+    expect(searchHelpTopics('source line')[0].id).toBe('source-line-removal');
+    expect(searchHelpTopics('confidential').some(topic => topic.id === 'source-line-removal')).toBe(true);
+    expect(searchHelpTopics('Undo new application')[0].id).toBe('second-application');
+    expect(searchHelpTopics('download timed out')[0].id).toBe('job-loop-review');
   });
 
   it('filters by task, announces results and recovers from an empty search', async () => {
     const user = userEvent.setup();
     showHelp();
     await user.click(screen.getByRole('button', { name: 'Privacy & recovery' }));
-    expect(screen.getByRole('status')).toHaveTextContent('2 topics match');
+    expect(screen.getByRole('status')).toHaveTextContent('3 topics match');
     expect(screen.getByRole('button', { name: 'Privacy & recovery' })).toHaveAttribute('aria-pressed', 'true');
     await user.type(screen.getByRole('searchbox'), 'no-such-help-topic');
     expect(screen.getByRole('heading', { name: 'No matching help topic yet.' })).toBeInTheDocument();
     for (const link of screen.getAllByRole('link', { name: 'Contact Jobvance' })) expect(link).toHaveAttribute('href', '/contact');
     await user.click(screen.getAllByRole('button', { name: 'Show all topics' })[0]);
     expect(screen.getByRole('searchbox')).toHaveValue('');
-    expect(screen.getByRole('status')).toHaveTextContent('11 topics');
+    expect(screen.getByRole('status')).toHaveTextContent('12 topics');
   });
 
   it('states the distinct local, recovery, source and approval limits', () => {

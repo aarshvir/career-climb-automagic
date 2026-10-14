@@ -14,6 +14,9 @@ function exact(item: Record<string, unknown>, keys: string[]): void { if (Object
 export function validateAdminAction(value: unknown): AdminAction {
   if (!value || typeof value !== 'object' || Array.isArray(value)) invalid();
   const item = value as Record<string, unknown>;
+  if(item.action==='guest_support_list'){exact(item,['action']);return {action:'guest_support_list'};}
+  if(item.action==='guest_support_detail'){exact(item,['action','id']);if(typeof item.id!=='string'||!uuidPattern.test(item.id))invalid();return {action:'guest_support_detail',id:item.id};}
+  if(item.action==='guest_support_update'){exact(item,['action','id','expectedVersion','status','reply']);if(typeof item.id!=='string'||!uuidPattern.test(item.id)||!Number.isSafeInteger(item.expectedVersion)||Number(item.expectedVersion)<0||typeof item.status!=='string'||!['received','in_review','resolved'].includes(item.status)||typeof item.reply!=='string'||item.reply.length>2000||item.reply.includes('\0'))invalid();return item as unknown as AdminAction;}
   if (item.action === 'snapshot') { exact(item, ['action', 'days']); if (![7,30,90].includes(Number(item.days)) || typeof item.days !== 'number') invalid(); return item as unknown as AdminAction; }
   if (item.action === 'provider_status') { exact(item, ['action']); return { action: 'provider_status' }; }
   if (item.action === 'support_detail') { exact(item,['action','id']); if (typeof item.id !== 'string' || !uuidPattern.test(item.id)) invalid(); return { action:'support_detail',id:item.id }; }
@@ -62,6 +65,9 @@ export async function authenticateAdmin(req: Request, db: AdminDatabase): Promis
 }
 async function rpc<T>(db: AdminDatabase, name: string, args: Record<string, unknown>): Promise<T> { const result = await db.rpc(name,args); adminDatabaseError(result.error); return result.data as T; }
 export async function controlAdmin(db: AdminDatabase, actor: { id: string; role: AdminRole }, action: AdminAction, env: LoopEnv, fetcher: LoopFetch = fetch): Promise<AdminResponse> {
+  if(action.action==='guest_support_list')return {guestSupport:await rpc(db,'jobvance_admin_guest_support_list',{p_actor:actor.id})};
+  if(action.action==='guest_support_detail')return {guestSupportDetail:await rpc(db,'jobvance_admin_guest_support_detail',{p_actor:actor.id,p_id:action.id})};
+  if(action.action==='guest_support_update')return {guestSupportDetail:await rpc(db,'jobvance_admin_guest_support_update',{p_actor:actor.id,p_id:action.id,p_expected_version:action.expectedVersion,p_status:action.status,p_reply:action.reply})};
   // Recheck inside each SQL RPC to fence role revocation after the HTTP lookup.
   if (action.action === 'snapshot') {
     const snapshot = await rpc<AdminSnapshot>(db,'jobvance_admin_snapshot',{p_actor:actor.id,p_days:action.days});

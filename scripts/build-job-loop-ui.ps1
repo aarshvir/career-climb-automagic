@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $loopRepo = [System.IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 $loopOutput = [System.IO.Path]::GetFullPath((Join-Path $loopRepo 'docs/supabase-loop-ui'))
 if (-not $loopOutput.StartsWith($loopRepo + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) { throw 'Bundle output must remain in this repository.' }
-$loopNames = @('job-loop-control', 'job-loop-worker', 'job-loop-oauth', 'jobvance-admin', 'jobvance-review-worker')
+$loopNames = @('job-loop-control', 'job-loop-worker', 'job-loop-oauth', 'jobvance-admin', 'jobvance-review-worker', 'jobvance-guest-support')
 $loopExternal = 'https://esm.sh/@supabase/supabase-js@2.57.4'
 $loopManifest = @()
 function Get-LoopNormalizedTextHash([string]$loopSourcePath) {

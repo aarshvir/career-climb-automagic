@@ -155,33 +155,99 @@ export function safeLoopGmailUrl(value: string): string {
   if (url.origin !== 'https://accounts.google.com' || url.pathname !== '/o/oauth2/v2/auth' || url.username || url.password || url.hash) throw new Error('Gmail connection returned an unexpected address.');
   return url.href;
 }
-export async function getLoopDownload(userId: string, packetId: string, format: 'pdf' | 'docx' | 'txt' | 'report' | 'letter') {
-  const result = await callJobLoop(userId, { action: 'download', packetId, format });
-  return fetchLoopArtifact(userId,result);
+export async function getLoopDownload(userId: string, packetId: string, format: 'pdf' | 'docx' | 'txt' | 'report' | 'letter', signal?: AbortSignal) {
+  return fetchLoopArtifact(userId, { action: 'download', packetId, format }, signal);
 }
-export async function getLoopPreview(userId:string,packetId:string,inputHash:string){
-  const result=await callJobLoop(userId,{action:'preview_packet',packetId,inputHash});
-  return fetchLoopArtifact(userId,result);
+export async function getLoopPreview(userId: string, packetId: string, inputHash: string, signal?: AbortSignal) {
+  return fetchLoopArtifact(userId, { action: 'preview_packet', packetId, inputHash }, signal);
 }
-export const LOOP_ARTIFACT_TIMEOUT_MS=45000;
-async function fetchLoopArtifact(userId:string,result:LoopResponse){
-  if (!result.url || !result.filename) throw new Error('The approved document is not available yet.');
-  const url = safeLoopDownloadUrl(result.url, userId);
-  const controller=new AbortController();
-  let deadlineTimer:ReturnType<typeof setTimeout>;
-  const deadline=new Promise<never>((_,reject)=>{deadlineTimer=setTimeout(()=>{controller.abort();reject(new Error('The document download timed out. Try again to request a fresh private link.'));},LOOP_ARTIFACT_TIMEOUT_MS);});
-  const transfer=(async()=>{
-    let response:Response;
-    try { response=await fetch(url,{credentials:'omit',cache:'no-store',redirect:'error',signal:controller.signal}); }
-    catch { throw new Error('The private document could not be loaded. Request a fresh link and retry.'); }
-    if(!response.ok)throw new Error('The document could not be downloaded. Request a fresh link and retry.');
-    if(Number(response.headers.get('content-length')||0)>10*1024*1024)throw new Error('The document exceeds the download limit.');
-    return response.blob().catch(()=>{throw new Error('The private document could not be read. Request a fresh link and retry.');});
-  })();
-  let blob:Blob;
-  try {blob=await Promise.race([transfer,deadline]);}
-  finally {clearTimeout(deadlineTimer!);controller.abort();}
-  await requireLoopOwner(userId);
-  if (blob.size > 10 * 1024 * 1024) throw new Error('The document exceeds the download limit.');
-  return { blob, filename: safeDocumentFilename(result.filename) };
+export const LOOP_ARTIFACT_TIMEOUT_MS = 45000;
+export const LOOP_ARTIFACT_MAX_BYTES = 10 * 1024 * 1024;
+type ArtifactAction = Extract<LoopAction, { action: 'download' | 'preview_packet' }>;
+
+async function fetchLoopArtifact(userId: string, action: ArtifactAction, signal?: AbortSignal) {
+  const controller = new AbortController();
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+  let subscription: { unsubscribe: () => void } | undefined;
+  const cancelledError = Object.assign(new Error('The document download was cancelled.'), { name: 'AbortError' });
+  const abortReason = () => controller.signal.reason instanceof Error ? controller.signal.reason : cancelledError;
+  const assertActive = () => { if (controller.signal.aborted) throw abortReason(); };
+  let onAbort: () => void;
+  const cancelled = new Promise<never>((_, reject) => {
+    onAbort = () => {
+      // Cancel a pending read as well as fetch: this also releases a stalled body.
+      void reader?.cancel().catch(() => undefined);
+      reject(abortReason());
+    };
+    controller.signal.addEventListener('abort', onAbort, { once: true });
+  });
+  // An auth callback may fire during subscription, before the first race is attached.
+  void cancelled.catch(() => undefined);
+  const cancelFromCaller = () => controller.abort(cancelledError);
+  try {
+    if (signal?.aborted) throw cancelledError;
+    signal?.addEventListener('abort', cancelFromCaller, { once: true });
+    // One deadline includes auth, signed-link issuance, transfer and final owner check.
+    deadlineTimer = setTimeout(() => controller.abort(new Error('The document download timed out. Try again to request a fresh private link.')), LOOP_ARTIFACT_TIMEOUT_MS);
+    subscription = supabase.auth.onAuthStateChange((_event, session) => {
+      // Stay synchronous: awaiting another auth method here can deadlock the SDK.
+      if (session?.user?.id !== userId) controller.abort(new Error('Your account changed. Previous account data has not been opened.'));
+    }).data.subscription;
+    assertActive();
+    // Every attempt asks the control service for a new owner-scoped signed link.
+    // This SDK cannot cancel link issuance, but cancellation prevents its later use.
+    const result = await Promise.race([callJobLoop(userId, action), cancelled]);
+    assertActive();
+    if (!result.url || !result.filename) throw new Error('The approved document is not available yet.');
+    const url = safeLoopDownloadUrl(result.url, userId);
+    const transfer = (async () => {
+      let response: Response;
+      try { response = await fetch(url, { credentials: 'omit', cache: 'no-store', redirect: 'error', signal: controller.signal }); }
+      catch { assertActive(); throw new Error('The private document could not be loaded. Request a fresh link and retry.'); }
+      assertActive();
+      reader = response.body?.getReader();
+      try {
+        if (!response.ok) throw new Error('The document could not be downloaded. Request a fresh link and retry.');
+        if (Number(response.headers.get('content-length') || 0) > LOOP_ARTIFACT_MAX_BYTES) {
+          controller.abort(new Error('The document exceeds the download limit.'));
+          assertActive();
+        }
+        const chunks: BlobPart[] = [];
+        let byteSize = 0;
+        if (reader) {
+          while (true) {
+            let chunk: ReadableStreamReadResult<Uint8Array>;
+            try { chunk = await reader.read(); }
+            catch { assertActive(); throw new Error('The private document could not be read. Request a fresh link and retry.'); }
+            assertActive();
+            if (chunk.done) break;
+            // Check actual decoded bytes before retaining each chunk; headers may lie.
+            if (chunk.value.byteLength > LOOP_ARTIFACT_MAX_BYTES - byteSize) {
+              controller.abort(new Error('The document exceeds the download limit.'));
+              assertActive();
+            }
+            byteSize += chunk.value.byteLength;
+            chunks.push(chunk.value);
+          }
+        }
+        return new Blob(chunks, { type: response.headers.get('content-type') || '' });
+      } finally {
+        void reader?.cancel().catch(() => undefined);
+        reader?.releaseLock();
+        reader = undefined;
+      }
+    })();
+    const blob = await Promise.race([transfer, cancelled]);
+    await Promise.race([requireLoopOwner(userId), cancelled]);
+    assertActive();
+    if (blob.size > LOOP_ARTIFACT_MAX_BYTES) throw new Error('The document exceeds the download limit.');
+    return { blob, filename: safeDocumentFilename(result.filename) };
+  } finally {
+    clearTimeout(deadlineTimer);
+    signal?.removeEventListener('abort', cancelFromCaller);
+    subscription?.unsubscribe();
+    controller.signal.removeEventListener('abort', onAbort!);
+    controller.abort();
+  }
 }

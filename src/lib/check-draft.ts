@@ -4,7 +4,11 @@ const DRAFT_KEY = "jobvance_check_oauth_draft_v1";
 const RETURN_KEY = "jobvance_check_oauth_return_v1";
 const TTL = 30 * 60 * 1000;
 const RECOVERY_KEY = "jobvance_check_recovery_v1";
-export type CheckRecovery = { draft: CheckDraft; step: number; cvReady: boolean; filename: string; ownerId: string | null; pageTarget: 1 | 2; reuseMode?: boolean };
+export type CheckAudience = 'student' | 'mba' | 'professional';
+export function checkAudience(value: unknown): CheckAudience | null {
+  return value === 'student' || value === 'mba' || value === 'professional' ? value : null;
+}
+export type CheckRecovery = { draft: CheckDraft; step: number; cvReady: boolean; filename: string; ownerId: string | null; pageTarget: 1 | 2; reuseMode?: boolean; audience?: CheckAudience };
 let inMemoryRecovery: { value: CheckRecovery; expiresAt: number } | null = null;
 export type CheckDraft = {
   jobTitle: string; company: string; sourceText: string; reviewedText: string; jobDescription: string;
@@ -22,7 +26,12 @@ export function validateCheckField(field: CheckDraftField, value: string): strin
   } else if (field === 'jobDescription') {
     if (typeof value !== 'string' || value.trim().length < 80 || value.length > 20000) throw new CheckDraftValidationError(field, 'Paste the full vacancy description (80–20,000 characters).');
   } else {
-    try { return validateCvText(value); }
+    try {
+      if (typeof value !== 'string' || value.length > 60000) throw new Error('Keep the CV text below 60,000 characters.');
+      validateCvText(value);
+      // Readability validation must not rewrite the candidate's retained wording or line endings.
+      return value;
+    }
     catch (failure) { throw new CheckDraftValidationError(field, failure instanceof Error ? failure.message : 'Review the readable CV text.'); }
   }
   return value.trim();
@@ -33,13 +42,33 @@ export type CheckReuseSource = 'source' | 'reviewed';
 /** A second application starts from explicitly chosen CV text, never an old vacancy or approval. */
 export function draftForAnotherVacancy(previous: CheckDraft, choice: CheckReuseSource): CheckDraft {
   if (choice !== 'source' && choice !== 'reviewed') throw new Error('Choose which CV version to reuse.');
-  const sourceText = validateCvText(choice === 'reviewed' ? previous.reviewedText : previous.sourceText);
+  const sourceText = validateCheckField(choice === 'reviewed' ? 'reviewedText' : 'sourceText', choice === 'reviewed' ? previous.reviewedText : previous.sourceText);
   return { jobTitle: '', company: '', sourceText, reviewedText: '', jobDescription: '' };
 }
 
 /** Copies only user-reviewed text into the current local source; saving remains separate. */
 export function keepReviewedEditsInSource(draft: CheckDraft): CheckDraft {
   return { jobTitle: draft.jobTitle, company: draft.company, sourceText: validateCheckField('reviewedText', draft.reviewedText), reviewedText: draft.reviewedText, jobDescription: draft.jobDescription };
+}
+
+export type CheckSourceLine = { number: number; text: string; start: number; end: number };
+
+/** Offsets include each line's own terminator so retained slices remain byte-for-byte literal. */
+export function checkSourceLines(text: string): CheckSourceLine[] {
+  return Array.from(text.matchAll(/[^\r\n]*(?:\r\n|\r|\n|$)/g))
+    .filter(match => match[0].length > 0)
+    .map((match, index) => ({ number: index + 1, text: match[0].replace(/(?:\r\n|\r|\n)$/, ''), start: match.index!, end: match.index! + match[0].length }));
+}
+
+/** Explicit preview/apply action: exclude chosen source lines and every identical full final-CV line. */
+export function removeSelectedSourceLines(draft: CheckDraft, selected: readonly number[]): CheckDraft {
+  const lines = checkSourceLines(draft.sourceText), chosen = new Set(selected);
+  if (!chosen.size || [...chosen].some(number => !Number.isInteger(number) || number < 1 || number > lines.length)) throw new Error('Choose source lines to remove.');
+  const removedText = new Set(lines.filter(line => chosen.has(line.number)).map(line => line.text));
+  const sourceText = lines.filter(line => !chosen.has(line.number)).map(line => draft.sourceText.slice(line.start, line.end)).join('');
+  const reviewedText = checkSourceLines(draft.reviewedText).filter(line => !removedText.has(line.text)).map(line => draft.reviewedText.slice(line.start, line.end)).join('');
+  validateCheckField('sourceText', sourceText); validateCheckField('reviewedText', reviewedText);
+  return { jobTitle: draft.jobTitle, company: draft.company, sourceText, reviewedText, jobDescription: draft.jobDescription };
 }
 
 function boundedRecovery(value: unknown): CheckRecovery | null {
@@ -50,9 +79,10 @@ function boundedRecovery(value: unknown): CheckRecovery | null {
   const pageTarget = item.pageTarget === undefined ? 2 : item.pageTarget;
   if (pageTarget !== 1 && pageTarget !== 2) return null;
   if (item.reuseMode !== undefined && typeof item.reuseMode !== 'boolean') return null;
+  if (item.audience !== undefined && !checkAudience(item.audience)) return null;
   if (item.reuseMode && ![1, 4, 5, 6].includes(item.step)) return null;
   for (const [key, limit] of [['jobTitle', 200], ['company', 200], ['sourceText', 60000], ['reviewedText', 60000], ['jobDescription', 20000]] as const) if (typeof item.draft[key] !== 'string' || item.draft[key].length > limit) return null;
-  return { draft: { jobTitle: item.draft.jobTitle, company: item.draft.company, sourceText: item.draft.sourceText, reviewedText: item.draft.reviewedText, jobDescription: item.draft.jobDescription }, step: item.step, cvReady: item.cvReady, filename: item.filename, ownerId: item.ownerId, pageTarget, ...(item.reuseMode === undefined ? {} : { reuseMode: item.reuseMode }) };
+  return { draft: { jobTitle: item.draft.jobTitle, company: item.draft.company, sourceText: item.draft.sourceText, reviewedText: item.draft.reviewedText, jobDescription: item.draft.jobDescription }, step: item.step, cvReady: item.cvReady, filename: item.filename, ownerId: item.ownerId, pageTarget, ...(item.reuseMode === undefined ? {} : { reuseMode: item.reuseMode }), ...(item.audience === undefined ? {} : { audience: item.audience }) };
 }
 
 /** Browser memory preserves route navigation; tab storage is used only after explicit consent. */

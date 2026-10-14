@@ -1,0 +1,110 @@
+{
+  "audit": "cycle2-mobile-accessibility-help",
+  "reviewer": "independent-mobile-help-agent",
+  "date": "2026-10-14",
+  "timezone": "Asia/Dubai",
+  "url": "http://127.0.0.1:8383",
+  "independence": {"previous_reports_read": false, "peer_scores_read": false, "target_score": null, "runtime_edited": false},
+  "scoring": {
+    "method": "Ten equal weights; arithmetic mean of 0–100 dimension scores",
+    "overall": 89.6,
+    "dimensions": {
+      "clarity": 91,
+      "activation": 92,
+      "form_effort": 87,
+      "evidence_quality": 82,
+      "workflow_completeness": 92,
+      "reuse_time_saving": 94,
+      "help_walkthroughs": 93,
+      "ui_accessibility": 84,
+      "trust_privacy": 92,
+      "reliability": 89
+    },
+    "version_scope": "Frozen UI and key source hashes through 2026-10-14T07:43:45.3501481+04:00; no later fixes rescored"
+  },
+  "provenance": {
+    "head": "9682cd1bbf776be6d2e74b023766fcd4c9056022",
+    "dirty_at_start": true,
+    "initial_hash_time": "2026-10-14T07:39:20.1963099+04:00",
+    "frozen_hash_time": "2026-10-14T07:43:45.3501481+04:00",
+    "key_files_unchanged_during_initial_journey": true,
+    "scope_caveat": "Eleven key files were hashed; this is not a complete served build digest or clean commit certification.",
+    "frozen_sha256": {
+      "src/pages/ProductPage.tsx": "A945404F59236521D082C040AFF9E1E0536146B4863A4A2586E304913A4BFADC",
+      "src/pages/CvCheck.tsx": "4F3A60652EF5AC763CA89E530876B2AFAB6482FFA671AFA21BA7364612D7F51C",
+      "src/pages/CvCheck.css": "88F5C5E4D3F7FE88A2E90195437AF3DA8B1CFBA3CDCC04B04C8CB5EA10134791",
+      "src/pages/HelpCenter.tsx": "8EB438757F876640BB3A8F6F2C3E7A1D4FEB9D9CD5E70AE458B58AD62B712919",
+      "src/pages/HelpCenter.css": "633781B2DF385F98367F5272B7D4D6A8523ACF8C771C6D6638D877307A3E8EA7",
+      "src/pages/Walkthroughs.tsx": "B462C788723C86484BC173ABD96BC76B5EF588DF822399DBF4B1EF994C5F0DDE",
+      "src/pages/Walkthroughs.css": "E262176A49BA5CC6019FCDEE56D37270969BB854384C58877E5C79FAF4FBE207",
+      "src/lib/walkthroughs.ts": "2ECDF8338B59FDFA617C935ADFDB1F5314C668797461D9E5C97609C47E6A7963",
+      "src/lib/check-draft.ts": "CF799C117BE996409CD2010D7E8BF322547171B7E46F883A9A7213D53E261484",
+      "src/pages/GuestSupport.tsx": "9F6E0B9D5C0BF9E041CB3AE79AFBC34C7BA5864A0570D13846725CE5B9C38E5D",
+      "src/pages/GuestSupport.css": "4C02A35753E4076459E25C9872C12334A57745D85BD2FD7C19E900B273731ECE"
+    },
+    "drift_detected_at": "2026-10-14T07:44:55.0018226+04:00",
+    "changed_sha256_at_detection": {
+      "src/pages/CvCheck.tsx": "7AD1626008FF6FA896F693FF1D25E64937F3EF9A0649FE2C905BF2430A79A0C2",
+      "src/lib/check-draft.ts": "0533755A60B0EB3D7759BF8DC1575709BA4981510A626E7951137733C1AE2789",
+      "src/pages/HelpCenter.tsx": "376B7CE04F94A4968C1AE400A3FD7C8A2133DF0BAB227B2D6794FDFB324F8A23"
+    },
+    "supplemental_media_scope": "Around07:45 after HMR reset; walkthrough component/manifest hashes unchanged at last comparison; visible burned-caption observation only"
+  },
+  "observed": [
+    {"id":"O1","boundary":"actual browser","result":"Student homepage CTA, free/no-account offer and six-step setup understood; empty role error focused Target role"},
+    {"id":"O2","boundary":"actual browser","result":"No-finished-CV disclosure opened, with starter and scanned-file help links"},
+    {"id":"O3","boundary":"actual browser","result":"Fictional source/vacancy yielded7 findings:0direct,3related,2missing,2manual; expected degree, academic context and missing professional years retained"},
+    {"id":"O4","boundary":"actual browser","result":"Selected source line removal previewed both versions; apply and undo changed/restored both; keep-reviewed-edits updated reusable source"},
+    {"id":"O5","boundary":"actual browser plus local downloaded file read","result":"Current PDF preview generation reported1page within maximum; accuracy/privacy approval unlocked downloads; TXT download completed and matched edited wording","download":"C:/Users/user/Downloads/CV-Graduate Data Analyst.txt","pdf_visual_layout_verified":false},
+    {"id":"O6","boundary":"actual browser","result":"Approved-final reuse opened4-step next-vacancy flow; inspect text retained deletion; undo restored previous application to review"},
+    {"id":"O7","boundary":"actual browser","result":"Help search pdf worked; related No CV yet anchor cleared filter and focused requested section"},
+    {"id":"O8","boundary":"actual browser and read-only media metadata","result":"First video loaded and played; duration111.275seconds, readyState4, no media error; chapter sought89.5seconds; transcript complete; untimed Next/End navigation worked"},
+    {"id":"O9","boundary":"actual browser","result":"Contact operator, storage/receipt boundary, retention and no-email statement visible; form not submitted"},
+    {"id":"O10","boundary":"actual390x844browser viewport","result":"Mobile menu, recovered review, source controls, chapters and transcript reflowed; no horizontal overflow; override reset","inner_width":390,"document_scroll_width":375,"video_width":295,"video_height":165.9375}
+  ],
+  "findings": [
+    {
+      "id":"MH-01","priority":"P2","title":"Same-step source actions lose keyboard focus",
+      "evidence_boundary":"Observed browser focus plus frozen source corroboration",
+      "repro":["Step5: choose source lines, select line4, preview, apply removal","Observe focus becomes web area/body","Undo removal also loses focus; keep reviewed edits and approval show same pattern"],
+      "impact":"Keyboard users lose their place after a privacy-sensitive change or approval",
+      "source":"src/pages/CvCheck.tsx","frozen_lines":[185,194,204,220,294],
+      "recommendation":"Focus a stable review/current-CV target after source actions and useful download/result target after approval; preserve live status"
+    },
+    {
+      "id":"MH-02","priority":"P2","title":"Source-removal checkbox names omit literal passage",
+      "evidence_boundary":"Observed accessibility tree plus frozen source",
+      "repro":["Step5: expand Choose source lines to remove","Checkbox announces only Remove source line N; no passage description"],
+      "impact":"Form-control navigation does not identify which private content will be removed",
+      "source":"src/pages/CvCheck.tsx","frozen_lines":[349],
+      "recommendation":"Include literal passage in accessible name or connect passage via aria-describedby; retain large clickable labels"
+    },
+    {
+      "id":"MH-03","priority":"P3","title":"Native media controls cover burned captions",
+      "evidence_boundary":"Supplemental actual screenshot around0:06 of unchanged first-check recording after source freeze",
+      "repro":["Load first-check recording and play with video focus","Native control bar overlays bottom burned-caption line"],
+      "impact":"Caption text is obscured while interacting with playback controls; phone video is small",
+      "source":"src/pages/Walkthroughs.tsx","frozen_lines":[28,29],
+      "recommendation":"Move burned captions above control safe area or ensure a reliably visible caption treatment without duplication; keep transcript"
+    }
+  ],
+  "tests": {
+    "command":"npm run test:run -- src/__tests__/help-center.test.tsx src/__tests__/walkthroughs.test.tsx src/__tests__/cv-check-journey.test.tsx src/__tests__/guest-support.test.tsx",
+    "start_local":"2026-10-14T07:44:02+04:00","duration_seconds":12.61,"files_passed":4,"tests_passed":65,
+    "version_boundary":"Post-freeze working tree; not evidence of frozen-version test status"
+  },
+  "not_performed":["signup/login","live candidate writes","support request save","outreach/submission","paid/model/cloud calls","all recordings or audio listening","real screen-reader session","real phone virtual keyboard","browser zoom matrix","file extraction from real PDF/DOCX/scanned CV","saved account/cloud workflow end-to-end","PDF visual pagination/readability inspection"],
+  "targeted_fix_verification": {
+    "original_score_changed": false,
+    "source_hash_time":"2026-10-14T07:48:17.9545333+04:00",
+    "cvcheck_sha256":"21CC4035208CE26238ED13A5C4850EA45EAC2AA5A48C575D3B1F263970D701E8",
+    "MH-01":"Passed actual browser: apply source removal, undo removal and keep edits focus Your review H2; next Tab reaches current CV textarea. Approval focuses Approve & download H2.",
+    "MH-02":"Passed DOM association: checkbox line4 aria-describedby resolves full literal volunteer passage. Spoken screen-reader session unverified.",
+    "MH-03":"Not fixed or reverified in this audit",
+    "end_hash_time":"2026-10-14T07:49:45.4932410+04:00",
+    "cvcheck_hash_still_matches":true,
+    "walkthrough_manifest_drift_sha256":"6D308D397FFCE0D130666DA539E7D6672BF59EE09AC2458CB6036BB883127FD6",
+    "boundary":"Narrow actual-browser recheck after source freeze; later HMR reset open check; no broader regression certification"
+  },
+  "artifacts_changed":["docs/product-hardening/cycle2-audits/mobile-help.md","docs/product-hardening/cycle2-audits/mobile-help.json"]
+}

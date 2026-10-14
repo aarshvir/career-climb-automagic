@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "review": "cycle2-independent-reliability-privacy",
+  "reviewer": "independent reliability/privacy reviewer",
+  "reportWrittenAt": "2026-10-14 03:50:30 UTC",
+  "independent": true,
+  "peerOrPreviousAuditsRead": false,
+  "targetOrScoresRead": false,
+  "initialSource": {
+    "frozenAt": "2026-10-14T03:40:42.8209165Z",
+    "head": "9682cd1bbf776be6d2e74b023766fcd4c9056022",
+    "dirtyWorkingTree": true,
+    "sourceFileCount": 397,
+    "sha256": "1177af0aeab25cc5f8765a0e3ab01c3595a470b2a0a8054d4b174323ddf89fe7",
+    "algorithm": "SHA256 of sorted relative-path<TAB>lowercase-sha256 entries, LF separated with no final LF",
+    "scope": [
+      "src",
+      "supabase/functions",
+      "supabase/migrations",
+      "supabase/tests",
+      "scripts",
+      "package.json",
+      "package-lock.json",
+      "docs/supabase-loop-ui"
+    ],
+    "manifest": "reliability-privacy-source-manifest.tsv",
+    "keyHashes": {
+      "src/pages/CvCheck.tsx": "4f3a60652ef5ac763ca89e530876b2afab6482ffa671afa21ba7364612d7f51c",
+      "src/lib/check-draft.ts": "cf799c117be996409cd2010d7e8bf322547171b7e46f883a9a7213d53e261484",
+      "src/pages/admin/GuestSupportInbox.tsx": "37f6691125c348c93563c2bee55a0a13b81d59b711fec6b71bc45819b18abaea",
+      "src/pages/GuestSupport.tsx": "9f6e0b9d5c0bf9e041cb3ae79afbc34c7ba5864a0570d13846725ce5b9c38e5d",
+      "src/pages/JobLoopPanels.tsx": "98153d6e5e39d9933651bdb1038041dab61e911c1c722cd6f94f7e3fd2ae4ef5",
+      "src/lib/job-loop-api.ts": "6eb9ec858af784a10fdb0c9c8ad934a6e97d17cc3c72a8012f1e2308cce001e3",
+      "src/pages/LoopPacketPreview.tsx": "6dc3311b8ae8f0372aa24b3220faf6e72a47e2a50fa48603977e137c469591e7",
+      "supabase/migrations/20261014020000_jobvance_guest_support.sql": "6be3004e419e004ff74ea604ae1a9c176ddf7415eb29bb40ed7f2dbba2b5f70a",
+      "src/pages/HelpCenter.tsx": "8eb438757f876640bb3a8f6f2c3e7a1d4feb9d9cd5e70ae458b58ad62b712919",
+      "supabase/migrations/20261011030000_job_loop_recurring.sql": "d1e5fc6d31805e8b3abd28ab1058cb7df00a69aafa2e9622ac31e04d866ce188"
+    }
+  },
+  "drift": {
+    "detected": true,
+    "firstDetectedAt": "2026-10-14T03:44:23.3422475Z",
+    "initialChangedPaths": [
+      "src/lib/check-draft.ts",
+      "src/pages/CvCheck.tsx",
+      "src/pages/HelpCenter.tsx",
+      "src/pages/JobLoopOverview.tsx"
+    ],
+    "capturedAt": "2026-10-14T03:48:02.9452650Z",
+    "same397CurrentPathsSha256": "bdc17e5e9fcd1734a6366b7a119bec41e830210f66fbcdc1f3d5d0a14b24b33f",
+    "changedPaths": [
+      "src/__tests__/cv-check-journey.test.tsx",
+      "src/__tests__/help-center.test.tsx",
+      "src/__tests__/lib/check-draft.test.ts",
+      "src/__tests__/lib/cv-evidence.test.ts",
+      "src/__tests__/lib/job-loop-api.test.ts",
+      "src/lib/check-draft.ts",
+      "src/lib/cv-evidence.ts",
+      "src/lib/job-loop-api.ts",
+      "src/pages/CvCheck.tsx",
+      "src/pages/HelpCenter.tsx",
+      "src/pages/JobLoopOverview.tsx"
+    ],
+    "handling": "Frozen snapshot used for initial assessment; later browser recovery and isolated API fix recheck are labeled supplementary. Preview full reload interrupted reuse inspection and cleared non-consented fictional state; not scored as a product defect."
+  },
+  "grading": {
+    "scale": {
+      "min": 0,
+      "max": 100
+    },
+    "equalWeightPerDimension": 0.1,
+    "arithmeticMean": 89,
+    "initialScoreUnchangedAfterFix": true,
+    "dimensions": [
+      {
+        "dimension": "clarity",
+        "score": 90,
+        "rationale": "Clear review and saving boundaries; cancellation guidance inconsistent."
+      },
+      {
+        "dimension": "activation",
+        "score": 92,
+        "rationale": "Guest reached approved real downloads without signup or payment."
+      },
+      {
+        "dimension": "form_effort",
+        "score": 86,
+        "rationale": "Six stages and detailed review; optional sections and four-stage reuse reduce repetition."
+      },
+      {
+        "dimension": "evidence_quality",
+        "score": 88,
+        "rationale": "Literal source passages, lines, context and limitations; requires human judgment."
+      },
+      {
+        "dimension": "workflow_completeness",
+        "score": 91,
+        "rationale": "Intake through review/export/reuse connected; private operations bounded to code/tests and supplied cloud evidence."
+      },
+      {
+        "dimension": "reuse_time_saving",
+        "score": 91,
+        "rationale": "Final CV default reuse, explicit source updates and independent approval."
+      },
+      {
+        "dimension": "help_walkthroughs",
+        "score": 87,
+        "rationale": "Detailed open task/recovery help, with material cancellation mismatch."
+      },
+      {
+        "dimension": "ui_accessibility",
+        "score": 86,
+        "rationale": "Named controls, focus and statuses; no full mobile or screen-reader certification."
+      },
+      {
+        "dimension": "trust_privacy",
+        "score": 94,
+        "rationale": "Explicit storage/sharing, owner/admin fences, hashed bearer receipts and minimal staff list."
+      },
+      {
+        "dimension": "reliability",
+        "score": 85,
+        "rationale": "Strong recovery/CAS/idempotency/stream controls; two material frozen-source gaps."
+      }
+    ]
+  },
+  "findings": [
+    {
+      "id": "RP-01",
+      "priority": "P2",
+      "title": "Artifact timeout begins after unbounded auth and signed-link preparation",
+      "confidence": "high",
+      "initialStatus": "open",
+      "evidenceType": "frozen source and installed SDK inspection; deterministic regression recipe, not private browser fault injection",
+      "sources": [
+        {
+          "path": "src/lib/job-loop-api.ts",
+          "line": 198
+        },
+        {
+          "path": "src/lib/job-loop-api.ts",
+          "line": 202
+        },
+        {
+          "path": "node_modules/@supabase/functions-js/src/FunctionsClient.ts",
+          "line": 94
+        }
+      ],
+      "reproduction": [
+        "Leave sdk.session, sdk.getUser or sdk.invoke unresolved in existing API test harness.",
+        "Call getLoopDownload or getLoopPreview with active owner.",
+        "Advance fake clock beyond 45000 ms; frozen implementation has not installed its timer and remains pending."
+      ],
+      "impact": "Unbounded busy preview/download until account change or unmount; no timely retry.",
+      "acceptanceTests": [
+        "Stalled session/getUser/invoke reject by overall deadline.",
+        "Late timed-out signed link cannot start fetch or download.",
+        "Timer and auth subscription are cleaned.",
+        "Fresh retry succeeds with a new link.",
+        "Existing stream, owner, unmount and approval cancellation remain passing."
+      ],
+      "followUpStatus": "resolved-in-isolated-source-recheck",
+      "followUpEvidence": "45/45 API tests passed and timer inspected before all prerequisite awaits; no deployment or hosted browser claim."
+    },
+    {
+      "id": "RP-02",
+      "priority": "P2",
+      "title": "Schedule cancellation guidance contradicts cancellation of current scheduled run",
+      "confidence": "high",
+      "initialStatus": "open",
+      "statusAtReportCapture": "open",
+      "evidenceType": "frozen UI/help source, SQL behavior and executed existing queued-run SQL assertion",
+      "sources": [
+        {
+          "path": "src/pages/HelpCenter.tsx",
+          "line": 151
+        },
+        {
+          "path": "src/pages/JobLoopPanels.tsx",
+          "line": 74
+        },
+        {
+          "path": "src/lib/walkthroughs.ts",
+          "line": 67
+        },
+        {
+          "path": "src/pages/ProductPage.tsx",
+          "line": 177
+        },
+        {
+          "path": "src/lib/career-guides.ts",
+          "line": 591
+        },
+        {
+          "path": "supabase/migrations/20261011030000_job_loop_recurring.sql",
+          "line": 80
+        }
+      ],
+      "reproduction": [
+        "Create and claim due schedule; start scheduled run to populate last_run_id.",
+        "Make that run running; call schedule action cancelled.",
+        "SQL sets current run cancelled, clears lease and finishes it despite help saying current work is not cancelled."
+      ],
+      "impact": "User trying to stop future scheduling can unintentionally stop active preparation; completion copy does not explain it.",
+      "acceptanceTests": [
+        "Choose and document semantics consistently across workspace notice/help/walkthrough/guide/terms.",
+        "If retaining SQL, explain Pause preserves current preparation and Cancel stops last queued/running scheduled run.",
+        "Test running scheduled-run cancellation and rejection of old-lease commit.",
+        "Verify retained work recovery/resume guidance."
+      ],
+      "runningReproductionExecuted": false,
+      "followUpStatus": "resolved-in-follow-up-runtime-copy-and-sql-tests",
+      "followUpEvidence": "Five runtime copy surfaces agree with existing SQL. Independent 11/11 real PostgreSQL fixture tests and 25/25 frontend help/walkthrough/guide tests pass. Released rendered media was not verified."
+    }
+  ],
+  "browser": {
+    "url": "http://127.0.0.1:8383",
+    "surface": "Codex IAB browser 2; isolated unauthenticated reviewer-created tab",
+    "viewportChanged": false,
+    "fictionalDataOnly": true,
+    "preDriftObserved": [
+      "Home-to-six-step guest check",
+      "Literal source-line exclusion preview/apply removes ORCHID-TEST-ONLY from both versions",
+      "Final review and factual/privacy confirmations",
+      "One-page exact-PDF preview link generated",
+      "Approval gates real TXT and PDF downloads",
+      "Prepared-file fallback link",
+      "Approved-final default reuse enters four-stage new-vacancy setup with empty vacancy inputs and Undo control"
+    ],
+    "txtArtifact": {
+      "path": "C:/Users/user/Downloads/CV-Graduate data analyst (1).txt",
+      "sha256": "200a748179676c33a5b5fa096caf03d12703ef6dc7426a9622b9c2ec7c08fc2c",
+      "readVerified": true,
+      "privateMarkerAbsent": true
+    },
+    "pdfArtifact": {
+      "path": "C:/Users/user/Downloads/CV-Graduate data analyst (1).pdf",
+      "bytes": 59018,
+      "downloadCompleted": true,
+      "embeddedVisualLayoutCertified": false
+    },
+    "postDriftObserved": [
+      "Explicit refresh recovery restores incomplete fictional role and notice",
+      "Help navigation and return restores draft",
+      "Clear current check removes own disposable local draft and recovery choice"
+    ],
+    "postDriftScreenshot": "reliability-privacy-recovery.jpg",
+    "guestSupportSubmitted": false,
+    "signedInOrAdminOrGmailOpened": false,
+    "reviewerTabClosed": true
+  },
+  "automatedTests": {
+    "initial": {
+      "startedAt": "2026-10-14T03:42:52Z",
+      "beforeFirstDetectedDrift": true,
+      "frontend": {
+        "files": 9,
+        "passed": 234,
+        "failed": 0
+      },
+      "backend": {
+        "files": 11,
+        "passed": 102,
+        "failed": 0
+      },
+      "classification": "Existing automated fixture/mocked tests, including PGlite PostgreSQL invariants; not actual browser/cloud operations"
+    },
+    "followUp": {
+      "startedAt": "2026-10-14T03:46:54Z",
+      "endedBy": "2026-10-14T03:46:56Z",
+      "command": "npm exec -- vitest run src/__tests__/lib/job-loop-api.test.ts",
+      "files": 1,
+      "passed": 45,
+      "failed": 0,
+      "sourceSha256": "6ec6a5ff0c8624655392707c27449b9a7eae6880b82a67734458c1976d378220",
+      "testSha256": "1c2d1491439dc0c7ed5aed66b64e664f565173cf142c26374ae042490b80cc9e",
+      "inspected": "Overall timer before auth subscription/link issuance; active through final owner fence; cancel race suppresses late link; byte/reader cleanup controls retained",
+      "initialScoresChanged": false
+    },
+    "rp02FollowUp": {
+      "checkedFrom": "2026-10-14T03:51:16Z",
+      "checkedBy": "2026-10-14T03:51:39Z",
+      "backend": {
+        "command": "npm exec -- vitest run --config supabase/tests/vitest.backend.config.ts supabase/tests/job-loop-recurring-sql.test.ts",
+        "files": 1,
+        "passed": 11,
+        "failed": 0,
+        "startedAt": "2026-10-14T03:51:22Z",
+        "durationSeconds": 1.14
+      },
+      "frontend": {
+        "command": "npm exec -- vitest run src/__tests__/help-center.test.tsx src/__tests__/walkthroughs.test.tsx src/__tests__/career-guides.test.tsx",
+        "files": 3,
+        "passed": 25,
+        "failed": 0,
+        "startedAt": "2026-10-14T03:51:35Z",
+        "durationSeconds": 3.26
+      },
+      "verifiedBehaviors": [
+        "Pause running scheduled job retains lease and permits commit",
+        "Cancel running scheduled job clears lease and rejects stale commit",
+        "Both stop further due claims",
+        "Help/workspace/terms/guide/walkthrough caption and narration source consistently explain actual SQL scope"
+      ],
+      "privateBrowserOrHostedVerification": false,
+      "releasedRenderedMediaVerified": false,
+      "releaseBoundary": "Narration/caption source corrected. Replacement rendered MP4/audio/captions and deployed website not verified by this reviewer.",
+      "initialScoresChanged": false,
+      "sourceHashes": {
+        "src/pages/HelpCenter.tsx": "589b48d21ada86218b7b6011fd191828fce8c46a4bff7e23678580078417001a",
+        "src/pages/JobLoopPanels.tsx": "db1f29532030db4c5b08cbf076f8c4d2f3e1141bed8d7b1abe652d8b5891add7",
+        "src/pages/ProductPage.tsx": "0904b81eb2621dc3b4fe94a52886eb0de8b72ea89d84c64ded2ae18d212364b1",
+        "src/lib/career-guides.ts": "dd6c29a44054e652b1710835ef62551172bbc7f8b575df4240c4fb4a7a819eac",
+        "src/lib/walkthroughs.ts": "6d308d397ffce0d130666da539e7d6672bf59ee09ac2458cb6036bb883127fd6",
+        "supabase/tests/job-loop-recurring-sql.test.ts": "8d643bd18df351d42fb9e56d494ece20e29122f40b73d1fd36cc6aa817761420",
+        "supabase/migrations/20261011030000_job_loop_recurring.sql": "d1e5fc6d31805e8b3abd28ab1058cb7df00a69aafa2e9622ac31e04d866ce188"
+      }
+    }
+  },
+  "inspectedControls": [
+    "Approval key covers five exact inputs and method",
+    "Source exclusion preserves retained slices and warns edited passages require manual removal",
+    "Reuse/undo/restoration clear prior approval/export assets; recovery excludes undo and approval",
+    "Owner/TTL/schema bounded optional tab recovery",
+    "Private artifact exact project/bucket/owner URL, redirect refusal, actual 10MiB streaming cap and lifecycle cancellation",
+    "256-bit support bearer hashed server-side; never persisted in browser URL/storage by receipt UI",
+    "Bounded support schema/message and response identity verification",
+    "Uncertain support retry reuses request reference; edits start new reference",
+    "Staff metadata list excludes message/reply/bearer/rate; explicit audited detail; versioned update",
+    "Fresh verified identity and active staff membership per request; service-only support RPCs",
+    "Service-only retention cleanup; strict worker authorization; one-use scheduled tickets",
+    "Atomic shared budget reservation; uncertain cost retention; source/version and lease guards"
+  ],
+  "suppliedCloudEvidence": {
+    "independentlyRerun": false,
+    "guestSupport": {
+      "path": "../jobvance-repair-evidence/cycle2-guest-support-live.json",
+      "finishedAt": "2026-10-14T03:28:39.365Z",
+      "reportedPassed": 9,
+      "paidCalls": 0,
+      "sends": 0,
+      "secretKeysPersisted": false,
+      "forgedNetworkHeaderProbe": "403 HTML gateway denial; not application-level IP trust proof"
+    },
+    "integratedLoop": {
+      "path": "docs/INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json",
+      "finishedAt": "2026-10-13T18:27:16.557Z",
+      "reportedPassed": 75,
+      "paidCalls": 0,
+      "sentMessages": 0,
+      "applicationSubmissions": 0
+    },
+    "coordinatorSuppliedNotIndependentlyReproduced": [
+      "Native SQL guest RLS enabled with anon/auth table grants false and service-only RPCs",
+      "Retention cron active at 03:17 UTC",
+      "Exactly tagged fictional admin list/detail/CAS checks; own QA rows removed with audit preserved"
+    ],
+    "quotaBoundary": "Five/hour network identity quota is defense in depth. Global SQL 100/day ceiling is authoritative."
+  },
+  "safetyAndScope": {
+    "runtimeSourceEdits": 0,
+    "deployments": 0,
+    "paidCalls": 0,
+    "sends": 0,
+    "outreach": 0,
+    "signups": 0,
+    "realUserReads": 0,
+    "realUserWrites": 0,
+    "noPrivateBrowserInference": true,
+    "exclusions": [
+      "No full mobile or assistive technology audit",
+      "No private signed-in/admin/Gmail browser coverage",
+      "No independently rerun live cloud SQL/HTTP checks",
+      "No paid provider, external send or employer submission"
+    ],
+    "outputs": [
+      "reliability-privacy.md",
+      "reliability-privacy.json",
+      "reliability-privacy-source-manifest.tsv",
+      "reliability-privacy-recovery.jpg"
+    ]
+  }
+}

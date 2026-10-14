@@ -1,4 +1,7 @@
 project_id = "gvftdfriujrkpptdueyb"
+
+[functions.jobvance-guest-support]
+verify_jwt = false
 [functions.trigger-make-run]
 enabled = false
 verify_jwt = true

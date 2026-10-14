@@ -20,7 +20,7 @@ vi.mock('@/lib/document-export', async importOriginal => ({ ...(await importOrig
 const source = "Alex Example\nEXPERIENCE\n• Prepared monthly stakeholder reports using Excel.\n• Supported a transformation pilot across five units.\n• Facilitated weekly workstream meetings.\nSKILLS\nExcel, Power BI\nEDUCATION\nBachelor of Business Administration";
 const StandardURL = globalThis.URL;
 const vacancy = "Responsibilities\n• Prepare monthly stakeholder reports using Excel.\n• Lead a transformation programme.\nRequirements\n• PMP certification required.\n• At least five years of transformation experience.";
-function show() { return render(<HelmetProvider><MemoryRouter><CvCheck /></MemoryRouter></HelmetProvider>); }
+function show(path = '/check') { return render(<HelmetProvider><MemoryRouter initialEntries={[path]}><CvCheck /></MemoryRouter></HelmetProvider>); }
 async function toReview(initialSource = source) {
   fireEvent.change(screen.getByLabelText("Target role"), { target: { value: "Transformation Manager" } });
   fireEvent.change(screen.getByLabelText("Company (optional)"), { target: { value: "Example Employer" } });
@@ -36,6 +36,7 @@ function approve() {
   fireEvent.click(screen.getByLabelText(/I reviewed the complete CV and vacancy/));
   fireEvent.click(screen.getByLabelText(/Both my source CV and final CV are safe/));
   fireEvent.click(screen.getByRole("button", { name: "Approve this CV" }));
+  expect(screen.getByRole('heading', { name: 'Approve & download' })).toHaveFocus();
 }
 beforeEach(() => {
   vi.stubGlobal("URL", class extends StandardURL { static createObjectURL = vi.fn(() => "blob:synthetic-reviewed-cv"); static revokeObjectURL = vi.fn(); });
@@ -46,6 +47,29 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("six-step free CV check", () => {
+  it('retains student guidance with a recovered draft after help and consented refresh, then clears it with a new check', async () => {
+    const first = show('/check?audience=student'); await toReview();
+    fireEvent.click(screen.getByLabelText('Keep my draft in this tab across refresh'));
+    expect(readCheckRecovery(null)?.value.audience).toBe('student');
+    expect(JSON.parse(sessionStorage.getItem('jobvance_check_recovery_v1')!).value.audience).toBe('student');
+    first.unmount();
+    const returned = show('/check');
+    expect(screen.getByRole('region', { name: 'University student guidance' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Your CV to review')).toHaveValue(source);
+    returned.unmount(); clearCheckRecovery();
+    show('/check');
+    expect(screen.queryByRole('region', { name: 'University student guidance' })).not.toBeInTheDocument();
+  });
+  it('explicit audience selection overrides recovered guidance and clear resets it', async () => {
+    const first = show('/check?audience=student'); await toReview(); first.unmount();
+    show('/check?audience=professional');
+    expect(screen.getByRole('region', { name: 'Busy professional guidance' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'University student guidance' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear & start again' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Clear current check' }));
+    expect(screen.queryByRole('region', { name: 'Busy professional guidance' })).not.toBeInTheDocument();
+    expect(readCheckRecovery(null)?.value.audience).toBeUndefined();
+  });
   it('MH-02 links validation to the actual role, source, vacancy and final CV, retaining feedback on unrelated edits', async () => {
     show(); fireEvent.click(screen.getByRole('button', { name: 'Continue to your CV' }));
     expect(screen.getByLabelText('Target role')).toHaveAttribute('aria-invalid', 'true');
@@ -135,6 +159,93 @@ describe("six-step free CV check", () => {
     expect(readCheckRecovery(null)!.value.draft.sourceText).toBe(source);
     expect(storage).not.toHaveBeenCalled(); expect(fetch).not.toHaveBeenCalled(); expect(mocks.save).not.toHaveBeenCalled();
     storage.mockRestore(); fetch.mockRestore();
+  });
+  it.each(['source', 'reviewed'] as const)('F03 previews and cancels exact source-line removal before keeping it out of %s reuse', async choice => {
+    const privateLine = 'Confidential fictional reference: PROJECT-ALPHA-FICTIONAL';
+    const initial = `${source}\n${privateLine}\nVerified source contribution to keep.`, storage = vi.spyOn(Storage.prototype, 'setItem'), fetch = vi.spyOn(globalThis, 'fetch');
+    show(); await toReview(initial);
+    const field = screen.getByLabelText('Your CV to review') as HTMLTextAreaElement;
+    const edited = `${field.value}\nVerified new contribution added during review.`;
+    fireEvent.change(field, { target: { value: edited } });
+    fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' })); approve();
+    fireEvent.click(screen.getByText('Choose source lines to remove'));
+    expect(screen.getByRole('link', { name: 'How source-line removal works' })).toHaveAttribute('href', '/help#source-line-removal');
+    const lineLabel = `Remove source line ${source.split('\n').length + 1}`;
+    expect(screen.getByLabelText(lineLabel)).toHaveAccessibleDescription(privateLine);
+    fireEvent.click(screen.getByLabelText(lineLabel)); fireEvent.click(screen.getByRole('button', { name: 'Preview selected line removals' }));
+    const preview = screen.getByRole('region', { name: 'Source-line removal preview' });
+    expect(preview.querySelectorAll('pre')).toHaveLength(2);
+    expect(preview.querySelectorAll('pre')[0]).not.toHaveTextContent(privateLine);
+    expect(preview.querySelectorAll('pre')[1]).not.toHaveTextContent(privateLine);
+    expect(preview.querySelectorAll('pre')[1]).toHaveTextContent('Verified new contribution added during review.');
+    expect(readCheckRecovery(null)!.value.draft).toMatchObject({ sourceText: initial, reviewedText: edited });
+    expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel line removal' }));
+    expect(screen.queryByRole('region', { name: 'Source-line removal preview' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Undo source-line removal' })).not.toBeInTheDocument();
+    expect(readCheckRecovery(null)!.value.draft.sourceText).toBe(initial);
+    fireEvent.click(screen.getByLabelText(lineLabel)); fireEvent.click(screen.getByRole('button', { name: 'Preview selected line removals' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove selected lines' }));
+    expect(screen.getByRole('heading', { name: 'Your review' })).toHaveFocus();
+    const changed = readCheckRecovery(null)!.value.draft;
+    expect(changed.sourceText).toBe(`${source}\nVerified source contribution to keep.`);
+    expect(changed.reviewedText).toBe(edited.replace(`${privateLine}\n`, ''));
+    expect(screen.getByLabelText('Your CV to review')).toHaveValue(changed.reviewedText);
+    expect(screen.getByRole('button', { name: 'Undo source-line removal' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' })); approve();
+    fireEvent.change(screen.getByLabelText('CV version for another vacancy'), { target: { value: choice } });
+    fireEvent.click(screen.getByRole('button', { name: 'Use this CV for another vacancy' }));
+    expect(readCheckRecovery(null)!.value.draft.sourceText).toBe(choice === 'source' ? changed.sourceText : changed.reviewedText);
+    expect(readCheckRecovery(null)!.value.draft.sourceText).not.toContain(privateLine);
+    expect(screen.getByRole('navigation', { name: 'Check progress' }).querySelectorAll('li')).toHaveLength(4);
+    expect(storage).not.toHaveBeenCalled(); expect(fetch).not.toHaveBeenCalled(); expect(mocks.save).not.toHaveBeenCalled();
+    storage.mockRestore(); fetch.mockRestore();
+  });
+  it('F03 invalidates approval and PDF/save assets on source-line removal, excludes undo from storage, and restores both versions deliberately', async () => {
+    mocks.auth.user = { id: 'account-a', email: 'a@example.test' };
+    const privateLine = 'Confidential fictional reference: PROJECT-ALPHA-FICTIONAL', initial = `${source}\n${privateLine}`;
+    show(); await toReview(initial);
+    const edited = `${(screen.getByLabelText('Your CV to review') as HTMLTextAreaElement).value}\nVerified reviewed contribution.`;
+    fireEvent.change(screen.getByLabelText('Your CV to review'), { target: { value: edited } });
+    fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview current PDF' }));
+    await waitFor(() => expect(screen.getByTitle('Exact PDF preview before approval')).toBeInTheDocument()); approve();
+    fireEvent.click(screen.getByLabelText('Keep my draft in this tab across refresh'));
+    fireEvent.click(screen.getByLabelText(/Save these reviewed texts privately/));
+    fireEvent.click(screen.getByText('Choose source lines to remove'));
+    fireEvent.click(screen.getByLabelText(`Remove source line ${source.split('\n').length + 1}`));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview selected line removals' })); fireEvent.click(screen.getByRole('button', { name: 'Remove selected lines' }));
+    expect(sessionStorage.getItem('jobvance_check_recovery_v1')).not.toContain('PROJECT-ALPHA-FICTIONAL');
+    expect(sessionStorage.getItem('jobvance_check_recovery_v1')).not.toContain('previousSource');
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:synthetic-reviewed-cv');
+    expect(screen.getByLabelText('Your CV to review')).not.toHaveValue(edited);
+    fireEvent.click(screen.getByRole('button', { name: 'Undo source-line removal' }));
+    expect(screen.getByRole('heading', { name: 'Your review' })).toHaveFocus();
+    expect(readCheckRecovery('account-a')!.value.draft).toMatchObject({ sourceText: initial, reviewedText: edited });
+    expect(screen.getByLabelText('Your CV to review')).toHaveValue(edited);
+    fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
+    expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled();
+    expect(screen.queryByTitle('Exact PDF preview before approval')).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/I reviewed the complete CV and vacancy/)).not.toBeChecked();
+    expect(screen.getByLabelText(/Both my source CV and final CV are safe/)).not.toBeChecked();
+    expect(screen.getByLabelText(/Save these reviewed texts privately/)).not.toBeChecked();
+    expect(mocks.save).not.toHaveBeenCalled(); expect(mocks.remove).not.toHaveBeenCalled();
+  });
+  it('F03 changes only the open copy of a saved check when source lines are removed', async () => {
+    mocks.auth.user = { id: 'account-a', email: 'a@example.test' };
+    const privateLine = 'Confidential fictional reference: PROJECT-ALPHA-FICTIONAL', text = `${source}\n${privateLine}`;
+    const record = { id: 'old-saved-check', user_id: 'account-a', job_title: 'Saved fictional role', company: 'Fictional employer', original_text: text, reviewed_text: text, job_description: vacancy, method_version: 'fictional-method', status: 'approved', created_at: '2026-10-11T00:00:00Z' }, snapshot = JSON.stringify(record);
+    mocks.list.mockResolvedValue([record]); show();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Open saved check' })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: 'Open saved check' }));
+    fireEvent.click(screen.getByText('Choose source lines to remove'));
+    fireEvent.click(screen.getByLabelText(`Remove source line ${source.split('\n').length + 1}`));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview selected line removals' })); fireEvent.click(screen.getByRole('button', { name: 'Remove selected lines' }));
+    expect(readCheckRecovery('account-a')!.value.draft.sourceText).not.toContain(privateLine);
+    expect(JSON.stringify(record)).toBe(snapshot);
+    expect(screen.getByRole('heading', { name: 'Saved fictional role' })).toBeInTheDocument();
+    expect(mocks.save).not.toHaveBeenCalled(); expect(mocks.remove).not.toHaveBeenCalled(); expect(mocks.tracker).not.toHaveBeenCalled();
   });
   it('professional F03 invalidates existing approval and keeps source undo out of consented recovery storage and other accounts', async () => {
     const confidential = source + '\nConfidential fictional code: PROJECT-ALPHA-FICTIONAL';

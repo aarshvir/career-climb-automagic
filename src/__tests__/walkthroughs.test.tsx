@@ -58,9 +58,13 @@ describe('honest interactive walkthroughs', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Step 6 of 6');
     await user.keyboard('{Home}');
     expect(screen.getByRole('status')).toHaveTextContent('Step 1 of 6');
+    await user.click(screen.getByRole('button', { name: 'Choose a different task' }));
     await user.click(screen.getByRole('button', { name: /Set up your reusable career record/ }));
     expect(screen.getByRole('status')).toHaveTextContent('Step 1 of 5: Open the saved workspace');
     expect(screen.getByRole('link', { name: 'Read task help' })).toHaveAttribute('href', '/help#job-loop-start');
+    expect(screen.getByRole('region', { name: 'Selected walkthrough' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Choose a different task' })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('region', { name: 'Choose a walkthrough' })).not.toBeInTheDocument();
   });
   it('keeps a keyboard focus target after an endpoint disables a navigation button',async()=>{
     const user=userEvent.setup();showWalkthrough();
@@ -77,6 +81,24 @@ describe('honest interactive walkthroughs', () => {
     view.unmount();
     showWalkthrough(undefined, '/walkthroughs?tutorial=missing');
     expect(screen.getByRole('status')).toHaveTextContent('Step 1 of 6: Choose one target role');
+  });
+
+  it('presents the selected task before choosing alternatives and distinguishes the released video from untimed steps', async () => {
+    const user=userEvent.setup();
+    const { container } = showWalkthrough(publicWalkthroughVideoManifest);
+    const selected = screen.getByRole('region', { name: 'Selected walkthrough' });
+    expect(selected).toHaveTextContent('Your first CV check');
+    expect(selected).toHaveTextContent('6 interactive steps · 1:51 captioned video');
+    expect(within(selected).getByRole('link', { name: 'Watch the video' })).toHaveAttribute('href', '#wt-recorded');
+    expect(within(selected).getByRole('link', { name: 'Follow interactive steps' })).toHaveAttribute('href', '#wt-interactive');
+    expect(container.querySelector('#wt-task-options')).toHaveAttribute('hidden');
+    expect(screen.getByText(/separate, untimed interactive steps/)).toBeInTheDocument();
+    expect(screen.getByText('Video chapter 0:13–0:34 · Your CV')).toBeInTheDocument();
+    expect(screen.getByText('Video chapter 1:29–1:51 · Approve & download')).toBeInTheDocument();
+    expect(screen.queryByText(/Planned narration/)).not.toBeInTheDocument();
+    expect(container.querySelector('video')).toBeNull();
+    await user.click(within(selected).getByRole('link', { name: 'Read video transcript' }));
+    expect(container.querySelector('#wt-transcript')).toHaveAttribute('open');
   });
 
   it('loads actual captioned media only after a user action and provides a playback-error fallback', async () => {
@@ -105,7 +127,7 @@ describe('honest interactive walkthroughs', () => {
     vi.stubGlobal('navigator', undefined);
     const html = renderToString(<MemoryRouter><Walkthroughs /></MemoryRouter>);
     expect(html).toContain('FICTIONAL DEMO');
-    expect(html).toContain('Complete transcript and planned script timings');
+    expect(html).toContain('Complete video transcript and measured chapter timings');
     expect(html).toContain('Continue to your CV');
     expect(fetch).not.toHaveBeenCalled();
     expect(storage).not.toHaveBeenCalled();
@@ -138,13 +160,25 @@ describe('walkthrough scripts and public media boundary', () => {
     expect(isPublicWalkthroughMediaUrl('https://raw.githubusercontent.com/other/career-climb-automagic/main/docs/product-hardening/tutorial-assets/videos/first-check.mp4','video')).toBe(false);
     expect(isPublicWalkthroughMediaUrl('https://raw.githubusercontent.com/aarshvir/other/main/docs/product-hardening/tutorial-assets/videos/first-check.mp4','video')).toBe(false);
   });
-  it('retains an integrated AI presenter disclosure and avoids duplicate native captions',()=>{
+  it('retains an integrated AI presenter disclosure and avoids duplicate native captions',async()=>{
+    const user=userEvent.setup();
     const asset=readyAsset({contentKind:'screen_walkthrough',presenterDisclosure:'Original fictional AI presenter; actual product screens use fictional data.',hasBurnedCaptions:true});
     expect(validateWalkthroughVideoManifest({version:1,videos:[asset]}).videos[0]).toMatchObject({presenterDisclosure:asset.presenterDisclosure,hasBurnedCaptions:true});
+    const {container}=showWalkthrough({version:1,videos:[asset]});
+    await user.click(screen.getByRole('button',{name:'Load recorded walkthrough'}));
+    const track=container.querySelector('track')!;
+    expect(track).not.toHaveAttribute('default');
+    fireEvent.error(track);
+    expect(screen.getByRole('alert')).toHaveTextContent('On-screen captions remain in the recording');
+    expect(container.querySelector('video')).toBeInTheDocument();
   });
   it('uses measured chapter starts and rejects invalid chapter metadata',async()=>{
     const user=userEvent.setup(),asset=readyAsset({chapters:[{id:'role',title:'Choose one target role',startSeconds:0},{id:'cv',title:'Read your CV',startSeconds:13.125}]});
     const {container}=showWalkthrough({version:1,videos:[asset]});
+    expect(screen.getByText('Video chapter 0:00–0:13 · Your role')).toBeInTheDocument();
+    expect(screen.getByText('Video chapter 0:13–2:20 · Your CV')).toBeInTheDocument();
+    expect(screen.queryByText(/Planned narration/)).not.toBeInTheDocument();
+    expect(screen.getAllByText(/Recording timing unavailable for this step/)).toHaveLength(4);
     await user.click(screen.getByRole('button',{name:'Load recorded walkthrough'}));
     await user.click(screen.getByRole('button',{name:'0:13 · Read your CV'}));
     const video=container.querySelector('video')!;fireEvent.loadedMetadata(video);expect(video.currentTime).toBe(13.125);

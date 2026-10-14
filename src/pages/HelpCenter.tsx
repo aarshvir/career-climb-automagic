@@ -36,7 +36,7 @@ export const helpTopics: HelpTopic[] = [
       'Download evidence report keeps the review questions separate from your CV. Sign-in is an optional later step for private saving.',
     ],
     action: { label: 'Start the free CV check', to: '/check' },
-    related: [{ label: 'File problems', id: 'uploads' }, { label: 'No CV yet', id: 'no-cv' }],
+    related: [{ label: 'File problems', id: 'uploads' }, { label: 'Remove private source lines', id: 'source-line-removal' }, { label: 'No CV yet', id: 'no-cv' }],
   },
   {
     id: 'no-cv', category: 'Free CV check', title: 'Start when you do not have a CV yet',
@@ -62,7 +62,20 @@ export const helpTopics: HelpTopic[] = [
       'If the file is empty, too large or has scrambled lines, export a smaller text-based copy or paste the correct text. Check names, dates, bullets, course headings and numbers before continuing.',
     ],
     notes: ['Keep readable CV text between 80 and 60,000 characters. Preserve nearby headings so a project cannot look like an employer role. Remove sensitive or confidential details before saving or sharing.'],
-    action: { label: 'Read my CV in the free check', to: '/check' }, related: [{ label: 'Recover an interrupted draft', id: 'recovery' }],
+    action: { label: 'Read my CV in the free check', to: '/check' }, related: [{ label: 'Remove private source lines', id: 'source-line-removal' }, { label: 'Recover an interrupted draft', id: 'recovery' }],
+  },
+  {
+    id: 'source-line-removal', category: 'Privacy & recovery', title: 'Remove selected source lines before reusing your CV',
+    summary: 'Remove confidential or sensitive information from the free check’s reusable source. Choose exact lines, preview both CV versions, then decide whether to apply the removal.',
+    steps: [
+      'In Your review or Approve & download, find Keep reviewed edits for future applications and open Choose source lines to remove. Read each complete numbered line and select only the Remove source line checkboxes you intend to remove.',
+      'Select Preview selected line removals. Read Reusable source after removal and Current CV after removal before changing either version. Remove selected lines applies only after this preview. Cancel line removal leaves the source unchanged.',
+      'Select Remove selected lines when both previews are correct. The selected source lines and every identical complete line in the current CV are removed. If the current CV contains an edited or differently worded version of that passage, inspect and remove it manually too.',
+      'Review the remaining headings, context and current CV. The previous evidence, PDF preview and approval are cleared. Run the comparison again and review and approve the current document before downloading.',
+      'If you removed the wrong lines, use Undo source-line removal while the page stays open. It restores the previous source and current CV, including removed details; review again before approving. Leaving or refreshing the page loses this undo.',
+    ],
+    notes: ['Editing the final CV alone does not update the reusable source. Keep these edits in my reusable source replaces the entire open source with the reviewed CV; choose it only after checking everything you want to keep. Selected line removal lets you preview particular literal source lines instead.', 'This changes the open check only. Saved account checks and downloaded files stay unchanged. Selecting lines is separate from private account saving and Job Loop fact permission. An exclusion preference does not remove private wording from a raw source.'],
+    action: { label: 'Review my source in the free check', to: '/check' }, related: [{ label: 'Privacy choices', id: 'privacy' }, { label: 'Prepare another application', id: 'second-application' }],
   },
   {
     id: 'job-loop-start', category: 'Job Loop', title: 'Set up Job Loop with the CV you already have',
@@ -119,12 +132,12 @@ export const helpTopics: HelpTopic[] = [
     steps: [
       'Open Outputs and select the document you want to review, or select Review this run’s outputs in the run history.',
       'Open Source references and evidence and Relevance and unresolved questions. Read CV text for factual review, including the context and result status of each claim.',
-      'Select Open exact PDF preview when a PDF artifact is ready. Inspect every page for cut-off text, missing characters, headings and the selected page preference. If the preview is blank, select open this exact PDF in a new tab. Do not treat a blank panel as a successful review.',
+      'Select Open exact PDF preview when a PDF artifact is ready. Inspect every page for cut-off text, missing characters, headings and the selected page preference. If the preview is blank, select open this exact PDF in a new tab. Use Reload exact PDF preview to request the file again if needed. Do not treat a blank panel as a successful review.',
       'If a fact is wrong, select Edit career facts, then rebuild, save and confirm the corrected career fact, and prepare a fresh output. A text edit cannot bypass source controls. Read any format warnings; a failed PDF does not imply a ready DOCX or TXT failed too.',
       'Confirm that the complete CV and evidence are accurate and safe for external use. Select Approve exact packet. Then choose a ready Download PDF, Download DOCX or Download TXT format. Download evidence report separately.',
       'Read Cover letter and message drafts (unsent) separately. You send or apply yourself on the employer’s site. An optional Create Gmail draft action creates an unsent draft only and has its own recipient and attachment confirmation.',
     ],
-    notes: ['Approval is blocked for outdated sources, held packets or unsaved career edits. Correct the record, rebuild and review again. In the free check, select Preview current PDF, then Open the exact PDF preview in a new tab if the inline PDF is blank. PDF download requires a current preview within the chosen maximum; approved DOCX/TXT can remain available.'],
+    notes: ['Approval is blocked for outdated sources, held packets or unsaved career edits. Correct the record, rebuild and review again. In the free check, select Preview current PDF, then Open the exact PDF preview in a new tab if the inline PDF is blank. PDF download requires a current preview within the chosen maximum; approved DOCX/TXT can remain available.', 'A Job Loop preview or download transfer stops when you leave the page, change accounts, select another packet, or its approval or source validity is lost. Stopping a file transfer does not cancel a cloud preparation run.', 'Transfers stop after 45 seconds or above the 10 MiB file limit. If you see “The document download timed out”, reopen the current packet and review or approve again if needed. Use Reload exact PDF preview or a ready Download format to request a fresh private link. For a file-limit message, try another ready format or contact workflow help.'],
     action: { label: 'Review my Job Loop outputs', to: '/loop' }, related: [{ label: 'Accuracy of facts', id: 'job-loop-facts' }, { label: 'Run recovery', id: 'job-loop-controls' }],
   },
   {
@@ -135,7 +148,7 @@ export const helpTopics: HelpTopic[] = [
       'On Today, read Prepare a cloud run. Choose Preparation provider. Source-based preparation · no AI uses cleared facts without an external model. An available AI model needs explicit permission for that selected provider and processing route.',
       'Select Prepare today’s applications only when the service reports it available. If cloud processing is not configured, the pilot is full or the allowance is exhausted, use saved records and manual tracking or the free check. No unavailable provider is silently substituted.',
       'Read Run history & source coverage. Check the status and message of every lane. For partial, blocked or failed runs, keep usable results separate from missing coverage. Use Resume run when available after addressing the stated issue. Use Cancel run for a queued or running job, then refresh to confirm its state.',
-      'Open Optional recurring preparation only if you want it. Check Preparation cadence, Local preparation time and Schedule timezone, then opt in and select Enable recurring preparation. Read the actual saved next run. Pause schedule stops future scheduling; Cancel schedule does not cancel an already running job, which has its own Cancel run.',
+      'Open Optional recurring preparation only if you want it. Check Preparation cadence, Local preparation time and Schedule timezone, then opt in and select Enable recurring preparation. Read the actual saved next run. Pause schedule stops future scheduling and retains the current run. Cancel schedule also cancels its latest scheduled run if that run is queued or running. A separately started manual run has its own Cancel run. Refresh records to confirm the result.',
       'Open Optional Gmail access only if you need it and access is available. Select chosen permissions, connect, and confirm the returned mailbox. Reading recruitment messages requires separate run consent; draft creation requires its own checks. Use Disconnect Gmail to stop future connection use.',
     ],
     notes: ['Cloud runs can continue after the page closes. Refresh records to inspect actual progress; closing the tab is not a cancel action. Recurring preparation currently uses the rules method and the same pilot allowance. Google account sign-in alone does not authorize mailbox reading. No messages or applications are sent automatically.'],
@@ -146,13 +159,13 @@ export const helpTopics: HelpTopic[] = [
     summary: 'Keep useful experience; give every new vacancy its own comparison, review and approval.',
     steps: [
       'In the free check, download or privately save the open approved check before replacing it. Under Your next application, choose CV version for another vacancy: Reviewed source CV or Approved final CV.',
-      'Select Use this CV for another vacancy. Enter the new Target role and Company (optional). Review the reused CV and paste the new vacancy description. The previous vacancy, findings and approval do not carry over.',
+      'Select Use this CV for another vacancy. Enter the new Target role, Company (optional) and Vacancy description together. Open Inspect or edit the reused CV when you need to check or change its text, then select Check this next vacancy. The previous vacancy, findings and approval do not carry over.',
       'Work through The evidence, Your review and Approve & download for the new job. You must approve the current version again before downloading.',
       'In Job Loop, use your saved career record and unchanged confirmed facts. Open Opportunities and add the next real vacancy, then return to Today to prepare and Outputs to review its separate document. Do not repeat unchanged fact entry.',
       'After you actually submit on the employer’s site, update Application status in Opportunities. Confirm that you report the status yourself, add a Follow-up date and My application notes if useful, and select Save tracking update.',
     ],
-    notes: ['Saved or prepared does not mean applied. Jobvance does not submit an employer application. Interview, offer, rejected and withdrawn are also your reported statuses, not independently verified outcomes.'],
-    action: { label: 'Continue in the free check', to: '/check' }, related: [{ label: 'Job Loop start', id: 'job-loop-start' }],
+    notes: ['Use Undo new application to restore the previous source CV, vacancy and final edits while this page stays open. Leaving or refreshing loses this undo. Restoring returns to review and clears approval; confirm accuracy and privacy again. Saved checks stay unchanged.', 'Saved or prepared does not mean applied. Jobvance does not submit an employer application. Interview, offer, rejected and withdrawn are also your reported statuses, not independently verified outcomes.'],
+    action: { label: 'Continue in the free check', to: '/check' }, related: [{ label: 'Remove private source lines', id: 'source-line-removal' }, { label: 'Job Loop start', id: 'job-loop-start' }],
   },
   {
     id: 'privacy', category: 'Privacy & recovery', title: 'Choose what is stored, shared or connected',
@@ -165,7 +178,7 @@ export const helpTopics: HelpTopic[] = [
       'For Job Loop support or account erasure, open Help & privacy. For a saved free check, use Delete in Your saved free checks and review the deletion confirmation. Downloaded files remain on your device.',
     ],
     notes: ['Anyone using your browser tab may see a temporarily retained draft. Confirm a returned Gmail mailbox and its permissions yourself. Disconnecting Gmail does not delete drafts already created there. Read the privacy policy for the full service policy.'],
-    action: { label: 'Read the privacy policy', to: '/privacy' }, related: [{ label: 'Recovery and limits', id: 'recovery' }],
+    action: { label: 'Read the privacy policy', to: '/privacy' }, related: [{ label: 'Remove private source lines', id: 'source-line-removal' }, { label: 'Recovery and limits', id: 'recovery' }],
   },
   {
     id: 'recovery', category: 'Privacy & recovery', title: 'Recover a draft or an interrupted check safely',
@@ -178,8 +191,8 @@ export const helpTopics: HelpTopic[] = [
       'Saved account records are separate from temporary drafts. Sign in to the same account, reopen a saved check or use Refresh records in Job Loop. A cloud run may still be progressing even when local edits are gone.',
       'If recovery has expired or the browser cannot retain the draft, paste your source again or open your saved account version. Clear & start again, followed by Clear current check, removes the open free check and its temporary sign-in draft. Use Contact if a repeatable service problem remains.',
     ],
-    notes: ['Temporary memory is a convenience, not a backup. Reading, saving and approval controls still apply after recovery. Avoid putting private CV text into a support message unless it is needed and safe to share.'],
-    action: { label: 'Return to the free check', to: '/check' }, related: [{ label: 'Privacy choices', id: 'privacy' }, { label: 'Run availability and recovery', id: 'job-loop-controls' }],
+    notes: ['Temporary memory is a convenience, not a backup. Reading, saving and approval controls still apply after recovery. Avoid putting private CV text into a support message unless it is needed and safe to share.', 'Leaving Job Loop stops an in-flight document preview or download. A cloud preparation run can still continue; use its separate Cancel run control when available and refresh to confirm the run state.'],
+    action: { label: 'Return to the free check', to: '/check' }, related: [{ label: 'Interrupted document transfer', id: 'job-loop-review' }, { label: 'Privacy choices', id: 'privacy' }, { label: 'Run availability and recovery', id: 'job-loop-controls' }],
   },
 ];
 

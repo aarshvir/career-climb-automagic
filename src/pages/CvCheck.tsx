@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { extractCvText, validateCvText } from "@/lib/cv-extraction";
 import { analyzeCvEvidence, prioritizeCvForVacancy, type EvidenceReport, type EvidenceRequirement, type EvidenceStatus } from "@/lib/cv-evidence";
-import { checkReviewKey, clearRetainedCheck, retainCheckForGoogle, readRetainedCheck, validateCheckDraft, validateCheckField, CheckDraftValidationError, readCheckRecovery, rememberCheckRecovery, clearCheckRecovery, draftForAnotherVacancy, keepReviewedEditsInSource, type CheckDraft, type CheckDraftField, type CheckReuseSource } from "@/lib/check-draft";
+import { checkReviewKey, clearRetainedCheck, retainCheckForGoogle, readRetainedCheck, validateCheckDraft, validateCheckField, CheckDraftValidationError, readCheckRecovery, rememberCheckRecovery, clearCheckRecovery, draftForAnotherVacancy, keepReviewedEditsInSource, checkSourceLines, removeSelectedSourceLines, checkAudience, type CheckAudience, type CheckDraft, type CheckDraftField, type CheckReuseSource } from "@/lib/check-draft";
 import { deleteFreeCheck, listFreeChecks, saveFreeCheck, type FreeCvCheck } from "@/lib/free-check-api";
 import { createFreeCheckCvBlob, createFreeCheckReportText } from "@/lib/free-check-export";
 import { downloadBlob, safeDocumentFilename } from "@/lib/document-download";
@@ -26,7 +26,7 @@ const stepNames = ["Your role", "Your CV", "One vacancy", "The evidence", "Your 
 const audienceGuidance = {
   student: { label: "University student", example: "e.g. Data analyst internship or Graduate analyst", text: "Projects, coursework, internships and volunteering count as source material. Keep them labelled as what they are; no employment history is required to check a CV." },
   mba: { label: "MBA student", example: "e.g. Associate consultant, Product manager or Finance associate", text: "Bring previous work and MBA projects. Keep classroom projects distinct from client or employer work, and explain your own contribution." },
-  professional: { label: "Career switcher", example: "e.g. Product lead, Finance manager or Transformation manager", text: "Start with the career record you already have. Show transferable experience without changing your responsibilities, and remove confidential information." },
+  professional: { label: "Busy professional", example: "e.g. Product lead, Finance manager or Transformation manager", text: "Start with the career record you already have. Reuse your experience for your next role, show transferable work without changing your responsibilities, and remove confidential information." },
 };
 const statusLabels: Record<EvidenceStatus, string> = {
   direct: "Direct wording found", partial: "Related passage — review needed", missing: "No passage found", review: "Needs manual review",
@@ -36,7 +36,7 @@ const statusStyles: Record<EvidenceStatus, string> = {
   missing: "border-slate-200 bg-slate-50 text-slate-800", review: "border-blue-200 bg-blue-50 text-blue-950",
 };
 type ApprovedCheck = { draft: CheckDraft; report: EvidenceReport; key: string; requestId: string };
-type SourceUndo = { text: string; ownerId: string | null };
+type SourceUndo = { text: string; reviewedText?: string; ownerId: string | null };
 type ApplicationUndo = { draft: CheckDraft; filename: string; pageTarget: 1 | 2; ownerId: string | null; sourceUndo: SourceUndo | null; reuseMode: boolean };
 type CheckInputField = CheckDraftField | 'file';
 const fieldIds: Record<CheckInputField, string> = { jobTitle: 'check-role', company: 'check-company', sourceText: 'check-source', reviewedText: 'check-reviewed', jobDescription: 'check-vacancy', file: 'check-file' };
@@ -93,10 +93,11 @@ function EvidenceResults({ report, originalText, onQuestion }: { report: Evidenc
 
 export default function CvCheck() {
   const [searchParams] = useSearchParams();
-  const audienceKey = searchParams.get("audience");
-  const guidance = audienceKey && Object.prototype.hasOwnProperty.call(audienceGuidance, audienceKey) ? audienceGuidance[audienceKey as keyof typeof audienceGuidance] : null;
+  const requestedAudience = checkAudience(searchParams.get("audience"));
   const { user, loading: authLoading } = useAuth();
   const [recovery] = useState(() => readCheckRecovery(user?.id ?? null));
+  const [audience, setAudience] = useState<CheckAudience | null>(() => requestedAudience ?? recovery?.value.audience ?? null);
+  const guidance = audience ? audienceGuidance[audience] : null;
   const [restored] = useState(() => readRetainedCheck());
   const initialDraft = restored ?? recovery?.value.draft ?? emptyDraft;
   const [draft, setDraft] = useState<CheckDraft>(initialDraft);
@@ -113,6 +114,9 @@ export default function CvCheck() {
   const [pageTarget, setPageTarget] = useState<1 | 2>(recovery?.value.pageTarget ?? 2);
   const [omitParagraphs, setOmitParagraphs] = useState<number[]>([]), [beforeSelection, setBeforeSelection] = useState<string | null>(null);
   const [previousSource, setPreviousSource] = useState<SourceUndo | null>(null), [previousApplication, setPreviousApplication] = useState<ApplicationUndo | null>(null);
+  const [selectedSourceLines, setSelectedSourceLines] = useState<number[]>([]), [sourceRemovalPreview, setSourceRemovalPreview] = useState<{ before: CheckDraft; after: CheckDraft; ownerId: string | null } | null>(null);
+  const [focusRequest, setFocusRequest] = useState(0);
+  const sourceLineId = useId();
   const [fact, setFact] = useState(""), [factPermitted, setFactPermitted] = useState(false), [question, setQuestion] = useState("");
   const [googleConsent, setGoogleConsent] = useState(false), [showAccount, setShowAccount] = useState(false);
   const [saveConsent, setSaveConsent] = useState(false), [saved, setSaved] = useState<FreeCvCheck | null>(null), [savedChecks, setSavedChecks] = useState<FreeCvCheck[]>([]), [savedError, setSavedError] = useState("");
@@ -140,6 +144,7 @@ export default function CvCheck() {
     revision.current += 1; setPreparedFile(null); setApproved(null); setCheckedFacts(false); setCheckedPrivacy(false); setSaveConsent(false); setSaved(null); setTracked(false); setError(""); setNotice("");
     clearRetainedCheck();
     setPdfPreview(null); setPdfError('');
+    setSelectedSourceLines([]); setSourceRemovalPreview(null);
   }
   function editDraft(patch: Partial<CheckDraft>, keepSelectionUndo = false) {
     let keepError = !!errorField && !!error;
@@ -156,6 +161,7 @@ export default function CvCheck() {
     clearCheckRecovery(); setRecoveryConsent(false); setPageTarget(2); setOmitParagraphs([]); setBeforeSelection(null);
     setPreviousSource(null); setPreviousApplication(null);
     setReuseMode(false); setReuseInspect(false);
+    setAudience(null);
   }
   function beginAnotherVacancy(previous: CheckDraft, choice: CheckReuseSource, previousFilename = '') {
     if (busy) return;
@@ -185,32 +191,51 @@ export default function CvCheck() {
       setPreviousSource({ text: draft.sourceText, ownerId: owner.current }); invalidate(); setDraft(next); setFilename(''); setCvReady(true); setStep(5);
       setReport(analyzeCvEvidence(next.reviewedText, next.jobDescription, next.jobTitle)); setBeforeSelection(null); setOmitParagraphs([]);
       setNotice('Your reviewed wording is now the reusable source for this open check. No saved account record was changed. Review and approve again; you can undo this source update while this page stays open.');
+      setFocusRequest(value => value + 1);
     } catch (failure) { showValidationFailure(failure, 'reviewedText', 'Review your CV text before updating its source.'); }
   }
   function undoSourceUpdate() {
     if (busy || !previousSource || previousSource.ownerId !== owner.current) return;
-    invalidate(); setDraft(current => ({ ...current, sourceText: previousSource.text })); setStep(5); setPreviousSource(null); setBeforeSelection(null); setOmitParagraphs([]);
-    setNotice('The prior reusable source is restored. It may include details you removed from the final CV. Review both versions before reusing or saving; your final edits remain.');
+    const before = previousSource, next = { ...draft, sourceText: before.text, ...(before.reviewedText === undefined ? {} : { reviewedText: before.reviewedText }) };
+    invalidate(); setDraft(next); setReport(analyzeCvEvidence(next.reviewedText, next.jobDescription, next.jobTitle)); setStep(5); setPreviousSource(null); setBeforeSelection(null); setOmitParagraphs([]);
+    setNotice(before.reviewedText === undefined ? 'The prior reusable source is restored. It may include details you removed from the final CV. Review both versions before reusing or saving; your final edits remain.' : 'The source-line removal was undone in both CV versions. Removed details may be back. Review and approve again before downloading, saving or reusing.');
+    setFocusRequest(value => value + 1);
+  }
+  function previewSourceRemoval() {
+    if (busy) return;
+    try { setSourceRemovalPreview({ before: draft, after: removeSelectedSourceLines(draft, selectedSourceLines), ownerId: owner.current }); setError(''); }
+    catch (failure) { setSourceRemovalPreview(null); setError(failure instanceof Error ? failure.message : 'Keep enough CV text to review.'); }
+  }
+  function applySourceRemoval() {
+    if (busy || !sourceRemovalPreview || sourceRemovalPreview.before !== draft || sourceRemovalPreview.ownerId !== owner.current) return;
+    const next = sourceRemovalPreview.after;
+    setPreviousSource({ text: draft.sourceText, reviewedText: draft.reviewedText, ownerId: owner.current });
+    invalidate(); setDraft(next); setFilename(''); setCvReady(true); setStep(5); setReport(analyzeCvEvidence(next.reviewedText, next.jobDescription, next.jobTitle)); setBeforeSelection(null); setOmitParagraphs([]);
+    setNotice('Your selected source lines and all identical complete lines in the current CV were removed. Edited or different passages still need your review. No saved check was changed. Review and approve again; you can undo this removal on this page.');
+    setFocusRequest(value => value + 1);
   }
   useEffect(() => {
     mounted.current = true; clearRetainedCheck();
     return () => { mounted.current = false; revision.current += 1; };
   }, []);
+  useEffect(() => { if (requestedAudience) setAudience(requestedAudience); }, [requestedAudience]);
   useEffect(() => () => { if (preparedFile) URL.revokeObjectURL(preparedFile.url); }, [preparedFile]);
   useEffect(() => () => { if (pdfPreview) URL.revokeObjectURL(pdfPreview.url); }, [pdfPreview]);
   useEffect(() => {
-    try { rememberCheckRecovery({ draft, step, cvReady, filename, ownerId: user?.id ?? null, pageTarget, ...(reuseMode ? { reuseMode: true } : {}) }, recoveryConsent); }
+    try { rememberCheckRecovery({ draft, step, cvReady, filename, ownerId: user?.id ?? null, pageTarget, ...(reuseMode ? { reuseMode: true } : {}), ...(audience ? { audience } : {}) }, recoveryConsent); }
     catch (failure) { setRecoveryConsent(false); setError(failure instanceof Error ? failure.message : 'Draft recovery is unavailable.'); }
-  }, [draft, step, cvReady, filename, user?.id, recoveryConsent, pageTarget, reuseMode]);
-  useEffect(() => { heading.current?.focus({ preventScroll: true }); const target = step === 1 ? intro.current : heading.current; target?.scrollIntoView?.({ block: "start", behavior: "auto" }); }, [step]);
+  }, [draft, step, cvReady, filename, user?.id, recoveryConsent, pageTarget, reuseMode, audience]);
+  useEffect(() => { heading.current?.focus({ preventScroll: true }); const target = step === 1 ? intro.current : heading.current; target?.scrollIntoView?.({ block: "start", behavior: "auto" }); }, [step, focusRequest]);
   useEffect(() => { if (errorField) document.getElementById(fieldIds[errorField])?.focus(); }, [errorField, step, reuseInspect]);
   useEffect(() => {
     const id = user?.id ?? null;
-    if (previousOwner.current !== id) { setPreviousSource(null); setPreviousApplication(null); }
+    if (previousOwner.current !== id) { setPreviousSource(null); setPreviousApplication(null); setSelectedSourceLines([]); setSourceRemovalPreview(null); }
     if (previousOwner.current && previousOwner.current !== id) {
       revision.current += 1; clearRetainedCheck(); setDraft(emptyDraft); setStep(1); setReport(null); setPreparedFile(null); setApproved(null); setCheckedFacts(false); setCheckedPrivacy(false); setSaved(null); setSaveConsent(false); setCvReady(false); setFilename(""); setFact(""); setQuestion(""); setFactPermitted(false); setTracked(false); setShowAccount(false); setNotice("The account changed. The previous check was cleared from this page."); setError("");
       clearCheckRecovery(); setRecoveryConsent(false); setPageTarget(2); setPdfPreview(null); setPdfError(''); setBeforeSelection(null); setOmitParagraphs([]);
+      setSelectedSourceLines([]); setSourceRemovalPreview(null);
       setReuseMode(false); setReuseInspect(false);
+      setAudience(null);
     }
     previousOwner.current = id;
     setSavedChecks([]); setSavedError(""); setDeleteTarget(null); setSavedLoading(!!id);
@@ -238,7 +263,7 @@ export default function CvCheck() {
     finally { if (mounted.current) setBusy(""); }
   }
   function confirmCv() {
-    try { const text = validateCvText(draft.sourceText); editDraft({ sourceText: text, reviewedText: text }); setCvReady(true); go(3); }
+    try { const text = validateCheckField('sourceText', draft.sourceText); editDraft({ sourceText: text, reviewedText: text }); setCvReady(true); go(3); }
     catch (failure) { setFieldError('sourceText', failure instanceof Error ? failure.message : "Review your CV text."); }
   }
   function runCheck() {
@@ -277,7 +302,7 @@ export default function CvCheck() {
   }
   function approve() {
     if (!checkedFacts || !checkedPrivacy || !report) return;
-    try { const valid = validateCheckDraft(draft); setApproved({ draft: valid, report, key: checkReviewKey(valid, report.methodVersion), requestId: crypto.randomUUID() }); setNotice("Ready to download. You can also save this version privately if you want to come back to it."); setError(""); }
+    try { const valid = validateCheckDraft(draft); setApproved({ draft: valid, report, key: checkReviewKey(valid, report.methodVersion), requestId: crypto.randomUUID() }); setNotice("Ready to download. You can also save this version privately if you want to come back to it."); setError(""); setFocusRequest(value => value + 1); }
     catch (failure) { showValidationFailure(failure, 'reviewedText', "Approval could not complete."); }
   }
   async function download(format: DocumentFormat) {
@@ -327,7 +352,15 @@ export default function CvCheck() {
     finally { if (mounted.current) { setBusy(""); setDeleteTarget(null); } }
   }
 
-  const sourceReviewControls = <section className="check-source-update" aria-label="Update your reusable source"><h3>Keep reviewed edits for future applications</h3><p>Edits to the final CV do not change the source by themselves. This replaces the reusable source for this open check with your reviewed CV, so your edits and removals carry into future reuse. Check that the facts you want to keep are still there. Saved account records stay unchanged; saving is a separate choice.</p><Button type="button" variant="outline" disabled={!!busy || draft.sourceText === draft.reviewedText} onClick={keepSourceEdits}>Keep these edits in my reusable source</Button>{previousSource && previousSource.ownerId === owner.current && <><Button type="button" variant="ghost" disabled={!!busy} onClick={undoSourceUpdate}>Undo source update</Button><p>Undo restores the prior source, which may include removed details. This undo is kept only on this page.</p></>}</section>;
+  const sourceReviewControls = <section className="check-source-update" aria-label="Update your reusable source">
+    <h3>Keep reviewed edits for future applications</h3><p>Edits to the final CV do not change the source by themselves. This replaces the reusable source for this open check with your reviewed CV, so your edits and removals carry into future reuse. Check that the facts you want to keep are still there. Saved account records stay unchanged; saving is a separate choice.</p><Button type="button" variant="outline" disabled={!!busy || draft.sourceText === draft.reviewedText} onClick={keepSourceEdits}>Keep these edits in my reusable source</Button>
+    <details className="check-source-lines"><summary>Choose source lines to remove</summary><p>Optional: select exact lines that are confidential or unsafe to reuse. Preview both CV versions before applying. This removes the selected source lines and all identical complete lines in your current CV. Edited or different passages stay in place; review those yourself. Remaining wording and line endings stay as entered.</p><Link to="/help#source-line-removal">How source-line removal works</Link>
+      <div className="check-source-line-options">{checkSourceLines(draft.sourceText).filter(line => line.text.trim()).map(line => <label key={line.number}><input type="checkbox" aria-label={`Remove source line ${line.number}`} aria-describedby={`${sourceLineId}-line-${line.number}`} disabled={!!busy} checked={selectedSourceLines.includes(line.number)} onChange={event => { setSelectedSourceLines(current => event.target.checked ? [...current, line.number] : current.filter(number => number !== line.number)); setSourceRemovalPreview(null); }} /><span><strong>Source line {line.number}</strong><span id={`${sourceLineId}-line-${line.number}`}>{line.text}</span></span></label>)}</div>
+      <Button type="button" variant="outline" disabled={!!busy || !selectedSourceLines.length} onClick={previewSourceRemoval}>Preview selected line removals</Button>
+      {sourceRemovalPreview && sourceRemovalPreview.before === draft && sourceRemovalPreview.ownerId === owner.current && <section className="check-source-removal-preview" aria-label="Source-line removal preview"><h4>Reusable source after removal</h4><pre>{sourceRemovalPreview.after.sourceText}</pre><h4>Current CV after removal</h4><pre>{sourceRemovalPreview.after.reviewedText}</pre><p>Read both versions and check that qualifications and context remain accurate. Applying clears approval, download previews and save consent. This changes only the check open on this page.</p><Button type="button" variant="outline" disabled={!!busy} onClick={applySourceRemoval}>Remove selected lines</Button><Button type="button" variant="ghost" disabled={!!busy} onClick={() => { setSelectedSourceLines([]); setSourceRemovalPreview(null); }}>Cancel line removal</Button></section>}
+    </details>
+    {previousSource && previousSource.ownerId === owner.current && <><Button type="button" variant="ghost" disabled={!!busy} onClick={undoSourceUpdate}>{previousSource.reviewedText === undefined ? 'Undo source update' : 'Undo source-line removal'}</Button><p>Undo restores the prior source{previousSource.reviewedText === undefined ? '' : ' and current CV'}, which may include removed details. This undo is kept only on this page.</p></>}
+  </section>;
 
   return <main className={`cv-check-page${step === 1 ? ' check-first-step' : ''}`}>
     <Helmet><title>{checkMeta.title}</title><meta name="description" content={checkMeta.description} /><link rel="canonical" href="https://jobvance.io/check" /></Helmet>

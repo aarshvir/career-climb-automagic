@@ -3,6 +3,8 @@
 export type AdminRole = 'owner' | 'operator';
 export type AdminWindow = 7 | 30 | 90;
 export type AdminSupportStatus = 'received' | 'in_review' | 'resolved';
+export interface AdminGuestSupport {id:string;category:'help'|'privacy'|'bug';status:AdminSupportStatus;version:number;createdAt:string;updatedAt:string;expiresAt:string;hasReply:boolean}
+export interface AdminGuestSupportDetail extends Omit<AdminGuestSupport,'hasReply'> {message:string;reply:string}
 export interface AdminConfig {
   version: number;
   schedulerEnabled: boolean;
@@ -61,9 +63,12 @@ export interface AdminSnapshot {
   providerStatus: AdminProviderStatus | null;
 }
 export type AdminAction =
+  | { action: 'guest_support_list' }
+  | { action: 'guest_support_detail'; id:string }
+  | { action: 'guest_support_update'; id:string; expectedVersion:number; status:AdminSupportStatus; reply:string }
   | { action: 'snapshot'; days: AdminWindow }
   | { action: 'update_config'; expectedVersion: number; config: AdminConfigInput }
   | { action: 'update_support'; id: string; expectedVersion: number; status: AdminSupportStatus }
   | { action: 'support_detail'; id: string }
   | { action: 'provider_status' };
-export interface AdminResponse { snapshot?: AdminSnapshot; providerStatus?: AdminProviderStatus; config?: AdminConfig; support?: { id: string; status: AdminSupportStatus; version: number }; supportDetail?: { id: string; message: string } }
+export interface AdminResponse { snapshot?: AdminSnapshot; providerStatus?: AdminProviderStatus; config?: AdminConfig; support?: { id: string; status: AdminSupportStatus; version: number }; supportDetail?: { id: string; message: string }; guestSupport?:AdminGuestSupport[]; guestSupportDetail?:AdminGuestSupportDetail }

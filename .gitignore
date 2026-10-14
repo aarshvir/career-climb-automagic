@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 .env
 .sites-runtime/
+.tmp/
 .sites-checkout/
 .sites-checkout-*/
 

@@ -4,6 +4,101 @@ import { analyzeCvEvidence, prioritizeCvForVacancy } from '@/lib/cv-evidence';
 const status = (cv: string, vacancy: string) => analyzeCvEvidence(cv, vacancy).requirements[0]?.status;
 
 describe('literal CV evidence comparison', () => {
+  it('does not let an initial support requirement bypass a separately requested owned action', () => {
+    const vacancy = 'Support the team and develop Python reports for operations planning.';
+    const supporting = 'Supported the team that developed Python reports for operations planning.';
+    const own = 'Developed Python reports for operations planning and supported the team.';
+    expect(status(supporting, vacancy)).toBe('partial');
+    expect(status(own, vacancy)).toBe('direct');
+    expect(status(supporting, 'Support the team developing Python reports for operations planning.')).toBe('direct');
+  });
+  it.each(['Built Excel dashboards for an MBA consulting project.', 'MBA PROJECTS\nBuilt Excel dashboards for operations planning.', 'CAPSTONE PROJECT\nBuilt Excel dashboards for operations planning.'])('keeps explicit MBA or capstone context in a professional-experience comparison: %s', cv => {
+    const professional = analyzeCvEvidence(cv, 'Professional experience building Excel dashboards.').requirements[0];
+    expect(professional.status).toBe('partial');
+    expect(professional.evidence[0].contextKind).toBe('academic_project');
+    expect(cv.slice(professional.evidence[0].start, professional.evidence[0].end)).toBe(professional.evidence[0].cvQuote);
+    const generic = analyzeCvEvidence(cv, 'Build Excel dashboards.').requirements[0];
+    expect(generic.status).toBe('direct'); expect(generic.evidence[0].contextKind).toBe('academic_project');
+  });
+  it('limits a delegated action to the contribution actually stated', () => {
+    const cv = 'Supported a team that developed Python reports for operations planning.';
+    const finding = analyzeCvEvidence(cv, 'Develop Python reports for operations planning.').requirements[0];
+    expect(finding.status).toBe('partial');
+    expect(finding.explanation).toMatch(/own contribution/);
+    expect(finding.evidence[0].cvQuote).toBe(cv);
+    expect(cv.slice(finding.evidence[0].start, finding.evidence[0].end)).toBe(cv);
+    expect(status(cv, 'Support a team developing Python reports for operations planning.')).toBe('direct');
+    expect(status('Developed Python reports for operations planning.', 'Develop Python reports for operations planning.')).toBe('direct');
+    expect(status('Supported data cleaning; developed Python reports for operations planning.', 'Develop Python reports for operations planning.')).toBe('direct');
+  });
+
+  it('keeps an owned action direct when support describes its purpose', () => {
+    expect(status('Built Excel dashboards to support stakeholders.', 'Build Excel dashboards.')).toBe('direct');
+    expect(status('Managed project schedules to support stakeholders.', 'Manage project schedules.')).toBe('direct');
+    expect(status('Supported stakeholders using Excel dashboards.', 'Support stakeholders using Excel dashboards.')).toBe('direct');
+  });
+
+  it('does not turn a university subject project into professional employment', () => {
+    const cv = 'Built Excel dashboards for a university supply-chain project.';
+    const finding = analyzeCvEvidence(cv, 'Professional experience building Excel dashboards.').requirements[0];
+    expect(finding.status).toBe('partial');
+    expect(finding.evidence[0].contextKind).toBe('academic_project');
+    expect(finding.explanation).toMatch(/does not establish the professional employment experience/);
+    expect(status(cv, 'Build Excel dashboards.')).toBe('direct');
+    expect(status('PROFESSIONAL EXPERIENCE\nBuilt Excel dashboards for logistics operations.', 'Professional experience building Excel dashboards.')).toBe('direct');
+  });
+
+  it('retains coursework headings and full source qualifiers for an otherwise completed task', () => {
+    const quote = 'Created a Power BI dashboard for the class project and presented findings to four classmates. This was academic work, not professional employment.';
+    const cv = `COURSEWORK PROJECT\r\n- ${quote}`;
+    const professional = analyzeCvEvidence(cv, 'Professional experience creating Power BI dashboards is required.').requirements[0];
+    const generic = analyzeCvEvidence(cv, 'Create a Power BI dashboard.').requirements[0];
+    expect(professional.status).toBe('partial');
+    expect(generic.status).toBe('direct');
+    expect(generic.explanation).toMatch(/academic evidence/);
+    for (const finding of [professional, generic]) {
+      expect(finding.evidence[0]).toMatchObject({ cvQuote: quote, contextKind: 'academic_project', line: 2 });
+      expect(cv.slice(finding.evidence[0].start, finding.evidence[0].end)).toBe(quote);
+    }
+    // The qualification can also follow the action without an academic heading.
+    const qualified = 'Created a Power BI dashboard. This was academic work, not professional employment.';
+    const finding = analyzeCvEvidence(qualified, 'Professional experience creating Power BI dashboards is required.').requirements[0];
+    expect(finding.status).toBe('partial');
+    expect(finding.evidence[0]).toMatchObject({ cvQuote: qualified, contextKind: 'academic_project' });
+    expect(status('COURSEWORK PROJECT\nCreated a Power BI dashboard.', 'Professional experience creating Power BI dashboards is required.')).toBe('partial');
+  });
+
+  it('does not let an unrelated negative about direct reports taint written reports', () => {
+    const cv = 'Prepared quarterly stakeholder reports using Excel.\nAssisted the project manager with schedules; did not manage the project budget or direct reports.';
+    const vacancy = 'Produce stakeholder reports using Excel.\nManage market research projects and own the project budget.';
+    const report = analyzeCvEvidence(cv, vacancy);
+    expect(report.requirements.map(item => item.status)).toEqual(['direct', 'review']);
+    expect(report.requirements[0].evidence.map(item => item.cvQuote)).toEqual(['Prepared quarterly stakeholder reports using Excel.']);
+    expect(report.requirements[1].evidence[0].cvQuote).toBe(cv.split('\n')[1]);
+    for (const requirement of report.requirements) {
+      expect(vacancy.slice(requirement.start, requirement.end)).toBe(requirement.vacancyQuote);
+      for (const evidence of requirement.evidence) expect(cv.slice(evidence.start, evidence.end)).toBe(evidence.cvQuote);
+    }
+    expect(status('Prepared quarterly stakeholder reports using Excel.\nDid not produce stakeholder reports using Excel.', 'Produce stakeholder reports using Excel.')).toBe('review');
+    expect(status('Did not manage direct reports.', 'Manage direct reports.')).toBe('review');
+    expect(status('Managed direct reports.', 'Manage direct reports.')).toBe('direct');
+  });
+
+  it('does not use team context alone as evidence for creating charts', () => {
+    const noise = 'Coordinated three university coding club workshops with a team of two volunteers.';
+    const vacancy = 'Create charts for a small research team.';
+    const missing = analyzeCvEvidence(noise, vacancy).requirements[0];
+    expect(missing.status).toBe('missing');
+    expect(missing.evidence).toEqual([]);
+    const relevant = 'Created charts for a small research team.';
+    const cv = `${noise}\n${relevant}`;
+    const direct = analyzeCvEvidence(cv, vacancy).requirements[0];
+    expect(direct.status).toBe('direct');
+    expect(direct.evidence.map(item => item.cvQuote)).toEqual([relevant]);
+    expect(cv.slice(direct.evidence[0].start, direct.evidence[0].end)).toBe(relevant);
+    expect(status('Supported the team.', 'Lead the team.')).toBe('partial');
+  });
+
   it('recognizes a completed coursework action without calling academic context unfinished', () => {
     const quote = 'Built an Excel dashboard for a university coursework project using a synthetic dataset of 200 orders.';
     const cv = `PROJECTS\n${quote}`;

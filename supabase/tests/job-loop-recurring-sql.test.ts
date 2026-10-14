@@ -17,6 +17,18 @@ async function schedule(user:string){await db.query("SELECT job_loop_save_schedu
 async function claimDue(lease=randomUUID()){return(await db.query<{r:{user_id:string;lease_token:string;next_run_at:string}[]}>('SELECT job_loop_claim_due($1,10) r',[lease])).rows[0].r;}
 async function packet(user:string,run:string,opportunity:string){const id=randomUUID(),artifacts=Object.fromEntries(['docx','txt'].map(key=>[key,{path:`${user}/${id}/${hash}/${key}`,sha256:hash,byteSize:100}]));const p={id,runId:run,opportunityId:opportunity,inputHash:hash,status:'review_required',cvText:'Fictional confirmed CV text. '.repeat(5),holdReasons:[],pageCount:null,formatStatus:{pdf:{ready:false,reason:'PDF_FONT_UNSUPPORTED'},docx:{ready:true},txt:{ready:true}},artifacts};const lease=randomUUID();await db.query('SELECT job_loop_claim_run($1,$2)',[run,lease]);await db.query("SELECT job_loop_commit_phase($1,$2,3,'running','{}',$3)",[run,lease,[p]]);return p;}
 describe('durable recurring cloud pilot in real PostgreSQL',()=>{
+  it.each(['paused', 'cancelled'])('keeps %s schedule behavior explicit for a running scheduled job and rejects stale completion', async action => {
+    const user=await account(); await schedule(user); const claimed=(await claimDue())[0];
+    const result=(await db.query<{r:{id:string}}>("SELECT job_loop_start_scheduled_run($1,$2,$3,$4,$4,(SELECT version FROM job_loop_records WHERE user_id=$1),'rules','grounded-rules-v1','{\"model\":false,\"inbox\":false}') r",[user,claimed.lease_token,randomUUID(),hash])).rows[0].r;
+    const runLease=randomUUID(); await db.query('SELECT job_loop_claim_run($1,$2)',[result.id,runLease]);
+    await db.query('SELECT job_loop_schedule_action($1,1,$2)',[user,action]);
+    const run=(await db.query<{status:string;lease_token:string|null}>('SELECT status,lease_token FROM job_loop_runs WHERE id=$1',[result.id])).rows[0];
+    expect(run.status).toBe(action==='paused'?'running':'cancelled');
+    expect(run.lease_token).toBe(action==='paused'?runLease:null);
+    expect(await claimDue()).toHaveLength(0);
+    if(action==='cancelled') await expect(db.query("SELECT job_loop_commit_phase($1,$2,1,'running','{}','[]')",[result.id,runLease])).rejects.toThrow(/LOOP_(LEASE_LOST|RUN_CANCELLED)/);
+    else await db.query("SELECT job_loop_commit_phase($1,$2,1,'running','{}','[]')",[result.id,runLease]);
+  });
   it('atomically limits cloud enrollment to ten accounts while leaving additional private records available',async()=>{
     const users=await Promise.all(Array.from({length:11},()=>account()));const results=await Promise.allSettled(users.map(user=>start(user)));
     expect(results.filter(value=>value.status==='fulfilled')).toHaveLength(10);expect(results.filter(value=>value.status==='rejected')).toHaveLength(1);

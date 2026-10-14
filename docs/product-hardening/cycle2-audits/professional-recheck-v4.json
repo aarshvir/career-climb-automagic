@@ -1,0 +1,126 @@
+{
+  "auditId": "professional-recheck-v4-20261014",
+  "status": "all three original findings pass targeted browser recheck",
+  "scope": {
+    "preview": "http://127.0.0.1:8383",
+    "candidateLabel": "current v4, as supplied by parent",
+    "head": "9682cd1bbf776be6d2e74b023766fcd4c9056022",
+    "browser": "Own Chrome extension tab 1385099325, Chrome browser binding id1 in this CUA session; session named Professional v4 recheck",
+    "requestedBrowserNote": "Parent referred to Chrome3; session discovery returned Chrome extension id1 and the audit used its own new tab. No other reviewer tab was touched.",
+    "viewport": "Existing viewport; no browser-wide viewport changes",
+    "observationWindowUtc": {
+      "start": "2026-10-14T03:53:05.2034505Z",
+      "end": "2026-10-14T03:54:39.0811821Z"
+    },
+    "timezone": "Asia/Dubai UTC+04:00",
+    "runtimeEdits": false,
+    "serviceWrites": false,
+    "signIn": false,
+    "realData": false,
+    "paidCalls": false
+  },
+  "immutableInitialAudit": {
+    "mbaMean": 86.7,
+    "professionalMean": 87.9,
+    "scoresRevised": false,
+    "files": [
+      {
+        "path": "docs/product-hardening/cycle2-audits/professional-mba.md",
+        "sha256BeforeAndAfter": "B1375343AB70C12C63467339E39FDBDDFFD22EE2EEA1EA6CC6C0F2F1C24428BE"
+      },
+      {
+        "path": "docs/product-hardening/cycle2-audits/professional-mba.json",
+        "sha256BeforeAndAfter": "6110600BFD2BA743F99B336234B1079F09D4A03880DECCC2FCFB7B96B5DF807F"
+      }
+    ]
+  },
+  "sourceDrift": {
+    "startHashUtc": "2026-10-14T03:53:05.2034505Z",
+    "endHashUtc": "2026-10-14T03:54:39.0811821Z",
+    "result": "All four relevant source hashes identical before and after browser work. HEAD unchanged; working tree contains supplied changes.",
+    "sha256": {
+      "src/lib/cv-evidence.ts": "C1D09F00F9BC452C09ABC51938B3F3C2C879981DB10E8482FDB5C0AD4B337884",
+      "src/pages/HelpCenter.tsx": "589B48D21ADA86218B7B6011FD191828FCE8C46A4BFF7E23678580078417001A",
+      "src/pages/JobLoopOverview.tsx": "7F1392C082A15694ED275A5E6695AA69033022D1F559E14B8749E92E6E8BE15A",
+      "src/pages/CvCheck.tsx": "21CC4035208CE26238ED13A5C4850EA45EAC2AA5A48C575D3B1F263970D701E8"
+    }
+  },
+  "fixtures": {
+    "role": "Reporting Analyst — fictional recheck",
+    "company": "Fictional Meridian Retail",
+    "positiveSource": "Prepared quarterly stakeholder reports using Excel.\nAssisted the project manager with schedules; did not manage the project budget or direct reports.",
+    "vacancy": "Produce stakeholder reports using Excel.\nManage market research projects and own the project budget.",
+    "trueNegativeControlSource": "Prepared quarterly stakeholder reports using Excel.\nAssisted the project manager with schedules; did not manage the project budget or direct reports.\nNo experience producing stakeholder reports using Excel."
+  },
+  "browserChecks": [
+    {
+      "id": "R01",
+      "finding": "PM-01",
+      "result": "pass",
+      "steps": [
+        "Open guest /check?audience=professional in own new tab.",
+        "Enter fictional role/company, paste positiveSource, confirm reviewed source, paste vacancy and check."
+      ],
+      "observed": "Produce stakeholder reports using Excel. => Direct wording found, with Prepared quarterly stakeholder reports using Excel. as line1 evidence. Manage market research projects and own the project budget. remains Needs manual review, citing the complete negative line2. Counts:1 direct/1 review.",
+      "boundedAcceptance": "Original unrelated direct-reports contamination is corrected in the exact minimal fixture; genuine budget negative remains conservative."
+    },
+    {
+      "id": "R02",
+      "finding": "PM-01 negative control",
+      "result": "pass",
+      "steps": [
+        "Return to Your CV using progress navigation.",
+        "Replace source with trueNegativeControlSource, confirm source, recheck retained same vacancy."
+      ],
+      "observed": "Reporting changes to Needs manual review; exact No experience producing stakeholder reports using Excel. line3 is first evidence, followed by positive line1. Explicit-negative explanation appears. Budget also stays review. Counts:0 direct/2 review.",
+      "boundedAcceptance": "Fix does not turn a genuine reporting negation or contradictory reporting claim into a direct finding."
+    },
+    {
+      "id": "R03",
+      "finding": "PM-02",
+      "result": "pass",
+      "steps": [
+        "Navigate to Help.",
+        "Enter confidential in Search help topics.",
+        "Select Remove selected source lines before reusing your CV from matched contents."
+      ],
+      "observed": "5 topics match, including dedicated source-removal topic with summary Remove confidential or sensitive information from the free check’s reusable source. Selecting match opens /help#source-line-removal, clears search to 12 topics and focuses the exact removal container.",
+      "boundedAcceptance": "Dedicated removal help is discoverable by confidential and its match navigates correctly."
+    },
+    {
+      "id": "R04",
+      "finding": "PM-03",
+      "result": "pass",
+      "steps": [
+        "Navigate through Job Loop main navigation and wait for What is Job Loop? heading.",
+        "Read Busy professionals card."
+      ],
+      "observed": "Reuse experience you have reviewed and keep confidential details out. Review your next move around your working day.",
+      "boundedAcceptance": "The audited card no longer implies independently verified career history."
+    },
+    {
+      "id": "R05",
+      "finding": "professional guidance label follow-up",
+      "result": "pass",
+      "steps": [
+        "Read initial /check?audience=professional page."
+      ],
+      "observed": "Busy professional guidance, label Busy professional. Text: Start with the career record you already have. Reuse your experience for your next role, show transferable work without changing your responsibilities, and remove confidential information.",
+      "boundedAcceptance": "Professional starting point is no longer labelled only Career switcher."
+    }
+  ],
+  "suppliedEvidence": [
+    {
+      "type": "parent-supplied automated test summary, not executed by this auditor and not browser evidence",
+      "detail": "Parent reports 103 evidence tests and 45 API tests passing. Parent describes fix as normalizing people objects separately. Raw receipts and mechanism were not independently inspected during this narrow recheck."
+    }
+  ],
+  "limitations": [
+    "No new full-journey score or broad regression assessment: original MBA86.7/professional87.9 remain unchanged.",
+    "Only stated exact fixture, true-negative control, help query/navigation and copy/guidance inspected.",
+    "No account, saved record, cloud run, private-runtime operation, service write, support submission, document export or PDF visual review repeated. Earlier PDF/layout and cloud boundaries remain unchanged.",
+    "No mobile, screen reader or keyboard-only recheck."
+  ],
+  "decision": "PM-01, PM-02 and PM-03 are closed for the stated targeted acceptance on the hashed v4 source. Professional guidance follow-up also passes. This does not certify broader evidence semantics, private runtime, all UI paths or production deployment."
+}
+

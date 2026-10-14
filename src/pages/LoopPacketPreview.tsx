@@ -7,15 +7,15 @@ import type { LoopPacket } from '../../supabase/functions/_shared/job-loop-types
 export default function LoopPacketPreview({ ownerId, packet, current, busy }: { ownerId: string; packet: LoopPacket; current: boolean; busy: boolean }) {
   const headingId = useId();
   const [url, setUrl] = useState(''), [error, setError] = useState(''), [loading, setLoading] = useState(false);
-  const alive = useRef(true), objectUrl = useRef(''), serial = useRef(0), currentRef = useRef(current);
+  const alive = useRef(true), objectUrl = useRef(''), serial = useRef(0), currentRef = useRef(current), transfer = useRef<AbortController | null>(null);
   currentRef.current = current;
-  const cleanup = useCallback(() => { alive.current = false; serial.current++; if (objectUrl.current) URL.revokeObjectURL(objectUrl.current); }, []);
+  const cleanup = useCallback(() => { alive.current = false; serial.current++; transfer.current?.abort(); if (objectUrl.current) URL.revokeObjectURL(objectUrl.current); }, []);
   useEffect(() => { alive.current = true; return cleanup; }, [cleanup]);
-  useEffect(() => { if (!current && objectUrl.current) { URL.revokeObjectURL(objectUrl.current); objectUrl.current = ''; setUrl(''); } }, [current]);
+  useEffect(() => { serial.current++; transfer.current?.abort(); setLoading(false); setError(''); if (objectUrl.current) { URL.revokeObjectURL(objectUrl.current); objectUrl.current = ''; setUrl(''); } }, [current, ownerId, packet.id, packet.inputHash]);
   async function preview() {
-    if (!current || loading || busy) return; const ticket = ++serial.current; setLoading(true); setError('');
-    try { const result = await getLoopPreview(ownerId, packet.id, packet.inputHash); if (!alive.current || ticket !== serial.current || !currentRef.current) return; if (objectUrl.current) URL.revokeObjectURL(objectUrl.current); objectUrl.current = URL.createObjectURL(new Blob([result.blob], { type: 'application/pdf' })); setUrl(objectUrl.current); }
-    catch (failure) { if (alive.current && ticket === serial.current && currentRef.current) setError(failure instanceof Error ? failure.message : 'The exact PDF preview could not be loaded.'); }
+    if (!current || loading || busy) return; const ticket = ++serial.current; transfer.current?.abort(); const controller=new AbortController(); transfer.current=controller; setLoading(true); setError('');
+    try { const result = await getLoopPreview(ownerId, packet.id, packet.inputHash, controller.signal); if (!alive.current || ticket !== serial.current || !currentRef.current || controller.signal.aborted) return; if (objectUrl.current) URL.revokeObjectURL(objectUrl.current); objectUrl.current = URL.createObjectURL(new Blob([result.blob], { type: 'application/pdf' })); setUrl(objectUrl.current); }
+    catch (failure) { if (!controller.signal.aborted && alive.current && ticket === serial.current && currentRef.current) setError(failure instanceof Error ? failure.message : 'The exact PDF preview could not be loaded.'); }
     finally { if (alive.current && ticket === serial.current) setLoading(false); }
   }
   const hasPdf = !!packet.artifacts.pdf;

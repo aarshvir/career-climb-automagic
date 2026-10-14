@@ -1,0 +1,402 @@
+{
+  "auditId": "cycle2-professional-mba-20261014",
+  "status": "complete for bounded guest audit; private runtime not browser-tested",
+  "independence": {
+    "priorAuditScoresRead": false,
+    "implementationReportsRead": false,
+    "targetScore": null,
+    "runtimeEdits": false,
+    "commits": false,
+    "deployments": false,
+    "realPersonalData": false,
+    "signIn": false,
+    "savedAccountWrites": false,
+    "paidModelCalls": false,
+    "liveSupportWrites": false
+  },
+  "scope": {
+    "repository": "C:/Users/user/OneDrive/Documents/Projects/Job CV linkedin/jobvance-independent",
+    "preview": "http://127.0.0.1:8383",
+    "browser": "Own CUA IAB tab 1, providerTabId browser-use:7a7eab3e-8215-46b1-bc75-3b5c8408dbcc",
+    "viewport": "Existing desktop viewport; no browser-wide viewport changes",
+    "browserWindowUtc": {
+      "lowerBound": "2026-10-14T03:28:28Z",
+      "upperBound": "2026-10-14T03:35:50Z"
+    },
+    "sourceAndTestWindowUtc": {
+      "lowerBound": "2026-10-14T03:35:50Z",
+      "upperBound": "2026-10-14T03:38:26Z"
+    },
+    "timezone": "Asia/Dubai UTC+04:00"
+  },
+  "build": {
+    "headAtStartAndEnd": "9682cd1bbf776be6d2e74b023766fcd4c9056022",
+    "workingTree": "Dirty before audit; no runtime edit by this auditor. Documentation and temporary files changed elsewhere during the audit.",
+    "sourceHashes": {
+      "src/pages/CvCheck.tsx": "4F3A60652EF5AC763CA89E530876B2AFAB6482FFA671AFA21BA7364612D7F51C",
+      "src/lib/cv-evidence.ts": "CCFC9575CF9A49842811B68C1DADDD8C0205EBCC313A3189AA4715B8F8E9DF12",
+      "src/lib/check-draft.ts": "CF799C117BE996409CD2010D7E8BF322547171B7E46F883A9A7213D53E261484",
+      "src/lib/free-check-export.ts": "8E311B9EAC2D0D986171A905E32DD4EE618DC3EF46FF86B509E521196E7B86A2",
+      "src/pages/HelpCenter.tsx": "8EB438757F876640BB3A8F6F2C3E7A1D4FEB9D9CD5E70AE458B58AD62B712919",
+      "src/pages/Walkthroughs.tsx": "B462C788723C86484BC173ABD96BC76B5EF588DF822399DBF4B1EF994C5F0DDE",
+      "src/lib/walkthroughs.ts": "2ECDF8338B59FDFA617C935ADFDB1F5314C668797461D9E5C97609C47E6A7963",
+      "src/pages/JobLoop.tsx": "70946927B2011748B98DE9DB65DC026AA10B71EC10D07892634360794710F722",
+      "src/pages/ProductPage.tsx": "A945404F59236521D082C040AFF9E1E0536146B4863A4A2586E304913A4BFADC",
+      "src/pages/JobLoopOverview.tsx": "F308C7B706EECEFB4841059DC094279CE5C5B87E3589F0CF1BD1A7324697BA08",
+      "src/lib/job-loop-audiences.ts": "29E62E1966F3C4ADACC9B7549A9CAEC63FC7145D08EB8A739AC2B880AFD06279"
+    },
+    "hashCapture": "Nine main files matched between the first post-browser collection (after 03:35:50 and before 03:36:19 UTC) and 03:37:52.4276836 UTC. Overview and audience hashes additionally collected at 03:38:25.9773832 UTC.",
+    "sourceDrift": "No change observed across those nine post-browser hashes. Per-file hashes were not captured before the first browser action; no claim of a fully pinned browser build or complete absence of drift during browsing."
+  },
+  "scoring": {
+    "scale": "0–100, ten equal dimensions per persona, arithmetic mean = raw sum / 10",
+    "interpretation": "Guest workflow/customer assessment under the stated boundaries. Scores do not certify private cloud operation, security, mobile accessibility, or hiring outcomes.",
+    "personas": [
+      {
+        "id": "mba",
+        "description": "MBA candidate pivoting from prior operations employment, with team classroom research, forecast benefit, partial responsibilities and unfinished degree",
+        "dimensions": [
+          {
+            "dimension": "clarity",
+            "score": 90
+          },
+          {
+            "dimension": "activation",
+            "score": 89
+          },
+          {
+            "dimension": "form effort",
+            "score": 87
+          },
+          {
+            "dimension": "evidence quality",
+            "score": 69
+          },
+          {
+            "dimension": "workflow completeness",
+            "score": 88
+          },
+          {
+            "dimension": "reuse/time-saving",
+            "score": 92
+          },
+          {
+            "dimension": "help/walkthroughs",
+            "score": 88
+          },
+          {
+            "dimension": "UI/accessibility",
+            "score": 86
+          },
+          {
+            "dimension": "trust/privacy",
+            "score": 92
+          },
+          {
+            "dimension": "reliability",
+            "score": 86
+          }
+        ],
+        "rawSum": 867,
+        "arithmeticMean": 86.7
+      },
+      {
+        "id": "professional",
+        "description": "Employed professional with about eight years of operations work, applying discreetly with limited time and a confidential employer/client line",
+        "dimensions": [
+          {
+            "dimension": "clarity",
+            "score": 88
+          },
+          {
+            "dimension": "activation",
+            "score": 90
+          },
+          {
+            "dimension": "form effort",
+            "score": 85
+          },
+          {
+            "dimension": "evidence quality",
+            "score": 79
+          },
+          {
+            "dimension": "workflow completeness",
+            "score": 88
+          },
+          {
+            "dimension": "reuse/time-saving",
+            "score": 93
+          },
+          {
+            "dimension": "help/walkthroughs",
+            "score": 89
+          },
+          {
+            "dimension": "UI/accessibility",
+            "score": 86
+          },
+          {
+            "dimension": "trust/privacy",
+            "score": 93
+          },
+          {
+            "dimension": "reliability",
+            "score": 88
+          }
+        ],
+        "rawSum": 879,
+        "arithmeticMean": 87.9
+      }
+    ]
+  },
+  "fixtures": {
+    "mba": {
+      "initialSource": "Mira Sen — fictional audit candidate\nMBA candidate, 2025–2027; not yet graduated.\nOperations Analyst, fictional Northwind Services, 2021–2025.\nPrepared quarterly stakeholder reports using Excel.\nMBA team project: Supported market research for a retail strategy module; personally coordinated six interviews and drafted the competitor summary.\nOur five-person MBA team forecast a 12% revenue uplift; this was a classroom forecast, not a realized outcome.\nAssisted the project manager with schedules; did not manage the project budget or direct reports.\nNo professional SQL experience. Completed SQL coursework exercises only.\nCONFIDENTIAL: Employer client codename ORCHID-LANTERN and unannounced pricing plan must not be shared.",
+      "reviewedSourceBeforeComparison": "Mira Sen — fictional audit candidate\nMBA candidate, 2025–2027; not yet graduated.\nOperations Analyst, fictional Northwind Services, 2021–2025.\nPrepared quarterly stakeholder reports using Excel.\nMBA team project: Supported market research for a retail strategy module; personally coordinated six interviews and drafted the competitor summary.\nOur five-person MBA team forecast a 12% revenue uplift; this was a classroom forecast, not a realized outcome.\nAssisted the project manager with schedules; did not manage the project budget or direct reports.\nNo professional SQL experience. Completed SQL coursework exercises only.",
+      "approvedText": "Mira Sen — fictional audit candidate\nMBA candidate, 2025–2027; not yet graduated.\nOperations Analyst, fictional Northwind Services, 2021–2025.\nPrepared quarterly stakeholder reports using Excel.\nMBA team project: Personally coordinated six interviews and drafted the competitor summary to support market research for a retail strategy module.\nOur five-person MBA team forecast a 12% revenue uplift; this was a classroom forecast, not a realized outcome.\nAssisted the project manager with schedules; did not manage the project budget or direct reports.\nNo professional SQL experience. Completed SQL coursework exercises only.",
+      "role": "Strategy Business Analyst",
+      "company": "Fictional Meridian Retail",
+      "vacancy": "Strategy Business Analyst — fictional Meridian Retail\nProduce stakeholder reports using Excel.\nManage market research projects and own the project budget.\nDemonstrate professional SQL experience.\nDeliver realized commercial revenue improvements.\nMBA degree completed is required.\nClearly explain personal contribution and team outcomes.",
+      "secondRole": "Research Associate",
+      "secondCompany": "Fictional Alder Consulting",
+      "secondVacancy": "Research Associate — fictional Alder Consulting\nPrepare stakeholder reports using Excel.\nCoordinate customer interviews for research projects.\nSupport competitor research and explain personal contributions.\nKeep projected and realized commercial outcomes clearly separate."
+    },
+    "professional": {
+      "initialSource": "Alex Reed — fictional audit candidate\nOperations Lead, fictional Sable Logistics, 2018–2026; currently employed.\nProduced weekly stakeholder reports using Excel.\nCoordinated a change rollout across four internal teams and supported the project lead; no line-management responsibility.\nReduced invoice cycle time from ten to eight days in a measured three-month internal pilot.\nCONFIDENTIAL: Client COBALT-PINE unannounced contract rate was 437 units; remove this whole line before reuse.\nNo Power BI production experience; completed introductory training only.\nUsed English and Arabic for internal coordination.",
+      "approvedText": "Alex Reed — fictional audit candidate\nOperations Lead, fictional Sable Logistics, 2018–2026; currently employed.\nProduced weekly stakeholder reports using Excel.\nSupported the project lead by coordinating a change rollout across four internal teams; no line-management responsibility.\nReduced invoice cycle time from ten to eight days in a measured three-month internal pilot.\nNo Power BI production experience; completed introductory training only.\nUsed English and Arabic for internal coordination.",
+      "role": "Operations Improvement Manager",
+      "company": "Fictional Seabrook Group",
+      "vacancy": "Operations Improvement Manager — fictional Seabrook Group\nProduce weekly stakeholder reports using Excel.\nLead cross-functional change rollouts and manage a team.\nDemonstrate measured operational process improvements.\nUse Power BI in production reporting.\nCoordinate with stakeholders in English and Arabic.\nEight years of relevant operations experience required.",
+      "secondRole": "Process Analyst",
+      "secondCompany": "Fictional Juniper Transit",
+      "secondVacancy": "Process Analyst — fictional Juniper Transit\nProduce weekly stakeholder reports using Excel.\nSupport cross-functional change projects.\nDocument measured invoice process improvements.\nCoordinate internal stakeholders in English and Arabic."
+    }
+  },
+  "browserEvidence": [
+    {
+      "id": "B01",
+      "persona": "both",
+      "observation": "Initial IAB navigation timed out and produced a white page with title only. One explicit reload recovered a fully usable home. No later persistent blank app observed.",
+      "classification": "transient preview/environment observation"
+    },
+    {
+      "id": "B02",
+      "persona": "mba",
+      "observation": "MBA home selector changed example, guidance and CTA to audience=mba. First check had six named steps, role/company, editable pasted source and vacancy."
+    },
+    {
+      "id": "B03",
+      "persona": "mba",
+      "observation": "Removed ORCHID-LANTERN confidential line in source editor before comparison. Initial six requirements all Needs manual review. SQL absence, forecast/realized distinction, unfinished degree and team contribution retained full source wording."
+    },
+    {
+      "id": "B04",
+      "persona": "mba",
+      "observation": "Reporting requirement incorrectly selected negative direct-reports sentence first despite complete positive reporting evidence. Same contamination recurred for second vacancy's reporting and interviews/projects."
+    },
+    {
+      "id": "B05",
+      "persona": "mba",
+      "observation": "Edited one contribution sentence without new facts; Keep these edits in my reusable source offered Undo source update. Undo restored prior source and kept final edits. Reapplied source update; final preview showed exact edited wording and no ORCHID-LANTERN."
+    },
+    {
+      "id": "B06",
+      "persona": "mba",
+      "observation": "PDF preview generated a one-page count within two-page maximum. Approval required accuracy/privacy confirmations. After approval actual TXT, PDF and DOCX downloads were received; fallback download link/status appeared."
+    },
+    {
+      "id": "B07",
+      "persona": "mba",
+      "observation": "Approved final CV was default for reuse. Reuse condensed first input into role/company/vacancy in a four-step new check. Inspect reused CV showed edits and no ORCHID-LANTERN. Checked second vacancy. Undo new application restored original role/vacancy/edited CV at review and cleared approval."
+    },
+    {
+      "id": "B08",
+      "persona": "both",
+      "observation": "Help provided 12 detailed topics, search, walkthroughs, exact control names and recovery limits. Search confidential returned four topics but omitted dedicated source-line-removal topic."
+    },
+    {
+      "id": "B09",
+      "persona": "both",
+      "observation": "Interactive walkthrough final step described PDF fallback and separate approval; task selector exposed contribution/reuse/control tutorials. Contribution tutorial preserved complete team/forecast source. Recording loaded visible product-screen poster/chapter controls. Audio playback, full caption synchronization and every video chapter were not verified."
+    },
+    {
+      "id": "B10",
+      "persona": "both",
+      "observation": "Job Loop overview explained first free check, separate private record, selected employer feeds, ten pilot seats/shared allowance, optional rules scheduling, unavailable broad paid search/mailbox access, disabled checkout and user submission. Private CTA reached /auth?next=%2Floop; no sign-in attempted."
+    },
+    {
+      "id": "B11",
+      "persona": "professional",
+      "observation": "Start with my existing CV opened audience=professional but labelled guidance Career switcher. Pasted eight-year source and vacancy. Evidence count was 1 direct, 3 related, 2 manual. Supporting vs leading, explicit Power BI absence and uncertainty about total relevant years were preserved."
+    },
+    {
+      "id": "B12",
+      "persona": "professional",
+      "observation": "Selected Remove source line 6 for COBALT-PINE; Preview selected line removals displayed both CV versions without line. Applied removal removed it from both. Undo deliberately restored both with warning. Repeated removal; edited contribution and kept it in reusable source."
+    },
+    {
+      "id": "B13",
+      "persona": "professional",
+      "observation": "One-page PDF preview generated. Inline PDF area was blank. New-tab exact blob PDF fallback was blocked by browser security policy; no workaround attempted. Textual full CV review/accuracy/privacy approval still worked. Actual TXT, DOCX and separate evidence report downloads were received."
+    },
+    {
+      "id": "B14",
+      "persona": "professional",
+      "observation": "Explicitly chose Reviewed source CV for second vacancy. Reused text contained safe edited source, no COBALT-PINE; checked second vacancy. Undo restored sanitized original application at review without approval. Contextual How source-line removal works opened exact help anchor; return to check retained sanitized draft, cleared approvals and discarded page-only undo."
+    }
+  ],
+  "findings": [
+    {
+      "id": "PM-01",
+      "priority": "P2",
+      "title": "Unrelated negation about direct reports contaminates stakeholder reporting",
+      "personas": [
+        "mba",
+        "professional"
+      ],
+      "evidence": [
+        "B04",
+        "S01"
+      ],
+      "reproduction": [
+        "Use MBA fixture reviewedSourceBeforeComparison and vacancy in a fresh guest check.",
+        "At evidence, open Produce stakeholder reports using Excel.",
+        "Observe Needs manual review and negative direct-reports sentence before the strong positive reporting sentence.",
+        "Repeat with second MBA vacancy; Prepare stakeholder reports using Excel remains incorrectly negative."
+      ],
+      "impact": "Hides a clear transferable strength, inflates manual-review work and tells a candidate they lack reporting experience when the negative concerns staff supervision.",
+      "source": "src/lib/cv-evidence.ts:91,335–344,363–370,396–403",
+      "boundedAcceptance": "With both minimal source lines present, reporting remains a direct/positive wording finding. A no-reporting-experience sentence must still trigger review; budget/team-leadership absence, SQL absence, project context and forecast qualifiers must remain conservative. Do not solve by stripping negative wording from the source."
+    },
+    {
+      "id": "PM-02",
+      "priority": "P3",
+      "title": "Confidential search omits the dedicated source-removal help",
+      "personas": [
+        "professional",
+        "mba"
+      ],
+      "evidence": [
+        "B08"
+      ],
+      "reproduction": [
+        "Open /help.",
+        "Enter confidential in Search help topics.",
+        "Observe four matches; Remove selected source lines before reusing your CV is absent."
+      ],
+      "impact": "A discreet applicant looking for the removal operation is led through adjacent topics; contextual link works once the control has already been found.",
+      "source": "src/pages/HelpCenter.tsx:68–77,199–209",
+      "boundedAcceptance": "The confidential query returns the dedicated source-removal topic, alongside relevant privacy material. Existing exact source/remove and contextual anchor navigation still work."
+    },
+    {
+      "id": "PM-03",
+      "priority": "P3",
+      "title": "Verified experience wording overstates what Jobvance establishes",
+      "personas": [
+        "professional"
+      ],
+      "evidence": [
+        "B10"
+      ],
+      "reproduction": [
+        "Open /job-loop.",
+        "Read Busy professionals card: Reuse verified experience and keep confidential details out."
+      ],
+      "impact": "Verified can imply independent checking, while the rest of the product accurately explains user confirmation and literal wording only.",
+      "source": "src/pages/JobLoopOverview.tsx:22",
+      "boundedAcceptance": "Use wording consistent with user-reviewed/confirmed experience. Do not imply independent credential or career-history verification."
+    }
+  ],
+  "boundaries": [
+    {
+      "id": "L01",
+      "type": "environment",
+      "detail": "Exact PDF visual layout remains unverified: inline viewer blank; fallback navigation blocked by browser security policy. MBA PDF download delivery was observed and file hash/size recorded, which does not prove page rendering or visual correctness."
+    },
+    {
+      "id": "L02",
+      "type": "scope",
+      "detail": "No authenticated private record, claims, cloud run, scheduler, employer feed, mailbox, account isolation or deletion was exercised in this browser audit. Parent-supplied cloud/runtime summary is recorded separately as supplied evidence, not independently observed here."
+    },
+    {
+      "id": "L03",
+      "type": "scope",
+      "detail": "No mobile viewport, screen reader, full keyboard-only journey, cross-browser matrix, live employer vacancy, actual application submission or production deployment tested."
+    },
+    {
+      "id": "L04",
+      "type": "privacy verification",
+      "detail": "Local-only processing statements were visibly reviewed and supported by local comparison source inspection, but network capture/third-party telemetry was not exhaustively inspected. UI wording and source behavior are not a complete privacy/security certification."
+    }
+  ],
+  "sourceAndTestEvidence": [
+    {
+      "id": "S01",
+      "type": "direct function probe, no file edits",
+      "detail": "Imported analyzeCvEvidence from current cv-evidence.ts with Node TypeScript stripping. Positive reporting line alone => first finding direct. Adding unrelated negative sentence about project budget/direct reports => same first finding review, with negative explanation. Reproduces browser result."
+    },
+    {
+      "id": "T01",
+      "type": "existing automated suite, not browser evidence",
+      "command": "node node_modules/vitest/vitest.mjs run src/__tests__/lib/cv-evidence.test.ts src/__tests__/lib/evidence-context-regression.test.ts src/__tests__/cv-check-journey.test.tsx src/__tests__/help-center.test.tsx src/__tests__/walkthroughs.test.tsx",
+      "result": "5 test files passed; 119 tests passed; exit 0; duration 11.01 seconds; started 2026-10-14 07:36:19 Asia/Dubai.",
+      "qualification": "Existing tests passing does not invalidate PM-01; the isolated fixture demonstrates a gap in their coverage."
+    },
+    {
+      "id": "F01",
+      "type": "downloaded artifact inspection, not browser visual layout",
+      "detail": "MBA DOCX 8 paragraphs and professional DOCX 7 paragraphs reconstructed from word/document.xml exactly matched corresponding UTF-8 TXT. Qualifiers preserved; neither contains ORCHID-LANTERN or COBALT-PINE. Professional evidence report separate label present and COBALT-PINE absent."
+    },
+    {
+      "id": "P01",
+      "type": "parent-supplied receipt summary; not independently inspected and not browser evidence",
+      "detail": "Parent reports prior 75 fictional rules-only hosted checks covering owner isolation/uploads/approved bytes/schedule/withdrawal, plus current 9 public support HTTP checks and native SQL checks for service-only/RLS/retention/owner-explicit read/CAS. Parent reports no paid calls or sends.",
+      "qualification": "Counts, scope and outcomes are supplied by the parent reviewer; this auditor did not receive or inspect the raw receipts or execute those private runtime checks. They do not upgrade the guest-browser validation claim."
+    }
+  ],
+  "downloads": [
+    {
+      "path": "C:/Users/user/Downloads/CV-Strategy Business Analyst.txt",
+      "bytes": 630,
+      "createdUtc": "2026-10-14T03:32:00.5470583Z",
+      "sha256": "6C0FA32EBB2FA1BD29F1E15EE94D2BDB2E80D81839FC7FE0F81FA9038E52C552"
+    },
+    {
+      "path": "C:/Users/user/Downloads/CV-Strategy Business Analyst.pdf",
+      "bytes": 58745,
+      "createdUtc": "2026-10-14T03:32:05.5241292Z",
+      "sha256": "11603CFDCE8DF3A391941B9680E757563DE68AE1513C03550CAB76D9B57EA728"
+    },
+    {
+      "path": "C:/Users/user/Downloads/CV-Strategy Business Analyst.docx",
+      "bytes": 10042,
+      "createdUtc": "2026-10-14T03:32:09.9122707Z",
+      "sha256": "E8A15FC0A3104518BA7C3D3189DB551D3ACA0218BD0FDC7E17E953BE71FDEC5D"
+    },
+    {
+      "path": "C:/Users/user/Downloads/CV-Operations Improvement Manager.txt",
+      "bytes": 504,
+      "createdUtc": "2026-10-14T03:34:59.6810069Z",
+      "sha256": "C3308EFC93C72A95AB2842F2008EA0543A176C58656ADA722BFF651CA7AD6640"
+    },
+    {
+      "path": "C:/Users/user/Downloads/CV-Operations Improvement Manager.docx",
+      "bytes": 9977,
+      "createdUtc": "2026-10-14T03:35:04.9127836Z",
+      "sha256": "7CD25CE1B753A30039ACA93E63C5BC203EF9D61CBCF4F1EFD81C85210AE0E558"
+    },
+    {
+      "path": "C:/Users/user/Downloads/Evidence-review-Operations Improvement Manager.txt",
+      "bytes": 4078,
+      "createdUtc": "2026-10-14T03:35:09.4287781Z",
+      "sha256": "74664C7078EC4DB7FF067DA350C0E8CBCBC0EB7B7AC0F91C05B632987E563F09"
+    }
+  ],
+  "boundedDecision": "Both personas can complete the authorized guest preparation, edited wording approval, actual text/Word delivery, source reuse and undo without sign-in. MBA evidence precision needs the PM-01 correction. The free workflow is usable with the stated PDF viewing boundary; this audit does not accept or certify the private cloud workflow.",
+  "freeze": {
+    "scoresFrozenBeforeRemediation": true,
+    "frozenAtUtc": "2026-10-14T03:41:00Z",
+    "timePrecision": "Approximate minute of initial scoring/report freeze; source hashes and artifact timestamps above are exact where recorded."
+  }
+}

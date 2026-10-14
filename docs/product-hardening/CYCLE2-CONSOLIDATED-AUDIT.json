@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "date": "2026-10-14",
+  "stage": "frozen_initial_cycle2",
+  "consolidator": "implementing root agent, not another independent reviewer",
+  "rubric": {
+    "dimensions": [
+      "clarity",
+      "activation",
+      "form_effort",
+      "evidence_quality",
+      "workflow_completeness",
+      "reuse_time_saving",
+      "help_walkthroughs",
+      "ui_accessibility",
+      "trust_privacy",
+      "reliability"
+    ],
+    "perDimensionWeight": 0.1,
+    "perReviewerWeight": 0.2,
+    "MbaProfessionalTreatment": "average of two persona dimension scores within one reviewer; avoids double weighting this reviewer"
+  },
+  "overall": 87.36,
+  "reviewers": [
+    {
+      "id": "pm",
+      "label": "Product manager",
+      "file": "pm.json",
+      "scores": {
+        "clarity": 88,
+        "activation": 90,
+        "form_effort": 87,
+        "evidence_quality": 78,
+        "workflow_completeness": 89,
+        "reuse_time_saving": 90,
+        "help_walkthroughs": 91,
+        "ui_accessibility": 86,
+        "trust_privacy": 90,
+        "reliability": 85
+      },
+      "mean": 87.4,
+      "sourceReportSha256": "ae2d09a780740ee6fd168bf94d46d9ea69a0be17478dc67b05c8767f3cf67263"
+    },
+    {
+      "id": "student",
+      "label": "University student",
+      "file": "student.json",
+      "scores": {
+        "clarity": 89,
+        "activation": 86,
+        "form_effort": 82,
+        "evidence_quality": 66,
+        "workflow_completeness": 85,
+        "reuse_time_saving": 90,
+        "help_walkthroughs": 89,
+        "ui_accessibility": 86,
+        "trust_privacy": 80,
+        "reliability": 82
+      },
+      "mean": 83.5,
+      "sourceReportSha256": "d34085483a8f57c81f39e654efb6f764deb16d6cf7a87417e7d2583c891784f2"
+    },
+    {
+      "id": "professional-mba",
+      "label": "MBA / professional reviewer",
+      "file": "professional-mba.json",
+      "scores": {
+        "clarity": 89,
+        "activation": 89.5,
+        "form_effort": 86,
+        "evidence_quality": 74,
+        "workflow_completeness": 88,
+        "reuse_time_saving": 92.5,
+        "help_walkthroughs": 88.5,
+        "ui_accessibility": 86,
+        "trust_privacy": 92.5,
+        "reliability": 87
+      },
+      "personas": [
+        {
+          "label": "MBA",
+          "scores": {
+            "clarity": 90,
+            "activation": 89,
+            "form_effort": 87,
+            "evidence_quality": 69,
+            "workflow_completeness": 88,
+            "reuse_time_saving": 92,
+            "help_walkthroughs": 88,
+            "ui_accessibility": 86,
+            "trust_privacy": 92,
+            "reliability": 86
+          },
+          "mean": 86.7
+        },
+        {
+          "label": "Busy professional",
+          "scores": {
+            "clarity": 88,
+            "activation": 90,
+            "form_effort": 85,
+            "evidence_quality": 79,
+            "workflow_completeness": 88,
+            "reuse_time_saving": 93,
+            "help_walkthroughs": 89,
+            "ui_accessibility": 86,
+            "trust_privacy": 93,
+            "reliability": 88
+          },
+          "mean": 87.9
+        }
+      ],
+      "mean": 87.3,
+      "sourceReportSha256": "6110600bfd2ba743f99b336234b1079f09d4a03880deccc2fcfb7b96b5df807f"
+    },
+    {
+      "id": "mobile-help",
+      "label": "Mobile / accessibility / help",
+      "file": "mobile-help.json",
+      "scores": {
+        "clarity": 91,
+        "activation": 92,
+        "form_effort": 87,
+        "evidence_quality": 82,
+        "workflow_completeness": 92,
+        "reuse_time_saving": 94,
+        "help_walkthroughs": 93,
+        "ui_accessibility": 84,
+        "trust_privacy": 92,
+        "reliability": 89
+      },
+      "mean": 89.6,
+      "sourceReportSha256": "73373538ae890f9214d933c7b4e5d85f5d86caadcfe1dd28451a4b087621294e"
+    },
+    {
+      "id": "reliability-privacy",
+      "label": "Reliability / privacy",
+      "file": "reliability-privacy.json",
+      "scores": {
+        "clarity": 90,
+        "activation": 92,
+        "form_effort": 86,
+        "evidence_quality": 88,
+        "workflow_completeness": 91,
+        "reuse_time_saving": 91,
+        "help_walkthroughs": 87,
+        "ui_accessibility": 86,
+        "trust_privacy": 94,
+        "reliability": 85
+      },
+      "mean": 89,
+      "sourceReportSha256": "658e9ecea36114f36988f5279355f7d2c0aa9b3d90e57603ea107ea9174ba881"
+    }
+  ],
+  "dimensions": {
+    "clarity": 89.4,
+    "activation": 89.9,
+    "form_effort": 85.6,
+    "evidence_quality": 77.6,
+    "workflow_completeness": 89,
+    "reuse_time_saving": 91.5,
+    "help_walkthroughs": 89.7,
+    "ui_accessibility": 85.6,
+    "trust_privacy": 89.7,
+    "reliability": 85.6
+  },
+  "interpretation": "Subjective bounded synthetic customer/workflow judgments. Initial grades remain frozen before follow-up fixes. Rechecks are separate pass/fail evidence, not score changes. Not real user satisfaction, market fit, hiring, ranking or scale evidence.",
+  "sourceScope": "Git base9682cd1 plus reviewer-hash-bound uncommitted cycle2 candidate. See each report for exact observation windows and drift, including reliability frozen snapshot and post-drift observations."
+}

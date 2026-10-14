@@ -1,0 +1,126 @@
+{
+  "audit": "cycle2-independent-product-manager",
+  "assessmentStage": "separate_targeted_recheck_v4",
+  "result": "original_reproducers_pass",
+  "newScoreAssigned": false,
+  "initialScoresUnchanged": {"overall": 87.4, "evidenceQuality": 78},
+  "provenance": {
+    "startUtc": "2026-10-14T03:47:57.103Z",
+    "endUtc": "2026-10-14T03:49:09.382Z",
+    "timezone": "Asia/Dubai",
+    "preview": "http://127.0.0.1:8383/check",
+    "browser": "Chrome",
+    "browserId": "1",
+    "ownTabId": "1385099318",
+    "sessionName": "🔎 PM retest",
+    "browserScopedViewportChanged": false,
+    "methodVersion": "english-literal-evidence-v4",
+    "sourceSha256": {
+      "src/lib/cv-evidence.ts": "C1D09F00F9BC452C09ABC51938B3F3C2C879981DB10E8482FDB5C0AD4B337884",
+      "src/pages/CvCheck.tsx": "21CC4035208CE26238ED13A5C4850EA45EAC2AA5A48C575D3B1F263970D701E8"
+    },
+    "reviewedRuntimeFilesDrift": false,
+    "newCandidateAcknowledged": "Parent declared other audience/help/focus changes; no inference of original-build equivalence.",
+    "initialArtifactHashesBeforeAndAfter": {
+      "pm.md": "7EC813F8508B96DD6CD075411ED734F0D8AAA6489D414709976FA05AFFA6EB7E",
+      "pm.json": "AE2D09A780740EE6FD168BF94D46D9EA69A0BE17478DC67B05C8767F3CF67263"
+    },
+    "initialArtifactsUnchanged": true,
+    "browserRecoveryNote": "Prior IAB browser unavailable; used new audit-owned Chrome tab. Not classified as product failure."
+  },
+  "originalFixture": {
+    "sameAsFrozenInitial": true,
+    "role": "Operations analyst",
+    "cv": "Alex Example\nOperations analyst | 2017–2025\nSupported a team that developed Python reports for operations planning.\nCoordinated weekly meetings with finance stakeholders.\nBuilt Excel dashboards for a university supply-chain project.\nMBA candidate, expected graduation 2027.\nCustomer service volunteer, 2024.\nNo direct experience managing employees.\nEstimated annual savings of $50,000 in a classroom case study; the recommendation was not implemented.",
+    "vacancy": "Operations Analyst\nRequirements:\nProfessional experience building Excel dashboards.\nDevelop Python reports for operations planning.",
+    "observedSummary": {"direct": 0, "partial": 2, "missing": 0, "review": 0},
+    "bothRemainVisibleInReviewOnlyFilter": true,
+    "sourceQuotesRetained": true
+  },
+  "issueRechecks": [
+    {
+      "id": "PM-01",
+      "targetedResult": "pass",
+      "status": "Related passage — review needed",
+      "sourceQuote": "Supported a team that developed Python reports for operations planning.",
+      "requirement": "Develop Python reports for operations planning.",
+      "explanation": "Your CV describes supporting or contributing to the work. It does not yet show that you carried out the requested action yourself. Keep your own contribution clear; add independent responsibility only if accurate.",
+      "reviewFilterRetainsCard": true,
+      "scope": "Exact original browser reproducer, not arbitrary contribution grammar"
+    },
+    {
+      "id": "PM-02",
+      "targetedResult": "pass",
+      "status": "Related passage — review needed",
+      "sourceQuote": "Built Excel dashboards for a university supply-chain project.",
+      "requirement": "Professional experience building Excel dashboards.",
+      "contextLabel": "Project / academic evidence",
+      "explanation": "The related source includes academic, project or volunteer work. It does not establish the professional employment experience requested. Keep its context visible.",
+      "reviewFilterRetainsCard": true,
+      "scope": "Exact original qualified-project browser reproducer, not every academic-context pattern"
+    }
+  ],
+  "positiveFixture": {
+    "cv": "Alex Example\nProfessional experience\nOperations Analyst | Example Company | 2017–2025\nDeveloped Python reports for operations planning.\nBuilt Excel dashboards for monthly finance reporting.\nAcademic projects\nBuilt Tableau dashboards for a university supply-chain project.",
+    "vacancy": "Operations Analyst\nRequirements:\nDevelop Python reports for operations planning.\nProfessional experience building Excel dashboards.\nBuild Tableau dashboards.",
+    "observedSummary": {"direct": 3, "partial": 0, "missing": 0, "review": 0},
+    "cases": [
+      {"case": "Personally stated Python development", "observedStatus": "Direct wording found", "contextLabel": "Employment section", "passed": true},
+      {"case": "Excel development under explicit professional experience", "observedStatus": "Direct wording found", "contextLabel": "Employment section", "passed": true},
+      {"case": "Plain Tableau capability from explicitly academic project", "observedStatus": "Direct wording found", "contextLabel": "Project / academic evidence", "academicEmploymentLimitationRetained": true, "passed": true}
+    ]
+  },
+  "suppliedNotIndependentlyRun": ["Parent-reported 103 focused tests", "Parent-reported passing typecheck"],
+  "limitations": ["No arbitrary-grammar or full context-pattern certification", "Not every initial acceptance variant rerun", "No full regression suite", "No authenticated or paid integration retest", "No rescore of other newer product changes"],
+  "actions": {"runtimeEdits": false, "initialReportsEdited": false, "commit": false, "deploy": false, "signup": false, "accountSave": false, "liveSupportWrites": 0, "paidCalls": 0, "sends": 0, "employerSubmissions": 0},
+  "rootAdditionalCases": {
+    "assessmentStage": "later_final_bounded_v4_appendix",
+    "result": "four_requested_comparisons_pass",
+    "newScoreAssigned": false,
+    "earlierRecheckAndInitialGradesPreserved": true,
+    "provenance": {
+      "startUtc": "2026-10-14T04:02:40.350Z",
+      "endUtc": "2026-10-14T04:03:37.367Z",
+      "preview": "http://127.0.0.1:8383/check",
+      "browser": "Chrome",
+      "browserId": "1",
+      "ownTabId": "1385099330",
+      "sessionName": "🔎 PM final cases",
+      "browserScopedViewportChanged": false,
+      "finalEvidenceSourceSha256": "BDD240DE9652E968F04031ECBDCA9AB3212F12220AC73CDE0881B17A3244E061",
+      "cvCheckSourceSha256": "21CC4035208CE26238ED13A5C4850EA45EAC2AA5A48C575D3B1F263970D701E8",
+      "reviewedRuntimeFilesDrift": false,
+      "earlierEvidenceSourceSha256PreservedAbove": "C1D09F00F9BC452C09ABC51938B3F3C2C879981DB10E8482FDB5C0AD4B337884",
+      "priorRecheckArtifactHashesBeforeAppendix": {
+        "pm-recheck-v4.md": "395C2971077D4BAFF6567EB3A0BC304671EABF7108ACE149F6F946F4D6DA791D",
+        "pm-recheck-v4.json": "FFD80B7C1411619E90C012BB4EAC6F2D902A26138DFB175FE60C67F9EFB89101"
+      },
+      "frozenInitialArtifactsStillUnchanged": true
+    },
+    "negativeFixture": {
+      "role": "Operations analyst",
+      "cv": "Alex Example\nMBA candidate, expected graduation 2027.\nBuilt Excel dashboards for an MBA consulting project.\nSupported the team that developed Python reports for operations planning.",
+      "vacancy": "Operations Analyst\nRequirements:\nProfessional experience building Excel dashboards.\nSupport the team and develop Python reports for operations planning.",
+      "observedSummary": {"direct": 0, "partial": 2, "missing": 0, "review": 0},
+      "bothRemainVisibleInReviewOnlyFilter": true,
+      "cases": [
+        {"case": "MBA consulting project versus professional Excel experience", "observedStatus": "Related passage — review needed", "contextLabel": "Project / academic evidence", "specificLimitation": "Does not establish professional employment experience requested", "passed": true},
+        {"case": "Support-owned development versus compound support-and-develop task", "observedStatus": "Related passage — review needed", "specificLimitation": "Support does not yet show the requested action was carried out personally", "passed": true}
+      ]
+    },
+    "positiveFixture": {
+      "cv": "Alex Example\nMBA candidate, expected graduation 2027.\nBuilt Excel dashboards for an MBA consulting project.\nDeveloped Python reports for operations planning and supported the team.",
+      "vacancy": "Operations Analyst\nRequirements:\nBuild Excel dashboards.\nSupport the team and develop Python reports for operations planning.",
+      "observedSummary": {"direct": 2, "partial": 0, "missing": 0, "review": 0},
+      "cases": [
+        {"case": "MBA Excel project versus plain capability", "observedStatus": "Direct wording found", "contextLabel": "Project / academic evidence", "professionalEmploymentLimitationRetained": true, "passed": true},
+        {"case": "Developed-first personal action with support clause versus compound task", "observedStatus": "Direct wording found", "passed": true}
+      ]
+    },
+    "suppliedNotIndependentlyRun": ["Parent-reported 65 passing evidence tests"],
+    "limits": "Four exact fictional comparisons plus negative-case filter behavior; no full regression suite or release certification.",
+    "runtimeEdits": false,
+    "serviceWrites": false,
+    "realDataUsed": false
+  }
+}

@@ -45,7 +45,7 @@ export interface EvidenceReport {
   warnings: string[];
 }
 
-const METHOD_VERSION = 'english-literal-evidence-v3';
+const METHOD_VERSION = 'english-literal-evidence-v4';
 const MAX_REQUIREMENTS = 40;
 const SCOPE = 'This is an English wording check of user-provided text. The claims are not verified. Read the job requirements yourself; this check does not decide whether you qualify or predict an interview.';
 type Span = { start: number; end: number };
@@ -242,7 +242,7 @@ function sectionFor(text: string): Section | null {
   if (/^(?:(?:technical|key|core|professional) )?(?:skills|competencies|tools|technologies)(?: and (?:tools|technologies))?$/.test(heading)) return 'skills';
   if (/^(?:education|academic (?:background|qualifications)|qualifications)$/.test(heading)) return 'education';
   if (/^(?:certifications?|certificates?|licenses?|licences?|professional qualifications)$/.test(heading)) return 'credentials';
-  if (/^(?:(?:academic|university|classroom|personal|selected) )?projects?$/.test(heading)) return 'projects';
+  if (/^(?:(?:academic|university|classroom|class|coursework|student|mba|capstone|personal|selected) )?projects?$/.test(heading)) return 'projects';
   if (/^(?:summary|profile|objective|interests|references|achievements|projects|languages|publications)$/.test(heading)) return 'other';
   return null;
 }
@@ -251,6 +251,8 @@ function tokens(text: string): string[] {
   const normalized = text.normalize('NFKC').toLowerCase()
     .replace(/\b(?:microsoft|ms)\s+excel\b/g, 'excel')
     .replace(/\bpower\s+bi\b/g, 'powerbi')
+    // People who report to a manager are a different object from written reports.
+    .replace(/\bdirect\s+reports?\b/g, 'directreport')
     .replace(/\bamazon\s+web\s+services\b/g, 'aws')
     .replace(/\bgoogle\s+cloud\s+platform\b/g, 'gcp');
   return (normalized.match(/\.net\b|[a-z][a-z0-9]*(?:\+\+|#)?(?:[.-][a-z0-9]+)*|\d+(?:\.\d+)?/g) ?? [])
@@ -283,11 +285,14 @@ function cvPassages(text: string): Passage[] {
     }
     const span = trimmedSpan(text, line.start + (bullet?.[0].length ?? 0), end);
     if (!span) continue;
+    const sourceQuote = text.slice(span.start, span.end);
+    // A qualification in a later sentence belongs to the same source line/bullet.
+    const academicContext = section === 'projects' || /\b(?:university|classroom|class|academic|coursework|student|mba|capstone)\s+(?:[\w-]+\s+){0,5}projects?\b|\b(?:academic|coursework|classroom)\s+(?:work|assignment|exercise|assessment)\b/i.test(sourceQuote);
     for (const part of clauses(text, span, true)) {
       const cvQuote = text.slice(part.start, part.end);
       const sourceKind: EvidenceSourceKind = inlineSkills || section === 'skills' || /\b(?:proficient|proficiency|familiar|knowledge of|skills include|competent)\b/i.test(cvQuote) ? 'skills' : ACTUAL_VERB.test(cvQuote) ? 'action' : 'other';
-      const contextKind = section === 'internships' ? 'internship' : section === 'volunteering' ? 'volunteering' : section === 'personal_projects' ? 'personal_project' : section === 'projects' || /\b(?:university|classroom|academic|coursework|student) (?:team )?project\b/i.test(cvQuote) ? 'academic_project' : section === 'experience' ? 'employment' : 'unspecified';
-      result.push({ cvQuote, ...part, line: line.line + (text.slice(line.start, part.start).match(/\r\n|\r|\n/g)?.length ?? 0), sourceKind, contextKind, section, terms: meaningful(cvQuote), negative: NEGATIVE.test(cvQuote), pending: PENDING.test(cvQuote), weakened: WEAKENED.test(cvQuote), sourceSpan: span, sourceLine: line.line, sourceQuote: text.slice(span.start,span.end) });
+      const contextKind = section === 'internships' ? 'internship' : section === 'volunteering' ? 'volunteering' : section === 'personal_projects' ? 'personal_project' : academicContext ? 'academic_project' : section === 'experience' ? 'employment' : 'unspecified';
+      result.push({ cvQuote, ...part, line: line.line + (text.slice(line.start, part.start).match(/\r\n|\r|\n/g)?.length ?? 0), sourceKind, contextKind, section, terms: meaningful(cvQuote), negative: NEGATIVE.test(cvQuote), pending: PENDING.test(cvQuote), weakened: WEAKENED.test(cvQuote), sourceSpan: span, sourceLine: line.line, sourceQuote });
     }
   }
   return result;
@@ -318,6 +323,15 @@ function durationSufficient(request: Duration, passage: Duration): boolean {
 function requestedActions(text: string): string[] {
   const raw = text.toLowerCase().match(/[a-z]+/g) ?? [];
   return [...new Set(raw.filter(term => ACTION_ALIASES[term]).map(term => ACTION_ALIASES[term]))];
+}
+
+/** A preceding support/contribution verb does not establish ownership of its dependent action.
+ * A support object after an owned action ("Built reports to support users") does not weaken it. */
+function limitedContribution(passage: Passage, action: string): boolean {
+  if (action === 'support' || !passage.weakened) return false;
+  const words = Object.keys(ACTION_ALIASES).filter(word => ACTION_ALIASES[word] === action);
+  const requested = new RegExp(`\\b(?:${words.join('|')})\\b`, 'i').exec(passage.cvQuote);
+  return !!requested && WEAKENED.test(passage.cvQuote.slice(0, requested.index));
 }
 
 function publicPassage(passage: Passage): EvidencePassage {
@@ -353,7 +367,12 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
   const technologies = terms.filter(term => TECH.has(term));
   const credentials = terms.filter(term => CREDENTIAL.has(term));
   const actions = requestedActions(vacancyQuote);
+  // Supporting a team doing a task is distinct from an additional task explicitly
+  // joined by "and/also/then". The latter still needs the applicant's own action.
+  const additionalActions = [...vacancyQuote.matchAll(/\b(?:and|also|then)\s+(?:(?:personally|independently)\s+)?([a-z]+)\b/gi)].map(match => ACTION_ALIASES[match[1].toLowerCase()]).filter(Boolean);
+  const ownershipActions = (actions[0] === 'support' ? additionalActions : actions).filter(action => action !== 'support');
   const experience = /\bexperience\b/i.test(vacancyQuote);
+  const professionalExperience = /\b(?:professional|industry|commercial|paid|employment)\s+(?:work\s+)?experience\b/i.test(vacancyQuote);
   const task = actions.length > 0 && terms.some(term => !actions.includes(term) && !CREDENTIAL.has(term));
   const specificCredential = credentials.some(term => !['license', 'certificate', 'certified', 'chartered'].includes(term)) || (credentials.length > 0 && terms.some(term => !CREDENTIAL.has(term) && !['valid', 'current', 'active'].includes(term)));
   const recognized = technologies.length > 0 || specificCredential || (!!requestedDuration && terms.length > 0) || (task && terms.length > 1);
@@ -366,7 +385,7 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     // A shared generic verb alone is not a related passage for the requested object.
     const anchors = matches.filter(term => technologies.length && !task ? TECH.has(term) : !actions.includes(term) || TECH.has(term) || CREDENTIAL.has(term));
     return { passage, matches, anchors, full: terms.length > 0 && matches.length === terms.length };
-  }).filter(match => match.anchors.length > 0).sort((a, b) => Number(b.full) - Number(a.full) || b.anchors.length - a.anchors.length || b.matches.length - a.matches.length || a.passage.start - b.passage.start);
+  }).filter(match => match.anchors.length > 0 && !(match.anchors.length === 1 && match.anchors[0] === 'team' && terms.some(term => !actions.includes(term) && term !== 'team'))).sort((a, b) => Number(b.full) - Number(a.full) || b.anchors.length - a.anchors.length || b.matches.length - a.matches.length || a.passage.start - b.passage.start);
   const datedQualification = credentials.length > 0 && /\b(?:by|before|after|completed|graduat(?:e|ed|ion))\b/i.test(vacancyQuote) && /\b(?:20\d\d|january|february|march|april|may|june|july|august|september|october|november|december)\b/i.test(vacancyQuote);
   const base: EvidenceRequirement = { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: publicPassages(related.map(item=>item.passage)), explanation: '', question: credentials.length ? 'What exact qualification, completion date and current status can you confirm? Keep expected completion clearly labelled.' : `Is there something your CV should show here? Add a specific example only if it is accurate.`, matchedTerms: [...new Set(related.flatMap(item => item.matches))], category: credentials.length ? 'qualification' : 'capability' };
   if (datedQualification) {
@@ -404,12 +423,13 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
   }
   const direct = related.find(({ passage, full }) => {
     if (!full || uncertain(passage)) return false;
-    if (/\b(?:professional|industry|commercial|paid|employment)\s+(?:work\s+)?experience\b/i.test(vacancyQuote) && ['academic_project','personal_project','volunteering'].includes(passage.contextKind ?? '')) return false;
+    if (professionalExperience && ['academic_project','personal_project','volunteering'].includes(passage.contextKind ?? '')) return false;
     if (task && passage.sourceKind !== 'action') return false;
     if (experience && !requestedDuration && passage.sourceKind !== 'action' && !/\bexperience\b/i.test(passage.cvQuote)) return false;
-    if (actions.includes('lead') && (passage.weakened || !/\b(?:led|lead|leading)\b(?!\s+by\b)/i.test(passage.cvQuote))) return false;
-    if (actions.includes('manage') && (passage.weakened || !/\b(?:managed|manage|managing)\b(?!\s+by\b)/i.test(passage.cvQuote))) return false;
-    if (actions.includes('supervise') && (passage.weakened || !/\b(?:supervised|supervise|supervising)\b(?!\s+by\b)/i.test(passage.cvQuote))) return false;
+    if (ownershipActions.some(action => limitedContribution(passage, action))) return false;
+    if (ownershipActions.includes('lead') && !/\b(?:led|lead|leading)\b(?!\s+by\b)/i.test(passage.cvQuote)) return false;
+    if (ownershipActions.includes('manage') && !/\b(?:managed|manage|managing)\b(?!\s+by\b)/i.test(passage.cvQuote)) return false;
+    if (ownershipActions.includes('supervise') && !/\b(?:supervised|supervise|supervising)\b(?!\s+by\b)/i.test(passage.cvQuote)) return false;
     if (credentials.length && (passage.sourceKind === 'skills' || (!['education', 'credentials'].includes(passage.section) && !/\b(?:certified|graduated|earned|awarded|completed|hold|holds)\b/i.test(passage.cvQuote) && !/^(?:i (?:have|hold) (?:a |an )?|(?:a |an )?)(?:bachelor|master|doctorate|mba|b\.sc|bsc|m\.sc|msc|valid .*licen[cs]e)\b/i.test(passage.cvQuote)))) return false;
     if (technologies.length && !task && !requestedDuration && passage.sourceKind === 'other' && !/\b(?:experience|programming|language|technology|technologies|software|tool)\b/i.test(passage.cvQuote)) return false;
     if (requestedDuration) {
@@ -425,7 +445,7 @@ function analyzeRequirement(text: string, span: Span, index: number, passages: P
     if (direct.passage.contextKind === 'academic_project') base.explanation += ' This passage is project or academic evidence; keep that context visible. It does not establish professional employment experience.';
   } else {
     base.status = 'partial';
-    base.explanation = requestedDuration ? 'You mention related work, but the amount of relevant experience is unclear. Check the roles and dates; the check has not assumed a total.' : actions.includes('lead') && related.some(item => item.passage.weakened) ? 'Your CV says you supported the work. Keep that distinction. If you led a part of it, explain which part.' : task && related.every(item => item.passage.sourceKind !== 'action') ? 'The skill appears in your CV, but the work is not clear. Add a real example if you have one.' : credentials.length ? 'Your CV mentions something related, but the subject, level or current status may differ. Check the exact qualification.' : 'Your CV covers part of this requirement. Read what is missing and add an example only if it is true.';
+    base.explanation = professionalExperience && related.some(item => ['academic_project','personal_project','volunteering'].includes(item.passage.contextKind ?? '')) ? 'The related source includes academic, project or volunteer work. It does not establish the professional employment experience requested. Keep its context visible.' : requestedDuration ? 'You mention related work, but the amount of relevant experience is unclear. Check the roles and dates; the check has not assumed a total.' : related.some(item => ownershipActions.some(action => limitedContribution(item.passage, action))) ? 'Your CV describes supporting or contributing to the work. It does not yet show that you carried out the requested action yourself. Keep your own contribution clear; add independent responsibility only if accurate.' : task && related.every(item => item.passage.sourceKind !== 'action') ? 'The skill appears in your CV, but the work is not clear. Add a real example if you have one.' : credentials.length ? 'Your CV mentions something related, but the subject, level or current status may differ. Check the exact qualification.' : 'Your CV covers part of this requirement. Read what is missing and add an example only if it is true.';
   }
   return base;
 }

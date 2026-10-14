@@ -43,7 +43,13 @@ describe('private owner portals', () => {
     expect(screen.getByRole('link', { name: 'Founder' })).toHaveAttribute('href', '/admin2?days=7');
     await user.click(screen.getByRole('button', { name: '90 days' })); await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'snapshot', days: 90 }));
     expect(await screen.findByRole('link', { name: 'Founder' })).toHaveAttribute('href', '/admin2?days=90'); expect(screen.getByRole('button', { name: '90 days' })).toHaveAttribute('aria-pressed', 'true');
-    await user.click(screen.getByRole('link', { name: 'Founder' })); await screen.findByRole('heading', { name: 'Observed milestones' }); expect(mocks.call).toHaveBeenCalledTimes(3); expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+    await user.click(screen.getByRole('link', { name: 'Founder' })); await screen.findByRole('heading', { name: 'Observed milestones' });
+    expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'snapshot')).toEqual([
+      ['owner-a', { action: 'snapshot', days: 7 }],
+      ['owner-a', { action: 'snapshot', days: 90 }],
+      ['owner-a', { action: 'snapshot', days: 90 }],
+    ]);
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
   });
   it('requires an explicit versioned save and locks stale controls until a fresh snapshot', async () => {
     mocks.call.mockImplementation(async (_id, action) => { if (action.action === 'update_config') throw new AdminApiError('conflict', 'Refresh to review the newer version.'); return { snapshot: current }; });

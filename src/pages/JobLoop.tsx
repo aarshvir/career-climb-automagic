@@ -133,10 +133,12 @@ export default function JobLoop() {
     catch (failure) { if (mounted.current && owner.current === id && generation.current === atGeneration && serial.current === ticket) setError(failure instanceof Error ? failure.message : 'Your Job Loop could not be loaded.'); }
     finally { if (mounted.current && owner.current === id && generation.current === atGeneration && serial.current === ticket) setLoading(false); }
   }, [applySnapshot]);
-  const clearMount = useCallback(() => { mounted.current = false; generation.current++; }, []);
+  const downloadTransfer = useRef<AbortController | null>(null);
+  const clearMount = useCallback(() => { mounted.current = false; generation.current++; downloadTransfer.current?.abort(); }, []);
   useEffect(() => { mounted.current = true; return clearMount; }, [clearMount]);
   useEffect(() => { clearGmailFragment(); }, []);
   useEffect(() => {
+    downloadTransfer.current?.abort();
     generation.current++; serial.current++; formRevision.current++; setSnapshot(null); setLoadedOwner(null); snapshotRef.current = null; setProfile(blankProfile(initialAudience.current)); setLists(listInputs(blankProfile(initialAudience.current))); setProfileDirty(false); profileDirtyRef.current = false; setSaveConsent(false); setCvs([]); setCvError(''); setSuggestions([]); setDirtyClaims(new Set()); setSelectedId(null); setReviewedText(''); setFacts(false); setDisclosure(false); setRecipientConsent(false); setMethod('rules'); setModel('grounded-rules-v1'); setModelConsent(false); setInboxConsent(false); setGmailReadConsent(false); setGmailDraftConsent(false); setBusy(''); setNotice(''); setError(''); setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setContact({ name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: false, inExistingThread: false }); startReference.current = null; draftReference.current = null;
     if (ticketOwner.current && ticketOwner.current !== user?.id) { setGmailTicket(''); setGmailPreview(null); setPreviewOwner(null); setMailboxConfirmed(false); setPreviewBusy(false); }
     ticketOwner.current = user?.id ?? null;
@@ -305,11 +307,14 @@ export default function JobLoop() {
   const pagesReady = !!packet && !!snapshot && packetPagesReady(packet, snapshot);
   const edited = !!packet && reviewedText !== packet.cvText;
   const packetApproved = !!packet && packet.status === 'approved' && packetFresh && pagesReady && !edited && !uncommitted;
+  const packetApprovedRef = useRef(packetApproved); packetApprovedRef.current = packetApproved;
+  useEffect(() => { downloadTransfer.current?.abort(); }, [selectedId, packet?.inputHash, packetApproved]);
   async function download(format: 'pdf' | 'docx' | 'txt' | 'report' | 'letter') {
     if (!packet || !packetApproved || !user || busyRef.current || (["pdf","docx","txt"].includes(format) && packet.formatStatus?.[format as "pdf" | "docx" | "txt"]?.ready === false)) return;
     const id = user.id, packetId = packet.id, hash = packet.inputHash, atGeneration = generation.current; setBusy('download'); busyRef.current = 'download'; setError('');
-    try { const result = await getLoopDownload(id, packetId, format); if (mounted.current && owner.current === id && generation.current === atGeneration && selectedRef.current === packetId && hash === packetHashRef.current) { downloadBlob(result.blob, result.filename); setNotice('Download requested. This does not send an application.'); } }
-    catch (failure) { if (mounted.current && owner.current === id && generation.current === atGeneration) setError(failure instanceof Error ? failure.message : 'Download failed.'); }
+    downloadTransfer.current?.abort(); const controller=new AbortController(); downloadTransfer.current=controller;
+    try { const result = await getLoopDownload(id, packetId, format, controller.signal); if (!controller.signal.aborted && packetApprovedRef.current && mounted.current && owner.current === id && generation.current === atGeneration && selectedRef.current === packetId && hash === packetHashRef.current) { downloadBlob(result.blob, result.filename); setNotice('Download requested. This does not send an application.'); } }
+    catch (failure) { if (!controller.signal.aborted && mounted.current && owner.current === id && generation.current === atGeneration) setError(failure instanceof Error ? failure.message : 'Download failed.'); }
     finally { if (mounted.current && owner.current === id && generation.current === atGeneration) { setBusy(''); busyRef.current = ''; } }
   }
   async function startRun() {

@@ -14,6 +14,7 @@ vi.mock('@/lib/job-loop-api', () => ({ callJobLoop: mocks.call, loadLoopSavedCvs
 vi.mock('@/lib/document-download', () => ({ downloadBlob: mocks.saveBlob }));
 vi.mock('@/lib/cv-extraction', () => ({ extractCvText: mocks.extract, validateCvText: (value: string) => { if (value.length < 80 || value.length > 60000) throw new Error('Review CV text length.'); return value; } }));
 import JobLoop from '@/pages/JobLoop';
+import LoopPacketPreview from '@/pages/LoopPacketPreview';
 const cv = 'Developed Python reports for a fictional university project using synthetic data. Assisted with reporting during a fictional internship. No employer is contacted.';
 const StandardURL = URL;
 const profile: LoopProfile = { audience: 'student', name: 'Fictional Casey', contactLine: '', targetTitles: ['Graduate analyst'], locations: ['Remote'], experienceYears: null, languages: [], pageTarget: 1, discreetSearch: false, sourceText: cv, excludedTerms: [], compensation: { currency: '', period: 'annual', minimum: null }, revision: 1, updatedAt: '2026-10-11T00:00:00Z' };
@@ -136,7 +137,7 @@ describe('exact approvals and account lifecycle', () => {
     render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ }));
     await user.click(screen.getByRole('button', { name: 'Open exact PDF preview' }));
     expect(await screen.findByTitle('Exact saved CV PDF preview')).toHaveAttribute('src', 'blob:synthetic-loop-preview');
-    expect(mocks.preview).toHaveBeenCalledWith('owner-a', 'packet-a', 'exact-server-hash');
+    expect(mocks.preview).toHaveBeenCalledWith('owner-a', 'packet-a', 'exact-server-hash', expect.any(AbortSignal));
     expect(mocks.download).not.toHaveBeenCalled(); expect(mocks.call.mock.calls.some(([, action]) => action.action === 'approve_packet')).toBe(false);
   });
   it('clears a cached PDF when the server revokes the packet after a vacancy-only change', async () => {
@@ -195,8 +196,41 @@ describe('exact approvals and account lifecycle', () => {
     current.packets = [{ ...packet, status: 'approved' }]; let finish!: (response: { blob: Blob; filename: string }) => void;
     mocks.download.mockImplementation(() => new Promise(resolve => { finish = resolve; })); const view = render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByRole('button', { name: 'Download TXT' }));
     await waitFor(() => expect(mocks.download).toHaveBeenCalledOnce());
+    const signal=mocks.download.mock.calls[0][3] as AbortSignal;expect(signal.aborted).toBe(false);
     await act(async () => { mocks.user = { id: 'owner-b' }; current = { ...snapshot(), profile: null, claims: [], packets: [] }; view.rerender(tree()); });
+    expect(signal.aborted).toBe(true);
     await act(async () => { finish({ blob: new Blob([cv]), filename: 'fictional.txt' }); }); expect(mocks.saveBlob).not.toHaveBeenCalled();
+  });
+  it('cancels an active download when a refresh revokes its packet without changing its input hash',async()=>{
+    current.packets=[{...packet,status:'approved'}];
+    let finish!:(response:{blob:Blob;filename:string})=>void;
+    mocks.download.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;}));
+    render(tree());await openTab('Outputs');const user=userEvent.setup();await user.click(screen.getByRole('button',{name:/Graduate analyst/}));
+    let refreshed!:(response:{snapshot:LoopSnapshot})=>void;
+    mocks.call.mockImplementationOnce(()=>new Promise(resolve=>{refreshed=resolve;}));
+    await user.click(screen.getByRole('button',{name:'Refresh records'}));
+    await user.click(screen.getByRole('button',{name:'Download TXT'}));
+    await waitFor(()=>expect(mocks.download).toHaveBeenCalledOnce());
+    const signal=mocks.download.mock.calls[0][3] as AbortSignal;expect(signal.aborted).toBe(false);
+    const revoked={...current,recordVersion:2,packets:[{...current.packets[0],status:'revoked' as const}]};
+    expect(revoked.packets[0].inputHash).toBe(packet.inputHash);
+    await act(async()=>{refreshed({snapshot:revoked});});
+    expect(signal.aborted).toBe(true);expect(screen.getByRole('button',{name:'Download TXT'})).toBeDisabled();
+    // A transport that settles late must still be stopped at the component fence.
+    await act(async()=>{finish({blob:new Blob([cv]),filename:'fictional.txt'});});
+    expect(mocks.saveBlob).not.toHaveBeenCalled();expect(screen.queryByText('Download requested. This does not send an application.')).not.toBeInTheDocument();
+    expect(mocks.call.mock.calls.some(([,action])=>action.action==='cancel_run')).toBe(false);
+  });
+  it('cancels a private download on unmount and ignores bytes that arrive afterward',async()=>{
+    current.packets=[{...packet,status:'approved'}];
+    let finish!:(response:{blob:Blob;filename:string})=>void;
+    mocks.download.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;}));
+    const view=render(tree());await openTab('Outputs');const user=userEvent.setup();await user.click(screen.getByRole('button',{name:/Graduate analyst/}));await user.click(screen.getByRole('button',{name:'Download TXT'}));
+    await waitFor(()=>expect(mocks.download).toHaveBeenCalledOnce());
+    const signal=mocks.download.mock.calls[0][3] as AbortSignal;expect(signal.aborted).toBe(false);
+    view.unmount();expect(signal.aborted).toBe(true);
+    await act(async()=>{finish({blob:new Blob([cv]),filename:'fictional.txt'});});
+    expect(mocks.saveBlob).not.toHaveBeenCalled();expect(mocks.call.mock.calls.some(([,action])=>action.action==='cancel_run')).toBe(false);
   });
   it('requires approved attachment and recipient confirmation and reuses an uncertain draft reference', async () => {
     current.gmail = { connected: true, email: 'fictional@example.test', status: 'Connected', allowDrafts: true }; current.capabilities.gmailRead = true; current.capabilities.gmailDrafts = true;
@@ -216,6 +250,38 @@ describe('exact approvals and account lifecycle', () => {
     current = { ...current, recordVersion: 2, runs: [{ ...current.runs[0], status: 'completed', phase: 'completed', finishedAt: profile.updatedAt }] };
     await act(async () => { await vi.advanceTimersByTimeAsync(5000); }); expect(screen.getByText('completed · completed')).toBeInTheDocument();
     view.unmount(); expect(mocks.call.mock.calls.some(([, action]) => action.action === 'cancel_run')).toBe(false);
+  });
+});
+
+describe('private PDF preview transfer lifecycle',()=>{
+  it.each(['unmount','owner','hash','packet','current'] as const)('cancels a pending preview on %s change and ignores its late bytes',async change=>{
+    const readyPacket={...packet,artifacts:{pdf:{path:'owner-a/packet-a/cv.pdf',sha256:'synthetic-hash',byteSize:100}}};
+    let finish!:(response:{blob:Blob;filename:string})=>void;
+    mocks.preview.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;}));
+    const view=render(<LoopPacketPreview ownerId="owner-a" packet={readyPacket} current busy={false}/>);
+    await userEvent.setup().click(screen.getByRole('button',{name:'Open exact PDF preview'}));
+    expect(mocks.preview).toHaveBeenCalledWith('owner-a',packet.id,packet.inputHash,expect.any(AbortSignal));
+    const signal=mocks.preview.mock.calls[0][3] as AbortSignal;expect(signal.aborted).toBe(false);
+    if(change==='unmount')view.unmount();
+    else view.rerender(<LoopPacketPreview ownerId={change==='owner'?'owner-b':'owner-a'} packet={{...readyPacket,id:change==='packet'?'packet-b':packet.id,inputHash:change==='hash'?'replacement-server-hash':packet.inputHash}} current={change!=='current'} busy={false}/>);
+    expect(signal.aborted).toBe(true);
+    await act(async()=>{finish({blob:new Blob(['%PDF-obsolete']),filename:'obsolete.pdf'});});
+    expect(URL.createObjectURL).not.toHaveBeenCalled();expect(screen.queryByTitle('Exact saved CV PDF preview')).not.toBeInTheDocument();expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    if(change!=='unmount'&&change!=='current')expect(screen.getByRole('button',{name:'Open exact PDF preview'})).toBeEnabled();
+  });
+  it('starts a fresh preview for the replacement source while suppressing an old cancellation error',async()=>{
+    const readyPacket={...packet,artifacts:{pdf:{path:'owner-a/packet-a/cv.pdf',sha256:'synthetic-hash',byteSize:100}}};
+    let failOld!:(error:Error)=>void;
+    mocks.preview.mockImplementationOnce(()=>new Promise((_resolve,reject)=>{failOld=reject;}));
+    const view=render(<LoopPacketPreview ownerId="owner-a" packet={readyPacket} current busy={false}/>);const user=userEvent.setup();
+    await user.click(screen.getByRole('button',{name:'Open exact PDF preview'}));
+    const oldSignal=mocks.preview.mock.calls[0][3] as AbortSignal;
+    view.rerender(<LoopPacketPreview ownerId="owner-a" packet={{...readyPacket,inputHash:'replacement-server-hash'}} current busy={false}/>);
+    expect(oldSignal.aborted).toBe(true);await user.click(screen.getByRole('button',{name:'Open exact PDF preview'}));
+    expect(mocks.preview).toHaveBeenLastCalledWith('owner-a',packet.id,'replacement-server-hash',expect.any(AbortSignal));
+    expect(await screen.findByTitle('Exact saved CV PDF preview')).toHaveAttribute('src','blob:synthetic-loop-preview');
+    await act(async()=>{failOld(Object.assign(new Error('The document download was cancelled.'),{name:'AbortError'}));});
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();expect(screen.getByTitle('Exact saved CV PDF preview')).toBeInTheDocument();
   });
 });
 

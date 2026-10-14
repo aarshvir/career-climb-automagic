@@ -18,7 +18,7 @@ export interface WalkthroughTutorial {
   scenes: WalkthroughScene[];
 }
 
-/** Original scripts for the current interface. Timings are narration plans, not recorded runtimes. */
+/** Narration preserves the released recordings; interactive instructions may evolve separately. */
 export const walkthroughs: WalkthroughTutorial[] = [
   {
     id: 'first-check', title: 'Your first CV check', description: 'Bring your CV and one real vacancy, review the evidence, then approve your own document.', audience: 'Students · MBA students · Busy professionals', helpAnchor: 'first-check', action: { label: 'Start my free check', to: '/check' },
@@ -53,7 +53,7 @@ export const walkthroughs: WalkthroughTutorial[] = [
   {
     id: 'another-application', title: 'Prepare your next application', description: 'Reuse a chosen CV or unchanged career facts, then report your actual application progress.', audience: 'Anyone applying to a second vacancy', helpAnchor: 'second-application', action: { label: 'Return to my free check', to: '/check' },
     scenes: [
-      { id: 'preserve', stageId: 'check-next-application', title: 'Keep the current application first', instruction: 'Download or save the approved check before replacing it. Under Your next application, choose CV version for another vacancy.', caption: 'Choose Reviewed source CV or Approved final CV deliberately.', narration: 'Before starting another application, download or save the approved check if you want to keep it. Under Your next application, choose which CV to reuse: Reviewed source CV or Approved final CV. The choice replaces the open check; saved applications stay unchanged.', durationSeconds: 23, demo: { section: 'Your next application', fields: [{ label: 'CV version for another vacancy', value: 'Reviewed source CV' }], action: 'Use this CV for another vacancy', note: 'The old vacancy and its approval do not carry over.' } },
+      { id: 'preserve', stageId: 'check-next-application', title: 'Keep the current application first', instruction: 'Download or save the approved check before replacing it. Under Your next application, choose CV version for another vacancy. Undo new application can restore the previous check for review only while this page stays open.', caption: 'Choose Reviewed source CV or Approved final CV deliberately.', narration: 'Before starting another application, download or save the approved check if you want to keep it. Under Your next application, choose which CV to reuse: Reviewed source CV or Approved final CV. The choice replaces the open check; saved applications stay unchanged.', durationSeconds: 23, demo: { section: 'Your next application', fields: [{ label: 'CV version for another vacancy', value: 'Reviewed source CV' }], action: 'Use this CV for another vacancy', note: 'The old vacancy and its approval do not carry over. Undo returns to review with approval cleared.' } },
       { id: 'new-check', stageId: 'check-next-vacancy', title: 'Give the new job a fresh review', instruction: 'Select Use this CV for another vacancy. Enter the target role, optional company and new vacancy together. Open Inspect or edit the reused CV if needed, then select Check this next vacancy. Review the new evidence and approve again.', caption: 'Useful source wording can carry over. Findings and approval belong to the new inputs.', narration: 'Select Use this CV for another vacancy. Enter the new target role and optional company, review the reused CV and paste the new posting. Work through the evidence and your review again. A previous approval cannot approve this new combination of CV and vacancy.', durationSeconds: 22, demo: { section: 'Next vacancy · reused CV', fields: [{ label: 'Target role', value: 'Business analyst — fictional new target' }, { label: 'Company (optional)', value: 'Add the new employer, if you want.' }], action: 'Check this next vacancy', note: 'A fresh comparison is required for the new posting.' } },
       { id: 'loop-reuse', stageId: 'loop-opportunities', title: 'Reuse saved Job Loop facts', instruction: 'In Job Loop, open Opportunities and add the next vacancy. Reuse unchanged confirmed facts, inspect preparation on Today, and review the separate document in Outputs.', caption: 'You do not need to re-enter unchanged career facts for every job.', narration: 'In Job Loop, your saved career record and unchanged cleared facts are already available. Add the next real vacancy in Opportunities. Inspect available preparation on Today, then review the new document in Outputs. Every packet still has its own source checks and exact approval.', durationSeconds: 23, demo: { section: 'Opportunities', fields: [{ label: 'Your saved facts', value: 'Unchanged confirmed facts are available for reuse.' }, { label: 'New vacancy', value: 'A separate actual posting you choose.' }], action: 'Save opportunity', note: 'This fictional storyboard creates no application document.' } },
       { id: 'tracking', stageId: 'loop-application-tracking', title: 'Report the status after you act', instruction: 'Apply yourself on the employer’s site. Then choose Application status, confirm that you report it, add a follow-up date if useful and select Save tracking update.', caption: 'Saved or prepared is not applied. All application outcomes are user reported.', narration: 'Submit on the employer site yourself. When you have actually applied, update Application status in Opportunities and confirm that you report it. Add a follow-up date and notes if helpful, then select Save tracking update. Preparing or downloading a CV does not mean an application was submitted.', durationSeconds: 25, demo: { section: 'Your opportunities · tracking', fields: [{ label: 'Application status', value: 'saved — no employer submission in this tutorial' }, { label: 'Follow-up date', value: 'Choose your own date after reviewing progress.' }], action: 'Save tracking update', note: 'Interview, offer and rejection are also your reported outcomes.' } },
@@ -64,7 +64,7 @@ export const walkthroughs: WalkthroughTutorial[] = [
     scenes: [
       { id: 'manual', stageId: 'loop-prepare', title: 'Begin with an available manual run', instruction: 'Save or discard career edits. On Today, check Prepare a cloud run and Preparation provider. Select Prepare today’s applications when available.', caption: 'Availability is reported in your workspace. Private saving does not start a run.', narration: 'Save or discard pending career edits and check that you have a confirmed, shareable fact. On Today, inspect preparation availability. Source-based preparation uses no external AI. Select Prepare today’s applications when the service permits it. A full pilot, missing configuration or allowance stop can make runs unavailable.', durationSeconds: 27, demo: { section: 'Today · Prepare a cloud run', fields: [{ label: 'Preparation provider', value: 'Source-based preparation · no AI' }, { label: 'Availability', value: 'Check the actual workspace. This tutorial reports no live service state.' }], action: 'Prepare today’s applications', note: 'Available external models require separate consent for the selected route.' } },
       { id: 'coverage', stageId: 'loop-run-history', title: 'Read partial results as partial', instruction: 'Inspect every lane in Run history & source coverage. Address reported issues before Resume run. Use Cancel run for queued or running jobs and refresh to confirm.', caption: 'Closing the page does not cancel a cloud run. A source failure is not proof that no jobs exist.', narration: 'Read the status, count and message for every source lane. A partial run may have usable outputs and missing coverage. Address the reported issue before using Resume run if available. Use Cancel run for a queued or running job, then refresh to confirm. Closing the page does not cancel cloud processing.', durationSeconds: 27, demo: { section: 'Run history & source coverage', fields: [{ label: 'Fictional lane A', value: 'Completed: illustrative source check only.' }, { label: 'Fictional lane B', value: 'Unavailable: no coverage should be inferred.' }], action: 'Inspect lane messages', note: 'No real run, search or model call takes place here.' } },
-      { id: 'optional', stageId: 'loop-optional-controls', title: 'Make separate connection choices', instruction: 'Use Optional recurring preparation or Optional Gmail access only when needed and available. Check saved next-run details and confirm any returned mailbox.', caption: 'Pause schedule, Cancel schedule and Cancel run control different things. No automatic sending.', narration: 'Recurring preparation is optional and uses the rules method. Check the saved next run after enabling it. Pause or cancel the schedule controls future scheduling; an active job has a separate Cancel run. Gmail connection and run reading consent are separate choices. A Gmail draft is unsent and requires its own recipient confirmation.', durationSeconds: 29, demo: { section: 'Today · Optional controls', fields: [{ label: 'Optional recurring preparation', value: 'Not enabled in this fictional demo.' }, { label: 'Optional Gmail access', value: 'Not connected in this fictional demo.' }], action: 'Read permissions before choosing', note: 'Google sign-in alone does not authorize inbox reading.' } },
+      { id: 'optional', stageId: 'loop-optional-controls', title: 'Make separate connection choices', instruction: 'Use Optional recurring preparation or Optional Gmail access only when needed and available. Check saved next-run details and confirm any returned mailbox.', caption: 'Pause retains current work. Cancel schedule also stops its latest queued or running scheduled job. No automatic sending.', narration: 'Recurring preparation is optional and uses the rules method. Check the saved next run after enabling it. Pause stops future scheduling and retains current work. Cancel schedule also stops its latest queued or running scheduled job. A separate manual run has its own Cancel run. Gmail connection and run reading consent are separate choices. A Gmail draft is unsent and requires its own recipient confirmation.', durationSeconds: 29, demo: { section: 'Today · Optional controls', fields: [{ label: 'Optional recurring preparation', value: 'Not enabled in this fictional demo.' }, { label: 'Optional Gmail access', value: 'Not connected in this fictional demo.' }], action: 'Read permissions before choosing', note: 'Google sign-in alone does not authorize inbox reading.' } },
       { id: 'recovery', stageId: 'check-draft-recovery', title: 'Choose refresh recovery deliberately', instruction: 'In the free check, open Draft recovery (optional) and check Keep my draft in this tab across refresh if needed. Otherwise route recovery stays in tab memory.', caption: 'Optional tab storage lasts 30 minutes after your last change. Restored approval is cleared.', narration: 'The free check can return from memory when you navigate away and come back in the same tab within thirty minutes. Refresh recovery needs the separate Keep my draft in this tab across refresh choice. It stores the CV and vacancy in that tab for thirty minutes after your last change. Read a restored draft and approve again.', durationSeconds: 29, demo: { section: 'Draft recovery (optional)', fields: [{ label: 'Keep my draft in this tab across refresh', value: 'Choose only if you want temporary tab storage.' }, { label: 'Restored approval', value: 'Cleared; review and approval are required again.' }], action: 'Review recovery choices', note: 'Anyone using this browser tab may see a retained draft.' } },
       { id: 'loop-memory', stageId: 'loop-draft-recovery', title: 'Know what can return', instruction: 'Return to Job Loop in the same tab within 30 minutes for unsaved draft memory. Refresh, closing the tab or changing accounts clears it. Saved account records are separate.', caption: 'Recovered claim and contact confirmations reset. A saved account record is not a temporary draft.', narration: 'Job Loop keeps unsaved career, claim and new-vacancy edits only in memory for up to thirty minutes across page navigation. Refresh, closing the tab or changing accounts clears them. Recovered claim and contact confirmations reset. Saved account records are separate, and cloud runs may still continue. Read recovery help before relying on temporary memory.', durationSeconds: 29, demo: { section: 'Job Loop · Unsaved edits', fields: [{ label: 'Route recovery', value: 'Same tab and account, up to 30 minutes.' }, { label: 'After recovery', value: 'Read the source again; fact and contact confirmations reset.' }], action: 'Read recovery help', note: 'This tutorial records no CV text, account details or browser draft.' } },
     ],
@@ -97,17 +97,32 @@ export interface WalkthroughVideoAsset {
 }
 export interface WalkthroughVideoManifest { version: 1; videos: WalkthroughVideoAsset[] }
 
+/** A released recording uses its measured chapters, never a planned script estimate. */
+export function walkthroughTranscript(tutorial: WalkthroughTutorial, asset?: WalkthroughVideoAsset) {
+  if (!asset || asset.tutorialId !== tutorial.id) return walkthroughScript(tutorial).map(scene => ({ ...scene, timing: 'planned' as const }));
+  return tutorial.scenes.map(scene => {
+    const chapterIndex = asset.chapters?.findIndex(chapter => chapter.id === scene.id) ?? -1;
+    const chapter = chapterIndex >= 0 ? asset.chapters![chapterIndex] : undefined;
+    return {
+      ...scene,
+      startSeconds: chapter?.startSeconds,
+      endSeconds: chapter ? (asset.chapters![chapterIndex + 1]?.startSeconds ?? asset.durationSeconds) : undefined,
+      timing: chapter ? 'recorded' as const : 'unavailable' as const,
+    };
+  });
+}
+
 /** Replace only with a reviewed public manifest after actual rendered assets exist. No startup fetch. */
 export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = {
   "version": 1,
   "videos": [
     {
       "tutorialId": "first-check",
-      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/first-check.mp4",
-      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/first-check.vtt",
-      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/first-check.jpg",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/first-check.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/first-check.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/first-check.jpg",
       "durationSeconds": 111.275,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "usesFictionalData": true,
       "contentKind": "screen_walkthrough",
       "status": "ready",
@@ -148,11 +163,11 @@ export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = {
     },
     {
       "tutorialId": "job-loop-start",
-      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/job-loop-start.mp4",
-      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/job-loop-start.vtt",
-      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/job-loop-start.jpg",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/job-loop-start.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/job-loop-start.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/job-loop-start.jpg",
       "durationSeconds": 95.625,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "usesFictionalData": true,
       "contentKind": "screen_walkthrough",
       "status": "ready",
@@ -188,11 +203,11 @@ export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = {
     },
     {
       "tutorialId": "source-review",
-      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/source-review.mp4",
-      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/source-review.vtt",
-      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/source-review.jpg",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/source-review.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/source-review.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/source-review.jpg",
       "durationSeconds": 78.425,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "usesFictionalData": true,
       "contentKind": "screen_walkthrough",
       "status": "ready",
@@ -223,11 +238,11 @@ export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = {
     },
     {
       "tutorialId": "another-application",
-      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/another-application.mp4",
-      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/another-application.vtt",
-      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/another-application.jpg",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/another-application.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/another-application.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/another-application.jpg",
       "durationSeconds": 75.30000000000001,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "usesFictionalData": true,
       "contentKind": "screen_walkthrough",
       "status": "ready",
@@ -258,11 +273,11 @@ export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = {
     },
     {
       "tutorialId": "controls-and-recovery",
-      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.mp4",
-      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.vtt",
-      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/76ed2305be14a9863e37f4faa5daf0a8586b4874/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.jpg",
-      "durationSeconds": 111.675,
-      "verifiedAt": "2026-10-13T19:53:17.135428+00:00",
+      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.mp4",
+      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.vtt",
+      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ce2b976a40be461d8c5a3f6c65f77bf60a795380/docs/product-hardening/tutorial-assets/videos/controls-and-recovery.jpg",
+      "durationSeconds": 115.37499999999999,
+      "verifiedAt": "2026-10-14T03:58:49.235149+00:00",
       "usesFictionalData": true,
       "contentKind": "screen_walkthrough",
       "status": "ready",
@@ -287,12 +302,12 @@ export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = {
         {
           "id": "recovery",
           "title": "Choose refresh recovery deliberately",
-          "startSeconds": 67.025
+          "startSeconds": 70.725
         },
         {
           "id": "loop-memory",
           "title": "Know what can return",
-          "startSeconds": 87.625
+          "startSeconds": 91.32499999999999
         }
       ]
     }

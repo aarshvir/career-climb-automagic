@@ -27,8 +27,13 @@ const snapshot = z.object({
   }),
   audit: z.array(z.object({ id, actorId: id, action: short, targetId: id.nullable(), at: short, details: z.record(z.union([short, z.number(), z.boolean(), z.null()])) })).max(1000), providerStatus: provider.nullable(),
 });
-const responseSchema = z.object({ snapshot: snapshot.optional(), providerStatus: provider.optional(), config: config.optional(), support: z.object({ id, status, version: count }).optional(), supportDetail: z.object({ id, message: z.string().max(2000) }).optional() });
+const guestMeta=z.object({id,category:z.enum(['help','privacy','bug']),status,version:count,createdAt:short,updatedAt:short,expiresAt:short});
+const guestDetail=guestMeta.extend({message:z.string().max(2000),reply:z.string().max(2000)});
+const responseSchema = z.object({ snapshot: snapshot.optional(), providerStatus: provider.optional(), config: config.optional(), support: z.object({ id, status, version: count }).optional(), supportDetail: z.object({ id, message: z.string().max(2000) }).optional(),guestSupport:z.array(guestMeta.extend({hasReply:z.boolean()})).max(100).optional(),guestSupportDetail:guestDetail.optional() });
 const actionSchema = z.discriminatedUnion('action', [
+  z.object({action:z.literal('guest_support_list')}),
+  z.object({action:z.literal('guest_support_detail'),id}),
+  z.object({action:z.literal('guest_support_update'),id,expectedVersion:count,status,reply:z.string().max(2000).refine(value=>!value.includes('\0'))}),
   z.object({ action: z.literal('snapshot'), days }),
   z.object({ action: z.literal('update_config'), expectedVersion: count, config: configInput }),
   z.object({ action: z.literal('update_support'), id, expectedVersion: count, status }),
@@ -80,5 +85,7 @@ export async function callAdmin(userId: string, action: AdminAction): Promise<Ad
   if (body.action === 'snapshot' && (!parsed.data.snapshot || parsed.data.snapshot.actor.id !== userId || parsed.data.snapshot.window.days !== body.days)) throw failure(503);
   if (body.action === 'update_config' && !parsed.data.config || body.action === 'update_support' && !parsed.data.support || body.action === 'provider_status' && !parsed.data.providerStatus) throw failure(503);
   if (body.action === 'support_detail' && (!parsed.data.supportDetail || parsed.data.supportDetail.id !== body.id)) throw failure(503);
+  if(body.action==='guest_support_list'&&!parsed.data.guestSupport)throw failure(503);
+  if(['guest_support_detail','guest_support_update'].includes(body.action)&&(!parsed.data.guestSupportDetail||parsed.data.guestSupportDetail.id!==('id' in body?body.id:'')))throw failure(503);
   return parsed.data as AdminResponse;
 }
