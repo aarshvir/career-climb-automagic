@@ -11,3 +11,7 @@
 
 .wt-video-chapters{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.wt-video-chapters button{padding:8px 12px;min-height:44px;border:1px solid #ccd3e1;border-radius:9px;font-size:13px;color:#24334a;background:#fff}.wt-video-chapters button:hover{border-color:#2850df;color:#2850df}
 @media print{.wt-selected-task{display:none}}
+
+/* Reserve physical space for native phone controls below the recorded picture. */
+@media(max-width:700px){.wt-main-video{aspect-ratio:4/3;object-fit:contain;object-position:top;background:#000}}
+.wt-main-video:fullscreen{object-position:center}

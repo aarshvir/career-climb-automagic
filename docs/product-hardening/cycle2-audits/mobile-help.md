@@ -69,3 +69,21 @@ The original scores above remain frozen. After the main agent changed the implem
 - **MH-02 targeted recheck passed at DOM-association level:** source line 4 retained the name **Remove source line 4** and its `aria-describedby` resolved to the full literal volunteer passage. A spoken screen-reader session was not performed.
 - Later development HMR reset the open check during a final geometry inspection. No broader regression conclusion or score change is inferred from this narrow recheck. MH-03 remains open in this audit.
 - At **07:49:45.4932410+04:00**, CvCheck still had the same recheck hash. Walkthroughs.tsx remained unchanged, while `src/lib/walkthroughs.ts` had drifted to `6D308D397FFCE0D130666DA539E7D6672BF59EE09AC2458CB6036BB883127FD6`; no revised walkthrough manifest/media is certified by this audit.
+
+### Later MH-03 phone recheck — local candidate only
+
+The original **89.6/100** score remains unchanged. On 14 October at approximately **08:15–08:18+04:00**, independently checked the later local candidate at `/walkthroughs#wt-recorded`. IAB was unavailable on this follow-up, so used a new Chrome tab after coordinating a pause with the main agent; no existing main-agent tabs were touched. Reset the temporary viewport afterward.
+
+**MH-03 targeted overlap recheck passed at 390×844.** Loaded the first-check recording from immutable media revision `ce2b976a40be461d8c5a3f6c65f77bf60a795380`, sought with a chapter, then used native keyboard seeking to pause an actual decoded frame at **1.11275 seconds**. With the optional caption track disabled and the native playback controls visible, the burned two-line caption occupied the band above the controls, rather than underneath them. Browser geometry showed a **295×221.25 px** video box, `object-fit: contain`, top positioning and `aspect-ratio: 4/3`. Document scroll width remained 375 px against a 390 px inner width. Inline burned text is still very small at this scale; the visible full-screen hint, written transcript and optional larger native captions are useful alternatives. No real phone or full-screen session is implied by this check.
+
+Also opened the actual native player menu, chose **Captions → English captions**, and observed the track reach **readyState 2 (LOADED)** and text-track mode **showing**. Larger native caption text appeared above the playback bar. Switched the option back to **Off** before the burned-only observation. Thus, this Chrome session loaded the optional English track; no source-only assumption was made about its response MIME type. This is a first-check recording spot check, not certification of all five recordings or browsers.
+
+Source snapshot at **08:15:03.4460403+04:00**, HEAD `b8299f084ca130d6f194fc210a9a5d28aa2bb27f` with later working changes:
+
+- `src/pages/Walkthroughs.css`: `ADD84A274690D2A58320108084BFA5DD0B576EDCC67FD408458A2EDAA8BDD391`
+- `src/pages/Walkthroughs.tsx`: `4781B063952E82C17A79186F687B68F03186928B9F37F3E680B3A6F13DEAA1B5`
+- `src/lib/walkthroughs.ts`: `6D9441B584DAC5D2DFD7FA7C1C01E83BA7589733EB0D0397410F57BBDB08038A`
+
+The main agent identified this local CSS as preparation for a later publication. This recheck does **not** certify published v17 or a future v18; those release states were not opened here. No runtime edits or new test suite were needed for this visual follow-up.
+
+All three follow-up source hashes still matched at **08:18:08.4864998+04:00**.
