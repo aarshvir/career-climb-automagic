@@ -1,6 +1,6 @@
 # Job Loop request lifetime repair — 14 October 2026
 
-This bounded JV-02 repair prevents an old permission, schedule, support message or erasure request from being applied to the same person's newly created Job Loop. It builds on v23's durable erasure and upload fencing. Publication identifiers and readback are recorded after release; this document alone is not a deployment receipt.
+This bounded JV-02 repair prevents an old permission, schedule, support message or erasure request from being applied to the same person's newly created Job Loop. It builds on v23's durable erasure and upload fencing. Published **v24** on Jobvance.io at **13:37 UTC**, source `5f1912c73f10eea3e0a7f577394263c55f5c3008`. [Exact receipt](releases/2026-10-14-request-generation.json) and [51 live HTTP checks](releases/2026-10-14-request-generation-live-check.json) retain publication/readback evidence. Migration `job_loop_request_generation` is applied as `20261014133523`; control v13, worker v10 and OAuth v4 are ACTIVE, and all three native source readbacks match the reviewed bundles.
 
 ## Behavior
 
@@ -15,6 +15,8 @@ This bounded JV-02 repair prevents an old permission, schedule, support message 
 ## Verification and independent review
 
 Three separately assigned agents implemented/reviewed SQL, delayed runtime/browser cases and draft recovery. Their review exposed additional stale manual-run/support intents, retained route drafts, child-local confirmations, mutation-response reactivation and mixed-lifetime snapshot ordering; those findings were fixed before release.
+
+The production build rendered 38 public routes and 20 guides without external requests. All 12 hosting check groups passed (compressed Worker 2,765,407 bytes). The 51 live HTTP checks match the exact built application bodies and headers, including CV-check, Job Loop, Help Center and main JavaScript. The archive contains 131 members and excludes source, internal docs, dependencies and environment files. Native unauthenticated control/worker calls return 401; the no-code OAuth callback returns the fixed Jobvance route with 303.
 
 The final relevant local run passed **315 Vitest cases across 17 files**. It includes 19 real PGlite SQL cases, nine delayed runtime cases, 35 browser request-contract cases, 50 journey cases and 21 route-draft cases, alongside the existing retention/worker/provider/budget regressions. Application TypeScript passed. Eight hermetic Deno handler tests passed on the generated deployment bundles, including stale-request rejection and read-only erasure continuation. Every runtime fetch in those tests is intercepted; no paid provider or real mailbox is contacted.
 
@@ -35,3 +37,6 @@ Frontend rollback alone does not reverse database grants or restore data. Never 
 JV-02 remains partial: automatic collection of unreferenced terminal-run artifacts is designed but not implemented/enabled; real isolated two-connection and Storage API verification, whole-account erasure and coordinated restore rehearsal remain open. No real candidate was erased for this release.
 
 These local and release-integrity checks do not newly certify production signup/OAuth, native download delivery, unassisted first/second applications, premium continuous video quality, full job-loop parity or a 95/98 product score. The remaining JV-01 work and shared application workflow repairs retain their priority after retention work. No ads, outreach, employer submissions, paid API/search calls or purchases were made.
+
+
+Security Advisor still reports the informational server-only lifecycle RLS-without-client-policy notice, plus existing definer-function and password-protection warnings. These remain tracked; this release does not establish a clean platform-wide security assessment. [Definer routine guidance](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable) and [password protection](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).

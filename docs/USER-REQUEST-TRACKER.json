@@ -8,21 +8,24 @@
     "dating": "Turn start timestamps; earlier standing instructions carried forward."
   },
   "application_baseline": {
-    "version": 23,
-    "source_commit": "033348c302cefa429b3ed447544d8fd1ad356846",
-    "live_checks": 50,
+    "version": 24,
+    "source_commit": "5f1912c73f10eea3e0a7f577394263c55f5c3008",
+    "live_checks": 51,
     "live_failures": 0,
-    "receipt": "../jobvance-repair-evidence/durable-erasure-release-receipt.json",
-    "tracked_receipt": "releases/2026-10-14-durable-erasure.json",
-    "tests": 293,
-    "deno_handler_tests": 6,
+    "receipt": "../jobvance-repair-evidence/request-generation-release-receipt.json",
+    "tracked_receipt": "releases/2026-10-14-request-generation.json",
+    "tests": 315,
+    "test_files": 17,
+    "deno_handler_tests": 8,
     "backend_migration": {
-      "version": "20261014102428",
-      "name": "job_loop_durable_erasure"
+      "version": "20261014133523",
+      "name": "job_loop_request_generation"
     },
-    "edge_control_version": 12,
-    "edge_worker_version": 9,
-    "unchanged_media_validation": "../jobvance-repair-evidence/copy-polish-release-receipt.json"
+    "backend_functions": {
+      "job-loop-control": 13,
+      "job-loop-worker": 10,
+      "job-loop-oauth": 4
+    }
   },
   "requirements": [
     {
@@ -136,7 +139,7 @@
     {
       "id": "RQ-19",
       "instruction": "Keep a rollback to the current moment (13 Oct 16:53; later publishing).",
-      "status_evidence": "**Frontend/source rollback preserved; private data restore unproven.** Saved v19 and remote tag `jobvance-before-audit-publication-2026-10-14`, plus earlier v14/v18 fallbacks. v23 retains saved frontend v22, tag jobvance-before-durable-erasure-2026-10-14 and exact prior edge/schema source backups. Backend rollback needs coordinated review; the old worker cannot safely be restored alone against the new storage guard.",
+      "status_evidence": "**Frontend/source rollback preserved; private data restore unproven.** Saved v19 and remote tag `jobvance-before-audit-publication-2026-10-14`, plus earlier v14/v18 fallbacks. v23 retains saved frontend v22, tag jobvance-before-durable-erasure-2026-10-14 and exact prior edge/schema source backups. Backend rollback needs coordinated review; the old worker cannot safely be restored alone against the new storage guard. v24 preserves saved v23, tag jobvance-before-request-fencing-2026-10-14 and exact pre-change native handler/function sources; bound RPCs require coordinated rollback.",
       "next_acceptance": "JV-08 isolated database/file restore and coordinated rollback rehearsal, preserving erasure generations/version floors and actual/uncertain commitments. A frontend version or Git tag is not a data restore."
     },
     {
@@ -208,7 +211,7 @@
     {
       "id": "RQ-31",
       "instruction": "Reassess end to end after owner reports AI-generated feel, unclear flow and unnecessary student/MBA separation; identify other poor product decisions.",
-      "status_evidence": "**Partial implementation after v21 assessment.** U06/U07 fixed in v22; v23 adds durable Loop erasure fencing, bounded cleanup and refresh-safe continuation. See [work preservation](WORK-PRESERVATION-RELEASE-2026-10-14.md) and [retention release](DURABLE-ERASURE-RELEASE-2026-10-14.md). Other 19 consolidated usability findings remain open; the audience split/shared journey has not been redesigned by these reliability repairs.",
+      "status_evidence": "**Partial implementation after v21 assessment.** U06/U07 fixed in v22; v23 adds durable Loop erasure fencing, bounded cleanup and refresh-safe continuation. See [work preservation](WORK-PRESERVATION-RELEASE-2026-10-14.md) and [retention release](DURABLE-ERASURE-RELEASE-2026-10-14.md). Other 19 consolidated usability findings remain open; the audience split/shared journey has not been redesigned by these reliability repairs. v24 also prevents stale same-owner permissions, source/claim/vacancy drafts, support messages and erasure confirmations from being adopted after fresh setup. Its 315 relevant tests/eight Deno/51 HTTP checks are bounded reliability evidence, not completion of the other 19 usability findings.",
       "next_acceptance": "Finish remaining JV-02 retention scope, remaining JV-01 navigation/save/export behavior and the shared application/home, lower-effort review and simpler entry. Validate actual unassisted first/second applications and opened exports; technical passes do not establish usability."
     }
   ],
@@ -290,7 +293,24 @@
       "tests": 150,
       "new_regressions": 17,
       "unchanged_media_validation": "../jobvance-repair-evidence/copy-polish-release-receipt.json"
+    },
+    {
+      "version": 23,
+      "source_commit": "033348c302cefa429b3ed447544d8fd1ad356846",
+      "live_checks": 50,
+      "live_failures": 0,
+      "receipt": "../jobvance-repair-evidence/durable-erasure-release-receipt.json",
+      "tracked_receipt": "releases/2026-10-14-durable-erasure.json",
+      "tests": 293,
+      "deno_handler_tests": 6,
+      "backend_migration": {
+        "version": "20261014102428",
+        "name": "job_loop_durable_erasure"
+      },
+      "edge_control_version": 12,
+      "edge_worker_version": 9,
+      "unchanged_media_validation": "../jobvance-repair-evidence/copy-polish-release-receipt.json"
     }
   ],
-  "latest_implementation_release": "DURABLE-ERASURE-RELEASE-2026-10-14.md"
+  "latest_implementation_release": "REQUEST-GENERATION-RELEASE-2026-10-14.md"
 }

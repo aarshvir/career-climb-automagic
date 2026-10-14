@@ -1,6 +1,6 @@
 # Jobvance erasure operations
 
-Reviewed 14 October 2026. This describes the deployed Loop-only operation and a whole-account verification checklist. It does not authorize deleting a real account or certify that the whole-account process has been built or rehearsed.
+Reviewed 14 October 2026, including v24 request-generation binding. This describes the deployed Loop-only operation and a whole-account verification checklist. It does not authorize deleting a real account or certify that the whole-account process has been built or rehearsed.
 
 ## Candidate: erase Job Loop only
 
@@ -40,3 +40,9 @@ The current **Privacy or account request** form records a request; it does not e
 | Backups and restore | Document provider backup retention and rehearse isolated restore/re-erasure behavior. Do not describe a Git tag or frontend version as a database/file backup. |
 
 Whole-account completion needs scope-specific receipts and readback, not a filename, support status or empty dashboard. No real account-wide deletion or restore was executed for the v23 release.
+
+## Stale requests and rollback
+
+After erasure and fresh setup, an old tab must refresh and review its action again. Never substitute the newest generation and automatically retry an old schedule, processing permission, mailbox operation, support message or erasure intent. Current erasure continuation is an authenticated read followed by a fresh explicit confirmation; the read itself does not delete anything. An old generation cannot erase a freshly initialized record.
+
+The v24 bound control/worker/OAuth routines and table grants must remain coordinated. A saved frontend or Git tag does not undo those backend changes or restore records/files. Keep the exact pre-change native backups and rehearse coordinated restore in isolation before promising recovery.
