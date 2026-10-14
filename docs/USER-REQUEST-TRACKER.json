@@ -1,0 +1,249 @@
+{
+  "updated": "2026-10-14",
+  "source_window": {
+    "start_utc": "2026-10-11T05:57:11Z",
+    "end_utc": "2026-10-14T05:57:11Z",
+    "main_turns": 16,
+    "user_message_items": 24,
+    "dating": "Turn start timestamps; earlier standing instructions carried forward."
+  },
+  "application_baseline": {
+    "version": 20,
+    "source_commit": "91cc092f470598623eb0f0c4e852c2e25eb5fe2e",
+    "live_checks": 44,
+    "live_failures": 0
+  },
+  "requirements": [
+    {
+      "id": "RQ-01",
+      "instruction": "Build a standalone cloud service; explain accounts and costs (11 Oct 07:52).",
+      "status_evidence": "**Shipped foundation; partial parity.** Supabase control/worker/scheduler replace dependency on Claude desktop/local document execution. See [cloud account guide](CLOUD-JOB-LOOP-ACCOUNTS.md), [parity matrix](JOB-LOOP-PARITY.md), [hosted synthetic validation](INTEGRATED-JOB-LOOP-HOSTED-VALIDATION.json). Some historical comparison text is stale.",
+      "next_acceptance": "Keep a current capability/account matrix and original-loop parity gaps. Do not describe the entire original loop as complete. RQ-11/12 cover unfinished discovery/inbox parity."
+    },
+    {
+      "id": "RQ-02",
+      "instruction": "Plug and play Claude, GPT, Kimi and other models (11 Oct reply).",
+      "status_evidence": "**Partial.** Direct adapters exist; routed candidate choices currently map GPT 6.1 Sol and Sonnet 5.5. Kimi K3 is available to reviewworker, while candidate Kimi remains direct K2.6 with separate key/pricing requirements. See `job-loop-providers.ts`.",
+      "next_acceptance": "Add a tested candidate-provider/model/route capability registry with owner settings, price bounds, consent, failure handling and truthful readiness. Reviewworker support alone does not finish candidate Kimi routing. No new paid test call is required to record this gap."
+    },
+    {
+      "id": "RQ-03",
+      "instruction": "Cap AI/search usage at US$50/month for ten users; remain free (11 Oct reply/buildrequest).",
+      "status_evidence": "**Implemented within scope.** Shared atomic UTC-month ledger covers candidate/admin/model review calls, including uncertain reservations; pilot max 10. No proof of total business cost≤ US$50.",
+      "next_acceptance": "Preserve cap; verify fair allocation and useful-output cost (JV-12). Track infrastructure/domain/email/media and founder-time separately. Do not promise a US$5 entitlement or ten additional available seats."
+    },
+    {
+      "id": "RQ-04",
+      "instruction": "Perform 5–6 independent customer-segment audits and score the as-is product (11 Oct 11:44).",
+      "status_evidence": "**Delivered for earlier snapshots.** [11 Oct ober audit](audits/2026-10-11/README.md) and later independent reports preserve evidence and grades.",
+      "next_acceptance": "Do not present earlier scores as a current regrade; run bounded fresh customer-perspective reviews after material fixes."
+    },
+    {
+      "id": "RQ-05",
+      "instruction": "Summarize what would make the product98/100 (11 Oct 17:55).",
+      "status_evidence": "**Strategy delivered; target unachieved.** [Ten-builds/acceptance strategy](JOBVANCE-TEN-BUILDS-AND-ARCHETYPES.md) and current [19-package plan](audits/2026-10-14-20-role-review/COORDINATOR-BACKLOG.json).",
+      "next_acceptance": "Evidence must determine future grades. No fixed uplift or guarantee is valid."
+    },
+    {
+      "id": "RQ-06",
+      "instruction": "Candidate actions visible, personalized landing pages, minimal manual effort/99% automation (11 Oct 18:02).",
+      "status_evidence": "**Partial.** Three audience routes, Today, opportunities, packets, dated actions and candidate/system activity exist.99% effort saving is unmeasured.",
+      "next_acceptance": "Preserve guest→private work (JV-03), exact edits/recovery (JV-01), per-vacancy composition (JV-04), understandable run/route/outcome history (JV-09/11); observe first/second task effort."
+    },
+    {
+      "id": "RQ-07",
+      "instruction": "Ten builds, ten archetypes, scores and aVC perspective;95/98 targets (11 Oct 18:06).",
+      "status_evidence": "**Concept analysis delivered; targets not achieved.** Ten archetypes/usefulness matrix and simulated investor lens in [strategy](JOBVANCE-TEN-BUILDS-AND-ARCHETYPES.md). This is not ten live customer studies or an externalVC valuation.",
+      "next_acceptance": "Keep targets as goals; measure actual task value, voluntary repeat use, switching reasons and support-adjusted economics before claiming sellability."
+    },
+    {
+      "id": "RQ-08",
+      "instruction": "Choose 3–4 related niches, retaining students and busy 5–10-year professionals; integrate common builds (11 Oct 18:27).",
+      "status_evidence": "**Decision narrowed to three initial audiences:** students, MBA jobseekers and busy professionals. Evidence remains a demand hypothesis.",
+      "next_acceptance": "One shared workflow with audience-specific examples; no separate products or assumed profitable niches without pilot evidence."
+    },
+    {
+      "id": "RQ-09",
+      "instruction": "Build B1–B7, B10 and light B8, with appropriate proposed subscription tiers (11 Oct 18:35).",
+      "status_evidence": "**Substantially shipped; unfinished.** [Integrated contract](INTEGRATED-JOB-LOOP-CONTRACT.md), source and hosted synthetic evidence. Free Starter ready; Focus US$15 / Loop US$29 are proposed, not purchases.",
+      "next_acceptance": "Close the known end-to-end gaps in JV-01–12. Do not mark the entire bundle complete while handoff, work loss, erasure and production seam checks remain."
+    },
+    {
+      "id": "RQ-10",
+      "instruction": "B9/full B8 uncertain, build later; final build request specifies light B8 (11 Oct 18:27–35).",
+      "status_evidence": "**Explicitly deferred/narrowed.** B9 coach/cohort portal and full mock-interview/case coaching are outside the current build. LightB8 factual drafts/briefs exist.",
+      "next_acceptance": "Do not reintroduce separate coach/institution infrastructure or full interview product simply because a strategy matrix lists it."
+    },
+    {
+      "id": "RQ-11",
+      "instruction": "Product should do what original job-loop/job-loop-2 does (earlier standing request; cloud choice11 Oct ).",
+      "status_evidence": "**Partial original-product obligation.** Reusable facts, sourced packets, schedules, tracking and action queue exist; mailbox/portal/receipt-ledger breadth is incomplete.",
+      "next_acceptance": "Refresh [parity matrix](JOB-LOOP-PARITY.md) against current code. Preserve original inbox checks, job search, per-roleCV, recruiter drafts and daily action intent; label unsupported lanes. Internal exclusions do not mean the human abandoned broader parity."
+    },
+    {
+      "id": "RQ-12",
+      "instruction": "Real job discovery/inbox support rather than fake jobs (standing original-loop request).",
+      "status_evidence": "**Limited discovery shipped; dependencies/implementation remain.** Selected public employer feeds work with coverage limits. Paid broad search and Gmail are not connected/configured as working candidate capabilities; LinkedIn/login-walled breadth is incomplete.",
+      "next_acceptance": "Keep manual real-vacancy intake. Complete account/consent/reconnect/security gates before optional Gmail (JV-17); do not claim whole-market coverage or an inbox check that did not happen."
+    },
+    {
+      "id": "RQ-13",
+      "instruction": "Replicate/improve private admin and admin2 like VedicHour, with designated owner (12 Oct 17:55andreply).",
+      "status_evidence": "**Built and previously verified.** [Admin guide](ADMIN-PORTALS-GUIDE.md), [admin/review contract](ADMIN-AND-INDEPENDENT-REVIEW-CONTRACT.md), [13 Oct ober release](LIVE-RELEASE-2026-10-13.md) record owner access/nonowner denial.",
+      "next_acceptance": "Complete sensitive-action step-up, safe diagnostics, both support queues and useful-outcome metrics (JV-07/09/10/11). Do not weaken server-side owner/membership authority."
+    },
+    {
+      "id": "RQ-14",
+      "instruction": "GPT 6.1 Sol, Kimi K3 max and Muse Spark 1.3 max review for each customer persona; impartial consolidated scores/plan (12 Oct 17:55).",
+      "status_evidence": "**Delivered for v12 baseline:**9/9 valid student/MBA/professional reviews. [Reports/provenance](audits/2026-10-12/CONSOLIDATED-REVIEW.md). NativeGPT configuration differs from an external returned-model receipt.",
+      "next_acceptance": "A current post-fix nine-review re-evaluation remains distinct work. The 20-role review is not its replacement. Preserve original scores, returned IDs and uncertain-call costs."
+    },
+    {
+      "id": "RQ-15",
+      "instruction": "Validate replacement OpenRouter key; initially use Sonnet 5.5/GPT 6.1 Sol medium in the live product (12 Oct reply).",
+      "status_evidence": "**Bounded verification delivered13 Oct ; not every model tested.** [Candidate verification](audits/2026-10-13/CANDIDATE-OPENROUTER-VERIFICATION.md): one fictionalGPT routed run and valid owner connection,US$0.002344 usage; source medium-effort contract. Sonnet is selectable but has no separate candidate smoke.",
+      "next_acceptance": "Keep key server-side, no key in tracker/chat/Git. Retain explicit actual-route consent and immutable history. Models assist commentary/questions; deterministic code computes scores/costs. Complete RQ-02 for consistent Kimi routing."
+    },
+    {
+      "id": "RQ-16",
+      "instruction": "Make highest-value fixes, independently audit entire journey with 4–5 reviewers, including a product manager (13 Oct 16:53).",
+      "status_evidence": "**Prior cycles delivered; latest findings still pending.** Hardening/design changes shipped;20-role audit includes Product Architect.",
+      "next_acceptance": "Next fix JV-01 andJV-02 first, then handoff/composition/verification/support. Independent reviewers must assess actual changed behavior without a desired grade."
+    },
+    {
+      "id": "RQ-17",
+      "instruction": "Fix everything recommended, then repeat audit/build loops; don't stop at the report (13 Oct 21:29).",
+      "status_evidence": "**Open implementation obligation.** v20 only republished current application/audit documentation; all 19 new work packages remain unimplemented.",
+      "next_acceptance": "A recommendation closes only after implementation, appropriate checks, release/readback and evidence. Use the current backlog; avoid repeated audits that produce no fix."
+    },
+    {
+      "id": "RQ-18",
+      "instruction": "Work overnight/up to five days without routine permission questions; keep rollback (13 Oct 16:53).",
+      "status_evidence": "**Follow-up exists:** active 3-hour heartbeat through 18 Oct 23:59 Dubai. This is periodic work, not continuously running 20 agents. The follow-up context was updated to v20, this tracker and the verified pending priorities during this reconciliation.",
+      "next_acceptance": "Keep current tracker in every resumed run; act within existing authorization, preserve current source/version, use native publication safeguards. Updated the existing automation; preserved its ACTIVE status, three-hour schedule, thread and deadline, and verified the saved state."
+    },
+    {
+      "id": "RQ-19",
+      "instruction": "Keep a rollback to the current moment (13 Oct 16:53; later publishing).",
+      "status_evidence": "**Frontend/source rollback preserved; private data restore unproven.** Saved v19 and remote tag `jobvance-before-audit-publication-2026-10-14`, plus earlier v14/v18 fallbacks.",
+      "next_acceptance": "Snapshot before fixes; test additive worker/schema compatibility and isolated private-record/file restoration (JV-08). Source rollback is not a proven complete database restore."
+    },
+    {
+      "id": "RQ-20",
+      "instruction": "Clear next click, fewer forms, proper help for required fields (13 Oct 16:53).",
+      "status_evidence": "**Partial.** Six-step guidance, labels, no-CV starter, task help and next actions exist. Known draft loss/re-entry, long evidence/edit separation and search vocabulary gaps remain.",
+      "next_acceptance": "JV-01/03/04/05/10; verify with novices in all three audiences, including account recovery and interrupted task return."
+    },
+    {
+      "id": "RQ-21",
+      "instruction": "Best-in-class human-looking avatar at bottom-right walking through product; best AI video tools (13 Oct 16:53).",
+      "status_evidence": "**Partial, not exact delivery.** Five playable films with captions/transcripts and speaking AI portrait exist. [Production record](product-hardening/tutorial-assets/README.md) states actual capture stills, not continuous recordings; head/eyes mostly static, presenter in right-side column. No premium-human-equivalence claim is verified.",
+      "next_acceptance": "Add a dedicated walkthrough quality/placement task beyond merely “videos exist”: actual current continuous task capture, natural speaking presenter, bottom-right placement without hiding controls, caption/mobile/playback/lip-sync review. Reuse licensed assets; no subscription/render purchase is implicit."
+    },
+    {
+      "id": "RQ-22",
+      "instruction": "Audit every aspect including marketing andSEO; compare5–6 leaders (13 Oct 16:53).",
+      "status_evidence": "**Research delivered, outcome proof pending.** Eight-product design research; six current career-product comparisons and latest20roles. [Competitor review](audits/2026-10-14-20-role-review/20-competitor-intelligence.md).",
+      "next_acceptance": "Same-input first/second-task comparisons remain missing. Treat advertised/tested/unknown claims separately; no forced ranking of Jobvance first."
+    },
+    {
+      "id": "RQ-23",
+      "instruction": "About 20 SEO articles/blogs and presence in Google/Gemini/ChatGPT/Claude; top 0.1% (13 Oct 16:53).",
+      "status_evidence": "**20 guides and technical foundations shipped; rankings/citations unverified.**38 public sitemap URLs, prerendered text/canonicals/schema/private noindex.",
+      "next_acceptance": "JV-11/13/15: search-console/indexing baseline, four deeper anchor guides/worksheet and audience links. Measure actual impressions/clicks/citations; don't guarantee search position or AI inclusion."
+    },
+    {
+      "id": "RQ-24",
+      "instruction": "Natural human-sounding writing and≤20% AI test result; fancy cohesive brand/logo/colors/layout (14 Oct 04:28; earlierhumanizationrequest).",
+      "status_evidence": "**Public redesign/copy shipped; detector goal not a verified metric.** Retired headline replaced by “Stop rewriting your CV for every job.” Shared private design and repeat-use demonstration need work.",
+      "next_acceptance": "Assess comprehension, specificity, clarity and novice task completion. JV-05/13/15. Do not certify an AI-authorship percentage or fictional 30-person development team."
+    },
+    {
+      "id": "RQ-25",
+      "instruction": "Use strong marketing/placeholders for research without users recognizing placeholders (14 Oct 03:16).",
+      "status_evidence": "**Handled with explicitly fictional demos.** Working data remains actual input; examples are labelled.",
+      "next_acceptance": "Keep appealing research prototypes and marketing copy. Do not publish invented customers/testimonials/results as real evidence or misrepresent a speaking AI portrait as an actual employee."
+    },
+    {
+      "id": "RQ-26",
+      "instruction": "Run all 20 named build/growth/operations roles and consolidate deep suggestions (14 Oct 05:06).",
+      "status_evidence": "**Delivered:**20 separate role contexts,100 criteria,88 findings,19 packages. [Index](audits/2026-10-14-20-role-review/INDEX.md).",
+      "next_acceptance": "Role examples such as Stripe/Twilio/Auth0/Sentry are not mandates to install every service. No launch, email or 24/7support service was activated by an audit round. Implementation remains RQ-17."
+    },
+    {
+      "id": "RQ-27",
+      "instruction": "Push all completed work to GitHub and make website live (11 Oct and 14 Oct 05:44).",
+      "status_evidence": "**Application source and 20-role audit pushed; v20 live.** GitHub source `91cc092`;44 HTTP checks, zero failures. Latest source reports are documentation, not implemented fixes.",
+      "next_acceptance": "Keep later tested source/tracker on GitHub. Research/prospect files in the sibling research folder are local deliverables, not automatically part of the application repository; never sweep private CV/email/environment folders into a push."
+    },
+    {
+      "id": "RQ-28",
+      "instruction": "Where is the quiz, is it live? (14 Oct 05:56).",
+      "status_evidence": "**Answered and live:**[`/check`](https://jobvance.io/check), labelled “Free CV check” / “Start my free CV check.”",
+      "next_acceptance": "Make entry and purpose clear; preserve six-step behavior. Original campaign slugs such as`/check/one-cv`return404 and are not implemented. See the supersession note below."
+    },
+    {
+      "id": "RQ-29",
+      "instruction": "Don't miss instructions from the last three days (14 Oct 05:57).",
+      "status_evidence": "**This tracker and three independent reconciliations created.**",
+      "next_acceptance": "Every resumed task reads this ledger and latest release receipt, then updates requirement-level evidence without silently dropping pending work."
+    }
+  ],
+  "standing_constraints": [
+    {
+      "id": "SC-01",
+      "instruction": "Build the recommended **six-step** Jobvance flow with real evidence, keep free, publish; no ads or outreach (10 Oct 20:27).",
+      "treatment": "Explicit human build instruction. It supersedes Claude attachment's original 15-screen funnel mechanics. The old diagnostic screens, fake-progress mechanics, campaign slugs,waitlist and experiment targets are not silently mandatory. They may be future acquisition experiments if chosen later."
+    },
+    {
+      "id": "SC-02",
+      "instruction": "Use existing source, remove fake operational data, make signup/CV/tailoring/download/tracking work.",
+      "treatment": "Preserve real user inputs and verified outcomes; synthetic fixtures remain identified. Current reliability gaps stay open, even when UI/code exists."
+    },
+    {
+      "id": "SC-03",
+      "instruction": "Leave Lovable; retain local source andGitHub and independent domain.",
+      "treatment": "Fulfilled foundation: independent Sites/Cloudflare frontend and existing Supabase backend; source/local history preserved; existing accounts/domain retained. No newbuilder dependency."
+    },
+    {
+      "id": "SC-04",
+      "instruction": "No licence/permit for now; payments pending.",
+      "treatment": "No real-money checkout, merchant signup/purchase, automatic paid conversion or unapproved workaround. Payment eligibility and provider setup remain dependencies. Proposed subscription tiers are not live entitlements."
+    },
+    {
+      "id": "SC-05",
+      "instruction": "Don't run ads or send outreach yet; free pilot.",
+      "treatment": "Binding. No messages, social posts/schedules, directory submissions, paid campaigns or employer applications follow automatically from “all permissions” or role descriptions. Drafts/research only."
+    },
+    {
+      "id": "SC-06",
+      "instruction": "Read the authorized email/attached job-loop skills and productize; fictional demo and 20 UAE coaches with tailored unsent outreach.",
+      "treatment": "Analysis and local deliverables exist in`../jobvance-product-research/`: `PRODUCTIZATION-REPORT.md`, `PILOT-DELIVERY.md`, `UAE-CAREER-COACHES-20.csv`, `UAE-CAREER-COACHES-20-OUTREACH.md`.20 prospects/drafts are not proof of customers or sent messages. No private source email/CV must be published as part of source synchronization."
+    },
+    {
+      "id": "SC-07",
+      "instruction": "Provide specific usable instructions; do not repeatedly ask for permission already granted.",
+      "treatment": "Use concrete acceptance checks and current help/account setup instructions. Ask only for a genuinely unavailable external input/credential through the appropriate secure flow after independent work; never request keys in chat. Native tool approvals still apply."
+    },
+    {
+      "id": "SC-08",
+      "instruction": "High quality, 95/98 scores, 99% effort saving, human writing and search leadership targets.",
+      "treatment": "Retain the owner's quality goals while reporting actual bounded evidence, missingness and current scores. Numeric calculations remain deterministic/tested."
+    }
+  ],
+  "open_implementation_packages": 19,
+  "automation": {
+    "id": "jobvance-product-improvement-and-review",
+    "kind": "heartbeat",
+    "status": "ACTIVE",
+    "frequency": "Every three hours",
+    "end": "2026-10-18T23:59:00+04:00",
+    "context_updated": true
+  },
+  "limits": [
+    "A report publication is not an implemented fix.",
+    "Source rollback is not a demonstrated database/file restore.",
+    "No current 95/98,99% effort,AI-authorship percentage or search-rank guarantee is claimed.",
+    "No secret keys,private CV/email contents or provider credentials are stored here."
+  ]
+}
