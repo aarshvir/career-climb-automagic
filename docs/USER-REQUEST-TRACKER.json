@@ -8,33 +8,27 @@
     "dating": "Turn start timestamps; earlier standing instructions carried forward."
   },
   "application_baseline": {
-    "version": 25,
-    "source_commit": "7a7af403bd62ea6d10bf056b68a67c5e5cbfe9de",
-    "live_checks": 51,
+    "version": 26,
+    "source_commit": "637539cd16f5d70bfbdbffe0eec2fa59064eb335",
+    "live_checks": 81,
     "live_failures": 0,
-    "receipt": "../jobvance-repair-evidence/artifact-maintenance-release-receipt.json",
-    "tracked_receipt": "releases/2026-10-14-artifact-maintenance.json",
-    "tests": 153,
-    "test_files": 10,
-    "deno_handler_tests": 10,
-    "native_postgres_checks": 6,
-    "backend_migrations": [
-      {
-        "version": "20261014162709",
-        "name": "job_loop_terminal_artifact_gc"
-      },
-      {
-        "version": "20261014162711",
-        "name": "job_loop_artifact_maintenance_dispatch"
-      }
-    ],
+    "receipt": "../jobvance-repair-evidence/navigation-save-release-receipt.json",
+    "tracked_receipt": "releases/2026-10-14-navigation-save.json",
+    "tests": 1198,
+    "test_files": 85,
+    "new_regression_cases": 45,
+    "new_test_files": 6,
+    "backend_unchanged_from": 25,
+    "historical_backend_validation": "releases/2026-10-14-artifact-maintenance.json",
     "backend_functions": {
       "job-loop-control": 14,
       "job-loop-worker": 11,
       "job-loop-oauth": 5
     },
     "production_collection_enabled": false,
-    "allowed_owners": 0
+    "allowed_owners": 0,
+    "native_export_delivery": "unverified",
+    "hosted_source_undo": "literal source/final restored; approval cleared; created on-device fixture only"
   },
   "requirements": [
     {
@@ -130,32 +124,34 @@
     {
       "id": "RQ-16",
       "instruction": "Make highest-value fixes, independently audit entire journey with 4–5 reviewers, including a product manager (13 Oct 16:53).",
-      "status_evidence": "**Prior cycles delivered; latest findings still pending.** Hardening/design changes shipped;20-role audit includes Product Architect.",
-      "next_acceptance": "Next fix JV-01 andJV-02 first, then handoff/composition/verification/support. Independent reviewers must assess actual changed behavior without a desired grade."
+      "status_evidence": "**Bounded fixes and independent reviews delivered; broader work remains.** v22–v26 cover demonstrated recovery, lifecycle, retention, navigation/source/save defects. [v26 release](NAVIGATION-SAVE-RELEASE-2026-10-14.md) records three separately assigned implementation/review contexts and correct regressions.",
+      "next_acceptance": "Pursue isolated hosted acceptance where secure synthetic authority exists; deliver JV-03/04 shared application/carryover/composition next. Keep the remaining admin/support/metrics/restore packages and impartial current customer review open."
     },
     {
       "id": "RQ-17",
       "instruction": "Fix everything recommended, then repeat audit/build loops; don't stop at the report (13 Oct 21:29).",
-      "status_evidence": "**Open implementation obligation.** v20 only republished current application/audit documentation; all 19 new work packages remain unimplemented.",
-      "next_acceptance": "A recommendation closes only after implementation, appropriate checks, release/readback and evidence. Use the current backlog; avoid repeated audits that produce no fix."
+      "status_evidence": "**Open implementation obligation.** v22–v26 implement bounded reliability and work-preservation repairs. All 19 broader packages remain open or partial; neither a release nor an assessment completes the plan.",
+      "next_acceptance": "Close recommendations only with implementation, appropriate checks, release/readback and acceptance evidence. Continue the current backlog without repetitive no-change audits."
     },
     {
       "id": "RQ-18",
       "instruction": "Work overnight/up to five days without routine permission questions; keep rollback (13 Oct 16:53).",
-      "status_evidence": "**Follow-up exists:** active 3-hour heartbeat through 18 Oct 23:59 Dubai. This is periodic work, not continuously running 20 agents. The follow-up context was updated to v20, this tracker and the verified pending priorities during this reconciliation.",
-      "next_acceptance": "Keep current tracker in every resumed run; act within existing authorization, preserve current source/version, use native publication safeguards. Updated the existing automation; preserved its ACTIVE status, three-hour schedule, thread and deadline, and verified the saved state."
+      "status_evidence": "**Active three-hour follow-up through 18 Oct 23:59 Dubai.** Latest context is updated to the v26 baseline and remaining priorities. This is periodic work, not 20 continuously running agents.",
+      "next_acceptance": "Read the newest tracker/receipt on every run; preserve rollout/rollback, native safeguards, the deadline and existing no-purchase/no-paid-call/no-send constraints."
     },
     {
       "id": "RQ-19",
       "instruction": "Keep a rollback to the current moment (13 Oct 16:53; later publishing).",
-      "status_evidence": "**Frontend/source rollback preserved; private data restore unproven.** Saved v19 and remote tag `jobvance-before-audit-publication-2026-10-14`, plus earlier v14/v18 fallbacks. v23 retains saved frontend v22, tag jobvance-before-durable-erasure-2026-10-14 and exact prior edge/schema source backups. Backend rollback needs coordinated review; the old worker cannot safely be restored alone against the new storage guard. v24 preserves saved v23, tag jobvance-before-request-fencing-2026-10-14 and exact pre-change native handler/function sources; bound RPCs require coordinated rollback. v25 preserves saved v24 and tag jobvance-before-artifact-maintenance-2026-10-14; permanent tombstones/path fences must survive rollback once claims exist.",
-      "next_acceptance": "JV-08 isolated database/file restore and coordinated rollback rehearsal, preserving erasure generations/version floors and actual/uncertain commitments. A frontend version or Git tag is not a data restore."
+      "status_evidence": "**Frontend/source rollback preserved; private data restore unproven.** Saved v19 and remote tag `jobvance-before-audit-publication-2026-10-14`, plus earlier v14/v18 fallbacks. v23 retains saved frontend v22, tag jobvance-before-durable-erasure-2026-10-14 and exact prior edge/schema source backups. Backend rollback needs coordinated review; the old worker cannot safely be restored alone against the new storage guard. v24 preserves saved v23, tag jobvance-before-request-fencing-2026-10-14 and exact pre-change native handler/function sources; bound RPCs require coordinated rollback. v25 preserves saved v24 and tag jobvance-before-artifact-maintenance-2026-10-14; permanent tombstones/path fences must survive rollback once claims exist. **v26 update:** [navigation/save repair](NAVIGATION-SAVE-RELEASE-2026-10-14.md) covers controlled source undo, tracking recovery/conflicts and optional-save independence; hosted native delivery and unassisted acceptance remain open.",
+      "next_acceptance": "JV-08 isolated database/file restore and coordinated rollback rehearsal, preserving erasure generations/version floors and actual/uncertain commitments. A frontend version or Git tag is not a data restore.",
+      "latest_bounded_evidence": "NAVIGATION-SAVE-RELEASE-2026-10-14.md; source undo/tracking/save controls verified locally and source undo observed live; full usability and native delivery not certified."
     },
     {
       "id": "RQ-20",
       "instruction": "Clear next click, fewer forms, proper help for required fields (13 Oct 16:53).",
-      "status_evidence": "**Partial.** Six-step guidance, labels, no-CV starter, task help and next actions exist. Known draft loss/re-entry, long evidence/edit separation and search vocabulary gaps remain.",
-      "next_acceptance": "JV-01/03/04/05/10; verify with novices in all three audiences, including account recovery and interrupted task return."
+      "status_evidence": "**Partial.** Six-step guidance, labels, no-CV starter, task help and next actions exist. Known draft loss/re-entry, long evidence/edit separation and search vocabulary gaps remain. **v26 update:** [navigation/save repair](NAVIGATION-SAVE-RELEASE-2026-10-14.md) covers controlled source undo, tracking recovery/conflicts and optional-save independence; hosted native delivery and unassisted acceptance remain open.",
+      "next_acceptance": "JV-01/03/04/05/10; verify with novices in all three audiences, including account recovery and interrupted task return.",
+      "latest_bounded_evidence": "NAVIGATION-SAVE-RELEASE-2026-10-14.md; source undo/tracking/save controls verified locally and source undo observed live; full usability and native delivery not certified."
     },
     {
       "id": "RQ-21",
@@ -196,8 +192,8 @@
     {
       "id": "RQ-27",
       "instruction": "Push all completed work to GitHub and make website live (11 Oct and 14 Oct 05:44).",
-      "status_evidence": "Application source, 20-role audit and completed copy/media fixes pushed to GitHub; v21 live. Source 7ef4816 passed 47 live-site and 15 remote-media checks. This copy release does not finish the 19-package implementation plan.",
-      "next_acceptance": "Keep later tested source/tracker on GitHub. Research/prospect files in the sibling research folder are local deliverables, not automatically part of the application repository; never sweep private CV/email/environment folders into a push."
+      "status_evidence": "**Source pushed and v26 live.** Runtime source `637539c`; 1,198 full-suite cases, 12 hosting groups and 81 live HTTP checks pass. [Receipt](releases/2026-10-14-navigation-save.json). Later documentation-only receipts do not require another runtime deployment.",
+      "next_acceptance": "Keep subsequent tested source/tracker on GitHub and publish actual runtime changes. Preserve private research/CV/email/environment folders; no broad file sweep."
     },
     {
       "id": "RQ-28",
@@ -214,14 +210,15 @@
     {
       "id": "RQ-30",
       "instruction": "Remove repeated customer-facing AI presenter, fictional, sample, fake and dummy wording so Jobvance feels like a finished product (14 Oct latest steering).",
-      "status_evidence": "Shipped v21 on Jobvance.io, source 7ef4816. All 38 public pages, sign-in and private analytics labels, pilot tour/download/request copy and five recorded guides cleaned up. 77 relevant tests, 38 rendered pages, 47 live-site checks and 15 media-byte checks passed. 24 video chapter frames reviewed. See COPY-POLISH-2026-10-14.md; internal fixtures/history retained.",
-      "next_acceptance": "Preserve concise example attribution and accessible guide provenance. Existing reliability, original-loop parity and full presenter-quality goals remain separate open requirements."
+      "status_evidence": "**Shipped v21, source `7ef4816`.** All 38 public pages and five recordings cleaned up; 77 tests, 47 live-site checks and 15 media-byte checks passed, with source/caption/geometry checks and 24 chapter-frame inspections. See [copy release note](COPY-POLISH-2026-10-14.md).",
+      "next_acceptance": "Preserve concise example attribution and accessible guide provenance. Existing reliability, original-loop parity and full presenter-quality goals remain separately open. Internal fixtures and historical reports are not public product copy."
     },
     {
       "id": "RQ-31",
       "instruction": "Reassess end to end after owner reports AI-generated feel, unclear flow and unnecessary student/MBA separation; identify other poor product decisions.",
-      "status_evidence": "**Partial implementation after v21 assessment.** U06/U07 fixed in v22; v23 adds durable Loop erasure fencing, bounded cleanup and refresh-safe continuation. See [work preservation](WORK-PRESERVATION-RELEASE-2026-10-14.md) and [retention release](DURABLE-ERASURE-RELEASE-2026-10-14.md). Other 19 consolidated usability findings remain open; the audience split/shared journey has not been redesigned by these reliability repairs. v24 also prevents stale same-owner permissions, source/claim/vacancy drafts, support messages and erasure confirmations from being adopted after fresh setup. Its 315 relevant tests/eight Deno/51 HTTP checks are bounded reliability evidence, not completion of the other 19 usability findings. v25 adds gated artifact-maintenance safeguards and six real isolated PostgreSQL concurrency checks. Collection stays disabled/empty allowlist pending actual Storage acceptance; this does not resolve the remaining clarity/audience/workflow findings.",
-      "next_acceptance": "Finish remaining JV-02 retention scope, remaining JV-01 navigation/save/export behavior and the shared application/home, lower-effort review and simpler entry. Validate actual unassisted first/second applications and opened exports; technical passes do not establish usability."
+      "status_evidence": "**Partial implementation after v21 assessment.** U06/U07 fixed in v22; v23 adds durable Loop erasure fencing, bounded cleanup and refresh-safe continuation. See [work preservation](WORK-PRESERVATION-RELEASE-2026-10-14.md) and [retention release](DURABLE-ERASURE-RELEASE-2026-10-14.md). Other 19 consolidated usability findings remain open; the audience split/shared journey has not been redesigned by these reliability repairs. v24 also prevents stale same-owner permissions, source/claim/vacancy drafts, support messages and erasure confirmations from being adopted after fresh setup. Its 315 relevant tests/eight Deno/51 HTTP checks are bounded reliability evidence, not completion of the other 19 usability findings. v25 adds gated artifact-maintenance safeguards and six real isolated PostgreSQL concurrency checks. Collection stays disabled/empty allowlist pending actual Storage acceptance; this does not resolve the remaining clarity/audience/workflow findings. **v26 update:** [navigation/save repair](NAVIGATION-SAVE-RELEASE-2026-10-14.md) covers controlled source undo, tracking recovery/conflicts and optional-save independence; hosted native delivery and unassisted acceptance remain open.",
+      "next_acceptance": "Continue JV-03/04 shared application/home and consented carryover, then lower-effort review and neutral entry. Pursue safely isolated Storage/restore acceptance and actual first/second-application/native-file evidence; v26 local repairs are not the remaining audience/workflow fixes.",
+      "latest_bounded_evidence": "NAVIGATION-SAVE-RELEASE-2026-10-14.md; source undo/tracking/save controls verified locally and source undo observed live; full usability and native delivery not certified."
     }
   ],
   "standing_constraints": [
@@ -339,9 +336,38 @@
         "job-loop-worker": 10,
         "job-loop-oauth": 4
       }
+    },
+    {
+      "version": 25,
+      "source_commit": "7a7af403bd62ea6d10bf056b68a67c5e5cbfe9de",
+      "live_checks": 51,
+      "live_failures": 0,
+      "receipt": "../jobvance-repair-evidence/artifact-maintenance-release-receipt.json",
+      "tracked_receipt": "releases/2026-10-14-artifact-maintenance.json",
+      "tests": 153,
+      "test_files": 10,
+      "deno_handler_tests": 10,
+      "native_postgres_checks": 6,
+      "backend_migrations": [
+        {
+          "version": "20261014162709",
+          "name": "job_loop_terminal_artifact_gc"
+        },
+        {
+          "version": "20261014162711",
+          "name": "job_loop_artifact_maintenance_dispatch"
+        }
+      ],
+      "backend_functions": {
+        "job-loop-control": 14,
+        "job-loop-worker": 11,
+        "job-loop-oauth": 5
+      },
+      "production_collection_enabled": false,
+      "allowed_owners": 0
     }
   ],
-  "latest_implementation_release": "ARTIFACT-MAINTENANCE-RELEASE-2026-10-14.md",
+  "latest_implementation_release": "NAVIGATION-SAVE-RELEASE-2026-10-14.md",
   "latest_synthetic_customer_assessment": {
     "date": "2026-10-14",
     "site_version": 25,

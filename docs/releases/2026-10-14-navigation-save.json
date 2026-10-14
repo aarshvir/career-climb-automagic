@@ -1,0 +1,117 @@
+{
+  "releasedAt": "2026-10-14T19:34:14.028881+00:00",
+  "site": "https://jobvance.io",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "version": 26,
+  "sourceCommit": "637539cd16f5d70bfbdbffe0eec2fa59064eb335",
+  "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_2dc8ea7a34208191979fb787654a1691",
+  "deploymentId": "appgdep_6acfd917661481919d8fb1d6697fb34d",
+  "status": "succeeded",
+  "nativeDeployment": {
+    "id": "appgdep_6acfd917661481919d8fb1d6697fb34d",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_2dc8ea7a34208191979fb787654a1691",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-14T19:34:14.028881+00:00"
+  },
+  "artifact": {
+    "archive": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-repair-evidence\\navigation-save-2026-10-14.tar.gz",
+    "sha256": "e25eaa0999f945a99637131babdd1cfb7db34fba71217a35361cb752fa172cb6",
+    "bytes": 4694762,
+    "members": 131,
+    "forbiddenMembers": [],
+    "workerBytesMatch": true,
+    "savedArchive": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_000000006a448209ba1f9b2dcae8cfeb",
+      "content_hash": "sha256:e966b6487d0454e9e2eefe930b1b075e4f1f51e1c619b295e455ed148963e17c",
+      "size_bytes": 14458880,
+      "file_count": 123
+    }
+  },
+  "validation": {
+    "vitest": {
+      "files": 85,
+      "passed": 1198,
+      "failed": 0,
+      "newCases": 45,
+      "newFiles": 6,
+      "report": "../jobvance-repair-evidence/navigation-save-vitest.json"
+    },
+    "typescript": "passed",
+    "hostingGroups": 12,
+    "liveHttpChecks": 81,
+    "liveHttpFailures": 0,
+    "publicPages": 38,
+    "guideArticles": 20,
+    "prerenderExternalRequests": 0,
+    "workerCompressedBytes": 2770484
+  },
+  "backend": {
+    "changed": false,
+    "priorReceipt": "2026-10-14-artifact-maintenance.json",
+    "controlVersion": 14,
+    "workerVersion": 11,
+    "oauthVersion": 5,
+    "collectionEnabled": false,
+    "ownerAllowlistChanged": false,
+    "note": "Backend and disabled collection are retained from v25; no migration, handler deployment or Storage mutation in this release.",
+    "collectionGateReadback": {
+      "enabled": false,
+      "allowedOwners": 0,
+      "checkedAt": "2026-10-14T19:42:30.312351+00:00",
+      "scope": "SELECT enabled and allowlist cardinality only; no candidate or Storage data accessed."
+    }
+  },
+  "rollback": {
+    "tag": "jobvance-before-navigation-save-repair-2026-10-14",
+    "tagCommit": "84ce5f3b619e01506c5a108b2cd560362787f74c",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_c52692c89a088191861721d9e6cfc762",
+    "note": "Frontend rollback only; keep all current backend fences and commitments. Not a database/file restore."
+  },
+  "hostedBrowser": {
+    "input": "created release-check CV and vacancy",
+    "existingSession": true,
+    "sourceReplacementUndoExact": true,
+    "finalEditsAfterUndoExact": true,
+    "approvalClearedAfterUndo": true,
+    "pdfPreviewPages": 1,
+    "downloadButtonsEnabledBeforeUndo": [
+      "pdf",
+      "docx",
+      "txt"
+    ],
+    "nativeFileDelivery": "unverified: PDF click/fallback download-event timeouts, no matching file at checked ordinary destination; tool reports blob retrieval unsupported",
+    "docxTxtNativeDelivery": "not tested",
+    "accountSave": false,
+    "trackingWrite": false,
+    "cloudRun": false,
+    "erasure": false,
+    "paidModelCalls": 0,
+    "limitations": [
+      "Assisted scripted QA is not unassisted customer research.",
+      "One batched edit/continue action needed a settled retry; cause not established.",
+      "Fresh signup/full OAuth, current mobile delivery, actual native export opening and complete first/second application acceptance remain open."
+    ]
+  },
+  "remaining": [
+    "Shared application/home and consented first-check carryover",
+    "Grouped lower-effort review, explicit per-vacancy preparation/composition and simpler neutral entry",
+    "Hosted native file receipt/opening and unassisted first/second application acceptance",
+    "Dedicated hosted Storage/dispatch and coordinated whole-account/restore verification",
+    "Original-loop parity, candidate model parity, natural continuous walkthroughs and current cross-model persona re-evaluation"
+  ],
+  "sourceArchive": {
+    "path": "..\\jobvance-repair-evidence\\navigation-save-source-637539c.zip",
+    "bytes": 29425597,
+    "sha256": "6ad930e4a31359742d91ee295bca037e871d563be0c292d7d923961cde5d863e"
+  }
+}
