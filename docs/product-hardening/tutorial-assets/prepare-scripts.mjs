@@ -22,8 +22,9 @@ for (const tutorial of walkthroughs) {
   await fs.writeFile(path.join(outputDir, `${tutorial.id}.txt`), tutorial.scenes.map(s => s.narration).join('\n\n') + '\n');
 }
 const first = walkthroughs.find(t => t.id === 'first-check');
+const scenesPerPart = Math.ceil(first.scenes.length / 3);
 for (let part = 0; part < 3; part++) {
-  const scenes = first.scenes.slice(part * 2, part * 2 + 2);
+  const scenes = first.scenes.slice(part * scenesPerPart, (part + 1) * scenesPerPart);
   await fs.writeFile(path.join(outputDir, `first-check-part-${part + 1}.txt`), scenes.map(s => s.narration).join(' ') + '\n');
   await fs.writeFile(path.join(outputDir, `first-check-part-${part + 1}.json`), JSON.stringify({
     tutorialId: first.id, part: part + 1, totalParts: 3,
