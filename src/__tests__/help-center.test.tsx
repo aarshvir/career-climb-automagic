@@ -74,6 +74,22 @@ describe('task-focused public help', () => {
     expect(container.querySelector('#job-loop-controls')).toHaveTextContent('partial, blocked or failed');
   });
 
+  it('teaches the three-stage free check and names no retired check controls', () => {
+    const { container } = showHelp();
+    const first = container.querySelector('#first-check')!;
+    for (const label of ['Add your CV and the job', 'Upload your CV (PDF, Word or text, up to 5 MB)', 'The job description', 'Job title', 'Company (optional)', 'Tailor my CV for this job', 'Compare without AI', 'Review changes', 'What changed for this job', 'Keep my original', 'Remove this summary', 'Quick questions (answer only if true)', 'Your tailored CV', 'Your CV for this job', 'Add something the job asks for (optional)', 'Continue to download', 'Maximum PDF length', 'Open the exact PDF preview in a new tab', 'I have checked this CV. It is accurate and safe to share with employers.', 'Download PDF, Download Word or Download TXT', 'only rewords your own CV lines']) expect(first).toHaveTextContent(label);
+    const next = container.querySelector('#second-application')!;
+    for (const label of ['Applying for another job?', 'Tailor for another job', 'Your next job', 'Check or edit the CV you are reusing', 'CV version for another vacancy', 'Use this CV for another vacancy', 'Undo new application']) expect(next).toHaveTextContent(label);
+    expect(container.querySelector('#privacy')).toHaveTextContent('sends the CV text and job description to our AI provider');
+    expect(container.querySelector('#privacy')).toHaveTextContent('Compare without AI keeps your CV on this device');
+    const text = helpTopics.flatMap(topic => [topic.title, topic.summary, ...topic.steps, ...topic.notes, ...(topic.fields ?? []).flatMap(field => [field.label, field.help])]).join(' ');
+    const retired = ['Continue to your CV', 'Read a CV file on this device', 'Use this reviewed CV text', 'One vacancy', 'Vacancy description', 'Check these inputs', 'The evidence', 'Review my CV & questions', 'Your review', 'Recheck my changes', 'Approve & download', 'Approve this CV', 'Preview current PDF', 'Check this next vacancy', 'Your next application', 'Inspect or edit the reused CV', 'Your saved free checks'];
+    for (const label of retired) expect(text, `help mentions ${label}`).not.toContain(label);
+    expect(text).not.toMatch(/Target role(?!s)/);
+    expect(searchHelpTopics('Tailor for another job')[0].id).toBe('second-application');
+    expect(searchHelpTopics('Compare without AI').some(topic => topic.id === 'first-check')).toBe(true);
+  });
+
   it('reveals a quick-start anchor even after a search hid that topic', async () => {
     const user = userEvent.setup();
     const { container } = showHelp();
