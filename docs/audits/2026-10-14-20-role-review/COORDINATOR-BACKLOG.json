@@ -138,7 +138,8 @@
         "evidence": "docs/releases/2026-10-15-check-tracking.json",
         "implemented": "Owner-checked unique saved-check/tracker relationship, retry-safe progress preservation and home grouping. No guessed historical merges.",
         "remaining": "Persisted check-to-Loop relationship; full canonical repeated application workflow and authenticated hosted acceptance."
-      }
+      },
+      "unpublished_work": "15 October: owner/generation-bound saved-check to Loop SQL foundation tested locally (86 cases, six native groups). Unapplied; handler/UI/home integration and independent review remain. See ../2026-10-15-check-loop-link/ASSESSMENT.md. Public v30 unchanged."
     },
     {
       "id": "JV-04",
