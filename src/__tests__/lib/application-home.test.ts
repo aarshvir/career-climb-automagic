@@ -25,6 +25,39 @@ describe('Applications home read-only projection', () => {
     expect(packed.progress.map(row => [row.id, row.status, row.notes])).toEqual([[second, 'interview', 'Exact notes'], [third, 'offer', 'Second attempt']]);
     expect(rows.filter(row => row.source === 'trackers').map(row => row.id)).toEqual(expect.arrayContaining([`tracker:${id}`, 'tracker:manual']));
   });
+  it('groups progress only by an exact owned saved check link, retaining unrelated same-title work', () => {
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check()], packs: [pack()], trackers: [tracker({ cv_check_id: id, updated_at: '2026-10-17T12:00:00Z' }), tracker({ id: third }), tracker({ id: 'pack-tracker', pack_id: id })] });
+    expect(rows).toHaveLength(3);
+    const checked = rows.find(row => row.id === `check:${id}`)!;
+    expect(checked.progress).toEqual([expect.objectContaining({ id: second, status: 'interview', notes: 'Exact notes', appliedAt: date, followUpAt: '2026-10-20', href: `/dashboard?tracked=${second}` })]);
+    expect(checked.lastRecordedAt).toBe('2026-10-17T12:00:00Z');
+    expect(rows[0].id).toBe(`check:${id}`);
+    expect(rows.find(row => row.id === `pack:${id}`)?.progress.map(row => row.id)).toEqual(['pack-tracker']);
+    expect(rows.find(row => row.id === `tracker:${third}`)).toBeDefined();
+  });
+  it('retains tracker notes and exact destination when the linked check is unavailable or deleted', () => {
+    for (const checks of [[], [check({ user_id: 'other' })]]) {
+      const [row] = buildApplicationHome('owner', { ...empty(), checks, trackers: [tracker({ cv_check_id: id })] });
+      expect(row.id).toBe(`tracker:${second}`);
+      expect(row.progress[0].notes).toBe('Exact notes');
+      expect(row.href).toBe(`/dashboard?tracked=${second}`);
+      expect(row.documents).toEqual([]);
+      expect(row.note).toContain('linked saved check is not in');
+    }
+    const [detached] = buildApplicationHome('owner', { ...empty(), trackers: [tracker({ cv_check_id: null })] });
+    expect(detached.progress[0].status).toBe('interview');
+  });
+  it('never attributes foreign-owner or unlinked tracking to an owned saved check', () => {
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check()], trackers: [tracker({ user_id: 'other', cv_check_id: id }), tracker({ id: third, cv_check_id: second })] });
+    expect(rows.find(row => row.source === 'checks')?.progress).toEqual([]);
+    expect(rows.find(row => row.source === 'trackers')?.id).toBe(`tracker:${third}`);
+  });
+  it('keeps contradictory check and pack links separate instead of attributing progress twice', () => {
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check()], packs: [pack()], trackers: [tracker({ pack_id: id, cv_check_id: id })] });
+    expect(rows).toHaveLength(3);
+    expect(rows.filter(row => row.source !== 'trackers').every(row => row.progress.length === 0)).toBe(true);
+    expect(rows.find(row => row.source === 'trackers')?.note).toContain('conflicting');
+  });
   it('never makes an approved check into a submitted application or revives approval', () => {
     const [row] = buildApplicationHome('owner', { ...empty(), checks: [check()] });
     expect(row.progress).toEqual([]); expect(row.note).toContain('fresh review');

@@ -69,6 +69,46 @@ describe('Applications home actual saved work', () => {
     expect(detail.getByText('interview', { exact: true })).toBeInTheDocument();
     expect(detail.getByRole('link', { name: 'Update this tracking entry' })).toHaveAttribute('href', `/dashboard?tracked=${trackedId}`);
   });
+  it('shows linked saved-check notes, dates and the exact tracking action together', async () => {
+    trackers = [{ ...tracker(), pack_id: null, cv_check_id: id }];
+    render(tree(`/applications?item=${encodeURIComponent(`check:${id}`)}`)); await loaded();
+    const detail = within(screen.getByRole('region', { name: 'Application details' }));
+    expect(detail.getByText('EXACT_TRACKER_NOTES')).toBeInTheDocument();
+    expect(detail.getByText('interview', { exact: true })).toBeInTheDocument();
+    expect(detail.getByRole('link', { name: 'Update this tracking entry' })).toHaveAttribute('href', `/dashboard?tracked=${trackedId}`);
+    expect(list().getAllByRole('button')).toHaveLength(2);
+    expect(list().queryByRole('button', { name: /Tracked application/ })).not.toBeInTheDocument();
+  });
+  it('keeps an exact tracker selection actionable while its saved check is unavailable, then offers its real joined detail', async () => {
+    const checks = deferred<FreeCvCheck[]>(); mocks.checks.mockReturnValueOnce(checks.promise);
+    trackers = [{ ...tracker(), pack_id: null, cv_check_id: id }];
+    render(tree(`/applications?item=${encodeURIComponent(`tracker:${trackedId}`)}`));
+    await screen.findByRole('link', { name: 'Update this tracked application' });
+    expect(screen.getByText('EXACT_TRACKER_NOTES')).toBeInTheDocument();
+    await act(async () => checks.resolve([check()])); await loaded();
+    expect(screen.getByRole('heading', { name: 'This tracking entry is grouped with its saved check' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open this application pack' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'View the linked check and progress' }));
+    expect(screen.getByRole('link', { name: 'Reopen this CV check' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
+    expect(screen.getByText('EXACT_TRACKER_NOTES')).toBeInTheDocument();
+  });
+  it('keeps check-linked tracking visible when saved checks fail without inventing a document', async () => {
+    trackers = [{ ...tracker(), pack_id: null, cv_check_id: id }]; mocks.checks.mockRejectedValue(new Error('offline'));
+    render(tree(`/applications?item=${encodeURIComponent(`tracker:${trackedId}`)}`));
+    await screen.findByRole('button', { name: 'Retry saved cv checks' });
+    await screen.findByRole('link', { name: 'Update this tracked application' });
+    expect(screen.getByText('EXACT_TRACKER_NOTES')).toBeInTheDocument();
+    expect(screen.getByText(/linked saved check is not in/)).toBeInTheDocument();
+    expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument();
+  });
+  it('reports unknown tracking for a saved check when the tracker read fails', async () => {
+    trackerRead = async () => ({ data: [], error: new Error('offline') });
+    render(tree(`/applications?item=${encodeURIComponent(`check:${id}`)}`));
+    await screen.findByRole('button', { name: 'Retry application tracking' });
+    expect(list().getByRole('button', { name: /Saved CV check.*Tracking not loaded/ })).toBeInTheDocument();
+    expect(screen.getByText('Tracking is not currently available. Retry its source above.')).toBeInTheDocument();
+    expect(screen.queryByText('No application progress is linked to this saved document.')).not.toBeInTheDocument();
+  });
   it('keeps saved checks and trackers available when packs fail, with no empty-source claim', async () => {
     packRead = async () => ({ data: [], error: new Error('offline') }); render(tree());
     await screen.findByRole('button', { name: 'Retry application packs' });

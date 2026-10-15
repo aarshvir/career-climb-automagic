@@ -44,21 +44,29 @@ function packetDocument(packet: LoopPacket, snapshot: LoopSnapshot): Application
 /** Read-only projection. Only actual foreign keys join records; similar wording is never an identity. */
 export function buildApplicationHome(ownerId: string, input: ApplicationHomeInput): ApplicationHomeRow[] {
   const checks = input.checks.filter(row => row.user_id === ownerId), packs = input.packs.filter(row => row.user_id === ownerId), trackers = input.trackers.filter(row => row.user_id === ownerId);
-  const rows: ApplicationHomeRow[] = checks.map(row => ({
-    id: `check:${row.id}`, source: 'checks', sourceLabel: 'Saved CV check', title: row.job_title, company: row.company, vacancy: row.job_description, employerUrl: null,
-    documents: [{ id: `${row.id}:final`, label: 'Reviewed final CV', state: row.status === 'approved' ? 'Reviewed check saved' : 'Saved draft', text: row.reviewed_text, createdAt: row.created_at, reasons: [] }, { id: `${row.id}:original`, label: 'Original source CV', state: 'Original input — may include details removed from the final CV', text: row.original_text, createdAt: row.created_at, reasons: [] }],
-    progress: [], lastRecordedAt: recorded(row.updated_at, row.created_at), href: href(`/check?savedCheck=${row.id}`), action: 'Reopen this CV check', note: 'A saved CV check does not record an application being sent. Reopening starts a fresh review.',
-  }));
+  const rows: ApplicationHomeRow[] = checks.map(row => {
+    const linked = trackers.filter(tracker => !tracker.pack_id && tracker.cv_check_id === row.id);
+    return {
+      id: `check:${row.id}`, source: 'checks', sourceLabel: 'Saved CV check', title: row.job_title, company: row.company, vacancy: row.job_description, employerUrl: null,
+      documents: [{ id: `${row.id}:final`, label: 'Reviewed final CV', state: row.status === 'approved' ? 'Reviewed check saved' : 'Saved draft', text: row.reviewed_text, createdAt: row.created_at, reasons: [] }, { id: `${row.id}:original`, label: 'Original source CV', state: 'Original input — may include details removed from the final CV', text: row.original_text, createdAt: row.created_at, reasons: [] }],
+      progress: linked.map(trackerProgress), lastRecordedAt: recorded(row.updated_at, row.created_at, ...linked.map(tracker => tracker.updated_at)), href: href(`/check?savedCheck=${row.id}`), action: 'Reopen this CV check', note: linked.length ? 'Reported progress comes from the tracking entry linked to this saved check. Reopening starts a fresh review.' : 'A saved CV check does not record an application being sent. Reopening starts a fresh review.',
+    };
+  });
   for (const row of packs) {
-    const linked = trackers.filter(tracker => tracker.pack_id === row.id);
+    const linked = trackers.filter(tracker => !tracker.cv_check_id && tracker.pack_id === row.id);
     rows.push({ id: `pack:${row.id}`, source: 'packs', sourceLabel: 'Application pack', title: row.job_title, company: row.company, vacancy: row.job_description, employerUrl: applicationEmployerUrl(row.job_url),
       documents: [{ id: `${row.id}:tailored`, label: 'Tailored CV', state: row.status === 'approved' ? 'Approved pack saved — reopen to review downloads' : 'Draft — review required', text: row.tailored_text, createdAt: row.created_at, reasons: [] }, { id: `${row.id}:original`, label: 'Original source CV', state: 'Original input', text: row.original_text, createdAt: row.created_at, reasons: [] }],
       progress: linked.map(trackerProgress), lastRecordedAt: recorded(row.created_at, ...linked.map(tracker => tracker.updated_at)), href: href(`/dashboard?pack=${row.id}`), action: 'Open this application pack', note: linked.length ? 'Reported progress comes from the tracking entries linked to this pack.' : 'No tracking entry is linked to this pack.',
     });
   }
-  const packIds = new Set(packs.map(row => row.id));
-  for (const row of trackers.filter(tracker => !tracker.pack_id || !packIds.has(tracker.pack_id))) rows.push({
-    id: `tracker:${row.id}`, source: 'trackers', sourceLabel: 'Tracked application', title: row.job_title, company: row.company, vacancy: '', employerUrl: applicationEmployerUrl(row.job_url), documents: [], progress: [trackerProgress(row)], lastRecordedAt: recorded(row.updated_at, row.created_at), href: href(`/dashboard?tracked=${row.id}`), action: 'Update this tracked application', note: row.pack_id ? 'The linked pack is not in the currently loaded pack list. This tracking entry is retained separately.' : 'This tracking entry has no linked CV pack.',
+  const packIds = new Set(packs.map(row => row.id)), checkIds = new Set(checks.map(row => row.id));
+  // A contradictory pair of source IDs cannot safely attribute progress to either document.
+  const standaloneTrackers = trackers.filter(tracker => {
+    if (tracker.pack_id && tracker.cv_check_id) return true;
+    return !(tracker.pack_id && packIds.has(tracker.pack_id)) && !(tracker.cv_check_id && checkIds.has(tracker.cv_check_id));
+  });
+  for (const row of standaloneTrackers) rows.push({
+    id: `tracker:${row.id}`, source: 'trackers', sourceLabel: 'Tracked application', title: row.job_title, company: row.company, vacancy: '', employerUrl: applicationEmployerUrl(row.job_url), documents: [], progress: [trackerProgress(row)], lastRecordedAt: recorded(row.updated_at, row.created_at), href: href(`/dashboard?tracked=${row.id}`), action: 'Update this tracked application', note: row.pack_id && row.cv_check_id ? 'This tracking entry has conflicting document links and is shown separately.' : row.cv_check_id ? 'The linked saved check is not in the currently loaded check list. This tracking entry is retained separately.' : row.pack_id ? 'The linked pack is not in the currently loaded pack list. This tracking entry is retained separately.' : 'This tracking entry has no linked CV pack.',
   });
   if (input.loop?.existingState === 'active' && validGeneration(input.loop.snapshot.lifecycleGeneration)) {
     const snapshot = input.loop.snapshot, generation = snapshot.lifecycleGeneration!;
