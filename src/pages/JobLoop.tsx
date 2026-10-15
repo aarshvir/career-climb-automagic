@@ -19,7 +19,7 @@ import LoopSavedCheckImport, { usableSavedCheck, type SavedCheckScope, type Save
 import { readSavedCheckContinuation, savedCheckContinuationPath } from '@/lib/saved-check-continuation';
 import type { FreeCvCheck } from '@/lib/free-check-api';
 import { loopDateLabel, loopFollowUpDue } from '@/lib/loop-calendar';
-import { clearLoopWorkingDraft, recoverLoopWorkingDraft, retainLoopWorkingDraft, type LoopClaimDraft } from '@/lib/loop-draft-memory';
+import { clearLoopWorkingDraft, recoverLoopWorkingDraft, retainLoopWorkingDraft, savedCheckVacancyFingerprint, type PendingSavedCheckLink, type LoopClaimDraft } from '@/lib/loop-draft-memory';
 import type { LoopAction, LoopApplicationStatus, LoopClaim, LoopClaimInput, LoopContact, LoopOpportunity, LoopPacket, LoopProfileInput, LoopProviderId, LoopResponse, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
 import './JobLoop.css';
 import { pruneTrackingApplications, registerTrackingDraftOwner, setTrackingLoopGeneration, trackingDraftAuthority, trackingDraftIdentity, trackingDraftScope, useTrackingDraft, type TrackingDraftScope } from '@/lib/tracking-draft-memory';
@@ -34,7 +34,7 @@ const statuses: LoopApplicationStatus[] = ['saved', 'prepared', 'applied', 'inte
 const display = (value: string) => value.replace(/_/g, ' ');
 const split = (value: string) => value.split(/[\n,]/).map(item => item.trim()).filter(Boolean);
 const listInputs = (profile: LoopProfileInput) => ({ targets: profile.targetTitles.join('\n'), locations: profile.locations.join('\n'), languages: profile.languages.join(', '), excluded: profile.excludedTerms.join('\n') });
-type SavedCheckBackup = { profile: LoopProfileInput; profileDirty: boolean; lists: ReturnType<typeof listInputs>; detailsReady: boolean; copiedHeader: { name: string; contactLine: string }; suggestions: { key: string; value: LoopClaimInput }[]; opportunity: { title: string; company: string; location: string; jobUrl: string; description: string; withContact: boolean; contact: LoopContact } };
+type SavedCheckBackup = { pendingCheckLink: PendingSavedCheckLink | null; profile: LoopProfileInput; profileDirty: boolean; lists: ReturnType<typeof listInputs>; detailsReady: boolean; copiedHeader: { name: string; contactLine: string }; suggestions: { key: string; value: LoopClaimInput }[]; opportunity: { title: string; company: string; location: string; jobUrl: string; description: string; withContact: boolean; contact: LoopContact } };
 const date = loopDateLabel;
 const activeRun = (snapshot: LoopSnapshot) => snapshot.runs.some(run => run.status === 'queued' || run.status === 'running');
 const packetSourcesCurrent = (packet: LoopPacket, snapshot: LoopSnapshot) => packet.status !== 'revoked' && !!snapshot.profile && packet.profileRevision === snapshot.profile.revision && Object.keys(packet.claimVersions).length > 0 && Object.entries(packet.claimVersions).every(([id, revision]) => snapshot.claims.some(claim => claim.id === id && claim.revision === revision && claim.status === 'active' && claim.confirmed && claim.shareable));
@@ -133,6 +133,9 @@ export default function JobLoop() {
   const [selectedId, setSelectedId] = useState<string | null>(null), [reviewedText, setReviewedText] = useState(''), [facts, setFacts] = useState(false), [disclosure, setDisclosure] = useState(false), [recipientConsent, setRecipientConsent] = useState(false);
   const [gmailTicket, setGmailTicket] = useState(returnedGmailTicket), [gmailPreview, setGmailPreview] = useState<NonNullable<LoopResponse['gmailPreview']> | null>(null), [previewOwner, setPreviewOwner] = useState<string | null>(null), [mailboxConfirmed, setMailboxConfirmed] = useState(false), [previewBusy, setPreviewBusy] = useState(false), [ticketExpired, setTicketExpired] = useState(false);
   const [savedCheckIntent, setSavedCheckIntent] = useState<{ id: string; scope: SavedCheckScope } | null>(null);
+  const [pendingCheckLink, setPendingCheckLink] = useState<PendingSavedCheckLink | null>(null), [linkConsent, setLinkConsent] = useState(false);
+  const opportunityDraftRevision = useRef(0);
+  const linkConsentRevision = useRef<number | null>(null);
   const [savedCheckUndo, setSavedCheckUndo] = useState<{ scope: SavedCheckScope; recordVersion: number; before: SavedCheckBackup } | null>(null), [restoreImportConfirmed, setRestoreImportConfirmed] = useState(false);
   const importAuthReady = useRef(!authLoading && !authError); importAuthReady.current = !authLoading && !authError;
   const ticketOwner = useRef(user?.id ?? null);
@@ -151,6 +154,7 @@ export default function JobLoop() {
     if (previous !== undefined && next.lifecycleGeneration !== undefined && next.lifecycleGeneration !== previous) {
       generation.current++; serial.current++; formRevision.current++; downloadTransfer.current?.abort();
       setSavedCheckIntent(null); setSavedCheckUndo(null); setRestoreImportConfirmed(false);
+      setPendingCheckLink(null); setLinkConsent(false); opportunityDraftRevision.current++;
       clearLoopWorkingDraft(); startReference.current = null; draftReference.current = null;
       setProfileDirty(false); profileDirtyRef.current = false; resetProfile = true;
       setSuggestions([]); setClaimDrafts({}); setDirtyClaims(new Set()); setDetailsReady(false);
@@ -165,6 +169,7 @@ export default function JobLoop() {
     if (owner.current && next.lifecycleGeneration !== undefined) { setTrackingLoopGeneration(owner.current, next.lifecycleGeneration); pruneTrackingApplications('loop', owner.current, next.opportunities.map(item => item.id), next.lifecycleGeneration); }
     setSnapshot(next); setLoadedOwner(owner.current); setErasureOwner(null);
     if (recovered) {
+      setPendingCheckLink(recovered.pendingCheckLink ?? null); setLinkConsent(false); opportunityDraftRevision.current++;
       setDetailsReady(!!recovered.profile.sourceText);setProfile(recovered.profile);setLists(recovered.lists);setProfileDirty(recovered.profileDirty);profileDirtyRef.current=recovered.profileDirty;
       setClaimDrafts(recovered.claimDrafts);setDirtyClaims(new Set(Object.keys(recovered.claimDrafts)));setSuggestions(recovered.suggestions);setNewClaimKey(recovered.newClaimKey);
       setTitle(recovered.opportunity.title);setCompany(recovered.opportunity.company);setLocation(recovered.opportunity.location);setJobUrl(recovered.opportunity.jobUrl);setDescription(recovered.opportunity.description);setWithContact(recovered.opportunity.withContact);setContact(recovered.opportunity.contact);
@@ -185,6 +190,7 @@ export default function JobLoop() {
   const clearMount = useCallback(() => { mounted.current = false; generation.current++; downloadTransfer.current?.abort(); }, []);
   useEffect(() => { mounted.current = true; return clearMount; }, [clearMount]);
   useEffect(() => { clearGmailFragment(); }, []);
+  useEffect(() => { if (authLoading || authError) setLinkConsent(false); }, [authLoading, authError]);
   useEffect(() => {
     const id = readSavedCheckContinuation(route.search);
     if (!id) return;
@@ -196,6 +202,7 @@ export default function JobLoop() {
   useEffect(() => {
     downloadTransfer.current?.abort();
     setSavedCheckIntent(null); setSavedCheckUndo(null); setRestoreImportConfirmed(false);
+    setPendingCheckLink(null); setLinkConsent(false); opportunityDraftRevision.current++;
     setErasureOwner(null);
     lifecycleGeneration.current = undefined; erasureGeneration.current = undefined; confirmationGeneration.current = undefined;
     generation.current++; serial.current++; formRevision.current++; setSnapshot(null); setLoadedOwner(null); snapshotRef.current = null; setProfile(blankProfile(initialAudience.current)); setLists(listInputs(blankProfile(initialAudience.current))); setProfileDirty(false); profileDirtyRef.current = false; setSaveConsent(false); setCvs([]); setCvError(''); setSuggestions([]); setDirtyClaims(new Set()); setSelectedId(null); setReviewedText(''); setFacts(false); setDisclosure(false); setRecipientConsent(false); setMethod('rules'); setModel('grounded-rules-v1'); setModelConsent(false); setInboxConsent(false); setGmailReadConsent(false); setGmailDraftConsent(false); setBusy(''); setNotice(''); setError(''); setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setContact({ name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: false, inExistingThread: false }); startReference.current = null; draftReference.current = null;
@@ -270,7 +277,10 @@ export default function JobLoop() {
     editProfile({ sourceText, ...(copyName ? { name: copied.name } : {}), ...(copyContact ? { contactLine: copied.contactLine } : {}) });
     copiedHeaderRef.current = { name: copyName ? copied.name : '', contactLine: copyContact ? copied.contactLine : '' };
   }
-  const savedCheckDraftKey = JSON.stringify([profile, lists, detailsReady, suggestions, claimDrafts, [...dirtyClaims], title, company, location, jobUrl, description, withContact, contact]);
+  const savedCheckDraftKey = JSON.stringify([profile, lists, detailsReady, suggestions, claimDrafts, [...dirtyClaims], title, company, location, jobUrl, description, withContact, contact, pendingCheckLink]);
+  const checkVacancyMatches = !pendingCheckLink || savedCheckVacancyFingerprint(pendingCheckLink.vacancy) === savedCheckVacancyFingerprint({ title, company, description });
+  const existingCheckLinks = pendingCheckLink ? snapshot?.opportunities.filter(item => item.sourceCheckId === pendingCheckLink.checkId) ?? [] : [];
+  const existingCheckLink = existingCheckLinks.length === 1 && existingCheckLinks[0].source === 'manual' && existingCheckLinks[0].sourceKey === `saved-check:${pendingCheckLink?.checkId}` ? existingCheckLinks[0] : null;
   const savedCheckNeedsReplacement = !!(profile.sourceText || title || company || location || jobUrl || description || withContact || Object.values(contact).some(Boolean));
   const savedCheckCopyHeader = !snapshot?.profile && !profileDirty && !profile.name.trim() && !profile.contactLine.trim();
   const savedCheckBlocked = dirtyClaims.size > 0 || Object.keys(claimDrafts).length > 0 ? 'Save or discard your claim edits before copying a saved check.' : '';
@@ -280,6 +290,7 @@ export default function JobLoop() {
       && lifecycleGeneration.current === scope.generation && snapshotRef.current?.lifecycleGeneration === scope.generation;
   }
   function clearImportConsents() {
+    setLinkConsent(false);
     setSaveConsent(false); setFacts(false); setDisclosure(false); setRecipientConsent(false); setModelConsent(false); setInboxConsent(false); setGmailReadConsent(false); setGmailDraftConsent(false);
   }
   function useSavedCheck(check: FreeCvCheck, version: SavedCheckVersion, scope: SavedCheckScope, replacementKey: string | null): boolean {
@@ -287,7 +298,9 @@ export default function JobLoop() {
       || (savedCheckNeedsReplacement && replacementKey !== savedCheckDraftKey) || !snapshotRef.current) return false;
     const sourceText = version === 'final' ? check.reviewed_text : check.original_text;
     try { validateCvText(sourceText); } catch { setError('This saved CV needs readable text before it can be copied.'); return false; }
-    const before: SavedCheckBackup = structuredClone({ profile, profileDirty, lists, detailsReady, copiedHeader: copiedHeaderRef.current, suggestions, opportunity: { title, company, location, jobUrl, description, withContact, contact } });
+    const before: SavedCheckBackup = structuredClone({ pendingCheckLink, profile, profileDirty, lists, detailsReady, copiedHeader: copiedHeaderRef.current, suggestions, opportunity: { title, company, location, jobUrl, description, withContact, contact } });
+    opportunityDraftRevision.current++;
+    setPendingCheckLink({ ...scope, checkId: check.id.toLowerCase(), vacancy: { title: check.job_title, company: check.company, description: check.job_description } });
     setSavedCheckUndo({ scope: { ...scope }, recordVersion: snapshotRef.current.recordVersion, before }); setRestoreImportConfirmed(false);
     importSource(sourceText, !savedCheckCopyHeader);
     if (!profile.targetTitles.length && !lists.targets.trim()) { editProfile({ targetTitles: [check.job_title] }); setLists(current => ({ ...current, targets: check.job_title })); }
@@ -300,6 +313,7 @@ export default function JobLoop() {
   function undoSavedCheckImport() {
     if (!savedCheckUndo || !restoreImportConfirmed || busyRef.current || !savedCheckScopeCurrent(savedCheckUndo.scope) || snapshotRef.current?.recordVersion !== savedCheckUndo.recordVersion || savedCheckBlocked) return;
     const before = savedCheckUndo.before; formRevision.current++;
+    opportunityDraftRevision.current++; setPendingCheckLink(before.pendingCheckLink);
     setProfile(before.profile); setLists(before.lists); setProfileDirty(before.profileDirty); profileDirtyRef.current = before.profileDirty; setDetailsReady(before.detailsReady); copiedHeaderRef.current = before.copiedHeader;
     setSuggestions(before.suggestions.map(item => ({ ...item, value: { ...item.value, confirmed: false, shareable: false } })));
     setTitle(before.opportunity.title); setCompany(before.opportunity.company); setLocation(before.opportunity.location); setJobUrl(before.opportunity.jobUrl); setDescription(before.opportunity.description); setWithContact(before.opportunity.withContact); setContact({ ...before.opportunity.contact, confirmedByUser: false });
@@ -332,12 +346,13 @@ export default function JobLoop() {
     const id = owner.current; if (!id || busyRef.current) return null;
     try { action = boundLoopAction(action, erasureGeneration.current ?? snapshotRef.current?.lifecycleGeneration); }
     catch(failure) { setError(failure instanceof Error ? failure.message : 'Refresh Jobvance before continuing.'); return null; }
-    const atGeneration = generation.current; ++serial.current; busyRef.current = action.action; setBusy(action.action); setError(''); setNotice('');
-    if (['save_profile', 'save_claim', 'withdraw_claim', 'add_opportunity', 'erase_loop', 'erase_self'].includes(action.action)) { setSavedCheckUndo(null); setRestoreImportConfirmed(false); }
+    const atGeneration = generation.current, atAuthority = trackingDraftAuthority(id); ++serial.current; busyRef.current = action.action; setBusy(action.action); setError(''); setNotice('');
+    if (['save_profile', 'save_claim', 'withdraw_claim', 'add_opportunity', 'link_saved_check', 'erase_loop', 'erase_self'].includes(action.action)) { setSavedCheckUndo(null); setRestoreImportConfirmed(false); }
     if(action.action==='erase_loop'||action.action==='erase_self'){erasureGeneration.current=action.expectedGeneration;setErasureOwner(id);setSnapshot(null);setLoadedOwner(null);snapshotRef.current=null;downloadTransfer.current?.abort();}
     try {
       const result = await callJobLoop(id, action);
       if (!mounted.current || owner.current !== id || generation.current !== atGeneration) return null;
+      if (action.action === 'link_saved_check' && (!importAuthReady.current || atAuthority < 0 || trackingDraftAuthority(id) !== atAuthority || result.snapshot?.lifecycleGeneration !== action.expectedGeneration)) return null;
       if (result.snapshot) applySnapshot(result.snapshot, resetProfile);
       else if (!['suggest_claims', 'gmail_connect', 'download', 'gmail_create_draft'].includes(action.action)) {
         const fresh = await callJobLoop(id, { action: 'get' });
@@ -345,7 +360,7 @@ export default function JobLoop() {
         if (fresh.erasureGeneration !== undefined) { erasureGeneration.current=fresh.erasureGeneration;setTrackingLoopGeneration(id,fresh.erasureGeneration);setErasureOwner(id);setSnapshot(null);setLoadedOwner(null);snapshotRef.current=null; }
         else if (fresh.snapshot) applySnapshot(fresh.snapshot, resetProfile);
       }
-      if (['save_profile', 'save_claim', 'withdraw_claim', 'add_opportunity'].includes(action.action)) { setModelConsent(false); setInboxConsent(false); }
+      if (['save_profile', 'save_claim', 'withdraw_claim', 'add_opportunity', 'link_saved_check'].includes(action.action)) { setModelConsent(false); setInboxConsent(false); }
       if (result.message || success) setNotice(result.message || success || '');
       return result;
     } catch (failure) { if (mounted.current && owner.current === id && generation.current === atGeneration) { setError(failure instanceof Error ? failure.message : 'This action could not be completed.'); if(loopErasureNeedsContinuation(failure)){setErasureOwner(id);setSnapshot(null);setLoadedOwner(null);snapshotRef.current=null;} } return null; }
@@ -376,18 +391,27 @@ export default function JobLoop() {
   }
   async function addOpportunity(event: FormEvent) {
     event.preventDefault(); if (!snapshot) return;
+    if (pendingCheckLink && (!savedCheckScopeCurrent(pendingCheckLink) || !checkVacancyMatches || !linkConsent || linkConsentRevision.current !== opportunityDraftRevision.current || (existingCheckLinks.length > 0 && !existingCheckLink))) { setError('Review the saved-check link and confirm your choice before saving.'); return; }
     if (title.trim().length < 2 || description.trim().length < 80 || !isLoopHttpsUrl(jobUrl)) { setError('Add a title, a real HTTPS vacancy link and the full job description (at least 80 characters).'); return; }
     if (withContact && (!contact.name.trim() || !contact.sourceQuote.trim() || !isLoopHttpsUrl(contact.sourceUrl) || !contact.confirmedByUser || (contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)))) { setError('Add a named contact, source link and source passage, then confirm the contact yourself. An email format is not verification.'); return; }
-    const result = await perform({ action: 'add_opportunity', expectedVersion: snapshot.recordVersion, opportunity: { title, company, location, url: jobUrl, description, contact: withContact ? contact : null } }, 'Opportunity saved as user-provided. No application or outreach was sent.');
-    if (result) { setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setContact({ name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: false, inExistingThread: false }); }
+    const revision = opportunityDraftRevision.current;
+    const opportunity = { title, company, location, url: jobUrl, description, contact: withContact ? contact : null };
+    const action: LoopAction = pendingCheckLink
+      ? { action: 'link_saved_check', expectedVersion: snapshot.recordVersion, expectedGeneration: pendingCheckLink.generation, checkId: pendingCheckLink.checkId, opportunity, linkConsent: true }
+      : { action: 'add_opportunity', expectedVersion: snapshot.recordVersion, opportunity };
+    const result = await perform(action, pendingCheckLink ? 'Vacancy linked to your saved check. Existing progress is kept. No preparation, application or outreach was started.' : 'Opportunity saved as user-provided. No application or outreach was sent.');
+    if (result && revision === opportunityDraftRevision.current && (!pendingCheckLink || savedCheckScopeCurrent(pendingCheckLink))) {
+      opportunityDraftRevision.current++; setPendingCheckLink(null); setLinkConsent(false);
+      setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setContact({ name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: false, inExistingThread: false });
+    }
   }
   const uncommitted = profileDirty || dirtyClaims.size > 0;
-  const hasUnsavedDraft = uncommitted || !!(title || company || location || jobUrl || description || withContact);
+  const hasUnsavedDraft = uncommitted || !!pendingCheckLink || !!(title || company || location || jobUrl || description || withContact);
   useEffect(() => {
     if (user?.id && (!snapshot || snapshot.lifecycleGeneration === undefined)) return;
-    if (user?.id && hasUnsavedDraft) retainLoopWorkingDraft(user.id, { lifecycleGeneration:snapshot!.lifecycleGeneration!, profile, profileDirty, lists, claimDrafts, suggestions, newClaimKey, opportunity: { title, company, location, jobUrl, description, withContact, contact } });
+    if (user?.id && hasUnsavedDraft) retainLoopWorkingDraft(user.id, { lifecycleGeneration:snapshot!.lifecycleGeneration!, pendingCheckLink, profile, profileDirty, lists, claimDrafts, suggestions, newClaimKey, opportunity: { title, company, location, jobUrl, description, withContact, contact } });
     else clearLoopWorkingDraft();
-  }, [user?.id, snapshot?.lifecycleGeneration, hasUnsavedDraft, profile, profileDirty, lists, claimDrafts, suggestions, newClaimKey, title, company, location, jobUrl, description, withContact, contact]);
+  }, [user?.id, snapshot?.lifecycleGeneration, hasUnsavedDraft, pendingCheckLink, profile, profileDirty, lists, claimDrafts, suggestions, newClaimKey, title, company, location, jobUrl, description, withContact, contact]);
   useEffect(() => {
     if (!hasUnsavedDraft) return;
     const leaving = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
@@ -503,7 +527,14 @@ export default function JobLoop() {
       </div>}
       {snapshot && <div className="jl-tab-panel" hidden={tab !== 'opportunities'}>
         <Link className="jl-text-link" to="/help#job-loop-vacancies">Help adding a real vacancy <ArrowRight size={14} aria-hidden="true" /></Link>
-        <section className="jl-panel"><h2>Add an opportunity</h2><p>Paste the actual vacancy. A user-provided link is not independently verified as open. No guessed contact details.</p><form className="jl-profile-form" onSubmit={event => void addOpportunity(event)}><fieldset className="jl-form-fields" disabled={!!busy}><div className="jl-form-grid"><Field label="Vacancy title" value={title} onChange={setTitle} /><Field label="Company" value={company} onChange={setCompany} /></div><Field label="Location" value={location} onChange={setLocation} /><Field label="Vacancy HTTPS link" type="url" value={jobUrl} onChange={setJobUrl} maxLength={2000} /><Field label="Full vacancy description" multiline value={description} onChange={setDescription} maxLength={20000} help="Paste at least 80 characters from the actual posting." /><Consent checked={withContact} onChange={setWithContact}>Add a named contact I have checked (optional).</Consent>{withContact && <div className="jl-contact-fields"><Field label="Contact name" value={contact.name} onChange={name => setContact(current => ({ ...current, name, confirmedByUser: false }))} /><Field label="Contact title" value={contact.title} onChange={title => setContact(current => ({ ...current, title, confirmedByUser: false }))} /><Field label="Contact email (optional, never guessed)" type="email" value={contact.email} onChange={email => setContact(current => ({ ...current, email, confirmedByUser: false }))} /><Field label="Public contact source HTTPS link" type="url" value={contact.sourceUrl} onChange={sourceUrl => setContact(current => ({ ...current, sourceUrl, confirmedByUser: false }))} maxLength={2000} /><Field label="Source passage supporting this contact" multiline value={contact.sourceQuote} onChange={sourceQuote => setContact(current => ({ ...current, sourceQuote, confirmedByUser: false }))} maxLength={60000} /><Consent checked={contact.confirmedByUser} onChange={confirmedByUser => setContact(current => ({ ...current, confirmedByUser }))}>I checked the name, role and supplied email against this source. Email syntax alone does not verify identity.</Consent><Consent checked={contact.inExistingThread} onChange={inExistingThread => setContact(current => ({ ...current, inExistingThread }))}>I already have an existing thread with this person; do not treat them as a cold contact.</Consent></div>}<button type="submit" className="jl-button jl-button--primary" disabled={!!busy}>Save opportunity</button></fieldset></form></section>
+        <section className="jl-panel"><h2>Add an opportunity</h2><p>Paste the actual vacancy. A user-provided link is not independently verified as open. No guessed contact details.</p><form className="jl-profile-form" onChangeCapture={event => { opportunityDraftRevision.current++; if (!(event.target as HTMLElement).closest('[data-link-consent]')) setLinkConsent(false); }} onSubmit={event => void addOpportunity(event)}><fieldset className="jl-form-fields" disabled={!!busy}><div className="jl-form-grid"><Field label="Vacancy title" value={title} onChange={setTitle} /><Field label="Company" value={company} onChange={setCompany} /></div><Field label="Location" value={location} onChange={setLocation} /><Field label="Vacancy HTTPS link" type="url" value={jobUrl} onChange={setJobUrl} maxLength={2000} /><Field label="Full vacancy description" multiline value={description} onChange={setDescription} maxLength={20000} help="Paste at least 80 characters from the actual posting." /><Consent checked={withContact} onChange={setWithContact}>Add a named contact I have checked (optional).</Consent>{withContact && <div className="jl-contact-fields"><Field label="Contact name" value={contact.name} onChange={name => setContact(current => ({ ...current, name, confirmedByUser: false }))} /><Field label="Contact title" value={contact.title} onChange={title => setContact(current => ({ ...current, title, confirmedByUser: false }))} /><Field label="Contact email (optional, never guessed)" type="email" value={contact.email} onChange={email => setContact(current => ({ ...current, email, confirmedByUser: false }))} /><Field label="Public contact source HTTPS link" type="url" value={contact.sourceUrl} onChange={sourceUrl => setContact(current => ({ ...current, sourceUrl, confirmedByUser: false }))} maxLength={2000} /><Field label="Source passage supporting this contact" multiline value={contact.sourceQuote} onChange={sourceQuote => setContact(current => ({ ...current, sourceQuote, confirmedByUser: false }))} maxLength={60000} /><Consent checked={contact.confirmedByUser} onChange={confirmedByUser => setContact(current => ({ ...current, confirmedByUser }))}>I checked the name, role and supplied email against this source. Email syntax alone does not verify identity.</Consent><Consent checked={contact.inExistingThread} onChange={inExistingThread => setContact(current => ({ ...current, inExistingThread }))}>I already have an existing thread with this person; do not treat them as a cold contact.</Consent></div>}{pendingCheckLink && <section aria-label="Saved-check vacancy link">
+          <p>This vacancy came from <strong>{pendingCheckLink.vacancy.title} · {pendingCheckLink.vacancy.company || 'Company not supplied'}</strong>. Saving it here can keep it together with that exact saved check in Applications.</p>
+          {existingCheckLink && <p role="status">Already linked: {existingCheckLink.title} · {display(existingCheckLink.status)}. Saving again keeps its current wording, notes and progress; it does not replace them. <Link to={`/loop?opportunity=${encodeURIComponent(existingCheckLink.id)}&generation=${pendingCheckLink.generation}`}>Open linked vacancy and progress</Link></p>}
+          {existingCheckLinks.length > 0 && !existingCheckLink && <p role="alert">The saved relationship is inconsistent. Refresh records before continuing; these records will not be merged.</p>}
+          {!checkVacancyMatches && <><p role="alert">The title, company or description differs from the saved check. Restore its vacancy wording to keep the link, or keep your edits as a separate vacancy.</p><div className="jl-actions"><button type="button" className="jl-button" onClick={() => { if (!savedCheckScopeCurrent(pendingCheckLink)) return; opportunityDraftRevision.current++; setTitle(pendingCheckLink.vacancy.title); setCompany(pendingCheckLink.vacancy.company); setDescription(pendingCheckLink.vacancy.description); setLinkConsent(false); }}>Restore saved vacancy wording</button><button type="button" className="jl-button" onClick={() => { if (!savedCheckScopeCurrent(pendingCheckLink)) return; opportunityDraftRevision.current++; setPendingCheckLink(null); setLinkConsent(false); setNotice('Your edited vacancy is now a separate local draft. Save it when ready; the saved check is unchanged.'); }}>Keep edits as a separate vacancy</button></div></>}
+          {checkVacancyMatches && <div data-link-consent><Consent checked={linkConsent} onChange={value => { linkConsentRevision.current = value ? opportunityDraftRevision.current : null; setLinkConsent(value); }}>Save this vacancy privately and link it to this saved check. Keep existing linked progress if it was already saved.</Consent></div>}
+          <p className="jl-help">This saves the vacancy relationship only. Your CV, fact review, model consent and output approval remain separate.</p>
+        </section>}<button type="submit" className="jl-button jl-button--primary" disabled={!!busy || !!pendingCheckLink && (!linkConsent || !checkVacancyMatches || !savedCheckScopeCurrent(pendingCheckLink) || existingCheckLinks.length > 0 && !existingCheckLink)}>{pendingCheckLink ? 'Save linked vacancy' : 'Save opportunity'}</button></fieldset></form></section>
         <section className="jl-panel"><h2>Your opportunities</h2>{snapshot.opportunities.length === 0 ? <p>No opportunities are recorded yet. Add a real vacancy or inspect a configured search run’s actual results.</p> : visibleOpportunities.map(item => <OpportunityRow key={trackingDraftIdentity(trackingDraftScope('loop', user.id, item.id, snapshot.lifecycleGeneration))} scope={trackingDraftScope('loop', user.id, item.id, snapshot.lifecycleGeneration)} opportunity={item} busy={!!busy} onSave={async (status, followUpAt, notes) => !!await perform({ action: 'update_opportunity', expectedVersion: snapshot.recordVersion, id: item.id, status, followUpAt, notes }, 'Tracking update saved as your report. No employer action was taken.')} />)}</section>
       </div>}
       {snapshot && tab === 'outputs' && <>

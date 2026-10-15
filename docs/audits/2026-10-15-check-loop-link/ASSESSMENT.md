@@ -6,6 +6,8 @@
 
 **Subsequent home update:** [HOME-INTEGRATION.md](HOME-INTEGRATION.md) records exact read-only check/Loop grouping, source-specific wording/progress/actions and same-generation bookmarks. This adds the source implementation of gate 5 with local interface evidence. Persisting the relationship from the import UI, complete journey acceptance, independent review and coordinated deployment remain open; public v30 is unchanged.
 
+**Subsequent import update:** [IMPORT-INTEGRATION.md](IMPORT-INTEGRATION.md) records the implemented draft provenance, explicit consent, changed-source choices, guarded retries and isolated first/second link checks. Gates 1–5 now have source implementation; complete customer acceptance, independent review and coordinated deployment remain open. Public v30 is unchanged.
+
 ## What exists
 
 The additive migration `20261015101948_job_loop_saved_check_link.sql` implements a service-only atomic operation for explicitly linking one owned saved check to one vacancy in the current Loop lifetime. It uses the existing lifecycle lock, record lock and versioned write routine. It neither initializes a record nor starts preparation. No existing records are backfilled or matched by title, employer or URL.
