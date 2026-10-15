@@ -1,6 +1,6 @@
 import { ApiError } from './core.ts';
 import type { adminClient } from './runtime.ts';
-import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
+import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
 import { digest } from './job-loop-providers.ts';
 import { eraseLoopArtifacts } from './job-loop-erasure.ts';
 import { validLoopGeneration } from './job-loop-request.ts';
@@ -16,6 +16,12 @@ export interface UsageRow { id: string; reserved_micros: number; actual_micros: 
 export interface PacketRow { id: string; user_id: string; input_version: number; status: LoopPacket['status']; data: LoopPacket }
 export interface ScheduleRow { user_id:string;version:number;status:LoopSchedule['status'];settings:LoopScheduleInput;next_run_at:string|null;lease_token:string|null;lease_until:string|null;last_run_id:string|null;last_attempt_at:string|null;message:string }
 const ERRORS: [string, number, string][] = [
+  ['LOOP_CHECK_LINK_CONSENT',400,'Choose to save this vacancy linked to the saved check.'],
+  ['LOOP_CHECK_UNAVAILABLE',404,'This saved check is no longer available in your account. Reopen your saved checks before continuing.'],
+  ['LOOP_CHECK_SOURCE_CHANGED',409,'The vacancy differs from the saved check. Restore its vacancy text or deliberately save a separate vacancy.'],
+  ['LOOP_CHECK_LINK_CONFLICT',409,'This saved check has conflicting vacancy links. Refresh Applications before continuing.'],
+  ['LOOP_CHECK_LINK_INVALID',422,'Review the saved check and vacancy details before linking them.'],
+  ['LOOP_OPPORTUNITY_LIMIT',422,'This pilot supports up to 100 opportunities.'],
   ['LOOP_VERSION_CONFLICT',409,'Your record changed. Refresh it before saving.'],['LOOP_REQUEST_CONFLICT',409,'This request reference belongs to different inputs.'],
   ['LOOP_DAILY_LIMIT',429,'This free pilot permits three new runs per account per UTC day, including corrective rebuilds. Resume an existing run instead.'],['LOOP_ACTIVE_RUN',409,'An active run already exists. Resume or cancel it before starting another.'],['LOOP_BUDGET_LIMIT',429,'The shared monthly AI/search usage limit has been reached.'],
   ['LOOP_STALE_INPUT',409,'The record changed. Confirm the current facts and build a new packet.'],['LOOP_LEASE_LOST',409,'This stage was cancelled or claimed by another worker.'],
@@ -69,6 +75,19 @@ export class LoopRepository {
   }
   erasureStatus(userId:string) { return this.rpc<{state:'active'|'erasing'|'erased';generation:number}>('job_loop_erasure_status',{p_user:userId}); }
   write(userId: string, expected: number, data: CareerRecord, inputsChanged: boolean) { return this.rpc<RecordRow>('job_loop_write_record',{ p_user:userId,p_expected:expected,p_data:data,p_inputs_changed:inputsChanged }); }
+  async linkSavedCheck(userId: string, generation: number, expected: number, checkId: string, opportunity: LoopOpportunityInput, linkConsent: boolean) {
+    const result = await this.rpc<{ record: RecordRow; opportunityId: string; reused: boolean }>('job_loop_link_saved_check', {
+      p_user: userId, p_generation: generation, p_expected: expected, p_check: checkId, p_opportunity: opportunity, p_link_consent: linkConsent,
+    });
+    const opportunities = result?.record?.data?.opportunities;
+    const matches = Array.isArray(opportunities) ? opportunities.filter(item => item?.sourceCheckId === checkId) : [];
+    if (result?.record?.user_id !== userId || typeof result?.reused !== 'boolean' || typeof result?.opportunityId !== 'string'
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(result.opportunityId) || matches.length !== 1
+      || matches[0].id !== result.opportunityId || matches[0].source !== 'manual' || matches[0].sourceKey !== `saved-check:${checkId}`) {
+      throw new ApiError(503,'LOOP_CHECK_LINK_INVALID','The saved vacancy link could not be confirmed. Retry the same saved check after refreshing.');
+    }
+    return { opportunityId: result.opportunityId, reused: result.reused };
+  }
   async run(userId: string, id: string): Promise<RunRow> {
     const { data,error } = await this.admin.from('job_loop_runs').select('*').eq('user_id',userId).eq('id',id).maybeSingle(); loopDatabaseError(error); if (!data) throw new ApiError(404,'LOOP_NOT_FOUND','That run is unavailable in your account.'); return data as RunRow;
   }

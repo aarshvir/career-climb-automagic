@@ -2,6 +2,8 @@
 
 15 October 2026. **Implemented and tested locally; not applied, exposed or deployed.** The live platform remains v30. This is partial work on JV-03/04, not delivery of the customer journey or an improved product score.
 
+**Later source update, 15 October:** [CONTRACT-INTEGRATION.md](CONTRACT-INTEGRATION.md) records the implemented client/control/repository contract and Unicode source-comparison correction. The foundation observations below retain their original scope. Gates 1–2 are now implemented in source; draft/UI/home integration, independent review and publication remain open. The migration is still unapplied and no UI calls the new action.
+
 ## What exists
 
 The additive migration `20261015101948_job_loop_saved_check_link.sql` implements a service-only atomic operation for explicitly linking one owned saved check to one vacancy in the current Loop lifetime. It uses the existing lifecycle lock, record lock and versioned write routine. It neither initializes a record nor starts preparation. No existing records are backfilled or matched by title, employer or URL.

@@ -94,6 +94,13 @@ describe('saved-check to Loop persistence boundary (not yet a published feature)
   it.each(['title', 'company', 'description'])('rejects an edited %s falsely attributed to the saved check', async key => {
     await expect(link({ input: { ...opportunity, description: opportunity.description.trim(), [key]: 'Different source '.repeat(8) } })).rejects.toThrow('LOOP_CHECK_SOURCE_CHANGED');
   });
+  it('matches the existing validator trim rules for Unicode whitespace in saved source fields', async () => {
+    const whitespace = '\t\n\v\f\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff';
+    await query('UPDATE cv_checks SET job_title=$2,company=$3,job_description=$4 WHERE id=$1', [check, whitespace + opportunity.title + whitespace, whitespace + opportunity.company + whitespace, whitespace + opportunity.description + whitespace]);
+    const result = await link();
+    expect(result.record.data.opportunities[0].title).toBe(opportunity.title);
+    expect(result.record.data.opportunities[0].description).toBe(opportunity.description.trim());
+  });
   it.each([null, [], { ...opportunity, id: randomUUID() }, { ...opportunity, sourceCheckId: randomUUID() }, { ...opportunity, contact: 'unconfirmed' }])('rejects malformed or metadata-bearing vacancy inputs (%j)', async input => {
     await expect(link({ input })).rejects.toThrow('LOOP_CHECK_LINK_INVALID');
   });

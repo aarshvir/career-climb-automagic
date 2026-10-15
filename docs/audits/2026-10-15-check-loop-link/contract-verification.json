@@ -1,0 +1,38 @@
+{
+  "status": "unpublished-source-only",
+  "publicVersionUnchanged": 30,
+  "productionMutationPerformed": false,
+  "independentReview": "pending-known-account-usage-limit",
+  "recordedAt": "2026-10-15T13:34:21.3359607Z",
+  "vitest": {
+    "passed": 1486,
+    "files": 101,
+    "success": true,
+    "failed": 0
+  },
+  "deno": {
+    "transport": "local intercepted Supabase HTTP fixtures",
+    "generatedBundleCases": 15,
+    "sourceCases": 15
+  },
+  "nativePostgres": {
+    "passedGroups": 6,
+    "clusterStopped": true,
+    "receipt": "check-loop-native-contract.json"
+  },
+  "typeScript": "passed",
+  "productionBuild": "passed",
+  "hostingCheckGroups": 12,
+  "liveSiteChecksPerformed": 0,
+  "hashEncoding": "SHA-256 of current file bytes; native migration receipt separately normalizes line endings",
+  "sourceHashes": {
+    "supabase/functions/_shared/job-loop-types.ts": "69cc5ddc2e58af68d59de6a685a079b0a7834d2b66e7cc94a1871456e1a37073",
+    "supabase/functions/_shared/job-loop-repository.ts": "7ea61b065beb1d2004024ab231b06ac4ab182102195253a6ac7a6d2c3ec5fd4a",
+    "docs/supabase-loop-ui/manifest.json": "bb16a457f0e774290384c2fa55f8c076b2f3786a2ac851a701c8efcc84c66d0e",
+    "src/lib/job-loop-api.ts": "0a3e43ea02bd83ec1a90685e334a735a034b34ea560e72c420f46774bad06e47",
+    "supabase/functions/_shared/job-loop-engine.ts": "68cd6d738de799f4f8522379c566f477f1f27108423ee58e07858b469f130af8",
+    "supabase/migrations/20261015101948_job_loop_saved_check_link.sql": "55669bb728eefe013315efbc217320d1241dc19f9d17361549201ed387f44492",
+    "supabase/functions/_shared/job-loop-request.ts": "ac4e54ca8cb975ddff72267382959cdf7a9653264620b364d22e0342c049fa87",
+    "supabase/functions/_shared/job-loop-runtime.ts": "f599c6c49312d39c11c0e91e2da1814831a52f596c3516b87c9c5cdba0824df8"
+  }
+}

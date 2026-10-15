@@ -147,6 +147,7 @@ export function validateAction(value: unknown): LoopAction {
   const keys: Record<string, string[]> = {
     get: [], get_existing: [], save_profile: ['expectedVersion', 'profile', 'saveConsent'], suggest_claims: [], save_claim: ['expectedVersion', 'id', 'claim'], withdraw_claim: ['expectedVersion', 'id'], add_opportunity: ['expectedVersion', 'opportunity'], update_opportunity: ['expectedVersion', 'id', 'status', 'followUpAt', 'notes'], start_run: ['requestId', 'provider', 'model', 'modelConsent', 'inboxConsent','processingRoute'], resume_run: ['runId'], cancel_run: ['runId'], approve_packet: ['packetId', 'inputHash', 'reviewedText', 'confirmFacts', 'confirmDisclosure'], download: ['packetId', 'format'], preview_packet: ['packetId','inputHash'], save_schedule:['expectedScheduleVersion','schedule','recurringConsent'], pause_schedule:['expectedScheduleVersion'],cancel_schedule:['expectedScheduleVersion'],erase_loop:['confirmErase'],erase_self:['confirmErase'],request_support:['category','message'], gmail_connect: ['allowDrafts'], gmail_preview: ['ticket'], gmail_finalize: ['ticket', 'confirmMailbox'], gmail_disconnect: [], gmail_create_draft: ['packetId', 'requestId', 'confirmRecipientAndAttachment'],
   };
+  keys.link_saved_check = ['expectedVersion', 'checkId', 'opportunity', 'linkConsent'];
   if (typeof action !== 'string' || !Object.prototype.hasOwnProperty.call(keys, action)) fail('Unsupported action. Sending and application submission are unavailable.');
   if (generationBoundAction(action)) keys[action].push('expectedGeneration');
   const a = obj(value, ['action', ...keys[action]]);
@@ -160,6 +161,12 @@ export function validateAction(value: unknown): LoopAction {
   if ('ticket' in a) a.ticket = text(a.ticket, 1, 16000);
   if (action === 'save_profile') { a.profile = validateProfile(a.profile); if (!a.saveConsent) fail('Explicit private-storage consent is required.'); }
   if (action === 'add_opportunity') a.opportunity = validateOpportunity(a.opportunity);
+  if (action === 'link_saved_check') {
+    if (typeof a.checkId !== 'string' || !UUID.test(a.checkId)) fail('Choose an exact saved check.');
+    if (a.linkConsent !== true) fail('Explicitly choose to save this vacancy linked to the saved check.');
+    a.checkId = a.checkId.toLowerCase();
+    a.opportunity = validateOpportunity(a.opportunity);
+  }
   if (action === 'save_claim') { obj(a.claim, ['sourceKind', 'sourceQuote', 'phrasing', 'context', 'kind', 'resultStatus', 'confirmed', 'shareable']); }
   if (action === 'start_run') { enumeration(a.provider, ['rules', 'anthropic', 'openai', 'moonshot']); text(a.model, 1, 150); if (a.provider !== 'rules' && !a.modelConsent) fail('Provider processing consent is required.'); if(a.processingRoute!==undefined){enumeration(a.processingRoute,['direct','openrouter']);if(a.provider==='rules')fail('Rules preparation does not authorize an external processing route.');} }
   if (action === 'update_opportunity') { enumeration(a.status, STATUSES); text(a.notes, 0, 5000); a.followUpAt=normalizeFollowUp(a.followUpAt as string|null); }

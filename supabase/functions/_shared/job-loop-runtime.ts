@@ -157,10 +157,24 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     if(!data.claims.some(claim=>claim.id===action.id))throw new ApiError(404,'LOOP_NOT_FOUND','That claim is unavailable.');
     data.claims=data.claims.map(claim=>claim.id===action.id?{...claim,status:'withdrawn',shareable:false,confirmed:false,revision:claim.revision+1}:claim);await repo.write(userId,action.expectedVersion,data,true);return finish('Claim withdrawn. Fresh outputs cannot reuse it.');
   }
+  if(action.action==='link_saved_check'){
+    // Validate again at the business boundary; no direct read/write pair may
+    // replace the atomic owner/generation/source-checked database operation.
+    const input=validateControlInput(action);
+    if(input.action!=='link_saved_check')throw new ApiError(400,'LOOP_INVALID_ACTION','Choose a saved check.');
+    const linked=await repo.linkSavedCheck(userId,input.expectedGeneration!,input.expectedVersion,input.checkId,input.opportunity,input.linkConsent);
+    const snapshot=await getLoopSnapshot(repo,userId,env,input.expectedGeneration);
+    const matches=snapshot.opportunities.filter(item=>item.sourceCheckId===input.checkId);
+    if(matches.length!==1||matches[0].id!==linked.opportunityId||matches[0].source!=='manual'||matches[0].sourceKey!==`saved-check:${input.checkId}`)
+      throw new ApiError(409,'LOOP_CHECK_LINK_CONFLICT','The linked vacancy changed before it could be confirmed. Refresh Applications before continuing.');
+    return {snapshot,checkLink:{checkId:input.checkId,...linked},message:linked.reused
+      ?'This saved check already has a linked vacancy. Its current details and application progress were kept.'
+      :'Vacancy saved and linked to this check. Review your career facts before preparing documents.'};
+  }
   if(action.action==='add_opportunity'){
     if(data.opportunities.length>=100)throw new ApiError(422,'LOOP_RECORD_LIMIT','This pilot supports up to 100 opportunities.');const input=validateOpportunity(action.opportunity);
     const sourceKey=input.url?`url:${await digest(safePublicUrl(input.url)??input.url)}`:`manual:${await digest(JSON.stringify([input.company,input.title,input.location,input.description]))}`;
-    const existing=data.opportunities.find(item=>item.sourceKey===sourceKey);let changed=false;
+    const existing=data.opportunities.find(item=>!item.sourceCheckId&&item.sourceKey===sourceKey);let changed=false;
     if(existing){changed=JSON.stringify([existing.title,existing.company,existing.location,existing.description,existing.contact,existing.source])!==JSON.stringify([input.title,input.company,input.location,input.description,input.contact,'manual']);data.opportunities=data.opportunities.map(item=>item.id===existing.id?{...item,...input,source:'manual',verification:'user_provided',checkedAt:new Date().toISOString()}:item);}
     else data.opportunities.push({...input,id:crypto.randomUUID(),source:'manual',sourceKey,checkedAt:new Date().toISOString(),verification:'user_provided',status:'saved',notes:'',followUpAt:null});
     await repo.write(userId,action.expectedVersion,data,changed);return finish(existing?'The opportunity source was updated from your reviewed text; application history was retained.':'Opportunity saved as user-provided text.');

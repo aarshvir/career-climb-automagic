@@ -33,6 +33,16 @@ globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
   if(['/rest/v1/job_loop_runs','/rest/v1/job_loop_packets','/rest/v1/job_loop_usage','/rest/v1/job_loop_connections','/rest/v1/job_loop_schedules','/rest/v1/job_loop_activity','/rest/v1/job_loop_support_requests'].includes(url.pathname)){assert(url.searchParams.get('user_id')===`eq.${owner}`,'Collection must bind owner.');return Response.json([]);}
   if(url.pathname==='/rest/v1/rpc/job_loop_budget_snapshot'){assert(body?.p_user===owner&&body?.p_cap_micros===50000000,'Budget read binds the authenticated owner and ceiling.');return Response.json({month:'2026-10',capUsd:50,committedUsd:0,remainingUsd:50,scope:'shared_ai_search',maxPilotUsers:10,enrolled:false,activeUsers:0,maxUsers:10});}
   if(url.pathname==='/rest/v1/rpc/job_loop_scheduler_state')return Response.json({ready:false,lastDispatchAt:null});
+  if(url.pathname==='/rest/v1/rpc/job_loop_link_saved_check'){
+    assert(body?.p_user===owner&&body.p_generation===lifecycle.generation&&body.p_link_consent===true,'Link uses verified owner, captured lifetime and explicit consent.');
+    assert(body.p_check==='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa','Only the exact fixture check is linked.');
+    const prior=record.data.opportunities.find(item=>item.sourceCheckId===body.p_check);
+    if(prior)return Response.json({record,opportunityId:prior.id,reused:true});
+    assert(body.p_expected===record.version,'First link retains expected version.');
+    const opportunity={...body.p_opportunity as import('../functions/_shared/job-loop-types.ts').LoopOpportunityInput,id:'33333333-3333-4333-a333-333333333333',sourceCheckId:body.p_check as string,source:'manual' as const,sourceKey:`saved-check:${body.p_check}`,checkedAt:'2026-10-15T00:00:00Z',verification:'user_provided' as const,status:'saved' as const,notes:'',followUpAt:null};
+    record.data.opportunities.push(opportunity);record.version++;record.input_version++;
+    return Response.json({record,opportunityId:opportunity.id,reused:false});
+  }
   if(url.pathname==='/rest/v1/rpc/job_loop_claim_run'){assert(body?.p_run===runId,'Internal run reference is bound.');return Response.json(null);}
   if(url.pathname==='/rest/v1/rpc/job_loop_write_record'){
     assert(body?.p_user===owner&&body.p_expected===record.version,'Claim write binds its authenticated owner and expected version.');
@@ -49,6 +59,24 @@ Deno.test('control rejects absent/invalid identity and caller-supplied owner bef
 });
 Deno.test('snapshot remains available with no model/mail/search keys and no paid calls',async()=>{
   setup();const response=await handlers[0](req({action:'get'}));assert(response.status===200,'Authenticated snapshot succeeds.');const body=await response.json();assert(body.snapshot.recordVersion===0,'Initial real record version.');assert(body.snapshot.capabilities.rulesEngine===true&&body.snapshot.capabilities.dailyRunLimit===3,'Rules capability and cap declared.');assert(body.snapshot.models.every((model:{ready:boolean})=>!model.ready),'No paid model is claimed ready.');assert(body.snapshot.gmail.connected===false,'Sign-in is not mailbox connection.');assert(calls.every(call=>call.url.startsWith('https://supabase.fixture.invalid/')),'Only fixture persistence/auth calls.');
+});
+Deno.test('actual saved-check link handler composes atomic RPC and returns exact retry identity without preparation',async()=>{
+  setup();lifecycle={state:'active',generation:0};
+  const action={action:'link_saved_check',expectedGeneration:0,expectedVersion:0,checkId:'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',linkConsent:true,opportunity:{title:'Analyst',company:'Example employer',location:'Dubai',url:'https://example.test/job',description:'Review customer research, document evidence and prepare reports for the product team.',contact:null}};
+  const first=await handlers[0](req(action)),body=await first.json();
+  assert(first.status===200&&body.checkLink.checkId===action.checkId&&!body.checkLink.reused,'First link has exact receipt.');
+  const retry=await handlers[0](req(action)),again=await retry.json();
+  assert(retry.status===200&&again.checkLink.opportunityId===body.checkLink.opportunityId&&again.checkLink.reused,'Lost-response retry returns the same opportunity.');
+  assert(again.snapshot.opportunities.length===1&&again.snapshot.opportunities[0].sourceCheckId===action.checkId,'Exact provenance survives the handler response.');
+  assert(!calls.some(call=>/open_record|write_record|start_run|reserve|storage/.test(new URL(call.url).pathname)),'No initialization, generic record rewrite, preparation, spend or upload.');
+});
+Deno.test('actual saved-check handler refuses missing consent, forged authority and stale generation before link persistence',async()=>{
+  setup();lifecycle={state:'active',generation:7};
+  const action={action:'link_saved_check',expectedGeneration:7,expectedVersion:0,checkId:'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',linkConsent:true,opportunity:{title:'Analyst',company:'Example employer',location:'Dubai',url:'https://example.test/job',description:'Review customer research, document evidence and prepare reports for the product team.',contact:null}};
+  for(const patch of [{linkConsent:false},{userId:'another-owner'},{expectedGeneration:undefined},{opportunity:{...action.opportunity,sourceCheckId:action.checkId}}])assert((await handlers[0](req({...action,...patch}))).status===400,'Invalid link payload rejected.');
+  assert((await handlers[0](req({...action,expectedGeneration:0}))).status===409,'Old generation rejected.');
+  assert(!calls.some(call=>/link_saved_check|open_record|write_record/.test(call.url)),'No rejected request reaches a link or record mutation.');
+  lifecycle={state:'active',generation:0};
 });
 Deno.test('passive home read uses authenticated owner, requires no caller authority and rejects forged fields',async()=>{
   setup();lifecycle={state:'active',generation:0};

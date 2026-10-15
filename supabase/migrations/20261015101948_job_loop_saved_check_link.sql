@@ -17,6 +17,9 @@ DECLARE
   item jsonb;
   next_record jsonb;
   item_id uuid;
+  -- Same explicit whitespace set as JavaScript String.trim in the existing
+  -- opportunity validator; preserve all non-whitespace source characters.
+  trim_chars constant text := U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF';
 BEGIN
   IF p_link_consent IS DISTINCT FROM true THEN RAISE EXCEPTION 'LOOP_CHECK_LINK_CONSENT'; END IF;
   IF p_user IS NULL OR p_check IS NULL OR p_expected IS NULL OR p_expected<0 THEN
@@ -64,7 +67,7 @@ BEGIN
   -- Exact source identity is not title/company/URL deduplication. Edited roles
   -- must be deliberately saved separately, not attributed to this saved check.
   IF (p_opportunity->>'title',p_opportunity->>'company',p_opportunity->>'description') IS DISTINCT FROM
-    (btrim(c.job_title,E' \t\n\r'),btrim(c.company,E' \t\n\r'),btrim(c.job_description,E' \t\n\r'))
+    (btrim(c.job_title,trim_chars),btrim(c.company,trim_chars),btrim(c.job_description,trim_chars))
   THEN RAISE EXCEPTION 'LOOP_CHECK_SOURCE_CHANGED'; END IF;
   IF length(p_opportunity->>'title') NOT BETWEEN 2 AND 200
     OR length(p_opportunity->>'company')>200 OR length(p_opportunity->>'location')>200
