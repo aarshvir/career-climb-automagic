@@ -1,6 +1,5 @@
 import { ApiError } from '../_shared/core.ts';
 import { adminClient, boundedBody, cors, json, serve } from '../_shared/runtime.ts';
-import { configuredLoopEnv } from '../_shared/jobvance-loop-config.ts';
 import { callRouter, prepareRouterRequest, ROUTER_MODELS, RouterUncertain, type RouterModel } from '../_shared/jobvance-openrouter.ts';
 import { supportRateHash } from '../_shared/jobvance-guest-support.ts';
 import { assembleTailoredCv, parseProposal, TAILOR_SCHEMA, TAILOR_SYSTEM_PROMPT, TailorInputError, tailorUserPrompt, validateTailorRequest } from '../_shared/cv-tailor.ts';
@@ -8,6 +7,17 @@ import { assembleTailoredCv, parseProposal, TAILOR_SCHEMA, TAILOR_SYSTEM_PROMPT,
 // Source-bound tailoring for guests and signed-in candidates. Nothing about the
 // CV, vacancy or model output is stored or logged; only the cost reservation.
 const LIMITS = { userDaily: 8, guestDaily: 2, guestGlobalDaily: 200 };
+
+/** Same owner settings as configuredLoopEnv: routing is off unless the private row is valid and enabled. */
+async function routerSettings(admin: ReturnType<typeof adminClient>): Promise<{ enabled: boolean; model: RouterModel }> {
+  try {
+    const { data, error } = await admin.from('jobvance_admin_config').select('monthly_cap_micros,router_enabled,default_model').eq('singleton', true).maybeSingle();
+    const cap = Number(data?.monthly_cap_micros);
+    const valid = !error && !!data && Number.isSafeInteger(cap) && cap > 0 && cap <= 50000000;
+    const model = String(data?.default_model ?? '');
+    return { enabled: valid && data?.router_enabled === true && model in ROUTER_MODELS, model: (model in ROUTER_MODELS ? model : 'openai/gpt-6.1-sol') as RouterModel };
+  } catch { return { enabled: false, model: 'openai/gpt-6.1-sol' }; }
+}
 const OUTPUT_TOKENS = 6000;
 
 function tailorError(error: { message?: string } | null): void {
@@ -37,11 +47,10 @@ serve(async req => {
   let userId: string | null = null;
   const token = /^Bearer\s+(\S+)$/i.exec(req.headers.get('Authorization') ?? '')?.[1];
   if (token) { try { const { data } = await admin.auth.getUser(token); userId = data.user?.id ?? null; } catch { userId = null; } }
-  const env = await configuredLoopEnv(admin, name => Deno.env.get(name));
-  if (env('JOB_LOOP_OPENROUTER_ENABLED') !== 'true') throw new ApiError(503, 'TAILOR_PAUSED', 'AI tailoring is paused right now. Your CV comparison still works.');
-  const configured = env('JOB_LOOP_DEFAULT_ROUTER_MODEL') ?? '';
-  const model = (configured in ROUTER_MODELS ? configured : 'openai/gpt-6.1-sol') as RouterModel;
-  const request = prepareRouterRequest(env, model, [
+  const settings = await routerSettings(admin);
+  if (!settings.enabled) throw new ApiError(503, 'TAILOR_PAUSED', 'AI tailoring is paused right now. Your CV comparison still works.');
+  const model = settings.model;
+  const request = prepareRouterRequest(name => Deno.env.get(name), model, [
     { role: 'system', content: TAILOR_SYSTEM_PROMPT },
     { role: 'user', content: tailorUserPrompt(input.cvText, input.jobTitle, input.company, input.jobDescription) },
   ], TAILOR_SCHEMA, OUTPUT_TOKENS, 'medium');

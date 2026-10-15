@@ -73,6 +73,9 @@ describe('rewrite validator rejects invented or inflated facts', () => {
     ['new licence', 'Advised clients on tax', 'Advised clients on tax as a licensed adviser'],
     ['new black belt', 'Ran improvement workshops', 'Ran improvement workshops as a Green Belt'],
     ['new scrum master', 'Coordinated sprint planning', 'Coordinated sprint planning as Scrum Master'],
+    ['new company opening a sentence', 'Supported market-entry studies for two consumer brands', 'Unilever market-entry studies supported for two consumer brands'],
+    ['new product opening a later sentence', 'Introduced a demand-forecasting pilot', 'Introduced a forecasting pilot. Salesforce dashboards tracked it'],
+    ['new acronym opening a sentence', 'Built the weekly KPI pack', 'SAP reporting pack built weekly'],
   ];
   it.each(cases)('rejects %s', (_label, source, after) => {
     expect(validateRewrite(after, [source])).not.toBeNull();
@@ -86,6 +89,8 @@ describe('rewrite validator accepts truthful rewording', () => {
     ['Led a 12-store replenishment redesign that cut stock-outs by 18% in 9 months', 'Led a 12-store replenishment process improvement that cut stock-outs by 18% in 9 months'],
     ['Supported the finance team with monthly reporting', 'Supported the finance team with monthly performance reporting'],
     ['Supported market-entry studies for two consumer brands', 'Supported market-entry analysis for two consumer brands'],
+    ['Reduced late deliveries by 22% by redesigning the dispatch schedule', 'Redesigned the dispatch schedule, reducing late deliveries by 22%'],
+    ['BSc Economics. Cleaned a survey dataset in Python. Presented findings to the tutor.', 'Economics undergraduate who cleaned a survey dataset in Python. Brings experience presenting findings.'],
   ];
   it.each(good)('accepts a rewrite of "%s"', (source, after) => {
     expect(validateRewrite(after, [source])).toBeNull();

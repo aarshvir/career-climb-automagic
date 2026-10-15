@@ -11,7 +11,7 @@ export default function SubscriptionPricing() {
       <p>{currentOffer.check}</p>
       <ul>{['Job requirements beside passages from your CV', 'An editable CV and a PDF layout preview', 'Reviewed PDF, DOCX and TXT downloads', 'Reuse your chosen CV for the next job'].map(item => <li key={item}><Check size={17} aria-hidden="true" />{item}</li>)}</ul>
       <Link className="product-button" to="/check">Check my CV against a job <ArrowRight size={17} aria-hidden="true" /></Link>
-      <p className="product-plan-note">The check compares wording. You make the final edits; it does not write a new CV for you.</p>
+      <p className="product-plan-note">AI tailoring uses only what is already in your CV, and you check every change. Free daily limits apply: 2 tailored CVs a day without an account, 8 when signed in.</p>
     </section>
     <section className="product-plan" aria-labelledby="loop-offer">
       <span className="product-eyebrow">OPTIONAL · ACCOUNT NEEDED</span>

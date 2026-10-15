@@ -122,6 +122,8 @@ function CvCheckWorkspace() {
   const sourceRoute = useLocation();
   const exactSelection = readApplicationSource(sourceRoute.search, 'savedCheck');
   const hasExactSelection = searchParams.has('savedCheck');
+  const reuseCheckId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(searchParams.get('reuseCheck') ?? '') ? searchParams.get('reuseCheck')!.toLowerCase() : null;
+  const reuseHandled = useRef('');
   const [openedSelection, setOpenedSelection] = useState<string | null>(null);
   const [replaceSelection, setReplaceSelection] = useState<{ id: string; draft: CheckDraft; owner: string; route: string } | null>(null);
   const requestedAudience = checkAudience(searchParams.get("audience"));
@@ -492,6 +494,14 @@ function CvCheckWorkspace() {
   }
 
   const exactCheck = user && exactSelection ? savedChecks.find(item => item.id === exactSelection.id && item.user_id === user.id) : null;
+  useEffect(() => {
+    if (!reuseCheckId || !user || savedLoading || busy || reuseHandled.current === `${user.id}:${reuseCheckId}`) return;
+    const record = savedChecks.find(item => item.id === reuseCheckId && item.user_id === user.id && item.status === 'approved');
+    if (!record) { if (!savedLoading && savedChecks.length) { reuseHandled.current = `${user.id}:${reuseCheckId}`; setError('That saved application is not available in this account.'); } return; }
+    reuseHandled.current = `${user.id}:${reuseCheckId}`;
+    beginAnotherVacancy({ jobTitle: record.job_title, company: record.company, sourceText: record.original_text, reviewedText: record.reviewed_text, jobDescription: record.job_description }, 'reviewed');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reuseCheckId, user?.id, savedLoading, savedChecks, busy]);
   function openExactCheck() {
     if (!exactCheck || !user || busy || savedLoading || savedError) return;
     const before = sourceSnapshot();

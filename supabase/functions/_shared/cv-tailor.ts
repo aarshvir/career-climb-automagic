@@ -80,10 +80,22 @@ export function numbers(text: string): string[] {
 function words(text: string): Set<string> {
   return new Set(normalise(text).split(/[^\p{L}\p{N}+#&.-]+/u).filter(Boolean).map(word => word.replace(/^[.-]+|[.-]+$/gu, "")));
 }
-/** Capitalised names and acronyms that are not ordinary sentence words. */
-function properTerms(text: string): string[] {
-  const tokens = text.match(/\b[\p{Lu}][\p{L}\p{N}&.+#-]*\b/gu) ?? [];
-  return tokens.filter(token => !COMMON_CAPS.has(token) && !COMMON_CAPS.has(token.replace(/\.$/u, "")));
+const SENTENCE_VERBS = new Set(["Brings", "Combines", "Offers", "Has", "Holds", "Skilled", "Known", "Focused", "Adept", "Comfortable", "Able", "Seeking", "Looking", "Keen", "Eager"]);
+const stem = (word: string) => normalise(word).replace(/(ing|ed|es|s|d)$/u, "");
+/** Capitalised names and acronyms that are not ordinary sentence words. A
+ * sentence-opening word is treated as ordinary when it is a known opening verb,
+ * or shares a stem with a source word ("Redesigned" for "redesigning"). */
+function properTerms(text: string, sourceWords: Set<string>): string[] {
+  const stems = new Set([...sourceWords].map(stem));
+  const found: string[] = [];
+  for (const match of text.matchAll(/\b[\p{Lu}][\p{L}\p{N}&.+#-]*\b/gu)) {
+    const token = match[0], index = match.index ?? 0;
+    if (COMMON_CAPS.has(token) || COMMON_CAPS.has(token.replace(/\.$/u, ""))) continue;
+    const opening = /^\s*$/u.test(text.slice(0, index)) || /[.!?;:]\s+$/u.test(text.slice(0, index));
+    if (opening && !/^[\p{Lu}\d&.+#-]{2,}$/u.test(token) && (SENTENCE_VERBS.has(token) || stems.has(stem(token)))) continue;
+    found.push(token);
+  }
+  return found;
 }
 
 export function validateRewrite(after: string, sources: string[]): string | null {
@@ -96,7 +108,7 @@ export function validateRewrite(after: string, sources: string[]): string | null
   const extraNumber = numbers(value).find(token => !allowedNumbers.has(token));
   if (extraNumber) return `Adds a number not in your CV (${extraNumber}).`;
   const sourceWords = words(source);
-  const extraTerm = properTerms(value).find(term => !sourceWords.has(normalise(term).replace(/^[.-]+|[.-]+$/gu, "")));
+  const extraTerm = properTerms(value, sourceWords).find(term => !sourceWords.has(normalise(term).replace(/^[.-]+|[.-]+$/gu, "")));
   if (extraTerm) return `Adds a name or term not in this part of your CV (${extraTerm}).`;
   if (CREDENTIAL.test(value) && !CREDENTIAL.test(source)) return "Adds a qualification or certification not in your CV.";
   const credentialAfter = normalise(value).match(new RegExp(CREDENTIAL.source, "giu")) ?? [];
