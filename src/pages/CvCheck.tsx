@@ -302,7 +302,8 @@ function CvCheckWorkspace() {
     catch (failure) { setRecoveryConsent(false); setError(failure instanceof Error ? failure.message : 'Draft recovery is unavailable.'); }
   }, [draft, step, cvReady, filename, user?.id, authLoading, authError, authAuthority, draftAuthority, draftOwner, recoveryConsent, pageTarget, reuseMode, audience, reviewStarted, saveReference, currentKey]);
   useEffect(() => {
-    if (step !== 6 || !report || busy || !currentKey || autoPreviewKey.current === currentKey || (pdfPreview && pdfPreview.key === currentKey)) return;
+    if (step !== 6) { autoPreviewKey.current = ''; return; }
+    if (!report || busy || !currentKey || autoPreviewKey.current === currentKey || (pdfPreview && pdfPreview.key === currentKey)) return;
     autoPreviewKey.current = currentKey; void previewPdf();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, report, currentKey, busy]);
@@ -321,6 +322,7 @@ function CvCheckWorkspace() {
       setReuseMode(false); setReuseInspect(false);
       setReviewStarted(false);
       setAudience(null);
+      setTailoring(null); setTailorUndo(null); setRoleTouched(false);
     } else if (previousOwner.current !== id) {
       // Email sign-in may adopt the open guest draft, but never its approval.
       invalidate(); setShowAccount(false); setGoogleConsent(false);

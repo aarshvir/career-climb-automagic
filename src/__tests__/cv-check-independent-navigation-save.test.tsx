@@ -40,37 +40,41 @@ function tree() { return <HelmetProvider><MemoryRouter initialEntries={['/check'
 function retain(draft = original, consent = false) {
   rememberCheckRecovery({ draft, step: 6, cvReady: true, filename: 'original-local-fixture.txt', ownerId: mocks.auth.user?.id ?? null, pageTarget: 1, reviewStarted: true }, consent);
 }
-function approve() {
-  fireEvent.click(screen.getByLabelText(/I reviewed the complete CV and vacancy/));
-  fireEvent.click(screen.getByLabelText(/Both my source CV and final CV are safe/));
-  fireEvent.click(screen.getByRole('button', { name: 'Approve this CV' }));
+function confirmBox() { return screen.getByLabelText(/I have checked this CV/) as HTMLInputElement; }
+// The final stage starts a PDF preview automatically and is busy until it settles.
+async function settled() { await waitFor(() => expect(confirmBox()).toBeEnabled()); }
+// One confirmation box now approves immediately when ticked.
+async function approve() {
+  await settled();
+  fireEvent.click(confirmBox());
+  expect(screen.getByText('Ready to download')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();
 }
+async function continueToDownload() { fireEvent.click(screen.getByRole('button', { name: 'Continue to download' })); await settled(); }
 function save() {
   fireEvent.click(screen.getByLabelText('Save these reviewed texts privately in my account.'));
   fireEvent.click(screen.getByRole('button', { name: 'Save approved check to my account' }));
 }
-function reapproveUnchanged() {
-  fireEvent.click(screen.getByRole('button', { name: 'Your review' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
-  approve();
+async function reapproveUnchanged() {
+  fireEvent.click(screen.getByRole('button', { name: 'Review changes' }));
+  await continueToDownload();
+  await approve();
 }
 function savedRecord(owner: string, input: SaveFreeCheckInput, id = `saved-${owner}`): FreeCvCheck {
   return { id, user_id: owner, request_id: input.requestId, job_title: input.jobTitle, company: input.company,
     job_description: input.jobDescription, original_text: input.originalText, reviewed_text: input.reviewedText,
     method_version: input.methodVersion, status: 'approved', created_at: '2026-10-14T00:00:00Z', updated_at: '2026-10-14T00:00:00Z' };
 }
-function enterNewOwnerReview() {
-  fireEvent.change(screen.getByLabelText('Target role'), { target: { value: 'Financial Analyst' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Continue to your CV' }));
-  fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: replacement } });
-  fireEvent.click(screen.getByRole('button', { name: 'Use this reviewed CV text' }));
-  fireEvent.change(screen.getByLabelText('Vacancy description'), { target: { value: vacancy } });
-  fireEvent.click(screen.getByRole('button', { name: 'Check these inputs' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Review my CV & questions' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
-  approve();
+async function enterNewOwnerReview() {
+  fireEvent.change(screen.getByLabelText('Job title'), { target: { value: 'Financial Analyst' } });
+  fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: replacement } });
+  fireEvent.change(screen.getByLabelText('The job description'), { target: { value: vacancy } });
+  fireEvent.click(screen.getByRole('button', { name: 'Compare without AI' }));
+  await continueToDownload();
+  await approve();
 }
+// The source CV now sits on stage 1 with the vacancy.
+function goToInputs() { fireEvent.click(screen.getByRole('button', { name: 'Add your CV and the job' })); }
 
 beforeEach(() => {
   clearTrackingDraftMemory();
@@ -89,10 +93,10 @@ describe('independent CV review navigation and optional account save acceptance'
   it('keeps the approved local TXT, DOCX and exact PDF available while optional account saving is unresolved', async () => {
     const pending = deferred<FreeCvCheck>(); mocks.save.mockReturnValueOnce(pending.promise);
     retain(); render(tree());
-    fireEvent.click(screen.getByRole('button', { name: 'Preview current PDF' }));
-    await screen.findByTitle('Exact PDF preview before approval'); approve(); save();
+    // The exact PDF preview is now generated automatically when the final stage opens.
+    await screen.findByTitle('Exact PDF preview before approval'); expect(mocks.preview).toHaveBeenCalledOnce(); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledOnce());
-    for (const format of ['TXT', 'DOCX', 'PDF']) expect(screen.getByRole('button', { name: `Download ${format}` })).toBeEnabled();
+    for (const format of ['TXT', 'Word', 'PDF']) expect(screen.getByRole('button', { name: `Download ${format}` })).toBeEnabled();
     fireEvent.click(screen.getByRole('button', { name: 'Download TXT' }));
     await waitFor(() => expect(mocks.download).toHaveBeenCalledOnce());
     expect(mocks.exportCv).toHaveBeenCalledWith(expect.objectContaining({ reviewedText: finalText }), 'txt');
@@ -105,7 +109,7 @@ describe('independent CV review navigation and optional account save acceptance'
   it('does not let completion of an optional save clear a still-pending local export operation', async () => {
     const pendingSave = deferred<FreeCvCheck>(), pendingExport = deferred<Blob>();
     mocks.save.mockReturnValueOnce(pendingSave.promise); mocks.exportCv.mockReturnValueOnce(pendingExport.promise);
-    retain(); render(tree()); approve(); save();
+    retain(); render(tree()); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledOnce());
     fireEvent.click(screen.getByRole('button', { name: 'Download TXT' }));
     await waitFor(() => expect(mocks.exportCv).toHaveBeenCalledOnce());
@@ -121,10 +125,10 @@ describe('independent CV review navigation and optional account save acceptance'
   it.each(['resolve', 'reject'] as const)('ignores owner A’s delayed save %s while owner B has its own pending save and approved local export', async outcome => {
     const first = deferred<FreeCvCheck>(), second = deferred<FreeCvCheck>();
     mocks.save.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
-    retain(); const view = render(tree()); approve(); save();
+    retain(); const view = render(tree()); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledOnce());
     await act(async () => { setTrackingDraftOwner('owner-b'); mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' }; view.rerender(tree()); });
-    enterNewOwnerReview(); save();
+    await enterNewOwnerReview(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
     await act(async () => {
       if (outcome === 'resolve') first.resolve(savedRecord('owner-a', mocks.save.mock.calls[0][1], 'OLD_OWNER_PRIVATE_SAVE'));
@@ -141,18 +145,18 @@ describe('independent CV review navigation and optional account save acceptance'
 
   it('reuses the same ambiguous save reference after unchanged reapproval and uses a different reference after a factual edit', async () => {
     mocks.save.mockImplementation(async (_owner, input) => { throw new mocks.Unconfirmed(input.requestId); });
-    retain(); render(tree()); approve(); save();
+    retain(); render(tree()); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledOnce());
     await screen.findByText(/save response was lost/i);
     const first = mocks.save.mock.calls[0][1].requestId;
-    reapproveUnchanged(); save();
+    await reapproveUnchanged(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
     await screen.findByText(/save response was lost/i);
     expect(mocks.save.mock.calls[1][1].requestId).toBe(first);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Your review' }));
-    fireEvent.change(screen.getByLabelText('Your CV to review'), { target: { value: finalText + '\n• Clarified the reporting definitions in the team checklist.' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' })); approve(); save();
+    fireEvent.click(screen.getByRole('button', { name: 'Review changes' }));
+    fireEvent.change(screen.getByLabelText('Your CV for this job'), { target: { value: finalText + '\n• Clarified the reporting definitions in the team checklist.' } });
+    await continueToDownload(); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(3));
     expect(mocks.save.mock.calls[2][1].requestId).not.toBe(first);
     expect(mocks.save.mock.calls[2][1].reviewedText).not.toBe(mocks.save.mock.calls[0][1].reviewedText);
@@ -161,12 +165,12 @@ describe('independent CV review navigation and optional account save acceptance'
   it.each(['resolve', 'reject'] as const)('ignores an earlier same-owner save %s after a new review starts its own save', async outcome => {
     const first = deferred<FreeCvCheck>(), second = deferred<FreeCvCheck>();
     mocks.save.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
-    retain(); render(tree()); approve(); save();
+    retain(); render(tree()); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledOnce());
-    fireEvent.click(screen.getByRole('button', { name: 'Your review' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review changes' }));
     const corrected = finalText + '\n• Clarified the reporting definitions for the team checklist.';
-    fireEvent.change(screen.getByLabelText('Your CV to review'), { target: { value: corrected } });
-    fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' })); approve(); save();
+    fireEvent.change(screen.getByLabelText('Your CV for this job'), { target: { value: corrected } });
+    await continueToDownload(); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
     await act(async () => {
       if (outcome === 'resolve') first.resolve(savedRecord('owner-a', mocks.save.mock.calls[0][1], 'EARLIER_REVIEW_PRIVATE_SAVE'));
@@ -183,36 +187,35 @@ describe('independent CV review navigation and optional account save acceptance'
 
   it('retains the ambiguous reference through an owner-matched consented refresh but clears approval', async () => {
     mocks.save.mockImplementation(async (_owner, input) => { throw new mocks.Unconfirmed(input.requestId); });
-    retain(original, true); const firstView = render(tree()); approve(); save();
+    retain(original, true); const firstView = render(tree()); await approve(); save();
     await screen.findByText(/save response was lost/i);
     const firstReference = mocks.save.mock.calls[0][1].requestId;
     const stored = sessionStorage.getItem('jobvance_check_recovery_v1'); expect(stored).not.toBeNull();
     firstView.unmount(); clearCheckRecovery(); sessionStorage.setItem('jobvance_check_recovery_v1', stored!);
-    render(tree());
+    render(tree()); await settled();
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
-    expect(screen.getByLabelText(/I reviewed the complete CV and vacancy/)).not.toBeChecked();
-    approve(); save();
+    expect(confirmBox()).not.toBeChecked();
+    await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
     expect(mocks.save.mock.calls[1][1].requestId).toBe(firstReference);
   });
 
   it('undoes a continuous source replacement to the exact prior source, edited final, stage and page target without restoring approval', async () => {
-    retain(); render(tree()); approve();
-    fireEvent.click(screen.getByRole('button', { name: 'Your CV' }));
-    const sourceEditor = screen.getByLabelText('CV text — paste, correct or remove private information');
+    retain(); render(tree()); await approve();
+    goToInputs();
+    const sourceEditor = screen.getByLabelText('Your CV');
     fireEvent.change(sourceEditor, { target: { value: replacement } });
     fireEvent.change(sourceEditor, { target: { value: replacement + '\n• Explained the finance reporting definitions.' } });
     fireEvent.click(screen.getByRole('button', { name: 'Undo source replacement' }));
-    expect(readCheckRecovery('owner-a')?.value).toMatchObject({ draft: original, pageTarget: 1, step: 2, filename: 'original-local-fixture.txt' });
-    expect(screen.getByRole('heading', { name: 'Your CV' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Use this reviewed CV text' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Check these inputs' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Review my CV & questions' }));
-    expect(screen.getByLabelText('Your CV to review')).toHaveValue(finalText);
-    fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
+    // The source editor is now on stage 1 (the old separate CV step 2 is part of it).
+    expect(readCheckRecovery('owner-a')?.value).toMatchObject({ draft: original, pageTarget: 1, step: 1, filename: 'original-local-fixture.txt' });
+    expect(screen.getByRole('heading', { name: 'Add your CV and the job' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Compare without AI' }));
+    expect(screen.getByLabelText('Your CV for this job')).toHaveValue(finalText);
+    await continueToDownload();
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
-    expect(screen.getByLabelText(/I reviewed the complete CV and vacancy/)).not.toBeChecked();
-    expect(screen.getByLabelText(/Both my source CV and final CV are safe/)).not.toBeChecked();
+    expect(confirmBox()).not.toBeChecked();
+    expect(screen.queryByText('Ready to download')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Maximum PDF length')).toHaveValue('1');
     expect(screen.queryByRole('button', { name: 'Undo source replacement' })).not.toBeInTheDocument();
     expect(mocks.save).not.toHaveBeenCalled();
@@ -220,15 +223,15 @@ describe('independent CV review navigation and optional account save acceptance'
 
   it('drops the previous owner’s source-replacement undo and ignores its late file read after the new owner approves another review', async () => {
     const pending = deferred<string>(); mocks.extract.mockReturnValueOnce(pending.promise);
-    retain(); const view = render(tree());
-    fireEvent.click(screen.getByRole('button', { name: 'Your CV' }));
-    fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: replacement } });
+    retain(); const view = render(tree()); await settled();
+    goToInputs();
+    fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: replacement } });
     expect(screen.getByRole('button', { name: 'Undo source replacement' })).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Read a CV file on this device'), { target: { files: [new File(['local fixture'], 'replacement.txt', { type: 'text/plain' })] } });
+    fireEvent.change(screen.getByLabelText(/Upload your CV/), { target: { files: [new File(['local fixture'], 'replacement.txt', { type: 'text/plain' })] } });
     await act(async () => { setTrackingDraftOwner('owner-b'); mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' }; view.rerender(tree()); });
     expect(screen.queryByRole('button', { name: 'Undo source replacement' })).not.toBeInTheDocument();
     expect(readCheckRecovery('owner-b')?.value.draft.sourceText).toBe('');
-    enterNewOwnerReview();
+    await enterNewOwnerReview();
     await act(async () => { pending.resolve(replacement + '\nOLD_OWNER_REPLACEMENT_FILE_RESULT'); });
     expect(readCheckRecovery('owner-b')?.value.draft.sourceText).toBe(replacement);
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();

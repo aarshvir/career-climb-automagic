@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -32,23 +32,23 @@ const sourceA = 'Owner A\nEXPERIENCE\n• Prepared weekly operations reports usi
 const sourceB = 'Owner B\nEXPERIENCE\n• Prepared monthly finance reports using Excel.\n• Analysed department spending for budget reviews.\nEDUCATION\nBachelor of Business Administration';
 const vacancy = 'Responsibilities\n• Prepare clear reports using Excel.\n• Explain the findings to colleagues.\nRequirements\n• Coordinate the reporting process with other teams.';
 function tree() { return <HelmetProvider><MemoryRouter initialEntries={['/check']}><CvCheck /></MemoryRouter></HelmetProvider>; }
+// Stage 1 now shows the role, CV upload, CV text and vacancy on one screen.
 function enterCvStage() {
-  fireEvent.change(screen.getByLabelText('Target role'), { target: { value: 'Reporting Analyst' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Continue to your CV' }));
+  fireEvent.change(screen.getByLabelText('Job title'), { target: { value: 'Reporting Analyst' } });
 }
+function fileInput() { return screen.getByLabelText(/Upload your CV/); }
 function selectFile(name: string) {
-  fireEvent.change(screen.getByLabelText('Read a CV file on this device'), {
+  fireEvent.change(fileInput(), {
     target: { files: [new File(['private test text'], name, { type: 'text/plain' })] },
   });
 }
+// Entering the final stage now starts its PDF preview automatically.
 function enterDownloadStage(source: string) {
   enterCvStage();
-  fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: source } });
-  fireEvent.click(screen.getByRole('button', { name: 'Use this reviewed CV text' }));
-  fireEvent.change(screen.getByLabelText('Vacancy description'), { target: { value: vacancy } });
-  fireEvent.click(screen.getByRole('button', { name: 'Check these inputs' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Review my CV & questions' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
+  fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: source } });
+  fireEvent.change(screen.getByLabelText('The job description'), { target: { value: vacancy } });
+  fireEvent.click(screen.getByRole('button', { name: 'Compare without AI' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Continue to download' }));
 }
 const StandardURL = globalThis.URL;
 beforeEach(() => {
@@ -72,15 +72,15 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
     mocks.extract.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
     const view = render(tree());
     enterCvStage(); selectFile('owner-a.txt');
-    expect(screen.getByLabelText('Read a CV file on this device')).toBeDisabled();
+    expect(fileInput()).toBeDisabled();
 
     await act(async () => {
       mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' };
       setTrackingDraftOwner('owner-b');
       view.rerender(tree());
     });
-    expect(screen.getByLabelText('Target role')).toHaveValue('');
-    expect(screen.getByRole('button', { name: 'Continue to your CV' })).toBeEnabled();
+    expect(screen.getByLabelText('Job title')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Compare without AI' })).toBeEnabled();
     enterCvStage(); selectFile('owner-b.txt');
 
     await act(async () => {
@@ -88,14 +88,14 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
       else first.reject(new Error('Owner A extraction failed late'));
       await Promise.resolve();
     });
-    expect(screen.getByLabelText('Read a CV file on this device')).toBeDisabled();
-    expect(screen.getByLabelText('CV text — paste, correct or remove private information')).toHaveValue('');
+    expect(fileInput()).toBeDisabled();
+    expect(screen.getByLabelText('Your CV')).toHaveValue('');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(readCheckRecovery('owner-b')?.value.draft.sourceText).toBe('');
 
     await act(async () => { second.resolve(sourceB); await Promise.resolve(); });
-    expect(screen.getByLabelText('Read a CV file on this device')).toBeEnabled();
-    expect(screen.getByLabelText('CV text — paste, correct or remove private information')).toHaveValue(sourceB);
+    expect(fileInput()).toBeEnabled();
+    expect(screen.getByLabelText('Your CV')).toHaveValue(sourceB);
     expect(readCheckRecovery('owner-b')?.value.draft.sourceText).toBe(sourceB);
     expect(mocks.save).not.toHaveBeenCalled();
     expect(mocks.tracker).not.toHaveBeenCalled();
@@ -107,7 +107,7 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
     mocks.preview.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
     const view = render(tree());
     enterDownloadStage(sourceA);
-    fireEvent.click(screen.getByRole('button', { name: 'Preview current PDF' }));
+    expect(mocks.preview).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' };
@@ -115,18 +115,22 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
       view.rerender(tree());
     });
     enterDownloadStage(sourceB);
-    fireEvent.click(screen.getByRole('button', { name: 'Preview current PDF' }));
+    expect(mocks.preview).toHaveBeenCalledTimes(2);
+    expect(mocks.preview.mock.calls[1][0]).toContain('Owner B');
     const staleBlob = new Blob(['owner A PDF bytes'], { type: 'application/pdf' });
     await act(async () => { first.resolve({ blob: staleBlob, pageCount: 1 }); await Promise.resolve(); });
 
-    expect(screen.getByRole('button', { name: 'Preview current PDF' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Show PDF preview' })).toBeDisabled();
+    expect(screen.getByLabelText(/I have checked this CV/)).toBeDisabled();
     expect(screen.queryByTitle('Exact PDF preview before approval')).not.toBeInTheDocument();
     expect(URL.createObjectURL).not.toHaveBeenCalled();
     expect(readCheckRecovery('owner-b')?.value.draft.reviewedText).not.toContain('Owner A');
 
     const currentBlob = new Blob(['owner B PDF bytes'], { type: 'application/pdf' });
     await act(async () => { second.resolve({ blob: currentBlob, pageCount: 1 }); await Promise.resolve(); });
-    expect(screen.getByRole('button', { name: 'Preview current PDF' })).toBeEnabled();
+    // The current owner's preview finishes: no longer busy, and the manual preview button is gone because a current preview exists.
+    await waitFor(() => expect(screen.getByLabelText(/I have checked this CV/)).toBeEnabled());
+    expect(screen.queryByRole('button', { name: 'Show PDF preview' })).not.toBeInTheDocument();
     expect(screen.getByTitle('Exact PDF preview before approval')).toHaveAttribute('src', 'blob:owner-b-current-preview');
     expect(URL.createObjectURL).toHaveBeenCalledExactlyOnceWith(currentBlob);
     expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled();
@@ -141,10 +145,10 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
     selectFile('owner-a.txt');
     fireEvent.click(screen.getByRole('button', { name: 'Clear current check' }));
 
-    expect(screen.getByLabelText('Target role')).toHaveValue('');
-    expect(screen.getByRole('button', { name: 'Continue to your CV' })).toBeEnabled();
+    expect(screen.getByLabelText('Job title')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Compare without AI' })).toBeEnabled();
     await act(async () => { pending.resolve(sourceA); await Promise.resolve(); });
-    expect(screen.getByRole('button', { name: 'Continue to your CV' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Compare without AI' })).toBeEnabled();
     expect(readCheckRecovery('owner-a')?.value.draft.sourceText).toBe('');
     expect(screen.queryByText(/Reading your CV on this device/)).not.toBeInTheDocument();
   });
@@ -153,14 +157,14 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
     const pending = deferred<string>();
     mocks.extract.mockReturnValueOnce(pending.promise);
     const view = render(tree()); enterCvStage();
-    fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: sourceA } });
+    fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: sourceA } });
     selectFile('replacement.txt');
     await act(async () => {
       mocks.auth.user = null;
       mocks.auth.authError = 'Sign-in restoration failed';
       view.rerender(tree());
     });
-    expect(screen.queryByLabelText('CV text — paste, correct or remove private information')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Your CV')).not.toBeInTheDocument();
     await act(async () => { pending.resolve(sourceB); await Promise.resolve(); });
     await act(async () => {
       mocks.auth.user = { id: 'owner-a', email: 'owner-a@example.test' };
@@ -168,8 +172,8 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
       mocks.auth.authError = null;
       view.rerender(tree());
     });
-    expect(screen.getByLabelText('Read a CV file on this device')).toBeEnabled();
-    expect(screen.getByLabelText('CV text — paste, correct or remove private information')).toHaveValue(sourceA);
+    expect(fileInput()).toBeEnabled();
+    expect(screen.getByLabelText('Your CV')).toHaveValue(sourceA);
     expect(readCheckRecovery('owner-a')?.value.draft.sourceText).toBe(sourceA);
     expect(screen.queryByText(/Reading your CV on this device/)).not.toBeInTheDocument();
   });

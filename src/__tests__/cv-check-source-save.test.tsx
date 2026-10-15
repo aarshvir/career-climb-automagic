@@ -25,29 +25,30 @@ const NativeURL = globalThis.URL;
 function deferred<T>() { let resolve!: (value: T) => void, reject!: (error: Error) => void; const promise = new Promise<T>((pass, fail) => { resolve = pass; reject = fail; }); return { promise, resolve, reject }; }
 function tree() { return <HelmetProvider><MemoryRouter initialEntries={['/check']}><CvCheck /></MemoryRouter></HelmetProvider>; }
 function review() {
-  fireEvent.change(screen.getByLabelText('Target role'), { target: { value: 'Reporting analyst' } });
+  fireEvent.change(screen.getByLabelText('Job title'), { target: { value: 'Reporting analyst' } });
   fireEvent.change(screen.getByLabelText('Company (optional)'), { target: { value: 'Actual employer' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Continue to your CV' }));
-  fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: source } });
-  fireEvent.click(screen.getByRole('button', { name: 'Use this reviewed CV text' }));
-  fireEvent.change(screen.getByLabelText('Vacancy description'), { target: { value: vacancy } });
-  fireEvent.click(screen.getByRole('button', { name: 'Check these inputs' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Review my CV & questions' }));
-  fireEvent.change(screen.getByLabelText('Your CV to review'), { target: { value: finalText } });
+  fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: source } });
+  fireEvent.change(screen.getByLabelText('The job description'), { target: { value: vacancy } });
+  fireEvent.click(screen.getByRole('button', { name: 'Compare without AI' }));
+  fireEvent.change(screen.getByLabelText('Your CV for this job'), { target: { value: finalText } });
 }
-function finishReview() { fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' })); }
-function approve() {
-  for (const label of [/I reviewed the complete CV and vacancy/, /Both my source CV and final CV are safe/]) {
-    const input = screen.getByLabelText(label); if (!(input as HTMLInputElement).checked) fireEvent.click(input);
-  }
-  fireEvent.click(screen.getByRole('button', { name: 'Approve this CV' }));
+function confirmBox() { return screen.getByLabelText(/I have checked this CV/) as HTMLInputElement; }
+// The final stage starts a PDF preview automatically and is busy until it settles.
+async function settled() { await waitFor(() => expect(confirmBox()).toBeEnabled()); }
+async function finishReview() { fireEvent.click(screen.getByRole('button', { name: 'Continue to download' })); await settled(); }
+// One confirmation box now approves immediately when ticked.
+async function approve() {
+  await settled();
+  if (!confirmBox().checked) fireEvent.click(confirmBox());
+  expect(screen.getByText('Ready to download')).toBeInTheDocument();
 }
 function save() {
   const input = screen.getByLabelText('Save these reviewed texts privately in my account.');
   if (!(input as HTMLInputElement).checked) fireEvent.click(input);
   fireEvent.click(screen.getByRole('button', { name: 'Save approved check to my account' }));
 }
-function goSource() { fireEvent.click(within(screen.getByRole('navigation', { name: 'Check progress' })).getByRole('button', { name: /Your CV/ })); }
+// The source CV now sits on stage 1 with the vacancy.
+function goSource() { fireEvent.click(within(screen.getByRole('navigation', { name: 'Check progress' })).getByRole('button', { name: 'Add your CV and the job' })); }
 beforeEach(() => {
   clearTrackingDraftMemory();
   vi.clearAllMocks(); clearCheckRecovery(); sessionStorage.clear(); localStorage.clear();
@@ -63,40 +64,42 @@ describe('bounded source replacement and optional-save repair', () => {
     const draft = { sourceText: source, reviewedText: finalText, jobDescription: vacancy, jobTitle: 'Reporting analyst', company: 'Actual employer' };
     rememberCheckRecovery({ draft, step: 6, cvReady: true, filename: 'original.pdf', ownerId: 'owner-a', pageTarget: 1, reviewStarted: true }, false);
     mocks.extract.mockResolvedValue(source);
-    render(tree()); approve(); goSource();
-    fireEvent.change(screen.getByLabelText('Read a CV file on this device'), { target: { files: [new File(['source'], 'reread.txt', { type: 'text/plain' })] } });
+    render(tree()); await approve(); goSource();
+    fireEvent.change(screen.getByLabelText(/Upload your CV/), { target: { files: [new File(['source'], 'reread.txt', { type: 'text/plain' })] } });
     await waitFor(() => expect(screen.getByText(/Read: reread.txt/)).toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: 'Undo source replacement' }));
-    expect(readCheckRecovery('owner-a')!.value).toMatchObject({ draft, filename: 'original.pdf', pageTarget: 1, cvReady: true, reviewStarted: true, step: 2 });
+    // The file was reread on stage 1 (the old separate CV step 2 is now part of stage 1).
+    expect(readCheckRecovery('owner-a')!.value).toMatchObject({ draft, filename: 'original.pdf', pageTarget: 1, cvReady: true, reviewStarted: true, step: 1 });
     expect(screen.getByText(/Read: original.pdf/)).toBeInTheDocument();
     expect(mocks.download).not.toHaveBeenCalled();
   });
 
-  it('restores exact source and final edits after a continuous source replacement, with fresh approval required', () => {
-    render(tree()); review(); finishReview(); approve();
+  it('restores exact source and final edits after a continuous source replacement, with fresh approval required', async () => {
+    render(tree()); review(); await finishReview(); await approve();
     const before = readCheckRecovery('owner-a')!.value.draft;
     goSource();
-    fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: replacement } });
-    fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: replacement + '\nAnother edit.' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Use this reviewed CV text' }));
+    fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: replacement } });
+    fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: replacement + '\nAnother edit.' } });
+    // Committing the replaced source (old "Use this reviewed CV text") is now preparing it for review.
+    fireEvent.click(screen.getByRole('button', { name: 'Compare without AI' }));
+    expect(readCheckRecovery('owner-a')!.value.draft.reviewedText).not.toBe(before.reviewedText);
     fireEvent.click(screen.getByRole('button', { name: 'Undo source replacement' }));
     const restored = readCheckRecovery('owner-a')!.value;
     expect(restored.draft).toEqual(before);
     expect(restored.reviewStarted).toBe(true);
-    fireEvent.click(screen.getByRole('button', { name: 'Use this reviewed CV text' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Check these inputs' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Review my CV & questions' }));
-    finishReview(); expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
-    expect(screen.getByLabelText(/I reviewed the complete CV and vacancy/)).not.toBeChecked();
+    fireEvent.click(screen.getByRole('button', { name: 'Compare without AI' }));
+    expect(readCheckRecovery('owner-a')!.value.draft.reviewedText).toBe(before.reviewedText);
+    await finishReview(); expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
+    expect(confirmBox()).not.toBeChecked();
   });
 
   it('keeps approved TXT, DOCX and exact ready PDF exports available while an optional save is unresolved', async () => {
     const pending = deferred<never>(); mocks.save.mockReturnValue(pending.promise);
-    render(tree()); review(); finishReview();
-    fireEvent.click(screen.getByRole('button', { name: 'Preview current PDF' }));
+    render(tree()); review(); await finishReview();
+    // The exact PDF preview is now generated automatically when the final stage opens.
     await waitFor(() => expect(screen.getByTitle('Exact PDF preview before approval')).toBeInTheDocument());
-    approve(); save();
-    for (const name of ['Download TXT', 'Download DOCX', 'Download PDF']) {
+    await approve(); save();
+    for (const name of ['Download TXT', 'Download Word', 'Download PDF']) {
       const button = screen.getByRole('button', { name }); expect(button).toBeEnabled(); fireEvent.click(button);
       await waitFor(() => expect(button).toBeEnabled());
     }
@@ -109,32 +112,35 @@ describe('bounded source replacement and optional-save repair', () => {
 
   it('reuses uncertain save identity after unchanged reapproval and recovery, but changes identity for changed content', async () => {
     mocks.save.mockRejectedValue(new Error('Save response uncertain'));
-    const first = render(tree()); review(); finishReview(); approve(); save();
+    const first = render(tree()); review(); await finishReview(); await approve(); save();
     await screen.findByText(/Save response uncertain/);
     const originalId = mocks.save.mock.calls[0][1].requestId;
-    fireEvent.click(screen.getByLabelText(/I reviewed the complete CV and vacancy/)); approve(); save();
+    // Unticking the single confirmation clears approval; ticking it again re-approves unchanged content.
+    fireEvent.click(confirmBox());
+    expect(screen.queryByText('Ready to download')).not.toBeInTheDocument();
+    await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
     expect(mocks.save.mock.calls[1][1].requestId).toBe(originalId);
     await screen.findByText(/Save response uncertain/); first.unmount();
-    render(tree()); approve(); save();
+    render(tree()); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(3));
     expect(mocks.save.mock.calls[2][1].requestId).toBe(originalId);
     await screen.findByText(/Save response uncertain/);
-    fireEvent.click(within(screen.getByRole('navigation', { name: 'Check progress' })).getByRole('button', { name: /Your review/ }));
-    fireEvent.change(screen.getByLabelText('Your CV to review'), { target: { value: finalText + '\nA new factual contribution.' } });
-    finishReview(); approve(); save();
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Check progress' })).getByRole('button', { name: 'Review changes' }));
+    fireEvent.change(screen.getByLabelText('Your CV for this job'), { target: { value: finalText + '\nA new factual contribution.' } });
+    await finishReview(); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(4));
     expect(mocks.save.mock.calls[3][1].requestId).not.toBe(originalId);
   });
 
   it('starts a new save identity after an explicit reset even when the next check contains identical text', async () => {
     mocks.save.mockRejectedValue(new Error('Save response uncertain'));
-    render(tree()); review(); finishReview(); approve(); save(); await screen.findByText(/Save response uncertain/);
+    render(tree()); review(); await finishReview(); await approve(); save(); await screen.findByText(/Save response uncertain/);
     const previousId = mocks.save.mock.calls[0][1].requestId;
     fireEvent.click(screen.getByRole('button', { name: 'Clear & start again' }));
     fireEvent.click(screen.getByRole('button', { name: 'Clear current check' }));
     expect(readCheckRecovery('owner-a')!.value.saveReference).toBeUndefined();
-    review(); finishReview(); approve(); save();
+    review(); await finishReview(); await approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
     expect(mocks.save.mock.calls[1][1].requestId).not.toBe(previousId);
   });

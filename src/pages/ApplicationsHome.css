@@ -2,3 +2,4 @@
 
 .ah-actions { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: .75rem 0; }
 .ah-actions .ah-subtle { flex-basis: 100%; margin: 0; }
+.ah-source-status--ready{padding:10px 16px;align-items:center;gap:16px;font-size:.8rem;color:#556b75;background:transparent;border-color:#e2e9e9}

@@ -25,7 +25,7 @@ const pack = (): ApplicationPack => ({ id: packId, user_id: 'owner-a', resume_id
 const tracker = (): TrackedApplication => ({ id: trackedId, user_id: 'owner-a', pack_id: packId, job_title: 'Finance Associate', company: 'Pack Employer', job_url: null, status: 'interview', notes: 'EXACT_TRACKER_NOTES', applied_at: date, follow_up_at: '2026-10-20', created_at: date, updated_at: date });
 function deferred<T>() { let resolve!: (value: T) => void, reject!: (reason?: unknown) => void; const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; }
 const tree = (url = '/applications') => <HelmetProvider><MemoryRouter initialEntries={[url]}><ApplicationsHome /></MemoryRouter></HelmetProvider>;
-async function loaded() { await waitFor(() => expect(screen.getAllByText('Loaded')).toHaveLength(4)); }
+async function loaded() { await waitFor(() => expect(screen.getByText('All saved work loaded')).toBeInTheDocument()); }
 function list() { return within(screen.getByRole('region', { name: 'Saved applications' })); }
 beforeEach(() => {
   vi.clearAllMocks(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a'); auth = { user: { id: 'owner-a' }, loading: false, authError: null };
@@ -46,7 +46,7 @@ describe('Applications home actual saved work', () => {
       expect(screen.getByRole('region', { name: 'Application details' })).not.toHaveFocus(); expect(scroll).not.toHaveBeenCalled();
       fireEvent.click(list().getByRole('button', { name: /Saved CV check.*Operations Analyst/ }));
       expect(screen.getByRole('region', { name: 'Application details' })).toHaveFocus();
-      expect(screen.getByRole('link', { name: 'Reopen this CV check' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
+      expect(screen.getByRole('link', { name: 'Open and edit' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
       expect(scroll).toHaveBeenCalledExactlyOnceWith({ block: 'start' });
       fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' })); await loaded();
       expect(scroll).toHaveBeenCalledTimes(1);
@@ -62,7 +62,7 @@ describe('Applications home actual saved work', () => {
     const detail = within(screen.getByRole('region', { name: 'Application details' }));
     expect(detail.getByText('Exact check vacancy requirements')).toBeInTheDocument();
     expect(detail.getByText('EXACT_FINAL_REVIEWED_CV')).toBeInTheDocument();
-    expect(detail.getByRole('link', { name: 'Reopen this CV check' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
+    expect(detail.getByRole('link', { name: 'Open and edit' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
     expect(detail.getByText(/No application progress is linked/)).toBeInTheDocument();
     fireEvent.click(list().getByRole('button', { name: /Application pack.*Finance Associate/ }));
     expect(detail.getByText('EXACT_TRACKER_NOTES')).toBeInTheDocument();
@@ -89,7 +89,7 @@ describe('Applications home actual saved work', () => {
     render(tree(`/applications?item=${encodeURIComponent(`check:${id}`)}`)); await loaded(); expect(screen.getByText('EXACT_FINAL_REVIEWED_CV')).toBeInTheDocument();
     mocks.checks.mockResolvedValue([]); fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' }));
     await screen.findByRole('heading', { name: 'This application is no longer available here' });
-    expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument(); expect(screen.queryByRole('link', { name: 'Reopen this CV check' })).not.toBeInTheDocument();
+    expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument(); expect(screen.queryByRole('link', { name: 'Open and edit' })).not.toBeInTheDocument();
   });
   it('shows erasing separately and never opens old Loop documents', async () => {
     mocks.loop.mockResolvedValue({ existingState: 'erasing', erasureGeneration: 8 }); render(tree(`/applications?item=${encodeURIComponent(`loop:7:${id}`)}`)); await loaded();
@@ -119,7 +119,7 @@ describe('Applications home actual saved work', () => {
   it('never applies ambiguous or malformed selectors to the first surviving item', async () => {
     render(tree(`/applications?item=check:${id}&item=pack:${packId}`)); await loaded();
     expect(screen.getByRole('heading', { name: 'This selection is not valid' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Reopen this CV check' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open and edit' })).not.toBeInTheDocument();
   });
   it('suppresses a delayed old owner response and resets selected detail on owner change', async () => {
     const old = deferred<FreeCvCheck[]>(); mocks.checks.mockReturnValueOnce(old.promise); const rendered = render(tree(`/applications?item=${encodeURIComponent(`check:${id}`)}`));

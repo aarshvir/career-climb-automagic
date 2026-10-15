@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -24,6 +24,7 @@ const mocks = vi.hoisted(() => ({
   list: vi.fn(),
   remove: vi.fn(),
   tracker: vi.fn(),
+  preview: vi.fn(),
 }));
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => mocks.auth }));
 vi.mock("@/pages/Auth", () => ({ default: () => <div>Optional account form</div> }));
@@ -33,6 +34,10 @@ vi.mock("@/lib/free-check-api", () => ({
   deleteFreeCheck: mocks.remove,
 }));
 vi.mock("@/lib/workspace-api", () => ({ addApplication: mocks.tracker }));
+// The final stage now prepares a PDF preview automatically; keep it local and offline.
+vi.mock("@/lib/document-export", async importOriginal => ({
+  ...(await importOriginal<typeof import("@/lib/document-export")>()), createReviewedPdfPreview: mocks.preview,
+}));
 
 const recoveryKey = "jobvance_check_recovery_v1";
 const source = [
@@ -80,16 +85,18 @@ function retainOwnedDraft() {
 }
 
 function enterAndEditCv() {
-  fireEvent.change(screen.getByLabelText("Target role"), { target: { value: draft.jobTitle } });
+  fireEvent.change(screen.getByLabelText("Job title"), { target: { value: draft.jobTitle } });
   fireEvent.change(screen.getByLabelText("Company (optional)"), { target: { value: draft.company } });
-  fireEvent.click(screen.getByRole("button", { name: "Continue to your CV" }));
-  fireEvent.change(screen.getByLabelText("CV text — paste, correct or remove private information"), { target: { value: source } });
-  fireEvent.click(screen.getByRole("button", { name: "Use this reviewed CV text" }));
-  fireEvent.change(screen.getByLabelText("Vacancy description"), { target: { value: vacancy } });
-  fireEvent.click(screen.getByRole("button", { name: "Check these inputs" }));
-  fireEvent.click(screen.getByRole("button", { name: "Review my CV & questions" }));
-  fireEvent.change(screen.getByLabelText("Your CV to review"), { target: { value: edited } });
-  expect(screen.getByLabelText("Your CV to review")).toHaveValue(edited);
+  fireEvent.change(screen.getByLabelText("Your CV"), { target: { value: source } });
+  fireEvent.change(screen.getByLabelText("The job description"), { target: { value: vacancy } });
+  fireEvent.click(screen.getByRole("button", { name: "Compare without AI" }));
+  fireEvent.change(screen.getByLabelText("Your CV for this job"), { target: { value: edited } });
+  expect(screen.getByLabelText("Your CV for this job")).toHaveValue(edited);
+}
+
+// The CV and vacancy now share stage 1; the rail is the way back to edit either.
+function goToInputs() {
+  fireEvent.click(within(screen.getByRole("navigation", { name: "Check progress" })).getByRole("button", { name: "Add your CV and the job" }));
 }
 
 beforeEach(() => {
@@ -99,6 +106,7 @@ beforeEach(() => {
   mocks.auth.loading = false;
   mocks.auth.authError = null;
   mocks.list.mockResolvedValue([]);
+  mocks.preview.mockResolvedValue({ blob: new Blob(["%PDF work-preservation fixture"], { type: "application/pdf" }), pageCount: 1 });
   sessionStorage.clear();
   localStorage.clear();
   clearRetainedCheck();
@@ -134,7 +142,7 @@ describe("JV-01 CV work preservation", () => {
       view.rerender(tree());
     });
 
-    expect(await screen.findByLabelText("Your CV to review")).toHaveValue(edited);
+    expect(await screen.findByLabelText("Your CV for this job")).toHaveValue(edited);
     expect(readCheckRecovery("owner-a")?.value).toMatchObject({
       ownerId: "owner-a", draft, step: 5, filename: "reviewed-cv.txt", pageTarget: 2,
     });
@@ -155,8 +163,8 @@ describe("JV-01 CV work preservation", () => {
       view.rerender(tree());
     });
 
-    expect(await screen.findByLabelText("Target role")).toHaveValue("");
-    expect(screen.queryByLabelText("Your CV to review")).not.toBeInTheDocument();
+    expect(await screen.findByLabelText("Job title")).toHaveValue("");
+    expect(screen.queryByLabelText("Your CV for this job")).not.toBeInTheDocument();
     expect(screen.queryByText("HOLD-BACK-FOR-REVIEW", { exact: false })).not.toBeInTheDocument();
     const recovered = readCheckRecovery("owner-b");
     expect(recovered?.value.draft.sourceText ?? "").toBe("");
@@ -169,12 +177,11 @@ describe("JV-01 CV work preservation", () => {
     render(tree());
     enterAndEditCv();
 
-    fireEvent.click(screen.getByRole("button", { name: "One vacancy" }));
-    expect(screen.getByLabelText("Vacancy description")).toHaveValue(vacancy);
-    fireEvent.click(screen.getByRole("button", { name: "Check these inputs" }));
-    fireEvent.click(screen.getByRole("button", { name: "Review my CV & questions" }));
+    goToInputs();
+    expect(screen.getByLabelText("The job description")).toHaveValue(vacancy);
+    fireEvent.click(screen.getByRole("button", { name: "Compare without AI" }));
 
-    expect(screen.getByLabelText("Your CV to review")).toHaveValue(edited);
+    expect(screen.getByLabelText("Your CV for this job")).toHaveValue(edited);
     expect(readCheckRecovery(null)?.value.draft).toEqual(draft);
     expect(mocks.save).not.toHaveBeenCalled();
     expect(mocks.tracker).not.toHaveBeenCalled();
@@ -184,14 +191,14 @@ describe("JV-01 CV work preservation", () => {
     render(tree());
     enterAndEditCv();
 
-    fireEvent.click(screen.getByRole("button", { name: "Your CV" }));
-    expect(screen.getByLabelText("CV text — paste, correct or remove private information")).toHaveValue(source);
-    fireEvent.click(screen.getByRole("button", { name: "Use this reviewed CV text" }));
+    goToInputs();
+    expect(screen.getByLabelText("Your CV")).toHaveValue(source);
+    // Re-entering the identical source is a reconfirmation, not a replacement.
+    fireEvent.change(screen.getByLabelText("Your CV"), { target: { value: source } });
     expect(readCheckRecovery(null)?.value.draft.reviewedText).toBe(edited);
-    fireEvent.click(screen.getByRole("button", { name: "Check these inputs" }));
-    fireEvent.click(screen.getByRole("button", { name: "Review my CV & questions" }));
+    fireEvent.click(screen.getByRole("button", { name: "Compare without AI" }));
 
-    expect(screen.getByLabelText("Your CV to review")).toHaveValue(edited);
+    expect(screen.getByLabelText("Your CV for this job")).toHaveValue(edited);
     expect(readCheckRecovery(null)?.value.draft).toEqual(draft);
     expect(mocks.save).not.toHaveBeenCalled();
     expect(mocks.tracker).not.toHaveBeenCalled();
@@ -201,7 +208,7 @@ describe("JV-01 CV work preservation", () => {
     retainOwnedDraft();
     mocks.auth.user = { id: "owner-a", email: "owner-a@example.test" };
     const view = render(tree());
-    expect(await screen.findByLabelText("Your CV to review")).toHaveValue(edited);
+    expect(await screen.findByLabelText("Your CV for this job")).toHaveValue(edited);
     const writes = vi.spyOn(Storage.prototype, "setItem");
 
     await act(async () => {
@@ -210,8 +217,8 @@ describe("JV-01 CV work preservation", () => {
       view.rerender(tree());
     });
 
-    expect(await screen.findByLabelText("Target role")).toHaveValue("");
-    expect(screen.queryByLabelText("Your CV to review")).not.toBeInTheDocument();
+    expect(await screen.findByLabelText("Job title")).toHaveValue("");
+    expect(screen.queryByLabelText("Your CV for this job")).not.toBeInTheDocument();
     for (const [key, value] of writes.mock.calls) {
       if (key !== recoveryKey) continue;
       const stored = JSON.parse(value);
@@ -232,7 +239,7 @@ describe("JV-01 CV work preservation", () => {
     retainOwnedDraft();
     mocks.auth.user = { id: "owner-a", email: "owner-a@example.test" };
     const view = render(tree());
-    expect(await screen.findByLabelText("Your CV to review")).toHaveValue(edited);
+    expect(await screen.findByLabelText("Your CV for this job")).toHaveValue(edited);
 
     await act(async () => {
       mocks.auth.user = null;
@@ -240,8 +247,8 @@ describe("JV-01 CV work preservation", () => {
       view.rerender(tree());
     });
 
-    expect(await screen.findByLabelText("Target role")).toHaveValue("");
-    expect(screen.queryByLabelText("Your CV to review")).not.toBeInTheDocument();
+    expect(await screen.findByLabelText("Job title")).toHaveValue("");
+    expect(screen.queryByLabelText("Your CV for this job")).not.toBeInTheDocument();
     const recovered = readCheckRecovery(null);
     expect(recovered?.value.draft.sourceText ?? "").toBe("");
     expect(recovered?.value.draft.reviewedText ?? "").toBe("");
@@ -257,10 +264,11 @@ describe("JV-01 CV work preservation", () => {
   it("keeps an open guest draft through email sign-in but requires a fresh approval", async () => {
     const view = render(tree());
     enterAndEditCv();
-    fireEvent.click(screen.getByRole("button", { name: "Recheck my changes & continue" }));
-    fireEvent.click(screen.getByLabelText(/I reviewed the complete CV and vacancy/));
-    fireEvent.click(screen.getByLabelText(/Both my source CV and final CV are safe/));
-    fireEvent.click(screen.getByRole("button", { name: "Approve this CV" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue to download" }));
+    const confirm = screen.getByLabelText(/I have checked this CV/);
+    await waitFor(() => expect(confirm).toBeEnabled());
+    fireEvent.click(confirm);
+    expect(screen.getByText("Ready to download")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Download TXT" })).toBeEnabled();
 
     await act(async () => {
@@ -271,12 +279,12 @@ describe("JV-01 CV work preservation", () => {
 
     expect(readCheckRecovery("owner-a")?.value).toMatchObject({ ownerId: "owner-a", draft, step: 6 });
     expect(screen.getByRole("button", { name: "Download TXT" })).toBeDisabled();
-    expect(screen.getByLabelText(/I reviewed the complete CV and vacancy/)).not.toBeChecked();
-    expect(screen.getByLabelText(/Both my source CV and final CV are safe/)).not.toBeChecked();
+    expect(screen.getByLabelText(/I have checked this CV/)).not.toBeChecked();
+    expect(screen.queryByText("Ready to download")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Save these reviewed texts privately in my account.")).not.toBeChecked();
     expect(screen.getByRole("button", { name: "Save approved check to my account" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: "Your review" }));
-    expect(screen.getByLabelText("Your CV to review")).toHaveValue(edited);
+    fireEvent.click(screen.getByRole("button", { name: "Review changes" }));
+    expect(screen.getByLabelText("Your CV for this job")).toHaveValue(edited);
     expect(mocks.save).not.toHaveBeenCalled();
     expect(mocks.tracker).not.toHaveBeenCalled();
   });
@@ -286,12 +294,11 @@ describe("JV-01 CV work preservation", () => {
     enterAndEditCv();
     const changedVacancy = vacancy + "\n• Create a checklist for reporting quality reviews.";
 
-    fireEvent.click(screen.getByRole("button", { name: "One vacancy" }));
-    fireEvent.change(screen.getByLabelText("Vacancy description"), { target: { value: changedVacancy } });
-    fireEvent.click(screen.getByRole("button", { name: "Check these inputs" }));
-    fireEvent.click(screen.getByRole("button", { name: "Review my CV & questions" }));
+    goToInputs();
+    fireEvent.change(screen.getByLabelText("The job description"), { target: { value: changedVacancy } });
+    fireEvent.click(screen.getByRole("button", { name: "Compare without AI" }));
 
-    expect(screen.getByLabelText("Your CV to review")).toHaveValue(edited);
+    expect(screen.getByLabelText("Your CV for this job")).toHaveValue(edited);
     expect(readCheckRecovery(null)?.value.draft).toEqual({ ...draft, jobDescription: changedVacancy });
     expect(mocks.save).not.toHaveBeenCalled();
     expect(mocks.tracker).not.toHaveBeenCalled();
@@ -308,8 +315,8 @@ describe("JV-01 CV work preservation", () => {
       view.rerender(tree());
     });
 
-    expect(screen.queryByLabelText("Target role")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Your CV to review")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Job title")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Your CV for this job")).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Your sign-in could not be restored");
     const retainedAfterFailure = sessionStorage.getItem(recoveryKey);
     expect(retainedAfterFailure).not.toBeNull();
@@ -323,7 +330,7 @@ describe("JV-01 CV work preservation", () => {
       mocks.auth.authError = null;
       view.rerender(tree());
     });
-    expect(screen.queryByLabelText("Your CV to review")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Your CV for this job")).not.toBeInTheDocument();
 
     await act(async () => {
       mocks.auth.user = { id: "owner-a", email: "owner-a@example.test" };
@@ -332,7 +339,7 @@ describe("JV-01 CV work preservation", () => {
       view.rerender(tree());
     });
 
-    expect(await screen.findByLabelText("Your CV to review")).toHaveValue(edited);
+    expect(await screen.findByLabelText("Your CV for this job")).toHaveValue(edited);
     expect(readCheckRecovery("owner-a")?.value).toMatchObject({ ownerId: "owner-a", draft, step: 5 });
     expect(mocks.save).not.toHaveBeenCalled();
     expect(mocks.tracker).not.toHaveBeenCalled();

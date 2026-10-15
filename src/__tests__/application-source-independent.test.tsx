@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { Link, MemoryRouter } from 'react-router-dom';
@@ -14,7 +14,7 @@ import type { ApplicationPack, TrackedApplication } from '@/lib/cv-database';
 import type { LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
 
 vi.unmock('react-router-dom'); vi.unmock('@tanstack/react-query');
-const mocks = vi.hoisted(() => ({ auth: { user: { id: 'owner-a' } as { id: string } | null, loading: false, authError: null as string | null }, list: vi.fn(), load: vi.fn(), loop: vi.fn(), save: vi.fn(), tracker: vi.fn(), download: vi.fn(), blob: vi.fn() }));
+const mocks = vi.hoisted(() => ({ auth: { user: { id: 'owner-a' } as { id: string } | null, loading: false, authError: null as string | null }, list: vi.fn(), load: vi.fn(), loop: vi.fn(), save: vi.fn(), tracker: vi.fn(), download: vi.fn(), blob: vi.fn(), preview: vi.fn() }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => mocks.auth }));
 vi.mock('@/integrations/supabase/client', () => ({ configurationError: null, supabase: {} }));
 vi.mock('@/pages/Auth', () => ({ default: () => <p>Local account form</p> }));
@@ -24,6 +24,8 @@ vi.mock('@/lib/job-loop-api', () => ({ callJobLoop: mocks.loop, loadLoopSavedCvs
 vi.mock('@/lib/cv-legacy', () => ({ listLegacyCvs: vi.fn(async () => []), downloadLegacyCv: vi.fn() }));
 vi.mock('@/lib/document-download', async original => ({ ...(await original<typeof import('@/lib/document-download')>()), downloadBlob: mocks.download }));
 vi.mock('@/lib/free-check-export', async original => ({ ...(await original<typeof import('@/lib/free-check-export')>()), createFreeCheckCvBlob: mocks.blob }));
+// The download stage previews the PDF automatically; keep that local (no font fetch).
+vi.mock('@/lib/document-export', async original => ({ ...(await original<typeof import('@/lib/document-export')>()), createReviewedPdfPreview: mocks.preview }));
 
 const id = '11111111-1111-4111-8111-111111111111', other = '22222222-2222-4222-8222-222222222222';
 const source = 'Local Candidate\r\nEXPERIENCE\r\nPrepared monthly reporting definitions and explained Excel reports to colleagues.\r\nPRIVATE_REMOVED_FROM_FINAL';
@@ -34,10 +36,13 @@ function saved(): FreeCvCheck { return { id, user_id: 'owner-a', request_id: id,
 function pack(): ApplicationPack { return { id, user_id: 'owner-a', request_id: id, resume_id: null, job_title: 'Exact saved pack', company: 'Saved company', job_url: null, job_description: vacancy, original_text: source, tailored_text: finalText, matched_keywords: [], missing_keywords: [], status: 'approved', created_at: '2026-10-15T00:00:00Z' }; }
 function tracker(): TrackedApplication { return { id: other, user_id: 'owner-a', pack_id: null, job_title: 'Unrelated tracking row', company: '', job_url: null, status: 'saved', notes: 'OTHER_RECORD_NOTE', applied_at: null, follow_up_at: null, created_at: '2026-10-15T00:00:00Z', updated_at: '2026-10-15T00:00:00Z' }; }
 function snapshot(): LoopSnapshot { return { lifecycleGeneration: 8, recordVersion: 1, profile: null, claims: [], opportunities: [{ id, title: 'Current lifetime vacancy', company: 'Local company', location: '', url: 'https://example.invalid/job', description: vacancy, source: 'manual', sourceKey: 'local', checkedAt: '2026-10-15T00:00:00Z', verification: 'user_provided', status: 'saved', notes: 'CURRENT_LIFETIME_NOTE', followUpAt: null, contact: null }], packets: [], runs: [], inbox: [], models: [], capabilities: { cloudWorker: false, rulesEngine: false, webSearch: false, gmailRead: false, gmailDrafts: false, monthlyUsageCapUsd: 50, dailyRunLimit: 1 }, gmail: { connected: false, email: null, allowDrafts: false, status: 'Not connected' } }; }
+// One confirmation approves; it is enabled once the automatic PDF preview settles.
+const confirmBox = () => screen.getByLabelText(/I have checked this CV/) as HTMLInputElement;
+async function approve() { await waitFor(() => expect(confirmBox()).toBeEnabled()); fireEvent.click(confirmBox()); }
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>(pass => { resolve = pass; }); return { promise, resolve }; }
 let client: QueryClient;
 function tree(component: React.ReactNode, path: string) { return <HelmetProvider><QueryClientProvider client={client}><MemoryRouter initialEntries={[path]}>{component}<Link to={`/dashboard?pack=${other}`}>Open a missing pack</Link></MemoryRouter></QueryClientProvider></HelmetProvider>; }
-beforeEach(() => { vi.clearAllMocks(); clearCheckRecovery(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a'); mocks.auth.user = { id: 'owner-a' }; mocks.auth.loading = false; mocks.auth.authError = null; mocks.list.mockReset().mockResolvedValue([saved()]); mocks.loop.mockReset().mockResolvedValue({ snapshot: snapshot() }); mocks.load.mockReset().mockResolvedValue({ cvs: [], packs: [pack()], applications: [tracker()], entitlement: null, entitlementError: null }); client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 20000 } } }); });
+beforeEach(() => { vi.clearAllMocks(); clearCheckRecovery(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a'); mocks.auth.user = { id: 'owner-a' }; mocks.auth.loading = false; mocks.auth.authError = null; mocks.list.mockReset().mockResolvedValue([saved()]); mocks.loop.mockReset().mockResolvedValue({ snapshot: snapshot() }); mocks.load.mockReset().mockResolvedValue({ cvs: [], packs: [pack()], applications: [tracker()], entitlement: null, entitlementError: null }); mocks.preview.mockResolvedValue({ blob: new Blob(['%PDF'], { type: 'application/pdf' }), pageCount: 1 }); client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 20000 } } }); });
 afterEach(() => { cleanup(); client.clear(); clearCheckRecovery(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); sessionStorage.clear(); vi.restoreAllMocks(); });
 
 describe('independent exact application source review', () => {
@@ -52,7 +57,9 @@ describe('independent exact application source review', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Replace current draft and open saved check' }));
     expect(readCheckRecovery('owner-a')?.value.draft.reviewedText).toBe(finalText);
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
-    expect(screen.getByLabelText(/I reviewed the complete CV and vacancy/)).not.toBeChecked();
+    expect(confirmBox()).not.toBeChecked();
+    // Undo waits for the automatic PDF preview of the replaced text to settle.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Undo source replacement' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Undo source replacement' }));
     expect(readCheckRecovery('owner-a')?.value.draft).toEqual(draft);
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
@@ -62,7 +69,7 @@ describe('independent exact application source review', () => {
     rememberCheckRecovery({ draft, ownerId: 'owner-a', step: 1, cvReady: true, filename: '', pageTarget: 2, reviewStarted: true }, false);
     render(tree(<CvCheck />, `/check?savedCheck=${id}`));
     fireEvent.click(await screen.findByRole('button', { name: 'Review selected saved check' }));
-    fireEvent.change(screen.getByLabelText('Target role'), { target: { value: 'Edited after replacement prompt' } });
+    fireEvent.change(screen.getByLabelText('Job title'), { target: { value: 'Edited after replacement prompt' } });
     expect(screen.queryByRole('button', { name: 'Replace current draft and open saved check' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Review selected saved check' })).toBeInTheDocument();
     expect(readCheckRecovery('owner-a')?.value.draft.jobTitle).toBe('Edited after replacement prompt');
@@ -70,9 +77,7 @@ describe('independent exact application source review', () => {
   it('requires a fresh approval after A to B to A even when React sees the same final owner', async () => {
     const view = render(tree(<CvCheck />, `/check?savedCheck=${id}`));
     fireEvent.click(await screen.findByRole('button', { name: 'Review selected saved check' }));
-    fireEvent.click(screen.getByLabelText(/I reviewed the complete CV and vacancy/));
-    fireEvent.click(screen.getByLabelText(/Both my source CV and final CV are safe/));
-    fireEvent.click(screen.getByRole('button', { name: 'Approve this CV' }));
+    await approve();
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();
     mocks.list.mockResolvedValue([]);
     await act(async () => { setTrackingDraftOwner('owner-b'); setTrackingDraftOwner('owner-a'); view.rerender(tree(<CvCheck />, `/check?savedCheck=${id}`)); });
@@ -103,9 +108,7 @@ describe('independent exact application source review', () => {
     const pending = deferred<Blob>(); mocks.blob.mockReturnValueOnce(pending.promise);
     render(tree(<CvCheck />, `/check?savedCheck=${id}`));
     fireEvent.click(await screen.findByRole('button', { name: 'Review selected saved check' }));
-    fireEvent.click(screen.getByLabelText(/I reviewed the complete CV and vacancy/));
-    fireEvent.click(screen.getByLabelText(/Both my source CV and final CV are safe/));
-    fireEvent.click(screen.getByRole('button', { name: 'Approve this CV' }));
+    await approve();
     fireEvent.click(screen.getByRole('button', { name: 'Download TXT' }));
     await act(async () => { setTrackingDraftOwner('owner-b'); pending.resolve(new Blob(['LOCAL_PRIVATE_DOCUMENT'])); });
     expect(mocks.download).not.toHaveBeenCalled();

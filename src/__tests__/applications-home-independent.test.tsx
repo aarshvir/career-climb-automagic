@@ -48,11 +48,11 @@ describe('independent shared Applications home boundaries', () => {
   it('removes selected private details and its continuation when an authoritative refresh removes that item', async () => {
     render(tree());
     fireEvent.click(await screen.findByRole('button', { name: /Saved CV check.*Exact saved role/ }));
-    expect(screen.getByRole('link', { name: 'Reopen this CV check' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
+    expect(screen.getByRole('link', { name: 'Open and edit' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
     mocks.list.mockResolvedValue([]);
     fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' }));
     await screen.findByRole('heading', { name: 'This application is no longer available here' });
-    expect(screen.queryByRole('link', { name: 'Reopen this CV check' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open and edit' })).not.toBeInTheDocument();
     expect(screen.queryByText('SAVED_VACANCY_TEXT')).not.toBeInTheDocument();
   });
   it.each(['loading', 'authError'] as const)('hides loaded details while authentication is unresolved: %s', async field => {
@@ -62,7 +62,7 @@ describe('independent shared Applications home boundaries', () => {
     if (field === 'loading') mocks.auth.loading = true; else mocks.auth.authError = 'Local session failure';
     view.rerender(tree());
     expect(screen.queryByText('SAVED_VACANCY_TEXT')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Reopen this CV check' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open and edit' })).not.toBeInTheDocument();
   });
   it('preserves actual many-to-one tracker links and same-title independent records in the pure projection', () => {
     const rows = buildApplicationHome('owner-a', { checks: [saved()], packs: [pack()], trackers: [tracker(id, id), tracker(second, id), tracker('33333333-3333-4333-8333-333333333333', null)], loop: { existingState: 'absent' } });
