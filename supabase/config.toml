@@ -16,6 +16,9 @@ entrypoint = "./functions/trigger-make-run/index.ts"
 # New handlers validate the user's token with auth.getUser inside the handler.
 # Disabling the legacy gateway JWT check supports current asymmetric signing keys.
 # The Stripe handler instead authenticates the unmodified body with Stripe HMAC.
+[functions.tailor-for-job]
+enabled = true
+verify_jwt = false
 [functions.tailor-cv]
 enabled = true
 verify_jwt = false
