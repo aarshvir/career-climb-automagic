@@ -9,6 +9,7 @@ import { collectLoopArtifacts } from './job-loop-artifact-gc.ts';
 export type LoopAdmin = ReturnType<typeof adminClient>;
 export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
 export interface RecordRow { user_id: string; version: number; input_version: number; lifecycle_generation?: number; data: CareerRecord; updated_at: string }
+export interface LifecycleRow { user_id: string; state: 'active' | 'erasing' | 'erased'; generation: number }
 export interface RunRow { id: string; user_id: string; request_id: string; request_hash: string; input_hash: string; input_version: number; lifecycle_generation?: number; snapshot: CareerRecord; provider: LoopRun['provider']; model: string; consents: { model: boolean; inbox: boolean; processingRoute?: 'direct' | 'openrouter' }; data: RunState; status: LoopRun['status']; phase: number; lease_token: string | null; lease_until: string | null; created_at: string; finished_at: string | null }
 export interface RunState { lanes?: LoopRun['lanes']; messages?: string[]; nextAction?: string; opportunityIds?: string[]; packetIds?: string[]; reusedPacketIds?:string[]; opportunities?: LoopOpportunity[]; inbox?: LoopInboxSignal[] }
 export interface UsageRow { id: string; reserved_micros: number; actual_micros: number | null; status: 'reserved' | 'settled' | 'uncertain'; result: unknown; is_new: boolean }
@@ -42,6 +43,19 @@ export function loopDatabaseError(error: { message?: string } | null): void {
 export class LoopRepository {
   constructor(public admin: LoopAdmin) {}
   async rpc<T>(name: string, args: Record<string, unknown>): Promise<T> { const { data,error } = await this.admin.rpc(name,args); loopDatabaseError(error); return data as T; }
+  /** Passive reads never call owner-lock RPCs that create lifecycle metadata. */
+  async existingLifecycle(userId: string): Promise<LifecycleRow | null> {
+    const {data,error}=await this.admin.from('job_loop_lifecycle').select('user_id,state,generation').eq('user_id',userId).maybeSingle();loopDatabaseError(error);
+    if(!data)return null;
+    if(data.user_id!==userId||!['active','erasing','erased'].includes(data.state)||!validLoopGeneration(Number(data.generation)))throw new ApiError(503,'LOOP_PERSISTENCE_FAILED','The existing Job Loop lifetime could not be confirmed.');
+    return {...data,generation:Number(data.generation)} as LifecycleRow;
+  }
+  async existingRecord(userId: string): Promise<RecordRow | null> {
+    const {data,error}=await this.admin.from('job_loop_records').select('*').eq('user_id',userId).maybeSingle();loopDatabaseError(error);
+    if(!data)return null;
+    if(data.user_id!==userId||!Number.isSafeInteger(Number(data.version))||Number(data.version)<0||!Number.isSafeInteger(Number(data.input_version))||Number(data.input_version)<0)throw new ApiError(503,'LOOP_PERSISTENCE_FAILED','The existing Job Loop record could not be confirmed.');
+    return {...data,version:Number(data.version),input_version:Number(data.input_version)} as RecordRow;
+  }
   async record(userId: string, expectedGeneration?: number, initialize = false): Promise<RecordRow> {
     if(expectedGeneration!==undefined)return this.rpc<RecordRow>('job_loop_read_record',{p_user:userId,p_generation:expectedGeneration});
     if(initialize)return this.rpc<RecordRow>('job_loop_open_record',{p_user:userId});

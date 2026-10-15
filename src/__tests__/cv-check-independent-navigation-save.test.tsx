@@ -3,6 +3,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CvCheck from '@/pages/CvCheck';
+import { clearTrackingDraftMemory, setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
 import { clearCheckRecovery, clearRetainedCheck, readCheckRecovery, rememberCheckRecovery, type CheckDraft } from '@/lib/check-draft';
 import type { FreeCvCheck, SaveFreeCheckInput } from '@/lib/free-check-api';
 
@@ -72,6 +73,7 @@ function enterNewOwnerReview() {
 }
 
 beforeEach(() => {
+  clearTrackingDraftMemory();
   for (const mock of [mocks.list, mocks.save, mocks.remove, mocks.tracker, mocks.exportCv, mocks.download, mocks.preview, mocks.extract]) mock.mockReset();
   mocks.auth.user = { id: 'owner-a', email: 'owner-a@example.test' }; mocks.auth.loading = false; mocks.auth.authError = null;
   mocks.list.mockResolvedValue([]);
@@ -121,7 +123,7 @@ describe('independent CV review navigation and optional account save acceptance'
     mocks.save.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
     retain(); const view = render(tree()); approve(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledOnce());
-    await act(async () => { mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' }; view.rerender(tree()); });
+    await act(async () => { setTrackingDraftOwner('owner-b'); mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' }; view.rerender(tree()); });
     enterNewOwnerReview(); save();
     await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(2));
     await act(async () => {
@@ -223,7 +225,7 @@ describe('independent CV review navigation and optional account save acceptance'
     fireEvent.change(screen.getByLabelText('CV text — paste, correct or remove private information'), { target: { value: replacement } });
     expect(screen.getByRole('button', { name: 'Undo source replacement' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Read a CV file on this device'), { target: { files: [new File(['local fixture'], 'replacement.txt', { type: 'text/plain' })] } });
-    await act(async () => { mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' }; view.rerender(tree()); });
+    await act(async () => { setTrackingDraftOwner('owner-b'); mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' }; view.rerender(tree()); });
     expect(screen.queryByRole('button', { name: 'Undo source replacement' })).not.toBeInTheDocument();
     expect(readCheckRecovery('owner-b')?.value.draft.sourceText).toBe('');
     enterNewOwnerReview();

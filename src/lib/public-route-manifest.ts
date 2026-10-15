@@ -7,9 +7,9 @@ export const publicPages: PublicPage[] = [
   ...careerGuides.map(guide=>({path:`/guides/${guide.slug}`,kind:'guide' as const,key:guide.slug,title:`${guide.title} | Jobvance`,description:guide.description,modified:guide.updatedAt})),
 ];
 
-export const clientOnlyPaths = ['/loop','/dashboard','/admin','/admin2','/auth','/auth/callback','/auth/forgot-password','/auth/reset'];
+export const clientOnlyPaths = ['/applications','/loop','/dashboard','/admin','/admin2','/auth','/auth/callback','/auth/forgot-password','/auth/reset'];
 export const routeRedirects: Record<string,string> = {
-  '/blog':'/guides', '/product':'/job-loop','/jobs':'/job-loop','/resume-management':'/dashboard?tab=cv','/resumes':'/dashboard?tab=cv','/applications':'/dashboard?tab=tracker','/job-preferences':'/dashboard?tab=tailor','/preferences':'/dashboard?tab=tailor','/settings':'/dashboard?tab=billing','/plan-selection':'/pricing','/thank-you':'/dashboard?tab=billing',
+  '/blog':'/guides', '/product':'/job-loop','/jobs':'/job-loop','/resume-management':'/dashboard?tab=cv','/resumes':'/dashboard?tab=cv','/job-preferences':'/dashboard?tab=tailor','/preferences':'/dashboard?tab=tailor','/settings':'/dashboard?tab=billing','/plan-selection':'/pricing','/thank-you':'/dashboard?tab=billing',
 };
 export function publicPage(path:string): PublicPage | undefined { return publicPages.find(page=>page.path===path); }
 export function escapedXml(value:string):string {return value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');}

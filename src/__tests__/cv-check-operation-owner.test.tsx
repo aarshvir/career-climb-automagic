@@ -3,6 +3,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CvCheck from '@/pages/CvCheck';
+import { clearTrackingDraftMemory, setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
 import { clearCheckRecovery, clearRetainedCheck, readCheckRecovery } from '@/lib/check-draft';
 
 vi.unmock('react-router-dom');
@@ -51,6 +52,7 @@ function enterDownloadStage(source: string) {
 }
 const StandardURL = globalThis.URL;
 beforeEach(() => {
+  clearTrackingDraftMemory();
   vi.clearAllMocks();
   vi.stubGlobal('URL', class extends StandardURL {
     static createObjectURL = vi.fn(() => 'blob:owner-b-current-preview');
@@ -74,6 +76,7 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
 
     await act(async () => {
       mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' };
+      setTrackingDraftOwner('owner-b');
       view.rerender(tree());
     });
     expect(screen.getByLabelText('Target role')).toHaveValue('');
@@ -108,6 +111,7 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
 
     await act(async () => {
       mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' };
+      setTrackingDraftOwner('owner-b');
       view.rerender(tree());
     });
     enterDownloadStage(sourceB);
@@ -160,6 +164,7 @@ describe('JV-01 pending operations stay bound to the active candidate', () => {
     await act(async () => { pending.resolve(sourceB); await Promise.resolve(); });
     await act(async () => {
       mocks.auth.user = { id: 'owner-a', email: 'owner-a@example.test' };
+      setTrackingDraftOwner('owner-a');
       mocks.auth.authError = null;
       view.rerender(tree());
     });

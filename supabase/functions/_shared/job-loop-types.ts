@@ -110,6 +110,7 @@ export interface LoopSnapshot {
 }
 export type LoopAction = (
   | { action: 'get' }
+  | { action: 'get_existing' }
   | { action: 'save_profile'; expectedVersion: number; profile: LoopProfileInput; saveConsent: boolean }
   | { action: 'suggest_claims' }
   | { action: 'save_claim'; expectedVersion: number; id?: string; claim: LoopClaimInput }
@@ -131,4 +132,4 @@ export type LoopAction = (
   | { action: 'gmail_finalize'; ticket: string; confirmMailbox: boolean }
   | { action: 'gmail_disconnect' }
   | { action: 'gmail_create_draft'; packetId: string; requestId: string; confirmRecipientAndAttachment: boolean }) & { expectedGeneration?: number };
-export type LoopResponse = { snapshot?: LoopSnapshot; erasureGeneration?: number; runId?: string; suggestions?: LoopClaimInput[]; url?: string; filename?: string; message?: string; error?: string; code?: string; gmailPreview?: { email: string | null; allowDrafts: boolean; expiresAt: string } };
+export type LoopResponse = { existingState?: 'active' | 'absent' | 'erasing'; snapshot?: LoopSnapshot; erasureGeneration?: number; runId?: string; suggestions?: LoopClaimInput[]; url?: string; filename?: string; message?: string; error?: string; code?: string; gmailPreview?: { email: string | null; allowDrafts: boolean; expiresAt: string } };

@@ -1,7 +1,7 @@
 import { ApiError, uuid } from './core.ts';
 import { validateAction, validateProfile, validateClaim, validateOpportunity, suggestClaims, assessOpportunity, composePacket, eligibleLoopClaims, fingerprintLoopInputs } from './job-loop-engine.ts';
 import { renderPacket } from './job-loop-render.ts';
-import { LoopRepository, loopDatabaseError, publicRun, type RunRow, type RunState, type ScheduleRow, type CareerRecord } from './job-loop-repository.ts';
+import { LoopRepository, loopDatabaseError, publicRun, type RunRow, type RunState, type ScheduleRow, type CareerRecord, type RecordRow } from './job-loop-repository.ts';
 import { configuredUsageCap, nextScheduledInstant } from './job-loop-schedule.ts';
 import { buildInterviewBrief } from './job-loop-preparation.ts';
 import { LIMITS, RULES_MODEL, digest, stableUuid, modelOptions, modelConfiguration, prepareModelRequest, callModel, searchReady, searchTavily, TAVILY_CREDIT_MICROS, employerFeeds, readEmployerFeed, safePublicUrl, type LoopEnv, type LoopFetch } from './job-loop-providers.ts';
@@ -68,12 +68,41 @@ export async function getLoopSnapshot(repo:LoopRepository,userId:string,env:Loop
     expectedGeneration=lifecycle.generation;
   }
   const record=await repo.record(userId,expectedGeneration,initialize);
-  const [collections,operations]=await Promise.all([repo.collections(userId),repo.operationalSnapshot(userId,cap)]);
+  const snapshot=await snapshotFromRecord(repo,userId,env,record,cap);
   await repo.assertGeneration(userId,record.lifecycle_generation);
+  return snapshot;
+}
+async function snapshotFromRecord(repo:LoopRepository,userId:string,env:LoopEnv,record:RecordRow,cap:number):Promise<LoopSnapshot> {
+  const [collections,operations]=await Promise.all([repo.collections(userId),repo.operationalSnapshot(userId,cap)]);
   const available=workerEnabled(env);const gmailReady=gmailConfigured(env);const connected=!!collections.connection;
   return {lifecycleGeneration:record.lifecycle_generation,recordVersion:Number(record.version),profile:record.data.profile,claims:record.data.claims,opportunities:record.data.opportunities,runs:collections.runs.map(run=>publicRun(run,collections.usage)),packets:collections.packets.map(row=>({...row.data,status:row.status})),inbox:collections.runs.find(run=>run.data.inbox)?.data.inbox??record.data.inbox,models:modelOptions(env),capabilities:{cloudWorker:available,rulesEngine:available,webSearch:searchReady(env),gmailRead:gmailReady,gmailDrafts:gmailReady,monthlyUsageCapUsd:cap,dailyRunLimit:LIMITS.dailyRuns,scheduler:available&&operations.scheduler.ready,packetsPerRun:LIMITS.packets},gmail:{connected:gmailReady&&connected,email:gmailReady?collections.connection?.email??null:null,allowDrafts:gmailReady&&!!collections.connection?.allow_drafts,status:!gmailReady?'Mailbox integration is not configured.':connected?collections.connection?.allow_drafts?'Connected with read and draft permission.':'Connected read-only. Reconnect to request draft permission.':'Not connected. Google sign-in is separate.'},schedule:operations.schedule,activity:operations.activity,support:operations.support as LoopSnapshot['support'],budget:{month:String(operations.budget.month),capUsd:Number(operations.budget.capUsd),committedUsd:Number(operations.budget.committedUsd),remainingUsd:Number(operations.budget.remainingUsd),scope:'shared_ai_search',maxPilotUsers:10},pilot:{enrolled:operations.budget.enrolled===true,activeUsers:Number(operations.budget.activeUsers),maxUsers:10},recurringReady:available&&operations.scheduler.ready,employerSources:employerFeeds(env).map(feed=>({provider:feed.provider,board:feed.board,company:feed.company??feed.board}))};
 }
+/** A list/home read must never open, activate, enroll or continue erasure. Read
+ * the durable lifetime again after all private collections so a delayed result
+ * cannot cross erasure into a fresh workspace. No newer lifetime is adopted. */
+export async function getExistingLoopSnapshot(repo:LoopRepository,userId:string,env:LoopEnv):Promise<LoopResponse> {
+  const lifecycle=await repo.existingLifecycle(userId);
+  if(lifecycle?.state==='erasing')return {existingState:'erasing',erasureGeneration:lifecycle.generation};
+  if(lifecycle?.state==='erased')return {existingState:'absent'};
+  const record=await repo.existingRecord(userId);
+  if(!lifecycle){
+    if(record)throw new ApiError(409,'LOOP_REQUEST_STALE','Open your saved Job Loop to confirm its current lifetime, then refresh Applications.');
+    return {existingState:'absent'};
+  }
+  if(!record)return {existingState:'absent'};
+  let cap=50;try{cap=configuredUsageCap(env);}catch{/* Existing private work remains readable without paid routing. */}
+  const snapshot=await snapshotFromRecord(repo,userId,env,{...record,lifecycle_generation:lifecycle.generation},cap);
+  const latestRecord=await repo.existingRecord(userId);
+  const latestLifecycle=await repo.existingLifecycle(userId);
+  if(latestLifecycle?.state==='erasing')return {existingState:'erasing',erasureGeneration:latestLifecycle.generation};
+  if(!latestLifecycle||latestLifecycle.state==='erased')return {existingState:'absent'};
+  if(latestLifecycle.generation!==lifecycle.generation)throw new ApiError(409,'LOOP_REQUEST_STALE','Your Job Loop changed lifetime while Applications loaded. Refresh before continuing.');
+  if(!latestRecord)return {existingState:'absent'};
+  if(latestRecord.version!==record.version||latestRecord.input_version!==record.input_version)throw new ApiError(409,'LOOP_VERSION_CONFLICT','Your Job Loop changed while Applications loaded. Refresh before continuing.');
+  return {existingState:'active',snapshot};
+}
 export async function controlLoop(repo:LoopRepository,userId:string,action:LoopAction,env:LoopEnv,fetcher:LoopFetch=fetch):Promise<LoopResponse> {
+  if(action.action==='get_existing')return getExistingLoopSnapshot(repo,userId,env);
   if(action.action==='get'){
     const lifecycle=await repo.erasureStatus(userId);
     if(lifecycle.state==='erasing')return {erasureGeneration:lifecycle.generation};

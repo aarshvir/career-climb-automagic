@@ -1,5 +1,5 @@
 import { Suspense, lazy, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -11,11 +11,12 @@ import Footer from "@/components/layout/Footer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProductPage from "@/pages/ProductPage";
 import RouteNavigation from '@/components/RouteNavigation';
-import { workspaceReturnPath } from '@/lib/account-return';
+import { accountDestination, workspaceReturnPath } from '@/lib/account-return';
 const Auth = lazy(() => import("@/pages/Auth")),
   AuthCallback = lazy(() => import("@/pages/AuthCallback"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
   ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const ApplicationsHome = lazy(() => import("@/pages/ApplicationsHome"));
 const Workspace = lazy(() => import("@/pages/Workspace"));
 const JobLoop = lazy(() => import("@/pages/JobLoop"));
 const AudienceLanding = lazy(() => import("@/pages/AudienceLanding"));
@@ -44,6 +45,14 @@ function ProtectedWorkspace() {
   ) : (
     <Navigate to={`/auth?next=${encodeURIComponent(workspaceReturnPath(location.search))}`} replace />
   );
+}
+function ProtectedApplications() {
+  const location = useLocation();
+  const destination = accountDestination(`/applications${location.search}`);
+  const { user, loading, authError, retryConnection } = useAuth();
+  if (authError) return <div className="p-8"><p role="alert">Your sign-in could not be restored.</p><button onClick={retryConnection}>Retry sign-in recovery</button><p><Link to={`/auth?next=${encodeURIComponent(destination)}`}>Open sign-in</Link></p></div>;
+  if (loading) return <p className="p-8" role="status">Opening your applications…</p>;
+  return user ? <ApplicationsHome /> : <Navigate to={`/auth?next=${encodeURIComponent(destination)}`} replace />;
 }
 function ProtectedJobLoop() {
   const { user, loading } = useAuth();
@@ -139,7 +148,7 @@ export default function MvpApp() {
                     />
                     <Route
                       path="/applications"
-                      element={<Navigate to="/dashboard?tab=tracker" replace />}
+                      element={<ProtectedApplications />}
                     />
                     <Route
                       path="/jobs"

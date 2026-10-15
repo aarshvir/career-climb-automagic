@@ -3,6 +3,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CvCheck from "@/pages/CvCheck";
+import { clearTrackingDraftMemory, setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
 import { clearCheckRecovery, readCheckRecovery } from '@/lib/check-draft';
 
 vi.unmock("react-router-dom");
@@ -43,6 +44,7 @@ function approve() {
   expect(screen.getByRole('heading', { name: 'Approve & download' })).toHaveFocus();
 }
 beforeEach(() => {
+  clearTrackingDraftMemory();
   vi.stubGlobal("URL", class extends StandardURL { static createObjectURL = vi.fn(() => "blob:synthetic-reviewed-cv"); static revokeObjectURL = vi.fn(); });
   vi.clearAllMocks(); mocks.auth.user = null; mocks.auth.loading = false; mocks.list.mockResolvedValue([]); sessionStorage.clear(); localStorage.clear();
   clearCheckRecovery();
@@ -139,7 +141,7 @@ describe("six-step free CV check", () => {
     const view = show(); await toApproval(); approve(); fireEvent.click(screen.getByRole('button', { name: 'Use this CV for another vacancy' }));
     expect(screen.getByRole('button', { name: 'Undo new application' })).toBeInTheDocument();
     if (action === 'reset') { fireEvent.click(screen.getByRole('button', { name: 'Clear & start again' })); fireEvent.click(screen.getByRole('button', { name: 'Clear current check' })); }
-    else { mocks.auth.user = { id: 'account-a', email: 'a@example.test' }; view.rerender(<HelmetProvider><MemoryRouter><CvCheck /></MemoryRouter></HelmetProvider>); }
+    else { setTrackingDraftOwner('account-a'); mocks.auth.user = { id: 'account-a', email: 'a@example.test' }; view.rerender(<HelmetProvider><MemoryRouter><CvCheck /></MemoryRouter></HelmetProvider>); }
     expect(screen.queryByRole('button', { name: 'Undo new application' })).not.toBeInTheDocument();
   });
   it('professional F03 copies reviewed removals into the reusable source, offers undo, and defaults future reuse to the final CV', async () => {
@@ -273,7 +275,7 @@ describe("six-step free CV check", () => {
     fireEvent.click(screen.getByRole('button', { name: 'Recheck my changes & continue' }));
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeDisabled();
     expect(screen.getByLabelText(/Save these reviewed texts privately/)).not.toBeChecked();
-    mocks.auth.user = { id: 'account-b', email: 'b@example.test' }; view.rerender(<HelmetProvider><MemoryRouter><CvCheck /></MemoryRouter></HelmetProvider>);
+    setTrackingDraftOwner('account-b'); mocks.auth.user = { id: 'account-b', email: 'b@example.test' }; view.rerender(<HelmetProvider><MemoryRouter><CvCheck /></MemoryRouter></HelmetProvider>);
     expect(screen.queryByRole('button', { name: 'Undo source update' })).not.toBeInTheDocument();
     expect(screen.getByLabelText('Target role')).toHaveValue(''); expect(mocks.save).not.toHaveBeenCalled();
   });
@@ -548,7 +550,7 @@ describe("six-step free CV check", () => {
     let finish!: (value: unknown) => void; mocks.save.mockReturnValue(new Promise(resolve => { finish = resolve; }));
     const view = show(); await toApproval(); approve(); fireEvent.click(screen.getByLabelText(/Save these reviewed texts privately/)); fireEvent.click(screen.getByRole("button", { name: "Save approved check to my account" }));
     await waitFor(() => expect(mocks.save).toHaveBeenCalled());
-    mocks.auth.user = { id: "account-b", email: "b@example.test" }; view.rerender(<HelmetProvider><MemoryRouter><CvCheck /></MemoryRouter></HelmetProvider>);
+    setTrackingDraftOwner('account-b'); mocks.auth.user = { id: "account-b", email: "b@example.test" }; view.rerender(<HelmetProvider><MemoryRouter><CvCheck /></MemoryRouter></HelmetProvider>);
     await act(async () => finish({ id: "private-a", user_id: "account-a", job_title: "Private account A role" }));
     expect(screen.queryByText("Private account A role")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Target role")).toHaveValue("");

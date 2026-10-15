@@ -3,6 +3,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CvCheck from "@/pages/CvCheck";
+import { clearTrackingDraftMemory, setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
 import {
   clearCheckRecovery,
   clearRetainedCheck,
@@ -93,6 +94,7 @@ function enterAndEditCv() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  clearTrackingDraftMemory();
   mocks.auth.user = null;
   mocks.auth.loading = false;
   mocks.auth.authError = null;
@@ -127,6 +129,7 @@ describe("JV-01 CV work preservation", () => {
 
     await act(async () => {
       mocks.auth.user = { id: "owner-a", email: "owner-a@example.test" };
+      setTrackingDraftOwner('owner-a');
       mocks.auth.loading = false;
       view.rerender(tree());
     });
@@ -147,6 +150,7 @@ describe("JV-01 CV work preservation", () => {
 
     await act(async () => {
       mocks.auth.user = { id: "owner-b", email: "owner-b@example.test" };
+      setTrackingDraftOwner('owner-b');
       mocks.auth.loading = false;
       view.rerender(tree());
     });
@@ -202,6 +206,7 @@ describe("JV-01 CV work preservation", () => {
 
     await act(async () => {
       mocks.auth.user = { id: "owner-b", email: "owner-b@example.test" };
+      setTrackingDraftOwner('owner-b');
       view.rerender(tree());
     });
 
@@ -231,6 +236,7 @@ describe("JV-01 CV work preservation", () => {
 
     await act(async () => {
       mocks.auth.user = null;
+      setTrackingDraftOwner(null);
       view.rerender(tree());
     });
 
@@ -259,6 +265,7 @@ describe("JV-01 CV work preservation", () => {
 
     await act(async () => {
       mocks.auth.user = { id: "owner-a", email: "owner-a@example.test" };
+      setTrackingDraftOwner('owner-a');
       view.rerender(tree());
     });
 
@@ -320,6 +327,7 @@ describe("JV-01 CV work preservation", () => {
 
     await act(async () => {
       mocks.auth.user = { id: "owner-a", email: "owner-a@example.test" };
+      setTrackingDraftOwner('owner-a');
       mocks.auth.loading = false;
       view.rerender(tree());
     });

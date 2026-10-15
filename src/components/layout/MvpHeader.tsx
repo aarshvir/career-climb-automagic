@@ -14,7 +14,7 @@ export function Brand() {
 }
 const links = [["/check","Free CV check"],["/job-loop","Job Loop"],["/guides","Career guides"],["/help","Help"]];
 export default function MvpHeader() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, authError, signOut } = useAuth();
   const previousOwner = useRef(user?.id ?? null);
   useEffect(() => { if (previousOwner.current && previousOwner.current !== user?.id) clearLoopWorkingDraft(); previousOwner.current = user?.id ?? null; }, [user?.id]);
   const client = useQueryClient();
@@ -23,15 +23,15 @@ export default function MvpHeader() {
   const [openPath,setOpenPath] = useState<string | null>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const open = openPath === location.pathname;
-  const account = loading ? <span className="text-xs text-muted-foreground">Checking account…</span> : user ? <>
-    <Button asChild size="sm"><Link to="/loop">My Job Loop <ArrowUpRight size={14} /></Link></Button>
+  const account = loading || authError ? <span className="text-xs text-muted-foreground">Checking account…</span> : user ? <>
+    <Button asChild size="sm"><Link to="/applications">My applications <ArrowUpRight size={14} /></Link></Button>
     <Button size="sm" variant="ghost" disabled={busy} onClick={async () => {
       setBusy(true);setError("");
       try { await signOut(); clearLoopWorkingDraft(); client.clear(); setOpenPath(null); }
       catch { setError("Sign out failed. Please retry."); }
       finally { setBusy(false); }
     }}>{busy ? "Signing out…" : "Sign out"}</Button>
-  </> : <><Button asChild size="sm" variant="ghost"><Link to="/auth">Sign in</Link></Button><Button asChild size="sm"><Link to="/check">Get started free <ArrowUpRight size={14} /></Link></Button></>;
+  </> : <><Button asChild size="sm" variant="ghost"><Link to="/auth?next=%2Fapplications">Sign in</Link></Button><Button asChild size="sm"><Link to="/check">Get started free <ArrowUpRight size={14} /></Link></Button></>;
   return <header className="jv-header">
     <a className="jv-skip" href="#main-content">Skip to content</a>
     <div className="jv-header-inner">

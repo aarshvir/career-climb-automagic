@@ -297,3 +297,30 @@ describe('private document and OAuth destinations', () => {
     expect(isLoopHttpsUrl('javascript:alert(1)')).toBe(false);
   });
 });
+
+
+describe('passive existing Loop response contract', () => {
+  const snapshot = {lifecycleGeneration:2,recordVersion:0,profile:null,claims:[],opportunities:[],runs:[],packets:[],inbox:[],models:[],capabilities:{cloudWorker:true,rulesEngine:true,webSearch:false,gmailRead:false,gmailDrafts:false,monthlyUsageCapUsd:50,dailyRunLimit:3},gmail:{connected:false,email:null,status:'Not connected',allowDrafts:false}};
+  it('accepts an active existing snapshot with its explicit generation',async()=>{
+    sdk.invoke.mockResolvedValue({data:{existingState:'active',snapshot},error:null});
+    expect((await callJobLoop('owner-a',{action:'get_existing'})).snapshot?.lifecycleGeneration).toBe(2);
+  });
+  it('rejects mismatched existing state and snapshot or an active response without a generation',async()=>{
+    for(const payload of [{existingState:'absent',snapshot},{existingState:'erasing',erasureGeneration:2,snapshot},{snapshot},{existingState:'active',snapshot:{...snapshot,lifecycleGeneration:undefined}}]){
+      sdk.invoke.mockResolvedValue({data:payload,error:null});
+      await expect(callJobLoop('owner-a',{action:'get_existing'})).rejects.toThrow();
+    }
+    expect(sdk.invoke.mock.calls.every(([,options])=>options.body.action==='get_existing')).toBe(true);
+  });
+
+  it.each([{existingState:'absent'}, {existingState:'erasing',erasureGeneration:2}])('reads %j without activating get',async payload=>{
+    sdk.invoke.mockResolvedValue({data:payload,error:null});
+    expect(await callJobLoop('owner-a',{action:'get_existing'})).toEqual(payload);
+    expect(sdk.invoke).toHaveBeenCalledExactlyOnceWith('job-loop-control',{body:{action:'get_existing'}});
+  });
+  it.each([{}, {existingState:'active'}, {existingState:'absent',erasureGeneration:2}, {existingState:'erasing'}, {existingState:'erasing',erasureGeneration:0}, {existingState:'unknown'}])('rejects invalid passive state %j without initializing fallback',async payload=>{
+    sdk.invoke.mockResolvedValue({data:payload,error:null});
+    await expect(callJobLoop('owner-a',{action:'get_existing'})).rejects.toThrow();
+    expect(sdk.invoke).toHaveBeenCalledTimes(1);
+  });
+});

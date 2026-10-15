@@ -57,12 +57,13 @@ const snapshotSchema = z.object({
   support:z.array(z.object({id,category:z.enum(['help','privacy','bug']),message:z.string().max(2000),status:z.enum(['received','in_review','resolved']),createdAt:short})).max(20).optional(),
   recurringReady:z.boolean().optional(),employerSources:z.array(z.object({provider:short,company:short,board:short})).max(4).optional(),
 });
-const responseSchema = z.object({ snapshot: snapshotSchema.optional(), erasureGeneration: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
+const responseSchema = z.object({ existingState: z.enum(['active', 'absent', 'erasing']).optional(), snapshot: snapshotSchema.optional(), erasureGeneration: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
   url: z.string().max(8000).optional(), filename: short.optional(), message: text.optional(), error: text.optional(), code: short.optional(),
   gmailPreview: z.object({ email: short.nullable(), allowDrafts: z.boolean(), expiresAt: short }).optional() });
 const version = z.number().int().nonnegative();
 const actionSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('get') }),
+  z.object({ action: z.literal('get_existing') }),
   z.object({ action: z.literal('save_profile'), expectedVersion: version, profile: profileSchema, saveConsent: z.boolean() }),
   z.object({ action: z.literal('suggest_claims') }),
   z.object({ action: z.literal('save_claim'), expectedVersion: version, id: id.optional(), claim: claimSchema }),
@@ -142,6 +143,13 @@ export async function callJobLoop(userId: string, action: LoopAction): Promise<L
   const parsed = responseSchema.safeParse(data);
   if (!parsed.success || (action.action === 'get' && !parsed.data.snapshot && parsed.data.erasureGeneration === undefined)) throw new Error(fallback);
   if (parsed.data.error) throw serviceFailure(parsed.data, fallback);
+  if (action.action === 'get_existing') {
+    const value = parsed.data;
+    const valid = value.existingState === 'active' ? !!value.snapshot && validLoopGeneration(value.snapshot.lifecycleGeneration) && value.erasureGeneration === undefined
+      : value.existingState === 'absent' ? !value.snapshot && value.erasureGeneration === undefined
+      : value.existingState === 'erasing' && !value.snapshot && value.erasureGeneration !== undefined;
+    if (!valid) throw new Error('Saved Job Loop applications could not be confirmed. Retry without changing your records.');
+  }
   return parsed.data as LoopResponse;
 }
 export async function loadLoopSavedCvs(userId: string) {

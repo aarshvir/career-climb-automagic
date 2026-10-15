@@ -3,6 +3,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CvCheck from '@/pages/CvCheck';
+import { clearTrackingDraftMemory, setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
 import { clearCheckRecovery, readCheckRecovery, rememberCheckRecovery } from '@/lib/check-draft';
 
 vi.unmock('react-router-dom');
@@ -48,6 +49,7 @@ function save() {
 }
 function goSource() { fireEvent.click(within(screen.getByRole('navigation', { name: 'Check progress' })).getByRole('button', { name: /Your CV/ })); }
 beforeEach(() => {
+  clearTrackingDraftMemory();
   vi.clearAllMocks(); clearCheckRecovery(); sessionStorage.clear(); localStorage.clear();
   mocks.auth.user = { id: 'owner-a', email: 'owner-a@example.test' }; mocks.auth.loading = false;
   mocks.list.mockResolvedValue([]); mocks.extract.mockResolvedValue(replacement);
@@ -144,6 +146,7 @@ describe('bounded source replacement and optional-save repair', () => {
     expect(link).toHaveAttribute('href', `/loop?fromCheck=${id}`);
     expect(mocks.save).not.toHaveBeenCalled(); expect(mocks.tracker).not.toHaveBeenCalled();
     mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' };
+    setTrackingDraftOwner('owner-b');
     mocks.list.mockResolvedValue([]); view.rerender(tree());
     await waitFor(() => expect(screen.queryByRole('link', { name: 'Continue this saved check in Job Loop' })).not.toBeInTheDocument());
   });

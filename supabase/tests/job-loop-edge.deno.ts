@@ -8,8 +8,9 @@ if(Deno.env.get('JOBVANCE_LOOP_UI_BUNDLES')==='true'){
 const owner='11111111-1111-4111-a111-111111111111',runId='22222222-2222-4222-a222-222222222222';const calls:{url:string;body:Record<string,unknown>|null}[]=[];const pending:Promise<unknown>[]=[];
 (globalThis as unknown as {EdgeRuntime:{waitUntil(promise:Promise<unknown>):void}}).EdgeRuntime={waitUntil:promise=>{pending.push(promise);}};
 function assert(value:unknown,message:string):asserts value{if(!value)throw new Error(message);}
-function setup(){for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
+function setup(){for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;existingLifecycleAbsent=false;existingRecordAbsent=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
 let writeFailure=false;
+let existingLifecycleAbsent=false,existingRecordAbsent=false;
 let maintenanceTicketValid=false;
 let maintenanceFile=false,maintenanceClaimed=false,maintenanceRemoved=false;
 let maintenanceToken='';
@@ -27,7 +28,8 @@ globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
   if(url.pathname==='/rest/v1/rpc/job_loop_erasure_status'){assert(body?.p_user===owner,'Lifecycle read binds authenticated owner.');return Response.json(lifecycle);}
   if(url.pathname==='/rest/v1/rpc/job_loop_assert_generation'){assert(body?.p_user===owner,'Generation guard binds authenticated owner.');return body?.p_generation===lifecycle.generation?Response.json(null):Response.json({message:'LOOP_REQUEST_STALE'},{status:400});}
   if(['/rest/v1/rpc/job_loop_open_record','/rest/v1/rpc/job_loop_read_record'].includes(url.pathname)){assert(body?.p_user===owner,'Atomic record read binds authenticated owner.');return Response.json({...record,lifecycle_generation:lifecycle.generation});}
-  if(url.pathname==='/rest/v1/job_loop_records'){assert(url.searchParams.get('user_id')===`eq.${owner}`||body?.user_id===owner,'Every record query binds the authenticated owner.');return init?.method==='POST'?new Response(null,{status:201}):Response.json(record);}
+  if(url.pathname==='/rest/v1/job_loop_lifecycle'){assert(url.searchParams.get('user_id')===`eq.${owner}`&&!body,'Passive lifecycle read binds owner without creating metadata.');return Response.json(existingLifecycleAbsent?null:{...lifecycle,user_id:owner});}
+  if(url.pathname==='/rest/v1/job_loop_records'){assert(url.searchParams.get('user_id')===`eq.${owner}`||body?.user_id===owner,'Every record query binds the authenticated owner.');return init?.method==='POST'?new Response(null,{status:201}):Response.json(existingRecordAbsent?null:record);}
   if(['/rest/v1/job_loop_runs','/rest/v1/job_loop_packets','/rest/v1/job_loop_usage','/rest/v1/job_loop_connections','/rest/v1/job_loop_schedules','/rest/v1/job_loop_activity','/rest/v1/job_loop_support_requests'].includes(url.pathname)){assert(url.searchParams.get('user_id')===`eq.${owner}`,'Collection must bind owner.');return Response.json([]);}
   if(url.pathname==='/rest/v1/rpc/job_loop_budget_snapshot'){assert(body?.p_user===owner&&body?.p_cap_micros===50000000,'Budget read binds the authenticated owner and ceiling.');return Response.json({month:'2026-10',capUsd:50,committedUsd:0,remainingUsd:50,scope:'shared_ai_search',maxPilotUsers:10,enrolled:false,activeUsers:0,maxUsers:10});}
   if(url.pathname==='/rest/v1/rpc/job_loop_scheduler_state')return Response.json({ready:false,lastDispatchAt:null});
@@ -47,6 +49,29 @@ Deno.test('control rejects absent/invalid identity and caller-supplied owner bef
 });
 Deno.test('snapshot remains available with no model/mail/search keys and no paid calls',async()=>{
   setup();const response=await handlers[0](req({action:'get'}));assert(response.status===200,'Authenticated snapshot succeeds.');const body=await response.json();assert(body.snapshot.recordVersion===0,'Initial real record version.');assert(body.snapshot.capabilities.rulesEngine===true&&body.snapshot.capabilities.dailyRunLimit===3,'Rules capability and cap declared.');assert(body.snapshot.models.every((model:{ready:boolean})=>!model.ready),'No paid model is claimed ready.');assert(body.snapshot.gmail.connected===false,'Sign-in is not mailbox connection.');assert(calls.every(call=>call.url.startsWith('https://supabase.fixture.invalid/')),'Only fixture persistence/auth calls.');
+});
+Deno.test('passive home read uses authenticated owner, requires no caller authority and rejects forged fields',async()=>{
+  setup();lifecycle={state:'active',generation:0};
+  assert((await handlers[0](req({action:'get_existing'},null))).status===401,'No identity cannot inspect existing work.');assert(calls.length===0,'No query without identity.');
+  assert((await handlers[0](req({action:'get_existing',userId:'forged'}))).status===400,'Caller cannot select another owner.');assert(calls.every(call=>call.url.includes('/auth/v1/user')),'Forged owner never reaches records.');
+  calls.length=0;const response=await handlers[0](req({action:'get_existing'})),body=await response.json();
+  assert(response.status===200&&body.existingState==='active'&&body.snapshot.lifecycleGeneration===0,'Existing active snapshot is bound to the current lifetime.');
+  assert(!calls.some(call=>/open_record|erasure_status|assert_generation|enroll|storage/.test(call.url)),'No initialization, lifecycle-creating guard, enrollment or Storage.');
+  assert(calls.every(call=>call.url.startsWith('https://supabase.fixture.invalid/')),'No model, mailbox or search call.');
+});
+Deno.test('passive home read distinguishes missing and erased work from an active empty snapshot without initializing',async()=>{
+  for(const state of ['missing','erased'] as const){
+    setup();existingLifecycleAbsent=state==='missing';existingRecordAbsent=true;lifecycle={state:state==='erased'?'erased':'active',generation:2};
+    const response=await handlers[0](req({action:'get_existing'})),body=await response.json();
+    assert(response.status===200&&body.existingState==='absent'&&!body.snapshot,'Absent records are not a fabricated empty saved workspace.');
+    assert(!calls.some(call=>/\/rpc\/|job_loop_pilot|storage/.test(call.url)),'Absence never opens, enrolls or calls operational RPCs.');
+  }
+  lifecycle={state:'active',generation:0};
+});
+Deno.test('passive home read exposes only erasure continuation state while cleanup is incomplete',async()=>{
+  setup();lifecycle={state:'erasing',generation:3};const response=await handlers[0](req({action:'get_existing'})),body=await response.json();
+  assert(response.status===200&&body.existingState==='erasing'&&body.erasureGeneration===3&&!body.snapshot,'No private snapshot while erasing.');
+  assert(!calls.some(call=>/\/rpc\/|job_loop_records|storage/.test(call.url)),'No private read, cleanup or activation occurs.');lifecycle={state:'active',generation:0};
 });
 Deno.test('actual handler rejects stale or generationless permission intents before opening a new workspace',async()=>{
   setup();lifecycle={state:'active',generation:2};

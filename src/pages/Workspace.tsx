@@ -1,5 +1,6 @@
+import { readApplicationSource } from '@/lib/application-source-selection';
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Upload,
@@ -185,7 +186,11 @@ export default function Workspace() {
   const trackingAuthority = user ? trackingDraftAuthority(user.id) : -1;
   const client = useQueryClient();
   const [params, setParams] = useSearchParams();
-  const tab = tabs.some((t) => t.id === params.get("tab"))
+  const sourceRoute = useLocation();
+  const exactPack = readApplicationSource(sourceRoute.search, 'pack');
+  const exactTracker = readApplicationSource(sourceRoute.search, 'tracked');
+  const hasExactSource = params.has('pack') || params.has('tracked');
+  const tab = exactPack ? 'tailor' : exactTracker ? 'tracker' : tabs.some((t) => t.id === params.get("tab"))
     ? (params.get("tab") as Tab)
     : "cv";
   const [file, setFile] = useState<File | null>(null),
@@ -207,20 +212,23 @@ export default function Workspace() {
   useEffect(() => { operationMounted.current = true; return () => { operationMounted.current = false; operationRevision.current++; }; }, []);
   const packRequest = useRef(crypto.randomUUID());
   const query = useQuery({
-    queryKey: ["workspace", user?.id],
+    queryKey: ["workspace", user?.id, trackingAuthority],
     queryFn: () => loadWorkspace(user!.id),
-    enabled: !!user && !configurationError,
+    enabled: !!user && !loading && !authError && trackingAuthority >= 0 && !configurationError,
     retry: 1,
   });
   const legacy = useQuery({
-    queryKey: ["legacy-cvs", user?.id],
+    queryKey: ["legacy-cvs", user?.id, trackingAuthority],
     queryFn: () => listLegacyCvs(user!.id),
-    enabled: !!user && tab === "cv" && !configurationError,
+    enabled: !!user && !loading && !authError && trackingAuthority >= 0 && tab === "cv" && !configurationError,
     retry: 1,
   });
   const data = query.data;
   useEffect(() => { if (user && !loading && !authError && data) pruneTrackingApplications('workspace', user.id, data.applications.filter(item => item.user_id === user.id).map(item => item.id)); }, [user?.id, loading, authError, data?.applications]);
-  const selected = data?.packs.find((p) => p.id === selectedId);
+  const selected = data?.packs.find((p) => p.id === selectedId && p.user_id === user?.id && (!hasExactSource || exactPack?.id === p.id));
+  const requestedPack = exactPack ? data?.packs.find(p => p.id === exactPack.id && p.user_id === user?.id) : null;
+  const requestedTracker = exactTracker ? data?.applications.find(p => p.id === exactTracker.id && p.user_id === user?.id) : null;
+  useEffect(() => { if (hasExactSource) { setSelectedId(''); setReviewText(''); setConfirmed(false); } }, [sourceRoute.search, trackingAuthority]);
   useEffect(() => {
     operationRevision.current++; lock.current = false; setBusy(false);
     setFile(null);
@@ -316,7 +324,7 @@ export default function Workspace() {
       packRequest.current = crypto.randomUUID();
     }, "Application pack saved. Review every fact before approving it.");
   }
-  if (loading)
+  if (loading || authError)
     return (
       <div className="ws-account-loading" role="status">
         <Loader2 size={22} className="animate-spin" aria-hidden="true" />
@@ -327,9 +335,11 @@ export default function Workspace() {
   const counts = workspaceCounts(data?.applications ?? []);
   return (
     <main className="jv-workspace">
+      {hasExactSource && <section className="m-4 rounded-xl border bg-white p-5" aria-label="Selected application source"><h2 className="font-semibold">Selected application</h2>{!exactPack && !exactTracker ? <p role="alert">This application link is invalid. Choose it again from My applications.</p> : query.isLoading ? <p role="status">Loading your selected application…</p> : query.error ? <p role="alert">The selected application could not be loaded. Retry before opening it.</p> : requestedPack ? <><p>{requestedPack.job_title} · {requestedPack.company}</p><p>Read this saved CV again before approving or downloading. Opening replaces any unsaved CV review on this page.</p><Button disabled={busy} onClick={() => { setSelectedId(requestedPack.id); setReviewText(requestedPack.tailored_text); setConfirmed(false); }}>Review selected CV</Button></> : requestedTracker ? <p>{requestedTracker.job_title} · {requestedTracker.company}. Your exact tracking record is shown below.</p> : <p role="alert">This application is no longer available in this account. No other application was selected.</p>}<p className="mt-3"><Link to="/applications">Back to my applications</Link></p></section>}
       <div className="ws-shell">
         <aside className="ws-sidebar">
           <div className="ws-sidebar-heading"><span className="ws-workspace-mark" aria-hidden="true">J</span><div><strong>Your workspace</strong><span>Prepare with care</span></div></div>
+          <Link to="/applications" className="ws-free-check">All my applications</Link>
           <nav aria-label="Workspace sections" className="ws-navigation">
             {tabs.map((t) => (
               <Button key={t.id} className="ws-nav-button" variant="ghost" onClick={() => setParams({ tab: t.id })} aria-current={tab === t.id ? "page" : undefined}>
@@ -926,7 +936,7 @@ export default function Workspace() {
                 CV pack.
               </p>
             )}
-            {data?.applications.filter(item => item.user_id === user.id).map((item) => (
+            {data?.applications.filter(item => item.user_id === user.id && (!hasExactSource || exactTracker?.id === item.id)).map((item) => (
               <TrackerRow
                 key={trackingDraftIdentity(trackingDraftScope('workspace', user.id, item.id))}
                 item={item}

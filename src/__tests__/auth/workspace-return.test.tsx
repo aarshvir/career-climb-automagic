@@ -66,7 +66,7 @@ describe('protected legacy workspace return through real app routes', () => {
     open(path);
     await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
     expect(window.location.pathname).toBe('/auth');
-    expect(new URLSearchParams(window.location.search).get('next')).toBe(`/dashboard?tab=${tab}`);
+    expect(new URLSearchParams(window.location.search).get('next')).toBe(path === '/applications' ? '/applications' : `/dashboard?tab=${tab}`);
     expect(screen.queryByTestId('workspace-path')).not.toBeInTheDocument();
     expect(sessionStorage.length).toBe(0); expect(localStorage.length).toBe(0);
   });
