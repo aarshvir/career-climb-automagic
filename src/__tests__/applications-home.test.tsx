@@ -27,6 +27,7 @@ function deferred<T>() { let resolve!: (value: T) => void, reject!: (reason?: un
 const tree = (url = '/applications') => <HelmetProvider><MemoryRouter initialEntries={[url]}><ApplicationsHome /></MemoryRouter></HelmetProvider>;
 async function loaded() { await waitFor(() => expect(screen.getAllByText('Loaded')).toHaveLength(4)); }
 function list() { return within(screen.getByRole('region', { name: 'Saved applications' })); }
+function linkedResponse(generation = 7) { return { existingState: 'active', snapshot: { lifecycleGeneration: generation, recordVersion: 2, profile: null, claims: [], packets: [], opportunities: [{ id: trackedId, source: 'manual', sourceKey: `saved-check:${id}`, sourceCheckId: id, title: 'Updated Operations Role', company: 'Loop Employer', description: 'LOOP_VACANCY_TEXT', url: 'https://employer.example.invalid/linked', status: 'saved', notes: 'LOOP_PROGRESS_NOTES', followUpAt: null, checkedAt: date }] } }; }
 beforeEach(() => {
   vi.clearAllMocks(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a'); auth = { user: { id: 'owner-a' }, loading: false, authError: null };
   mocks.owner.mockImplementation(async () => ({ data: { user: auth.user }, error: null }));
@@ -37,6 +38,48 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearTrackingDraftMemory(); });
 
 describe('Applications home actual saved work', () => {
+  it('opens an exact Loop bookmark in its joined application with both sources and separately labelled progress', async () => {
+    packs = []; trackers = [{ ...tracker(), pack_id: null, cv_check_id: id }]; mocks.loop.mockResolvedValue(linkedResponse());
+    render(tree(`/applications?item=${encodeURIComponent(`loop:7:${trackedId}`)}`)); await loaded();
+    expect(list().getAllByRole('button')).toHaveLength(1);
+    const detail = within(screen.getByRole('region', { name: 'Application details' }));
+    expect(detail.getByRole('link', { name: 'Reopen this CV check' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
+    expect(detail.getByRole('link', { name: 'Open this Job Loop vacancy' })).toHaveAttribute('href', `/loop?opportunity=${trackedId}&generation=7`);
+    expect(detail.getByRole('link', { name: 'Update this vacancy progress' })).toHaveAttribute('href', `/loop?opportunity=${trackedId}&generation=7`);
+    expect(detail.getByRole('link', { name: 'Update this tracking entry' })).toHaveAttribute('href', `/dashboard?tracked=${trackedId}`);
+    for (const text of ['LOOP_PROGRESS_NOTES', 'EXACT_TRACKER_NOTES', 'LOOP_VACANCY_TEXT', 'Exact check vacancy requirements', 'Job Loop progress', 'Saved-check tracking']) expect(detail.getByText(text)).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'Loop Employer' } });
+    expect(list().getAllByRole('button')).toHaveLength(1);
+    expect(mocks.loop).toHaveBeenCalledExactlyOnceWith('owner-a', { action: 'get_existing' });
+  });
+  it('keeps the exact selected vacancy through delayed check loading and later failed-source refresh', async () => {
+    packs = []; trackers = []; const delayed = deferred<FreeCvCheck[]>(); mocks.checks.mockReturnValueOnce(delayed.promise); mocks.loop.mockResolvedValue(linkedResponse());
+    render(tree(`/applications?item=${encodeURIComponent(`loop:7:${trackedId}`)}`));
+    await screen.findByRole('link', { name: 'Open this Job Loop vacancy' });
+    expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument();
+    await act(async () => delayed.resolve([check()])); await loaded();
+    expect(screen.getByText('EXACT_FINAL_REVIEWED_CV')).toBeInTheDocument(); expect(screen.getByText('LOOP_PROGRESS_NOTES')).toBeInTheDocument();
+    mocks.checks.mockRejectedValue(new Error('offline')); fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' }));
+    await screen.findByRole('button', { name: 'Retry saved cv checks' }); await screen.findByRole('link', { name: 'Open this Job Loop vacancy' });
+    expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument(); expect(screen.getByText('LOOP_PROGRESS_NOTES')).toBeInTheDocument();
+    expect(screen.getByText(/linked saved check is not in/)).toBeInTheDocument();
+  });
+  it('never resolves an old joined vacancy bookmark after a generation change', async () => {
+    packs = []; trackers = []; mocks.loop.mockResolvedValue(linkedResponse()); render(tree(`/applications?item=${encodeURIComponent(`loop:7:${trackedId}`)}`)); await loaded();
+    expect(screen.getByText('EXACT_FINAL_REVIEWED_CV')).toBeInTheDocument();
+    mocks.loop.mockResolvedValue(linkedResponse(9)); fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' })); await loaded();
+    expect(screen.getByRole('heading', { name: 'This application is no longer available here' })).toBeInTheDocument();
+    expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open this Job Loop vacancy' })).not.toBeInTheDocument();
+  });
+  it('retains joined relationship detail when the separate tracker source fails', async () => {
+    packs = []; trackerRead = async () => ({ data: [], error: new Error('offline') }); mocks.loop.mockResolvedValue(linkedResponse());
+    render(tree(`/applications?item=${encodeURIComponent(`check:${id}`)}`)); await screen.findByRole('button', { name: 'Retry application tracking' });
+    await screen.findByText('LOOP_PROGRESS_NOTES');
+    expect(within(screen.getByRole('region', { name: 'Application details' })).getByText(/have a recorded link/)).toBeInTheDocument();
+    expect(screen.getByText(/Linked tracking information is not currently loaded/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Update this vacancy progress' })).toBeInTheDocument();
+  });
   it('focuses and reveals the exact detail only after a deliberate list choice, without refresh auto-scroll', async () => {
     const scroll = vi.fn(); const previous = HTMLElement.prototype.scrollIntoView;
     HTMLElement.prototype.scrollIntoView = scroll;

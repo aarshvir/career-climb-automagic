@@ -6,11 +6,13 @@ import { isApplicationSourcePath } from './application-source-selection';
 export type ApplicationHomeSource = 'checks' | 'packs' | 'trackers' | 'loop';
 export type ExistingApplicationLoop = { existingState: 'absent' } | { existingState: 'erasing'; erasureGeneration: number } | { existingState: 'active'; snapshot: LoopSnapshot };
 export interface ApplicationHomeDocument { id: string; label: string; state: string; text: string; evidence?: string; createdAt: string | null; reasons: string[] }
-export interface ApplicationHomeProgress { id: string; title: string; company: string; status: string; notes: string; appliedAt: string | null; followUpAt: string | null; href: string | null }
+export interface ApplicationHomeProgress { id: string; title: string; company: string; status: string; notes: string; appliedAt: string | null; followUpAt: string | null; href: string | null; sourceLabel?: string; action?: string }
+export interface ApplicationHomeRelatedSource { id: string; href: string | null; action: string; title: string; company: string; vacancy: string; employerUrl: string | null }
 export interface ApplicationHomeRow {
   id: string; source: ApplicationHomeSource; sourceLabel: string; title: string; company: string;
   vacancy: string; employerUrl: string | null; documents: ApplicationHomeDocument[]; progress: ApplicationHomeProgress[];
   lastRecordedAt: string | null; href: string | null; action: string; note: string;
+  relatedSources?: ApplicationHomeRelatedSource[];
 }
 export interface ApplicationHomeInput { checks: FreeCvCheck[]; packs: ApplicationPack[]; trackers: TrackedApplication[]; loop: ExistingApplicationLoop | null }
 const validGeneration = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
@@ -21,6 +23,12 @@ export function applicationEmployerUrl(value: string | null): string | null {
 }
 export function applicationHomeSource(id: string): ApplicationHomeSource | null {
   return id.startsWith('check:') ? 'checks' : id.startsWith('pack:') ? 'packs' : id.startsWith('tracker:') ? 'trackers' : id.startsWith('loop:') ? 'loop' : null;
+}
+/** A Loop bookmark can resolve to its exact joined check, but never another lifetime. */
+export function resolveApplicationHomeSelection(rows: ApplicationHomeRow[], id: string | null): ApplicationHomeRow | undefined {
+  if (!id) return undefined;
+  const matches = rows.filter(row => row.id === id || row.relatedSources?.some(source => source.id === id));
+  return matches.length === 1 ? matches[0] : undefined;
 }
 /** Local selection only: opaque source identity; an invalid or ambiguous query never selects another item. */
 export function readApplicationHomeSelection(search: string): { id: string | null; invalid: boolean } {
@@ -76,6 +84,36 @@ export function buildApplicationHome(ownerId: string, input: ApplicationHomeInpu
         progress: [{ id: row.id, title: row.title, company: row.company, status: row.status, notes: row.notes, appliedAt: null, followUpAt: row.followUpAt, href: href(`/loop?opportunity=${row.id}&generation=${generation}`) }],
         lastRecordedAt: recorded(row.checkedAt, ...packets.map(packet => packet.createdAt)), href: href(`/loop?opportunity=${row.id}&generation=${generation}`), action: 'Open this Job Loop vacancy', note: 'Documents show recent loaded output attempts. Earlier outputs may exist. Approval and available formats are checked again in Job Loop.',
       });
+    }
+    // Only a uniquely recorded server provenance link can join these sources.
+    // A missing/failed check read never discards independently saved Loop work.
+    for (const opportunity of snapshot.opportunities.filter(item => item.sourceCheckId !== undefined)) {
+      const loopRows = rows.filter(row => row.id === `loop:${generation}:${opportunity.id}`);
+      const checkRows = rows.filter(row => row.id === `check:${opportunity.sourceCheckId}`);
+      const links = snapshot.opportunities.filter(item => item.sourceCheckId === opportunity.sourceCheckId);
+      const validLink = typeof opportunity.sourceCheckId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(opportunity.sourceCheckId)
+        && opportunity.source === 'manual' && opportunity.sourceKey === `saved-check:${opportunity.sourceCheckId}`;
+      const loopRow = loopRows[0];
+      if (!loopRow) continue;
+      if (!validLink || !loopRow.href || links.length !== 1 || loopRows.length !== 1 || snapshot.opportunities.filter(item => item.id === opportunity.id).length !== 1 || checkRows.length > 1) {
+        loopRow.note = 'This vacancy has conflicting saved-check links and is shown separately. ' + loopRow.note;
+        continue;
+      }
+      const checkRow = checkRows[0];
+      if (!checkRow) {
+        loopRow.note = 'The linked saved check is not in the currently loaded check list. This vacancy and its progress remain available. ' + loopRow.note;
+        continue;
+      }
+      checkRow.sourceLabel = 'Saved application';
+      checkRow.relatedSources = [{ id: loopRow.id, href: loopRow.href, action: loopRow.action, title: loopRow.title, company: loopRow.company, vacancy: loopRow.vacancy, employerUrl: loopRow.employerUrl }];
+      checkRow.documents.push(...loopRow.documents.map(document => ({ ...document, id: `loop:${generation}:${document.id}`, label: 'Job Loop CV' })));
+      checkRow.progress = [
+        ...checkRow.progress.map(progress => ({ ...progress, sourceLabel: 'Saved-check tracking', action: 'Update this tracking entry' })),
+        ...loopRow.progress.map(progress => ({ ...progress, sourceLabel: 'Job Loop progress', action: 'Update this vacancy progress' })),
+      ];
+      checkRow.lastRecordedAt = recorded(checkRow.lastRecordedAt, loopRow.lastRecordedAt);
+      checkRow.note = 'This saved check and Job Loop vacancy have a recorded link. Each keeps its own wording and progress. ' + (loopRow.documents.length ? 'Recent Job Loop outputs are included below; earlier outputs may exist.' : 'No Job Loop output is included in the currently loaded results.');
+      rows.splice(rows.indexOf(loopRow), 1);
     }
   }
   return rows.sort((a, b) => (b.lastRecordedAt ? Date.parse(b.lastRecordedAt) : -Infinity) - (a.lastRecordedAt ? Date.parse(a.lastRecordedAt) : -Infinity) || a.id.localeCompare(b.id));

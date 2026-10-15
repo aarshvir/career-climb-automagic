@@ -7,7 +7,7 @@ import { listFreeChecks, type FreeCvCheck } from '@/lib/free-check-api';
 import { callJobLoop } from '@/lib/job-loop-api';
 import { registerTrackingDraftOwner, trackingDraftAuthority } from '@/lib/tracking-draft-memory';
 import { loopDateLabel } from '@/lib/loop-calendar';
-import { applicationHomeSource, buildApplicationHome, readApplicationHomeSelection, type ApplicationHomeRow, type ApplicationHomeSource, type ExistingApplicationLoop } from '@/lib/application-home';
+import { applicationHomeSource, buildApplicationHome, readApplicationHomeSelection, resolveApplicationHomeSelection, type ApplicationHomeRow, type ApplicationHomeSource, type ExistingApplicationLoop } from '@/lib/application-home';
 import './ApplicationsHome.css';
 
 type Data = { checks: FreeCvCheck[]; packs: ApplicationPack[]; trackers: TrackedApplication[]; loop: ExistingApplicationLoop };
@@ -93,10 +93,10 @@ export default function ApplicationsHome() {
   const selection = readApplicationHomeSelection(searchParams.toString() ? `?${searchParams.toString()}` : '');
   const state = scope && view.key === scope.key ? view.sources : emptySources();
   const rows = scope ? buildApplicationHome(scope.ownerId, { checks: state.checks.data ?? [], packs: state.packs.data ?? [], trackers: state.trackers.data ?? [], loop: state.loop.data }) : [];
-  const selected = rows.find(row => row.id === selection.id);
+  const selected = resolveApplicationHomeSelection(rows, selection.id);
   const selectedSource = selection.id ? applicationHomeSource(selection.id) : null;
   const linkedSelection = selection.id?.startsWith('tracker:') ? rows.find(row => (row.source === 'packs' || row.source === 'checks') && row.progress.some(progress => `tracker:${progress.id}` === selection.id)) : null;
-  const visibleRows = rows.filter(row => `${row.title} ${row.company}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const visibleRows = rows.filter(row => `${row.title} ${row.company} ${row.relatedSources?.map(source => `${source.title} ${source.company}`).join(' ') ?? ''}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const allReady = sources.every(source => state[source].phase === 'ready');
   useEffect(() => {
     if (!scope || !current(scope) || deliberateChoice?.scopeKey !== scope.key || deliberateChoice.id !== selected?.id) return;
@@ -128,10 +128,12 @@ export default function ApplicationsHome() {
 }
 function ApplicationDetail({ row, trackersAvailable }: { row: ApplicationHomeRow; trackersAvailable: boolean }) {
   return <article><p className="ah-eyebrow">{row.sourceLabel}</p><h2>{row.title || 'Untitled saved role'}</h2><p className="ah-company">{row.company || 'Company not recorded'}</p>
-    {row.href ? <Link className="ah-button ah-button--primary" to={row.href}>{row.action}</Link> : <p role="alert">This record's exact continuation link could not be confirmed. Refresh before continuing.</p>}
-    <p className="ah-subtle">{(row.source === 'packs' || row.source === 'checks') && !trackersAvailable ? 'Linked tracking information is not currently loaded. The saved document is still available.' : row.note}</p>
+    <div className="ah-actions">{row.href ? <Link className="ah-button ah-button--primary" to={row.href}>{row.action}</Link> : <p role="alert">This record's exact continuation link could not be confirmed. Refresh before continuing.</p>}{row.relatedSources?.map(source => source.href ? <Link key={source.id} className="ah-button" to={source.href}>{source.action}</Link> : <p key={source.id} role="alert">The exact vacancy link could not be confirmed.</p>)}</div>
+    <p className="ah-subtle">{row.note}</p>
+    {(row.source === 'packs' || row.source === 'checks') && !trackersAvailable && <p className="ah-subtle">Linked tracking information is not currently loaded. The saved document is still available.</p>}
     <section><h3>Vacancy</h3>{row.vacancy ? <pre>{row.vacancy}</pre> : <p>No vacancy description is stored with this tracking entry.</p>}{row.employerUrl && <a href={row.employerUrl} target="_blank" rel="noopener noreferrer">Open recorded vacancy link</a>}</section>
+    {row.relatedSources?.map(source => <section key={source.id} aria-label="Linked Job Loop vacancy"><h3>Job Loop vacancy</h3><p>{source.title} · {source.company}</p>{source.vacancy === row.vacancy ? <p>The vacancy text matches the saved check.</p> : <><p>This vacancy text differs from the saved check above.</p><pre>{source.vacancy || 'No vacancy text stored.'}</pre></>}{source.employerUrl && <a href={source.employerUrl} target="_blank" rel="noopener noreferrer">Open linked vacancy posting</a>}</section>)}
     <section><h3>Documents</h3>{row.documents.length ? row.documents.map(document => <details className="ah-document" key={document.id}><summary>{document.label} <span>{document.state}</span></summary>{document.reasons.length > 0 && <ul>{document.reasons.map((reason, index) => <li key={index}>{reason}</li>)}</ul>}<pre>{document.text || 'No CV text stored for this version.'}</pre>{document.evidence && <details><summary>Evidence notes for this output</summary><pre>{document.evidence}</pre></details>}</details>) : <p>{row.source === 'loop' ? 'No output attempt is included in the recent loaded results. Open this vacancy in Job Loop to review its current work.' : 'No CV document is linked to this tracking entry.'}</p>}</section>
-    <section><h3>Reported progress</h3>{row.progress.length ? row.progress.map(progress => <div className="ah-progress" key={progress.id}><p><strong>{progress.status}</strong>{row.progress.length > 1 && ` · ${progress.title}${progress.company ? ` · ${progress.company}` : ''}`}</p><p>Applied date: {loopDateLabel(progress.appliedAt)} · Follow-up: {loopDateLabel(progress.followUpAt)}</p><h4>Notes</h4>{progress.notes ? <pre>{progress.notes}</pre> : <p>No notes recorded.</p>}{progress.href && (row.source === 'packs' || row.source === 'checks') && <Link to={progress.href}>Update this tracking entry</Link>}</div>) : <p>{(row.source === 'packs' || row.source === 'checks') && !trackersAvailable ? 'Tracking is not currently available. Retry its source above.' : 'No application progress is linked to this saved document.'}</p>}</section>
+    <section><h3>Reported progress</h3>{row.progress.length ? row.progress.map(progress => <div className="ah-progress" key={progress.sourceLabel ? progress.sourceLabel + progress.id : progress.id}>{progress.sourceLabel && <h4>{progress.sourceLabel}</h4>}<p><strong>{progress.status}</strong>{row.progress.length > 1 && ` · ${progress.title}${progress.company ? ` · ${progress.company}` : ''}`}</p><p>Applied date: {loopDateLabel(progress.appliedAt)} · Follow-up: {loopDateLabel(progress.followUpAt)}</p><h4>Notes</h4>{progress.notes ? <pre>{progress.notes}</pre> : <p>No notes recorded.</p>}{progress.href && (row.source === 'packs' || row.source === 'checks') && <Link to={progress.href}>{progress.action || 'Update this tracking entry'}</Link>}</div>) : <p>{(row.source === 'packs' || row.source === 'checks') && !trackersAvailable ? 'Tracking is not currently available. Retry its source above.' : 'No application progress is linked to this saved document.'}</p>}</section>
   </article>;
 }

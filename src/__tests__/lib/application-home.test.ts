@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applicationHomeSource, buildApplicationHome, readApplicationHomeSelection } from '@/lib/application-home';
+import { applicationHomeSource, buildApplicationHome, readApplicationHomeSelection, resolveApplicationHomeSelection } from '@/lib/application-home';
 import type { ApplicationPack, TrackedApplication } from '@/lib/cv-database';
 import type { FreeCvCheck } from '@/lib/free-check-api';
 import type { LoopPacket, LoopSnapshot } from '../../../supabase/functions/_shared/job-loop-types';
@@ -12,6 +12,70 @@ function tracker(extra: Partial<TrackedApplication> = {}): TrackedApplication { 
 function snapshot(): LoopSnapshot { return { lifecycleGeneration: 7, recordVersion: 2, profile: { revision: 2, pageTarget: 2 }, claims: [{ id: 'claim', revision: 1, status: 'active', confirmed: true, shareable: true }], opportunities: [{ id, title: 'Analyst', company: 'Acme', description: 'Exact Loop vacancy', url: 'https://employer.example.invalid/job', status: 'saved', notes: 'Loop notes', followUpAt: null, checkedAt: date }], packets: [], runs: [] } as unknown as LoopSnapshot; }
 function packet(extra: Partial<LoopPacket> = {}): LoopPacket { return { id: second, opportunityId: id, status: 'approved', profileRevision: 2, claimVersions: { claim: 1 }, pageCount: 1, holdReasons: [], cvText: 'Exact packet wording', evidenceText: 'Source evidence', createdAt: date, ...extra } as LoopPacket; }
 const empty = () => ({ checks: [], packs: [], trackers: [], loop: null });
+function linkedLoop() { const loop = snapshot(); Object.assign(loop.opportunities[0], { source: 'manual', sourceKey: `saved-check:${id}`, sourceCheckId: id }); return loop; }
+
+describe('exact check and Loop home relationship', () => {
+  it('joins only exact provenance while preserving both wordings, actions, progress and output attempts', () => {
+    const loop = linkedLoop(); loop.packets = [packet({ status: 'held', holdReasons: ['Confirm source'] }), packet({ id: third, status: 'revoked' })];
+    const input = { ...empty(), checks: [check()], trackers: [tracker({ id, cv_check_id: id })], loop: { existingState: 'active' as const, snapshot: loop } };
+    const before = JSON.stringify(input), rows = buildApplicationHome('owner', input), [row] = rows;
+    expect(rows).toHaveLength(1); expect(row.id).toBe(`check:${id}`); expect(row.sourceLabel).toBe('Saved application');
+    expect(row.vacancy).toBe('Exact saved vacancy'); expect(row.relatedSources?.[0]).toMatchObject({ id: `loop:7:${id}`, vacancy: 'Exact Loop vacancy', href: `/loop?opportunity=${id}&generation=7` });
+    expect(row.documents.map(item => item.text)).toEqual(['Exact reviewed final wording', 'Original private input', 'Exact packet wording', 'Exact packet wording']);
+    expect(row.documents.slice(2).map(item => item.state)).toEqual(['Held for review', 'Revoked output']);
+    expect(row.progress.map(item => [item.sourceLabel, item.status, item.notes])).toEqual([['Saved-check tracking', 'interview', 'Exact notes'], ['Job Loop progress', 'saved', 'Loop notes']]);
+    expect(row.progress.map(item => item.href)).toEqual([`/dashboard?tracked=${id}`, `/loop?opportunity=${id}&generation=7`]);
+    expect(resolveApplicationHomeSelection(rows, `loop:7:${id}`)).toBe(row);
+    expect(resolveApplicationHomeSelection(rows, `loop:6:${id}`)).toBeUndefined();
+    expect(JSON.stringify(input)).toBe(before);
+  });
+  it('retains unrelated checks, packs and manual vacancies with identical wording', () => {
+    const loop = linkedLoop(); loop.opportunities.push({ ...loop.opportunities[0], id: second, sourceCheckId: undefined, sourceKey: 'url:separate' });
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check(), check({ id: third })], packs: [pack()], loop: { existingState: 'active', snapshot: loop } });
+    expect(new Set(rows.map(row => row.id))).toEqual(new Set([`check:${id}`, `check:${third}`, `pack:${id}`, `loop:7:${second}`]));
+  });
+  it.each([{ checks: [] }, { checks: [check({ user_id: 'other' })] }])('retains a linked vacancy when its owned check is not loaded', ({ checks }) => {
+    const [row] = buildApplicationHome('owner', { ...empty(), checks, loop: { existingState: 'active', snapshot: linkedLoop() } });
+    expect(row.id).toBe(`loop:7:${id}`); expect(row.note).toContain('not in the currently loaded check list');
+    expect(row.progress[0].notes).toBe('Loop notes'); expect(row.relatedSources).toBeUndefined(); expect(row.documents).toEqual([]);
+  });
+  it.each([{ source: 'web_search' }, { sourceKey: 'url:wrong' }, { sourceCheckId: '' }, { sourceCheckId: '../bad' }])('keeps malformed provenance separate: %j', patch => {
+    const loop = linkedLoop(); Object.assign(loop.opportunities[0], patch);
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check()], loop: { existingState: 'active', snapshot: loop } });
+    expect(rows).toHaveLength(2); expect(rows.find(row => row.source === 'loop')?.note).toContain('conflicting');
+    expect(rows.find(row => row.source === 'checks')?.relatedSources).toBeUndefined();
+  });
+  it('does not hide either vacancy when two links point at the same check', () => {
+    const loop = linkedLoop(); loop.opportunities.push({ ...loop.opportunities[0], id: second, notes: 'Second record' });
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check()], loop: { existingState: 'active', snapshot: loop } });
+    expect(rows).toHaveLength(3); expect(rows.filter(row => row.source === 'loop').every(row => row.note.includes('conflicting'))).toBe(true);
+    expect(rows.find(row => row.source === 'checks')?.progress).toEqual([]);
+  });
+  it('never matches a previous-lifetime bookmark to a fresh relationship', () => {
+    const loop = linkedLoop(); loop.lifecycleGeneration = 9;
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check()], loop: { existingState: 'active', snapshot: loop } });
+    expect(resolveApplicationHomeSelection(rows, `loop:7:${id}`)).toBeUndefined();
+    expect(resolveApplicationHomeSelection(rows, `loop:9:${id}`)?.id).toBe(`check:${id}`);
+  });
+  it('keeps two applications independent even when all their titles and employers are the same', () => {
+    const loop = linkedLoop(); loop.opportunities.push({ ...loop.opportunities[0], id: second, sourceCheckId: third, sourceKey: `saved-check:${third}`, notes: 'Second vacancy notes' });
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check(), check({ id: third, reviewed_text: 'Second CV wording' })], loop: { existingState: 'active', snapshot: loop } });
+    expect(rows).toHaveLength(2);
+    expect(resolveApplicationHomeSelection(rows, `loop:7:${id}`)?.documents[0].text).toBe('Exact reviewed final wording');
+    expect(resolveApplicationHomeSelection(rows, `loop:7:${second}`)?.documents[0].text).toBe('Second CV wording');
+    expect(resolveApplicationHomeSelection(rows, `loop:7:${second}`)?.progress[0].notes).toBe('Second vacancy notes');
+  });
+  it('does not join two conflicting copies of the same opportunity identifier', () => {
+    const loop = linkedLoop(); loop.opportunities.push({ ...loop.opportunities[0], sourceCheckId: third, sourceKey: `saved-check:${third}` });
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check(), check({ id: third })], loop: { existingState: 'active', snapshot: loop } });
+    expect(rows).toHaveLength(4); expect(rows.every(row => !row.relatedSources)).toBe(true);
+    expect(resolveApplicationHomeSelection(rows, `loop:7:${id}`)).toBeUndefined();
+  });
+  it('does not let an ambiguous source alias select the first record', () => {
+    const rows = buildApplicationHome('owner', { ...empty(), checks: [check()], loop: { existingState: 'active', snapshot: linkedLoop() } });
+    expect(resolveApplicationHomeSelection([...rows, { ...rows[0], id: `check:${second}` }], `loop:7:${id}`)).toBeUndefined();
+  });
+});
 
 describe('Applications home read-only projection', () => {
   it('keeps identical titles and raw IDs distinct across their actual sources', () => {
