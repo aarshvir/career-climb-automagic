@@ -9,6 +9,7 @@ import { beginGmail, createGmailDraft, gmailConfigured, readRecruitmentInbox,pre
 import type { LoopAction, LoopClaim, LoopLane, LoopOpportunity, LoopResponse, LoopSnapshot } from './job-loop-types.ts';
 import { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
 import { generationBoundAction } from './job-loop-request.ts';
+import { selectedRunOpportunities, selectedPhaseOpportunities } from './job-loop-selection.ts';
 export { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
 
 export function validateControlInput(value: unknown): LoopAction {
@@ -34,6 +35,9 @@ export async function candidatePreparationHash(data:CareerRecord):Promise<string
 type PreparationChoices=Pick<Extract<LoopAction,{action:'start_run'}>,'provider'|'model'|'modelConsent'|'inboxConsent'|'processingRoute'>;
 export async function preparationRequestHash(data:CareerRecord,choices:PreparationChoices):Promise<string>{return digest(JSON.stringify([choices.provider,choices.model,choices.modelConsent,choices.inboxConsent,await candidatePreparationHash(data),...(choices.provider==='rules'?[]:[choices.processingRoute??'direct'])]));}
 export async function canReplayPreparation(run:RunRow,data:CareerRecord,action:PreparationChoices):Promise<boolean>{
+  // The existing action is discovery-wide. An explicit-selection request must
+  // never be adopted by it; the selected control contract is a separate gate.
+  if(run.selected_opportunity_ids!=null)return false;
   if(run.provider!==action.provider||run.model!==action.model||(run.consents.model===true)!==action.modelConsent||(run.consents.inbox===true)!==action.inboxConsent||!run.snapshot.profile||!data.profile)return false;
   if(run.provider!=='rules'&&(run.consents.processingRoute??'direct')!==(action.processingRoute??'direct'))return false;
   const originals=new Set(run.snapshot.opportunities.map(item=>item.id));
@@ -266,6 +270,16 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
   const state:RunState={...run.data,lanes:[...(run.data.lanes??[])],messages:[...(run.data.messages??[])],packetIds:[...(run.data.packetIds??[])]};const profile=run.snapshot.profile;
   if(!profile){await repo.commit(run,run.phase,'blocked',{...state,nextAction:'Save a reviewed career record.'});return false;}
   try{
+    const selected = selectedRunOpportunities(run);
+    if(selected && run.phase===0){
+      state.lanes!.push(lane('Selected vacancies','completed',selected.length,'Only your saved selection will be considered. Inbox and discovery were not requested.'));
+      await repo.commit(run,1,'running',state);return true;
+    }
+    if(selected && run.phase===1){
+      state.reusedPacketIds=[];
+      state.opportunities=selected;state.opportunityIds=selected.map(item=>item.id);
+      await repo.commit(run,2,'running',state);return true;
+    }
     if(run.phase===0){
       if(run.consents.inbox&&gmailConfigured(env)){try{const inbox=await readRecruitmentInbox(repo,run.user_id,env,fetcher,run.lifecycle_generation);state.inbox=inbox.signals;state.lanes!.push(lane('Recruitment inbox','partial',inbox.signals.length,`Bounded seven-day metadata/snippet triage${inbox.truncated?'; additional or unread messages remain':''}. Role receipts are unconfirmed; no applied status was inferred. Contextual reply drafts and existing-thread replies remain manual in Gmail.`));}catch{state.lanes!.push(lane('Recruitment inbox','not_connected',0,'Mailbox read was unavailable. No inbox check is claimed.'));}}
       else state.lanes!.push(lane('Recruitment inbox',run.consents.inbox?'not_connected':'not_run',0,run.consents.inbox?'Mailbox access is not configured or connected.':'Mailbox processing was not requested.'));
@@ -302,10 +316,16 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
       await repo.commit(run,2,'running',state,[],newFound);return true;
     }
     if(run.phase>=2&&run.phase<=6){
-      const opportunity=state.opportunities?.[run.phase-2];if(!opportunity){await repo.commit(run,7,'running',state);return true;}
+      const opportunity=(selected?selectedPhaseOpportunities(selected,state):state.opportunities)?.[run.phase-2];if(!opportunity){await repo.commit(run,7,'running',state);return true;}
       const current=await repo.record(run.user_id);const actual=current.data.opportunities.find(item=>item.id===opportunity.id);
+      if(selected&&(!actual||actual.verification!==opportunity.verification||actual.source!==opportunity.source||actual.sourceKey!==opportunity.sourceKey||actual.sourceCheckId!==opportunity.sourceCheckId||await packetInputHash(profile,run.snapshot.claims,actual)!==await packetInputHash(profile,run.snapshot.claims,opportunity)))throw new ApiError(409,'LOOP_SELECTION_UNAVAILABLE','A chosen vacancy changed or was removed. Start a new request with the current source.');
       if(actual&&!['saved','prepared'].includes(actual.status)){state.messages!.push('An opportunity moved beyond preparation; its existing application history was preserved.');await repo.commit(run,run.phase+1,'running',state);return true;}
       if(opportunity.source!=='manual'&&!matchesDiscoveryTarget(profile,opportunity)){state.messages!.push('An automatically found vacancy does not match the declared target and stated constraints. It was kept in your history and skipped for preparation.');await repo.commit(run,run.phase+1,'running',state);return true;}
+      if(selected){
+        const hash=await packetInputHash(profile,run.snapshot.claims,opportunity);
+        const existing=(await repo.collections(run.user_id)).packets.find(item=>['review_required','approved'].includes(item.status)&&item.data.opportunityId===opportunity.id&&item.data.inputHash===hash);
+        if(existing){state.reusedPacketIds=[...new Set([...(state.reusedPacketIds??[]),existing.id])];state.messages!.push('An unchanged selected packet was retained without another preparation charge.');await repo.commit(run,run.phase+1,'running',state);return true;}
+      }
       const assessment=assessOpportunity(profile,run.snapshot.claims,opportunity);const allowed=eligibleLoopClaims(profile,run.snapshot.claims).filter(claim=>assessment.claimIds.includes(claim.id));let selectedClaimIds:string[]|undefined;let modelQuestions:{question:string;claimIds:string[]}[]=[];
       if(run.provider!=='rules'){
         if((modelConfiguration(run.provider,run.model,env).transport??'direct')!==(run.consents.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','The processing route changed after approval. No paid call was made; start again with explicit route consent.');

@@ -167,7 +167,8 @@
         "UX-02",
         "BACKEND-03"
       ],
-      "implementation_status": "partial: v29 exact vacancy source selection and recent-attempt review shipped; selected-vacancy server request identity, preparation and composition remain open"
+      "implementation_status": "partial: v29 exact vacancy source selection and recent-attempt review shipped; selected-vacancy server request identity, preparation and composition remain open",
+      "unpublished_work": "16 October: exact ordered selected-vacancy/generation SQL admission and snapshot-only worker foundation implemented; 20 new PGlite and 14 worker cases, full1553/102, TS,15source/15bundled Deno and12hosting groups passed. No selected client/control/UI caller; migration unapplied, bundles undeployed, native selected concurrency and independent review remain open. See ../2026-10-16-selected-preparation/ASSESSMENT.md. Publicv30 unchanged; per-application composition/grouped review and hosted first/second-task acceptance remain unfinished."
     },
     {
       "id": "JV-05",
