@@ -23,3 +23,7 @@ JV-03/04 remain partial. This release is the existing-record home and exact cont
 ## Rollback
 
 Saved v28 and tag `jobvance-before-applications-home-2026-10-15` at `09d2baecea84b2fcefa00cc77a15f3f50b2ce03b` preserve the previous frontend/source. Private before/after control sources are in the sibling repair-evidence directory. The additive control15 action remains compatible with the v28 frontend; frontend rollback does not require restoring handlers. Backend/file restore is separate and has not been rehearsed. Never restore older worker/handlers alone or remove lifecycle/path/tombstone fences. Production collection remains previously disabled; no fresh gate query is claimed for this release.
+
+## Published result
+
+Public version29 succeeded on15 October2026 at01:23:40 UTC /05:23 Dubai. Source `b753f4bf1c7085b6a7a87316e735248036f5fb88` is pushed to GitHub and Sites. [Exact release receipt](releases/2026-10-15-applications-home.json). All86 live HTTP checks matched expected application bytes/status/security headers. Hosted guest entry to an exact created check selector in Applications reached sign-in with that item preserved. Actual sign-in was not completed. The baseline and source rollback tag are retained.

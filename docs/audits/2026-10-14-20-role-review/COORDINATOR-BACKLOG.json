@@ -119,8 +119,8 @@
         "PA-03",
         "UX-01"
       ],
-      "implementation_status": "partial: v28 explicit saved-check to Loop local draft continuation shipped; shared application home and durable identity remain open",
-      "implementation_evidence": "../../CHECK-CONTINUATION-RELEASE-2026-10-15.md",
+      "implementation_status": "partial: v28 explicit check carryover and v29 private existing-record Applications home/exact source continuation shipped; new canonical relationships and hosted authenticated acceptance remain open",
+      "implementation_evidence": "../../APPLICATIONS-HOME-RELEASE-2026-10-15.md",
       "completed_within_validation_scope": [
         "Owner/auth-lifetime/generation-bound approved saved-check chooser and exact opaque auth return",
         "Reviewed final text default; original source requires separate choice",
@@ -129,10 +129,9 @@
         "1290 full-suite tests, TypeScript,12 hosting groups,83 live HTTP checks; independent bounded reviews"
       ],
       "remaining_acceptance": [
-        "Shared Applications home with side-effect-free existing-record reads; do not use initializing Loop GET passively",
-        "Additive idempotent exact check/pack/tracker relationships and adapters; do not merge by title/company",
-        "Hosted authenticated import/save and unassisted first/second applications",
-        "JV-04 exact chosen-opportunity run identity, preparation and per-application composition"
+        "Additive idempotent new saved-check/tracker/Loop relationships without title/company merging",
+        "Actual authenticated hosted home/import/save and unassisted first/second application",
+        "Pagination and exact retrieval beyond recent source bounds"
       ]
     },
     {
@@ -160,7 +159,8 @@
         "PA-02",
         "UX-02",
         "BACKEND-03"
-      ]
+      ],
+      "implementation_status": "partial: v29 exact vacancy source selection and recent-attempt review shipped; selected-vacancy server request identity, preparation and composition remain open"
     },
     {
       "id": "JV-05",
@@ -357,7 +357,7 @@
         "All three persona examples"
       ],
       "acceptance_criteria": [
-        "A metadata-only guest count can describe source\u00e2\u2020\u2019check\u00e2\u2020\u2019review\u00e2\u2020\u2019approved export action without CV text or sensitive URLs.",
+        "A metadata-only guest count can describe sourceâ†’checkâ†’reviewâ†’approved export action without CV text or sensitive URLs.",
         "Prepared request, received inquiry, admitted account and genuine research participant remain separate denominators.",
         "Scheduled runs cannot count as a voluntary human return; successful job-search exit is distinguished from harmful dropout.",
         "First/repeat task records include active minutes, assistance, corrections, usefulness and non-completion reason.",
@@ -462,7 +462,7 @@
       "acceptance_criteria": [
         "Each intended participant has an actual vacancy, existing CV/project evidence, available review time and a segment/source record.",
         "Coach relevance, current service verification and willingness to introduce remain separate fields; unknowns stay unknown.",
-        "Request reception\u00e2\u2020\u2019acknowledgement\u00e2\u2020\u2019admission\u00e2\u2020\u2019agreed task is rehearsed with fictional data.",
+        "Request receptionâ†’acknowledgementâ†’admissionâ†’agreed task is rehearsed with fictional data.",
         "Ten participants are not promised ten additional cloud seats or an automaticUS$5entitlement.",
         "A named owner/back-up checks both support queues and handles public exposed-data/inaccurate-claim concerns.",
         "No invitations, followups, ads or messages are sent by this audit; founder research/support time is separately budgeted."

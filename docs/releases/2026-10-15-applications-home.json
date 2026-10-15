@@ -1,0 +1,84 @@
+{
+  "site": "https://jobvance.io",
+  "sourceCommit": "b753f4bf1c7085b6a7a87316e735248036f5fb88",
+  "version": 29,
+  "savedVersion": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7468c7b72a488191b471c30ab945e95c",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 29,
+    "source": {
+      "commit_sha": "b753f4bf1c7085b6a7a87316e735248036f5fb88"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000f3f4820884e0ee06f0a9332a",
+      "content_hash": "sha256:beba388bf02870ac34b3c4e60db9fe2b19f167990eabb8253f2dde4cdae8f2fb",
+      "size_bytes": 14510080,
+      "file_count": 124
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad02b002f288191bdabb66bc1c9b30b",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7468c7b72a488191b471c30ab945e95c",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-15T01:23:40.196514+00:00"
+  },
+  "validation": {
+    "vitest": {
+      "tests": 1372,
+      "passed": 1372,
+      "files": 95
+    },
+    "typescript": "passed",
+    "hostingCheckGroups": 12,
+    "liveHttpChecks": 86,
+    "liveHttpFailures": 0,
+    "denoSourceCases": 13,
+    "denoGeneratedCases": 13,
+    "independentReviewCases": 102,
+    "compressedWorkerBytes": 2787547
+  },
+  "backend": {
+    "control": {
+      "version": 15,
+      "status": "ACTIVE",
+      "sourceReadbackMatches": true,
+      "sha256": "c74ab7f7c8b40747efa9bde41825d0afebff1f8cb67ce15891e654321e3bb6b9",
+      "unauthenticatedExistingReadStatus": 401
+    },
+    "worker": {
+      "version": 11,
+      "changed": false
+    },
+    "oauth": {
+      "version": 5,
+      "changed": false
+    },
+    "migrationsApplied": [],
+    "collectionGate": "unchanged; last actual readback v26 disabled with empty owner allowlist"
+  },
+  "rollback": {
+    "sourceTag": "jobvance-before-applications-home-2026-10-15",
+    "sourceCommit": "09d2baecea84b2fcefa00cc77a15f3f50b2ce03b",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_77a3a87c5584819197bb57b9a00ff062"
+  },
+  "limitations": [
+    "Authenticated hosted home/source loading and source continuation not newly tested; isolated created fixtures only.",
+    "Actual guest auth routing preserves exact home item selector; no signup/OAuth completed.",
+    "Canonical new check/tracker/Loop links and selected-vacancy preparation remain incomplete.",
+    "Recent Loop snapshot has150 packet/30 run bounds; not a complete historical archive.",
+    "No real candidate mutation, paid AI/search call, automatic collection activation or outreach.",
+    "No new customer score, unassisted acceptance or coordinated backend/file restore claim."
+  ]
+}
