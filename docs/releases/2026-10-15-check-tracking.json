@@ -1,0 +1,68 @@
+{
+  "site": "https://jobvance.io",
+  "sourceCommit": "7a53f31325eb6395d720b76f38a79152f9745677",
+  "version": 30,
+  "savedVersion": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f1cd7b344a6481918edd5d7a0e62a915",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 30,
+    "source": {
+      "commit_sha": "7a53f31325eb6395d720b76f38a79152f9745677"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000285481f48d2c447bf056002d",
+      "content_hash": "sha256:51a409bc5287c400e8c42fcfe55f2953d76bb4d3b0f5d5c2e66ee45fe8da122a",
+      "size_bytes": 14520320,
+      "file_count": 125
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad07deeb01881919a3ba8c4991c807c",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f1cd7b344a6481918edd5d7a0e62a915",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-15T07:17:25.828487+00:00"
+  },
+  "migration": {
+    "name": "cv_check_tracking_link",
+    "appliedVersion": "20261015071201",
+    "localFile": "supabase/migrations/20261015041519_cv_check_tracking_link.sql",
+    "readback": "../jobvance-repair-evidence/check-tracking-after-schema.json"
+  },
+  "validation": {
+    "vitest": {
+      "passed": 1412,
+      "files": 98,
+      "newCases": 40
+    },
+    "typescript": true,
+    "hostingGroups": 12,
+    "nativePostgresGroups": 5,
+    "liveHttpChecks": 87,
+    "liveFailures": 0,
+    "compressedWorkerBytes": 2789054
+  },
+  "rollback": {
+    "tag": "jobvance-before-check-tracking-2026-10-15",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7468c7b72a488191b471c30ab945e95c",
+    "note": "Interface rollback preserves additive check-link schema; source rollback is not database/file restore."
+  },
+  "limitations": [
+    "No production candidate was mutated or deleted by testing.",
+    "Authenticated hosted check tracking/save, signup/OAuth and unassisted journeys remain unverified.",
+    "Three agents contributed; usage limits interrupted later agent turns. Only recorded tests/source reviews are claimed.",
+    "Check-to-Loop persisted identity and selected-vacancy scoped preparation remain open.",
+    "Edge control15/worker11/OAuth5 unchanged; GC configuration not freshly queried."
+  ]
+}

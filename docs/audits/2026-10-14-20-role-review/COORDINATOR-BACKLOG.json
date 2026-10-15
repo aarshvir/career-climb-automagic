@@ -132,7 +132,13 @@
         "Additive idempotent new saved-check/tracker/Loop relationships without title/company merging",
         "Actual authenticated hosted home/import/save and unassisted first/second application",
         "Pagination and exact retrieval beyond recent source bounds"
-      ]
+      ],
+      "check_tracking_v30": {
+        "status": "partial",
+        "evidence": "docs/releases/2026-10-15-check-tracking.json",
+        "implemented": "Owner-checked unique saved-check/tracker relationship, retry-safe progress preservation and home grouping. No guessed historical merges.",
+        "remaining": "Persisted check-to-Loop relationship; full canonical repeated application workflow and authenticated hosted acceptance."
+      }
     },
     {
       "id": "JV-04",

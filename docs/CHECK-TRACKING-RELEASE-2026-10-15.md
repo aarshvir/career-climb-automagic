@@ -1,6 +1,6 @@
 # Saved-check tracking release — 15 October 2026
 
-Prepared from v29 with rollback tag `jobvance-before-check-tracking-2026-10-15`. Exact source, saved artifact, public version, deployment and HTTP readback are recorded separately in `docs/releases/2026-10-15-check-tracking.json` after successful publication.
+Published as **v30** on https://jobvance.io at15 October2026 07:17UTC /11:17Dubai, source `7a53f31325eb6395d720b76f38a79152f9745677`. All87 live HTTP byte/header checks passed. Prepared from v29 with rollback tag `jobvance-before-check-tracking-2026-10-15`. Exact source, saved artifact, public version, deployment and HTTP readback are recorded separately in `docs/releases/2026-10-15-check-tracking.json` with successful publication.
 
 The reviewed CV and its application progress now share an exact relationship. The candidate explicitly saves the check, then chooses **Track this saved check**. Retrying returns existing progress, without duplicate tracking or overwriting notes/status. Applications groups only this verified relationship; old manual entries stay independent. Optional tracking does not block local downloads or implicitly save CV text.
 
