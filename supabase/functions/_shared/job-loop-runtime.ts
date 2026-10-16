@@ -9,6 +9,7 @@ import { beginGmail, createGmailDraft, gmailConfigured, readRecruitmentInbox,pre
 import type { LoopAction, LoopClaim, LoopLane, LoopOpportunity, LoopResponse, LoopSnapshot } from './job-loop-types.ts';
 import { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
 import { generationBoundAction } from './job-loop-request.ts';
+import { selectedRunOpportunities, selectedPhaseOpportunities } from './job-loop-selection.ts';
 export { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
 
 export function validateControlInput(value: unknown): LoopAction {
@@ -34,6 +35,9 @@ export async function candidatePreparationHash(data:CareerRecord):Promise<string
 type PreparationChoices=Pick<Extract<LoopAction,{action:'start_run'}>,'provider'|'model'|'modelConsent'|'inboxConsent'|'processingRoute'>;
 export async function preparationRequestHash(data:CareerRecord,choices:PreparationChoices):Promise<string>{return digest(JSON.stringify([choices.provider,choices.model,choices.modelConsent,choices.inboxConsent,await candidatePreparationHash(data),...(choices.provider==='rules'?[]:[choices.processingRoute??'direct'])]));}
 export async function canReplayPreparation(run:RunRow,data:CareerRecord,action:PreparationChoices):Promise<boolean>{
+  // The existing action is discovery-wide. An explicit-selection request must
+  // never be adopted by it; the selected control contract is a separate gate.
+  if(run.selected_opportunity_ids!=null)return false;
   if(run.provider!==action.provider||run.model!==action.model||(run.consents.model===true)!==action.modelConsent||(run.consents.inbox===true)!==action.inboxConsent||!run.snapshot.profile||!data.profile)return false;
   if(run.provider!=='rules'&&(run.consents.processingRoute??'direct')!==(action.processingRoute??'direct'))return false;
   const originals=new Set(run.snapshot.opportunities.map(item=>item.id));
@@ -42,6 +46,18 @@ export async function canReplayPreparation(run:RunRow,data:CareerRecord,action:P
   // original vacancy must still have the same actual source facts, including
   // original automatically found vacancies; deletions and edits cannot hide.
   return await candidatePreparationHash(run.snapshot)===await candidatePreparationHash({...data,opportunities:data.opportunities.filter(item=>originals.has(item.id))});
+}
+type SelectedChoices=Extract<LoopAction,{action:'start_selected_run'}>;
+export async function selectedPreparationHashes(data:CareerRecord,action:SelectedChoices):Promise<{inputHash:string;requestHash:string}>{
+  if(!data.profile)throw new ApiError(422,'LOOP_PROFILE_REQUIRED','Save a reviewed profile before starting.');
+  const vacancies=action.opportunityIds.map(id=>{
+    const matches=data.opportunities.filter(item=>item.id===id);
+    if(matches.length!==1)throw new ApiError(409,'LOOP_SELECTION_UNAVAILABLE','A selected vacancy is unavailable. Refresh your selection.');
+    const o=matches[0];return {id:o.id,title:o.title,company:o.company,location:o.location,url:o.url,description:o.description,contact:o.contact,source:o.source,sourceKey:o.sourceKey,sourceCheckId:o.sourceCheckId??null,verification:o.verification};
+  });
+  const inputHash=await fingerprintLoopInputs(data.profile,data.claims,vacancies);
+  const requestHash=await digest(JSON.stringify(['selected-v1',action.expectedGeneration,action.opportunityIds,action.provider,action.model,action.modelConsent,action.processingRoute??null,inputHash]));
+  return {inputHash,requestHash};
 }
 export async function constantTimeEqual(left:string,right:string):Promise<boolean> {
   const [a,b]=await Promise.all([crypto.subtle.digest('SHA-256',new TextEncoder().encode(left)),crypto.subtle.digest('SHA-256',new TextEncoder().encode(right))]);
@@ -102,6 +118,7 @@ export async function getExistingLoopSnapshot(repo:LoopRepository,userId:string,
   return {existingState:'active',snapshot};
 }
 export async function controlLoop(repo:LoopRepository,userId:string,action:LoopAction,env:LoopEnv,fetcher:LoopFetch=fetch):Promise<LoopResponse> {
+  if(action.action==='start_selected_run')action=validateControlInput(structuredClone(action));
   if(action.action==='get_existing')return getExistingLoopSnapshot(repo,userId,env);
   if(action.action==='get'){
     const lifecycle=await repo.erasureStatus(userId);
@@ -157,10 +174,24 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     if(!data.claims.some(claim=>claim.id===action.id))throw new ApiError(404,'LOOP_NOT_FOUND','That claim is unavailable.');
     data.claims=data.claims.map(claim=>claim.id===action.id?{...claim,status:'withdrawn',shareable:false,confirmed:false,revision:claim.revision+1}:claim);await repo.write(userId,action.expectedVersion,data,true);return finish('Claim withdrawn. Fresh outputs cannot reuse it.');
   }
+  if(action.action==='link_saved_check'){
+    // Validate again at the business boundary; no direct read/write pair may
+    // replace the atomic owner/generation/source-checked database operation.
+    const input=validateControlInput(action);
+    if(input.action!=='link_saved_check')throw new ApiError(400,'LOOP_INVALID_ACTION','Choose a saved check.');
+    const linked=await repo.linkSavedCheck(userId,input.expectedGeneration!,input.expectedVersion,input.checkId,input.opportunity,input.linkConsent);
+    const snapshot=await getLoopSnapshot(repo,userId,env,input.expectedGeneration);
+    const matches=snapshot.opportunities.filter(item=>item.sourceCheckId===input.checkId);
+    if(matches.length!==1||matches[0].id!==linked.opportunityId||matches[0].source!=='manual'||matches[0].sourceKey!==`saved-check:${input.checkId}`)
+      throw new ApiError(409,'LOOP_CHECK_LINK_CONFLICT','The linked vacancy changed before it could be confirmed. Refresh Applications before continuing.');
+    return {snapshot,checkLink:{checkId:input.checkId,...linked},message:linked.reused
+      ?'This saved check already has a linked vacancy. Its current details and application progress were kept.'
+      :'Vacancy saved and linked to this check. Review your career facts before preparing documents.'};
+  }
   if(action.action==='add_opportunity'){
     if(data.opportunities.length>=100)throw new ApiError(422,'LOOP_RECORD_LIMIT','This pilot supports up to 100 opportunities.');const input=validateOpportunity(action.opportunity);
     const sourceKey=input.url?`url:${await digest(safePublicUrl(input.url)??input.url)}`:`manual:${await digest(JSON.stringify([input.company,input.title,input.location,input.description]))}`;
-    const existing=data.opportunities.find(item=>item.sourceKey===sourceKey);let changed=false;
+    const existing=data.opportunities.find(item=>!item.sourceCheckId&&item.sourceKey===sourceKey);let changed=false;
     if(existing){changed=JSON.stringify([existing.title,existing.company,existing.location,existing.description,existing.contact,existing.source])!==JSON.stringify([input.title,input.company,input.location,input.description,input.contact,'manual']);data.opportunities=data.opportunities.map(item=>item.id===existing.id?{...item,...input,source:'manual',verification:'user_provided',checkedAt:new Date().toISOString()}:item);}
     else data.opportunities.push({...input,id:crypto.randomUUID(),source:'manual',sourceKey,checkedAt:new Date().toISOString(),verification:'user_provided',status:'saved',notes:'',followUpAt:null});
     await repo.write(userId,action.expectedVersion,data,changed);return finish(existing?'The opportunity source was updated from your reviewed text; application history was retained.':'Opportunity saved as user-provided text.');
@@ -168,6 +199,28 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
   if(action.action==='update_opportunity'){
     if(!data.opportunities.some(item=>item.id===action.id))throw new ApiError(404,'LOOP_NOT_FOUND','That opportunity is unavailable.');
     data.opportunities=data.opportunities.map(item=>item.id===action.id?{...item,status:action.status,notes:action.notes,followUpAt:action.followUpAt}:item);await repo.write(userId,action.expectedVersion,data,false);return finish('Application progress updated from your report.');
+  }
+  if(action.action==='start_selected_run'){
+    configuredUsageCap(env);
+    if(!workerEnabled(env))throw new ApiError(503,'LOOP_DISABLED','Cloud runs are disabled.');
+    const hashes=await selectedPreparationHashes(data,action),existing=await repo.requestRun(userId,action.requestId);
+    const consents={model:action.modelConsent,inbox:false,...(action.provider!=='rules'?{processingRoute:action.processingRoute??'direct'}:{})};
+    const matches=(run:RunRow)=>run.user_id===userId&&run.request_id===action.requestId&&run.selected_generation===action.expectedGeneration&&JSON.stringify(run.selected_opportunity_ids)===JSON.stringify(action.opportunityIds)&&run.request_hash===hashes.requestHash&&run.input_hash===hashes.inputHash&&run.provider===action.provider&&run.model===action.model&&run.consents.model===consents.model&&run.consents.inbox===false&&(run.consents.processingRoute??null)===(consents.processingRoute??null);
+    if(existing&&!matches(existing))throw new ApiError(409,'LOOP_REQUEST_CONFLICT','This request belongs to different selected vacancies, source facts or processing choices. Start a new request.');
+    if(!existing){
+      if(row.version!==action.expectedVersion)throw new ApiError(409,'LOOP_VERSION_CONFLICT','Saved work changed. Refresh and review your selection.');
+      if(!eligibleLoopClaims(data.profile!,data.claims).length)throw new ApiError(422,'LOOP_CLAIMS_REQUIRED','Confirm and allow sharing of at least one source-backed claim first.');
+      for(const id of action.opportunityIds){const o=data.opportunities.find(item=>item.id===id)!;if(!['saved','prepared'].includes(o.status)||o.verification==='closed_confirmed')throw new ApiError(409,'LOOP_SELECTION_UNAVAILABLE','A chosen vacancy is no longer available for preparation.');}
+      if(action.provider==='rules'){if(action.model!==RULES_MODEL)throw new ApiError(400,'LOOP_MODEL_INVALID','Choose the current rules preparation method.');}
+      else{const config=modelConfiguration(action.provider,action.model,env);if((config.transport??'direct')!==(action.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','Review the current provider route before starting.');}
+    }
+    // Always enter the atomic bound routine, including retries, so lifecycle
+    // changes after the initial read cannot dispatch an old request.
+    const run=await repo.rpc<RunRow>('job_loop_start_selected_run_bound',{p_user:userId,p_generation:action.expectedGeneration,p_request:action.requestId,p_request_hash:hashes.requestHash,p_input_hash:hashes.inputHash,p_expected:action.expectedVersion,p_provider:action.provider,p_model:action.model,p_consents:consents,p_selected:action.opportunityIds});
+    if(!matches(run))throw new ApiError(409,'LOOP_SELECTION_INVALID','The saved preparation selection could not be confirmed. Retry the same request after refreshing.');
+    let message=existing?'The same selected preparation is already saved; its progress was retained.':'Preparation saved for your selected vacancies only.';
+    try{if(['queued','running'].includes(run.status))await dispatchWorker(run.id,env,fetcher);}catch{message='The selected preparation is saved. Resume this same run when the worker is available.';}
+    return {...await finish(message),runId:run.id,selectedRun:{requestId:action.requestId,runId:run.id,generation:action.expectedGeneration!,opportunityIds:[...action.opportunityIds]}};
   }
   if(action.action==='start_run'){
     configuredUsageCap(env);
@@ -252,6 +305,16 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
   const state:RunState={...run.data,lanes:[...(run.data.lanes??[])],messages:[...(run.data.messages??[])],packetIds:[...(run.data.packetIds??[])]};const profile=run.snapshot.profile;
   if(!profile){await repo.commit(run,run.phase,'blocked',{...state,nextAction:'Save a reviewed career record.'});return false;}
   try{
+    const selected = selectedRunOpportunities(run);
+    if(selected && run.phase===0){
+      state.lanes!.push(lane('Selected vacancies','completed',selected.length,'Only your saved selection will be considered. Inbox and discovery were not requested.'));
+      await repo.commit(run,1,'running',state);return true;
+    }
+    if(selected && run.phase===1){
+      state.reusedPacketIds=[];
+      state.opportunities=selected;state.opportunityIds=selected.map(item=>item.id);
+      await repo.commit(run,2,'running',state);return true;
+    }
     if(run.phase===0){
       if(run.consents.inbox&&gmailConfigured(env)){try{const inbox=await readRecruitmentInbox(repo,run.user_id,env,fetcher,run.lifecycle_generation);state.inbox=inbox.signals;state.lanes!.push(lane('Recruitment inbox','partial',inbox.signals.length,`Bounded seven-day metadata/snippet triage${inbox.truncated?'; additional or unread messages remain':''}. Role receipts are unconfirmed; no applied status was inferred. Contextual reply drafts and existing-thread replies remain manual in Gmail.`));}catch{state.lanes!.push(lane('Recruitment inbox','not_connected',0,'Mailbox read was unavailable. No inbox check is claimed.'));}}
       else state.lanes!.push(lane('Recruitment inbox',run.consents.inbox?'not_connected':'not_run',0,run.consents.inbox?'Mailbox access is not configured or connected.':'Mailbox processing was not requested.'));
@@ -288,10 +351,16 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
       await repo.commit(run,2,'running',state,[],newFound);return true;
     }
     if(run.phase>=2&&run.phase<=6){
-      const opportunity=state.opportunities?.[run.phase-2];if(!opportunity){await repo.commit(run,7,'running',state);return true;}
+      const opportunity=(selected?selectedPhaseOpportunities(selected,state):state.opportunities)?.[run.phase-2];if(!opportunity){await repo.commit(run,7,'running',state);return true;}
       const current=await repo.record(run.user_id);const actual=current.data.opportunities.find(item=>item.id===opportunity.id);
+      if(selected&&(!actual||actual.verification!==opportunity.verification||actual.source!==opportunity.source||actual.sourceKey!==opportunity.sourceKey||actual.sourceCheckId!==opportunity.sourceCheckId||await packetInputHash(profile,run.snapshot.claims,actual)!==await packetInputHash(profile,run.snapshot.claims,opportunity)))throw new ApiError(409,'LOOP_SELECTION_UNAVAILABLE','A chosen vacancy changed or was removed. Start a new request with the current source.');
       if(actual&&!['saved','prepared'].includes(actual.status)){state.messages!.push('An opportunity moved beyond preparation; its existing application history was preserved.');await repo.commit(run,run.phase+1,'running',state);return true;}
       if(opportunity.source!=='manual'&&!matchesDiscoveryTarget(profile,opportunity)){state.messages!.push('An automatically found vacancy does not match the declared target and stated constraints. It was kept in your history and skipped for preparation.');await repo.commit(run,run.phase+1,'running',state);return true;}
+      if(selected){
+        const hash=await packetInputHash(profile,run.snapshot.claims,opportunity);
+        const existing=(await repo.collections(run.user_id)).packets.find(item=>['review_required','approved'].includes(item.status)&&item.data.opportunityId===opportunity.id&&item.data.inputHash===hash);
+        if(existing){state.reusedPacketIds=[...new Set([...(state.reusedPacketIds??[]),existing.id])];state.messages!.push('An unchanged selected packet was retained without another preparation charge.');await repo.commit(run,run.phase+1,'running',state);return true;}
+      }
       const assessment=assessOpportunity(profile,run.snapshot.claims,opportunity);const allowed=eligibleLoopClaims(profile,run.snapshot.claims).filter(claim=>assessment.claimIds.includes(claim.id));let selectedClaimIds:string[]|undefined;let modelQuestions:{question:string;claimIds:string[]}[]=[];
       if(run.provider!=='rules'){
         if((modelConfiguration(run.provider,run.model,env).transport??'direct')!==(run.consents.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','The processing route changed after approval. No paid call was made; start again with explicit route consent.');

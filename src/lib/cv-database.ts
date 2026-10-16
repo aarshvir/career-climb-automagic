@@ -34,6 +34,8 @@ export type TrackedApplication = {
   id: string;
   user_id: string;
   pack_id: string | null;
+  /** Absent only in legacy cached rows created before the additive link migration. */
+  cv_check_id?: string | null;
   job_title: string;
   company: string;
   job_url: string | null;
@@ -69,7 +71,9 @@ export type MvpDatabase = {
       }>;
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      track_cv_check: { Args: { p_cv_check_id: string }; Returns: TrackedApplication[] };
+    };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
   };

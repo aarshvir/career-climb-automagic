@@ -132,7 +132,14 @@
         "Additive idempotent new saved-check/tracker/Loop relationships without title/company merging",
         "Actual authenticated hosted home/import/save and unassisted first/second application",
         "Pagination and exact retrieval beyond recent source bounds"
-      ]
+      ],
+      "check_tracking_v30": {
+        "status": "partial",
+        "evidence": "docs/releases/2026-10-15-check-tracking.json",
+        "implemented": "Owner-checked unique saved-check/tracker relationship, retry-safe progress preservation and home grouping. No guessed historical merges.",
+        "remaining": "Persisted check-to-Loop relationship; full canonical repeated application workflow and authenticated hosted acceptance."
+      },
+      "unpublished_work": "15 October: SQL/client/control contract, exact home grouping and consented import/save UI exist in source. Exact owner/auth/generation-bound provenance survives profile save, undo and recovery; changed-source choices and delayed/batched-save protection implemented. 1519 tests/101 files and TypeScript pass; final build/hosting receipt in ../2026-10-15-check-loop-link/import-verification.json. Isolated desktop/mobile first/second links and repeat save observed. Migration unapplied, control/site undeployed; independent review, hosted acceptance and coordinated exposure remain. Public v30 unchanged."
     },
     {
       "id": "JV-04",
@@ -160,7 +167,8 @@
         "UX-02",
         "BACKEND-03"
       ],
-      "implementation_status": "partial: v29 exact vacancy source selection and recent-attempt review shipped; selected-vacancy server request identity, preparation and composition remain open"
+      "implementation_status": "partial: v29 exact vacancy source selection and recent-attempt review shipped; selected-vacancy server request identity, preparation and composition remain open",
+      "unpublished_work": "16 October: deliberate exact one/two-vacancy UI now calls the existing selected contract with fresh consent, owner/auth/generation-bound direct choice, stable page-memory retry, stale-result guards and honest returned scope. All1630/105 and TS pass; ui-verification.json records build/hosting. Isolated desktop/mobile adapter request receipts are not actual worker/export or hosted acceptance. Both migrations unapplied, handlers/site undeployed. Subsequent native PostgreSQL verification passed nine selected-admission race groups, plus six existing link and five tracker groups; see selected-preparation/NATIVE-ADMISSION.md. Full-navigation retry recovery, actual first/second worker/export tasks, independent review, coordinated release and composition/grouped review remain open. Publicv30 unchanged."
     },
     {
       "id": "JV-05",

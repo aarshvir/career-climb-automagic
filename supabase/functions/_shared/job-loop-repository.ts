@@ -1,6 +1,6 @@
 import { ApiError } from './core.ts';
 import type { adminClient } from './runtime.ts';
-import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
+import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
 import { digest } from './job-loop-providers.ts';
 import { eraseLoopArtifacts } from './job-loop-erasure.ts';
 import { validLoopGeneration } from './job-loop-request.ts';
@@ -10,12 +10,20 @@ export type LoopAdmin = ReturnType<typeof adminClient>;
 export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
 export interface RecordRow { user_id: string; version: number; input_version: number; lifecycle_generation?: number; data: CareerRecord; updated_at: string }
 export interface LifecycleRow { user_id: string; state: 'active' | 'erasing' | 'erased'; generation: number }
-export interface RunRow { id: string; user_id: string; request_id: string; request_hash: string; input_hash: string; input_version: number; lifecycle_generation?: number; snapshot: CareerRecord; provider: LoopRun['provider']; model: string; consents: { model: boolean; inbox: boolean; processingRoute?: 'direct' | 'openrouter' }; data: RunState; status: LoopRun['status']; phase: number; lease_token: string | null; lease_until: string | null; created_at: string; finished_at: string | null }
+export interface RunRow { id: string; user_id: string; request_id: string; request_hash: string; input_hash: string; input_version: number; lifecycle_generation?: number; selected_opportunity_ids?: string[] | null; selected_generation?: number | null; snapshot: CareerRecord; provider: LoopRun['provider']; model: string; consents: { model: boolean; inbox: boolean; processingRoute?: 'direct' | 'openrouter' }; data: RunState; status: LoopRun['status']; phase: number; lease_token: string | null; lease_until: string | null; created_at: string; finished_at: string | null }
 export interface RunState { lanes?: LoopRun['lanes']; messages?: string[]; nextAction?: string; opportunityIds?: string[]; packetIds?: string[]; reusedPacketIds?:string[]; opportunities?: LoopOpportunity[]; inbox?: LoopInboxSignal[] }
 export interface UsageRow { id: string; reserved_micros: number; actual_micros: number | null; status: 'reserved' | 'settled' | 'uncertain'; result: unknown; is_new: boolean }
 export interface PacketRow { id: string; user_id: string; input_version: number; status: LoopPacket['status']; data: LoopPacket }
 export interface ScheduleRow { user_id:string;version:number;status:LoopSchedule['status'];settings:LoopScheduleInput;next_run_at:string|null;lease_token:string|null;lease_until:string|null;last_run_id:string|null;last_attempt_at:string|null;message:string }
 const ERRORS: [string, number, string][] = [
+  ['LOOP_CHECK_LINK_CONSENT',400,'Choose to save this vacancy linked to the saved check.'],
+  ['LOOP_CHECK_UNAVAILABLE',404,'This saved check is no longer available in your account. Reopen your saved checks before continuing.'],
+  ['LOOP_CHECK_SOURCE_CHANGED',409,'The vacancy differs from the saved check. Restore its vacancy text or deliberately save a separate vacancy.'],
+  ['LOOP_CHECK_LINK_CONFLICT',409,'This saved check has conflicting vacancy links. Refresh Applications before continuing.'],
+  ['LOOP_CHECK_LINK_INVALID',422,'Review the saved check and vacancy details before linking them.'],
+  ['LOOP_OPPORTUNITY_LIMIT',422,'This pilot supports up to 100 opportunities.'],
+  ['LOOP_SELECTION_INVALID',409,'The saved vacancy selection could not be confirmed. Refresh and review the chosen vacancies.'],
+  ['LOOP_SELECTION_UNAVAILABLE',409,'A chosen vacancy is unavailable. Refresh and review your selection.'],
   ['LOOP_VERSION_CONFLICT',409,'Your record changed. Refresh it before saving.'],['LOOP_REQUEST_CONFLICT',409,'This request reference belongs to different inputs.'],
   ['LOOP_DAILY_LIMIT',429,'This free pilot permits three new runs per account per UTC day, including corrective rebuilds. Resume an existing run instead.'],['LOOP_ACTIVE_RUN',409,'An active run already exists. Resume or cancel it before starting another.'],['LOOP_BUDGET_LIMIT',429,'The shared monthly AI/search usage limit has been reached.'],
   ['LOOP_STALE_INPUT',409,'The record changed. Confirm the current facts and build a new packet.'],['LOOP_LEASE_LOST',409,'This stage was cancelled or claimed by another worker.'],
@@ -69,6 +77,19 @@ export class LoopRepository {
   }
   erasureStatus(userId:string) { return this.rpc<{state:'active'|'erasing'|'erased';generation:number}>('job_loop_erasure_status',{p_user:userId}); }
   write(userId: string, expected: number, data: CareerRecord, inputsChanged: boolean) { return this.rpc<RecordRow>('job_loop_write_record',{ p_user:userId,p_expected:expected,p_data:data,p_inputs_changed:inputsChanged }); }
+  async linkSavedCheck(userId: string, generation: number, expected: number, checkId: string, opportunity: LoopOpportunityInput, linkConsent: boolean) {
+    const result = await this.rpc<{ record: RecordRow; opportunityId: string; reused: boolean }>('job_loop_link_saved_check', {
+      p_user: userId, p_generation: generation, p_expected: expected, p_check: checkId, p_opportunity: opportunity, p_link_consent: linkConsent,
+    });
+    const opportunities = result?.record?.data?.opportunities;
+    const matches = Array.isArray(opportunities) ? opportunities.filter(item => item?.sourceCheckId === checkId) : [];
+    if (result?.record?.user_id !== userId || typeof result?.reused !== 'boolean' || typeof result?.opportunityId !== 'string'
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(result.opportunityId) || matches.length !== 1
+      || matches[0].id !== result.opportunityId || matches[0].source !== 'manual' || matches[0].sourceKey !== `saved-check:${checkId}`) {
+      throw new ApiError(503,'LOOP_CHECK_LINK_INVALID','The saved vacancy link could not be confirmed. Retry the same saved check after refreshing.');
+    }
+    return { opportunityId: result.opportunityId, reused: result.reused };
+  }
   async run(userId: string, id: string): Promise<RunRow> {
     const { data,error } = await this.admin.from('job_loop_runs').select('*').eq('user_id',userId).eq('id',id).maybeSingle(); loopDatabaseError(error); if (!data) throw new ApiError(404,'LOOP_NOT_FOUND','That run is unavailable in your account.'); return data as RunRow;
   }
@@ -132,5 +153,5 @@ export function publicSchedule(row:ScheduleRow):LoopSchedule{return {...row.sett
 
 export function publicRun(row: RunRow, usage: {run_id:string;reserved_micros:number;actual_micros:number|null;status:string}[]): LoopRun {
   const owned=usage.filter(item=>item.run_id===row.id);
-  return {id:row.id,requestId:row.request_id,status:row.status,phase:['inbox','discovery','prepare_1','prepare_2','prepare_3','prepare_4','prepare_5','report'][row.phase] ?? 'report',startedAt:row.created_at,finishedAt:row.finished_at,inputHash:row.input_hash,provider:row.provider,model:row.model,lanes:row.data.lanes??[],messages:row.data.messages??[],nextAction:row.data.nextAction??'This run is awaiting its next background stage.',opportunityIds:row.data.opportunityIds??[],packetIds:row.data.packetIds??[],reservedUsd:owned.filter(item=>item.status!=='settled').reduce((sum,item)=>sum+Number(item.reserved_micros),0)/1000000,usageUsd:owned.reduce((sum,item)=>sum+Number(item.actual_micros??0),0)/1000000};
+  return {...(row.selected_opportunity_ids!=null?{selection:{generation:row.selected_generation!,opportunityIds:[...row.selected_opportunity_ids]}}:{}),id:row.id,requestId:row.request_id,status:row.status,phase:(row.selected_opportunity_ids!=null&&row.phase<2?'selection':['inbox','discovery','prepare_1','prepare_2','prepare_3','prepare_4','prepare_5','report'][row.phase] ?? 'report'),startedAt:row.created_at,finishedAt:row.finished_at,inputHash:row.input_hash,provider:row.provider,model:row.model,lanes:row.data.lanes??[],messages:row.data.messages??[],nextAction:row.data.nextAction??'This run is awaiting its next background stage.',opportunityIds:row.data.opportunityIds??[],packetIds:row.data.packetIds??[],reservedUsd:owned.filter(item=>item.status!=='settled').reduce((sum,item)=>sum+Number(item.reserved_micros),0)/1000000,usageUsd:owned.reduce((sum,item)=>sum+Number(item.actual_micros??0),0)/1000000};
 }

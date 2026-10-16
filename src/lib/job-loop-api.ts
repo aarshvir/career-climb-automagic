@@ -4,6 +4,7 @@ import { readAuthSession } from '@/utils/authSession';
 import { listCvDocuments } from '@/lib/cv-documents';
 import { safeDocumentFilename } from '@/lib/document-download';
 import { LoopServiceError } from './loop-service-error';
+import { trackingDraftAuthority } from './tracking-draft-memory';
 import { generationBoundAction, validLoopGeneration } from '../../supabase/functions/_shared/job-loop-request';
 export { boundLoopAction } from '../../supabase/functions/_shared/job-loop-request';
 import type { LoopAction, LoopResponse } from '../../supabase/functions/_shared/job-loop-types';
@@ -25,13 +26,15 @@ const contactSchema = z.object({ name: short, title: short, email: short, source
 const opportunitySchema = z.object({ title: short, company: short, location: short, url: z.string().max(2000), description: text, contact: contactSchema.nullable() });
 const scheduleSchema=z.object({cadence:z.enum(['daily','weekdays','weekly']),timezone:z.string().min(1).max(100),localTime:z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/),weeklyDay:z.number().int().min(0).max(6).nullable(),provider:z.union([provider,z.literal('rules')]),model:short,modelConsent:z.boolean(),inboxConsent:z.boolean()});
 const laneSchema = z.object({ name: short, status: z.enum(['completed', 'partial', 'blocked', 'not_connected', 'not_run']), count: z.number().int().nonnegative(), checkedAt: short, message: text });
+const selectedIds=z.array(z.string().uuid().transform(value=>value.toLowerCase())).min(1).max(2).refine(ids=>new Set(ids).size===ids.length);
+const selectionSchema=z.object({generation:z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),opportunityIds:selectedIds}).strict();
 const snapshotSchema = z.object({
   lifecycleGeneration: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional(),
   recordVersion: z.number().int().nonnegative(), profile: profileSchema.extend({ revision: z.number().int().nonnegative(), updatedAt: short }).nullable(),
   claims: z.array(claimSchema.extend({ id, revision: z.number().int().nonnegative(), status: z.enum(['active', 'withdrawn']), createdAt: short })).max(1000),
-  opportunities: z.array(opportunitySchema.extend({ id, source: z.enum(['manual', 'employer_api', 'web_search']), sourceKey: short, checkedAt: short,
+  opportunities: z.array(opportunitySchema.extend({ id, sourceCheckId: z.string().uuid().optional(), source: z.enum(['manual', 'employer_api', 'web_search']), sourceKey: short, checkedAt: short,
     verification: z.enum(['user_provided', 'listed_on_source', 'unverified', 'closed_confirmed']), status, followUpAt: short.nullable(), notes: text })).max(2000),
-  runs: z.array(z.object({ id, requestId: id, status: z.enum(['queued', 'running', 'completed', 'partial', 'blocked', 'cancelled', 'failed']),
+  runs: z.array(z.object({ selection:selectionSchema.optional(), id, requestId: id, status: z.enum(['queued', 'running', 'completed', 'partial', 'blocked', 'cancelled', 'failed']),
     phase: short, startedAt: short, finishedAt: short.nullable(), inputHash: id, provider: z.union([provider, z.literal('rules')]), model: short,
     lanes: z.array(laneSchema).max(40), opportunityIds: z.array(id).max(2000), packetIds: z.array(id).max(2000), messages: z.array(text).max(100),
     nextAction: text, reservedUsd: z.number().nonnegative(), usageUsd: z.number().nonnegative() })).max(1000),
@@ -57,7 +60,8 @@ const snapshotSchema = z.object({
   support:z.array(z.object({id,category:z.enum(['help','privacy','bug']),message:z.string().max(2000),status:z.enum(['received','in_review','resolved']),createdAt:short})).max(20).optional(),
   recurringReady:z.boolean().optional(),employerSources:z.array(z.object({provider:short,company:short,board:short})).max(4).optional(),
 });
-const responseSchema = z.object({ existingState: z.enum(['active', 'absent', 'erasing']).optional(), snapshot: snapshotSchema.optional(), erasureGeneration: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
+const responseSchema = z.object({ selectedRun:selectionSchema.extend({requestId:z.string().uuid(),runId:z.string().uuid()}).strict().optional(), existingState: z.enum(['active', 'absent', 'erasing']).optional(), snapshot: snapshotSchema.optional(), erasureGeneration: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
+  checkLink: z.object({ checkId: z.string().uuid(), opportunityId: z.string().uuid(), reused: z.boolean() }).strict().optional(),
   url: z.string().max(8000).optional(), filename: short.optional(), message: text.optional(), error: text.optional(), code: short.optional(),
   gmailPreview: z.object({ email: short.nullable(), allowDrafts: z.boolean(), expiresAt: short }).optional() });
 const version = z.number().int().nonnegative();
@@ -69,7 +73,10 @@ const actionSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('save_claim'), expectedVersion: version, id: id.optional(), claim: claimSchema }),
   z.object({ action: z.literal('withdraw_claim'), expectedVersion: version, id }),
   z.object({ action: z.literal('add_opportunity'), expectedVersion: version, opportunity: opportunitySchema }),
+  z.object({ action: z.literal('link_saved_check'), expectedGeneration: version.max(Number.MAX_SAFE_INTEGER), expectedVersion: version.max(Number.MAX_SAFE_INTEGER), checkId: z.string().uuid().transform(value => value.toLowerCase()),
+    opportunity: opportunitySchema.extend({ contact: contactSchema.strict().nullable() }).strict(), linkConsent: z.literal(true) }).strict(),
   z.object({ action: z.literal('update_opportunity'), expectedVersion: version, id, status, followUpAt: short.nullable(), notes: z.string().max(5000) }),
+  z.object({action:z.literal('start_selected_run'),expectedGeneration:version.max(Number.MAX_SAFE_INTEGER),expectedVersion:version.max(Number.MAX_SAFE_INTEGER),requestId:z.string().uuid().transform(value=>value.toLowerCase()),opportunityIds:selectedIds,prepareConsent:z.literal(true),provider:z.union([provider,z.literal('rules')]),model:short,modelConsent:z.boolean(),processingRoute:z.enum(['direct','openrouter']).optional()}).strict(),
   z.object({ action: z.literal('start_run'), requestId: z.string().uuid(), provider: z.union([provider, z.literal('rules')]), model: short, modelConsent: z.boolean(), inboxConsent: z.boolean(),processingRoute:z.enum(['direct','openrouter']).optional() }),
   z.object({ action: z.literal('resume_run'), runId: id }), z.object({ action: z.literal('cancel_run'), runId: id }),
   z.object({ action: z.literal('approve_packet'), packetId: id, inputHash: id, reviewedText: text, confirmFacts: z.boolean(), confirmDisclosure: z.boolean() }),
@@ -90,12 +97,13 @@ export function isLoopHttpsUrl(value: string): boolean {
 }
 function assertConsent(action: LoopAction) {
   if (action.action === 'save_profile' && !action.saveConsent) throw new Error('Choose private saving before saving your career record.');
-  if (action.action === 'start_run' && action.provider !== 'rules' && !action.modelConsent) throw new Error('Allow processing by the selected provider before starting.');
-  if (action.action === 'start_run' && action.provider === 'rules' && action.model !== 'grounded-rules-v1') throw new Error('Choose an available preparation method.');
+  if ((action.action === 'start_run'||action.action === 'start_selected_run') && action.provider !== 'rules' && !action.modelConsent) throw new Error('Allow processing by the selected provider before starting.');
+  if ((action.action === 'start_run'||action.action === 'start_selected_run') && action.provider === 'rules' && action.model !== 'grounded-rules-v1') throw new Error('Choose an available preparation method.');
+  if(action.action==='start_selected_run'&&action.provider==='rules'&&action.processingRoute!==undefined)throw new Error('Rules preparation does not authorize an external processing route.');
   if (action.action === 'approve_packet' && (!action.confirmFacts || !action.confirmDisclosure)) throw new Error('Review the facts and disclosure before approving.');
   if (action.action === 'gmail_create_draft' && !action.confirmRecipientAndAttachment) throw new Error('Confirm the recipient and exact approved attachment before creating a Gmail draft.');
   if (action.action === 'gmail_finalize' && !action.confirmMailbox) throw new Error('Confirm the previewed mailbox and permissions before connecting it.');
-  if (action.action === 'add_opportunity' && (!isLoopHttpsUrl(action.opportunity.url) || (action.opportunity.contact && !isLoopHttpsUrl(action.opportunity.contact.sourceUrl)))) throw new Error('Use a real HTTPS vacancy and contact source link, without embedded credentials.');
+  if ((action.action === 'add_opportunity' || action.action === 'link_saved_check') && (!isLoopHttpsUrl(action.opportunity.url) || (action.opportunity.contact && !isLoopHttpsUrl(action.opportunity.contact.sourceUrl)))) throw new Error('Use a real HTTPS vacancy and contact source link, without embedded credentials.');
   if(action.action==='save_schedule'&&(!action.recurringConsent||action.schedule.provider!=='rules'&&!action.schedule.modelConsent))throw new Error('Explicitly allow recurring preparation and any selected provider processing.');
   if(action.action==='save_schedule'&&action.schedule.provider==='rules'&&action.schedule.model!=='grounded-rules-v1')throw new Error('Choose the available rules preparation method.');
   if((action.action==='erase_loop'||action.action==='erase_self')&&!action.confirmErase)throw new Error('Confirm erasing your private Job Loop record and documents.');
@@ -121,28 +129,47 @@ function serviceFailure(payload: unknown, fallback: string): LoopServiceError {
 }
 export async function callJobLoop(userId: string, action: LoopAction): Promise<LoopResponse> {
   const expectedGeneration = action.expectedGeneration;
+  const linkAuthority = (action.action === 'link_saved_check'||action.action === 'start_selected_run') ? trackingDraftAuthority(userId) : null;
+  function stillCurrent() {
+    if (linkAuthority !== null && (linkAuthority < 0 || trackingDraftAuthority(userId) !== linkAuthority)) throw new Error('Your sign-in changed. Reopen the saved application before continuing.');
+  }
+  async function requireCurrentOwner() { stillCurrent(); await requireLoopOwner(userId); stillCurrent(); }
   if (generationBoundAction(action.action) && !validLoopGeneration(expectedGeneration)) throw new Error('Refresh Jobvance before continuing. Your saved work is retained.');
   // This repository disables strictNullChecks, which makes Zod's inferred
   // properties optional in TypeScript. Runtime schemas still require every field.
   action = actionSchema.parse(action) as LoopAction;
   if (generationBoundAction(action.action)) action = { ...action, expectedGeneration };
   assertConsent(action);
-  await requireLoopOwner(userId);
+  await requireCurrentOwner();
+  stillCurrent();
   const fallback = action.action === 'get' ? 'The Job Loop service is still being configured or could not be reached. Your free CV check and existing workspace remain available.' : 'This action could not be confirmed. Refresh your Job Loop before retrying.';
   let result: { data: unknown; error: unknown };
   try { result = await supabase.functions.invoke<unknown>('job-loop-control', { body: action }); }
-  catch { await requireLoopOwner(userId); throw new Error(fallback); }
+  catch { await requireCurrentOwner(); throw new Error(fallback); }
   const { data, error } = result;
-  await requireLoopOwner(userId);
+  await requireCurrentOwner();
+  stillCurrent();
   if (error) {
     const response = (error as { context?: unknown }).context;
     const payload = response instanceof Response ? await response.clone().json().catch(() => null) : null;
-    await requireLoopOwner(userId);
+    await requireCurrentOwner();
     throw serviceFailure(payload, fallback);
   }
   const parsed = responseSchema.safeParse(data);
   if (!parsed.success || (action.action === 'get' && !parsed.data.snapshot && parsed.data.erasureGeneration === undefined)) throw new Error(fallback);
   if (parsed.data.error) throw serviceFailure(parsed.data, fallback);
+  if (action.action === 'link_saved_check') {
+    const result = parsed.data, matches = result.snapshot?.opportunities.filter(item => item.sourceCheckId === action.checkId);
+    if (!result.checkLink || result.checkLink.checkId !== action.checkId || result.snapshot?.lifecycleGeneration !== expectedGeneration
+      || matches?.length !== 1 || matches[0].id !== result.checkLink.opportunityId || matches[0].source !== 'manual' || matches[0].sourceKey !== `saved-check:${action.checkId}`) {
+      throw new Error('The saved vacancy link could not be confirmed. Refresh and retry this same saved check.');
+    }
+  }
+  if(action.action==='start_selected_run'){
+    const result=parsed.data, receipt=result.selectedRun;
+    const matching=result.snapshot?.runs.filter(run=>run.id===receipt?.runId)??[];
+    if(!receipt||result.runId!==receipt.runId||receipt.requestId!==action.requestId||receipt.generation!==expectedGeneration||result.snapshot?.lifecycleGeneration!==expectedGeneration||JSON.stringify(receipt.opportunityIds)!==JSON.stringify(action.opportunityIds)||matching.length>1||matching.some(run=>run.requestId!==action.requestId||run.selection?.generation!==expectedGeneration||JSON.stringify(run.selection.opportunityIds)!==JSON.stringify(action.opportunityIds)))throw new Error('The selected preparation could not be confirmed. Refresh and retry the same request.');
+  }
   if (action.action === 'get_existing') {
     const value = parsed.data;
     const valid = value.existingState === 'active' ? !!value.snapshot && validLoopGeneration(value.snapshot.lifecycleGeneration) && value.erasureGeneration === undefined

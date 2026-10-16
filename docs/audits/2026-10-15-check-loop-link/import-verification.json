@@ -1,0 +1,55 @@
+{
+  "status": "unpublished-source-only",
+  "publicVersionUnchanged": 30,
+  "recordedAt": "2026-10-15T19:41:13.588202+00:00",
+  "productionMutationPerformed": false,
+  "newTests": 16,
+  "vitest": {
+    "success": true,
+    "passed": 1519,
+    "failed": 0,
+    "files": 101
+  },
+  "typeScript": "passed",
+  "build": "Vite/prerender passed; unchanged worker packaging passed on retry",
+  "packagingFirstAttempt": "Symbolic-link guard rejected an entry; immediate later enumeration found none. Cause unestablished; guard unchanged.",
+  "hostingCheckGroups": 12,
+  "compressedBytes": 2793010,
+  "browser": {
+    "environment": "actual JobLoop component, isolated synthetic in-memory adapters",
+    "observed": [
+      "first exact linked vacancy save on desktop",
+      "second source selected on mobile",
+      "changed employer blocks link and offers explicit restore/separate",
+      "restored wording requires fresh consent",
+      "repeat first link leaves exactly two distinct opportunities"
+    ],
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "documentWidth": 375
+    },
+    "hostedAuthenticated": false,
+    "unassistedCustomers": 0,
+    "finalRevisionAndEmptyFieldGuards": "verified afterward by final component suite",
+    "screenshots": [
+      "check-loop-import-mobile.png",
+      "check-loop-import-desktop.png"
+    ],
+    "cleanup": "tab closed, viewport reset, local server stopped"
+  },
+  "independentReview": "pending known account usage limit; no paid workaround",
+  "liveChecks": 0,
+  "nativePostgresRerun": false,
+  "denoRerun": false,
+  "migrationApplied": false,
+  "handlerDeployed": false,
+  "sitePublished": false,
+  "sourceHashConvention": "SHA256 UTF-8 with normalized LF newlines",
+  "sourceHashes": {
+    "src/pages/JobLoop.tsx": "245dc5db68564de12e43ef9f2a9e63aaf08aab976b945a1066efe06842f76671",
+    "src/lib/loop-draft-memory.ts": "b55c371f4aa1f08d948144a35e374293a1aff34e82369f64b7ffa56f7c8c2824",
+    "src/__tests__/job-loop-saved-check-import.test.tsx": "4ff635881ca5354faead2aa0cd9ee451dfbd8c7e2d533f9e032091dd0c97bb17",
+    "src/__tests__/lib/loop-draft-memory.test.ts": "a05451c351370e3822a20f73bb67678830535c6954b1ac5a7feec6f5fac68598"
+  }
+}

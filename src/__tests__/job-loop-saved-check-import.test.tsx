@@ -3,7 +3,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import JobLoop from '@/pages/JobLoop';
-import type { LoopProfile, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
+import type { LoopProfile, LoopSnapshot, LoopResponse, LoopOpportunity } from '../../supabase/functions/_shared/job-loop-types';
 import type { FreeCvCheck } from '@/lib/free-check-api';
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 import { clearTrackingDraftMemory, setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
@@ -42,6 +42,14 @@ function RouteState() { const location = useLocation(); return <output data-test
 function tree(path = `/loop?fromCheck=${id}`) { return <HelmetProvider><MemoryRouter initialEntries={[path]}><JobLoop /><RouteState /></MemoryRouter></HelmetProvider>; }
 async function preview() { await screen.findByLabelText('Saved CV check'); await waitFor(() => expect(screen.getByLabelText('Saved CV check')).toHaveValue(id)); }
 function noWrites() { expect(mocks.call.mock.calls.every(([, action]) => action.action === 'get')).toBe(true); }
+function linked(checkId = id): LoopOpportunity { return { id: `op-${checkId}`, sourceCheckId: checkId, source: 'manual', sourceKey: `saved-check:${checkId}`, title: 'Operations Analyst', company: 'Saved Employer Fixture', description: vacancy, location: '', url: 'https://employer.example.invalid/job', contact: null, checkedAt: '2026-10-15T00:00:00Z', verification: 'user_provided', status: 'interview', notes: 'Keep my existing progress', followUpAt: null }; }
+async function importAndOpen() {
+  await preview(); fireEvent.click(screen.getByRole('button', { name: 'Use this saved check' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+  fireEvent.change(screen.getByLabelText('Vacancy HTTPS link'), { target: { value: 'https://employer.example.invalid/job' } });
+}
+const linkConsentLabel = /Save this vacancy privately and link it to this saved check/;
+function submitLink() { fireEvent.click(screen.getByLabelText(linkConsentLabel)); fireEvent.click(screen.getByRole('button', { name: 'Save linked vacancy' })); }
 beforeEach(() => {
   vi.clearAllMocks(); mocks.list.mockReset(); mocks.call.mockReset(); mocks.auth.user = { id: 'owner-a' }; mocks.auth.loading = false; mocks.auth.authError = null;
   clearLoopWorkingDraft(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a');
@@ -52,6 +60,143 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); vi.restoreAllMocks(); window.history.replaceState(null, '', '/'); });
 
 describe('saved check continuation inside the real Loop workspace', () => {
+  it('requires fresh link consent and sends the exact source identity without saving the CV or starting preparation', async () => {
+    render(tree()); await importAndOpen();
+    expect(screen.getByRole('button', { name: 'Save linked vacancy' })).toBeDisabled(); noWrites();
+    mocks.call.mockImplementation(async (_owner, action) => {
+      expect(action).toMatchObject({ action: 'link_saved_check', checkId: id, expectedGeneration: 0, expectedVersion: 1, linkConsent: true, opportunity: { title: 'Operations Analyst', description: vacancy, contact: null } });
+      return { snapshot: { ...current, recordVersion: 2, opportunities: [linked()] }, checkLink: { checkId: id, opportunityId: linked().id, reused: false } };
+    });
+    submitLink(); await waitFor(() => expect(screen.getByLabelText('Vacancy title')).toHaveValue(''));
+    expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue(finalText);
+    expect(screen.getByLabelText('My application notes')).toHaveValue('Keep my existing progress');
+    expect(mocks.call.mock.calls.filter(([, a]) => a.action !== 'get')).toHaveLength(1);
+  });
+
+  it.each(['Vacancy title', 'Company', 'Full vacancy description'])('requires a restore-or-separate choice after editing %s', async field => {
+    render(tree()); await importAndOpen(); fireEvent.click(screen.getByLabelText(linkConsentLabel));
+    fireEvent.change(screen.getByLabelText(field), { target: { value: field === 'Full vacancy description' ? vacancy + ' Changed requirements.' : 'Changed source field' } });
+    expect(screen.getByRole('button', { name: 'Save linked vacancy' })).toBeDisabled();
+    expect(screen.queryByLabelText(linkConsentLabel)).not.toBeInTheDocument(); noWrites();
+    fireEvent.click(screen.getByRole('button', { name: 'Restore saved vacancy wording' }));
+    expect(screen.getByLabelText(linkConsentLabel)).not.toBeChecked();
+    expect(screen.getByLabelText('Vacancy title')).toHaveValue('Operations Analyst');
+    expect(screen.getByLabelText('Full vacancy description')).toHaveValue(vacancy);
+    fireEvent.change(screen.getByLabelText('Company'), { target: { value: 'Separate company' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Keep edits as a separate vacancy' }));
+    expect(screen.getByLabelText('Company')).toHaveValue('Separate company');
+    mocks.call.mockResolvedValue({ snapshot: current }); fireEvent.click(screen.getByRole('button', { name: 'Save opportunity' }));
+    await waitFor(() => expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'add_opportunity', opportunity: expect.objectContaining({ company: 'Separate company' }) })));
+  });
+
+  it('invalidates link consent even when source wording is changed back in one batch', async () => {
+    render(tree()); await importAndOpen(); fireEvent.click(screen.getByLabelText(linkConsentLabel));
+    act(() => { fireEvent.change(screen.getByLabelText('Company'), { target: { value: 'Changed' } }); fireEvent.change(screen.getByLabelText('Company'), { target: { value: 'Saved Employer Fixture' } }); });
+    expect(screen.getByLabelText(linkConsentLabel)).not.toBeChecked(); noWrites();
+  });
+
+  it('rejects a same-batch submit after a field change before React commits consent invalidation', async () => {
+    render(tree()); await importAndOpen(); fireEvent.click(screen.getByLabelText(linkConsentLabel));
+    act(() => { fireEvent.change(screen.getByLabelText('Company'), { target: { value: 'New employer' } }); fireEvent.submit(screen.getByLabelText('Company').closest('form')!); });
+    noWrites(); expect(screen.getByLabelText('Company')).toHaveValue('New employer');
+  });
+
+  it('retains exact identity through navigation recovery but never retains link consent', async () => {
+    const first = render(tree()); await importAndOpen(); fireEvent.click(screen.getByLabelText(linkConsentLabel)); first.unmount();
+    render(tree('/loop')); fireEvent.click(await screen.findByRole('button', { name: 'Opportunities' }));
+    expect(screen.getByLabelText('Vacancy title')).toHaveValue('Operations Analyst');
+    expect(screen.getByLabelText(linkConsentLabel)).not.toBeChecked();
+    mocks.call.mockResolvedValue({ snapshot: { ...current, opportunities: [linked()] }, checkLink: { checkId: id, opportunityId: linked().id, reused: false } }); submitLink();
+    await waitFor(() => expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'link_saved_check', checkId: id })));
+  });
+
+  it('keeps provenance after a profile save instead of falling back to a manual vacancy', async () => {
+    current.profile = existingProfile(); render(tree()); await preview(); fireEvent.click(screen.getByLabelText(/Replace these local drafts/)); fireEvent.click(screen.getByRole('button', { name: 'Use this saved check' }));
+    mocks.call.mockImplementation(async (_owner, action) => { if (action.action === 'save_profile') return { snapshot: { ...current, recordVersion: 2, profile: { ...action.profile, revision: 2 } } }; return { snapshot: current }; });
+    fireEvent.click(screen.getByLabelText(/Save this reviewed text and profile privately/));
+    fireEvent.submit(screen.getByLabelText('Reviewed source CV or career record').closest('form')!);
+    await waitFor(() => expect(screen.queryByText('Working on your request…')).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    fireEvent.change(screen.getByLabelText('Vacancy HTTPS link'), { target: { value: 'https://employer.example.invalid/job' } }); submitLink();
+    await waitFor(() => expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'link_saved_check', checkId: id, expectedVersion: 2 })));
+  });
+
+  it('shows current linked progress on reopening and preserves it on an ambiguous retry', async () => {
+    current.opportunities = [linked()]; render(tree()); await importAndOpen();
+    expect(screen.getByRole('link', { name: 'Open linked vacancy and progress' })).toHaveAttribute('href', `/loop?opportunity=${linked().id}&generation=0`);
+    expect(screen.getByText(/Already linked:/)).toHaveTextContent('interview');
+    mocks.call.mockRejectedValueOnce(new Error('Response lost'));
+    submitLink(); await screen.findByText('Response lost');
+    expect(screen.getByLabelText('Vacancy title')).toHaveValue('Operations Analyst');
+    mocks.call.mockResolvedValue({ snapshot: current, checkLink: { checkId: id, opportunityId: linked().id, reused: true } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save linked vacancy' }));
+    await waitFor(() => expect(screen.getByLabelText('Vacancy title')).toHaveValue(''));
+    expect(screen.getByLabelText('My application notes')).toHaveValue('Keep my existing progress');
+    expect(mocks.call.mock.calls.filter(([, a]) => a.action === 'link_saved_check').map(([, a]) => a.checkId)).toEqual([id, id]);
+  });
+
+  it('keeps pending attribution in route memory even when all vacancy fields were intentionally cleared', async () => {
+    const view = render(tree()); await importAndOpen();
+    // Save the CV independently so the pending link is the only remaining draft.
+    fireEvent.click(screen.getByRole('button', { name: 'Career record' }));
+    fireEvent.change(screen.getByLabelText('Locations'), { target: { value: 'Dubai' } });
+    mocks.call.mockImplementation(async (_owner, action) => {
+      if (action.action === 'save_profile') { current = { ...current, recordVersion: 2, profile: { ...action.profile, revision: 1 } }; return { snapshot: current }; }
+      if (action.action === 'suggest_claims') return { suggestions: [] };
+      return { snapshot: current };
+    });
+    fireEvent.click(screen.getByLabelText(/Save this reviewed text and profile privately/)); fireEvent.submit(screen.getByLabelText('Reviewed source CV or career record').closest('form')!);
+    await waitFor(() => expect(mocks.call.mock.calls.some(([, a]) => a.action === 'suggest_claims')).toBe(true));
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    for (const label of ['Vacancy title', 'Company', 'Full vacancy description', 'Vacancy HTTPS link']) fireEvent.change(screen.getByLabelText(label), { target: { value: '' } });
+    view.unmount(); render(tree('/loop')); fireEvent.click(await screen.findByRole('button', { name: 'Opportunities' }));
+    expect(screen.getByLabelText('Vacancy title')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Restore saved vacancy wording' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save linked vacancy' })).toBeDisabled();
+  });
+
+  it('does not clear newer vacancy edits when a delayed save succeeds', async () => {
+    render(tree()); await importAndOpen(); const pending = deferred<LoopResponse>(); mocks.call.mockReturnValue(pending.promise); submitLink();
+    // A programmatic change can occur even while the native fieldset is disabled.
+    fireEvent.change(screen.getByLabelText('Vacancy title'), { target: { value: 'Newer local vacancy' } });
+    await act(async () => pending.resolve({ snapshot: { ...current, opportunities: [linked()] }, checkLink: { checkId: id, opportunityId: linked().id, reused: false } }));
+    expect(screen.getByLabelText('Vacancy title')).toHaveValue('Newer local vacancy');
+    expect(screen.getByRole('button', { name: 'Restore saved vacancy wording' })).toBeInTheDocument();
+  });
+
+  it('rejects an old auth lifetime result before React renders the identity transition', async () => {
+    render(tree()); await importAndOpen(); const pending = deferred<LoopResponse>(); mocks.call.mockImplementation((_owner, action) => action.action === 'get' ? Promise.resolve({ snapshot: current }) : pending.promise); submitLink();
+    await act(async () => { setTrackingDraftOwner('owner-b'); setTrackingDraftOwner('owner-a'); pending.resolve({ snapshot: { ...current, opportunities: [linked()] }, checkLink: { checkId: id, opportunityId: linked().id, reused: false } }); });
+    expect(screen.queryByText('Keep my existing progress')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Vacancy linked to your saved check/)).not.toBeInTheDocument();
+  });
+
+  it('restores the preceding imported check identity on undo, including two checks with the same vacancy wording', async () => {
+    const secondId = '22222222-2222-4222-8222-222222222222'; mocks.list.mockResolvedValue([saved(), saved({ id: secondId })]);
+    render(tree()); await importAndOpen();
+    fireEvent.click(screen.getByRole('button', { name: 'Career record' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose a saved CV check' })); await screen.findByLabelText('Saved CV check');
+    fireEvent.change(screen.getByLabelText('Saved CV check'), { target: { value: secondId } });
+    fireEvent.click(screen.getByLabelText(/Replace these local drafts/)); fireEvent.click(screen.getByRole('button', { name: 'Use this saved check' }));
+    fireEvent.click(screen.getByLabelText(/Replace my current local CV and vacancy fields/)); fireEvent.click(screen.getByRole('button', { name: 'Undo saved-check import' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    expect(screen.getByLabelText(linkConsentLabel)).not.toBeChecked();
+    mocks.call.mockResolvedValue({ snapshot: { ...current, opportunities: [linked()] }, checkLink: { checkId: id, opportunityId: linked().id, reused: false } }); submitLink();
+    await waitFor(() => expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'link_saved_check', checkId: id })));
+  });
+
+  it('saves a second identical-wording check as its own exact application instead of selecting the first link', async () => {
+    const secondId = '22222222-2222-4222-8222-222222222222'; current.opportunities = [linked()]; mocks.list.mockResolvedValue([saved({ id: secondId })]);
+    render(tree(`/loop?fromCheck=${secondId}`)); await screen.findByLabelText('Saved CV check');
+    await waitFor(() => expect(screen.getByLabelText('Saved CV check')).toHaveValue(secondId));
+    fireEvent.click(screen.getByRole('button', { name: 'Use this saved check' })); fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    expect(screen.queryByRole('link', { name: 'Open linked vacancy and progress' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Vacancy HTTPS link'), { target: { value: 'https://employer.example.invalid/job' } });
+    mocks.call.mockResolvedValue({ snapshot: { ...current, opportunities: [linked(), linked(secondId)] }, checkLink: { checkId: secondId, opportunityId: linked(secondId).id, reused: false } }); submitLink();
+    await waitFor(() => expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'link_saved_check', checkId: secondId })));
+    await waitFor(() => expect(screen.getAllByLabelText('My application notes')).toHaveLength(2));
+  });
+
   it('preserves the exact opaque intent through the actual signed-out Loop sign-in link without loading records', () => {
     mocks.auth.user = null; setTrackingDraftOwner(null); render(tree());
     expect(screen.getByRole('link', { name: 'Sign in to review this saved check' })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?fromCheck=${id}`)}`);
@@ -232,5 +377,62 @@ describe('saved check continuation inside the real Loop workspace', () => {
     expect(mocks.list).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByRole('button', { name: 'Choose a saved CV check' }));
     await screen.findByLabelText('Saved CV check'); expect(screen.getByLabelText('Saved CV check')).toHaveValue(''); noWrites();
+  });
+});
+
+
+describe('selected preparation in the actual Loop page', () => {
+  const opportunityIds = ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', '33333333-3333-4333-8333-333333333333'];
+  function preparedRecord() {
+    current.profile = existingProfile();
+    current.claims = [{ id: 'claim-1', revision: 1, status: 'active', createdAt: '2026-10-16', sourceKind: 'user_answer', sourceQuote: 'Maintained operations reports at Example Company.', phrasing: 'Maintained operations reports at Example Company.', context: 'Example Company', kind: 'employment', resultStatus: 'not_measured', confirmed: true, shareable: true }];
+    current.opportunities = opportunityIds.map((opId, i) => ({ ...linked(), id: opId, title: `Chosen role ${i + 1}`, sourceCheckId: undefined, sourceKey: opId, status: 'saved' }));
+  }
+  async function readyChoice() {
+    await screen.findByRole('heading', { name: 'Prepare for a saved vacancy' });
+    fireEvent.click(screen.getByLabelText(/Chosen role 3 · Saved Employer Fixture/));
+    fireEvent.click(screen.getByLabelText(/Prepare documents for only my chosen vacancies/));
+  }
+  it('offers a direct vacancy choice, requires consent and dispatches the selected action with original authority', async () => {
+    preparedRecord(); render(tree('/loop')); await screen.findByRole('heading', { name: 'Prepare for a saved vacancy' });
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose Chosen role 3 for preparation' }));
+    expect(screen.getByLabelText(/Chosen role 3 · Saved Employer Fixture/)).toBeChecked(); noWrites();
+    expect(screen.getByLabelText(/Prepare documents for only my chosen vacancies/)).not.toBeChecked();
+    mocks.call.mockImplementation(async (_owner, action) => ({ snapshot: structuredClone(current), selectedRun: { requestId: action.requestId, runId: id, generation: 0, opportunityIds: [...action.opportunityIds] } }));
+    fireEvent.click(screen.getByLabelText(/Prepare documents for only my chosen vacancies/));
+    fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' }));
+    await screen.findByText(/Your chosen application preparation is recorded/);
+    expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'start_selected_run', expectedGeneration: 0, expectedVersion: 1, opportunityIds: [opportunityIds[2]], prepareConsent: true, modelConsent: false }));
+  });
+  it('does not carry a direct vacancy choice into a refreshed record lifetime', async () => {
+    preparedRecord(); render(tree('/loop')); await screen.findByRole('heading', { name: 'Prepare for a saved vacancy' });
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose Chosen role 3 for preparation' }));
+    expect(screen.getByLabelText(/Chosen role 3 · Saved Employer Fixture/)).toBeChecked();
+    current = { ...current, lifecycleGeneration: 1, recordVersion: 2 };
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh records' }));
+    await waitFor(() => expect(screen.getByLabelText(/Chosen role 3 · Saved Employer Fixture/)).not.toBeChecked());
+    noWrites();
+  });
+  it('blocks same-batch claim edits before React applies the dirty-state update', async () => {
+    preparedRecord(); render(tree('/loop')); await readyChoice();
+    act(() => { fireEvent.change(screen.getAllByLabelText('Wording I can substantiate')[0], { target: { value: 'New wording' } }); fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' })); });
+    noWrites();
+  });
+  it('does not apply delayed selection responses over newer profile edits', async () => {
+    preparedRecord(); render(tree('/loop')); await readyChoice(); const result = deferred<LoopResponse>();
+    mocks.call.mockImplementation(() => result.promise); fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' }));
+    const action = mocks.call.mock.calls.at(-1)![1];
+    fireEvent.change(screen.getByLabelText('My name'), { target: { value: 'Keep newer name' } });
+    await act(async () => result.resolve({ snapshot: { ...structuredClone(current), recordVersion: 99 }, message: 'Stale preparation response', selectedRun: { requestId: action.requestId, runId: id, generation: 0, opportunityIds: action.opportunityIds } }));
+    expect(screen.getByLabelText('My name')).toHaveValue('Keep newer name'); expect(screen.queryByText('Stale preparation response')).not.toBeInTheDocument();
+  });
+  it('rejects delayed results after confirmed auth authority changes', async () => {
+    preparedRecord(); const view = render(tree('/loop')); await readyChoice(); const result = deferred<LoopResponse>();
+    mocks.call.mockImplementation(() => result.promise); fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' }));
+    mocks.auth.authError = 'Session unavailable'; view.rerender(tree('/loop'));
+    await act(async () => result.resolve({ snapshot: structuredClone(current), message: 'Old session result' }));
+    expect(screen.queryByText('Old session result')).not.toBeInTheDocument();
   });
 });

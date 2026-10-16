@@ -43,6 +43,8 @@ export interface LoopOpportunityInput {
 }
 export interface LoopOpportunity extends LoopOpportunityInput {
   id: string; source: 'manual' | 'employer_api' | 'web_search'; sourceKey: string;
+  /** Server-verified continuation provenance; not an approval or submission. */
+  sourceCheckId?: string;
   checkedAt: string; verification: 'user_provided' | 'listed_on_source' | 'unverified' | 'closed_confirmed';
   status: LoopApplicationStatus; followUpAt: string | null; notes: string;
 }
@@ -82,6 +84,7 @@ export interface LoopInboxSignal {
   threadId: string; opportunityId: string | null; roleUnconfirmed: boolean;
 }
 export interface LoopRun {
+  selection?: { generation: number; opportunityIds: string[] };
   id: string; requestId: string; status: 'queued' | 'running' | 'completed' | 'partial' | 'blocked' | 'cancelled' | 'failed';
   phase: string; startedAt: string; finishedAt: string | null; inputHash: string;
   provider: LoopProviderId | 'rules'; model: string; lanes: LoopLane[];
@@ -116,7 +119,9 @@ export type LoopAction = (
   | { action: 'save_claim'; expectedVersion: number; id?: string; claim: LoopClaimInput }
   | { action: 'withdraw_claim'; expectedVersion: number; id: string }
   | { action: 'add_opportunity'; expectedVersion: number; opportunity: LoopOpportunityInput }
+  | { action: 'link_saved_check'; expectedVersion: number; checkId: string; opportunity: LoopOpportunityInput; linkConsent: boolean }
   | { action: 'update_opportunity'; expectedVersion: number; id: string; status: LoopApplicationStatus; followUpAt: string | null; notes: string }
+  | { action: 'start_selected_run'; expectedVersion: number; requestId: string; opportunityIds: string[]; prepareConsent: boolean; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; processingRoute?: 'direct' | 'openrouter' }
   | { action: 'start_run'; requestId: string; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; inboxConsent: boolean; processingRoute?: 'direct' | 'openrouter' }
   | { action: 'resume_run'; runId: string }
   | { action: 'cancel_run'; runId: string }
@@ -132,4 +137,4 @@ export type LoopAction = (
   | { action: 'gmail_finalize'; ticket: string; confirmMailbox: boolean }
   | { action: 'gmail_disconnect' }
   | { action: 'gmail_create_draft'; packetId: string; requestId: string; confirmRecipientAndAttachment: boolean }) & { expectedGeneration?: number };
-export type LoopResponse = { existingState?: 'active' | 'absent' | 'erasing'; snapshot?: LoopSnapshot; erasureGeneration?: number; runId?: string; suggestions?: LoopClaimInput[]; url?: string; filename?: string; message?: string; error?: string; code?: string; gmailPreview?: { email: string | null; allowDrafts: boolean; expiresAt: string } };
+export type LoopResponse = { selectedRun?: { requestId: string; runId: string; generation: number; opportunityIds: string[] }; existingState?: 'active' | 'absent' | 'erasing'; snapshot?: LoopSnapshot; erasureGeneration?: number; checkLink?: { checkId: string; opportunityId: string; reused: boolean }; runId?: string; suggestions?: LoopClaimInput[]; url?: string; filename?: string; message?: string; error?: string; code?: string; gmailPreview?: { email: string | null; allowDrafts: boolean; expiresAt: string } };

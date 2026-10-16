@@ -1,0 +1,45 @@
+{
+  "status": "unpublished-source-only",
+  "publicVersionUnchanged": 30,
+  "productionMutationPerformed": false,
+  "recordedAt": "2026-10-15T16:31:44.1388632Z",
+  "newTests": 17,
+  "vitest": {
+    "success": true,
+    "passed": 1503,
+    "failed": 0,
+    "files": 101
+  },
+  "typeScript": "passed",
+  "build": "Vite and prerender passed; unchanged worker packaging passed on retry",
+  "packagingFirstAttempt": "Rejected a symbolic-link entry; subsequent read-only enumeration found none. Cause not established. Guard unchanged.",
+  "hostingCheckGroups": 12,
+  "compressedBytes": 2790268,
+  "browser": {
+    "unassistedCustomers": 0,
+    "observed": [
+      "same-generation Loop bookmark opens joined check",
+      "separate source wording and progress",
+      "both continuation actions",
+      "linked employer search",
+      "mobile focus and no horizontal overflow"
+    ],
+    "viewport": {
+      "settledDetailTop": 100.25,
+      "width": 390,
+      "documentWidth": 375,
+      "height": 844
+    },
+    "environment": "isolated local actual component with synthetic adapters",
+    "hostedAuthenticated": false
+  },
+  "independentReview": "pending known account usage limit",
+  "liveChecks": 0,
+  "sourceHashes": {
+    "src/__tests__/applications-home.test.tsx": "8fd5f9f2564ab21f812450601bee835ab59bf362884a28be3b1037db3c73da78",
+    "src/pages/ApplicationsHome.tsx": "948b95b748b5216d90440b68d033384c8ce15a172e059550dd3c35a903b30233",
+    "src/pages/ApplicationsHome.css": "b95aea2f28481efbee653e7293b15df41cc2caefd9f00c551c8a185524144fbb",
+    "src/lib/application-home.ts": "7f195243851070f155360f47230250e3016386c8037a0e94fc0c92a14a2d30f4",
+    "src/__tests__/lib/application-home.test.ts": "73ec43054d5c9d5185fc4610306874d8f23d3f1029f305a81cb48fa2e25f6f3a"
+  }
+}

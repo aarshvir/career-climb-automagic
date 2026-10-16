@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe,it,expect,vi } from 'vitest';
-import { processLoopPhase } from '../functions/_shared/job-loop-runtime.ts';
+import { processLoopPhase,canReplayPreparation } from '../functions/_shared/job-loop-runtime.ts';
 import { LoopRepository,type RecordRow,type RunRow,type RunState } from '../functions/_shared/job-loop-repository.ts';
 import { digest } from '../functions/_shared/job-loop-providers.ts';
 import { ApiError } from '../functions/_shared/core.ts';
@@ -36,5 +36,42 @@ describe('checkpointed actual rule-engine cloud phases',()=>{
   it('does not prepare a newly applied opportunity from a stale discovery snapshot',async()=>{
     const h=harness();h.run.phase=2;h.run.data={opportunities:[structuredClone(h.record.data.opportunities[0])],packetIds:[],lanes:[],messages:[]};h.record.data.opportunities[0].status='applied';
     expect(await processLoopPhase(h.repo,id,()=>undefined)).toBe(true);expect(h.packets).toHaveLength(0);expect(h.mock.upload).not.toHaveBeenCalled();expect(h.run.data.messages?.join(' ')).toMatch(/history was preserved/);
+  });
+});
+
+function selectedHarness(two=false){
+  const h=harness();const first=h.record.data.opportunities[0];
+  h.record.data.opportunities=[first,{...first,id:'44444444-4444-4444-a444-444444444444',title:'Second vacancy'},{...first,id:'55555555-5555-4555-a555-555555555555',title:'Third vacancy'}];
+  h.run.lifecycle_generation=0;h.run.selected_generation=0;h.run.snapshot=structuredClone(h.record.data);h.run.selected_opportunity_ids=two?[h.record.data.opportunities[2].id,first.id]:[h.record.data.opportunities[2].id];return h;
+}
+const noNetwork=()=>{throw new Error('Selected preparation must not discover or read inbox.');};
+async function drain(h:ReturnType<typeof harness>){let n=0;while(await processLoopPhase(h.repo,id,()=>undefined,noNetwork)){if(++n>10)throw new Error('Phase loop');}}
+describe('explicit selected-vacancy worker foundation',()=>{
+  it('prepares the third vacancy first and only that vacancy with real rendered artifacts',async()=>{
+    const h=selectedHarness();await drain(h);expect(h.run.status).toBe('completed');expect(h.packets.map(p=>p.opportunityId)).toEqual(h.run.selected_opportunity_ids);expect(h.artifacts.size).toBeGreaterThan(0);expect(h.mock.reserve).not.toHaveBeenCalled();expect(h.run.data.lanes?.map(l=>l.name)).toEqual(['Selected vacancies']);
+  });
+  it('preserves the chosen two-vacancy order',async()=>{const h=selectedHarness(true);await drain(h);expect(h.packets.map(p=>p.opportunityId)).toEqual(h.run.selected_opportunity_ids);});
+  it('ignores mutable phase wording and uses the admitted immutable source',async()=>{
+    const h=selectedHarness();await processLoopPhase(h.repo,id,()=>undefined);await processLoopPhase(h.repo,id,()=>undefined);
+    h.run.data.opportunities![0].title='Injected vacancy';h.run.data.opportunities![0].description='Injected body';await drain(h);expect(h.packets[0].title).not.toBe('Injected vacancy');expect(JSON.stringify(h.packets[0])).not.toContain('Injected body');expect(h.packets[0].opportunityId).toBe(h.run.selected_opportunity_ids![0]);
+  });
+  it.each(['omit','replace','reorder'] as const)('fails closed on %s phase selection',async mode=>{
+    const h=selectedHarness(true);await processLoopPhase(h.repo,id,()=>undefined);await processLoopPhase(h.repo,id,()=>undefined);
+    if(mode==='omit'){h.run.data.opportunities=[];h.run.data.opportunityIds=[];}
+    if(mode==='replace'){h.run.data.opportunities=[h.record.data.opportunities[1]];h.run.data.opportunityIds=[h.record.data.opportunities[1].id];}
+    if(mode==='reorder'){h.run.data.opportunities!.reverse();h.run.data.opportunityIds!.reverse();}
+    await drain(h);expect(h.run.status).toBe('blocked');expect(h.mock.upload).not.toHaveBeenCalled();expect(h.mock.reserve).not.toHaveBeenCalled();
+  });
+  it.each(['changed','removed','closed','provenance'] as const)('blocks %s source before rendering',async mode=>{
+    const h=selectedHarness();if(mode==='changed')h.record.data.opportunities[2].description+='Changed';else if(mode==='closed')h.record.data.opportunities[2].verification='closed_confirmed';else if(mode==='provenance')h.record.data.opportunities[2].sourceKey='manual:other';else h.record.data.opportunities.pop();await drain(h);expect(h.run.status).toBe('blocked');expect(h.mock.upload).not.toHaveBeenCalled();
+  });
+  it('preserves later applied progress without preparing it again',async()=>{const h=selectedHarness();h.record.data.opportunities[2].status='applied';await drain(h);expect(h.packets).toHaveLength(0);expect(h.record.data.opportunities[2].status).toBe('applied');});
+  it('retains the exact existing packet without upload or another model reservation',async()=>{
+    const h=selectedHarness();await drain(h);const original=h.packets[0];h.mock.upload.mockClear();h.run.phase=0;h.run.status='queued';h.run.data={};await drain(h);expect(h.packets).toHaveLength(1);expect(h.run.data.reusedPacketIds).toEqual([original.id]);expect(h.mock.upload).not.toHaveBeenCalled();expect(h.mock.reserve).not.toHaveBeenCalled();
+  });
+  it('rejects a selected snapshot from another lifecycle',async()=>{const h=selectedHarness();h.run.selected_generation=1;await drain(h);expect(h.run.status).toBe('blocked');expect(h.mock.upload).not.toHaveBeenCalled();});
+  it('rejects inbox expansion and a discovery-wide replay of the selected intent',async()=>{
+    const h=selectedHarness();expect(await canReplayPreparation(h.run,h.record.data,{provider:'rules',model:h.run.model,modelConsent:false,inboxConsent:false})).toBe(false);
+    h.run.consents.inbox=true;await drain(h);expect(h.run.status).toBe('blocked');expect(h.mock.upload).not.toHaveBeenCalled();
   });
 });

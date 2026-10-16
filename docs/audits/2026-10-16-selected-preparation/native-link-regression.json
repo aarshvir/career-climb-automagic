@@ -1,0 +1,120 @@
+{
+  "url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-5-windows-x64-binaries.zip",
+  "bytes": 381531864,
+  "sha256": "80379b2c04d51c30225532e0ae04509899141e9957ed096fe749d7fd9df8f82f",
+  "provenance": [
+    "https://www.postgresql.org/download/windows/",
+    "https://www.enterprisedb.com/download-postgresql-binaries",
+    "https://github.com/EnterpriseDB/edb-installers/issues/731",
+    "https://www.postgresql.org/about/licence/"
+  ],
+  "suite": "check-loop",
+  "startedAt": "2026-10-16T07:26:21.116Z",
+  "checks": [
+    {
+      "name": "two first links serialize to one opportunity and one record write",
+      "passed": true,
+      "distinctBackendPids": [
+        45352,
+        29636
+      ],
+      "blockingPids": [
+        45352
+      ]
+    },
+    {
+      "name": "source deletion waits for link then retains independently saved Loop work",
+      "passed": true,
+      "distinctBackendPids": [
+        41828,
+        48176
+      ],
+      "blockingPids": [
+        41828
+      ]
+    },
+    {
+      "name": "deletion winning first prevents link without recreating a check",
+      "passed": true,
+      "distinctBackendPids": [
+        35416,
+        19136
+      ],
+      "blockingPids": [
+        35416
+      ]
+    },
+    {
+      "name": "a retry waits for progress editing and never overwrites the winning notes or status",
+      "passed": true,
+      "distinctBackendPids": [
+        38092,
+        49868
+      ],
+      "blockingPids": [
+        38092
+      ]
+    },
+    {
+      "name": "erasure winning the lifecycle lock rejects an old link and fresh generation does not adopt it",
+      "passed": true,
+      "distinctBackendPids": [
+        49172,
+        35952
+      ],
+      "blockingPids": [
+        49172
+      ]
+    },
+    {
+      "name": "native browser/private-routine and cross-owner boundaries reject guessed identity",
+      "passed": true,
+      "rejectedAttempts": [
+        "anon-public",
+        "auth-public",
+        "auth-private",
+        "server-foreign-check"
+      ]
+    }
+  ],
+  "limitations": [
+    "Native PostgreSQL sessions execute actual migrations; auth.users/auth.uid, unrelated pack columns and Storage tables use isolated fixtures. No worker, provider, document rendering or export runs here.",
+    "No hosted Supabase, PostgREST, real authentication or production candidate data is exercised.",
+    "The vendor repository publishes the ZIP digest; no detached publisher signature was located."
+  ],
+  "archiveVerifiedAt": "2026-10-16T07:26:21.398Z",
+  "extraction": {
+    "entries": 22033,
+    "extracted": 3016,
+    "expandedBytes": 1002085601
+  },
+  "harnessSha256": "f1a7e0d969cfc1bf9a1fd83c96a9b5b8ca7d08574971fb73d4dac545ac754946",
+  "migration": {
+    "name": "20261015101948_job_loop_saved_check_link.sql",
+    "sha256": "55669bb728eefe013315efbc217320d1241dc19f9d17361549201ed387f44492"
+  },
+  "casesSha256": "38798996e88b9aaab75be091816636a135558f4a749c5950c119f3fc2a6ea505",
+  "version": "postgres (PostgreSQL) 17.11",
+  "executedSchemaSha256": "ede5c326aeab3dae44f7284a815657111e73817b92fbf06e44a03d2c81017281",
+  "backendPids": [
+    44292,
+    45352,
+    29636,
+    41828,
+    48176,
+    35416,
+    19136,
+    38092,
+    49868,
+    49172,
+    35952,
+    50008,
+    49488,
+    29532,
+    25880,
+    46948
+  ],
+  "passed": true,
+  "clusterStopped": true,
+  "finishedAt": "2026-10-16T07:26:31.109Z"
+}
