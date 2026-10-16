@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CvCheck from "@/pages/CvCheck";
 import { clearTrackingDraftMemory } from '@/lib/tracking-draft-memory';
 import { clearCheckRecovery } from '@/lib/check-draft';
-import { companyFromVacancy, roleFromVacancy } from '@/lib/cv-tailor-api';
+import { companyFromVacancy, roleFromVacancy, TailorUnavailable } from '@/lib/cv-tailor-api';
 
 vi.unmock("react-router-dom");
 const mocks = vi.hoisted(() => ({
@@ -97,6 +97,23 @@ describe('AI tailoring in the check', () => {
     expect(screen.queryByRole('heading', { name: 'What changed for this job' })).not.toBeInTheDocument();
     expect(reviewed()).toContain('Prepared monthly stakeholder reports using Excel.');
     expect(screen.getByRole('heading', { name: 'Review changes' })).toBeInTheDocument();
+  });
+  it.each(['TAILOR_FREE_LIMIT', 'TAILOR_PASS_DAILY_LIMIT', 'TAILOR_GUEST_LIMIT'])('keeps the on-device fallback and links to passes when %s is reached', async code => {
+    mocks.tailor.mockRejectedValue(new TailorUnavailable('You have used your 3 free AI-tailored CVs this month. Passes start at $9 on the Pricing page.', code));
+    show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    const link = await screen.findByRole('link', { name: 'See passes from $9' });
+    expect(link).toHaveAttribute('href', '/pricing');
+    expect(screen.getByRole('status')).toHaveTextContent(/3 free AI-tailored CVs this month.*so you can edit it yourself/);
+    expect(reviewed()).toContain('Prepared monthly stakeholder reports using Excel.');
+    expect(screen.getByRole('heading', { name: 'Review changes' })).toBeInTheDocument();
+  });
+  it('does not offer passes for failures a pass would not fix', async () => {
+    mocks.tailor.mockRejectedValue(new TailorUnavailable('AI tailoring is paused until next month to stay within our monthly budget.', 'TAILOR_BUDGET_LIMIT'));
+    show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByText(/paused until next month/);
+    expect(screen.queryByRole('link', { name: 'See passes from $9' })).not.toBeInTheDocument();
   });
   it('compares without AI when asked, never calling the AI service', () => {
     show(); fill();

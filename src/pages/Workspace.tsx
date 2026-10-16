@@ -34,6 +34,7 @@ import {
 } from "@/lib/cv-documents";
 import { downloadPack } from "@/lib/document-export";
 import { currentOffer } from "@/lib/current-offer";
+import TailorPlanLine from "@/components/TailorPlanLine";
 import { listLegacyCvs, downloadLegacyCv } from "@/lib/cv-legacy";
 import type { ApplicationPack, TrackedApplication } from "@/lib/cv-database";
 import {
@@ -959,14 +960,15 @@ export default function Workspace() {
           <Card className="ws-card ws-billing-card">
             <CardHeader><p className="ws-step-label">YOUR ACCESS</p><CardTitle>{currentOffer.statement}</CardTitle></CardHeader>
             <CardContent className="space-y-4">
+              {data.entitlement?.tailorAccess && <TailorPlanLine access={data.entitlement.tailorAccess} />}
               <p>{currentOffer.check}</p>
               <Button asChild><Link to="/check">Check a CV for free</Link></Button>
               <p>This starts a separate check. Your existing documents and tracking entries stay in this workspace.</p>
               <h3 className="font-semibold">Your existing workspace allowance</h3>
               <p>{data.entitlement ? `${data.entitlement.creditsRemaining} saved preparations available.` : 'Access could not be checked. Reload to try again.'} Previously approved documents remain available to download.</p>
               {data.entitlement?.expiresAt && <p>Existing preparation access ends {dateLabel(data.entitlement.expiresAt)}. Saved documents remain available.</p>}
-              <p>{currentOffer.future}</p>
-              <Link to="/pricing" className="underline">See what’s included</Link>
+              <p>{currentOffer.passes}</p>
+              <Link to="/pricing" className="underline">See passes and what’s free</Link>
             </CardContent>
           </Card>
         )}

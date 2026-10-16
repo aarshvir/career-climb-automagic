@@ -35,7 +35,7 @@ export default function MvpHeader() {
   return <header className="jv-header">
     <a className="jv-skip" href="#main-content">Skip to content</a>
     <div className="jv-header-inner">
-      <Brand /><span className="jv-beta">Free beta</span>
+      <Brand /><span className="jv-beta">Free to start</span>
       <nav aria-label="Main navigation" className="jv-header-nav">{links.map(([to,label])=><NavLink key={to} to={to}>{label}</NavLink>)}</nav>
       <div className="jv-header-actions">{account}</div>
       <Button ref={toggle} variant="ghost" size="icon" className="jv-menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="mobile-navigation" onClick={()=>setOpenPath(open ? null : location.pathname)}>{open ? <X /> : <Menu />}</Button>

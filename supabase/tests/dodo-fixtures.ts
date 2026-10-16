@@ -1,5 +1,5 @@
 import { createHmac, randomBytes } from 'node:crypto';
-import { PASS } from '../functions/_shared/core.ts';
+import { JOB_PASS_PRODUCT, PASS, PASS_PLANS, type PassPlanKey } from '../functions/_shared/core.ts';
 
 // Invented test-mode values only. The signing secret is random per test run, and every
 // signature is computed below with an independent HMAC implementation (node:crypto).
@@ -16,6 +16,26 @@ export const dodoCheckoutUrl = `https://test.checkout.dodopayments.com/session/$
 export function dodoEnvironment(changes: Record<string, string | undefined> = {}): Record<string, string | undefined> {
   return { JOBVANCE_BILLING_ENABLED: 'true', JOBVANCE_PAYMENT_PROVIDER: 'dodo', JOBVANCE_BILLING_MODE: 'test', APP_URL: 'https://staging.fixture.invalid',
     DODO_PAYMENTS_API_KEY: dodoApiKey, DODO_PAYMENTS_WEBHOOK_KEY: dodoWebhookKey, DODO_PRODUCT_ID: dodoProductId, ...changes };
+}
+
+/** Invented test-mode product IDs for the three passes, one per plan. */
+export const dodoPlanProducts: Record<PassPlanKey, string> = { sprint_7d: 'pdt_FixtureSprintPass001', search_30d: 'pdt_FixtureSearchPass001', move_90d: 'pdt_FixtureMovePass00001' };
+
+/** The legacy environment plus the three pass products. */
+export function dodoPassEnvironment(changes: Record<string, string | undefined> = {}): Record<string, string | undefined> {
+  return dodoEnvironment({ DODO_PRODUCT_SPRINT: dodoPlanProducts.sprint_7d, DODO_PRODUCT_SEARCH: dodoPlanProducts.search_30d, DODO_PRODUCT_MOVE: dodoPlanProducts.move_90d, ...changes });
+}
+
+/** A one-time USD product priced exactly at the plan price. */
+export function dodoPlanProduct(plan: PassPlanKey, changes: Record<string, unknown> = {}, price: Record<string, unknown> = {}) {
+  return dodoProduct({ product_id: dodoPlanProducts[plan], name: `Jobvance ${PASS_PLANS[plan].name} pass`, ...changes }, { price: PASS_PLANS[plan].amount, ...price });
+}
+
+/** A pass purchase with tax added on top of the plan price. */
+export function dodoPassPayment(plan: PassPlanKey, changes: Record<string, unknown> = {}) {
+  const tax = Math.round(PASS_PLANS[plan].amount * 0.05);
+  return dodoPayment({ total_amount: PASS_PLANS[plan].amount + tax, tax, product_cart: [{ product_id: dodoPlanProducts[plan], quantity: 1 }],
+    metadata: { user_id: dodoOwner, request_id: dodoRequestId, product: JOB_PASS_PRODUCT, plan }, ...changes });
 }
 
 export function dodoProduct(changes: Record<string, unknown> = {}, price: Record<string, unknown> = {}) {

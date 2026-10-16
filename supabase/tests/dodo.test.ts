@@ -1,11 +1,11 @@
 // @vitest-environment node
 import { randomBytes, webcrypto } from 'node:crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { billingConfiguration, PASS } from '../functions/_shared/core';
-import { dodoCheckoutBody, dodoCheckoutExpiry, dodoLedgerRefundAmount, dodoSigningKey, parseDodoEvent, validateDodoCheckoutSession, validateDodoPayment,
+import { billingConfiguration, JOB_PASS_PRODUCT, PASS, PASS_PLANS } from '../functions/_shared/core';
+import { dodoCheckoutBody, dodoCheckoutExpiry, dodoClaimedPlan, dodoExpectedProduct, dodoLedgerRefundAmount, dodoSigningKey, parseDodoEvent, validateDodoCheckoutSession, validateDodoPayment,
   validateDodoProduct, validateDodoRefund, verifyDodoSignature } from '../functions/_shared/dodo';
-import { dodoCheckoutUrl, dodoEnvelope, dodoEnvironment, dodoOwner, dodoPayment, dodoPaymentId, dodoProduct, dodoProductId, dodoRefund, dodoRequestId,
-  dodoSessionId, dodoSign, dodoWebhookKey } from './dodo-fixtures';
+import { dodoCheckoutUrl, dodoEnvelope, dodoEnvironment, dodoOwner, dodoPassEnvironment, dodoPassPayment, dodoPayment, dodoPaymentId, dodoPlanProduct, dodoPlanProducts, dodoProduct, dodoProductId,
+  dodoRefund, dodoRequestId, dodoSessionId, dodoSign, dodoWebhookKey } from './dodo-fixtures';
 
 beforeAll(() => { Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true }); });
 
@@ -124,7 +124,7 @@ describe('Dodo event parsing and validation', () => {
     expect(() => parseDodoEvent(raw)).toThrow();
   });
   it('accepts a $29 pass with tax added on top or included in the price', () => {
-    expect(validateDodoPayment(dodoPayment(), dodoProductId)).toEqual({ paymentId: dodoPaymentId, sessionId: dodoSessionId, totalAmount: 3045, userId: dodoOwner, requestId: dodoRequestId });
+    expect(validateDodoPayment(dodoPayment(), dodoProductId)).toEqual({ paymentId: dodoPaymentId, sessionId: dodoSessionId, totalAmount: 3045, taxAmount: 145, userId: dodoOwner, requestId: dodoRequestId });
     expect(validateDodoPayment(dodoPayment({ total_amount: 2900, tax: 483 }), dodoProductId).totalAmount).toBe(2900);
     expect(validateDodoPayment(dodoPayment({ total_amount: 2900, tax: null }), dodoProductId).totalAmount).toBe(2900);
   });
@@ -188,5 +188,72 @@ describe('Dodo checkout shape', () => {
     expect(dodoCheckoutExpiry({ created_at: '2026-10-17T10:00:00Z' })).toBe(Date.parse('2026-10-18T10:00:00Z'));
     expect(dodoCheckoutExpiry({ created_at: '2026-10-17T10:00:00Z', checkout_expires_at: '2026-10-17T11:00:00Z' })).toBe(Date.parse('2026-10-17T11:00:00Z'));
     expect(dodoCheckoutExpiry({})).toBeNaN();
+  });
+});
+
+describe('Dodo one-time passes', () => {
+  const config = (changes: Record<string, string | undefined> = {}) => billingConfiguration(key => dodoPassEnvironment(changes)[key]);
+  it('reads one product per plan and keeps the legacy product optional', () => {
+    expect(config()).toMatchObject({ provider: 'dodo', productId: dodoProductId, planProducts: dodoPlanProducts });
+    expect(config({ DODO_PRODUCT_ID: undefined })).toMatchObject({ provider: 'dodo', productId: null, planProducts: dodoPlanProducts });
+    expect(config({ DODO_PRODUCT_ID: undefined, DODO_PRODUCT_SEARCH: undefined, DODO_PRODUCT_MOVE: undefined })?.planProducts).toEqual({ sprint_7d: dodoPlanProducts.sprint_7d });
+  });
+  it.each([
+    { DODO_PRODUCT_SPRINT: 'pdt_../../payments' }, { DODO_PRODUCT_SEARCH: 'pri_wrongprovider' }, { DODO_PRODUCT_MOVE: 'pdt_has space' },
+    { DODO_PRODUCT_MOVE: dodoPlanProducts.sprint_7d }, { DODO_PRODUCT_ID: dodoPlanProducts.search_30d },
+    { DODO_PRODUCT_ID: undefined, DODO_PRODUCT_SPRINT: undefined, DODO_PRODUCT_SEARCH: undefined, DODO_PRODUCT_MOVE: undefined },
+  ])('fails closed on a malformed, shared or missing product %#', change => expect(config(change)).toBeNull());
+  it('keeps every live-mode gate for pass products', () => {
+    expect(config({ JOBVANCE_BILLING_MODE: 'live', APP_URL: 'https://jobvance.io', SUPPORT_EMAIL: 'support@example.invalid', JOBVANCE_LIVE_BILLING_REVIEWED: 'true',
+      JOBVANCE_COMMERCIAL_TERMS_REVIEWED: 'true', JOBVANCE_SELLER_ELIGIBILITY_REVIEWED: 'true', DODO_PRODUCT_ID: undefined })).toBeNull();
+  });
+  it('accepts each plan product only at exactly its own one-time USD price', () => {
+    for (const plan of ['sprint_7d', 'search_30d', 'move_90d'] as const) {
+      const { amount } = PASS_PLANS[plan];
+      expect(validateDodoProduct(dodoPlanProduct(plan), dodoPlanProducts[plan], amount).product_id).toBe(dodoPlanProducts[plan]);
+      expect(() => validateDodoProduct(dodoPlanProduct(plan, {}, { price: amount + 100 }), dodoPlanProducts[plan], amount)).toThrow(`one-time USD $${amount / 100}`);
+      expect(() => validateDodoProduct(dodoPlanProduct(plan, {}, { currency: 'EUR' }), dodoPlanProducts[plan], amount)).toThrow();
+      expect(() => validateDodoProduct(dodoPlanProduct(plan, { is_recurring: true }), dodoPlanProducts[plan], amount)).toThrow();
+      expect(() => validateDodoProduct(dodoPlanProduct(plan), dodoPlanProducts[plan], PASS.amount)).toThrow();
+    }
+  });
+  it('builds a server-fixed pass checkout from the plan key only', () => {
+    const passConfig = config();
+    if (passConfig?.provider !== 'dodo') throw new Error('Dodo fixture configuration expected.');
+    expect(dodoExpectedProduct(passConfig, 'move_90d')).toEqual({ productId: dodoPlanProducts.move_90d, amount: 3900 });
+    expect(dodoCheckoutBody(passConfig, dodoOwner, dodoRequestId, 'search_30d')).toEqual({
+      product_cart: [{ product_id: dodoPlanProducts.search_30d, quantity: 1 }],
+      return_url: 'https://staging.fixture.invalid/applications?checkout=success',
+      cancel_url: 'https://staging.fixture.invalid/pricing?checkout=cancelled',
+      metadata: { user_id: dodoOwner, request_id: dodoRequestId, product: JOB_PASS_PRODUCT, plan: 'search_30d' },
+      feature_flags: { allow_discount_code: false, allow_currency_selection: false },
+    });
+    const legacyOnly = billingConfiguration(key => dodoEnvironment()[key]);
+    if (legacyOnly?.provider !== 'dodo') throw new Error('Dodo fixture configuration expected.');
+    expect(() => dodoCheckoutBody(legacyOnly, dodoOwner, dodoRequestId, 'sprint_7d')).toThrow('not on sale');
+  });
+  it('reads which product a payment claims without trusting it for the grant', () => {
+    expect(dodoClaimedPlan({ product: PASS.product })).toBeNull();
+    expect(dodoClaimedPlan({ product: JOB_PASS_PRODUCT, plan: 'move_90d' })).toBe('move_90d');
+    for (const other of [null, [], 'text', {}, { product: 'another' }, { order: 'x' }]) expect(dodoClaimedPlan(other)).toBeUndefined();
+    for (const forged of [{ product: JOB_PASS_PRODUCT }, { product: JOB_PASS_PRODUCT, plan: 'lifetime' }, { product: JOB_PASS_PRODUCT, plan: 'toString' }, { product: PASS.product, plan: 'move_90d' }]) {
+      expect(() => dodoClaimedPlan(forged)).toThrow('Unknown payment product');
+    }
+  });
+  it('verifies a pass payment against its plan price, before or after tax', () => {
+    expect(validateDodoPayment(dodoPassPayment('sprint_7d'), dodoPlanProducts.sprint_7d, 900, 'sprint_7d')).toMatchObject({ totalAmount: 945, taxAmount: 45, userId: dodoOwner });
+    expect(validateDodoPayment(dodoPassPayment('move_90d', { total_amount: 3900, tax: 650 }), dodoPlanProducts.move_90d, 3900, 'move_90d').totalAmount).toBe(3900);
+    for (const change of [{ total_amount: 2900, tax: 0 }, { total_amount: 1000, tax: 50 }, { product_cart: [{ product_id: dodoPlanProducts.move_90d, quantity: 1 }] },
+      { metadata: { user_id: dodoOwner, request_id: dodoRequestId, product: JOB_PASS_PRODUCT, plan: 'move_90d' } }, { metadata: { user_id: dodoOwner, request_id: dodoRequestId, product: PASS.product } }]) {
+      expect(() => validateDodoPayment(dodoPassPayment('sprint_7d', change), dodoPlanProducts.sprint_7d, 900, 'sprint_7d')).toThrow();
+    }
+    // A pass payment never verifies as the legacy pack, and the legacy pack never verifies as a pass.
+    expect(() => validateDodoPayment(dodoPassPayment('move_90d', { total_amount: 2900, tax: 0 }), dodoPlanProducts.move_90d)).toThrow();
+    expect(() => validateDodoPayment(dodoPayment(), dodoProductId, PASS.amount, 'sprint_7d')).toThrow();
+  });
+  it('records pass refunds in plan-price units', () => {
+    const payment = validateDodoPayment(dodoPassPayment('move_90d'), dodoPlanProducts.move_90d, 3900, 'move_90d');
+    expect(dodoLedgerRefundAmount(validateDodoRefund(dodoRefund({ amount: payment.totalAmount })), payment, 3900)).toBe(3900);
+    expect(dodoLedgerRefundAmount(validateDodoRefund(dodoRefund({ amount: 1000, is_partial: true })), payment, 3900)).toBe(952);
   });
 });

@@ -325,7 +325,7 @@ describe("Real workspace journey and truthful failures", () => {
   it.each(['stripe', 'paddle'] as const)('does not expose checkout even when the backend reports %s billing ready', async provider => {
     state.data.entitlement = {creditsRemaining:0,expiresAt:null,billingConfigured:true,billingMode:'live',paymentProvider:provider};
     mount('/dashboard?tab=billing');
-    await screen.findByText('Jobvance is free while in beta.');
+    await screen.findByText('Free to start: 3 tailored CVs a month. Passes from $9, one-time.');
     expect(screen.getByRole('button', {name:'Access'})).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', {name:'Check a CV for free'})).toHaveAttribute('href', '/check');
     expect(screen.getByText(/0 saved preparations available/)).toHaveTextContent('Previously approved documents remain available to download.');

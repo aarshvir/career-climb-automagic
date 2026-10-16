@@ -2,3 +2,5 @@
 .ah-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
 .ah-actions .ah-subtle{flex-basis:100%;margin:0}
 .ah-source-status--ready{padding:10px 16px;align-items:center;gap:16px;font-size:.8rem;color:#556b75;background:transparent;border-color:#e2e9e9}
+.ah-plan{margin:-14px 0 22px;font-size:.9rem;color:#33505d}
+.ah-plan a{color:inherit;text-decoration:underline;text-underline-offset:3px}

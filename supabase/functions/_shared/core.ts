@@ -3,7 +3,24 @@ export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message); }
 }
 
+// Legacy pack: still honoured when configured, but no longer offered anywhere in the UI.
 export const PASS = { product: 'jobvance_ten_pack_v1', amount: 2900, currency: 'usd', credits: 10, days: 30 } as const;
+/**
+ * One-time job-search passes (USD cents). These mirror the rows seeded into public.jobvance_pass_plans
+ * exactly; the database row decides what a paid order grants, and these values decide what is sold.
+ */
+export const PASS_PLANS = {
+  sprint_7d: { name: 'Sprint', amount: 900, days: 7, tailorQuota: 25, productEnv: 'DODO_PRODUCT_SPRINT' },
+  search_30d: { name: 'Job Search', amount: 1900, days: 30, tailorQuota: 100, productEnv: 'DODO_PRODUCT_SEARCH' },
+  move_90d: { name: 'Career Move', amount: 3900, days: 90, tailorQuota: 300, productEnv: 'DODO_PRODUCT_MOVE' },
+} as const;
+export type PassPlanKey = keyof typeof PASS_PLANS;
+export const PASS_PLAN_KEYS = Object.keys(PASS_PLANS) as PassPlanKey[];
+export function isPassPlan(value: unknown): value is PassPlanKey { return typeof value === 'string' && Object.prototype.hasOwnProperty.call(PASS_PLANS, value); }
+/** Checkout metadata marker for a pass; the legacy pack keeps PASS.product. */
+export const JOB_PASS_PRODUCT = 'jobvance_job_pass_v1';
+/** AI-tailoring allowances passed to jobvance_tailor_reserve and jobvance_get_tailor_access. */
+export const TAILOR_LIMITS = { freeMonthly: 3, passDaily: 40, guestDaily: 1, guestGlobalDaily: 200 } as const;
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function objectInput(value: unknown): Record<string, unknown> {
@@ -85,7 +102,8 @@ export async function fingerprint(input: TailorInput, original: string): Promise
 interface BillingBase { mode: 'test' | 'live'; secretKey: string; webhookSecret: string; appUrl: string }
 export interface StripeBillingConfig extends BillingBase { provider: 'stripe' }
 export interface PaddleBillingConfig extends BillingBase { provider: 'paddle'; priceId: string }
-export interface DodoBillingConfig extends BillingBase { provider: 'dodo'; productId: string; apiBaseUrl: string }
+/** productId is the legacy $29 pack (optional); planProducts maps each pass to its own Dodo product. */
+export interface DodoBillingConfig extends BillingBase { provider: 'dodo'; productId: string | null; planProducts: Partial<Record<PassPlanKey, string>>; apiBaseUrl: string }
 export type BillingConfig = StripeBillingConfig | PaddleBillingConfig | DodoBillingConfig;
 // Dodo documents one API host per mode; a key created in one mode never authenticates on the other.
 export const DODO_API_BASE_URL = { test: 'https://test.dodopayments.com', live: 'https://live.dodopayments.com' } as const;
@@ -108,17 +126,22 @@ export function billingConfiguration(get: (key: string) => string | undefined): 
   const secretKey = get(provider === 'paddle' ? 'PADDLE_API_KEY' : provider === 'dodo' ? 'DODO_PAYMENTS_API_KEY' : 'STRIPE_SECRET_KEY') ?? '';
   const webhookSecret = get(provider === 'paddle' ? 'PADDLE_WEBHOOK_SECRET' : provider === 'dodo' ? 'DODO_PAYMENTS_WEBHOOK_KEY' : 'STRIPE_WEBHOOK_SECRET') ?? '';
   const priceId = get('PADDLE_PRICE_ID') ?? '';
-  const productId = get('DODO_PRODUCT_ID') ?? '';
+  const productId = get('DODO_PRODUCT_ID') || null;
+  const planProducts: Partial<Record<PassPlanKey, string>> = {};
+  for (const key of PASS_PLAN_KEYS) { const value = get(PASS_PLANS[key].productEnv); if (value) planProducts[key] = value; }
+  // Every configured Dodo product must be well formed and distinct, and at least one must exist.
+  const productIds = [productId, ...Object.values(planProducts)].filter((value): value is string => !!value);
   const appUrl = get('APP_URL') ?? '';
   if (mode !== 'test' && mode !== 'live') return null;
   if (provider === 'stripe' && (!secretKey.startsWith(mode === 'test' ? 'sk_test_' : 'sk_live_') || !webhookSecret.startsWith('whsec_'))) return null;
   if (provider === 'paddle' && (!secretKey.startsWith(mode === 'test' ? 'pdl_sdbx_apikey_' : 'pdl_live_apikey_') || webhookSecret.length < 16 || webhookSecret.length > 512 || !/^pri_[a-z\d]{26}$/.test(priceId))) return null;
-  if (provider === 'dodo' && (!isDodoApiKey(secretKey, mode) || !isDodoWebhookKey(webhookSecret) || !DODO_PRODUCT_ID.test(productId))) return null;
+  if (provider === 'dodo' && (!isDodoApiKey(secretKey, mode) || !isDodoWebhookKey(webhookSecret) || productIds.length === 0 ||
+    productIds.some(value => !DODO_PRODUCT_ID.test(value)) || new Set(productIds).size !== productIds.length)) return null;
   if (mode === 'live' && (get('JOBVANCE_LIVE_BILLING_REVIEWED') !== 'true' || get('JOBVANCE_COMMERCIAL_TERMS_REVIEWED') !== 'true' || get('JOBVANCE_SELLER_ELIGIBILITY_REVIEWED') !== 'true' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(get('SUPPORT_EMAIL') ?? '') || (provider === 'paddle' && get('JOBVANCE_PADDLE_MERCHANT_APPROVAL_REVIEWED') !== 'true') || (provider === 'dodo' && get('JOBVANCE_DODO_MERCHANT_APPROVAL_REVIEWED') !== 'true'))) return null;
   try {
     const url = new URL(appUrl);
     if (url.username || url.password || url.pathname !== '/' || url.search || url.hash || (url.protocol !== 'https:' && !(mode === 'test' && url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname)))) return null;
-    if (provider === 'dodo') return { provider, mode, secretKey, webhookSecret, appUrl: url.origin, productId, apiBaseUrl: DODO_API_BASE_URL[mode] };
+    if (provider === 'dodo') return { provider, mode, secretKey, webhookSecret, appUrl: url.origin, productId, planProducts, apiBaseUrl: DODO_API_BASE_URL[mode] };
     return provider === 'paddle' ? { provider, mode, secretKey, webhookSecret, appUrl: url.origin, priceId } : { provider, mode, secretKey, webhookSecret, appUrl: url.origin };
   } catch { return null; }
 }

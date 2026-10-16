@@ -65,8 +65,9 @@ for(const page of publicRender.pages){
   assert.equal(response.headers.get('X-Robots-Tag'),null);
   if(page.path==='/') assert.ok(!/href="\/check\?audience=/.test(html),'Examples must not select a persona for a neutral visitor.');
   if(page.path==='/pricing') {
-    assert.ok(html.includes('Jobvance is free while in beta.'));
-    assert.ok(!/\$15|\$29|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable purchases.');
+    assert.ok(html.includes('Free to start: 3 tailored CVs a month. Passes from $9, one-time.'));
+    for(const price of ['$9','$19','$39'])assert.ok(html.includes(price),'The public offer must show each pass price.');
+    assert.ok(!/\$15|\$29|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable or legacy purchases.');
   }
   if(page.path==='/check') {
     assert.ok(html.includes('Compare your CV with a job description'),'The initial check page must explain its purpose before JavaScript/auth resolves.');

@@ -1,4 +1,4 @@
-import { ApiError, PASS, paymentMetadata, type DodoBillingConfig } from './core.ts';
+import { ApiError, JOB_PASS_PRODUCT, objectInput, PASS, PASS_PLANS, uuid, type DodoBillingConfig, type PassPlanKey } from './core.ts';
 
 // Dodo publishes no identifier grammar. These follow the prefixes in its documented examples
 // (pay_…, ref_…, cks_…) and bound the rest to a URL- and SQL-safe character set.
@@ -19,24 +19,35 @@ function record(value: unknown, error: () => ApiError): Record<string, unknown> 
 }
 const absent = (value: unknown) => value === null || value === undefined;
 
-/** The configured product must be the one-time, base-priced USD $29 pass before any checkout is opened. */
-export function validateDodoProduct(value: unknown, productId: string): Record<string, unknown> {
-  const invalid = () => new ApiError(503, 'INVALID_PASS_PRICE', 'The configured pass must be a one-time USD $29 product.');
+/** The configured product must be one-time and base-priced at exactly the expected USD amount before any checkout is opened. */
+export function validateDodoProduct(value: unknown, productId: string, amount: number = PASS.amount): Record<string, unknown> {
+  const invalid = () => new ApiError(503, 'INVALID_PASS_PRICE', `The configured pass must be a one-time USD $${amount / 100} product.`);
   const product = record(value, invalid);
   const price = record(product.price, invalid);
-  if (product.product_id !== productId || product.is_recurring !== false || !absent(product.pricing_mode) || price.type !== 'one_time_price' || price.price !== PASS.amount ||
+  if (product.product_id !== productId || product.is_recurring !== false || !absent(product.pricing_mode) || price.type !== 'one_time_price' || price.price !== amount ||
     price.currency !== 'USD' || price.pay_what_you_want === true || price.purchasing_power_parity === true || !(absent(price.discount_bps) || price.discount_bps === 0) ||
     !(absent(price.discount) || price.discount === 0)) throw invalid();
   return product;
 }
 
-/** Server-fixed checkout request: the browser can choose neither the product, the quantity nor the identity. */
-export function dodoCheckoutBody(config: DodoBillingConfig, userId: string, requestId: string): Record<string, unknown> {
+/** The Dodo product and base price a checkout or payment must match: the legacy pack, or one pass plan. */
+export function dodoExpectedProduct(config: DodoBillingConfig, plan: PassPlanKey | null): { productId: string; amount: number } {
+  const productId = plan ? config.planProducts[plan] : config.productId;
+  if (!productId) throw new ApiError(503, 'BILLING_UNAVAILABLE', plan ? 'This pass is not on sale yet.' : 'Payments are not enabled yet.');
+  return { productId, amount: plan ? PASS_PLANS[plan].amount : PASS.amount };
+}
+
+/**
+ * Server-fixed checkout request: the browser can choose neither the product, the price, the quantity nor
+ * the identity. A pass names only its plan key; the product and price come from server configuration.
+ */
+export function dodoCheckoutBody(config: DodoBillingConfig, userId: string, requestId: string, plan: PassPlanKey | null = null): Record<string, unknown> {
+  const { productId } = dodoExpectedProduct(config, plan);
   return {
-    product_cart: [{ product_id: config.productId, quantity: 1 }],
-    return_url: `${config.appUrl}/dashboard?checkout=success`,
-    cancel_url: `${config.appUrl}/dashboard?checkout=cancelled`,
-    metadata: { user_id: userId, request_id: requestId, product: PASS.product },
+    product_cart: [{ product_id: productId, quantity: 1 }],
+    return_url: plan ? `${config.appUrl}/applications?checkout=success` : `${config.appUrl}/dashboard?checkout=success`,
+    cancel_url: plan ? `${config.appUrl}/pricing?checkout=cancelled` : `${config.appUrl}/dashboard?checkout=cancelled`,
+    metadata: plan ? { user_id: userId, request_id: requestId, product: JOB_PASS_PRODUCT, plan } : { user_id: userId, request_id: requestId, product: PASS.product },
     // Codes and currency switching would change the amount that the webhook verifies.
     feature_flags: { allow_discount_code: false, allow_currency_selection: false },
   };
@@ -105,12 +116,35 @@ export function parseDodoEvent(raw: string): DodoEvent {
   return { type: event.type, created, data: record(event.data, () => new ApiError(400, 'INVALID_PAYMENT_EVENT', 'Payment event cannot be verified.')) };
 }
 
-export interface VerifiedDodoPayment { paymentId: string; sessionId: string; totalAmount: number; userId: string; requestId: string }
 /**
- * A succeeded USD purchase of exactly one configured pass, made through a checkout session, whose
- * price before tax is $29. Dodo is the merchant of record and may add tax on top or include it.
+ * Which of our products a payment's metadata claims: null for the legacy pack, a plan key for a pass,
+ * undefined when the payment is not ours. The claim only selects what to check the payment against;
+ * the bound order decides what is granted.
  */
-export function validateDodoPayment(value: unknown, productId: string): VerifiedDodoPayment {
+export function dodoClaimedPlan(metadata: unknown): PassPlanKey | null | undefined {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return undefined;
+  const fields = metadata as Record<string, unknown>;
+  const invalid = () => new ApiError(400, 'INVALID_PAYMENT', 'Unknown payment product.');
+  if (fields.product === PASS.product) { if (fields.plan !== undefined) throw invalid(); return null; }
+  if (fields.product === JOB_PASS_PRODUCT) { const plan = fields.plan; if (typeof plan !== 'string' || !Object.prototype.hasOwnProperty.call(PASS_PLANS, plan)) throw invalid(); return plan as PassPlanKey; }
+  return undefined;
+}
+
+function dodoPaymentIdentity(value: unknown, plan: PassPlanKey | null): { userId: string; requestId: string } {
+  const metadata = objectInput(value);
+  if (plan === null ? metadata.product !== PASS.product || metadata.plan !== undefined : metadata.product !== JOB_PASS_PRODUCT || metadata.plan !== plan) {
+    throw new ApiError(400, 'INVALID_PAYMENT', 'Unknown payment product.');
+  }
+  return { userId: uuid(metadata.user_id, 'Payment user'), requestId: uuid(metadata.request_id, 'Payment request') };
+}
+
+export interface VerifiedDodoPayment { paymentId: string; sessionId: string; totalAmount: number; taxAmount: number; userId: string; requestId: string }
+/**
+ * A succeeded USD purchase of exactly one configured product, made through a checkout session, whose
+ * price before tax is the expected amount ($29 for the legacy pack, the plan price for a pass). Dodo is
+ * the merchant of record and may add tax on top or include it.
+ */
+export function validateDodoPayment(value: unknown, productId: string, amount: number = PASS.amount, plan: PassPlanKey | null = null): VerifiedDodoPayment {
   const invalid = () => new ApiError(400, 'INVALID_PAYMENT', 'The payment does not match this one-time pass.');
   const payment = record(value, invalid);
   const cart = payment.product_cart;
@@ -121,8 +155,8 @@ export function validateDodoPayment(value: unknown, productId: string): Verified
     !absent(payment.discount_id) || (Array.isArray(payment.discounts) && payment.discounts.length > 0) || !Array.isArray(cart) || cart.length !== 1) throw invalid();
   const item = record(cart[0], invalid);
   if (item.product_id !== productId || item.quantity !== 1) throw invalid();
-  if (typeof total !== 'number' || typeof tax !== 'number' || !Number.isSafeInteger(total) || !Number.isSafeInteger(tax) || tax < 0 || (total !== PASS.amount && total - tax !== PASS.amount)) throw invalid();
-  return { paymentId: payment.payment_id, sessionId: payment.checkout_session_id, totalAmount: total, ...paymentMetadata(payment.metadata) };
+  if (typeof total !== 'number' || typeof tax !== 'number' || !Number.isSafeInteger(total) || !Number.isSafeInteger(tax) || tax < 0 || (total !== amount && total - tax !== amount)) throw invalid();
+  return { paymentId: payment.payment_id, sessionId: payment.checkout_session_id, totalAmount: total, taxAmount: tax, ...dodoPaymentIdentity(payment.metadata, plan) };
 }
 
 export interface VerifiedDodoRefund { refundId: string; paymentId: string; amount: number }
@@ -135,10 +169,10 @@ export function validateDodoRefund(value: unknown): VerifiedDodoRefund {
 }
 
 /**
- * The ledger records refunds in pass-price units (at most $29 before tax), as Paddle's subtotal and
- * Stripe's untaxed amount do. Any refund still revokes the unused paid grant in full.
+ * The ledger records refunds in price units before tax (at most the product's price), as Paddle's
+ * subtotal and Stripe's untaxed amount do. Any refund still revokes the unused grant or pass in full.
  */
-export function dodoLedgerRefundAmount(refund: VerifiedDodoRefund, payment: VerifiedDodoPayment): number {
+export function dodoLedgerRefundAmount(refund: VerifiedDodoRefund, payment: VerifiedDodoPayment, price: number = PASS.amount): number {
   if (refund.paymentId !== payment.paymentId || refund.amount > payment.totalAmount) throw new ApiError(400, 'INVALID_REFUND', 'The refund does not match this pass.');
-  return Math.max(1, Math.floor(refund.amount * PASS.amount / payment.totalAmount));
+  return Math.max(1, Math.floor(refund.amount * price / payment.totalAmount));
 }

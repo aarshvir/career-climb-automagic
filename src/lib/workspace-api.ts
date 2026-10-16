@@ -6,6 +6,7 @@ import {
   type TrackedApplication,
 } from "@/lib/cv-database";
 import { listCvDocuments } from "@/lib/cv-documents";
+import { tailorAccessSchema } from "@/lib/tailor-access";
 
 export const applicationStatuses = [
   "saved",
@@ -22,6 +23,8 @@ export const entitlementSchema = z.object({
   billingConfigured: z.boolean(),
   billingMode: z.enum(["test", "live"]).nullable().optional(),
   paymentProvider: z.enum(["paddle", "stripe", "dodo"]).nullable().optional(),
+  // Free AI-tailored CVs left this month and any active passes; null when it could not be read.
+  tailorAccess: tailorAccessSchema.nullable().optional(),
 });
 export type Entitlement = z.infer<typeof entitlementSchema>;
 export type WorkspaceAccess = {

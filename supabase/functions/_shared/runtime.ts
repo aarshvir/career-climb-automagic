@@ -72,6 +72,7 @@ export function databaseError(error: { message: string; code?: string } | null):
     ['CV_CHANGED', 409, 'The CV changed while the pack was being created. Try again.'],
     ['INVALID_PACK', 400, 'The pack request is invalid.'],
     ['CHECKOUT_LIMIT', 429, 'Too many new checkout requests. Try again tomorrow or reuse your existing checkout.'],
+    ['INVALID_PLAN', 400, 'That pass is not available.'],
   ];
   for (const [code, status, message] of known) if (error.message.includes(code)) throw new ApiError(status, code, message);
   // Do not return SQL internals, processor payloads or personal information.

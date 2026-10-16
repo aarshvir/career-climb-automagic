@@ -25,7 +25,7 @@ export class TailorUnavailable extends Error {
 }
 
 const messages: Record<number, string> = {
-  429: 'You have reached today’s AI tailoring limit. Your CV comparison and editing still work.',
+  429: 'You have reached your AI tailoring limit for now. Compare without AI and editing still work. Passes start at $9 on the Pricing page.',
   503: 'AI tailoring is unavailable right now. Your CV comparison still works.',
 };
 

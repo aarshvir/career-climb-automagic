@@ -41,19 +41,36 @@ describe('audience entry points', () => {
   });
 });
 
-describe('current free offer', () => {
-  it('offers useful check access without speculative prices, quotas or disabled purchase controls', () => {
+describe('current offer', () => {
+  it('starts free and offers only the three one-time passes, never the legacy pack or a subscription', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: 'Your CV and one job' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Keep your job search organised' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
-    expect(screen.getByRole('link', { name: 'See what Job Loop includes' })).toHaveAttribute('href', '/job-loop');
+    expect(screen.getAllByRole('heading', { level: 2 }).slice(0, 4).map(heading => heading.textContent)).toEqual(['Free', 'Sprint', 'Job Search', 'Career Move']);
+    expect(screen.getByRole('link', { name: /Check my CV against a job/ })).toHaveAttribute('href', '/check');
+    expect(screen.queryByText(/\$15|\$29|ten application packs|per month, billed|cancel anytime|free trial/i)).not.toBeInTheDocument();
+    expect(screen.getByText('One-time payment. No subscription, nothing renews.')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.queryByText(/\$15|\$29|20 reviewed|30 scheduled|60 per month|proposed future tier/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/Cloud preparation is limited to ten accounts/)).toBeInTheDocument();
-    expect(screen.getByText(/no guaranteed daily AI allowance/)).toBeInTheDocument();
-    expect(screen.getByText(/does not become a paid subscription automatically/)).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /buy|subscribe|pay/i })).not.toBeInTheDocument();
+  });
+  it('states the new free allowance everywhere the old beta line was', () => {
+    render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
+    expect(screen.getByText('Free to start: 3 tailored CVs a month. Passes from $9, one-time.')).toBeInTheDocument();
+    expect(screen.queryByText(/free while in beta/i)).not.toBeInTheDocument();
+    cleanup();
+    render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
+    expect(screen.getByText('Free to start: 3 tailored CVs a month. Passes from $9, one-time.')).toBeInTheDocument();
+    expect(screen.queryByText(/2 tailored CVs a day|8 when signed in|during beta/i)).not.toBeInTheDocument();
+  });
+  it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
+    render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);
+    expect(screen.getByRole('heading', { name: 'Payments' }).nextElementSibling).toHaveTextContent(/Dodo Payments, which acts as our merchant of record and payment processor/);
+    expect(screen.queryByText(/Paddle or Stripe/)).not.toBeInTheDocument();
+    cleanup();
+    render(<HelmetProvider><MemoryRouter><ProductPage kind="refund" /></MemoryRouter></HelmetProvider>);
+    expect(screen.getByRole('heading', { name: '7-day money-back promise' }).nextElementSibling).toHaveTextContent(/within 7 days of buying it.*fewer than 5 tailored CVs/);
+    expect(screen.getByRole('heading', { name: 'What a refund does' }).nextElementSibling).toHaveTextContent(/stops working straight away.*partial refund/);
+    cleanup();
+    render(<HelmetProvider><MemoryRouter><ProductPage kind="terms" /></MemoryRouter></HelmetProvider>);
+    expect(screen.getByRole('heading', { name: 'Passes' }).nextElementSibling).toHaveTextContent(/Sprint \(\$9, 7 days, 25 AI-tailored CVs\).*Nothing renews/);
+    expect(screen.queryByText(/No paid plan is currently offered for sale/)).not.toBeInTheDocument();
   });
 });
 

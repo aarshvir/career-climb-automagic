@@ -1,5 +1,5 @@
-import { ApiError, objectInput, PASS, uuid } from '../_shared/core.ts';
-import { dodoCheckoutBody, dodoCheckoutExpiry, validateDodoCheckoutSession, validateDodoProduct } from '../_shared/dodo.ts';
+import { ApiError, isPassPlan, objectInput, PASS, uuid, type PassPlanKey } from '../_shared/core.ts';
+import { dodoCheckoutBody, dodoCheckoutExpiry, dodoExpectedProduct, validateDodoCheckoutSession, validateDodoProduct } from '../_shared/dodo.ts';
 import { validatePaddlePrice, validatePaddleTransaction } from '../_shared/paddle.ts';
 import { authenticatedClient, databaseError, dodoRequest, getBilling, json, paddleRequest, readJson, serve, stripeRequest } from '../_shared/runtime.ts';
 
@@ -7,10 +7,23 @@ serve(async req => {
   const { admin, user } = await authenticatedClient(req);
   const billing = getBilling();
   if (!billing) throw new ApiError(503, 'BILLING_UNAVAILABLE', 'Payments are not enabled yet.');
-  const requestId = uuid(objectInput(await readJson(req)).requestId, 'Request ID');
+  const input = objectInput(await readJson(req));
+  const requestId = uuid(input.requestId, 'Request ID');
+  // A pass names only its plan key. Omitted means the legacy pack, exactly as before.
+  let plan: PassPlanKey | null = null;
+  if (input.plan !== undefined && input.plan !== null) {
+    if (!isPassPlan(input.plan)) throw new ApiError(400, 'INVALID_INPUT', 'Choose one of the listed passes.');
+    plan = input.plan;
+  }
+  if (plan && billing.provider !== 'dodo') throw new ApiError(503, 'BILLING_UNAVAILABLE', 'Passes are not on sale yet.');
   if (billing.provider === 'paddle') validatePaddlePrice(await paddleRequest(billing, `prices/${billing.priceId}`), billing.priceId);
-  if (billing.provider === 'dodo') validateDodoProduct(await dodoRequest(billing, `products/${billing.productId}`), billing.productId);
-  const { data: order, error } = await admin.rpc('jobvance_begin_checkout', { p_user_id: user.id, p_request_id: requestId, p_provider: billing.provider, p_billing_mode: billing.mode });
+  if (billing.provider === 'dodo') {
+    // Fail closed unless the configured product is a one-time USD price equal to this plan's price.
+    const expected = dodoExpectedProduct(billing, plan);
+    validateDodoProduct(await dodoRequest(billing, `products/${expected.productId}`), expected.productId, expected.amount);
+  }
+  const planArgument = plan ? { p_plan: plan } : {};
+  const { data: order, error } = await admin.rpc('jobvance_begin_checkout', { p_user_id: user.id, p_request_id: requestId, p_provider: billing.provider, p_billing_mode: billing.mode, ...planArgument });
   databaseError(error);
   if (order.status !== 'created') throw new ApiError(409, 'CHECKOUT_FINISHED', 'This checkout was already completed. Refresh your pack balance.');
   if (billing.provider === 'paddle') {
@@ -39,9 +52,9 @@ serve(async req => {
     if (!order.creationClaimAcquired) throw new ApiError(409, 'CHECKOUT_RECOVERY_REQUIRED', 'This checkout is still being prepared or needs recovery. Retry shortly; if it remains unavailable, start a new checkout or contact support.');
     // The durable claim prevents concurrent duplicate sessions. Dodo documents no idempotency key
     // for checkout sessions, so an ambiguous failure is never retried against the provider.
-    const session = validateDodoCheckoutSession(await dodoRequest(billing, 'checkouts', dodoCheckoutBody(billing, user.id, requestId)), billing.mode);
+    const session = validateDodoCheckoutSession(await dodoRequest(billing, 'checkouts', dodoCheckoutBody(billing, user.id, requestId, plan)), billing.mode);
     const { error: savedError } = await admin.rpc('jobvance_finish_checkout', { p_user_id: user.id, p_request_id: requestId, p_session_id: session.sessionId,
-      p_url: session.url, p_expires_at: null, p_provider: billing.provider, p_billing_mode: billing.mode });
+      p_url: session.url, p_expires_at: null, p_provider: billing.provider, p_billing_mode: billing.mode, ...planArgument });
     databaseError(savedError);
     return json(req, { provider: 'dodo', url: session.url, sessionId: session.sessionId, billingMode: billing.mode });
   }

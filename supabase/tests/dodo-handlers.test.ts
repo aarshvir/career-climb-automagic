@@ -194,7 +194,8 @@ describe('dodo-webhook handler', () => {
     expect(state.orderQueries[0]).toEqual({ table: 'billing_orders', user_id: dodoOwner, request_id: dodoRequestId, provider: 'dodo', billing_mode: 'test', checkout_session_id: dodoSessionId });
     expect(rpc('jobvance_apply_payment_event')[0].args).toEqual({ p_event_id: 'dodo_msg_FixturePaidEvent', p_event_type: 'payment.succeeded',
       p_event_created: Math.floor(Date.parse('2026-10-17T10:00:00Z') / 1000), p_action: 'paid', p_user_id: dodoOwner, p_request_id: dodoRequestId,
-      p_payment_intent: `dodo_${dodoPaymentId}`, p_session_id: dodoSessionId, p_refund_amount: 0, p_provider: 'dodo', p_billing_mode: 'test', p_refund_id: null });
+      p_payment_intent: `dodo_${dodoPaymentId}`, p_session_id: dodoSessionId, p_refund_amount: 0, p_provider: 'dodo', p_billing_mode: 'test', p_refund_id: null,
+      p_paid_amount: 3045, p_paid_tax: 145 });
     expect(fetches).toHaveLength(0);
   });
   it('rejects a payment that our backend did not create and bind', async () => {

@@ -22,7 +22,7 @@ import { createFreeCheckCvBlob, createFreeCheckReportText } from "@/lib/free-che
 import { downloadBlob, safeDocumentFilename } from "@/lib/document-download";
 import { trackFreeCheck } from "@/lib/free-check-tracking";
 import { createReviewedPdfPreview, type DocumentFormat } from "@/lib/document-export";
-import { companyFromVacancy, requestTailoredCv, roleFromVacancy, type TailorChange } from "@/lib/cv-tailor-api";
+import { companyFromVacancy, requestTailoredCv, roleFromVacancy, TailorUnavailable, type TailorChange } from "@/lib/cv-tailor-api";
 import { staticPageMeta } from "@/lib/public-site-meta";
 import "./CvCheck.css";
 
@@ -47,6 +47,8 @@ const statusStyles: Record<EvidenceStatus, string> = {
 };
 type ApprovedCheck = { draft: CheckDraft; report: EvidenceReport; key: string; requestId: string };
 type Tailoring = { changes: (TailorChange & { reverted?: boolean })[]; questions: string[]; rejectedCount: number; ownerId: string | null };
+// Allowance limits that a one-time pass can lift (or that explain the passes on offer).
+const PASS_OFFER_CODES = new Set(['TAILOR_FREE_LIMIT', 'TAILOR_GUEST_LIMIT', 'TAILOR_PASS_DAILY_LIMIT']);
 type SourceUndo = { text: string; reviewedText?: string; ownerId: string | null };
 type ApplicationUndo = { draft: CheckDraft; filename: string; pageTarget: 1 | 2; ownerId: string | null; sourceUndo: SourceUndo | null; reuseMode: boolean; saveReference: CheckSaveReference | null };
 type SourceReplacementUndo = { draft: CheckDraft; filename: string; pageTarget: 1 | 2; ownerId: string | null; step: number; cvReady: boolean; reviewStarted: boolean; report: EvidenceReport | null; reuseMode: boolean; reuseInspect: boolean; sourceUndo: SourceUndo | null; applicationUndo: ApplicationUndo | null; saveReference: CheckSaveReference | null };
@@ -179,6 +181,8 @@ function CvCheckWorkspace() {
     saved.job_title === approved.draft.jobTitle && saved.company === approved.draft.company &&
     saved.job_description === approved.draft.jobDescription && saved.original_text === approved.draft.sourceText && saved.reviewed_text === approved.draft.reviewedText;
   const [tailoring, setTailoring] = useState<Tailoring | null>(null), [tailorUndo, setTailorUndo] = useState<{ text: string; ownerId: string | null } | null>(null);
+  // The limit notice that should carry a link to passes; any other notice replaces it.
+  const [passOfferNotice, setPassOfferNotice] = useState("");
   const [roleTouched, setRoleTouched] = useState(!!initialDraft.jobTitle);
   const autoPreviewKey = useRef('');
   const visibleSteps = [1, 5, 6];
@@ -397,7 +401,9 @@ function CvCheckWorkspace() {
     } catch (failure) {
       if (!mounted.current || !authorityCurrent() || revision.current !== atRevision || owner.current !== startingOwner) return;
       setReport(analyzeCvEvidence(local, valid.jobDescription, valid.jobTitle)); setReviewStarted(true); setTailoring(null); setStep(5);
-      setNotice(`${failure instanceof Error ? failure.message : 'AI tailoring is unavailable right now.'} Your CV is below beside what the job asks for, so you can edit it yourself.`);
+      const text = `${failure instanceof Error ? failure.message : 'AI tailoring is unavailable right now.'} Your CV is below beside what the job asks for, so you can edit it yourself.`;
+      setNotice(text);
+      setPassOfferNotice(failure instanceof TailorUnavailable && PASS_OFFER_CODES.has(failure.code) ? text : "");
     } finally { if (mounted.current && authorityCurrent() && revision.current === atRevision && owner.current === startingOwner) setBusy(''); }
   }
   function revertChange(index: number) {
@@ -558,7 +564,7 @@ function CvCheckWorkspace() {
     </aside>
     <div className="check-workarea">
     {error && <Alert id="check-validation-error" variant="destructive" role="alert" className="mb-5"><AlertDescription>{error}</AlertDescription></Alert>}
-    {notice && <p role="status" className="mb-5 rounded-xl border bg-muted/40 px-4 py-3 text-sm leading-6">{notice}</p>}
+    {notice && <p role="status" className="mb-5 rounded-xl border bg-muted/40 px-4 py-3 text-sm leading-6">{notice}{notice === passOfferNotice && <> <Link className="font-medium underline underline-offset-4" to="/pricing">See passes from $9</Link></>}</p>}
     {previousReplacement && previousReplacement.ownerId === owner.current && <section className="mb-5 rounded-xl border p-4" aria-label="Source replacement undo"><Button type="button" variant="outline" disabled={!!busy} onClick={undoSourceReplacement}>Undo source replacement</Button><p className="mt-2 text-sm">Restore the source CV, final edits and application details from before this replacement. Review is required again. Undo lasts while this page stays open.</p></section>}
     {previousApplication && previousApplication.ownerId === owner.current && <div className="check-undo-application"><Button type="button" variant="outline" disabled={!!busy} onClick={undoNewApplication}>Undo new application</Button><p>Restore the previous CV, vacancy and edits for a fresh review. Undo is kept only on this page; leaving or refreshing loses it.</p></div>}
     {busy && <p role="status" className="mb-4 flex items-center gap-2 text-sm"><Loader2 size={16} className="animate-spin" />{busy}</p>}

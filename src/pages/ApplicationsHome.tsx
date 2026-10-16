@@ -10,6 +10,9 @@ import { loopDateLabel } from '@/lib/loop-calendar';
 import { applicationHomeSource, buildApplicationHome, readApplicationHomeSelection, resolveApplicationHomeSelection, type ApplicationHomeRow, type ApplicationHomeSource, type ExistingApplicationLoop } from '@/lib/application-home';
 import { createReviewedCvBlob } from '@/lib/document-export';
 import { downloadBlob, safeDocumentFilename } from '@/lib/document-download';
+import { getEntitlement } from '@/lib/workspace-api';
+import type { TailorAccess } from '@/lib/tailor-access';
+import TailorPlanLine from '@/components/TailorPlanLine';
 import './ApplicationsHome.css';
 
 type Data = { checks: FreeCvCheck[]; packs: ApplicationPack[]; trackers: TrackedApplication[]; loop: ExistingApplicationLoop };
@@ -18,6 +21,19 @@ type Sources = { [K in ApplicationHomeSource]: SourceState<Data[K]> };
 type Scope = { ownerId: string; authority: number; key: string };
 const sources: ApplicationHomeSource[] = ['checks', 'packs', 'trackers', 'loop'];
 const labels: Record<ApplicationHomeSource, string> = { checks: 'Saved CV checks', packs: 'Application packs', trackers: 'Application tracking', loop: 'Job Loop' };
+// Query parameters a payment provider adds when it returns from checkout. They are never selections.
+const checkoutReturnParams = ['checkout', 'payment_id', 'status', 'email', 'subscription_id', 'license_key'];
+/** "Your plan" line. An unavailable summary is simply not shown; it never hides saved work. */
+function YourPlan({ ownerId, refresh }: { ownerId: string; refresh: number }) {
+  const [loaded, setLoaded] = useState<{ ownerId: string; access: TailorAccess | null } | null>(null);
+  useEffect(() => {
+    let live = true;
+    void getEntitlement().then(entitlement => { if (live) setLoaded({ ownerId, access: entitlement.tailorAccess ?? null }); })
+      .catch(() => { if (live) setLoaded({ ownerId, access: null }); });
+    return () => { live = false; };
+  }, [ownerId, refresh]);
+  return loaded?.ownerId === ownerId && loaded.access ? <TailorPlanLine className="ah-plan" access={loaded.access} /> : null;
+}
 const emptySources = (): Sources => ({ checks: { phase: 'loading', data: null }, packs: { phase: 'loading', data: null }, trackers: { phase: 'loading', data: null }, loop: { phase: 'loading', data: null } });
 async function requireOwner(ownerId: string) {
   const { data, error } = await mvpSupabase.auth.getUser();
@@ -66,6 +82,25 @@ export default function ApplicationsHome() {
   const [view, setView] = useState<{ key: string; sources: Sources }>({ key: '', sources: emptySources() });
   const [query, setQuery] = useState('');
   const [deliberateChoice, setDeliberateChoice] = useState<{ id: string; scopeKey: string } | null>(null);
+  const [checkoutNotice, setCheckoutNotice] = useState(''), [planRefresh, setPlanRefresh] = useState(0), [awaitingPass, setAwaitingPass] = useState(false);
+  const checkoutReturn = searchParams.get('checkout');
+  // Returning from checkout: drop the provider's parameters (including the buyer's email) from the
+  // address bar. The URL is never proof of payment; only the webhook adds the pass.
+  useEffect(() => {
+    if (!checkoutReturn) return;
+    setCheckoutNotice(checkoutReturn === 'success' ? 'Checkout returned. Your pass appears under “Your plan” once Dodo Payments confirms the payment, usually within a minute.' : '');
+    setAwaitingPass(checkoutReturn === 'success');
+    const next = new URLSearchParams(searchParams);
+    for (const name of checkoutReturnParams) next.delete(name);
+    setSearchParams(next, { replace: true });
+  }, [checkoutReturn]);
+  // Re-read the plan a few times while the payment webhook arrives.
+  useEffect(() => {
+    if (!awaitingPass) return;
+    let attempts = 0;
+    const timer = setInterval(() => { setPlanRefresh(value => value + 1); if (++attempts >= 6) { clearInterval(timer); setAwaitingPass(false); } }, 5000);
+    return () => clearInterval(timer);
+  }, [awaitingPass]);
   const detailRegion = useRef<HTMLElement | null>(null);
   const current = useCallback((captured: Scope) => mounted.current && scopeRef.current?.key === captured.key && trackingDraftAuthority(captured.ownerId) === captured.authority, []);
   const load = useCallback((source: ApplicationHomeSource, captured: Scope) => {
@@ -92,7 +127,9 @@ export default function ApplicationsHome() {
     }
     if (scope) for (const source of sources) load(source, scope);
   }, [scope?.key, load]);
-  const selection = readApplicationHomeSelection(searchParams.toString() ? `?${searchParams.toString()}` : '');
+  const selectionParams = new URLSearchParams(searchParams);
+  for (const name of checkoutReturnParams) selectionParams.delete(name);
+  const selection = readApplicationHomeSelection(selectionParams.toString() ? `?${selectionParams.toString()}` : '');
   const state = scope && view.key === scope.key ? view.sources : emptySources();
   const rows = scope ? buildApplicationHome(scope.ownerId, { checks: state.checks.data ?? [], packs: state.packs.data ?? [], trackers: state.trackers.data ?? [], loop: state.loop.data }) : [];
   const selected = resolveApplicationHomeSelection(rows, selection.id);
@@ -116,6 +153,8 @@ export default function ApplicationsHome() {
     <header className="ah-heading"><div><p className="ah-eyebrow">YOUR JOB SEARCH</p><h1>Your applications</h1><p>Find the job, see your saved work, and pick up where you left off.</p></div><Link className="ah-button ah-button--primary" to="/check">Check a CV against a job</Link></header>
     {authLoading || !authError && user && authority < 0 ? <p role="status">Confirming your account…</p> : authError ? <section className="ah-notice" role="alert"><h2>Confirm your account to see saved work</h2><p>Your applications stay hidden until your sign-in is confirmed.</p><button className="ah-button" onClick={retryConnection}>Retry account connection</button></section> : !scope ? <section className="ah-notice"><h2>Sign in to see your applications</h2><p>Your private CVs and progress are only shown to your account.</p><Link className="ah-button" to="/auth?next=%2Fapplications">Sign in</Link></section> : <>
       {allReady ? <section className="ah-source-status ah-source-status--ready" aria-label="Saved work sources"><span role="status">All saved work loaded</span><button className="ah-text-button" onClick={() => { for (const source of sources) load(source, scope); }}>Refresh applications</button></section> : <section className="ah-source-status" aria-label="Saved work sources">{sources.filter(source => state[source].phase !== 'ready').map(source => <div key={source}><strong>{labels[source]}</strong>{state[source].phase === 'loading' ? <span role="status">Loading…</span> : state[source].phase === 'error' ? <><span role="alert">Unavailable. Other saved work is still shown.</span><button className="ah-text-button" onClick={() => load(source, scope)}>Retry {labels[source].toLowerCase()}</button></> : <span>Loaded</span>}</div>)}<button className="ah-text-button" onClick={() => { for (const source of sources) load(source, scope); }}>Refresh applications</button></section>}
+      <YourPlan ownerId={scope.ownerId} refresh={planRefresh} />
+      {checkoutNotice && <p className="ah-notice" role="status">{checkoutNotice}</p>}
       {state.loop.data?.existingState === 'absent' && <p className="ah-subtle">No active Job Loop record. Viewing this page does not create one.</p>}
       {state.loop.data?.existingState === 'erasing' && <p className="ah-notice">Your Job Loop erasure is unfinished. Its previous CVs and vacancies are hidden. <Link to="/loop">Review remaining erasure</Link></p>}
       
