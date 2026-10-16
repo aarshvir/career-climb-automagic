@@ -21,7 +21,7 @@ export const entitlementSchema = z.object({
   expiresAt: z.string().nullable(),
   billingConfigured: z.boolean(),
   billingMode: z.enum(["test", "live"]).nullable().optional(),
-  paymentProvider: z.enum(["paddle", "stripe"]).nullable().optional(),
+  paymentProvider: z.enum(["paddle", "stripe", "dodo"]).nullable().optional(),
 });
 export type Entitlement = z.infer<typeof entitlementSchema>;
 export type WorkspaceAccess = {
@@ -252,4 +252,5 @@ export async function startCheckout(requestId: string) {
 export const checkoutSchema = z.discriminatedUnion("provider", [
   z.object({provider:z.literal("paddle"),transactionId:z.string().regex(/^txn_[a-z0-9]{26}$/),billingMode:z.enum(["test","live"])}),
   z.object({provider:z.literal("stripe"),sessionId:z.string().min(1),billingMode:z.enum(["test","live"]),url:z.string().url().refine(value=>{const url=new URL(value);return url.protocol==='https:'&&url.hostname==='checkout.stripe.com'&&!url.username&&!url.password;},'The checkout address was invalid.')}),
+  z.object({provider:z.literal("dodo"),sessionId:z.string().regex(/^cks_[A-Za-z0-9_-]{1,100}$/),billingMode:z.enum(["test","live"]),url:z.string().url().refine(value=>{const url=new URL(value);return url.protocol==='https:'&&['checkout.dodopayments.com','test.checkout.dodopayments.com'].includes(url.hostname)&&!url.port&&!url.username&&!url.password;},'The checkout address was invalid.')}),
 ]);

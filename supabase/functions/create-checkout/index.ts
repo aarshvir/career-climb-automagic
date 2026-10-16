@@ -1,6 +1,7 @@
 import { ApiError, objectInput, PASS, uuid } from '../_shared/core.ts';
+import { dodoCheckoutBody, dodoCheckoutExpiry, validateDodoCheckoutSession, validateDodoProduct } from '../_shared/dodo.ts';
 import { validatePaddlePrice, validatePaddleTransaction } from '../_shared/paddle.ts';
-import { authenticatedClient, databaseError, getBilling, json, paddleRequest, readJson, serve, stripeRequest } from '../_shared/runtime.ts';
+import { authenticatedClient, databaseError, dodoRequest, getBilling, json, paddleRequest, readJson, serve, stripeRequest } from '../_shared/runtime.ts';
 
 serve(async req => {
   const { admin, user } = await authenticatedClient(req);
@@ -8,6 +9,7 @@ serve(async req => {
   if (!billing) throw new ApiError(503, 'BILLING_UNAVAILABLE', 'Payments are not enabled yet.');
   const requestId = uuid(objectInput(await readJson(req)).requestId, 'Request ID');
   if (billing.provider === 'paddle') validatePaddlePrice(await paddleRequest(billing, `prices/${billing.priceId}`), billing.priceId);
+  if (billing.provider === 'dodo') validateDodoProduct(await dodoRequest(billing, `products/${billing.productId}`), billing.productId);
   const { data: order, error } = await admin.rpc('jobvance_begin_checkout', { p_user_id: user.id, p_request_id: requestId, p_provider: billing.provider, p_billing_mode: billing.mode });
   databaseError(error);
   if (order.status !== 'created') throw new ApiError(409, 'CHECKOUT_FINISHED', 'This checkout was already completed. Refresh your pack balance.');
@@ -28,6 +30,20 @@ serve(async req => {
       p_url: null, p_expires_at: null, p_provider: billing.provider, p_billing_mode: billing.mode });
     databaseError(savedError);
     return json(req, { provider: 'paddle', transactionId: verified.transactionId, billingMode: billing.mode });
+  }
+  if (billing.provider === 'dodo') {
+    if (order.checkout_url) {
+      if (!(dodoCheckoutExpiry(order) > Date.now())) throw new ApiError(409, 'CHECKOUT_EXPIRED', 'This checkout expired. Start a new checkout.');
+      return json(req, { provider: 'dodo', url: order.checkout_url, sessionId: order.checkout_session_id, billingMode: billing.mode });
+    }
+    if (!order.creationClaimAcquired) throw new ApiError(409, 'CHECKOUT_RECOVERY_REQUIRED', 'This checkout is still being prepared or needs recovery. Retry shortly; if it remains unavailable, start a new checkout or contact support.');
+    // The durable claim prevents concurrent duplicate sessions. Dodo documents no idempotency key
+    // for checkout sessions, so an ambiguous failure is never retried against the provider.
+    const session = validateDodoCheckoutSession(await dodoRequest(billing, 'checkouts', dodoCheckoutBody(billing, user.id, requestId)), billing.mode);
+    const { error: savedError } = await admin.rpc('jobvance_finish_checkout', { p_user_id: user.id, p_request_id: requestId, p_session_id: session.sessionId,
+      p_url: session.url, p_expires_at: null, p_provider: billing.provider, p_billing_mode: billing.mode });
+    databaseError(savedError);
+    return json(req, { provider: 'dodo', url: session.url, sessionId: session.sessionId, billingMode: billing.mode });
   }
   if (order.checkout_url) {
     if (Date.parse(order.checkout_expires_at) <= Date.now()) throw new ApiError(409, 'CHECKOUT_EXPIRED', 'This checkout expired. Start a new checkout.');

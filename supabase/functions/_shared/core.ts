@@ -85,23 +85,40 @@ export async function fingerprint(input: TailorInput, original: string): Promise
 interface BillingBase { mode: 'test' | 'live'; secretKey: string; webhookSecret: string; appUrl: string }
 export interface StripeBillingConfig extends BillingBase { provider: 'stripe' }
 export interface PaddleBillingConfig extends BillingBase { provider: 'paddle'; priceId: string }
-export type BillingConfig = StripeBillingConfig | PaddleBillingConfig;
+export interface DodoBillingConfig extends BillingBase { provider: 'dodo'; productId: string; apiBaseUrl: string }
+export type BillingConfig = StripeBillingConfig | PaddleBillingConfig | DodoBillingConfig;
+// Dodo documents one API host per mode; a key created in one mode never authenticates on the other.
+export const DODO_API_BASE_URL = { test: 'https://test.dodopayments.com', live: 'https://live.dodopayments.com' } as const;
+export const DODO_PRODUCT_ID = /^pdt_[A-Za-z0-9_-]{1,100}$/;
+// Dodo publishes no API key grammar, so accept any header-safe token. A key visibly carrying the
+// other mode's prefix is still refused, so a live key can never be paired with test mode.
+export function isDodoApiKey(value: string, mode: 'test' | 'live'): boolean {
+  return /^[\x21-\x7e]{1,512}$/.test(value) && !value.startsWith(mode === 'test' ? 'dodo_live_' : 'dodo_test_');
+}
+// Standard Webhooks secret: an optional `whsec_` prefix followed by the base64-encoded signing key.
+export function isDodoWebhookKey(value: string): boolean {
+  const encoded = value.startsWith('whsec_') ? value.slice(6) : value;
+  return encoded.length >= 4 && encoded.length <= 512 && encoded.length % 4 === 0 && /^[A-Za-z0-9+/]+={0,2}$/.test(encoded);
+}
 export function billingConfiguration(get: (key: string) => string | undefined): BillingConfig | null {
   if (get('JOBVANCE_BILLING_ENABLED') !== 'true') return null;
   const mode = get('JOBVANCE_BILLING_MODE');
   const provider = get('JOBVANCE_PAYMENT_PROVIDER') ?? 'paddle';
-  if (provider !== 'paddle' && provider !== 'stripe') return null;
-  const secretKey = get(provider === 'paddle' ? 'PADDLE_API_KEY' : 'STRIPE_SECRET_KEY') ?? '';
-  const webhookSecret = get(provider === 'paddle' ? 'PADDLE_WEBHOOK_SECRET' : 'STRIPE_WEBHOOK_SECRET') ?? '';
+  if (provider !== 'paddle' && provider !== 'stripe' && provider !== 'dodo') return null;
+  const secretKey = get(provider === 'paddle' ? 'PADDLE_API_KEY' : provider === 'dodo' ? 'DODO_PAYMENTS_API_KEY' : 'STRIPE_SECRET_KEY') ?? '';
+  const webhookSecret = get(provider === 'paddle' ? 'PADDLE_WEBHOOK_SECRET' : provider === 'dodo' ? 'DODO_PAYMENTS_WEBHOOK_KEY' : 'STRIPE_WEBHOOK_SECRET') ?? '';
   const priceId = get('PADDLE_PRICE_ID') ?? '';
+  const productId = get('DODO_PRODUCT_ID') ?? '';
   const appUrl = get('APP_URL') ?? '';
   if (mode !== 'test' && mode !== 'live') return null;
   if (provider === 'stripe' && (!secretKey.startsWith(mode === 'test' ? 'sk_test_' : 'sk_live_') || !webhookSecret.startsWith('whsec_'))) return null;
   if (provider === 'paddle' && (!secretKey.startsWith(mode === 'test' ? 'pdl_sdbx_apikey_' : 'pdl_live_apikey_') || webhookSecret.length < 16 || webhookSecret.length > 512 || !/^pri_[a-z\d]{26}$/.test(priceId))) return null;
-  if (mode === 'live' && (get('JOBVANCE_LIVE_BILLING_REVIEWED') !== 'true' || get('JOBVANCE_COMMERCIAL_TERMS_REVIEWED') !== 'true' || get('JOBVANCE_SELLER_ELIGIBILITY_REVIEWED') !== 'true' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(get('SUPPORT_EMAIL') ?? '') || (provider === 'paddle' && get('JOBVANCE_PADDLE_MERCHANT_APPROVAL_REVIEWED') !== 'true'))) return null;
+  if (provider === 'dodo' && (!isDodoApiKey(secretKey, mode) || !isDodoWebhookKey(webhookSecret) || !DODO_PRODUCT_ID.test(productId))) return null;
+  if (mode === 'live' && (get('JOBVANCE_LIVE_BILLING_REVIEWED') !== 'true' || get('JOBVANCE_COMMERCIAL_TERMS_REVIEWED') !== 'true' || get('JOBVANCE_SELLER_ELIGIBILITY_REVIEWED') !== 'true' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(get('SUPPORT_EMAIL') ?? '') || (provider === 'paddle' && get('JOBVANCE_PADDLE_MERCHANT_APPROVAL_REVIEWED') !== 'true') || (provider === 'dodo' && get('JOBVANCE_DODO_MERCHANT_APPROVAL_REVIEWED') !== 'true'))) return null;
   try {
     const url = new URL(appUrl);
     if (url.username || url.password || url.pathname !== '/' || url.search || url.hash || (url.protocol !== 'https:' && !(mode === 'test' && url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname)))) return null;
+    if (provider === 'dodo') return { provider, mode, secretKey, webhookSecret, appUrl: url.origin, productId, apiBaseUrl: DODO_API_BASE_URL[mode] };
     return provider === 'paddle' ? { provider, mode, secretKey, webhookSecret, appUrl: url.origin, priceId } : { provider, mode, secretKey, webhookSecret, appUrl: url.origin };
   } catch { return null; }
 }

@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { ApiError, billingConfiguration, type PaddleBillingConfig, type StripeBillingConfig } from './core.ts';
+import { ApiError, billingConfiguration, type DodoBillingConfig, type PaddleBillingConfig, type StripeBillingConfig } from './core.ts';
 
 const env = (name: string) => Deno.env.get(name);
 export const getBilling = () => billingConfiguration(env);
@@ -109,4 +109,21 @@ export async function paddleRequest(config: PaddleBillingConfig, endpoint: strin
   const result = await response.json();
   if (!result.data || typeof result.data !== 'object' || Array.isArray(result.data)) throw new ApiError(503, 'INVALID_PAYMENT_RESPONSE', 'The payment response could not be verified.');
   return result.data;
+}
+
+export async function dodoRequest(config: DodoBillingConfig, endpoint: string, body?: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const unavailable = () => new ApiError(503, 'PAYMENT_PROVIDER_ERROR', 'Checkout is temporarily unavailable. Retry with the same request or contact support if it needs recovery.');
+  let response: Response;
+  try {
+    response = await fetch(`${config.apiBaseUrl}/${endpoint}`, { method: body ? 'POST' : 'GET', headers: {
+      Authorization: `Bearer ${config.secretKey}`, Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}),
+    }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(15000) });
+  } catch {
+    // Network and timeout errors may describe the request; never surface them or the bearer key.
+    throw unavailable();
+  }
+  if (!response.ok) { await response.body?.cancel().catch(() => undefined); throw unavailable(); }
+  const result: unknown = await response.json().catch(() => null);
+  if (!result || typeof result !== 'object' || Array.isArray(result)) throw new ApiError(503, 'INVALID_PAYMENT_RESPONSE', 'The payment response could not be verified.');
+  return result as Record<string, unknown>;
 }
