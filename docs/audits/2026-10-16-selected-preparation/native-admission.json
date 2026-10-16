@@ -1,0 +1,203 @@
+{
+  "url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-5-windows-x64-binaries.zip",
+  "bytes": 381531864,
+  "sha256": "80379b2c04d51c30225532e0ae04509899141e9957ed096fe749d7fd9df8f82f",
+  "provenance": [
+    "https://www.postgresql.org/download/windows/",
+    "https://www.enterprisedb.com/download-postgresql-binaries",
+    "https://github.com/EnterpriseDB/edb-installers/issues/731",
+    "https://www.postgresql.org/about/licence/"
+  ],
+  "suite": "selected-preparation",
+  "startedAt": "2026-10-16T07:25:55.061Z",
+  "checks": [
+    {
+      "name": "simultaneous exact requests admit one ordered immutable run",
+      "passed": true,
+      "distinctBackendPids": [
+        19116,
+        42320
+      ],
+      "blockingPids": [
+        19116
+      ]
+    },
+    {
+      "name": "conflicting concurrent request identity rejects order hash and consent substitutions",
+      "passed": true,
+      "conflicts": [
+        {
+          "conflict": "order",
+          "distinctBackendPids": [
+            48060,
+            43376
+          ],
+          "blockingPids": [
+            48060
+          ]
+        },
+        {
+          "conflict": "hash",
+          "distinctBackendPids": [
+            48060,
+            39616
+          ],
+          "blockingPids": [
+            48060
+          ]
+        },
+        {
+          "conflict": "consent",
+          "distinctBackendPids": [
+            48060,
+            37556
+          ],
+          "blockingPids": [
+            48060
+          ]
+        }
+      ]
+    },
+    {
+      "name": "source edit winning first rejects admission with the original displayed version",
+      "passed": true,
+      "distinctBackendPids": [
+        44644,
+        50036
+      ],
+      "blockingPids": [
+        44644
+      ]
+    },
+    {
+      "name": "admission winning first retains immutable wording while a later source edit proceeds",
+      "passed": true,
+      "distinctBackendPids": [
+        36172,
+        27420
+      ],
+      "blockingPids": [
+        36172
+      ]
+    },
+    {
+      "name": "ambiguous exact retry waits for later progress without replacing it or duplicating a run",
+      "passed": true,
+      "distinctBackendPids": [
+        28916,
+        29652
+      ],
+      "blockingPids": [
+        28916
+      ]
+    },
+    {
+      "name": "erasure winning first rejects old admission and old identity cannot enter a fresh generation",
+      "passed": true,
+      "distinctBackendPids": [
+        38724,
+        44092
+      ],
+      "blockingPids": [
+        38724
+      ],
+      "originalGeneration": 0,
+      "freshGeneration": 2
+    },
+    {
+      "name": "erasure waits for admitted selection then cancels it and rejects its old retry",
+      "passed": true,
+      "distinctBackendPids": [
+        46824,
+        49900
+      ],
+      "blockingPids": [
+        46824
+      ]
+    },
+    {
+      "name": "competing selected and wider discovery requests preserve the one-active-run gate",
+      "passed": true,
+      "competitors": [
+        {
+          "kind": "selected",
+          "distinctBackendPids": [
+            49300,
+            50608
+          ],
+          "blockingPids": [
+            49300
+          ]
+        },
+        {
+          "kind": "discovery",
+          "distinctBackendPids": [
+            49300,
+            9844
+          ],
+          "blockingPids": [
+            49300
+          ]
+        }
+      ]
+    },
+    {
+      "name": "concurrent admission cannot exceed daily quota even after the winner becomes terminal",
+      "passed": true,
+      "distinctBackendPids": [
+        49252,
+        45116
+      ],
+      "blockingPids": [
+        49252
+      ]
+    }
+  ],
+  "limitations": [
+    "Native PostgreSQL sessions execute actual migrations; auth.users/auth.uid, unrelated pack columns and Storage tables use isolated fixtures. No worker, provider, document rendering or export runs here.",
+    "No hosted Supabase, PostgREST, real authentication or production candidate data is exercised.",
+    "The vendor repository publishes the ZIP digest; no detached publisher signature was located."
+  ],
+  "archiveVerifiedAt": "2026-10-16T07:25:55.333Z",
+  "extraction": {
+    "entries": 22033,
+    "extracted": 3016,
+    "expandedBytes": 1002085601
+  },
+  "harnessSha256": "f1a7e0d969cfc1bf9a1fd83c96a9b5b8ca7d08574971fb73d4dac545ac754946",
+  "migration": {
+    "name": "20261015223000_job_loop_selected_preparation.sql",
+    "sha256": "4e3d1e9063e21958bd0168f598b97e2ad754400f9d2fc6d1d31aec2d953ee780"
+  },
+  "casesSha256": "7120a84c57333229b3a8e9d08bbf5a811a0d20ec5a78baa8af0748c681c9afbe",
+  "version": "postgres (PostgreSQL) 17.11",
+  "executedSchemaSha256": "d33b05c3a958cee01b2217352c3aa21f02df187fdc53b4e954326bbf8c568416",
+  "backendPids": [
+    40920,
+    19116,
+    42320,
+    48060,
+    43376,
+    39616,
+    37556,
+    44644,
+    50036,
+    36172,
+    27420,
+    28916,
+    29652,
+    38724,
+    44092,
+    29912,
+    46824,
+    49900,
+    49300,
+    50608,
+    9844,
+    49252,
+    45116
+  ],
+  "passed": true,
+  "clusterStopped": true,
+  "finishedAt": "2026-10-16T07:26:05.343Z"
+}

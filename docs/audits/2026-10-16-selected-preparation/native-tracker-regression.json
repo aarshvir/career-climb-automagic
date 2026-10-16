@@ -1,0 +1,107 @@
+{
+  "url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-5-windows-x64-binaries.zip",
+  "bytes": 381531864,
+  "sha256": "80379b2c04d51c30225532e0ae04509899141e9957ed096fe749d7fd9df8f82f",
+  "provenance": [
+    "https://www.postgresql.org/download/windows/",
+    "https://www.enterprisedb.com/download-postgresql-binaries",
+    "https://github.com/EnterpriseDB/edb-installers/issues/731",
+    "https://www.postgresql.org/about/licence/"
+  ],
+  "suite": "check-tracking",
+  "startedAt": "2026-10-16T07:26:47.171Z",
+  "checks": [
+    {
+      "name": "concurrent first tracking returns one identity and preserves winner progress",
+      "passed": true,
+      "distinctBackendPids": [
+        48288,
+        22880
+      ],
+      "blockingPids": [
+        48288
+      ]
+    },
+    {
+      "name": "source deletion waits for active creation then detaches without losing progress",
+      "passed": true,
+      "distinctBackendPids": [
+        38684,
+        45352
+      ],
+      "blockingPids": [
+        38684
+      ]
+    },
+    {
+      "name": "creation waits for source deletion then fails without resurrecting source",
+      "passed": true,
+      "distinctBackendPids": [
+        23732,
+        50520
+      ],
+      "blockingPids": [
+        23732
+      ]
+    },
+    {
+      "name": "native permission and owner boundaries block guessed links and foreign sources",
+      "passed": true,
+      "rejectedAttempts": [
+        "foreign source",
+        "missing identity",
+        "anonymous RPC",
+        "direct insert",
+        "direct unlink",
+        "transfer owner",
+        "source reparent"
+      ]
+    },
+    {
+      "name": "manual and pack rows remain writable and same-title checks stay distinct",
+      "passed": true,
+      "distinctExactChecks": 2,
+      "legacyRowsUpdatedAndDeleted": 2
+    }
+  ],
+  "limitations": [
+    "Native PostgreSQL sessions execute actual migrations; auth.users/auth.uid, unrelated pack columns and Storage tables use isolated fixtures. No worker, provider, document rendering or export runs here.",
+    "No hosted Supabase, PostgREST, real authentication or production candidate data is exercised.",
+    "The vendor repository publishes the ZIP digest; no detached publisher signature was located."
+  ],
+  "archiveVerifiedAt": "2026-10-16T07:26:47.521Z",
+  "extraction": {
+    "entries": 22033,
+    "extracted": 3016,
+    "expandedBytes": 1002085601
+  },
+  "harnessSha256": "f1a7e0d969cfc1bf9a1fd83c96a9b5b8ca7d08574971fb73d4dac545ac754946",
+  "migration": {
+    "name": "20261015041519_cv_check_tracking_link.sql",
+    "sha256": "0393485911dcddda4adc0fb06859dbde63e8bda041f5e54f37d28ded58015fd3"
+  },
+  "version": "postgres (PostgreSQL) 17.11",
+  "executedSchemaSha256": "6b6a03f2b4a531f3ab42a77c5119c4582d31fa825aa20de27ef2e9387079f32b",
+  "backendPids": [
+    44352,
+    48288,
+    22880,
+    38684,
+    45352,
+    23732,
+    50520,
+    22828,
+    26136,
+    48008,
+    41104,
+    51176,
+    6960,
+    49944,
+    43052,
+    28288,
+    40216
+  ],
+  "passed": true,
+  "clusterStopped": true,
+  "finishedAt": "2026-10-16T07:26:57.350Z"
+}

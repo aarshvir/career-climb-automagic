@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { checkTrackingSchema, checkTrackingMigration } from '../supabase/tests/fixtures/check-tracking-schema.mjs';
 import { checkLoopSchema, checkLoopMigration } from '../supabase/tests/fixtures/check-loop-schema.mjs';
 import { checkLoopNativeCases } from './fixtures/check-loop-native-cases.mjs';
+import { selectedPreparationNativeCases } from './fixtures/selected-preparation-native-cases.mjs';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, readFile, realpath, stat, statfs, writeFile } from 'node:fs/promises';
@@ -27,8 +28,12 @@ const source = {
   ],
 };
 const args = process.argv.slice(2);
-assert(args.every(arg => arg === '--prepare-only' || arg === '--check-loop' || arg.startsWith('--fixture-root=')), 'Unknown argument.');
+assert(args.every(arg => arg === '--prepare-only' || arg === '--check-loop' || arg === '--selected-preparation' || arg.startsWith('--fixture-root=')), 'Unknown argument.');
+const selectedPreparation = args.includes('--selected-preparation');
 const checkLoop = args.includes('--check-loop');
+assert(!(selectedPreparation && checkLoop), 'Choose one native suite.');
+const suite = selectedPreparation ? 'selected-preparation' : checkLoop ? 'check-loop' : 'check-tracking';
+const selectedMigration = '20261015223000_job_loop_selected_preparation.sql';
 assert.equal(process.platform, 'win32', 'This pinned archive is for Windows x64.');
 assert.equal(process.arch, 'x64', 'This pinned archive is for Windows x64.');
 const temporary = path.join(repo, '.tmp');
@@ -43,10 +48,10 @@ const disk = await statfs(root);
 assert(Number(disk.bavail) * Number(disk.bsize) > 4 * 1024 ** 3, 'At least 4 GiB of free space is required.');
 const localEnv = { ...process.env, TEMP: root, TMP: root };
 for (const key of Object.keys(localEnv)) if (/^SUPABASE_|^JOB_LOOP_|^OPENROUTER_|^ANTHROPIC_|^OPENAI_|^DATABASE_URL$|^PG/.test(key)) delete localEnv[key];
-Object.assign(localEnv, { PGPASSFILE: path.join(root, 'pgpass'), PGSYSCONFDIR: root, PGAPPNAME: checkLoop ? 'jobvance-isolated-check-loop' : 'jobvance-isolated-check-tracking', PSQL_HISTORY: path.join(root, 'psql-history') });
+Object.assign(localEnv, { PGPASSFILE: path.join(root, 'pgpass'), PGSYSCONFDIR: root, PGAPPNAME: `jobvance-isolated-${suite}`, PSQL_HISTORY: path.join(root, 'psql-history') });
 const archive = path.join(root, 'postgresql.zip');
-const evidence = { ...source, root, suite: checkLoop ? 'check-loop' : 'check-tracking', startedAt: new Date().toISOString(), checks: [], limitations: [
-  'Native PostgreSQL sessions execute the actual tracker/check migrations; auth.users, auth.uid and unrelated pack columns use isolated fixtures.',
+const evidence = { ...source, root, suite, startedAt: new Date().toISOString(), checks: [], limitations: [
+  'Native PostgreSQL sessions execute actual migrations; auth.users/auth.uid, unrelated pack columns and Storage tables use isolated fixtures. No worker, provider, document rendering or export runs here.',
   'No hosted Supabase, PostgREST, real authentication or production candidate data is exercised.',
   'The vendor repository publishes the ZIP digest; no detached publisher signature was located.',
 ] };
@@ -155,7 +160,7 @@ class Session {
     this.ended = false;
     this.pending = null;
     this.process = spawn(executable, ['-X', '-qAt', '-v', 'ON_ERROR_STOP=1', '-h', '127.0.0.1', '-p', String(port), '-U', 'fixture_admin', '-d', 'postgres'], {
-      cwd: root, env: { ...localEnv, PGAPPNAME: `jobvance-check-tracking-${name}` }, shell: false, windowsHide: true,
+      cwd: root, env: { ...localEnv, PGAPPNAME: `jobvance-${suite}-${name}` }, shell: false, windowsHide: true,
     });
     this.process.stdout.on('data', chunk => {
       this.buffer += chunk;
@@ -221,8 +226,9 @@ async function runNative() {
   const session = name => { const result = new Session(psql, port, name); sessions.push(result); return result; };
   evidence.port = port; evidence.dataDirectory = data;
   evidence.harnessSha256 = await digest(fileURLToPath(import.meta.url));
-  const migration = checkLoop ? checkLoopMigration : checkTrackingMigration;
+  const migration = selectedPreparation ? selectedMigration : checkLoop ? checkLoopMigration : checkTrackingMigration;
   evidence.migration = { name: migration, sha256: await digest(path.join(repo, 'supabase/migrations', migration)) };
+  if (selectedPreparation) evidence.casesSha256 = await digest(path.join(repo, 'scripts/fixtures/selected-preparation-native-cases.mjs'));
   if (checkLoop) evidence.casesSha256 = await digest(path.join(repo, 'scripts/fixtures/check-loop-native-cases.mjs'));
   try {
     evidence.version = (await command(path.join(bin, 'postgres.exe'), ['--version'])).stdout.trim();
@@ -231,7 +237,10 @@ async function runNative() {
     await command(pgctl, ['start', '-D', data, '-l', logfile, '-w', '-t', '15', '-o', `-h 127.0.0.1 -p ${port} -c max_connections=10 -c shared_buffers=32MB`]);
     const observer = session('observer');
     await observer.query("SET statement_timeout='8s'; SET lock_timeout='6s';");
-    await observer.query(await (checkLoop ? checkLoopSchema() : checkTrackingSchema()));
+    let schema = await (checkLoop || selectedPreparation ? checkLoopSchema() : checkTrackingSchema());
+    if (selectedPreparation) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', selectedMigration), 'utf8');
+    evidence.executedSchemaSha256 = createHash('sha256').update(schema).digest('hex');
+    await observer.query(schema);
     const owner = randomUUID(), other = randomUUID();
     await observer.query(`INSERT INTO auth.users(id) VALUES(${quote(owner)}),(${quote(other)});`);
     const pids = new Set([await observer.json('SELECT to_json(pg_backend_pid());')]);
@@ -263,7 +272,8 @@ async function runNative() {
       const detail = await test(); evidence.checks.push({ name, passed: true, ...detail });
       console.log(JSON.stringify({ check: name, passed: true }));
     }
-    if (checkLoop) await checkLoopNativeCases({ observer, actor, check, blocking, quote, owner, other, newCheck });
+    if (selectedPreparation) await selectedPreparationNativeCases({ observer, actor, check, blocking, quote });
+    else if (checkLoop) await checkLoopNativeCases({ observer, actor, check, blocking, quote, owner, other, newCheck });
     else {
     await check('concurrent first tracking returns one identity and preserves winner progress', async () => {
       const source = await newCheck(), first = await actor('first'), retry = await actor('retry');
@@ -353,7 +363,7 @@ async function runNative() {
       catch (error) { evidence.clusterStopped = false; evidence.stopFailure = String(error); }
     }
     evidence.finishedAt = new Date().toISOString();
-    await writeFile(path.join(root, checkLoop ? 'check-loop-evidence.json' : 'check-tracking-evidence.json'), JSON.stringify(evidence, null, 2));
+    await writeFile(path.join(root, `${suite}-evidence.json`), JSON.stringify(evidence, null, 2));
     console.log(JSON.stringify({ stage: 'native-fixture-finished', root, passed: evidence.passed, checks: evidence.checks.length, clusterStopped: evidence.clusterStopped }));
   }
 }
