@@ -47,6 +47,18 @@ export async function canReplayPreparation(run:RunRow,data:CareerRecord,action:P
   // original automatically found vacancies; deletions and edits cannot hide.
   return await candidatePreparationHash(run.snapshot)===await candidatePreparationHash({...data,opportunities:data.opportunities.filter(item=>originals.has(item.id))});
 }
+type SelectedChoices=Extract<LoopAction,{action:'start_selected_run'}>;
+export async function selectedPreparationHashes(data:CareerRecord,action:SelectedChoices):Promise<{inputHash:string;requestHash:string}>{
+  if(!data.profile)throw new ApiError(422,'LOOP_PROFILE_REQUIRED','Save a reviewed profile before starting.');
+  const vacancies=action.opportunityIds.map(id=>{
+    const matches=data.opportunities.filter(item=>item.id===id);
+    if(matches.length!==1)throw new ApiError(409,'LOOP_SELECTION_UNAVAILABLE','A selected vacancy is unavailable. Refresh your selection.');
+    const o=matches[0];return {id:o.id,title:o.title,company:o.company,location:o.location,url:o.url,description:o.description,contact:o.contact,source:o.source,sourceKey:o.sourceKey,sourceCheckId:o.sourceCheckId??null,verification:o.verification};
+  });
+  const inputHash=await fingerprintLoopInputs(data.profile,data.claims,vacancies);
+  const requestHash=await digest(JSON.stringify(['selected-v1',action.expectedGeneration,action.opportunityIds,action.provider,action.model,action.modelConsent,action.processingRoute??null,inputHash]));
+  return {inputHash,requestHash};
+}
 export async function constantTimeEqual(left:string,right:string):Promise<boolean> {
   const [a,b]=await Promise.all([crypto.subtle.digest('SHA-256',new TextEncoder().encode(left)),crypto.subtle.digest('SHA-256',new TextEncoder().encode(right))]);
   const x=new Uint8Array(a),y=new Uint8Array(b);let difference=0;for(let i=0;i<32;i++)difference|=x[i]^y[i];return difference===0;
@@ -106,6 +118,7 @@ export async function getExistingLoopSnapshot(repo:LoopRepository,userId:string,
   return {existingState:'active',snapshot};
 }
 export async function controlLoop(repo:LoopRepository,userId:string,action:LoopAction,env:LoopEnv,fetcher:LoopFetch=fetch):Promise<LoopResponse> {
+  if(action.action==='start_selected_run')action=validateControlInput(structuredClone(action));
   if(action.action==='get_existing')return getExistingLoopSnapshot(repo,userId,env);
   if(action.action==='get'){
     const lifecycle=await repo.erasureStatus(userId);
@@ -186,6 +199,28 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
   if(action.action==='update_opportunity'){
     if(!data.opportunities.some(item=>item.id===action.id))throw new ApiError(404,'LOOP_NOT_FOUND','That opportunity is unavailable.');
     data.opportunities=data.opportunities.map(item=>item.id===action.id?{...item,status:action.status,notes:action.notes,followUpAt:action.followUpAt}:item);await repo.write(userId,action.expectedVersion,data,false);return finish('Application progress updated from your report.');
+  }
+  if(action.action==='start_selected_run'){
+    configuredUsageCap(env);
+    if(!workerEnabled(env))throw new ApiError(503,'LOOP_DISABLED','Cloud runs are disabled.');
+    const hashes=await selectedPreparationHashes(data,action),existing=await repo.requestRun(userId,action.requestId);
+    const consents={model:action.modelConsent,inbox:false,...(action.provider!=='rules'?{processingRoute:action.processingRoute??'direct'}:{})};
+    const matches=(run:RunRow)=>run.user_id===userId&&run.request_id===action.requestId&&run.selected_generation===action.expectedGeneration&&JSON.stringify(run.selected_opportunity_ids)===JSON.stringify(action.opportunityIds)&&run.request_hash===hashes.requestHash&&run.input_hash===hashes.inputHash&&run.provider===action.provider&&run.model===action.model&&run.consents.model===consents.model&&run.consents.inbox===false&&(run.consents.processingRoute??null)===(consents.processingRoute??null);
+    if(existing&&!matches(existing))throw new ApiError(409,'LOOP_REQUEST_CONFLICT','This request belongs to different selected vacancies, source facts or processing choices. Start a new request.');
+    if(!existing){
+      if(row.version!==action.expectedVersion)throw new ApiError(409,'LOOP_VERSION_CONFLICT','Saved work changed. Refresh and review your selection.');
+      if(!eligibleLoopClaims(data.profile!,data.claims).length)throw new ApiError(422,'LOOP_CLAIMS_REQUIRED','Confirm and allow sharing of at least one source-backed claim first.');
+      for(const id of action.opportunityIds){const o=data.opportunities.find(item=>item.id===id)!;if(!['saved','prepared'].includes(o.status)||o.verification==='closed_confirmed')throw new ApiError(409,'LOOP_SELECTION_UNAVAILABLE','A chosen vacancy is no longer available for preparation.');}
+      if(action.provider==='rules'){if(action.model!==RULES_MODEL)throw new ApiError(400,'LOOP_MODEL_INVALID','Choose the current rules preparation method.');}
+      else{const config=modelConfiguration(action.provider,action.model,env);if((config.transport??'direct')!==(action.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','Review the current provider route before starting.');}
+    }
+    // Always enter the atomic bound routine, including retries, so lifecycle
+    // changes after the initial read cannot dispatch an old request.
+    const run=await repo.rpc<RunRow>('job_loop_start_selected_run_bound',{p_user:userId,p_generation:action.expectedGeneration,p_request:action.requestId,p_request_hash:hashes.requestHash,p_input_hash:hashes.inputHash,p_expected:action.expectedVersion,p_provider:action.provider,p_model:action.model,p_consents:consents,p_selected:action.opportunityIds});
+    if(!matches(run))throw new ApiError(409,'LOOP_SELECTION_INVALID','The saved preparation selection could not be confirmed. Retry the same request after refreshing.');
+    let message=existing?'The same selected preparation is already saved; its progress was retained.':'Preparation saved for your selected vacancies only.';
+    try{if(['queued','running'].includes(run.status))await dispatchWorker(run.id,env,fetcher);}catch{message='The selected preparation is saved. Resume this same run when the worker is available.';}
+    return {...await finish(message),runId:run.id,selectedRun:{requestId:action.requestId,runId:run.id,generation:action.expectedGeneration!,opportunityIds:[...action.opportunityIds]}};
   }
   if(action.action==='start_run'){
     configuredUsageCap(env);

@@ -168,7 +168,7 @@
         "BACKEND-03"
       ],
       "implementation_status": "partial: v29 exact vacancy source selection and recent-attempt review shipped; selected-vacancy server request identity, preparation and composition remain open",
-      "unpublished_work": "16 October: exact ordered selected-vacancy/generation SQL admission and snapshot-only worker foundation implemented; 20 new PGlite and 14 worker cases, full1553/102, TS,15source/15bundled Deno and12hosting groups passed. No selected client/control/UI caller; migration unapplied, bundles undeployed, native selected concurrency and independent review remain open. See ../2026-10-16-selected-preparation/ASSESSMENT.md. Publicv30 unchanged; per-application composition/grouped review and hosted first/second-task acceptance remain unfinished."
+      "unpublished_work": "16 October: selected admission/worker now has strict client/control contract, server-derived selection/source hashes, generation/version consent binding, progress-preserving retry and explicit returned scope. Full1600/104, TS,16source/16bundled Deno pass; build/hosting receipt in ../2026-10-16-selected-preparation/contract-verification.json. No UI caller, no applied migrations or deployed handlers. Native selection concurrency, UI/component first/second task acceptance, independent review, coordinated release and composition/grouped review remain open. Publicv30 unchanged."
     },
     {
       "id": "JV-05",

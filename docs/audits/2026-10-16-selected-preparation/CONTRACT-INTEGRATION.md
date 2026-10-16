@@ -1,0 +1,29 @@
+# Selected preparation client and control contract
+
+16 October 2026. **Unpublished source only; public v30 and control15/worker11/OAuth5 remain unchanged.** The earlier admission migration and worker foundation are retained. Both pending migrations remain unapplied, all generated handlers undeployed, and no candidate-facing page calls the new action yet.
+
+## Implemented boundary
+
+`start_selected_run` requires the displayed lifecycle generation and record version, a stable request UUID, one or two ordered exact vacancy UUIDs, explicit preparation consent and explicit model processing choice. Client and server reject owner overrides, caller hashes, inbox/recurring expansion, duplicate IDs, missing consent and unsupported routing. UUIDs are normalized before comparison. The browser copies its validated payload before authentication awaits and rejects owner/auth-lifetime changes, including A→B→A, before dispatch and after response.
+
+The control handler derives the owner from its authenticated session and computes source/request fingerprints itself. These include the selected vacancies' exact facts, provenance and order, the career profile and claims, original generation and provider choices. Unselected vacancy changes do not alter an existing selection's identity. A new request must still match the displayed version and contain available selected sources plus confirmed shareable evidence. The atomic routine rechecks version and generation under its existing locks.
+
+A retry must match the original selected generation, IDs/order, source/input hashes, provider/model and processing consent. Later tracking notes/status and unrelated vacancy changes are preserved. Replays enter the bound atomic routine again, so an erasure/new lifetime during the earlier read cannot bypass the lifecycle check. An ordinary discovery-wide run cannot become a selected run. A mismatched server receipt is rejected before dispatch. If dispatch fails, the saved run identity is returned for resumption rather than a new request.
+
+Run snapshots now carry an explicit optional selection (original generation and ordered IDs), separately from prepared opportunity IDs. Their initial phase is described as selection rather than inbox/discovery. A strict selected-run response receipt also preserves exact identity if that older request falls outside the recent-run list. The browser checks request/run IDs, selection, receipt generation, current snapshot generation and any matching run entry. This is returned scope data; the candidate UI still needs deliberate selection, consent controls and readable scope presentation.
+
+## Verification
+
+- **1,600 tests passed in 104 files**, including **26 new server-contract and 21 new browser-boundary cases**. Existing SQL admission and actual worker-phase tests remain active. These are isolated fixtures, not authenticated production tasks.
+- **16 actual Deno source tests and 16 generated-handler tests passed**. The added selected-handler test exercises SDK HTTP composition, derives the owner, selects the third vacancy, sends server hashes to the atomic RPC, returns exact scope, rejects invalid actions and preserves retry progress. All HTTP requests are intercepted fixtures; the SQL effects in that handler test are mocked.
+- TypeScript passed. Vite and prerender passed. Initial packaging rejected a symbolic-link entry; subsequent enumeration found none, and unchanged packaging plus all **12 hosting groups passed on retry**. Cause remains unestablished and the link guard is unchanged. An earlier hosting command ran before packaging finished and correctly found no server artifact; only the ordered final check is counted. Exact results are in `contract-verification.json`. No new native PostgreSQL concurrency run, browser task, hosted mutation or live HTTP check was performed.
+- The known independent review limitation remains; no new reviewer sign-off, paid model/search call, production mutation or collection configuration query occurred. The worker's selected rendering tests remain bounded evidence, not semantic rewriting or full application acceptance.
+
+## Remaining gates
+
+1. Candidate UI: explicitly choose one/two saved vacancies, show exact source and provider processing scope, capture the displayed generation/version and immutable draft/request identity, require fresh consent, and invalidate stale confirmations/results after edits or auth changes. No unscoped button may promise preparation of only the chosen job. Existing saved-check import, link consent, undo and recovery must remain intact.
+2. Native isolated multi-connection admission races against source edits, duplicate/conflicting requests, erasure and competing runs; actual component and desktop/mobile first/second preparation/export checks. Existing native link/concurrency receipts do not certify this new selected contract.
+3. Independent combined review of pending SQL/contract/home/import/selection work, then coordinated migration/control/worker/site exposure and exact readback. **Never deploy selected admission against worker11**, or the pending import UI alone against control15. Preserve savedv30, source/schema rollback evidence, permanent GC fences and all actual/reserved/uncertain spending. Collection stays disabled; its last actual configuration query remains v26.
+4. Hosted authenticated and unassisted first/second tasks, pagination/exact older-source retrieval, per-application composition/grouped review and all remaining original requests. No target-score uplift or whole journey completion is inferred.
+
+Additional source rollback tag `jobvance-before-selected-contract-2026-10-16` is pushed at `7b947dcb4d8a3f80a997e18239b8c3afe5a4e746`. Source rollback remains separate from database/file restore. No frontend or backend was published during this step.

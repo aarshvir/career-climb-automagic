@@ -1,0 +1,58 @@
+{
+  "status": "unpublished-source-only",
+  "recordedAt": "2026-10-16T01:29:20.340511+00:00",
+  "publicVersionUnchanged": 30,
+  "productionMutationPerformed": false,
+  "migrationsApplied": [],
+  "handlersDeployed": [],
+  "uiCallerImplemented": false,
+  "independentReview": "pending-known-reviewer-usage-limit",
+  "vitest": {
+    "success": true,
+    "passed": 1600,
+    "failed": 0,
+    "files": 104,
+    "newServerCases": 26,
+    "newClientCases": 21
+  },
+  "typeScript": "passed",
+  "deno": {
+    "sourceCases": 16,
+    "generatedHandlerCases": 16,
+    "newSelectedHandlerCases": 1,
+    "scope": "intercepted Supabase HTTP fixtures; no hosted persistence"
+  },
+  "build": {
+    "vite": "passed",
+    "prerender": "passed",
+    "initialPackaging": "symbolic-link guard rejection",
+    "laterEnumeration": {
+      "links": []
+    },
+    "unchangedPackagingRetry": "passed",
+    "cause": "unestablished",
+    "guardChanged": false
+  },
+  "hostingGroups": 12,
+  "prematureHostingAttempt": "missing artifact before build completion; not counted",
+  "nativePostgresRun": false,
+  "browserAcceptancePerformed": false,
+  "liveHttpChecks": 0,
+  "providerCalls": 0,
+  "hashEncoding": "SHA-256 of current file bytes",
+  "sourceHashes": {
+    "src/lib/job-loop-api.ts": "017387e5e65cde4d11722eb191be8cd4a47baa9154a89b1d9f665ca8f5b98776",
+    "supabase/functions/_shared/job-loop-engine.ts": "2cc2eecc3ac5f219334ed0850706392f838e88890a769d78f7506b366d6882bf",
+    "supabase/functions/_shared/job-loop-runtime.ts": "980268a0446e2c7240cb5981c270a8a40bf0201451adcf03e50a8db0612d71a7",
+    "supabase/functions/_shared/job-loop-types.ts": "7b166e26e4a92e32b73c523517421adebbbe32366fd27fb79835aff2a223b99f",
+    "supabase/functions/_shared/job-loop-repository.ts": "5d60cbc3a1f979bbe32787b953c16ac038ddcc9ba23400cebfb3368113234216",
+    "supabase/functions/_shared/job-loop-request.ts": "ec62a453d08bf38bf462a693aa4d4886258bcf17526bf3d27456bb1eb7428a07",
+    "supabase/tests/job-loop-selected-control.test.ts": "c55e0dd8bc117553d2b77e1774b4c7c0bb64c2a46cfea016459d76496f4c0ff9",
+    "supabase/tests/job-loop-edge.deno.ts": "5f8cea0e886fe1652ad96e5cb81f237f3f5b9c05297fc20928d54c2927919292",
+    "src/__tests__/lib/job-loop-selected-api.test.ts": "aa57cacebd71686ff9a1872ca54f351b6d6f5f879e8b1a4f0c0349ebd75e01e0",
+    "docs/supabase-loop-ui/manifest.json": "d9bbc974a8d0915b6f1635715871d89484d0f957ffcb4f11a3d32639f8090282",
+    "docs/supabase-loop-ui/job-loop-control.js": "685c6731c245e65d1f05dc6f26215198ff53e7c53ce5d7f729410418207e5fbf",
+    "docs/supabase-loop-ui/job-loop-worker.js": "6bfcebd61fbf64aeb38e82c191c242a6ee62fad986fd542bcf653fe6a9afac4f",
+    "docs/supabase-loop-ui/job-loop-oauth.js": "3cc4e794fe6b5c52b807cf58693dbbca816650687418e99b8bf5da5ca1bdc256"
+  }
+}
