@@ -3,6 +3,7 @@ import { checkTrackingSchema, checkTrackingMigration } from '../supabase/tests/f
 import { checkLoopSchema, checkLoopMigration } from '../supabase/tests/fixtures/check-loop-schema.mjs';
 import { checkLoopNativeCases } from './fixtures/check-loop-native-cases.mjs';
 import { selectedPreparationNativeCases } from './fixtures/selected-preparation-native-cases.mjs';
+import { cvVariantsNativeCases } from './fixtures/cv-variants-native-cases.mjs';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, readFile, realpath, stat, statfs, writeFile } from 'node:fs/promises';
@@ -28,12 +29,14 @@ const source = {
   ],
 };
 const args = process.argv.slice(2);
-assert(args.every(arg => arg === '--prepare-only' || arg === '--check-loop' || arg === '--selected-preparation' || arg.startsWith('--fixture-root=')), 'Unknown argument.');
+assert(args.every(arg => arg === '--prepare-only' || arg === '--check-loop' || arg === '--selected-preparation' || arg === '--cv-variants' || arg.startsWith('--fixture-root=')), 'Unknown argument.');
 const selectedPreparation = args.includes('--selected-preparation');
 const checkLoop = args.includes('--check-loop');
-assert(!(selectedPreparation && checkLoop), 'Choose one native suite.');
-const suite = selectedPreparation ? 'selected-preparation' : checkLoop ? 'check-loop' : 'check-tracking';
+const cvVariants = args.includes('--cv-variants');
+assert([selectedPreparation, checkLoop, cvVariants].filter(Boolean).length <= 1, 'Choose one native suite.');
+const suite = cvVariants ? 'cv-variants' : selectedPreparation ? 'selected-preparation' : checkLoop ? 'check-loop' : 'check-tracking';
 const selectedMigration = '20261015223000_job_loop_selected_preparation.sql';
+const cvVariantsMigration = '20261017013000_job_loop_cv_variants.sql';
 assert.equal(process.platform, 'win32', 'This pinned archive is for Windows x64.');
 assert.equal(process.arch, 'x64', 'This pinned archive is for Windows x64.');
 const temporary = path.join(repo, '.tmp');
@@ -226,8 +229,9 @@ async function runNative() {
   const session = name => { const result = new Session(psql, port, name); sessions.push(result); return result; };
   evidence.port = port; evidence.dataDirectory = data;
   evidence.harnessSha256 = await digest(fileURLToPath(import.meta.url));
-  const migration = selectedPreparation ? selectedMigration : checkLoop ? checkLoopMigration : checkTrackingMigration;
+  const migration = cvVariants ? cvVariantsMigration : selectedPreparation ? selectedMigration : checkLoop ? checkLoopMigration : checkTrackingMigration;
   evidence.migration = { name: migration, sha256: await digest(path.join(repo, 'supabase/migrations', migration)) };
+  if (cvVariants) evidence.casesSha256 = await digest(path.join(repo, 'scripts/fixtures/cv-variants-native-cases.mjs'));
   if (selectedPreparation) evidence.casesSha256 = await digest(path.join(repo, 'scripts/fixtures/selected-preparation-native-cases.mjs'));
   if (checkLoop) evidence.casesSha256 = await digest(path.join(repo, 'scripts/fixtures/check-loop-native-cases.mjs'));
   try {
@@ -237,8 +241,9 @@ async function runNative() {
     await command(pgctl, ['start', '-D', data, '-l', logfile, '-w', '-t', '15', '-o', `-h 127.0.0.1 -p ${port} -c max_connections=10 -c shared_buffers=32MB`]);
     const observer = session('observer');
     await observer.query("SET statement_timeout='8s'; SET lock_timeout='6s';");
-    let schema = await (checkLoop || selectedPreparation ? checkLoopSchema() : checkTrackingSchema());
-    if (selectedPreparation) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', selectedMigration), 'utf8');
+    let schema = await (checkLoop || selectedPreparation || cvVariants ? checkLoopSchema() : checkTrackingSchema());
+    if (selectedPreparation || cvVariants) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', selectedMigration), 'utf8');
+    if (cvVariants) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', cvVariantsMigration), 'utf8');
     evidence.executedSchemaSha256 = createHash('sha256').update(schema).digest('hex');
     await observer.query(schema);
     const owner = randomUUID(), other = randomUUID();
@@ -272,7 +277,8 @@ async function runNative() {
       const detail = await test(); evidence.checks.push({ name, passed: true, ...detail });
       console.log(JSON.stringify({ check: name, passed: true }));
     }
-    if (selectedPreparation) await selectedPreparationNativeCases({ observer, actor, check, blocking, quote });
+    if (cvVariants) await cvVariantsNativeCases({ observer, actor, check, blocking, quote });
+    else if (selectedPreparation) await selectedPreparationNativeCases({ observer, actor, check, blocking, quote });
     else if (checkLoop) await checkLoopNativeCases({ observer, actor, check, blocking, quote, owner, other, newCheck });
     else {
     await check('concurrent first tracking returns one identity and preserves winner progress', async () => {

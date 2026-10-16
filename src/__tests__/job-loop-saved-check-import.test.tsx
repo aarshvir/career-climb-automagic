@@ -209,7 +209,7 @@ describe('saved check continuation inside the real Loop workspace', () => {
     expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue('');
     expect(screen.getByLabelText('Full vacancy description')).toHaveValue('');
     expect(screen.queryByText('PRIVATE_DETAIL_REMOVED_FROM_FINAL')).not.toBeInTheDocument();
-    expect(screen.getByTestId('route')).toHaveTextContent(/^\/loop$/);
+    await waitFor(() => expect(screen.getByTestId('route')).toHaveTextContent(/^\/loop$/));
     noWrites(); fireEvent.click(screen.getByRole('button', { name: 'Use this saved check' }));
     expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue(finalText);
     expect(screen.getByLabelText('Vacancy title')).toHaveValue('Operations Analyst');

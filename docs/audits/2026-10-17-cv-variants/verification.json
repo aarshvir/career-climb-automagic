@@ -1,0 +1,63 @@
+{
+  "recordedAt": "2026-10-16T22:44:19.9772553Z",
+  "status": "unpublished source foundation",
+  "baseCommit": "89d50abbce434b75ebf5592fb296d7589cca16de",
+  "rollbackTag": "jobvance-before-cv-variants-2026-10-17",
+  "publicVersion": 32,
+  "publicRuntimeSource": "2d332203572fa2459eca2b4342ebbc761fa51db3",
+  "migrationApplied": false,
+  "handlersDeployed": false,
+  "sitePublished": false,
+  "tests": {
+    "newIntentContract": 26,
+    "firstFullAttempt": {
+      "passed": 1904,
+      "failed": 1,
+      "reason": "Existing saved-check route assertion ran before deferred navigation committed; unchanged focused 38 passed, assertion now awaits identical exact route."
+    },
+    "newSql": 42,
+    "full": {
+      "passed": 1905,
+      "exitCode": 0,
+      "files": 115
+    }
+  },
+  "typecheck": {
+    "targetedSharedHelperAndTest": "passed",
+    "app": "passed"
+  },
+  "nativePostgres": {
+    "version": "17.11",
+    "clusterStopped": true,
+    "groups": 9,
+    "postRunPostgresProcesses": 0,
+    "receipt": "native-postgres.json",
+    "includesSelectedPreparationMigration": true
+  },
+  "independentReview": "independent-review.md",
+  "sourceSha256": {
+    "supabase/migrations/20261017013000_job_loop_cv_variants.sql": "4adbe12e4ad3e910ae9226c6880e4ce9dbeb81d6bf4e58fc1205e642d89e5282",
+    "supabase/functions/_shared/job-loop-cv-variants.ts": "4db327b5461d6668c57538ac8b1503aa7c108bdc0c7989ad81158b40bcb9c9b0",
+    "supabase/tests/job-loop-cv-variants-sql.test.ts": "6e350ec5ff0f4031b2287bfa81c48372b6d4fdfe0205b69a27b151d73e555b35",
+    "supabase/tests/job-loop-cv-variants.test.ts": "b99fc7b2f0c5d9ad07472eebcb79c96d73226c1684006193610732c1cb9f256a",
+    "scripts/test-check-tracking-postgres.mjs": "2e32675ceff67bfa2d5ecae2963ebcd94f2fc1198fe3e90d91e29d4c4292d250",
+    "scripts/fixtures/cv-variants-native-cases.mjs": "463d2278be547ab02fa59b831189a1d4c6e49f2354d2d2b43ce3139f31bd6a0b",
+    "src/__tests__/job-loop-saved-check-import.test.tsx": "7113ebfbf40f6a770cb6faef5df8c97154fa789e981de083c353f3062e321a1b"
+  },
+  "notRun": [
+    "frontend build or packaging",
+    "Deno handlers",
+    "live HTTP checks",
+    "browser variant tasks",
+    "hosted signup, persistence, worker or Storage",
+    "paid provider/search calls"
+  ],
+  "limitations": [
+    "No registered control/client/UI action.",
+    "Independent CV drafts can save with empty facts; variant-specific fact editing/confirmation remains pending.",
+    "No manual/scheduled variant selection, packet provenance or approval/download integration.",
+    "PGlite is embedded; native PostgreSQL uses isolated auth and Storage fixtures.",
+    "No production candidate or backend/config/billing mutation.",
+    "Original 100-scenario simulation and its limitations unchanged; no score uplift."
+  ]
+}
