@@ -90,6 +90,25 @@ describe('task-focused public help', () => {
     expect(searchHelpTopics('Compare without AI').some(topic => topic.id === 'first-check')).toBe(true);
   });
 
+  it('guides no-CV customers into the real Loop builder and preserves a check fallback', () => {
+    const { container } = showHelp();
+    const builder = container.querySelector('#no-cv')!;
+    expect(builder).toHaveTextContent('My CV & experience');
+    expect(builder).toHaveTextContent('No CV yet? Build one with guided questions');
+    expect(builder).toHaveTextContent('Preview my CV draft');
+    expect(builder).toHaveTextContent('Use this CV draft');
+    expect(builder).toHaveTextContent('Undo CV builder replacement');
+    expect(builder).toHaveTextContent('does not save it, approve it or start a run');
+    expect(builder).toHaveTextContent('does not call an AI provider');
+    expect(within(builder as HTMLElement).getByRole('link', { name: /Build my first CV in Job Loop/ })).toHaveAttribute('href', '/loop');
+    expect(within(builder as HTMLElement).getByRole('link', { name: 'Try the free CV Check' })).toHaveAttribute('href', '/help#first-check');
+    const loopText = helpTopics.filter(topic => topic.category === 'Job Loop').flatMap(topic => topic.steps).join(' ');
+    expect(loopText).not.toContain('Open Outputs');
+    expect(loopText).not.toContain('Open Career record');
+    expect(container.querySelector('#job-loop-review')).toHaveTextContent('Open Prepared CVs');
+    expect(container.querySelector('#job-loop-start')).toHaveTextContent('My CV & experience');
+  });
+
   it('reveals a quick-start anchor even after a search hid that topic', async () => {
     const user = userEvent.setup();
     const { container } = showHelp();

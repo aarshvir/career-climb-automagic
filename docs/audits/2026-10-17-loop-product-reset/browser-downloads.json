@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-16T20:53:04.010Z",
+  "scope": "Actual IAB download events and parsed received files; localhost UI with in-memory account/approval adapters and pre-generated actual worker artifacts. Not hosted persistence or unassisted customers.",
+  "checks": [
+    {
+      "job": 1,
+      "format": "pdf",
+      "bytes": 57329,
+      "sha256": "30f9c2433bdb8933fca440c4d6fbe1a908dbce05570314bfcc05fc76ec54977d",
+      "hashMatchesWorker": true,
+      "parsedExpectedText": true,
+      "pages": 1
+    },
+    {
+      "job": 1,
+      "format": "docx",
+      "bytes": 9736,
+      "sha256": "dad7457f38c6ba9361b5ef07ae8cb86dcc095297ab939e88df105e275cd51ff2",
+      "hashMatchesWorker": true,
+      "parsedExpectedText": true,
+      "pages": null
+    },
+    {
+      "job": 1,
+      "format": "txt",
+      "bytes": 161,
+      "sha256": "2dec2d5701aad7c953b13d4e551d0d8d86aa74974b662a777e71b42cb062d5a7",
+      "hashMatchesWorker": true,
+      "parsedExpectedText": true,
+      "pages": null
+    },
+    {
+      "job": 2,
+      "format": "pdf",
+      "bytes": 57329,
+      "sha256": "390145fa5d2b75de16781653a770ad429ee5e407edcdc34531ec2e5ab5847974",
+      "hashMatchesWorker": true,
+      "parsedExpectedText": true,
+      "pages": 1
+    },
+    {
+      "job": 2,
+      "format": "docx",
+      "bytes": 9737,
+      "sha256": "ec5ab1ec5592c93a3cb8933a7dccccc97929dd540da6e255306c46522f1cc314",
+      "hashMatchesWorker": true,
+      "parsedExpectedText": true,
+      "pages": null
+    },
+    {
+      "job": 2,
+      "format": "txt",
+      "bytes": 161,
+      "sha256": "2dec2d5701aad7c953b13d4e551d0d8d86aa74974b662a777e71b42cb062d5a7",
+      "hashMatchesWorker": true,
+      "parsedExpectedText": true,
+      "pages": null
+    }
+  ]
+}

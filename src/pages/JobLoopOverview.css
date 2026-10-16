@@ -3,3 +3,5 @@
 /* Keep the first useful action within a normal laptop viewport. */
 .lo-copy h1 { font-size:clamp(42px,5vw,64px); line-height:1.1; }
 .lo-copy .lo-lead { font-size:18px !important; line-height:1.75 !important; }
+
+.lo-loop-hero { padding-block:24px 48px; }

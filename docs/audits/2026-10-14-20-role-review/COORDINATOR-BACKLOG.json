@@ -638,5 +638,20 @@
     ],
     "source_commit": "5bf52c4e5b749d80822b5973cc85b2adeea985c7",
     "receipt": "../../releases/2026-10-15-clarity-evidence.json"
+  },
+  "latest_owner_direction": {
+    "date": "2026-10-17",
+    "request": "RQ-33: Job Loop primary recurring product; CV Check acquisition; three-stage journey; guided CV creation; proposed $29/$59/$99 monthly plans; 100 synthetic customer cases.",
+    "implemented_scope": "Three-panel public/dashboard entry and guided exact-answer CV draft with owner/auth/generation-bound recovery, preview, replacement and undo. Local actual-worker first/second export acceptance plus real browser receipt of six generated files.",
+    "assessment": "../2026-10-17-loop-product-reset/ASSESSMENT.md",
+    "remaining": [
+      "Owned three-CV-variant contract and immutable run/schedule selection",
+      "Three chosen weekdays, 31-day daily entitlement and retry/missed-run rules",
+      "Explicit recurring AI processing consent and source-bound tailoring",
+      "Broader useful discovery, missing-target admission and unsupported PDF scripts",
+      "Hosted authenticated worker/Storage and unassisted first/second tasks",
+      "Existing pagination, grouped review, recovery and all previously tracked requirements"
+    ],
+    "commercial_state": "Proposed plans only; no checkout, subscriptions, paid provider test or production candidate mutation."
   }
 }

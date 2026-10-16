@@ -138,7 +138,7 @@ describe('saved check continuation inside the real Loop workspace', () => {
   it('keeps pending attribution in route memory even when all vacancy fields were intentionally cleared', async () => {
     const view = render(tree()); await importAndOpen();
     // Save the CV independently so the pending link is the only remaining draft.
-    fireEvent.click(screen.getByRole('button', { name: 'Career record' }));
+    fireEvent.click(screen.getByRole('button', { name: 'My CV & experience' }));
     fireEvent.change(screen.getByLabelText('Locations'), { target: { value: 'Dubai' } });
     mocks.call.mockImplementation(async (_owner, action) => {
       if (action.action === 'save_profile') { current = { ...current, recordVersion: 2, profile: { ...action.profile, revision: 1 } }; return { snapshot: current }; }
@@ -174,7 +174,7 @@ describe('saved check continuation inside the real Loop workspace', () => {
   it('restores the preceding imported check identity on undo, including two checks with the same vacancy wording', async () => {
     const secondId = '22222222-2222-4222-8222-222222222222'; mocks.list.mockResolvedValue([saved(), saved({ id: secondId })]);
     render(tree()); await importAndOpen();
-    fireEvent.click(screen.getByRole('button', { name: 'Career record' }));
+    fireEvent.click(screen.getByRole('button', { name: 'My CV & experience' }));
     fireEvent.click(screen.getByRole('button', { name: 'Choose a saved CV check' })); await screen.findByLabelText('Saved CV check');
     fireEvent.change(screen.getByLabelText('Saved CV check'), { target: { value: secondId } });
     fireEvent.click(screen.getByLabelText(/Replace these local drafts/)); fireEvent.click(screen.getByRole('button', { name: 'Use this saved check' }));
@@ -238,7 +238,7 @@ describe('saved check continuation inside the real Loop workspace', () => {
   });
 
   it('loads the chooser only after a deliberate opening when there is no URL intent', async () => {
-    render(tree('/loop')); fireEvent.click(await screen.findByRole('button', { name: 'Career record' }));
+    render(tree('/loop')); fireEvent.click(await screen.findByRole('button', { name: 'My CV & experience' }));
     expect(mocks.list).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Choose a saved CV check' }));
     await screen.findByLabelText('Saved CV check'); expect(mocks.list).toHaveBeenCalledExactlyOnceWith('owner-a');
