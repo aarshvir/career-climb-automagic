@@ -168,7 +168,7 @@
         "BACKEND-03"
       ],
       "implementation_status": "partial: v29 exact vacancy source selection and recent-attempt review shipped; selected-vacancy server request identity, preparation and composition remain open",
-      "unpublished_work": "16 October: selected admission/worker now has strict client/control contract, server-derived selection/source hashes, generation/version consent binding, progress-preserving retry and explicit returned scope. Full1600/104, TS,16source/16bundled Deno pass; build/hosting receipt in ../2026-10-16-selected-preparation/contract-verification.json. No UI caller, no applied migrations or deployed handlers. Native selection concurrency, UI/component first/second task acceptance, independent review, coordinated release and composition/grouped review remain open. Publicv30 unchanged."
+      "unpublished_work": "16 October: deliberate exact one/two-vacancy UI now calls the existing selected contract with fresh consent, owner/auth/generation-bound direct choice, stable page-memory retry, stale-result guards and honest returned scope. All1630/105 and TS pass; ui-verification.json records build/hosting. Isolated desktop/mobile adapter request receipts are not actual worker/export or hosted acceptance. Both migrations unapplied, handlers/site undeployed. Native selected concurrency, full-navigation retry recovery, actual first/second worker/export tasks, independent review, coordinated release and composition/grouped review remain open. Publicv30 unchanged."
     },
     {
       "id": "JV-05",

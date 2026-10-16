@@ -1,0 +1,89 @@
+{
+  "status": "unpublished-source-only",
+  "recordedAt": "2026-10-16T04:47:49.590613+00:00",
+  "parentCommit": "0eaf2bf7efbad64e1fd32c14c39283c2d13acef6",
+  "publicVersionUnchanged": 30,
+  "productionMutationPerformed": false,
+  "migrationsApplied": [],
+  "handlersDeployed": [],
+  "uiCallerImplemented": true,
+  "independentReview": "pending-known-reviewer-usage-limit-no-new-signoff",
+  "vitest": {
+    "passed": 1630,
+    "failed": 0,
+    "files": 105,
+    "newChooserCases": 25,
+    "newJobLoopCases": 5
+  },
+  "typeScript": "passed",
+  "build": {
+    "finalVite": "passed",
+    "finalPrerender": "passed",
+    "finalPackaging": "passed",
+    "earlierAttempts": "symbolic-link guard rejection; later enumeration links=[] and unchanged retry passed before final source build",
+    "guardChanged": false,
+    "cause": "unestablished"
+  },
+  "hosting": {
+    "result": "passed",
+    "publicPages": 38,
+    "guideArticles": 20,
+    "checks": [
+      "security-headers-and-jsonld-hashes",
+      "private-client-routes",
+      "rendered-public-content",
+      "canonical-redirects",
+      "real-notfound-status",
+      "asset-bytes-and-mime",
+      "etag-and-cache",
+      "head",
+      "missing-and-private-paths",
+      "unsafe-methods",
+      "project-identity",
+      "compressed-size"
+    ],
+    "compressedBytes": 2794725
+  },
+  "browser": {
+    "scope": "real JobLoop page with isolated in-memory auth/backend receipt adapters; no actual worker or rendering",
+    "desktopThirdVacancyRequest": true,
+    "mobileTwoDistinctRequests": true,
+    "mobileViewport": {
+      "width": 390,
+      "height": 844,
+      "documentWidth": 375
+    },
+    "finalDesktopDirectChoice": {
+      "freshConsentRequired": true,
+      "focus": "jl-selected-prepare-heading",
+      "topPx": 100.375
+    },
+    "viewportReset": true,
+    "tabsClosed": true,
+    "serverStopped": true,
+    "finalNoticeClearingGuard": "subsequently covered by final full component suite"
+  },
+  "nativePostgresRun": false,
+  "denoRun": false,
+  "actualWorkerBrowserTask": false,
+  "exportsReceived": false,
+  "hostedAuthenticatedAcceptance": false,
+  "liveHttpChecks": 0,
+  "providerCalls": 0,
+  "fullNavigationRetryRecovery": "open; existing retry scope is mounted-page memory",
+  "sourceHashEncoding": "SHA-256 current file bytes",
+  "sourceHashes": {
+    "src/pages/LoopSelectedPreparation.tsx": "1e1e548bed82cdb513c99e4e2484c8ffdc992d041bf4325ef3540dc79198e539",
+    "src/pages/JobLoop.tsx": "5a227e12b39d3774547e05560e62ed6ba200246a2ce9646659eaf3b2a4c30776",
+    "src/__tests__/job-loop-selected-preparation.test.tsx": "94082cf772101bfe2bb3adceab3571cf6dd824bbad5170aaaec3ff20cb7d71e0",
+    "src/__tests__/job-loop-saved-check-import.test.tsx": "a6c5c37fcec8b43dc5942cce700fec64cf943afb91d3ee6076550c3005167bfb"
+  },
+  "evidenceHashes": {
+    "selected-ui-full.json": "5b6457cbc216934ad2b030dcf528855e2757779309931219c2e5da30cc698c7b",
+    "selected-ui-typescript.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "selected-ui-build-final.log": "eea6244858c6044fe1bb8bdf87be5a47945d814075973e9e80e4a361355b4a00",
+    "selected-ui-hosting-final.log": "ad29462b64770a74171c8cdbc3b704c238c0c2596702a4e0c1fd2d8e918d12b0",
+    "selected-ui-mobile.png": "0ccc57b9ecb1be51ba0c58dc921fdd56a1c5dcc9d00f2deb406c3cc4aef7dad9",
+    "selected-ui-desktop.png": "a63d7adbb9045a9e2a2365355295fb0400e82e058ceddd4891f4f52bb32b7cf4"
+  }
+}

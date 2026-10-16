@@ -379,3 +379,60 @@ describe('saved check continuation inside the real Loop workspace', () => {
     await screen.findByLabelText('Saved CV check'); expect(screen.getByLabelText('Saved CV check')).toHaveValue(''); noWrites();
   });
 });
+
+
+describe('selected preparation in the actual Loop page', () => {
+  const opportunityIds = ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', '33333333-3333-4333-8333-333333333333'];
+  function preparedRecord() {
+    current.profile = existingProfile();
+    current.claims = [{ id: 'claim-1', revision: 1, status: 'active', createdAt: '2026-10-16', sourceKind: 'user_answer', sourceQuote: 'Maintained operations reports at Example Company.', phrasing: 'Maintained operations reports at Example Company.', context: 'Example Company', kind: 'employment', resultStatus: 'not_measured', confirmed: true, shareable: true }];
+    current.opportunities = opportunityIds.map((opId, i) => ({ ...linked(), id: opId, title: `Chosen role ${i + 1}`, sourceCheckId: undefined, sourceKey: opId, status: 'saved' }));
+  }
+  async function readyChoice() {
+    await screen.findByRole('heading', { name: 'Prepare for a saved vacancy' });
+    fireEvent.click(screen.getByLabelText(/Chosen role 3 · Saved Employer Fixture/));
+    fireEvent.click(screen.getByLabelText(/Prepare documents for only my chosen vacancies/));
+  }
+  it('offers a direct vacancy choice, requires consent and dispatches the selected action with original authority', async () => {
+    preparedRecord(); render(tree('/loop')); await screen.findByRole('heading', { name: 'Prepare for a saved vacancy' });
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose Chosen role 3 for preparation' }));
+    expect(screen.getByLabelText(/Chosen role 3 · Saved Employer Fixture/)).toBeChecked(); noWrites();
+    expect(screen.getByLabelText(/Prepare documents for only my chosen vacancies/)).not.toBeChecked();
+    mocks.call.mockImplementation(async (_owner, action) => ({ snapshot: structuredClone(current), selectedRun: { requestId: action.requestId, runId: id, generation: 0, opportunityIds: [...action.opportunityIds] } }));
+    fireEvent.click(screen.getByLabelText(/Prepare documents for only my chosen vacancies/));
+    fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' }));
+    await screen.findByText(/Your chosen application preparation is recorded/);
+    expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'start_selected_run', expectedGeneration: 0, expectedVersion: 1, opportunityIds: [opportunityIds[2]], prepareConsent: true, modelConsent: false }));
+  });
+  it('does not carry a direct vacancy choice into a refreshed record lifetime', async () => {
+    preparedRecord(); render(tree('/loop')); await screen.findByRole('heading', { name: 'Prepare for a saved vacancy' });
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose Chosen role 3 for preparation' }));
+    expect(screen.getByLabelText(/Chosen role 3 · Saved Employer Fixture/)).toBeChecked();
+    current = { ...current, lifecycleGeneration: 1, recordVersion: 2 };
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh records' }));
+    await waitFor(() => expect(screen.getByLabelText(/Chosen role 3 · Saved Employer Fixture/)).not.toBeChecked());
+    noWrites();
+  });
+  it('blocks same-batch claim edits before React applies the dirty-state update', async () => {
+    preparedRecord(); render(tree('/loop')); await readyChoice();
+    act(() => { fireEvent.change(screen.getAllByLabelText('Wording I can substantiate')[0], { target: { value: 'New wording' } }); fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' })); });
+    noWrites();
+  });
+  it('does not apply delayed selection responses over newer profile edits', async () => {
+    preparedRecord(); render(tree('/loop')); await readyChoice(); const result = deferred<LoopResponse>();
+    mocks.call.mockImplementation(() => result.promise); fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' }));
+    const action = mocks.call.mock.calls.at(-1)![1];
+    fireEvent.change(screen.getByLabelText('My name'), { target: { value: 'Keep newer name' } });
+    await act(async () => result.resolve({ snapshot: { ...structuredClone(current), recordVersion: 99 }, message: 'Stale preparation response', selectedRun: { requestId: action.requestId, runId: id, generation: 0, opportunityIds: action.opportunityIds } }));
+    expect(screen.getByLabelText('My name')).toHaveValue('Keep newer name'); expect(screen.queryByText('Stale preparation response')).not.toBeInTheDocument();
+  });
+  it('rejects delayed results after confirmed auth authority changes', async () => {
+    preparedRecord(); const view = render(tree('/loop')); await readyChoice(); const result = deferred<LoopResponse>();
+    mocks.call.mockImplementation(() => result.promise); fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' }));
+    mocks.auth.authError = 'Session unavailable'; view.rerender(tree('/loop'));
+    await act(async () => result.resolve({ snapshot: structuredClone(current), message: 'Old session result' }));
+    expect(screen.queryByText('Old session result')).not.toBeInTheDocument();
+  });
+});
