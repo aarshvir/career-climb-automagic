@@ -247,6 +247,14 @@ export default function Workspace() {
     setReviewText(selected?.tailored_text ?? "");
     setConfirmed(false);
   }, [selected?.id, selected?.tailored_text]);
+  // Payment providers may append the buyer's email to the return URL; drop it from
+  // the address bar and history before anything else can read or share the URL.
+  useEffect(() => {
+    if (!params.has("email")) return;
+    const next = new URLSearchParams(params);
+    next.delete("email");
+    setParams(next, { replace: true });
+  }, [params, setParams]);
   useEffect(() => {
     if (params.get("checkout") === "success")
       setNotice(

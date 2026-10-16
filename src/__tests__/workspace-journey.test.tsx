@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Workspace from "@/pages/Workspace";
 import type {
@@ -147,6 +147,9 @@ const cv: CvDocument = {
   text_content: original,
   created_at: "2026-10-10T00:00:00Z",
 };
+function LocationProbe() {
+  return <output data-testid="location-search">{useLocation().search}</output>;
+}
 function mount(url = "/dashboard") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, retryDelay: 0 } },
@@ -155,6 +158,7 @@ function mount(url = "/dashboard") {
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[url]}>
         <Workspace />
+        <LocationProbe />
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -288,6 +292,13 @@ describe("Real workspace journey and truthful failures", () => {
     expect(calls.openCheckout).not.toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: /buy|checkout/i })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Check a CV for free' })).toHaveAttribute('href', '/check');
+  });
+  it("removes a buyer email that a payment provider appends to the return URL", async () => {
+    mount("/dashboard?tab=billing&checkout=success&payment_id=pay_fixture&status=succeeded&email=buyer%40example.invalid");
+    await screen.findByText(/Checkout returned/);
+    await waitFor(() => expect(screen.getByTestId("location-search").textContent).not.toContain("email"));
+    expect(screen.getByTestId("location-search").textContent).toContain("checkout=success");
+    expect(screen.getByTestId("location-search").textContent).not.toContain("example.invalid");
   });
   it("saves in-progress notes and date when the status changes", async () => {
     state.data.applications.push({ id: 'track1', user_id: state.user.id, pack_id: null, job_title: 'Analyst', company: '', job_url: null, status: 'saved', notes: '', applied_at: null, follow_up_at: null, created_at: '2026-10-10T00:00:00Z', updated_at: '2026-10-10T00:00:00Z' });
