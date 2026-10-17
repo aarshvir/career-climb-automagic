@@ -13,6 +13,15 @@ const ashbyRow = (patch:Record<string,unknown>={}) => ({ title:'Software Enginee
 const greenhouseRow = (id:number,title='Software Engineer') => ({id,title,absolute_url:`https://careers.example.com/jobs/${id}`,content:description,location:{name:'San Francisco, California'}});
 
 describe('bounded published discovery', () => {
+  it('uses broad level requests in both source admission and worker reconciliation without widening geography', async () => {
+    const wanted = { ...profile, targetTitles: ['Find any director-level roles'] };
+    const rows = [greenhouseRow(1, 'Director of Engineering'), greenhouseRow(2, 'Creative Director'), greenhouseRow(3, 'Assistant to the Director'), greenhouseRow(4, 'Software Engineer')];
+    rows.push({ ...greenhouseRow(5, 'Finance Director'), location: { name: 'London, UK' } });
+    const result = await readEmployerFeed({ provider: 'greenhouse', board: 'created' }, async () => json({ jobs: rows }), wanted);
+    expect(result.opportunities.map(item => item.title)).toEqual(['Director of Engineering', 'Creative Director']);
+    const reconciled = reconcileDiscovery(wanted, [], result.opportunities.map((item, index) => job({ ...item, id: `director-${index}` })));
+    expect(reconciled.preparation.map(item => item.title)).toEqual(['Director of Engineering', 'Creative Director']);
+  });
   it('supports the documented Ashby listed-only contract and rejects hidden postings', async () => {
     const fetcher=vi.fn(async()=>json({jobs:[ashbyRow(),ashbyRow({jobUrl:'https://jobs.ashbyhq.com/created/hidden',isListed:false}),ashbyRow({isListed:undefined,jobUrl:'https://jobs.ashbyhq.com/created/unknown'})]}));
     const result=await readEmployerFeed({provider:'ashby',board:'created',company:'Created'},fetcher,profile);
@@ -92,6 +101,13 @@ describe('fresh discovery reconciliation without erasing history',()=>{
 });
 
 describe('honest matching explanations across supported target markets',()=>{
+  it('recognises Toronto within Canadian remote scope without overriding a contradictory country', () => {
+    const preferences = { ...profile, locations: ['Toronto', 'Remote'] };
+    expect(inspectDiscoveryTarget(preferences, job({ location: 'Remote — Canada' })).location).toBe('matched');
+    expect(inspectDiscoveryTarget({ ...profile, locations: ['Canada'] }, job({ location: 'Toronto' })).location).toBe('matched');
+    expect(inspectDiscoveryTarget({ ...profile, locations: ['Canada'] }, job({ location: 'Toronto, United States' })).location).toBe('mismatch');
+    expect(inspectDiscoveryTarget(preferences, job({ location: 'Remote — United States' })).location).toBe('mismatch');
+  });
   it.each([['US','Seattle'],['US','Pittsburgh, PA'],['India','Bangalore'],['India','Hyderabad'],['UK','Leeds'],['UAE','Sharjah'],['Saudi Arabia','Riyadh'],['Qatar','Doha'],['Bahrain','Manama'],['Oman','Muscat']])('recognises %s country preference for %s without inventing work authorisation',(target,location)=>{
     expect(inspectDiscoveryTarget({...profile,locations:[target]},job({location})).location).toBe('matched');
   });

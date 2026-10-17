@@ -1,0 +1,15 @@
+# Role and location preferences — 17 October 2026
+
+Owner feedback: preselect useful roles from known profile information, offer searchable choices and custom text, support broad director-level searches, and include location preferences.
+
+Implemented editable role chips with searchable native choices and unrestricted custom titles, plus equivalent city/country/Remote choices. Pending text is retained on Continue. Commas inside a title or place remain part of that entry. Up to three role headings can be suggested from an optional locally read CV or explicit account career fields. Standard Google name/email/avatar do not imply a profession; no external profile lookup or paid inference is performed. Accepted, edited or removed roles cannot be silently replaced by later CV changes. Existing accounts, auth lifetime, lifecycle, original save version and explicit private-save consent remain required.
+
+The shared discovery matcher now recognizes bounded English level-only requests such as `Find any director-level roles`, `Director`, `Any vice president-level role` and entry-level roles. It matches title evidence across functions and preserves narrower functional targets and location/pay/exclusion checks. Actual Assistant/Associate Director ranks qualify; supporting roles such as Assistant to the Director, Assistant, Director of Engineering and Chief of Staff to the Director do not. Toronto maps to Canada while contradictory country restrictions remain rejected.
+
+Validation: 2,605 tests in 144 files; application TypeScript; 28 source and 28 generated Deno handler checks; production frontend/prerender build and all 12 hosting groups passed. Initial hosting packaging encountered a transient OneDrive file-type report; subsequent read-only inspection found no symlinks, and the unchanged hosting build and checks passed. No security check was removed.
+
+Independent reviewer ran 158 focused cases and identified comma splitting, supporting-role false positives and Toronto remote coverage; corrections and regressions landed before release. Actual isolated browser journey confirmed CV-derived suggestions, removal, broad and comma-containing custom roles, pending location inclusion, CV carryover and explicit save of exact arrays. Browser auth and persistence were synthetic; this is not a new hosted customer or unassisted acceptance claim. No paid providers, real candidate records, billing or Meta settings changed.
+
+Scope limits: the suggestion catalogue and English broad-level phrases are bounded; arbitrary prose is not a semantic search guarantee. Discovery remains limited to existing configured sources. No fresh mobile-browser or natural multi-day journey was performed. Existing readiness gaps and prior simulation results remain unchanged.
+
+Rollback: source tag `jobvance-before-role-preferences-2026-10-17` at `de0801ee68122977d3720a4174f9b3be819a7889`, saved public v37, and private before-control/worker source files in `../jobvance-repair-evidence/role-preferences-before-*.json`. No schema changes or migrations are needed. Source rollback is separate from backend source restore.

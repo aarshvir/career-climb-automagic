@@ -6,7 +6,7 @@ import { blankLoopProfile } from '@/lib/job-loop-audiences';
 import { clearTrackingDraftMemory, setTrackingDraftOwner, setTrackingLoopGeneration } from '@/lib/tracking-draft-memory';
 
 vi.unmock('react-router-dom');
-const state = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string } | null, loading: false, authError: null as string | null, call: vi.fn(), extract: vi.fn() }));
+const state = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string; user_metadata?: unknown } | null, loading: false, authError: null as string | null, call: vi.fn(), extract: vi.fn() }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: state.user, loading: state.loading, authError: state.authError, retryConnection: vi.fn() }) }));
 vi.mock('@/lib/job-loop-api', async () => ({ callJobLoop: state.call, boundLoopAction: (await import('../../supabase/functions/_shared/job-loop-request')).boundLoopAction }));
 vi.mock('@/lib/cv-extraction', async importOriginal => ({ ...(await importOriginal<typeof import('@/lib/cv-extraction')>()), extractCvText: state.extract }));
@@ -35,6 +35,94 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearTrackingDraftMemory(); });
 
 describe('account-first owned onboarding', () => {
+  it('preselects only explicit account career fields and keeps them editable', async () => {
+    state.user = { id: 'owner-a', user_metadata: { full_name: 'Data Analyst', email: 'director@example.test', job_title: 'Operations manager', target_titles: ['Product manager'] } };
+    open(); await screen.findByLabelText('Target roles');
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Product manager\nOperations manager');
+    expect(screen.getByText(/Suggested from your account profile/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Product manager' }));
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Operations manager');
+  });
+  it('does not infer roles from ordinary Google name or email', async () => {
+    state.user = { id: 'owner-a', user_metadata: { full_name: 'Data Analyst', email: 'director@example.test' } };
+    open(); await screen.findByLabelText('Target roles');
+    expect(screen.getByLabelText('Target roles')).toHaveValue('');
+  });
+  it('suggests exact CV headings locally and never restores a removed role after another upload', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    const cv = 'Alex Example\nSenior data analyst\nBuilt data pipelines.\nOperations manager | Example Ltd';
+    fireEvent.change(screen.getByLabelText('Paste your CV for role suggestions'), { target: { value: cv } });
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Senior data analyst\nOperations manager');
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Senior data analyst' }));
+    state.extract.mockResolvedValue(cv + '\nMarketing manager');
+    fireEvent.change(screen.getByLabelText('Upload a CV for role suggestions'), { target: { files: [new File(['cv'], 'cv.txt')] } });
+    await waitFor(() => expect(screen.queryByText('Reading your CV…')).not.toBeInTheDocument());
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Operations manager');
+    expect(state.call).toHaveBeenCalledOnce();
+  });
+  it('keeps accepted account suggestions when a CV is added in the later experience step', async () => {
+    state.user = { id: 'owner-a', user_metadata: { job_title: 'Product manager' } };
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.change(screen.getByLabelText('Search or add a location'), { target: { value: 'United States' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: 'Alex Example\nData analyst' } });
+    for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Product manager');
+  });
+  it('does not overwrite a typed custom role when a CV is provided', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Find any director-level roles' } });
+    fireEvent.change(screen.getByLabelText('Paste your CV for role suggestions'), { target: { value: 'Alex Example\nData analyst' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    await screen.findByLabelText('Cities or countries');
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Find any director-level roles');
+  });
+  it('includes uncommitted broad roles and custom locations on Continue and preserves them on Back', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    const roles = screen.getByRole('combobox', { name: 'Search or add a role' });
+    expect(roles).toHaveAttribute('list', 'oq-roles-options');
+    fireEvent.change(roles, { target: { value: 'Any director-level role' } });
+    fireEvent.keyDown(roles, { key: 'Enter' });
+    expect(screen.getByRole('button', { name: 'Remove Any director-level role' })).toBeInTheDocument();
+    fireEvent.change(roles, { target: { value: 'Climate policy adviser' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Search or add a location' }), { target: { value: 'Remote' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Search or add a location' }), { target: { value: 'United States' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByLabelText('Cities or countries')).toHaveValue('Remote\nUnited States');
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Any director-level role\nClimate policy adviser');
+  });
+  it('preserves commas within custom role and city names across steps and the actual save', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Director, Engineering' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.change(screen.getByLabelText('Search or add a location'), { target: { value: 'Portland, Maine' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Example' } });
+    fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: source } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Save this CV text/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save my setup' }));
+    await screen.findByRole('heading', { name: 'Your setup is saved.' });
+    expect(state.call.mock.calls.at(-1)![1].profile).toMatchObject({ targetTitles: ['Director, Engineering'], locations: ['Portland, Maine'] });
+  });
+  it('keeps oversized selections visible for correction instead of dropping them', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: Array.from({ length: 10 }, (_, i) => `Role ${i}`).join('\n') } });
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Custom eleventh role' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('one and ten');
+    expect(screen.getByLabelText('Target roles')).toHaveValue(Array.from({ length: 10 }, (_, i) => `Role ${i}`).concat('Custom eleventh role').join('\n'));
+  });
   it('requires an account before reading or entering any private answers', () => {
     state.user = null; open(); expect(screen.getByTestId('destination')).toHaveTextContent('/auth?mode=signup&next=%2Fonboarding'); expect(state.call).not.toHaveBeenCalled();
   });
@@ -99,7 +187,7 @@ describe('account-first owned onboarding', () => {
     await screen.findByText(/returned setup differs/); expect(screen.queryByRole('heading', { name: 'Your setup is saved.' })).not.toBeInTheDocument();
   });
   it('requires a real target and supports an education-only CV without inventing employment', () => {
-    expect(onboardingStepError(0, blankLoopProfile())).toMatch(/specific role titles/);
+    expect(onboardingStepError(0, blankLoopProfile())).toMatch(/role titles or seniority/);
     expect(onboardingStepError(4, savedProfile)).toBe('');
     expect(onboardingStepError(2, { ...savedProfile, compensation: { currency: '', period: 'annual', minimum: 50000 } })).toMatch(/currency/);
   });

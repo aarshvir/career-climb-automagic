@@ -37,10 +37,49 @@ function roleTerms(value: string): string[] {
     .replace(/\blead\b(?!\s+generation)/g, ' ');
   return [...new Set(tokens(normalized).filter(word => !ROLE_STOP.has(word) && !LEVEL_WORDS.has(word)).map(word => ROLE_NORMALIZATIONS[word] ?? word))];
 }
+
+type BroadRoleLevel = 'director' | 'vp' | 'entry' | 'senior' | 'manager' | 'head' | 'lead';
+/** Only an entire, explicit level request can search across functions. Extra
+ * functional words must retain the normal complete-role matching contract. */
+function broadRoleLevel(target: string): BroadRoleLevel | null {
+  const request = normalText(target).trim().replace(/[.!?]+$/, '').replace(/[–—-]/g, ' ').replace(/\s+/g, ' ')
+    .replace(/^(?:please )?(?:find|show|search for|look for|looking for)(?: me)? /, '')
+    .replace(/^(?:any|all|a few|some) /, '')
+    .replace(/ (?:jobs?|roles?|positions?|opportunities)$/, '')
+    .replace(/ level$/, '').trim();
+  if (/^directors?$/.test(request)) return 'director';
+  if (/^(?:vp|vice president|vice presidents)$/.test(request)) return 'vp';
+  if (/^(?:entry|junior|jr|graduate)$/.test(request)) return 'entry';
+  if (/^(?:senior|sr)$/.test(request)) return 'senior';
+  if (/^managers?$/.test(request)) return 'manager';
+  if (/^head$/.test(request)) return 'head';
+  if (/^lead$/.test(request)) return 'lead';
+  return null;
+}
+function matchesBroadRoleLevel(level: BroadRoleLevel, title: string): boolean {
+  // A reporting line or assistant role does not confer the supported person's
+  // level. In particular, descriptions mentioning a director are never used.
+  const actual = normalText(title).split(/\b(?:reports?|reporting) to\b|\b(?:supports?|supporting) (?:the |a )?/)[0];
+  if (/\b(?:assistant|coordinator|administrator|secretary|analyst|intern|chief of staff)\s+(?:to|for)\b|\b(?:executive|personal|administrative) assistant\b|\bassistant\s*[,;:]\s*(?:director|vp|vice president|manager|head)\b|\boffice of\b|\b(?:director|vp|vice president|manager|head)(?:'s)?\s+(?:assistant|office|coordinator|support)\b/.test(actual)) return false;
+  switch (level) {
+    case 'director': return /\bdirector\b/.test(actual) && !EARLY.test(actual);
+    case 'vp': return /\b(?:[es]?vp|(?:executive |senior |assistant |associate )?vice[ -]president)\b/.test(actual) && !EARLY.test(actual);
+    case 'entry': return EARLY.test(actual) && !SENIOR.test(actual);
+    case 'senior': return SENIOR.test(actual) && !EARLY.test(actual);
+    case 'manager': return /\bmanager\b/.test(actual) && !EARLY.test(actual);
+    case 'head': return /\bhead\b/.test(actual) && !EARLY.test(actual);
+    case 'lead': return /\blead\b(?!\s+generation)/.test(actual) && !EARLY.test(actual);
+  }
+}
 function matchRole(targets: string[], title: string): Pick<DiscoveryMatchEvidence, 'role' | 'seniority'> {
   const orderedTitleTerms = roleTerms(title); const titleTerms = new Set(orderedTitleTerms);
   let roleMatched = false;
   for (const target of targets) {
+    const broadLevel = broadRoleLevel(target);
+    if (broadLevel) {
+      if (matchesBroadRoleLevel(broadLevel, title)) return { role: 'matched', seniority: 'compatible' };
+      continue;
+    }
     const terms = roleTerms(target);
     if (!terms.length || !terms.every(term => titleTerms.has(term))) continue;
     if (EARLY.test(target) && SENIOR.test(title) || SENIOR.test(target) && EARLY.test(title)) { roleMatched = true; continue; }
@@ -56,6 +95,7 @@ function matchRole(targets: string[], title: string): Pick<DiscoveryMatchEvidenc
 const CITY_COUNTRIES: [string, string][] = [
   ['dubai', 'united arab emirates'], ['abu dhabi', 'united arab emirates'],
   ['london', 'united kingdom'], ['new york', 'united states'],
+  ['toronto', 'canada'],
   ['san francisco', 'united states'], ['los angeles', 'united states'], ['seattle', 'united states'],
   ['boston', 'united states'], ['austin', 'united states'], ['chicago', 'united states'],
   ['atlanta', 'united states'], ['denver', 'united states'], ['miami', 'united states'],
