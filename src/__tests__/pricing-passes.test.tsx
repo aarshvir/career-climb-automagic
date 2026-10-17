@@ -31,7 +31,7 @@ describe('Pricing page tiers', () => {
     expect(tier('Free')).toHaveTextContent('3 AI-tailored CVs a month when signed in');
     expect(tier('Free')).toHaveTextContent('Compare without AI, as often as you like');
     expect(tier('Sprint')).toHaveTextContent(/\$9One-time · 7 days.*25 AI-tailored CVs/);
-    expect(tier('Job Search')).toHaveTextContent(/Most popular.*\$19One-time · 30 days.*100 AI-tailored CVs/);
+    expect(tier('Job Search')).toHaveTextContent(/30-day pass.*\$19One-time · 30 days.*100 AI-tailored CVs/);
     expect(tier('Career Move')).toHaveTextContent(/Best value.*\$39One-time · 90 days.*About \$13 a month.*300 AI-tailored CVs/);
     for (const line of ['One-time payment. No subscription, nothing renews.', '7-day money-back if you’ve used fewer than 5 tailored CVs.', 'Secure checkout by Dodo Payments, our merchant of record.']) {
       expect(screen.getByText(line)).toBeInTheDocument();

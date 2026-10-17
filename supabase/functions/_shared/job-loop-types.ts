@@ -102,7 +102,7 @@ export interface LoopSnapshot {
   recordVersion: number; profile: LoopProfile | null; claims: LoopClaim[];
   opportunities: LoopOpportunity[]; runs: LoopRun[]; packets: LoopPacket[]; inbox: LoopInboxSignal[];
   models: LoopModelOption[];
-  capabilities: { cloudWorker: boolean; rulesEngine: boolean; webSearch: boolean; gmailRead: boolean; gmailDrafts: boolean; monthlyUsageCapUsd: number; dailyRunLimit: number; scheduler?: boolean; packetsPerRun?: number };
+  capabilities: { cloudWorker: boolean; rulesEngine: boolean; webSearch: boolean; gmailRead: boolean; gmailDrafts: boolean; monthlyUsageCapUsd: number; dailyRunLimit: number; scheduler?: boolean; packetsPerRun?: number; cvVariants?: boolean };
   gmail: { connected: boolean; email: string | null; allowDrafts: boolean; status: string };
   schedule?: LoopSchedule | null;
   budget?: { month: string; capUsd: number; committedUsd: number; remainingUsd: number; scope: 'shared_ai_search'; maxPilotUsers: number };

@@ -29,7 +29,15 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); });
 
 describe('CV variants in the actual Job Loop page', () => {
+  it.each([undefined, false])('keeps the variant editor unavailable when the deployed backend capability is %s', async capability => {
+    current.capabilities.cvVariants = capability;
+    render(<HelmetProvider><MemoryRouter initialEntries={['/loop']}><JobLoop /></MemoryRouter></HelmetProvider>);
+    fireEvent.click(await screen.findByRole('button', { name: 'My CV & experience' }));
+    expect(screen.queryByRole('button', { name: 'Load saved CV variants' })).not.toBeInTheDocument();
+    expect(mocks.call.mock.calls.map(([, action]) => action.action)).toEqual(['get']);
+  });
   it('uses exact variant actions, preserves the main draft and never adopts a variant receipt as a complete workspace snapshot', async () => {
+    current.capabilities.cvVariants = true;
     render(<HelmetProvider><MemoryRouter initialEntries={['/loop']}><JobLoop /></MemoryRouter></HelmetProvider>);
     fireEvent.click(await screen.findByRole('button', { name: 'My CV & experience' }));
     fireEvent.change(screen.getByLabelText('My name'), { target: { value: 'Newer local main name' } });
