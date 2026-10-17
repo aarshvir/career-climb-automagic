@@ -24,3 +24,7 @@ Actual isolated browser: desktop entered a broad director role and uncommitted U
 Initial full run caught old empty-dashboard CTA expectations and the lifecycle regression during concurrent review. Correct selectors were updated to the intended new direct setup action; existing behavioral assertions remain. Final integrated suite passed.
 
 Build/hosting/publication and exact live receipt are recorded separately in the release receipt. Backend, payments, schedules, provider consent and advertising settings are unchanged. This repair does not prove all usability gaps resolved or establish NPS.
+
+## Publication
+
+Public v41, source d1ff52897ff4267ea9fb2595bae9aaaa2d78879a, succeeded 17 October 16:21 UTC. Full production build and 12 hosting groups passed. Four live routes reference the current entry; entry plus five changed JavaScript bundles matched exact built bytes. Live signed-in Chrome confirmed bare dashboard redirects to Job Loop and a temporary unsaved director-role/location draft resumes at Locations with United States still in its search field. No final Save or provider action was used. The temporary browser tab was closed afterward. These are assisted navigation checks, not unassisted product acceptance.

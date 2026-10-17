@@ -1,0 +1,53 @@
+{
+  "version": 41,
+  "source": "d1ff52897ff4267ea9fb2595bae9aaaa2d78879a",
+  "url": "https://jobvance.io",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_e37ccc9668ac81919bed4fda5f46efb7",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 41,
+    "source": {
+      "commit_sha": "d1ff52897ff4267ea9fb2595bae9aaaa2d78879a"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000d5a481f4b6e59a93467286b1",
+      "content_hash": "sha256:644c6fce110db780b895e308009a7a177caa5b5cde6a4166448988110675b24c",
+      "size_bytes": 15022080,
+      "file_count": 133
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad3a06523e48191af0bd1ac1b51917a",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_e37ccc9668ac81919bed4fda5f46efb7",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-17T16:21:13.128189+00:00"
+  },
+  "validation": {
+    "tests": 2639,
+    "files": 146,
+    "typeScript": "passed",
+    "productionBuild": "passed",
+    "hostingGroups": 12,
+    "desktopMobile": "Actual components with isolated auth/persistence: leave setup, dashboard resume, exact pending role/location and step restored. Mobile 390x844/document375.",
+    "liveBytes": "Four routes reference current entry; entry plus five changed JS bundles exact bytes.",
+    "liveBrowser": "Signed-in Chrome: bare /dashboard redirected to /loop; temporary unsaved broad role and pending location survived Back to Job Loop and Resume setup at step 2. No save, schedule or provider action. Explicit saved-CV document page loaded with renamed sections and existing files intact. Created test tabs closed; temporary unsaved choices discarded.",
+    "screenshot": "../jobvance-repair-evidence/journey-resume-live.png"
+  },
+  "scope": "Default Job Loop dashboard, two-product chooser, optional guided setup continuation, clearer legacy document navigation",
+  "draftLimit": "In-memory 30-minute same-tab route recovery; refresh/logout/new session clears. Fresh passive lifecycle read, no permissions restored.",
+  "backend": "Unchanged worker15/control20/tailor4/OAuth5; payments and ads unchanged",
+  "rollbackTag": "jobvance-before-journey-clarity-2026-10-17",
+  "priorVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d1e7290b63dc8191a25834936190a98b"
+}
