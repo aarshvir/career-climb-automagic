@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-17",
+  "scope": "local marketing operations and native-tool automation integration",
+  "tests": { "total": 121, "passed": 121, "failed": 0, "quality": 26, "receiptStore": 20, "measurement": 63, "integration": 12 },
+  "integration": { "realTemporarySqlite": true, "restartAndConcurrentClaims": true, "actualFixtureBytes": true, "cliSubprocesses": true, "externalPublication": false },
+  "actualExistingVideo": { "version": "B-feed", "bytes": 9028441, "sha256": "3a1c696e8dd781892a0614a66dc64f702b9b985514e99b5394e860197bbc5db5", "quality": "blocked_pending_full_review_transcript_measurement_and_approval" },
+  "meta": { "accountId": "1843729196384751", "campaignId": "120252906111780325", "adId": "120252906172570325", "freshBrowserReadback": true, "status": "IN_DRAFT", "errorCode": 1815199, "websiteEventsSelected": false, "spend": null },
+  "automation": { "id": "jobvance-us-marketing-loop", "existingAutomationUpdated": true, "stateInitialized": true },
+  "customerRuntimeChanged": false,
+  "publicReleaseRetained": "v42",
+  "paidProviderCalls": false,
+  "creditsPurchased": false,
+  "adActivation": false,
+  "candidateDataMutation": false,
+  "coldEmailSent": false
+}
