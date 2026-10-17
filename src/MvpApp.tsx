@@ -11,6 +11,7 @@ import Footer from "@/components/layout/Footer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProductPage from "@/pages/ProductPage";
 import RouteNavigation from '@/components/RouteNavigation';
+import SiteShareMetadata from '@/components/SiteShareMetadata';
 import { accountDestination, workspaceReturnPath } from '@/lib/account-return';
 const Auth = lazy(() => import("@/pages/Auth")),
   AuthCallback = lazy(() => import("@/pages/AuthCallback"));
@@ -84,6 +85,7 @@ export default function MvpApp() {
           <AuthProvider>
             <TooltipProvider>
               <BrowserRouter>
+                <SiteShareMetadata />
                 <RouteNavigation />
                 <SiteChrome position="header" />
                 <div id="main-content" tabIndex={-1} className="outline-none">

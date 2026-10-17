@@ -16,8 +16,9 @@ const source = await readFile(resolve(root, 'dist/server/index.js'), 'utf8');
 const { default: worker } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 const escape = value => value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 function meta(html, key) {
-  const found = [...html.matchAll(/<meta\s+(?:name|property)="([^"]+)"\s+content="([^"]*)"\s*\/?\s*>/g)].filter(match => match[1] === key);
+  const found = [...html.matchAll(/<meta\s+(?:data-rh="true"\s+)?(?:name|property)="([^"]+)"\s+content="([^"]*)"\s*\/?\s*>/g)].filter(match => match[1] === key);
   assert.equal(found.length, 1, `Exactly one ${key} is required.`);
+  assert.ok(found[0][0].includes('data-rh="true"'), `${key} must be client-managed to avoid duplicate route metadata.`);
   return found[0][2];
 }
 function verify(html, title) {
