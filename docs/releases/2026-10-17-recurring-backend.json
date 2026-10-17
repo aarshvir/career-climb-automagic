@@ -1,0 +1,42 @@
+{
+  "version": "v34",
+  "source": "6544ca0a9b53761b4190ac2dde3288f1ff92f9d0",
+  "runtimeCommit": "71228f3",
+  "site": "https://jobvance.io",
+  "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_9b10ea9e5a748191b45e92b4242b60d4",
+  "deployment": "appgdep_6ad364677e588191ae06e9e79440b6cf",
+  "succeededAt": "2026-10-17T12:05:17.682377+00:00",
+  "archiveSha256": "9c63ce501fda051e883b36a2d8ac4f16aaacb7a5ac9687edd55bfc272e2b72e2",
+  "backend": {
+    "control": 18,
+    "worker": 13,
+    "oauth": 5,
+    "dodoUnchanged": true
+  },
+  "migrations": [
+    "20261017114658",
+    "20261017114700",
+    "20261017114703",
+    "20261017114706",
+    "20261017114708"
+  ],
+  "validation": {
+    "tests": 2448,
+    "files": 136,
+    "sourceDeno": 28,
+    "generatedDeno": 28,
+    "nativeConcurrencyGroups": 6,
+    "hostingGroups": 12,
+    "hostedChecks": 49,
+    "hostedDownloads": 9,
+    "liveHtml": 7,
+    "liveJs": 10,
+    "actualAiCalls": 2,
+    "actualAiCostUsd": 0.002974
+  },
+  "limits": [
+    "Dodo merchant approval remains pending; recurring checkout/webhook mapping is not integrated.",
+    "Hosted synthetic acceptance is not unassisted customer research.",
+    "Discovery breadth, full-route ambiguous recovery, pagination, grouped review and unsupported PDF scripts remain open."
+  ]
+}
