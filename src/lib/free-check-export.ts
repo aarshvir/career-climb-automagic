@@ -3,7 +3,7 @@ import { createReviewedCvBlob, type DocumentFormat } from "./document-export";
 import { downloadBlob, safeDocumentFilename } from "./document-download";
 
 export type ApprovedFreeCheckSnapshot = { reviewedText: string; jobTitle: string; approved: boolean };
-export type FreeCheckReportOptions = { sourceLabel: string; jobTitle: string };
+export type FreeCheckReportOptions = { sourceLabel: string; jobTitle: string; coverageBefore?: EvidenceReport['summary'] };
 
 export async function createFreeCheckCvBlob(snapshot: ApprovedFreeCheckSnapshot, format: DocumentFormat): Promise<Blob> {
   if (!snapshot.approved) throw new Error("Review and approve your current CV text before downloading it.");
@@ -49,6 +49,12 @@ export function createFreeCheckReportText(report: EvidenceReport, options: FreeC
     if (requirement.question) lines.push(`Review question: ${requirement.question}`);
   }
   lines.push("", "SUMMARY", noteText(report.summary));
+  if (options.coverageBefore) {
+    const before = options.coverageBefore, after = report.summary;
+    lines.push("", "COVERAGE BEFORE AND AFTER TAILORING (original CV → this CV)",
+      `Covered: ${before.direct} → ${after.direct}`, `Partly covered: ${before.partial} → ${after.partial}`,
+      `Not shown in the CV: ${before.missing} → ${after.missing}`, `Needs your judgment: ${before.review} → ${after.review}`);
+  }
   if (report.unparsedNotes.length) lines.push("", "NOTES REQUIRING HUMAN REVIEW", ...report.unparsedNotes.map(noteText));
   if (report.omittedSections.length) lines.push("", "VACANCY SECTIONS OUTSIDE THE CHECK", ...report.omittedSections.map((section) => section.vacancyQuote));
   if (report.warnings.length) lines.push("", "METHOD WARNINGS", ...report.warnings.map(noteText));

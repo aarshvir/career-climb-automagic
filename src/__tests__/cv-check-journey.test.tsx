@@ -544,7 +544,9 @@ describe("three-stage free CV check", () => {
     show(); await toReview();
     // The requirement findings now sit beside the CV in the review stage.
     fireEvent.click(screen.getByText('What the job asks for, beside your CV'));
-    expect(screen.getByText("Lead a transformation programme.")).toBeInTheDocument();
+    // The requirement now also appears in the coverage panel above the CV.
+    expect(screen.getAllByText("Lead a transformation programme.").length).toBeGreaterThanOrEqual(2);
+    expect(within(screen.getByRole("region", { name: "How your CV covers this job" })).getByText("Lead a transformation programme.")).toBeInTheDocument();
     const leadershipFinding = screen.getByRole("article", { name: "Vacancy finding: Lead a transformation programme." });
     expect(within(leadershipFinding).getByText("Supported a transformation pilot across five units.", { exact: true })).toBeInTheDocument();
     expect(within(leadershipFinding).getByText("Related passage — review needed")).toBeInTheDocument();

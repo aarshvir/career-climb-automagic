@@ -2,11 +2,13 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 
 const changeSchema = z.object({
-  kind: z.enum(['rewrite', 'summary', 'order']),
+  kind: z.enum(['rewrite', 'summary', 'order', 'addition']),
   n: z.number().int().nullable(),
   before: z.string().max(20000),
   after: z.string().max(20000),
   sources: z.array(z.number().int()).max(200),
+  /** One-based numbers of the confirmed answers this change used. */
+  facts: z.array(z.number().int().min(1).max(5)).max(5).default([]),
 });
 const responseSchema = z.object({
   tailored: z.object({
@@ -29,10 +31,10 @@ const messages: Record<number, string> = {
   503: 'AI tailoring is unavailable right now. Your CV comparison still works.',
 };
 
-/** Sends the CV and vacancy for source-bound tailoring. Explicit consent is required by the server. */
-export async function requestTailoredCv(input: { cvText: string; jobDescription: string; jobTitle: string; company: string }): Promise<TailoredCv> {
+/** Sends the CV and vacancy (and any answers the candidate confirmed) for source-bound tailoring. Explicit consent is required by the server. */
+export async function requestTailoredCv(input: { cvText: string; jobDescription: string; jobTitle: string; company: string; facts?: string[] }): Promise<TailoredCv> {
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const body = { requestId: crypto.randomUUID(), cvText: input.cvText, jobDescription: input.jobDescription, jobTitle: input.jobTitle, company: input.company, consent: true };
+  const body = { requestId: crypto.randomUUID(), cvText: input.cvText, jobDescription: input.jobDescription, jobTitle: input.jobTitle, company: input.company, consent: true, ...(input.facts?.length ? { facts: input.facts } : {}) };
   const result = await Promise.race([
     supabase.functions.invoke('tailor-for-job', { body }),
     new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new TailorUnavailable('AI tailoring took too long. Your CV comparison still works.', 'TAILOR_TIMEOUT')), 140000); }),
