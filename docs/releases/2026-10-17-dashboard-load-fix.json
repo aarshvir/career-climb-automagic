@@ -1,0 +1,51 @@
+{
+  "version": 40,
+  "source": "f1c848a27c50f6fca7dcc2148f50dc11bd2ce84a",
+  "url": "https://jobvance.io/loop",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d1e7290b63dc8191a25834936190a98b",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 40,
+    "source": {
+      "commit_sha": "f1c848a27c50f6fca7dcc2148f50dc11bd2ce84a"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000e7988243b4f7ac60e4bb482a",
+      "content_hash": "sha256:df092fd3da4ad470c8a75c551a1d4053c254c28f41c04d44987ffdbabfeabefc",
+      "size_bytes": 15011840,
+      "file_count": 132
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad39d3427b08191ac618d7804c9d2a5",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d1e7290b63dc8191a25834936190a98b",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-17T16:07:36.341345+00:00"
+  },
+  "cause": "Browser employerSources schema capped at four while deployed control20 returns six default sources and allows eight.",
+  "fix": "Accept up to eight bounded sources; retain malformed and oversized rejection; replace misleading configuration fallback.",
+  "validation": {
+    "focusedTests": 139,
+    "regressionBefore": "Two actual-feed resolver API contract cases failed before fix",
+    "typeScript": "passed",
+    "productionBuild": "passed",
+    "hostingGroups": 12,
+    "liveBytes": "Entry, job-loop-api and JobLoop JS exact bytes",
+    "signedInBrowser": "Same live Chrome dashboard reproduced error before deployment and loaded successfully after reload, displaying Careem, GoCardless, Duolingo, Toast, Notion, Zapier.",
+    "screenshot": "../jobvance-repair-evidence/dashboard-load-fixed-live.png"
+  },
+  "backend": "Unchanged worker15/control20; no migrations or candidate edits",
+  "rollbackTag": "jobvance-before-dashboard-load-fix-2026-10-17"
+}
