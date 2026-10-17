@@ -1,4 +1,4 @@
-# Recurring Job Loop release — 17 October 2026
+# Recurring Job Loop release â€” 17 October 2026
 
 The owner authorized implementation and deployment of three CV variants, weekly/three-weekday/daily recurrence and recurring AI preparation. The existing independent source editor and fact authority are now connected to exact manual and scheduled execution, packet identity, approval and downloads. Legacy global records and historical output are preserved; choosing a CV never swaps the global profile.
 
