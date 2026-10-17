@@ -3,17 +3,14 @@
 You are taking Jobvance (jobvance.io, repo `aarshvir/career-climb-automagic`) from a beta to a polished, account-based, paid product. Read this whole brief before changing anything.
 
 ## 0. Start from Claude's work
-- **Merge `claude/dodo-payments` into main now.** It already contains all of main. It adds:
-  - Dodo Payments billing (test mode first) and one-time CV passes ($9 / $19 / $39);
-  - the combined pricing page;
-  - removal of a buyer's email from the payment return URL.
-
-  Do not apply its migrations or deploy its edge functions. Right after you publish, Claude will apply the two pending Dodo migrations and deploy `create-checkout`, `get-entitlement`, `dodo-webhook` and `tailor-for-job`.
-- **Merge `claude/deep-tailor` when Claude confirms it is finished.** It adds "Deep tailor".
-  - What it does: the AI uses answers the candidate has confirmed as true to write stronger bullets, new bullets and a cited profile summary.
-  - How it stays honest: every change is validated against the CV line and the cited answers, so nothing is invented.
-  - Where it lives: the backend is in `supabase/functions/_shared/cv-tailor.ts` and `tailor-for-job`. Claude is finishing its /check screens and the requirement-coverage view.
-  - **Use this engine for every CV that Job Loop prepares.** Leave the tailoring and review internals of `src/pages/CvCheck.tsx` to Claude's branch, to avoid conflicts.
+- **Already done (no action):** you merged `claude/dodo-payments` at `c91243b`, applied both Dodo migrations and deployed `tailor-for-job` v3, `create-checkout`, `dodo-webhook` and `get-entitlement`. Payments stay off until the owner adds the Dodo secrets, and live payments wait for Dodo's merchant approval.
+- **Merge `claude/deep-tailor` now.** It merges cleanly into today's main and also carries this brief and the simulation data. It adds "Deep tailor":
+  - What it does: the candidate answers the AI's gap questions and ticks "This is true and I can talk about it in an interview". The AI then rewrites again from the original CV plus those answers: stronger, achievement-first bullets, new bullets drawn only from the answers, and a cited profile summary.
+  - How it stays honest: every change is validated against its own CV line and the answers it cites, so nothing is invented. Changes are marked "from your answer" and can be removed or undone.
+  - Requirement coverage: each requirement in the ad is shown as covered, partly covered, not shown or needs your judgment, before → after, with the closest CV line. Never a percentage.
+  - Where it lives: `supabase/functions/_shared/cv-tailor.ts`, `tailor-for-job`, `src/pages/CvCheck.tsx`, `src/components/RequirementCoverage.tsx`.
+  - **Deploy `tailor-for-job` from this branch before publishing its front end.** It is backward compatible with the current site; the new front end sends answers that only the new function accepts.
+  - **Use this engine for every CV that Job Loop prepares**, including asking each user the gap questions once and reusing their confirmed answers.
 - **Read `docs/audits/2026-10-17-pmf-simulation/PMF-SIMULATION.html`.**
   - What it found: 100 simulated visitors; 0% "very disappointed"; NPS −88; 11% would pay.
   - Why: thin CV changes; no proof of fit; a homepage promise the product can't yet keep (account wall, 10 places, few sources); painful input on a phone; an unknown brand; a plain PDF.
@@ -87,7 +84,7 @@ Target: at least 40% of people who start a trial become paying customers.
   5. daily value;
   6. reminders;
   7. the first charge.
-- **Plans, through Dodo subscriptions.** Extend the Dodo integration on `claude/dodo-payments` to subscriptions: active, renewed, cancelled and payment-failed webhooks, with entitlements by plan. Build and deploy this in Dodo test mode.
+- **Plans, through Dodo subscriptions.** Extend the Dodo integration (now on main) to subscriptions: active, renewed, cancelled and payment-failed webhooks, with entitlements by plan. Build and deploy this in Dodo test mode.
 
   | Plan | Price | Runs |
   |---|---|---|
