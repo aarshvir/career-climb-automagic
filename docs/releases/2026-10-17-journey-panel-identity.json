@@ -1,0 +1,50 @@
+{
+  "version": 42,
+  "source": "a6a0829cf4fd28d57ca737188acf24c89c4a24c2",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_c252415ec3748191b436d970b98699f6",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 42,
+    "source": {
+      "commit_sha": "a6a0829cf4fd28d57ca737188acf24c89c4a24c2"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000cc0081f4b92a20aba5c284f6",
+      "content_hash": "sha256:bceee4a44d4aefbbddf612c9d46627fec7b3a0351c934d427d57171c1f230474",
+      "size_bytes": 15022080,
+      "file_count": 133
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad3a1e537e48191903cce9474a4e2c0",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_c252415ec3748191b436d970b98699f6",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-17T16:27:37.400572+00:00"
+  },
+  "previousRelease": "2026-10-17-journey-clarity.json",
+  "change": "Distinct selected, variant and saved-check panel keys, preserving owner/auth/lifecycle invalidation. Prevents sibling key collision during screen changes.",
+  "validation": {
+    "regression": "New actual-component test failed before fix and passed after",
+    "focusedTests": 68,
+    "independentTests": 9,
+    "typeScript": "passed",
+    "productionBuild": "Vite and 38-page prerender passed; initial host packaging falsely reported symlinks. Node dirent/lstat/readlink inventory confirmed 131 files and zero symlinks; unchanged host packager rerun passed.",
+    "hostingGroups": 12,
+    "fullSuiteScope": "2639 tests/146 files passed on preceding v41 runtime; no claim of another fullsuite after three key prefixes.",
+    "liveBytes": "Four route shells reference current entry; entry and five changed JavaScript bundles match exact built bytes at 2026-10-17T16:27:57.362Z."
+  },
+  "backend": "Unchanged; no payment, provider, schedule or candidate-data mutation",
+  "rollbackTag": "jobvance-before-journey-clarity-2026-10-17"
+}
