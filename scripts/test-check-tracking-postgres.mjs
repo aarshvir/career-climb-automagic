@@ -5,6 +5,7 @@ import { checkLoopNativeCases } from './fixtures/check-loop-native-cases.mjs';
 import { selectedPreparationNativeCases } from './fixtures/selected-preparation-native-cases.mjs';
 import { cvVariantsNativeCases } from './fixtures/cv-variants-native-cases.mjs';
 import { cvVariantFactsNativeCases } from './fixtures/cv-variant-facts-native-cases.mjs';
+import { recurringProductNativeCases } from './fixtures/recurring-product-native-cases.mjs';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, readFile, realpath, stat, statfs, writeFile } from 'node:fs/promises';
@@ -30,13 +31,14 @@ const source = {
   ],
 };
 const args = process.argv.slice(2);
-assert(args.every(arg => arg === '--prepare-only' || arg === '--check-loop' || arg === '--selected-preparation' || arg === '--cv-variants' || arg === '--cv-variant-facts' || arg.startsWith('--fixture-root=')), 'Unknown argument.');
+assert(args.every(arg => arg === '--recurring-product' || arg === '--prepare-only' || arg === '--check-loop' || arg === '--selected-preparation' || arg === '--cv-variants' || arg === '--cv-variant-facts' || arg.startsWith('--fixture-root=')), 'Unknown argument.');
 const selectedPreparation = args.includes('--selected-preparation');
 const checkLoop = args.includes('--check-loop');
 const cvVariants = args.includes('--cv-variants');
-const cvVariantFacts = args.includes('--cv-variant-facts');
+const recurringProduct=args.includes('--recurring-product');
+const cvVariantFacts = args.includes('--cv-variant-facts')||recurringProduct;
 assert([selectedPreparation, checkLoop, cvVariants, cvVariantFacts].filter(Boolean).length <= 1, 'Choose one native suite.');
-const suite = cvVariantFacts ? 'cv-variant-facts' : cvVariants ? 'cv-variants' : selectedPreparation ? 'selected-preparation' : checkLoop ? 'check-loop' : 'check-tracking';
+const suite = recurringProduct?'recurring-product':cvVariantFacts ? 'cv-variant-facts' : cvVariants ? 'cv-variants' : selectedPreparation ? 'selected-preparation' : checkLoop ? 'check-loop' : 'check-tracking';
 const selectedMigration = '20261015223000_job_loop_selected_preparation.sql';
 const cvVariantsMigration = '20261017013000_job_loop_cv_variants.sql';
 const cvVariantFactsMigration = '20261017080000_job_loop_cv_variant_facts.sql';
@@ -249,6 +251,7 @@ async function runNative() {
     if (selectedPreparation || cvVariants || cvVariantFacts) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', selectedMigration), 'utf8');
     if (cvVariants || cvVariantFacts) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', cvVariantsMigration), 'utf8');
     if (cvVariantFacts) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', cvVariantFactsMigration), 'utf8');
+    if(recurringProduct){evidence.casesSha256=await digest(path.join(repo,'scripts/fixtures/recurring-product-native-cases.mjs'));evidence.productMigrations=[];for(const name of ['20261017122000_job_loop_dodo_entitlements.sql','20261017130000_job_loop_variant_execution.sql','20261017131000_job_loop_recurring_product.sql']){const filename=path.join(repo,'supabase/migrations',name);schema+='\n'+await readFile(filename,'utf8');evidence.productMigrations.push({name,sha256:await digest(filename)});}}
     evidence.executedSchemaSha256 = createHash('sha256').update(schema).digest('hex');
     await observer.query(schema);
     const owner = randomUUID(), other = randomUUID();
@@ -282,7 +285,8 @@ async function runNative() {
       const detail = await test(); evidence.checks.push({ name, passed: true, ...detail });
       console.log(JSON.stringify({ check: name, passed: true }));
     }
-    if (cvVariantFacts) await cvVariantFactsNativeCases({ observer, actor, check, blocking, quote });
+    if(recurringProduct)await recurringProductNativeCases({observer,actor,check,blocking,quote});
+    else if (cvVariantFacts) await cvVariantFactsNativeCases({ observer, actor, check, blocking, quote });
     else if (cvVariants) await cvVariantsNativeCases({ observer, actor, check, blocking, quote });
     else if (selectedPreparation) await selectedPreparationNativeCases({ observer, actor, check, blocking, quote });
     else if (checkLoop) await checkLoopNativeCases({ observer, actor, check, blocking, quote, owner, other, newCheck });

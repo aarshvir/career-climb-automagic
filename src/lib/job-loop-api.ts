@@ -26,7 +26,8 @@ const profileSchema = z.object({ audience: z.enum(['student', 'mba', 'profession
 const contactSchema = z.object({ name: short, title: short, email: short, sourceUrl: z.string().max(2000), sourceQuote: text,
   confirmedByUser: z.boolean(), inExistingThread: z.boolean() });
 const opportunitySchema = z.object({ title: short, company: short, location: short, url: z.string().max(2000), description: text, contact: contactSchema.nullable() });
-const scheduleSchema=z.object({cadence:z.enum(['daily','weekdays','weekly']),timezone:z.string().min(1).max(100),localTime:z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/),weeklyDay:z.number().int().min(0).max(6).nullable(),provider:z.union([provider,z.literal('rules')]),model:short,modelConsent:z.boolean(),inboxConsent:z.boolean()});
+const cvSelectionSchema=z.object({variantId:z.string().uuid(),variantRevision:z.number().int().positive().max(Number.MAX_SAFE_INTEGER),sourceHash:z.string().regex(/^[a-f0-9]{64}$/),factRefs:z.array(z.object({id:z.string().uuid(),revision:z.number().int().positive().max(Number.MAX_SAFE_INTEGER)}).strict()).max(150)}).strict();
+const scheduleSchema=z.object({cadence:z.enum(['daily','weekdays','weekly','three_weekly']),timezone:z.string().min(1).max(100),localTime:z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/),weeklyDay:z.number().int().min(0).max(6).nullable(),provider:z.union([provider,z.literal('rules')]),model:short,modelConsent:z.boolean(),inboxConsent:z.boolean(),cvSelection:cvSelectionSchema.optional(),weeklyDays:z.array(z.number().int().min(0).max(6)).max(3).optional(),processingRoute:z.enum(['direct','openrouter']).optional(),recurringAiConsent:z.object({provider,model:short,processingRoute:z.enum(['direct','openrouter']),sourceScope:z.literal('selected_cv'),cvSelection:cvSelectionSchema,consented:z.literal(true)}).strict().optional()});
 const laneSchema = z.object({ name: short, status: z.enum(['completed', 'partial', 'blocked', 'not_connected', 'not_run']), count: z.number().int().nonnegative(), checkedAt: short, message: text });
 const selectedIds=z.array(z.string().uuid().transform(value=>value.toLowerCase())).min(1).max(2).refine(ids=>new Set(ids).size===ids.length);
 const selectionSchema=z.object({generation:z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),opportunityIds:selectedIds}).strict();
@@ -36,11 +37,11 @@ const snapshotSchema = z.object({
   claims: z.array(claimSchema.extend({ id, revision: z.number().int().nonnegative(), status: z.enum(['active', 'withdrawn']), createdAt: short })).max(1000),
   opportunities: z.array(opportunitySchema.extend({ id, sourceCheckId: z.string().uuid().optional(), source: z.enum(['manual', 'employer_api', 'web_search']), sourceKey: short, checkedAt: short,
     verification: z.enum(['user_provided', 'listed_on_source', 'unverified', 'closed_confirmed']), status, followUpAt: short.nullable(), notes: text })).max(2000),
-  runs: z.array(z.object({ selection:selectionSchema.optional(), id, requestId: id, status: z.enum(['queued', 'running', 'completed', 'partial', 'blocked', 'cancelled', 'failed']),
+  runs: z.array(z.object({ selection:selectionSchema.optional(), cvSelection:cvSelectionSchema.optional(), id, requestId: id, status: z.enum(['queued', 'running', 'completed', 'partial', 'blocked', 'cancelled', 'failed']),
     phase: short, startedAt: short, finishedAt: short.nullable(), inputHash: id, provider: z.union([provider, z.literal('rules')]), model: short,
     lanes: z.array(laneSchema).max(40), opportunityIds: z.array(id).max(2000), packetIds: z.array(id).max(2000), messages: z.array(text).max(100),
     nextAction: text, reservedUsd: z.number().nonnegative(), usageUsd: z.number().nonnegative() })).max(1000),
-  packets: z.array(z.object({ id, runId: id, opportunityId: id, title: short, company: short, inputHash: id, profileRevision: z.number().int().nonnegative(),
+  packets: z.array(z.object({ cvSelection:cvSelectionSchema.optional(), id, runId: id, opportunityId: id, title: short, company: short, inputHash: id, profileRevision: z.number().int().nonnegative(),
     claimVersions: z.record(z.number().int().nonnegative()), cvText: text, evidenceText: text, coverLetterText: text,
     connectionNote: text, messageText: text, emailSubject: short, emailBody: text, contact: contactSchema.nullable(),
     assessment: z.object({ score: z.number().min(0).max(100), method: short, components: z.object({ role: z.number(), evidence: z.number(), constraints: z.number() }),
@@ -79,8 +80,8 @@ const actionSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('link_saved_check'), expectedGeneration: version.max(Number.MAX_SAFE_INTEGER), expectedVersion: version.max(Number.MAX_SAFE_INTEGER), checkId: z.string().uuid().transform(value => value.toLowerCase()),
     opportunity: opportunitySchema.extend({ contact: contactSchema.strict().nullable() }).strict(), linkConsent: z.literal(true) }).strict(),
   z.object({ action: z.literal('update_opportunity'), expectedVersion: version, id, status, followUpAt: short.nullable(), notes: z.string().max(5000) }),
-  z.object({action:z.literal('start_selected_run'),expectedGeneration:version.max(Number.MAX_SAFE_INTEGER),expectedVersion:version.max(Number.MAX_SAFE_INTEGER),requestId:z.string().uuid().transform(value=>value.toLowerCase()),opportunityIds:selectedIds,prepareConsent:z.literal(true),provider:z.union([provider,z.literal('rules')]),model:short,modelConsent:z.boolean(),processingRoute:z.enum(['direct','openrouter']).optional()}).strict(),
-  z.object({ action: z.literal('start_run'), requestId: z.string().uuid(), provider: z.union([provider, z.literal('rules')]), model: short, modelConsent: z.boolean(), inboxConsent: z.boolean(),processingRoute:z.enum(['direct','openrouter']).optional() }),
+  z.object({action:z.literal('start_selected_run'),cvSelection:cvSelectionSchema.optional(),expectedGeneration:version.max(Number.MAX_SAFE_INTEGER),expectedVersion:version.max(Number.MAX_SAFE_INTEGER),requestId:z.string().uuid().transform(value=>value.toLowerCase()),opportunityIds:selectedIds,prepareConsent:z.literal(true),provider:z.union([provider,z.literal('rules')]),model:short,modelConsent:z.boolean(),processingRoute:z.enum(['direct','openrouter']).optional()}).strict(),
+  z.object({ action: z.literal('start_run'), cvSelection:cvSelectionSchema.optional(), requestId: z.string().uuid(), provider: z.union([provider, z.literal('rules')]), model: short, modelConsent: z.boolean(), inboxConsent: z.boolean(),processingRoute:z.enum(['direct','openrouter']).optional() }),
   z.object({ action: z.literal('resume_run'), runId: id }), z.object({ action: z.literal('cancel_run'), runId: id }),
   z.object({ action: z.literal('approve_packet'), packetId: id, inputHash: id, reviewedText: text, confirmFacts: z.boolean(), confirmDisclosure: z.boolean() }),
   z.object({ action: z.literal('download'), packetId: id, format: z.enum(['pdf', 'docx', 'txt', 'report', 'letter']) }),

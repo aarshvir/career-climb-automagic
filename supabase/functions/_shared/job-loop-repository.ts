@@ -1,6 +1,6 @@
 import { ApiError } from './core.ts';
 import type { adminClient } from './runtime.ts';
-import type { LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
+import type { LoopCvSelection, LoopActivity, LoopClaim, LoopInboxSignal, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopRun, LoopSchedule, LoopScheduleInput } from './job-loop-types.ts';
 import { digest } from './job-loop-providers.ts';
 import { eraseLoopArtifacts } from './job-loop-erasure.ts';
 import { validLoopGeneration } from './job-loop-request.ts';
@@ -9,15 +9,20 @@ import { captureCvVariantSaveIntent, validateCvVariantSaveReceipt, validateCvVar
 import { captureCvVariantFactSaveIntent, captureCvVariantFactWithdrawIntent, validateCvVariantFactReadScope, validateCvVariantFactReceipt, validateCvVariantFactsRead } from './job-loop-cv-variant-facts.ts';
 
 export type LoopAdmin = ReturnType<typeof adminClient>;
-export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
+export interface CareerRecord { cvSelection?: LoopCvSelection; profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
 export interface RecordRow { user_id: string; version: number; input_version: number; lifecycle_generation?: number; data: CareerRecord; updated_at: string }
 export interface LifecycleRow { user_id: string; state: 'active' | 'erasing' | 'erased'; generation: number }
 export interface RunRow { id: string; user_id: string; request_id: string; request_hash: string; input_hash: string; input_version: number; lifecycle_generation?: number; selected_opportunity_ids?: string[] | null; selected_generation?: number | null; snapshot: CareerRecord; provider: LoopRun['provider']; model: string; consents: { model: boolean; inbox: boolean; processingRoute?: 'direct' | 'openrouter' }; data: RunState; status: LoopRun['status']; phase: number; lease_token: string | null; lease_until: string | null; created_at: string; finished_at: string | null }
 export interface RunState { lanes?: LoopRun['lanes']; messages?: string[]; nextAction?: string; opportunityIds?: string[]; packetIds?: string[]; reusedPacketIds?:string[]; opportunities?: LoopOpportunity[]; inbox?: LoopInboxSignal[] }
 export interface UsageRow { id: string; reserved_micros: number; actual_micros: number | null; status: 'reserved' | 'settled' | 'uncertain'; result: unknown; is_new: boolean }
 export interface PacketRow { id: string; user_id: string; input_version: number; status: LoopPacket['status']; data: LoopPacket }
-export interface ScheduleRow { user_id:string;version:number;status:LoopSchedule['status'];settings:LoopScheduleInput;next_run_at:string|null;lease_token:string|null;lease_until:string|null;last_run_id:string|null;last_attempt_at:string|null;message:string }
+export interface ScheduleRow { occurrence_request?:string|null; bound_generation?:number|null; user_id:string;version:number;status:LoopSchedule['status'];settings:LoopScheduleInput;next_run_at:string|null;lease_token:string|null;lease_until:string|null;last_run_id:string|null;last_attempt_at:string|null;message:string }
 const ERRORS: [string, number, string][] = [
+  ['LOOP_SCHEDULE_ENTITLEMENT',403,'This cadence is not included in your current Job Loop access. Choose an included schedule.'],
+  ['LOOP_WEEKLY_SCHEDULE_LIMIT',429,'This week’s included scheduled runs have been used. Your next scheduled occurrence remains available.'],
+  ['LOOP_SCHEDULE_SOURCE_CHANGED',409,'The CV or facts changed. Choose the current source and confirm recurring preparation again.'],
+  ['LOOP_RECURRING_AI_CONSENT',400,'Confirm recurring AI processing for this exact CV, model and provider route.'],
+  ['LOOP_SUBSCRIPTION_REQUIRED',403,'Active Job Loop access is required for this preparation.'],
   ['LOOP_VARIANT_FACT_CONSENT_REQUIRED',400,'Confirm saving or withdrawing this exact fact.'],
   ['LOOP_VARIANT_FACT_REVISION_CONFLICT',409,'This fact changed. Refresh it before confirming another change.'],
   ['LOOP_VARIANT_FACT_SOURCE_CHANGED',409,'The saved CV source changed. Review this fact against its exact source.'],
@@ -191,6 +196,7 @@ export class LoopRepository {
     const path=packet.artifacts[key]?.path;
     if (!path || !/^[a-f0-9]{64}$/.test(packet.artifacts[key].sha256) || path!==`${userId}/${packet.id}/${packet.artifacts[key].sha256}/${key}`) throw new ApiError(404,'LOOP_ARTIFACT_MISSING','That approved artifact is unavailable.');
     const stored=await this.admin.storage.from('job-loop-artifacts').download(path);loopDatabaseError(stored.error);if(!stored.data||await digest(new Uint8Array(await stored.data.arrayBuffer()))!==packet.artifacts[key].sha256)throw new ApiError(409,'LOOP_ARTIFACT_CHANGED','The stored artifact no longer matches the approved manifest.');
+    if(packet.cvSelection)await this.rpc('job_loop_assert_packet_cv_authority',{p_user:userId,p_packet:packet.id});
     const {data,error}=await this.admin.storage.from('job-loop-artifacts').createSignedUrl(path,120); loopDatabaseError(error); if (!data?.signedUrl) throw new ApiError(503,'LOOP_ARTIFACT_MISSING','The download could not be opened.'); return data.signedUrl;
   }
 }
@@ -198,5 +204,5 @@ export function publicSchedule(row:ScheduleRow):LoopSchedule{return {...row.sett
 
 export function publicRun(row: RunRow, usage: {run_id:string;reserved_micros:number;actual_micros:number|null;status:string}[]): LoopRun {
   const owned=usage.filter(item=>item.run_id===row.id);
-  return {...(row.selected_opportunity_ids!=null?{selection:{generation:row.selected_generation!,opportunityIds:[...row.selected_opportunity_ids]}}:{}),id:row.id,requestId:row.request_id,status:row.status,phase:(row.selected_opportunity_ids!=null&&row.phase<2?'selection':['inbox','discovery','prepare_1','prepare_2','prepare_3','prepare_4','prepare_5','report'][row.phase] ?? 'report'),startedAt:row.created_at,finishedAt:row.finished_at,inputHash:row.input_hash,provider:row.provider,model:row.model,lanes:row.data.lanes??[],messages:row.data.messages??[],nextAction:row.data.nextAction??'This run is awaiting its next background stage.',opportunityIds:row.data.opportunityIds??[],packetIds:row.data.packetIds??[],reservedUsd:owned.filter(item=>item.status!=='settled').reduce((sum,item)=>sum+Number(item.reserved_micros),0)/1000000,usageUsd:owned.reduce((sum,item)=>sum+Number(item.actual_micros??0),0)/1000000};
+  return {...(row.snapshot.cvSelection?{cvSelection:row.snapshot.cvSelection}:{}),...(row.selected_opportunity_ids!=null?{selection:{generation:row.selected_generation!,opportunityIds:[...row.selected_opportunity_ids]}}:{}),id:row.id,requestId:row.request_id,status:row.status,phase:(row.selected_opportunity_ids!=null&&row.phase<2?'selection':['inbox','discovery','prepare_1','prepare_2','prepare_3','prepare_4','prepare_5','report'][row.phase] ?? 'report'),startedAt:row.created_at,finishedAt:row.finished_at,inputHash:row.input_hash,provider:row.provider,model:row.model,lanes:row.data.lanes??[],messages:row.data.messages??[],nextAction:row.data.nextAction??'This run is awaiting its next background stage.',opportunityIds:row.data.opportunityIds??[],packetIds:row.data.packetIds??[],reservedUsd:owned.filter(item=>item.status!=='settled').reduce((sum,item)=>sum+Number(item.reserved_micros),0)/1000000,usageUsd:owned.reduce((sum,item)=>sum+Number(item.actual_micros??0),0)/1000000};
 }

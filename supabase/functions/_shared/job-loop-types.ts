@@ -57,7 +57,9 @@ export interface LoopAssessment {
   score: number; method: string; components: { role: number; evidence: number; constraints: number };
   gaps: string[]; flags: string[]; claimIds: string[];
 }
+export interface LoopCvSelection { variantId: string; variantRevision: number; sourceHash: string; factRefs: Array<{id: string; revision: number}> }
 export interface LoopPacket {
+  cvSelection?: LoopCvSelection;
   id: string; runId: string; opportunityId: string; title: string; company: string;
   inputHash: string; profileRevision: number; claimVersions: Record<string, number>;
   cvText: string; evidenceText: string; coverLetterText: string;
@@ -71,7 +73,10 @@ export interface LoopPacket {
   interviewBrief?: { title: string; prompt: string; evidenceClaimIds: string[]; sourceQuote: string }[];
 }
 export interface LoopScheduleInput {
-  cadence: 'daily' | 'weekdays' | 'weekly'; timezone: string; localTime: string; weeklyDay: number | null;
+  cvSelection?: LoopCvSelection;
+  cadence: 'daily' | 'weekdays' | 'weekly' | 'three_weekly'; timezone: string; localTime: string; weeklyDay: number | null;
+  weeklyDays?: number[]; processingRoute?: 'direct' | 'openrouter';
+  recurringAiConsent?: { provider: LoopProviderId; model: string; processingRoute: 'direct' | 'openrouter'; sourceScope: 'selected_cv'; cvSelection: LoopCvSelection; consented: true };
   provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; inboxConsent: boolean;
 }
 export interface LoopSchedule extends LoopScheduleInput {
@@ -85,6 +90,7 @@ export interface LoopInboxSignal {
   threadId: string; opportunityId: string | null; roleUnconfirmed: boolean;
 }
 export interface LoopRun {
+  cvSelection?: LoopCvSelection;
   selection?: { generation: number; opportunityIds: string[] };
   id: string; requestId: string; status: 'queued' | 'running' | 'completed' | 'partial' | 'blocked' | 'cancelled' | 'failed';
   phase: string; startedAt: string; finishedAt: string | null; inputHash: string;
@@ -102,7 +108,7 @@ export interface LoopSnapshot {
   recordVersion: number; profile: LoopProfile | null; claims: LoopClaim[];
   opportunities: LoopOpportunity[]; runs: LoopRun[]; packets: LoopPacket[]; inbox: LoopInboxSignal[];
   models: LoopModelOption[];
-  capabilities: { cloudWorker: boolean; rulesEngine: boolean; webSearch: boolean; gmailRead: boolean; gmailDrafts: boolean; monthlyUsageCapUsd: number; dailyRunLimit: number; scheduler?: boolean; packetsPerRun?: number; cvVariants?: boolean };
+  capabilities: { cvVariants?: boolean; cloudWorker: boolean; rulesEngine: boolean; webSearch: boolean; gmailRead: boolean; gmailDrafts: boolean; monthlyUsageCapUsd: number; dailyRunLimit: number; scheduler?: boolean; packetsPerRun?: number };
   gmail: { connected: boolean; email: string | null; allowDrafts: boolean; status: string };
   schedule?: LoopSchedule | null;
   budget?: { month: string; capUsd: number; committedUsd: number; remainingUsd: number; scope: 'shared_ai_search'; maxPilotUsers: number };
@@ -136,8 +142,8 @@ export type LoopAction = (
   | { action: 'add_opportunity'; expectedVersion: number; opportunity: LoopOpportunityInput }
   | { action: 'link_saved_check'; expectedVersion: number; checkId: string; opportunity: LoopOpportunityInput; linkConsent: boolean }
   | { action: 'update_opportunity'; expectedVersion: number; id: string; status: LoopApplicationStatus; followUpAt: string | null; notes: string }
-  | { action: 'start_selected_run'; expectedVersion: number; requestId: string; opportunityIds: string[]; prepareConsent: boolean; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; processingRoute?: 'direct' | 'openrouter' }
-  | { action: 'start_run'; requestId: string; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; inboxConsent: boolean; processingRoute?: 'direct' | 'openrouter' }
+  | { action: 'start_selected_run'; cvSelection?: LoopCvSelection; expectedVersion: number; requestId: string; opportunityIds: string[]; prepareConsent: boolean; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; processingRoute?: 'direct' | 'openrouter' }
+  | { action: 'start_run'; cvSelection?: LoopCvSelection; requestId: string; provider: LoopProviderId | 'rules'; model: string; modelConsent: boolean; inboxConsent: boolean; processingRoute?: 'direct' | 'openrouter' }
   | { action: 'resume_run'; runId: string }
   | { action: 'cancel_run'; runId: string }
   | { action: 'save_schedule'; expectedScheduleVersion: number; schedule: LoopScheduleInput; recurringConsent: boolean }

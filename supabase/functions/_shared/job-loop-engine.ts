@@ -1,3 +1,4 @@
+import { validateCvSelection } from './job-loop-variant-execution.ts';
 import type { LoopAction, LoopAssessment, LoopClaim, LoopClaimInput, LoopContact, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopProfileInput } from './job-loop-types.ts';
 import { normalizeFollowUp, validateScheduleInput } from './job-loop-schedule.ts';
 import { readDiscoveryMinimumExperience } from '../../../src/lib/employer-discovery.ts';
@@ -147,9 +148,9 @@ export function validateAction(value: unknown): LoopAction {
   if (!value || typeof value !== 'object' || !('action' in value)) fail('Missing action.');
   const action = (value as { action: unknown }).action;
   const keys: Record<string, string[]> = {
-    get: [], get_existing: [], save_profile: ['expectedVersion', 'profile', 'saveConsent'], suggest_claims: [], save_claim: ['expectedVersion', 'id', 'claim'], withdraw_claim: ['expectedVersion', 'id'], add_opportunity: ['expectedVersion', 'opportunity'], update_opportunity: ['expectedVersion', 'id', 'status', 'followUpAt', 'notes'], start_run: ['requestId', 'provider', 'model', 'modelConsent', 'inboxConsent','processingRoute'], resume_run: ['runId'], cancel_run: ['runId'], approve_packet: ['packetId', 'inputHash', 'reviewedText', 'confirmFacts', 'confirmDisclosure'], download: ['packetId', 'format'], preview_packet: ['packetId','inputHash'], save_schedule:['expectedScheduleVersion','schedule','recurringConsent'], pause_schedule:['expectedScheduleVersion'],cancel_schedule:['expectedScheduleVersion'],erase_loop:['confirmErase'],erase_self:['confirmErase'],request_support:['category','message'], gmail_connect: ['allowDrafts'], gmail_preview: ['ticket'], gmail_finalize: ['ticket', 'confirmMailbox'], gmail_disconnect: [], gmail_create_draft: ['packetId', 'requestId', 'confirmRecipientAndAttachment'],
+    get: [], get_existing: [], save_profile: ['expectedVersion', 'profile', 'saveConsent'], suggest_claims: [], save_claim: ['expectedVersion', 'id', 'claim'], withdraw_claim: ['expectedVersion', 'id'], add_opportunity: ['expectedVersion', 'opportunity'], update_opportunity: ['expectedVersion', 'id', 'status', 'followUpAt', 'notes'], start_run: ['cvSelection','requestId', 'provider', 'model', 'modelConsent', 'inboxConsent','processingRoute'], resume_run: ['runId'], cancel_run: ['runId'], approve_packet: ['packetId', 'inputHash', 'reviewedText', 'confirmFacts', 'confirmDisclosure'], download: ['packetId', 'format'], preview_packet: ['packetId','inputHash'], save_schedule:['expectedScheduleVersion','schedule','recurringConsent'], pause_schedule:['expectedScheduleVersion'],cancel_schedule:['expectedScheduleVersion'],erase_loop:['confirmErase'],erase_self:['confirmErase'],request_support:['category','message'], gmail_connect: ['allowDrafts'], gmail_preview: ['ticket'], gmail_finalize: ['ticket', 'confirmMailbox'], gmail_disconnect: [], gmail_create_draft: ['packetId', 'requestId', 'confirmRecipientAndAttachment'],
   };
-  keys.start_selected_run = ['expectedVersion','requestId','opportunityIds','prepareConsent','provider','model','modelConsent','processingRoute'];
+  keys.start_selected_run = ['cvSelection','expectedVersion','requestId','opportunityIds','prepareConsent','provider','model','modelConsent','processingRoute'];
   keys.link_saved_check = ['expectedVersion', 'checkId', 'opportunity', 'linkConsent'];
   keys.save_cv_variant = ['expectedVersion','requestId','variantId','expectedVariantRevision','label','profile','claimRefs','saveConsent'];
   keys.read_cv_variants = [];
@@ -161,7 +162,7 @@ export function validateAction(value: unknown): LoopAction {
   if (generationBoundAction(action)) keys[action].push('expectedGeneration');
   const a = obj(value, ['action', ...keys[action]]);
   if (generationBoundAction(action) && !validLoopGeneration(a.expectedGeneration)) fail('Refresh Jobvance before continuing. This action needs the current workspace lifetime.');
-  if (keys[action].some(key => !(key === 'id' && action === 'save_claim') && !(key === 'processingRoute' && (action === 'start_run'||action === 'start_selected_run')) && !Object.prototype.hasOwnProperty.call(a, key))) fail('An action is missing required inputs.');
+  if (keys[action].some(key => !(key === 'id' && action === 'save_claim') && !(key === 'cvSelection' && (action === 'start_run'||action === 'start_selected_run')) && !(key === 'processingRoute' && (action === 'start_run'||action === 'start_selected_run')) && !Object.prototype.hasOwnProperty.call(a, key))) fail('An action is missing required inputs.');
   if ('expectedVersion' in a) version(a.expectedVersion);
   if (action === 'save_cv_variant_fact' || action === 'withdraw_cv_variant_fact' || action === 'read_cv_variant_facts') {
     const { action: _action, ...intent } = a;
@@ -194,6 +195,7 @@ export function validateAction(value: unknown): LoopAction {
     if(new Set(a.opportunityIds as string[]).size!==(a.opportunityIds as string[]).length)fail('Choose each vacancy once.');
   }
   if (action === 'save_claim') { obj(a.claim, ['sourceKind', 'sourceQuote', 'phrasing', 'context', 'kind', 'resultStatus', 'confirmed', 'shareable']); }
+  if ((action === 'start_run'||action === 'start_selected_run') && a.cvSelection!==undefined) a.cvSelection=validateCvSelection(a.cvSelection);
   if (action === 'start_run'||action === 'start_selected_run') { enumeration(a.provider, ['rules', 'anthropic', 'openai', 'moonshot']); text(a.model, 1, 150); if (a.provider !== 'rules' && !a.modelConsent) fail('Provider processing consent is required.'); if(a.processingRoute!==undefined){enumeration(a.processingRoute,['direct','openrouter']);if(a.provider==='rules')fail('Rules preparation does not authorize an external processing route.');} }
   if (action === 'update_opportunity') { enumeration(a.status, STATUSES); text(a.notes, 0, 5000); a.followUpAt=normalizeFollowUp(a.followUpAt as string|null); }
   if (action === 'save_schedule') { a.schedule=validateScheduleInput(a.schedule); if(!a.recurringConsent)fail('Explicit recurring preparation permission is required.'); }

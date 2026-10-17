@@ -1,0 +1,237 @@
+{
+  "kind": "recurring-loop-hosted",
+  "startedAt": "2026-10-17T12:00:19.549Z",
+  "status": "passed",
+  "accountsCreated": 1,
+  "paidCalls": 2,
+  "sentMessages": 0,
+  "applicationSubmissions": 0,
+  "authAccountsDeleted": 0,
+  "syntheticLoopsErased": 0,
+  "credentialsPrintedOrSaved": false,
+  "signedLinksPrintedOrSaved": false,
+  "checks": [
+    {
+      "name": "local-public-key-is-project-bound-and-not-privileged",
+      "passed": true
+    },
+    {
+      "name": "signup-does-not-send-confirmation-mail",
+      "passed": true
+    },
+    {
+      "name": "fresh-recurring-identity-is-own-synthetic-account",
+      "passed": true
+    },
+    {
+      "name": "variant-authority-deployed",
+      "passed": true
+    },
+    {
+      "name": "pilot-capacity-available",
+      "passed": true
+    },
+    {
+      "name": "saved-variant-0",
+      "passed": true
+    },
+    {
+      "name": "saved-variant-1",
+      "passed": true
+    },
+    {
+      "name": "saved-variant-2",
+      "passed": true
+    },
+    {
+      "name": "cloud-run-reaches-an-observable-completion-state",
+      "passed": true
+    },
+    {
+      "name": "rules-run-incurs-no-funded-provider-usage",
+      "passed": true
+    },
+    {
+      "name": "exact-hosted-variant-0",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-pdf-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-pdf-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "hosted-pdf-header-0",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-docx-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-docx-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "hosted-docx-source-0",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-txt-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-txt-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "hosted-txt-source-0",
+      "passed": true
+    },
+    {
+      "name": "cloud-run-reaches-an-observable-completion-state",
+      "passed": true
+    },
+    {
+      "name": "rules-run-incurs-no-funded-provider-usage",
+      "passed": true
+    },
+    {
+      "name": "exact-hosted-variant-1",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-pdf-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-pdf-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "hosted-pdf-header-1",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-docx-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-docx-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "hosted-docx-source-1",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-txt-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-txt-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "hosted-txt-source-1",
+      "passed": true
+    },
+    {
+      "name": "chosen-recurring-model-ready",
+      "passed": true
+    },
+    {
+      "name": "hosted-weekly-schedule",
+      "passed": true
+    },
+    {
+      "name": "hosted-three_weekly-schedule",
+      "passed": true
+    },
+    {
+      "name": "hosted-daily-schedule",
+      "passed": true
+    },
+    {
+      "name": "operator-made-qa-schedule-dispatches-through-cloud-service",
+      "passed": true
+    },
+    {
+      "name": "scheduled-dispatch-advances-real-next-run",
+      "passed": true
+    },
+    {
+      "name": "cloud-run-reaches-an-observable-completion-state",
+      "passed": true
+    },
+    {
+      "name": "bounded-ai-usage-settled",
+      "passed": true
+    },
+    {
+      "name": "scheduled-progress-has-jobvance-actor-history",
+      "passed": true
+    },
+    {
+      "name": "scheduled-third-CV",
+      "passed": true
+    },
+    {
+      "name": "scheduled-output-ready",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-pdf-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-pdf-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-docx-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-docx-bytes-match-manifest",
+      "passed": true
+    },
+    {
+      "name": "private-exact-manifest-txt-link",
+      "passed": true
+    },
+    {
+      "name": "hosted-txt-bytes-match-manifest",
+      "passed": true
+    }
+  ],
+  "models": [
+    {
+      "provider": "anthropic",
+      "model": "claude-sonnet-5-5",
+      "ready": true,
+      "transport": "openrouter"
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "ready": true,
+      "transport": "openrouter"
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-6-luna",
+      "ready": false
+    },
+    {
+      "provider": "moonshot",
+      "model": "kimi-k2.6",
+      "ready": false
+    }
+  ],
+  "aiUsageUsd": 0.002974,
+  "finishedAt": "2026-10-17T12:02:16.628Z"
+}

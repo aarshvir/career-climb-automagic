@@ -1,3 +1,4 @@
+import LoopVariantPreparation from './LoopVariantPreparation';
 import { readApplicationSource } from '@/lib/application-source-selection';
 import { useCallback, useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -515,6 +516,10 @@ export default function JobLoop() {
       </>}
       {snapshot && <div className="jl-tab-panel" hidden={tab !== 'record'}>
         {'cvVariants' in snapshot.capabilities && snapshot.capabilities.cvVariants === true && <LoopCvVariants snapshot={snapshot} owner={user.id} authority={trackingAuthority} ready={!authLoading && !authError} busy={!!busy} hidden={tab !== 'record'} captureGuard={() => {
+          const atOwner = owner.current, atAuthority = trackingDraftAuthority(user.id), atGeneration = generation.current, atLifecycle = lifecycleGeneration.current;
+          return () => mounted.current && importAuthReady.current && owner.current === atOwner && trackingDraftAuthority(user.id) === atAuthority && generation.current === atGeneration && lifecycleGeneration.current === atLifecycle;
+        }} />}
+        {'cvVariants' in snapshot.capabilities && snapshot.capabilities.cvVariants === true && <LoopVariantPreparation key={`${user.id}:${trackingAuthority}:${snapshot.lifecycleGeneration}`} perform={perform} snapshot={snapshot} owner={user.id} authority={trackingAuthority} busy={!!busy} hidden={tab !== 'record'} captureGuard={() => {
           const atOwner = owner.current, atAuthority = trackingDraftAuthority(user.id), atGeneration = generation.current, atLifecycle = lifecycleGeneration.current;
           return () => mounted.current && importAuthReady.current && owner.current === atOwner && trackingDraftAuthority(user.id) === atAuthority && generation.current === atGeneration && lifecycleGeneration.current === atLifecycle;
         }} />}
