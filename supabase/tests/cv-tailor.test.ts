@@ -157,7 +157,7 @@ describe('request and response handling', () => {
   });
   it('parses fenced or padded model JSON and drops malformed parts', () => {
     const proposal = parseProposal('```json\n{"rewrites":[{"n":11,"text":"x"},{"n":"bad"}],"orders":[[1,2],["a"]],"summary":{"text":"","sources":[]},"questions":["Q?",3]}\n```');
-    expect(proposal.rewrites).toEqual([{ n: 11, text: 'x' }]);
+    expect(proposal.rewrites).toEqual([{ n: 11, text: 'x', facts: [] }]);
     expect(proposal.orders).toEqual([[1, 2]]);
     expect(proposal.summary).toBeNull();
     expect(proposal.questions).toEqual(['Q?']);
@@ -167,6 +167,71 @@ describe('request and response handling', () => {
     const prompt = tailorUserPrompt(cv, 'Head of Ops', 'Example', 'Lead operational excellence.');
     expect(prompt).toContain('9 [bullet] - Led a 12-store replenishment redesign');
     expect(prompt).toContain('8 [role] Senior Manager');
-    expect((TAILOR_SCHEMA as { required: string[] }).required).toEqual(['rewrites', 'orders', 'summary', 'questions']);
+    expect((TAILOR_SCHEMA as { required: string[] }).required).toEqual(['rewrites', 'orders', 'additions', 'summary', 'questions']);
+  });
+});
+
+describe('answers the candidate confirmed (deep tailor)', () => {
+  const facts = ['I ran the monthly reporting cycle for the finance team myself, covering 14 cost centres.', 'I trained 6 store managers to use the Power BI sales dashboard.'];
+  const role = 'Senior Manager, Strategy & Operations - Gulf Home Retail, Dubai | 2022 - present';
+  const rewrite = 'Ran the monthly reporting cycle for the finance team across 14 cost centres';
+  it('lets a rewrite use an answer it cites, and only that answer', () => {
+    const cited = assembleTailoredCv(cv, { rewrites: [{ n: 12, text: rewrite, facts: [1] }] }, facts);
+    expect(cited.rejected).toEqual([]);
+    expect(cited.changes).toEqual([{ kind: 'rewrite', n: 12, before: '- Supported the finance team with monthly reporting', after: `- ${rewrite}`, sources: [12], facts: [1] }]);
+    for (const facts_ of [[], [2], [7]]) {
+      const result = assembleTailoredCv(cv, { rewrites: [{ n: 12, text: rewrite, facts: facts_ }] }, facts);
+      expect(result.changes).toEqual([]);
+      expect(result.rejected[0].reason).toMatch(/number/u);
+    }
+    expect(assembleTailoredCv(cv, { rewrites: [{ n: 12, text: rewrite, facts: [1] }] }).rejected).toHaveLength(1);
+    expect(assembleTailoredCv(cv, { rewrites: [{ n: 12, text: 'Ran the monthly reporting cycle across 20 cost centres', facts: [1] }] }, facts).rejected[0].reason).toMatch(/\(20\)/u);
+  });
+  it('adds a new bullet from an answer first under a role and keeps every original line', () => {
+    const added = 'Trained 6 store managers to use the Power BI sales dashboard';
+    const result = assembleTailoredCv(cv, { additions: [{ after: 8, text: added, facts: [2] }] }, facts);
+    expect(result.rejected).toEqual([]);
+    const lines = result.text.split('\n');
+    expect(lines[lines.indexOf(role) + 1]).toBe(`- ${added}`);
+    expect(result.changes).toEqual([{ kind: 'addition', n: 8, before: '', after: `- ${added}`, sources: [8], facts: [2] }]);
+    for (const original of cv.split('\n')) expect(lines).toContain(original);
+  });
+  it('places a new line after its bullet even when that bullet moves', () => {
+    const added = 'Ran the monthly reporting cycle across 14 cost centres';
+    const result = assembleTailoredCv(cv, { orders: [[12, 9, 10, 11]], additions: [{ after: 12, text: added, facts: [1] }] }, facts);
+    const lines = result.text.split('\n');
+    expect(lines.slice(lines.indexOf(role) + 1, lines.indexOf(role) + 3)).toEqual(['- Supported the finance team with monthly reporting', `- ${added}`]);
+  });
+  it('rejects new lines that cite no answer, sit outside a role or go beyond the answer', () => {
+    const reasons = (additions: { after: number; text: string; facts: number[] }[], given = facts) => assembleTailoredCv(cv, { additions }, given).rejected.map(item => item.reason);
+    expect(reasons([{ after: 8, text: 'Trained 6 store managers on Power BI', facts: [] }])[0]).toMatch(/answers/u);
+    expect(reasons([{ after: 8, text: 'Trained 6 store managers on Power BI', facts: [2] }], [])[0]).toMatch(/answers/u);
+    expect(reasons([{ after: 7, text: 'Trained 6 store managers on Power BI', facts: [2] }])[0]).toMatch(/role/u);
+    expect(reasons([{ after: 8, text: 'Trained 8 store managers on Power BI', facts: [2] }])[0]).toMatch(/number/u);
+    expect(reasons([{ after: 8, text: 'Trained 6 store managers on Tableau', facts: [2] }])[0]).toMatch(/Tableau/u);
+    const many = Array.from({ length: 7 }, () => ({ after: 8, text: 'Trained 6 store managers on Power BI', facts: [2] }));
+    const result = assembleTailoredCv(cv, { additions: many }, facts);
+    expect(result.changes).toHaveLength(5);
+    expect(result.rejected).toHaveLength(2);
+  });
+  it('lets the summary cite answers as well as CV lines', () => {
+    const text = 'Operations and strategy manager who ran monthly reporting for the finance team across 14 cost centres.';
+    const result = assembleTailoredCv(cv, { summary: { text, sources: [5], facts: [1] } }, facts);
+    expect(result.changes).toEqual([expect.objectContaining({ kind: 'summary', after: text, sources: [5], facts: [1] })]);
+    expect(assembleTailoredCv(cv, { summary: { text, sources: [5], facts: [] } }, facts).rejected).toHaveLength(1);
+  });
+  it('accepts up to five answers of 10 to 400 characters and nothing else', () => {
+    const ok = { requestId: '7d2c1a9e-3b4f-4c5d-8e6f-1a2b3c4d5e6f', cvText: cv, jobDescription: 'Lead operational excellence across retail operations, reporting and vendor management for a growing group.', jobTitle: 'Head of Ops', company: 'Example', consent: true };
+    expect(validateTailorRequest(ok).facts).toEqual([]);
+    expect(validateTailorRequest({ ...ok, facts: ['  I ran the   monthly reporting cycle myself.  '] }).facts).toEqual(['I ran the monthly reporting cycle myself.']);
+    for (const facts_ of [[], Array(6).fill('I ran the monthly reporting cycle.'), ['too short'], ['x'.repeat(401)], 'I ran the reporting cycle myself.', ['I ran it\0 myself, for a year.'], [42]]) {
+      expect(() => validateTailorRequest({ ...ok, facts: facts_ })).toThrow();
+    }
+    expect(() => validateTailorRequest({ ...ok, facts: ['I ran the monthly reporting cycle.'], extra: true })).toThrow();
+  });
+  it('lists the confirmed answers in the prompt only when there are some', () => {
+    expect(tailorUserPrompt(cv, 'Head of Ops', 'Example', 'Lead operational excellence.', facts)).toContain('A1: I ran the monthly reporting cycle');
+    expect(tailorUserPrompt(cv, 'Head of Ops', 'Example', 'Lead operational excellence.')).not.toContain('ANSWERS');
+    expect(parseProposal('{"rewrites":[],"orders":[],"additions":[{"after":8,"text":"x","facts":[2,"a"]},{"after":"no","text":"y"}],"summary":{"text":"s","sources":[5],"facts":[1]},"questions":[]}')).toMatchObject({ additions: [{ after: 8, text: 'x', facts: [2] }], summary: { facts: [1] } });
   });
 });

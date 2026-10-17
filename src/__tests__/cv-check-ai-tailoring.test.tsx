@@ -1,10 +1,11 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CvCheck from "@/pages/CvCheck";
 import { clearTrackingDraftMemory } from '@/lib/tracking-draft-memory';
 import { clearCheckRecovery } from '@/lib/check-draft';
+import { analyzeCvEvidence } from '@/lib/cv-evidence';
 import { companyFromVacancy, roleFromVacancy, TailorUnavailable } from '@/lib/cv-tailor-api';
 
 vi.unmock("react-router-dom");
@@ -142,5 +143,78 @@ describe('AI tailoring in the check', () => {
     fireEvent.change(screen.getByLabelText('Maximum PDF length'), { target: { value: '1' } });
     expect(screen.getByRole('button', { name: 'Download Word' })).toBeEnabled();
     expect(screen.getByLabelText(/I have checked this CV/)).toBeChecked();
+  });
+});
+
+describe('deep tailor from answers the candidate confirms', () => {
+  const question = 'Did you lead any part of the transformation pilot, or support it?';
+  const answerText = 'I led the pilot workstream for two of the five units.';
+  const role = 'Analyst - Example Co | 2021 - 2024';
+  const added = '- Led the pilot workstream for two of the five units.';
+  const deepText = tailoredText.replace(`${role}\n`, `${role}\n${added}\n`);
+  const deep = { text: deepText, changes: [{ kind: 'addition', n: 5, before: '', after: added, sources: [5], facts: [1] }], questions: [], rejectedCount: 0 };
+  async function tailorThenAnswer() {
+    mocks.tailor.mockResolvedValueOnce(tailored).mockResolvedValueOnce(deep);
+    show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+    const improve = screen.getByRole('button', { name: 'Improve my CV with these answers' });
+    expect(improve).toBeDisabled();
+    fireEvent.change(screen.getByLabelText(question), { target: { value: answerText } });
+    expect(improve).toBeDisabled();
+    fireEvent.click(screen.getByLabelText(/This is true and I can talk about it in an interview/));
+    expect(improve).toBeEnabled();
+    return improve;
+  }
+  it('sends only confirmed answers, with the original CV, and marks what came from them', async () => {
+    fireEvent.click(await tailorThenAnswer());
+    await screen.findByText(/New line · from your answer/);
+    expect(mocks.tailor).toHaveBeenLastCalledWith({ cvText: source, jobDescription: vacancy, jobTitle: 'Transformation Analyst', company: 'Example Bank', facts: [answerText] });
+    expect(reviewed()).toBe(deepText);
+    expect(screen.getByText(`From your answer: “${answerText}”`)).toBeInTheDocument();
+    expect(screen.getByText(/1 change uses your answers/)).toBeInTheDocument();
+  });
+  it('withdraws the confirmation when an answer is edited', async () => {
+    const improve = await tailorThenAnswer();
+    fireEvent.change(screen.getByLabelText(question), { target: { value: `${answerText} Edited.` } });
+    expect(screen.getByLabelText(/This is true and I can talk about it in an interview/)).not.toBeChecked();
+    expect(improve).toBeDisabled();
+  });
+  it('removes a new line, and undo brings back the previous version with its changes', async () => {
+    fireEvent.click(await tailorThenAnswer());
+    await screen.findByText(/New line · from your answer/);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove this line' }));
+    expect(reviewed()).toBe(tailoredText);
+    fireEvent.click(screen.getByRole('button', { name: 'Undo and restore the previous version' }));
+    expect(reviewed()).toBe(tailoredText);
+    expect(screen.getByText(/Your original:/)).toBeInTheDocument();
+    expect(screen.getByLabelText(question)).toHaveValue('');
+  });
+  it('keeps the current CV when the answer-based tailoring fails', async () => {
+    mocks.tailor.mockReset();
+    mocks.tailor.mockResolvedValueOnce(tailored).mockRejectedValueOnce(new Error('AI tailoring is unavailable right now.'));
+    show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+    fireEvent.change(screen.getByLabelText(question), { target: { value: answerText } });
+    fireEvent.click(screen.getByLabelText(/This is true and I can talk about it in an interview/));
+    fireEvent.click(screen.getByRole('button', { name: 'Improve my CV with these answers' }));
+    await screen.findByText(/Your current CV is unchanged/);
+    expect(reviewed()).toBe(tailoredText);
+  });
+});
+
+describe('requirement coverage', () => {
+  it('shows before → after counts from the original and tailored CV, never a percentage', async () => {
+    mocks.tailor.mockResolvedValue(tailored);
+    show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+    const coverage = screen.getByRole('region', { name: 'How your CV covers this job' });
+    const before = analyzeCvEvidence(source, vacancy, 'Transformation Analyst').summary, after = analyzeCvEvidence(tailoredText, vacancy, 'Transformation Analyst').summary;
+    expect(within(coverage).getByText('Covered').nextElementSibling).toHaveTextContent(`${before.direct} → ${after.direct}`);
+    expect(within(coverage).getByText('Partly covered').nextElementSibling).toHaveTextContent(`${before.partial} → ${after.partial}`);
+    expect(within(coverage).getByText('Not shown in your CV').nextElementSibling).toHaveTextContent(`${before.missing} → ${after.missing}`);
+    expect(coverage.textContent).not.toMatch(/%|score:|pass|fail/iu);
   });
 });

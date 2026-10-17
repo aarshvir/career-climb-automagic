@@ -54,7 +54,7 @@ serve(async req => {
   const model = settings.model;
   const request = prepareRouterRequest(name => Deno.env.get(name), model, [
     { role: 'system', content: TAILOR_SYSTEM_PROMPT },
-    { role: 'user', content: tailorUserPrompt(input.cvText, input.jobTitle, input.company, input.jobDescription) },
+    { role: 'user', content: tailorUserPrompt(input.cvText, input.jobTitle, input.company, input.jobDescription, input.facts) },
   ], TAILOR_SCHEMA, OUTPUT_TOKENS, 'medium');
   const ip = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
   const rateHash = userId ? null : await supportRateHash(ip, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
@@ -79,6 +79,6 @@ serve(async req => {
   let proposal;
   try { proposal = parseProposal(result.content); }
   catch { throw new ApiError(502, 'TAILOR_UNREADABLE', 'The AI suggestions could not be used this time. Your CV comparison still works.'); }
-  const tailored = assembleTailoredCv(input.cvText, proposal);
+  const tailored = assembleTailoredCv(input.cvText, proposal, input.facts);
   return json(req, { tailored: { text: tailored.text, changes: tailored.changes, questions: tailored.questions, rejectedCount: tailored.rejected.length }, model: result.model });
 });
