@@ -1,0 +1,47 @@
+{
+  "version": 39,
+  "source": "84c7db94d7766063f641e1e7138fd392c52560a9",
+  "url": "https://jobvance.io",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d9e4b1f3abcc81919602c4847e85925b",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 39,
+    "source": {
+      "commit_sha": "84c7db94d7766063f641e1e7138fd392c52560a9"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000cdd881f4b695e0781089fbe2",
+      "content_hash": "sha256:af50aaf6be0333dba8e58859394da6b18ebc54de0e9b752e289f5656ce55ad4b",
+      "size_bytes": 15011840,
+      "file_count": 132
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad39b83448081918d018d881d7c721c",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d9e4b1f3abcc81919602c4847e85925b",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-17T16:00:31.641856+00:00"
+  },
+  "validation": {
+    "focusedTests": 24,
+    "typeScript": "passed",
+    "productionBuild": "passed",
+    "hostingGroups": 12,
+    "browser": "Isolated synthetic auth/persistence: desktop 1280x720 and mobile 390x844; visible blue Next; missing-role validation; pending role -> locations; Back preservation; expanded CV -> Next.",
+    "live": "Onboarding HTTP200 and exact entry JS, onboarding JS and CSS bytes verified.",
+    "backend": "unchanged worker15/control20; no migration"
+  },
+  "rollbackTag": "jobvance-before-onboarding-next-2026-10-17"
+}
