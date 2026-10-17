@@ -1,0 +1,43 @@
+{
+  "version": "v37",
+  "source": "0182a4969f4abfcaf1f27202236ca9626d36a491",
+  "site": "https://jobvance.io",
+  "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_8acdac8a546c8191b191ed62baf981d1",
+  "deployment": "appgdep_6ad38d5a435c8191a5de4a9d28c66441",
+  "succeededAt": "2026-10-17T14:59:57.177545+00:00",
+  "scope": "Account-first Job Loop social sharing artwork and metadata ownership; backend and payments unchanged from v35",
+  "validation": {
+    "affectedTests": 25,
+    "actualHelmetTests": 2,
+    "applicationTypeScript": "passed",
+    "productionBuild": "passed",
+    "hostingGroups": 12,
+    "staticMetadataRoutes": 38,
+    "onboardingFallback": true,
+    "liveMetadataPages": 3,
+    "exactLivePngRoutes": 2,
+    "independentReview": "passed"
+  },
+  "image": {
+    "path": "/og-job-loop-account.png",
+    "legacyPath": "/og-jobvance.png",
+    "width": 1200,
+    "height": 630,
+    "bytes": 50322,
+    "sha256": "1b13f8b7fd661ad429b95d09af60a53e9150f23a013ab60eeea258b2ce3ef6cf"
+  },
+  "rollback": {
+    "sourceTag": "jobvance-before-social-preview-2026-10-17",
+    "savedVersionRetained": "v35"
+  },
+  "unpublishedIntermediateVersion": {
+    "version": "v36",
+    "reason": "Independent review found client metadata duplicates; corrected before any deployment"
+  },
+  "limitations": [
+    "No new backend, hosted candidate, provider or payment tests for this metadata-only follow-up.",
+    "Third-party caches may retain older attachments; the Facebook introduction's old attachment was explicitly removed.",
+    "The v35 product readiness limits and -75 simulated recommendation forecast remain unchanged."
+  ],
+  "parentProductReceipt": "2026-10-17-deep-tailor-account.json"
+}
