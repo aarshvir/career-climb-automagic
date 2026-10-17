@@ -11,7 +11,10 @@ function assert(value:unknown,message:string):asserts value{if(!value)throw new 
 let selectedFixtureRun:import('../functions/_shared/job-loop-repository.ts').RunRow|null=null;
 let cvVariantReceipt:Record<string,unknown>|null=null;
 let cvVariantSaveFailure:string|null=null,cvVariantEraseAfterRpc=false;
-function setup(){selectedFixtureRun=null;cvVariantReceipt=null;cvVariantSaveFailure=null;cvVariantEraseAfterRpc=false;for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;existingLifecycleAbsent=false;existingRecordAbsent=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
+let cvVariantFact:import('../functions/_shared/job-loop-cv-variant-facts.ts').CvVariantFactSnapshot|null=null;
+const cvVariantFactRequests=new Map<string,{body:string;receipt:Record<string,unknown>}>();
+let cvVariantFactFailure:string|null=null,cvVariantFactEraseAfterRpc=false;
+function setup(){selectedFixtureRun=null;cvVariantReceipt=null;cvVariantSaveFailure=null;cvVariantEraseAfterRpc=false;cvVariantFact=null;cvVariantFactRequests.clear();cvVariantFactFailure=null;cvVariantFactEraseAfterRpc=false;for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;existingLifecycleAbsent=false;existingRecordAbsent=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
 let writeFailure=false;
 let existingLifecycleAbsent=false,existingRecordAbsent=false;
 let maintenanceTicketValid=false;
@@ -49,6 +52,34 @@ globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
     const response={generation:lifecycle.generation,recordVersion:record.version,variants:cvVariantReceipt?[cvVariantReceipt.variant]:[]};
     if(cvVariantEraseAfterRpc)lifecycle={state:'erasing',generation:lifecycle.generation+1};
     return Response.json(response);
+  }
+  if(['/rest/v1/rpc/job_loop_save_cv_variant_fact_bound','/rest/v1/rpc/job_loop_withdraw_cv_variant_fact_bound','/rest/v1/rpc/job_loop_read_cv_variant_facts_bound'].includes(url.pathname)){
+    const source=cvVariantReceipt?.variant as import('../functions/_shared/job-loop-types.ts').LoopCvVariant|undefined;
+    assert(source&&body?.p_user===owner&&body.p_generation===lifecycle.generation&&body.p_variant===source.id,'Independent facts derive owner and bind exact CV/lifetime in actual SDK body.');
+    const metadata={id:source.id,revision:source.revision,sourceHash:source.sourceHash};
+    const finish=(response:Record<string,unknown>)=>{if(cvVariantFactEraseAfterRpc)lifecycle={state:'erasing',generation:lifecycle.generation+1};return Response.json(response);};
+    if(url.pathname.endsWith('/job_loop_read_cv_variant_facts_bound'))return finish({generation:lifecycle.generation,recordVersion:record.version,variant:metadata,facts:cvVariantFact?[cvVariantFact]:[]});
+    if(cvVariantFactFailure)return Response.json({message:cvVariantFactFailure,code:'P0001'},{status:400});
+    const previous=cvVariantFactRequests.get(body.p_request as string);
+    if(previous){
+      if(previous.body!==JSON.stringify(body))return Response.json({message:'LOOP_REQUEST_CONFLICT',code:'P0001'},{status:400});
+      return finish({...previous.receipt,recordVersion:record.version,variant:metadata,fact:cvVariantFact,reused:true});
+    }
+    if(body.p_expected!==record.version)return Response.json({message:'LOOP_VERSION_CONFLICT',code:'P0001'},{status:400});
+    assert(body.p_variant_expected===1&&body.p_source_hash==='b'.repeat(64),'Original source revision/hash reach atomic fact mutation unchanged.');
+    const withdraw=url.pathname.endsWith('/job_loop_withdraw_cv_variant_fact_bound');
+    if(withdraw){
+      assert(cvVariantFact&&body.p_fact===cvVariantFact.id&&body.p_fact_expected===cvVariantFact.revision&&body.p_withdraw_consent===true&&!Object.hasOwn(body,'p_claim'),'Withdrawal sends original fact revision and explicit consent, never replacement wording.');
+      cvVariantFact={...cvVariantFact,revision:cvVariantFact.revision+1,status:'withdrawn',confirmed:false,shareable:false};
+    }else{
+      assert(body.p_fact===null&&body.p_fact_expected===0&&body.p_save_consent===true,'Fact creation sends exact original zero revision and save consent.');
+      const claim=body.p_claim as import('../functions/_shared/job-loop-types.ts').LoopClaimInput;
+      assert(claim.confirmed===true&&claim.shareable===false,'Private confirmation does not silently become sharing permission.');
+      cvVariantFact={...claim,id:'88888888-8888-4888-a888-888888888888',revision:1,status:'active',createdAt:'2026-10-17T00:00:00Z',updatedAt:'2026-10-17T00:00:00Z',variantId:source.id,generation:lifecycle.generation,variantRevision:body.p_variant_expected as number,sourceHash:body.p_source_hash as string};
+    }
+    record.version++;
+    const response={generation:lifecycle.generation,recordVersion:record.version,variant:metadata,fact:cvVariantFact,requestId:body.p_request,requestHash:'c'.repeat(64),savedRevision:cvVariantFact.revision,sourceHash:body.p_source_hash,variantRevision:body.p_variant_expected,reused:false};
+    cvVariantFactRequests.set(body.p_request as string,{body:JSON.stringify(body),receipt:response});return finish(response);
   }
   if(url.pathname==='/rest/v1/job_loop_records'){assert(url.searchParams.get('user_id')===`eq.${owner}`||body?.user_id===owner,'Every record query binds the authenticated owner.');return init?.method==='POST'?new Response(null,{status:201}):Response.json(existingRecordAbsent?null:record);}
   if(url.pathname==='/rest/v1/job_loop_runs'&&selectedFixtureRun){assert(url.searchParams.get('user_id')===`eq.${owner}`,'Selected run reads derive owner.');return Response.json(url.searchParams.has('request_id')?selectedFixtureRun:[selectedFixtureRun]);}
@@ -289,4 +320,84 @@ Deno.test('actual variant reads do not initialize missing work and fresh saves r
   assert(withdrawn.status===422&&withdrawnBody.code==='LOOP_VARIANT_CLAIM_INVALID','Current withdrawn facts require explicit review.');
   assert(!calls.some(call=>call.url.endsWith('/rpc/job_loop_save_cv_variant_bound')),'A fresh invalid fact never reaches atomic save.');
   assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+
+async function cvVariantFactAction(){
+  const action=cvVariantAction();assert((await handlers[0](req(action))).status===200,'Fixture owns a saved variant before independent fact confirmation.');calls.length=0;
+  const {id,revision,status,createdAt,...claim}=record.data.claims[0];
+  return {action:'save_cv_variant_fact',expectedGeneration:7,expectedVersion:2,requestId:'99999999-9999-4999-a999-999999999999',variantId:'77777777-7777-4777-a777-777777777777',expectedVariantRevision:1,sourceHash:'b'.repeat(64),factId:null,expectedFactRevision:0,claim:{...claim,shareable:false},saveConsent:true};
+}
+function cvVariantFactWithdraw(action:Awaited<ReturnType<typeof cvVariantFactAction>>){
+  const {claim,saveConsent,...original}=action;
+  return {...original,action:'withdraw_cv_variant_fact',expectedVersion:record.version,requestId:'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',factId:'88888888-8888-4888-a888-888888888888',expectedFactRevision:1,withdrawConsent:true};
+}
+Deno.test('actual independent fact handlers compose save, passive read and withdrawal without replacing global facts',async()=>{
+  const action=await cvVariantFactAction(),before=JSON.stringify(record.data);
+  const saved=await handlers[0](req(action)),body=await saved.json();
+  assert(saved.status===200&&body.variantFactSave.fact.confirmed&&body.variantFactSave.fact.shareable===false&&body.variantFactSave.savedRevision===1,'Explicit private confirmation returns exact fact receipt.');
+  const read=await handlers[0](req({action:'read_cv_variant_facts',expectedGeneration:7,variantId:action.variantId})),listed=await read.json();
+  assert(read.status===200&&listed.cvVariantFacts.facts.length===1&&listed.cvVariantFacts.facts[0].id===body.variantFactSave.fact.id,'Passive fact read preserves exact independent identity.');
+  const withdrawn=await handlers[0](req(cvVariantFactWithdraw(action))),withdrawnBody=await withdrawn.json();
+  assert(withdrawn.status===200&&withdrawnBody.variantFactSave.savedRevision===2&&withdrawnBody.variantFactSave.fact.status==='withdrawn'&&!withdrawnBody.variantFactSave.fact.confirmed&&!withdrawnBody.variantFactSave.fact.shareable,'Withdrawal revokes both confirmation and sharing.');
+  assert(JSON.stringify(record.data)===before&&record.input_version===1&&record.version===4,'Independent fact ordering changes no global source, global fact or preparation input.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+Deno.test('actual fact retry reports current withdrawal with original saved revision after later CV edits',async()=>{
+  const action=await cvVariantFactAction();assert((await handlers[0](req(action))).status===200,'First fact save succeeds.');assert((await handlers[0](req(cvVariantFactWithdraw(action)))).status===200,'Later explicit withdrawal succeeds.');
+  const current=cvVariantReceipt!.variant as import('../functions/_shared/job-loop-types.ts').LoopCvVariant;
+  current.revision=2;current.sourceHash='d'.repeat(64);current.profile.sourceText+='\nLater source edit.';record.version++;
+  const retry=await handlers[0](req(action)),body=await retry.json();
+  assert(retry.status===200&&body.variantFactSave.reused&&body.variantFactSave.savedRevision===1&&body.variantFactSave.variantRevision===1&&body.variantFactSave.sourceHash===action.sourceHash,'Retry retains original request/source receipt after source changes.');
+  assert(body.variantFactSave.variant.revision===2&&body.variantFactSave.fact.revision===2&&body.variantFactSave.fact.status==='withdrawn'&&!body.variantFactSave.fact.shareable,'Current state remains withdrawn and distinct from original receipt.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+Deno.test('actual independent fact handlers reject missing auth, forged owner, missing consent and stale generation',async()=>{
+  const action=await cvVariantFactAction();
+  assert((await handlers[0](req(action,null))).status===401,'Fact saving requires identity.');assert(calls.length===0,'Missing identity never reaches persistence.');
+  for(const patch of [{userId:owner},{saveConsent:false},{sourceHash:[action.sourceHash]},{expectedGeneration:undefined},{claim:{...action.claim,kind:['employment']}}])assert((await handlers[0](req({...action,...patch}))).status===400,'Malformed or privileged fact intent fails before source access.');
+  assert(calls.every(call=>call.url.endsWith('/auth/v1/user')),'Only identity lookup for malformed intent.');
+  assert((await handlers[0](req({...action,expectedGeneration:6}))).status===409,'Original lifetime mismatch is rejected.');
+  assert(!calls.some(call=>/cv_variant.*_bound/.test(call.url)),'Stale generation never reaches variant source or facts.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+Deno.test('actual fact fresh source validation rejects cropped wording and canonical expansion before atomic save',async()=>{
+  for(const mode of ['cropped','context','source']){
+    const action=await cvVariantFactAction();
+    if(mode==='cropped')action.claim.phrasing='Led all operations reporting.';
+    if(mode==='context'){
+      const current=cvVariantReceipt!.variant as import('../functions/_shared/job-loop-types.ts').LoopCvVariant;
+      current.profile.sourceText=current.profile.sourceText.replace('Example employer\n','Example employer\nAnalyst 2020–2022\n');
+    }
+    if(mode==='source')action.sourceHash='e'.repeat(64);
+    const response=await handlers[0](req(action)),body=await response.json();
+    assert(response.status===422&&body.code==='LOOP_VARIANT_FACT_INVALID','Incorrect source requires explicit new evidence review.');
+    assert(!calls.some(call=>call.url.endsWith('/job_loop_save_cv_variant_fact_bound'))&&!JSON.stringify(body).includes(action.claim.sourceQuote),'Bad fact never reaches write or echoes private source.');
+    assertVariantOnlyCalls();
+  }
+  lifecycle={state:'active',generation:0};
+});
+Deno.test('actual fact writes expose bounded conflict codes and refuse same request with changed consent content',async()=>{
+  const action=await cvVariantFactAction();cvVariantFactFailure='LOOP_VARIANT_FACT_REVISION_CONFLICT';
+  const rejected=await handlers[0](req(action)),rejectedBody=await rejected.json();
+  assert(rejected.status===409&&rejectedBody.code==='LOOP_VARIANT_FACT_REVISION_CONFLICT'&&!rejectedBody.variantFactSave,'Exact fact revision conflict reaches public handler response.');
+  cvVariantFactFailure=null;assert((await handlers[0](req(action))).status===200,'Original intent succeeds when storage available.');
+  const changed=await handlers[0](req({...action,claim:{...action.claim,shareable:true}})),changedBody=await changed.json();
+  assert(changed.status===409&&changedBody.code==='LOOP_REQUEST_CONFLICT'&&!changedBody.variantFactSave,'Original request cannot be repurposed to grant sharing.');
+  assert(cvVariantFact?.shareable===false,'Conflicting retry leaves private fact private.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+Deno.test('actual independent fact read remains passive and delayed write/read results fail after erasure',async()=>{
+  await cvVariantFactAction();existingLifecycleAbsent=true;
+  const absent=await handlers[0](req({action:'read_cv_variant_facts',expectedGeneration:7,variantId:'77777777-7777-4777-a777-777777777777'}));
+  assert(absent.status===409&&!calls.some(call=>new URL(call.url).pathname.includes('/rpc/')),'Absent workspace cannot be initialized by fact read.');
+  for(const mode of ['save','read','withdraw']){
+    const action=await cvVariantFactAction();
+    if(mode==='withdraw')assert((await handlers[0](req(action))).status===200,'Withdrawal race starts with saved fact.');
+    cvVariantFactEraseAfterRpc=true;
+    const payload=mode==='save'?action:mode==='read'?{action:'read_cv_variant_facts',expectedGeneration:7,variantId:action.variantId}:cvVariantFactWithdraw(action);
+    const response=await handlers[0](req(payload)),body=await response.json();
+    assert(response.status===409&&body.code==='LOOP_ERASURE_IN_PROGRESS'&&!body.variantFactSave&&!body.cvVariantFacts,'Delayed fact source is discarded after lifetime revocation.');
+    assert(!JSON.stringify(body).includes(action.claim.sourceQuote),'Rejected publication does not echo fact source.');assertVariantOnlyCalls();
+  }
+  lifecycle={state:'active',generation:0};
 });

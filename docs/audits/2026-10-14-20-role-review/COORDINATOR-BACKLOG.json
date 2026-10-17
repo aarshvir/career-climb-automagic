@@ -690,5 +690,19 @@
       "Combined review and coordinated exposure",
       "Hosted first/second customer acceptance and all original tracked requirements"
     ]
+  },
+  "cvVariantFactAuthority": {
+    "date": "2026-10-17",
+    "status": "unpublished source only; both variant migrations unapplied; public v32/backend unchanged",
+    "assessment": "../2026-10-17-cv-variants/FACT-AUTHORITY.md",
+    "implemented": "Separate exact-source variant fact confirmation/sharing/withdrawal with immutable history, strict authenticated control/browser contracts, current authority resolver and original/current retry distinction. Future-version semantic validation bypass corrected in new fact and existing variant saves.",
+    "validation": "2227 tests/126 files, app TypeScript,28 source/28 generated Deno,9 native PostgreSQL groups;165 separately rerun incl70 independently authored. Build/hosting details in facts-verification.json.",
+    "remaining": [
+      "Candidate independent fact review/withdrawal UI and original-request recovery",
+      "Immutable chosen variant and ordered fact references in manual/scheduled admission, worker, packet reuse/approval/download",
+      "Recurring entitlement/cadence/AI consent/discovery",
+      "Combined review and coordinated exposure",
+      "Hosted/unassisted first/second tasks and every original open requirement"
+    ]
   }
 }

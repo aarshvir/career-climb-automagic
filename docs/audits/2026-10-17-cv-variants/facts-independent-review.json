@@ -1,0 +1,60 @@
+{
+  "reviewedAt": "2026-10-17T07:46:45.679Z",
+  "reviewer": "Separate variant-fact review agent",
+  "result": "No remaining material blocker identified in bounded unpublished fact authority scope",
+  "normalization": "UTF-8 text with CRLF normalized to LF; SHA-256",
+  "sourceHashes": {
+    "supabase/migrations/20261017080000_job_loop_cv_variant_facts.sql": "847f7079085b6a90e94a05b866043fa7696803243fa7f5818653a8ee64393308",
+    "supabase/functions/_shared/job-loop-cv-variant-facts.ts": "4645c9e0b8b7183fa856400af71bc12082541c9427e32aa67a00440cd55dbd44",
+    "supabase/functions/_shared/job-loop-engine.ts": "cebda065c04c33dec7e2f727a6416ecb51d25d7dcc989cf777b4d34db95a312a",
+    "supabase/functions/_shared/job-loop-runtime.ts": "c6c9fbd4fcaab390727e2556c03574116b4d638a7916ecda8d56017b96ee1ca1",
+    "supabase/functions/_shared/job-loop-repository.ts": "7b014b598970f107a3545f444e8fe0d402dfcfe4d0f96b6092883f55319e51e5",
+    "supabase/functions/_shared/job-loop-request.ts": "3fe54a36f55f94595f213744b09c05426866fd3968387f34c0ca044cd4fec4aa",
+    "supabase/functions/_shared/job-loop-types.ts": "1f9cbd507230ccdfda61d6cd24663e17c568db809f69b9742451263e0d869405",
+    "src/lib/job-loop-api.ts": "143a803c3403e08f171dd3f9cfd1c80a08e06095a9fb795786e6346745d9b20e",
+    "scripts/test-check-tracking-postgres.mjs": "465147b48ce6dbe2275cab986eda4d11ab88a4867dee33ac8047053de2ad15bc",
+    "scripts/fixtures/cv-variant-facts-native-cases.mjs": "52af1a203a053be96940edd2ca0ee64c92464ba5ab59a85c3734dcdf85eb3362",
+    "src/__tests__/lib/job-loop-cv-variant-facts-api.test.ts": "43800ed981f8ad28f0b02d9ee4b1edc18b8ed0b893419e8b251bde7d229a7dba",
+    "supabase/tests/job-loop-cv-variant-facts-runtime.test.ts": "5d4a24b6c16510dd512aab18039df6d7f9b772c86085a4e6c5b17fb474a97142",
+    "supabase/tests/job-loop-cv-variant-facts-sql.test.ts": "d60e42f054fb7da3b10768b3a4a6b7acee784dca08c7ae0fd12e619c8c74d1cb",
+    "supabase/tests/job-loop-cv-variant-facts.test.ts": "d70be8b12537a5e61fc25347bbeeece4b057126ae1778cea7267338c4b10ce16",
+    "supabase/tests/job-loop-edge.deno.ts": "2d55ca3371379d16681cfc799e574b8fe7443e88daf0006d48059b22a817b0e0"
+  },
+  "independentTests": {
+    "files": 2,
+    "passed": 70,
+    "browserApi": 57,
+    "actualControlRepositoryPGlite": 13
+  },
+  "combinedReviewerRun": {
+    "files": 4,
+    "passed": 165,
+    "command": "node node_modules/vitest/vitest.mjs run supabase/tests/job-loop-cv-variant-facts-runtime.test.ts src/__tests__/lib/job-loop-cv-variant-facts-api.test.ts supabase/tests/job-loop-cv-variant-facts-sql.test.ts supabase/tests/job-loop-cv-variant-facts.test.ts"
+  },
+  "nativeReceiptReviewed": {
+    "executedBy": "Storage author",
+    "reviewerReran": false,
+    "checks": 9,
+    "passed": true,
+    "clusterStopped": true,
+    "finishedAt": "2026-10-17T07:44:17.394Z",
+    "sourceHashMatches": {
+      "migration": true,
+      "harness": true,
+      "cases": true
+    }
+  },
+  "correctedFindings": [
+    "Reject future expected record versions before semantic-validation bypass in both fact and variant save branches",
+    "Reject non-reused fresh-save receipt paired with a newer current source revision"
+  ],
+  "limitations": [
+    "No candidate fact UI or browser journey",
+    "No variant run/schedule/worker/packet/approval/download integration",
+    "PGlite is not multi-connection proof",
+    "Native receipt belongs to separate storage-author execution",
+    "No production deployment or migration",
+    "No provider calls or hosted/unassisted customer acceptance",
+    "No full-product sign-off"
+  ]
+}

@@ -1,6 +1,15 @@
 {
-  "externalImport": "https://esm.sh/@supabase/supabase-js@2.57.4",
   "generator": "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",
+  "hashAlgorithms": {
+    "migration": "sha256-utf8-lf-no-bom",
+    "source": "sha256-utf8-lf-no-bom",
+    "artifact": "sha256-bytes"
+  },
+  "externalPackages": [
+    "npm:jspdf@4.2.1",
+    "npm:docx@9.9.0"
+  ],
+  "externalImport": "https://esm.sh/@supabase/supabase-js@2.57.4",
   "migrations": [
     {
       "sha256": "a3312c82e04f7f8ffa8486aca3ba03eedeb583edec2614b7590ad5e7fe4baba9",
@@ -65,18 +74,18 @@
     {
       "sha256": "4adbe12e4ad3e910ae9226c6880e4ce9dbeb81d6bf4e58fc1205e642d89e5282",
       "path": "supabase/migrations/20261017013000_job_loop_cv_variants.sql"
+    },
+    {
+      "sha256": "847f7079085b6a90e94a05b866043fa7696803243fa7f5818653a8ee64393308",
+      "path": "supabase/migrations/20261017080000_job_loop_cv_variant_facts.sql"
     }
-  ],
-  "externalPackages": [
-    "npm:jspdf@4.2.1",
-    "npm:docx@9.9.0"
   ],
   "bundles": [
     {
-      "sha256": "45bae58021bcd84afa462f8473ed8956b561eb47e078c123b817a41892adca23",
-      "function": "job-loop-control",
+      "bytes": 92874,
       "artifact": "docs/supabase-loop-ui/job-loop-control.js",
-      "bytes": 82265,
+      "function": "job-loop-control",
+      "sha256": "8ff6f071c3f93e3fd2d1cdea5f14a3cdd8e04e8bfc7df53a94a9329b2e454eeb",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -115,6 +124,10 @@
           "path": "supabase/functions/_shared/job-loop-artifact-gc.ts"
         },
         {
+          "sha256": "4645c9e0b8b7183fa856400af71bc12082541c9427e32aa67a00440cd55dbd44",
+          "path": "supabase/functions/_shared/job-loop-cv-variant-facts.ts"
+        },
+        {
           "sha256": "5a5edd0850dcd8862c9c7e7a6f00dee463a04a033d3d0a0538d31c6b70c7cbcc",
           "path": "supabase/functions/_shared/job-loop-cv-variants.ts"
         },
@@ -123,7 +136,7 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "3f43828eea6786c490d8a12d31178397d20dfaf1bf88fd37349a878f429fc4a6",
+          "sha256": "cebda065c04c33dec7e2f727a6416ecb51d25d7dcc989cf777b4d34db95a312a",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
@@ -147,15 +160,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "fcc343fdc1c6589a33b69441c1b67fa6f0d6e246c3fef156a8925840657cb1d2",
+          "sha256": "7b014b598970f107a3545f444e8fe0d402dfcfe4d0f96b6092883f55319e51e5",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "a994d3d8ec18fa0531f0e59d5e5d7dd5dfaf53841ab55f13ab463e9e8936928c",
+          "sha256": "3fe54a36f55f94595f213744b09c05426866fd3968387f34c0ca044cd4fec4aa",
           "path": "supabase/functions/_shared/job-loop-request.ts"
         },
         {
-          "sha256": "8d3080a799a1fed7b28ffe9d7b5a259062325dadcbcfc6666097c778d391502b",
+          "sha256": "c6c9fbd4fcaab390727e2556c03574116b4d638a7916ecda8d56017b96ee1ca1",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -171,7 +184,7 @@
           "path": "supabase/functions/_shared/job-loop-selection.ts"
         },
         {
-          "sha256": "1e857fda413ef8ec0d66e20eae17390537909068718be27046013280bc84fdfc",
+          "sha256": "1f9cbd507230ccdfda61d6cd24663e17c568db809f69b9742451263e0d869405",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -261,10 +274,10 @@
       ]
     },
     {
-      "sha256": "61fe89ad526f372f62d310a83f93510e44142f33d7a7ee00fbb21347768aa8df",
-      "function": "job-loop-worker",
+      "bytes": 1116455,
       "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
-      "bytes": 1108338,
+      "function": "job-loop-worker",
+      "sha256": "929074a9f16a31716712ef1a1fd9d7272e2b4145d1862766a85698a745165aa7",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -303,6 +316,10 @@
           "path": "supabase/functions/_shared/job-loop-artifact-gc.ts"
         },
         {
+          "sha256": "4645c9e0b8b7183fa856400af71bc12082541c9427e32aa67a00440cd55dbd44",
+          "path": "supabase/functions/_shared/job-loop-cv-variant-facts.ts"
+        },
+        {
           "sha256": "5a5edd0850dcd8862c9c7e7a6f00dee463a04a033d3d0a0538d31c6b70c7cbcc",
           "path": "supabase/functions/_shared/job-loop-cv-variants.ts"
         },
@@ -311,7 +328,7 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "3f43828eea6786c490d8a12d31178397d20dfaf1bf88fd37349a878f429fc4a6",
+          "sha256": "cebda065c04c33dec7e2f727a6416ecb51d25d7dcc989cf777b4d34db95a312a",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
@@ -335,15 +352,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "fcc343fdc1c6589a33b69441c1b67fa6f0d6e246c3fef156a8925840657cb1d2",
+          "sha256": "7b014b598970f107a3545f444e8fe0d402dfcfe4d0f96b6092883f55319e51e5",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "a994d3d8ec18fa0531f0e59d5e5d7dd5dfaf53841ab55f13ab463e9e8936928c",
+          "sha256": "3fe54a36f55f94595f213744b09c05426866fd3968387f34c0ca044cd4fec4aa",
           "path": "supabase/functions/_shared/job-loop-request.ts"
         },
         {
-          "sha256": "8d3080a799a1fed7b28ffe9d7b5a259062325dadcbcfc6666097c778d391502b",
+          "sha256": "c6c9fbd4fcaab390727e2556c03574116b4d638a7916ecda8d56017b96ee1ca1",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -359,7 +376,7 @@
           "path": "supabase/functions/_shared/job-loop-selection.ts"
         },
         {
-          "sha256": "1e857fda413ef8ec0d66e20eae17390537909068718be27046013280bc84fdfc",
+          "sha256": "1f9cbd507230ccdfda61d6cd24663e17c568db809f69b9742451263e0d869405",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -449,10 +466,10 @@
       ]
     },
     {
-      "sha256": "6d45b40ba89ff10d1c389b2d9230d170ec8aee273be99056c41a6a7bdfba8cb5",
-      "function": "job-loop-oauth",
+      "bytes": 41304,
       "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
-      "bytes": 33206,
+      "function": "job-loop-oauth",
+      "sha256": "7f59508056a07647cbc1607908a3cd07f34182bea6a613412dfb70b3b0193ffc",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -491,6 +508,10 @@
           "path": "supabase/functions/_shared/job-loop-artifact-gc.ts"
         },
         {
+          "sha256": "4645c9e0b8b7183fa856400af71bc12082541c9427e32aa67a00440cd55dbd44",
+          "path": "supabase/functions/_shared/job-loop-cv-variant-facts.ts"
+        },
+        {
           "sha256": "5a5edd0850dcd8862c9c7e7a6f00dee463a04a033d3d0a0538d31c6b70c7cbcc",
           "path": "supabase/functions/_shared/job-loop-cv-variants.ts"
         },
@@ -499,7 +520,7 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "3f43828eea6786c490d8a12d31178397d20dfaf1bf88fd37349a878f429fc4a6",
+          "sha256": "cebda065c04c33dec7e2f727a6416ecb51d25d7dcc989cf777b4d34db95a312a",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
@@ -523,15 +544,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "fcc343fdc1c6589a33b69441c1b67fa6f0d6e246c3fef156a8925840657cb1d2",
+          "sha256": "7b014b598970f107a3545f444e8fe0d402dfcfe4d0f96b6092883f55319e51e5",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "a994d3d8ec18fa0531f0e59d5e5d7dd5dfaf53841ab55f13ab463e9e8936928c",
+          "sha256": "3fe54a36f55f94595f213744b09c05426866fd3968387f34c0ca044cd4fec4aa",
           "path": "supabase/functions/_shared/job-loop-request.ts"
         },
         {
-          "sha256": "8d3080a799a1fed7b28ffe9d7b5a259062325dadcbcfc6666097c778d391502b",
+          "sha256": "c6c9fbd4fcaab390727e2556c03574116b4d638a7916ecda8d56017b96ee1ca1",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -547,7 +568,7 @@
           "path": "supabase/functions/_shared/job-loop-selection.ts"
         },
         {
-          "sha256": "1e857fda413ef8ec0d66e20eae17390537909068718be27046013280bc84fdfc",
+          "sha256": "1f9cbd507230ccdfda61d6cd24663e17c568db809f69b9742451263e0d869405",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -637,10 +658,10 @@
       ]
     },
     {
-      "sha256": "dfb621c08804f7c1d90f9a3bab54ff7caa1d5c564608d43c7600f7c9d4750bc2",
-      "function": "jobvance-admin",
-      "artifact": "docs/supabase-loop-ui/jobvance-admin.js",
       "bytes": 10981,
+      "artifact": "docs/supabase-loop-ui/jobvance-admin.js",
+      "function": "jobvance-admin",
+      "sha256": "dfb621c08804f7c1d90f9a3bab54ff7caa1d5c564608d43c7600f7c9d4750bc2",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -679,6 +700,10 @@
           "path": "supabase/functions/_shared/job-loop-artifact-gc.ts"
         },
         {
+          "sha256": "4645c9e0b8b7183fa856400af71bc12082541c9427e32aa67a00440cd55dbd44",
+          "path": "supabase/functions/_shared/job-loop-cv-variant-facts.ts"
+        },
+        {
           "sha256": "5a5edd0850dcd8862c9c7e7a6f00dee463a04a033d3d0a0538d31c6b70c7cbcc",
           "path": "supabase/functions/_shared/job-loop-cv-variants.ts"
         },
@@ -687,7 +712,7 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "3f43828eea6786c490d8a12d31178397d20dfaf1bf88fd37349a878f429fc4a6",
+          "sha256": "cebda065c04c33dec7e2f727a6416ecb51d25d7dcc989cf777b4d34db95a312a",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
@@ -711,15 +736,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "fcc343fdc1c6589a33b69441c1b67fa6f0d6e246c3fef156a8925840657cb1d2",
+          "sha256": "7b014b598970f107a3545f444e8fe0d402dfcfe4d0f96b6092883f55319e51e5",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "a994d3d8ec18fa0531f0e59d5e5d7dd5dfaf53841ab55f13ab463e9e8936928c",
+          "sha256": "3fe54a36f55f94595f213744b09c05426866fd3968387f34c0ca044cd4fec4aa",
           "path": "supabase/functions/_shared/job-loop-request.ts"
         },
         {
-          "sha256": "8d3080a799a1fed7b28ffe9d7b5a259062325dadcbcfc6666097c778d391502b",
+          "sha256": "c6c9fbd4fcaab390727e2556c03574116b4d638a7916ecda8d56017b96ee1ca1",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -735,7 +760,7 @@
           "path": "supabase/functions/_shared/job-loop-selection.ts"
         },
         {
-          "sha256": "1e857fda413ef8ec0d66e20eae17390537909068718be27046013280bc84fdfc",
+          "sha256": "1f9cbd507230ccdfda61d6cd24663e17c568db809f69b9742451263e0d869405",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -825,10 +850,10 @@
       ]
     },
     {
-      "sha256": "f32179a391ccc4d1893f9571f68fc90124af664a5cd6b43ca2c22a1b9984716e",
-      "function": "jobvance-review-worker",
-      "artifact": "docs/supabase-loop-ui/jobvance-review-worker.js",
       "bytes": 21246,
+      "artifact": "docs/supabase-loop-ui/jobvance-review-worker.js",
+      "function": "jobvance-review-worker",
+      "sha256": "f32179a391ccc4d1893f9571f68fc90124af664a5cd6b43ca2c22a1b9984716e",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -867,6 +892,10 @@
           "path": "supabase/functions/_shared/job-loop-artifact-gc.ts"
         },
         {
+          "sha256": "4645c9e0b8b7183fa856400af71bc12082541c9427e32aa67a00440cd55dbd44",
+          "path": "supabase/functions/_shared/job-loop-cv-variant-facts.ts"
+        },
+        {
           "sha256": "5a5edd0850dcd8862c9c7e7a6f00dee463a04a033d3d0a0538d31c6b70c7cbcc",
           "path": "supabase/functions/_shared/job-loop-cv-variants.ts"
         },
@@ -875,7 +904,7 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "3f43828eea6786c490d8a12d31178397d20dfaf1bf88fd37349a878f429fc4a6",
+          "sha256": "cebda065c04c33dec7e2f727a6416ecb51d25d7dcc989cf777b4d34db95a312a",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
@@ -899,15 +928,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "fcc343fdc1c6589a33b69441c1b67fa6f0d6e246c3fef156a8925840657cb1d2",
+          "sha256": "7b014b598970f107a3545f444e8fe0d402dfcfe4d0f96b6092883f55319e51e5",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "a994d3d8ec18fa0531f0e59d5e5d7dd5dfaf53841ab55f13ab463e9e8936928c",
+          "sha256": "3fe54a36f55f94595f213744b09c05426866fd3968387f34c0ca044cd4fec4aa",
           "path": "supabase/functions/_shared/job-loop-request.ts"
         },
         {
-          "sha256": "8d3080a799a1fed7b28ffe9d7b5a259062325dadcbcfc6666097c778d391502b",
+          "sha256": "c6c9fbd4fcaab390727e2556c03574116b4d638a7916ecda8d56017b96ee1ca1",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -923,7 +952,7 @@
           "path": "supabase/functions/_shared/job-loop-selection.ts"
         },
         {
-          "sha256": "1e857fda413ef8ec0d66e20eae17390537909068718be27046013280bc84fdfc",
+          "sha256": "1f9cbd507230ccdfda61d6cd24663e17c568db809f69b9742451263e0d869405",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -1013,10 +1042,10 @@
       ]
     },
     {
-      "sha256": "d2faa1698b41d6d823e8530388743d8a70eb45184f0c0b37150b1192a7fcd0dc",
-      "function": "jobvance-guest-support",
-      "artifact": "docs/supabase-loop-ui/jobvance-guest-support.js",
       "bytes": 5327,
+      "artifact": "docs/supabase-loop-ui/jobvance-guest-support.js",
+      "function": "jobvance-guest-support",
+      "sha256": "d2faa1698b41d6d823e8530388743d8a70eb45184f0c0b37150b1192a7fcd0dc",
       "sources": [
         {
           "sha256": "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
@@ -1055,6 +1084,10 @@
           "path": "supabase/functions/_shared/job-loop-artifact-gc.ts"
         },
         {
+          "sha256": "4645c9e0b8b7183fa856400af71bc12082541c9427e32aa67a00440cd55dbd44",
+          "path": "supabase/functions/_shared/job-loop-cv-variant-facts.ts"
+        },
+        {
           "sha256": "5a5edd0850dcd8862c9c7e7a6f00dee463a04a033d3d0a0538d31c6b70c7cbcc",
           "path": "supabase/functions/_shared/job-loop-cv-variants.ts"
         },
@@ -1063,7 +1096,7 @@
           "path": "supabase/functions/_shared/job-loop-engine-font.ts"
         },
         {
-          "sha256": "3f43828eea6786c490d8a12d31178397d20dfaf1bf88fd37349a878f429fc4a6",
+          "sha256": "cebda065c04c33dec7e2f727a6416ecb51d25d7dcc989cf777b4d34db95a312a",
           "path": "supabase/functions/_shared/job-loop-engine.ts"
         },
         {
@@ -1087,15 +1120,15 @@
           "path": "supabase/functions/_shared/job-loop-render.ts"
         },
         {
-          "sha256": "fcc343fdc1c6589a33b69441c1b67fa6f0d6e246c3fef156a8925840657cb1d2",
+          "sha256": "7b014b598970f107a3545f444e8fe0d402dfcfe4d0f96b6092883f55319e51e5",
           "path": "supabase/functions/_shared/job-loop-repository.ts"
         },
         {
-          "sha256": "a994d3d8ec18fa0531f0e59d5e5d7dd5dfaf53841ab55f13ab463e9e8936928c",
+          "sha256": "3fe54a36f55f94595f213744b09c05426866fd3968387f34c0ca044cd4fec4aa",
           "path": "supabase/functions/_shared/job-loop-request.ts"
         },
         {
-          "sha256": "8d3080a799a1fed7b28ffe9d7b5a259062325dadcbcfc6666097c778d391502b",
+          "sha256": "c6c9fbd4fcaab390727e2556c03574116b4d638a7916ecda8d56017b96ee1ca1",
           "path": "supabase/functions/_shared/job-loop-runtime.ts"
         },
         {
@@ -1111,7 +1144,7 @@
           "path": "supabase/functions/_shared/job-loop-selection.ts"
         },
         {
-          "sha256": "1e857fda413ef8ec0d66e20eae17390537909068718be27046013280bc84fdfc",
+          "sha256": "1f9cbd507230ccdfda61d6cd24663e17c568db809f69b9742451263e0d869405",
           "path": "supabase/functions/_shared/job-loop-types.ts"
         },
         {
@@ -1200,10 +1233,5 @@
         }
       ]
     }
-  ],
-  "hashAlgorithms": {
-    "source": "sha256-utf8-lf-no-bom",
-    "artifact": "sha256-bytes",
-    "migration": "sha256-utf8-lf-no-bom"
-  }
+  ]
 }

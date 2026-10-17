@@ -1,4 +1,5 @@
 /** Shared, platform-independent cloud-loop contract. No provider keys or runtime globals. */
+import type { CvVariantFactSaveIntent, CvVariantFactWithdrawIntent, CvVariantFactReadScope, CvVariantFactReceipt, CvVariantFactsRead } from './job-loop-cv-variant-facts.ts';
 export type LoopAudience = 'student' | 'mba' | 'professional';
 export type LoopProviderId = 'anthropic' | 'openai' | 'moonshot';
 export type LoopClaimKind = 'employment' | 'internship' | 'academic_project' | 'personal_project' | 'volunteering' | 'education' | 'skill';
@@ -123,6 +124,9 @@ export interface LoopCvVariants { generation: number; recordVersion: number; var
 export type LoopAction = (
   | { action: 'get' }
   | { action: 'get_existing' }
+  | ({ action: 'save_cv_variant_fact' } & CvVariantFactSaveIntent)
+  | ({ action: 'withdraw_cv_variant_fact' } & CvVariantFactWithdrawIntent)
+  | ({ action: 'read_cv_variant_facts' } & CvVariantFactReadScope)
   | { action: 'read_cv_variants'; expectedGeneration: number }
   | { action: 'save_cv_variant'; expectedGeneration: number; expectedVersion: number; requestId: string; variantId: string | null; expectedVariantRevision: number; label: string; profile: LoopProfileInput; claimRefs: Array<{id: string; revision: number}>; saveConsent: true }
   | { action: 'save_profile'; expectedVersion: number; profile: LoopProfileInput; saveConsent: boolean }
@@ -148,4 +152,4 @@ export type LoopAction = (
   | { action: 'gmail_finalize'; ticket: string; confirmMailbox: boolean }
   | { action: 'gmail_disconnect' }
   | { action: 'gmail_create_draft'; packetId: string; requestId: string; confirmRecipientAndAttachment: boolean }) & { expectedGeneration?: number };
-export type LoopResponse = { variantSave?: LoopCvVariantSaveReceipt; cvVariants?: LoopCvVariants; selectedRun?: { requestId: string; runId: string; generation: number; opportunityIds: string[] }; existingState?: 'active' | 'absent' | 'erasing'; snapshot?: LoopSnapshot; erasureGeneration?: number; checkLink?: { checkId: string; opportunityId: string; reused: boolean }; runId?: string; suggestions?: LoopClaimInput[]; url?: string; filename?: string; message?: string; error?: string; code?: string; gmailPreview?: { email: string | null; allowDrafts: boolean; expiresAt: string } };
+export type LoopResponse = { variantFactSave?: CvVariantFactReceipt; cvVariantFacts?: CvVariantFactsRead; variantSave?: LoopCvVariantSaveReceipt; cvVariants?: LoopCvVariants; selectedRun?: { requestId: string; runId: string; generation: number; opportunityIds: string[] }; existingState?: 'active' | 'absent' | 'erasing'; snapshot?: LoopSnapshot; erasureGeneration?: number; checkLink?: { checkId: string; opportunityId: string; reused: boolean }; runId?: string; suggestions?: LoopClaimInput[]; url?: string; filename?: string; message?: string; error?: string; code?: string; gmailPreview?: { email: string | null; allowDrafts: boolean; expiresAt: string } };

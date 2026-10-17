@@ -3,6 +3,7 @@ import { normalizeFollowUp, validateScheduleInput } from './job-loop-schedule.ts
 import { readDiscoveryMinimumExperience } from '../../../src/lib/employer-discovery.ts';
 import { generationBoundAction, validLoopGeneration } from './job-loop-request.ts';
 import { validateCvVariantSaveIntent } from './job-loop-cv-variants.ts';
+import { validateCvVariantFactSaveIntent, validateCvVariantFactWithdrawIntent, validateCvVariantFactReadScope } from './job-loop-cv-variant-facts.ts';
 
 const CLAIM_KINDS = ['employment', 'internship', 'academic_project', 'personal_project', 'volunteering', 'education', 'skill'] as const;
 const STATUSES = ['saved', 'prepared', 'applied', 'interview', 'offer', 'rejected', 'withdrawn'] as const;
@@ -152,12 +153,22 @@ export function validateAction(value: unknown): LoopAction {
   keys.link_saved_check = ['expectedVersion', 'checkId', 'opportunity', 'linkConsent'];
   keys.save_cv_variant = ['expectedVersion','requestId','variantId','expectedVariantRevision','label','profile','claimRefs','saveConsent'];
   keys.read_cv_variants = [];
+  const factKeys = ['expectedVersion','requestId','variantId','expectedVariantRevision','sourceHash','factId','expectedFactRevision'];
+  keys.save_cv_variant_fact = [...factKeys,'claim','saveConsent'];
+  keys.withdraw_cv_variant_fact = [...factKeys,'withdrawConsent'];
+  keys.read_cv_variant_facts = ['variantId'];
   if (typeof action !== 'string' || !Object.prototype.hasOwnProperty.call(keys, action)) fail('Unsupported action. Sending and application submission are unavailable.');
   if (generationBoundAction(action)) keys[action].push('expectedGeneration');
   const a = obj(value, ['action', ...keys[action]]);
   if (generationBoundAction(action) && !validLoopGeneration(a.expectedGeneration)) fail('Refresh Jobvance before continuing. This action needs the current workspace lifetime.');
   if (keys[action].some(key => !(key === 'id' && action === 'save_claim') && !(key === 'processingRoute' && (action === 'start_run'||action === 'start_selected_run')) && !Object.prototype.hasOwnProperty.call(a, key))) fail('An action is missing required inputs.');
   if ('expectedVersion' in a) version(a.expectedVersion);
+  if (action === 'save_cv_variant_fact' || action === 'withdraw_cv_variant_fact' || action === 'read_cv_variant_facts') {
+    const { action: _action, ...intent } = a;
+    if (action === 'save_cv_variant_fact') return { action, ...validateCvVariantFactSaveIntent(intent) };
+    if (action === 'withdraw_cv_variant_fact') return { action, ...validateCvVariantFactWithdrawIntent(intent) };
+    return { action, ...validateCvVariantFactReadScope(intent) };
+  }
   if (action === 'save_cv_variant') {
     const { action: _action, ...intent } = a;
     return { action, ...validateCvVariantSaveIntent(intent) };

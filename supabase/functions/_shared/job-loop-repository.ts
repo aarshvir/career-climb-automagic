@@ -6,6 +6,7 @@ import { eraseLoopArtifacts } from './job-loop-erasure.ts';
 import { validLoopGeneration } from './job-loop-request.ts';
 import { collectLoopArtifacts } from './job-loop-artifact-gc.ts';
 import { captureCvVariantSaveIntent, validateCvVariantSaveReceipt, validateCvVariantsRead } from './job-loop-cv-variants.ts';
+import { captureCvVariantFactSaveIntent, captureCvVariantFactWithdrawIntent, validateCvVariantFactReadScope, validateCvVariantFactReceipt, validateCvVariantFactsRead } from './job-loop-cv-variant-facts.ts';
 
 export type LoopAdmin = ReturnType<typeof adminClient>;
 export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
@@ -17,6 +18,12 @@ export interface UsageRow { id: string; reserved_micros: number; actual_micros: 
 export interface PacketRow { id: string; user_id: string; input_version: number; status: LoopPacket['status']; data: LoopPacket }
 export interface ScheduleRow { user_id:string;version:number;status:LoopSchedule['status'];settings:LoopScheduleInput;next_run_at:string|null;lease_token:string|null;lease_until:string|null;last_run_id:string|null;last_attempt_at:string|null;message:string }
 const ERRORS: [string, number, string][] = [
+  ['LOOP_VARIANT_FACT_CONSENT_REQUIRED',400,'Confirm saving or withdrawing this exact fact.'],
+  ['LOOP_VARIANT_FACT_REVISION_CONFLICT',409,'This fact changed. Refresh it before confirming another change.'],
+  ['LOOP_VARIANT_FACT_SOURCE_CHANGED',409,'The saved CV source changed. Review this fact against its exact source.'],
+  ['LOOP_VARIANT_FACT_UNAVAILABLE',404,'That fact is no longer available for this CV in your account.'],
+  ['LOOP_VARIANT_FACT_LIMIT',422,'This CV supports up to 150 saved facts. Update an existing fact.'],
+  ['LOOP_VARIANT_FACT_INVALID',422,'Review the complete fact, source context and sharing choice before saving.'],
   ['LOOP_VARIANT_CONSENT_REQUIRED',400,'Choose private saving for this CV variant.'],
   ['LOOP_VARIANT_REVISION_CONFLICT',409,'This CV variant changed. Refresh it before saving.'],
   ['LOOP_VARIANT_CLAIM_UNAVAILABLE',409,'A chosen fact changed or is no longer shareable. Review it again.'],
@@ -87,6 +94,20 @@ export class LoopRepository {
   async readCvVariants(userId:string,generation:number) {
     const result=await this.rpc<unknown>('job_loop_read_cv_variants_bound',{p_user:userId,p_generation:generation});
     try{return validateCvVariantsRead(result,generation);}catch{throw new ApiError(503,'LOOP_VARIANT_RECEIPT_INVALID','The saved CV variant list could not be confirmed. Refresh before continuing.');}
+  }
+  async readCvVariantFacts(userId:string,value:unknown) {
+    const scope=validateCvVariantFactReadScope(value);
+    const result=await this.rpc<unknown>('job_loop_read_cv_variant_facts_bound',{p_user:userId,p_generation:scope.expectedGeneration,p_variant:scope.variantId});
+    try{return validateCvVariantFactsRead(result,scope);}catch{throw new ApiError(503,'LOOP_VARIANT_FACT_RECEIPT_INVALID','The saved facts could not be confirmed. Refresh before continuing.');}
+  }
+  async writeCvVariantFact(userId:string,value:unknown,withdraw=false) {
+    const intent=withdraw?captureCvVariantFactWithdrawIntent(value):captureCvVariantFactSaveIntent(value);
+    const args={p_user:userId,p_generation:intent.expectedGeneration,p_expected:intent.expectedVersion,p_request:intent.requestId,
+      p_variant:intent.variantId,p_variant_expected:intent.expectedVariantRevision,p_source_hash:intent.sourceHash,
+      p_fact:intent.factId,p_fact_expected:intent.expectedFactRevision};
+    const result=await this.rpc<unknown>(withdraw?'job_loop_withdraw_cv_variant_fact_bound':'job_loop_save_cv_variant_fact_bound',
+      'claim' in intent?{...args,p_claim:intent.claim,p_save_consent:intent.saveConsent}:{...args,p_withdraw_consent:intent.withdrawConsent});
+    try{return validateCvVariantFactReceipt(result,intent);}catch{throw new ApiError(503,'LOOP_VARIANT_FACT_RECEIPT_INVALID','The fact change could not be confirmed. Retry the original request before changing it again.');}
   }
   async saveCvVariant(userId:string,value:unknown) {
     const intent=captureCvVariantSaveIntent(value);
