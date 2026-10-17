@@ -28,3 +28,7 @@ Build/hosting/publication and exact live receipt are recorded separately in the 
 ## Publication
 
 Public v41, source d1ff52897ff4267ea9fb2595bae9aaaa2d78879a, succeeded 17 October 16:21 UTC. Full production build and 12 hosting groups passed. Four live routes reference the current entry; entry plus five changed JavaScript bundles matched exact built bytes. Live signed-in Chrome confirmed bare dashboard redirects to Job Loop and a temporary unsaved director-role/location draft resumes at Locations with United States still in its search field. No final Save or provider action was used. The temporary browser tab was closed afterward. These are assisted navigation checks, not unassisted product acceptance.
+
+## Final panel identity correction
+
+Cleanup of the preview server exposed an existing React duplicate-key warning in adjacent variant-preparation and saved-check-import panels. A new actual-dashboard regression reproduced the warning before the fix. Distinct selected/variant/saved-check prefixes now retain the same owner, authentication authority and lifecycle values while separating sibling identities. All 68 focused dashboard/onboarding/Loop journey tests passed afterward. This bounded follow-on is published with a separate receipt; the 2,639 full-suite count above belongs to the preceding integrated v41 runtime, not a new full-suite run after these three key changes.

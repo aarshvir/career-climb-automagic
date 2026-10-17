@@ -48,6 +48,18 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); clearOnboardingDraft(); });
 
 describe('Job Loop dashboard setup continuity', () => {
+  it('keeps independent CV preparation and saved-check panels distinct when variants are enabled', async () => {
+    snapshot.capabilities.cvVariants = true;
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      openDashboard();
+      await screen.findByRole('link', { name: 'Start your setup' });
+      fireEvent.click(screen.getByRole('button', { name: 'Set up directly without questions' }));
+      expect(screen.getByLabelText('Reviewed source CV or career record')).toBeVisible();
+      expect(errors.mock.calls.filter(args => args.some(value => typeof value === 'string' && value.includes('same key')))).toEqual([]);
+    } finally { errors.mockRestore(); }
+  });
+
   it('shows one setup destination instead of competing empty overview, discovery and preparation panels', async () => {
     openDashboard();
     const setup = await screen.findByRole('region', { name: 'Job Loop setup' });
