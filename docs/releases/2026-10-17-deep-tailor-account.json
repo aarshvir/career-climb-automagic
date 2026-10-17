@@ -1,0 +1,97 @@
+{
+  "version": "v35",
+  "source": "b75fdaa5608782394a36b936ec13e4a11ac1c3fb",
+  "site": "https://jobvance.io",
+  "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ffac81e8552c81919aaa628970895a3a",
+  "deployment": "appgdep_6ad3860926a08191b51f887b578fd2ab",
+  "succeededAt": "2026-10-17T14:28:43.941335+00:00",
+  "backend": {
+    "worker": 14,
+    "control": 19,
+    "tailorForJob": 4,
+    "retainedReadbackFiles": { "worker": 2, "control": 2, "tailorForJob": 6 },
+    "retainedFilesMatchUploaded": true,
+    "platformPrunedUnusedGuestSupport": true,
+    "oauthUnchanged": true,
+    "gcConfigurationQueried": false,
+    "gcConfigurationChanged": false
+  },
+  "newMigrations": [],
+  "validation": {
+    "tests": 2560,
+    "testFiles": 142,
+    "applicationTypeScript": "passed",
+    "sourceDeno": 28,
+    "generatedDeno": 28,
+    "productionBuild": "passed",
+    "hostingGroups": 12,
+    "liveHttp": {
+      "pages": 9,
+      "javascriptAssets": 34,
+      "unauthorizedHandlerRejections": 6,
+      "emptyHeadBodies": 43,
+      "htmlNormalization": "Observed appended Cloudflare challenge script only",
+      "headContentLength": "Omitted by platform; empty bodies and ETag parity passed"
+    },
+    "localBrowser": {
+      "desktopQuizPrivateSaveAndRecordHandoff": true,
+      "mobileSamePageLayout": { "viewportWidth": 390, "viewportHeight": 844, "documentWidth": 375 },
+      "mobileSeparateCompletion": false,
+      "harnessStopped": true
+    },
+    "hostedSynthetic": {
+      "checks": 49,
+      "variantsSaved": 3,
+      "manualRulesRuns": 2,
+      "dailyAiDispatches": 1,
+      "dailyScheduleMadeDueByOperator": true,
+      "cadencesSaved": ["weekly", "three_weekly", "daily"],
+      "cadencesDispatched": ["daily"],
+      "exactArtifactDownloads": 9,
+      "settledAiUsageUsd": 0.003906,
+      "scheduledRunStatus": "partial",
+      "scheduledDiscovery": {
+        "profileFixture": "Operations Analyst / Remote",
+        "boardPublishedRows": { "Careem": 14, "GoCardless": 32, "Duolingo": 63, "Toast": 318, "Notion": 128, "Zapier": 11 },
+        "matchedJobsAcrossBoards": 0,
+        "userProvidedQaVacanciesProcessed": 2,
+        "broadWebSearch": "not connected",
+        "linkedin": "blocked",
+        "mailbox": "not requested"
+      },
+      "scheduleCancelledVersion": 4,
+      "liveLeaseAfterCleanup": false,
+      "realCandidateRecordUsed": false
+    }
+  },
+  "personaForecast": {
+    "personas": 100,
+    "recommendationIndex": -75,
+    "promoters": 0,
+    "passives": 25,
+    "detractors": 75,
+    "actualParticipants": 0,
+    "measuredNps": false,
+    "targetAchieved": false
+  },
+  "rollback": {
+    "sourceTag": "jobvance-before-account-deep-tailor-2026-10-17",
+    "savedVersionRetained": "v34",
+    "sourceRollbackIsDatabaseRestore": false
+  },
+  "privateEvidenceFiles": [
+    "deep-tailor-account-release-receipt.json",
+    "deep-tailor-live-http.json",
+    "recurring-hosted-fc72154d6fcf1c75.json",
+    "onboarding-desktop-handoff.png",
+    "onboarding-mobile-handoff.png"
+  ],
+  "limitations": [
+    "No nonempty hosted Deep Tailor rewrite quality proof or independently verified two-provider-transaction count.",
+    "All six deployed employer sources were observed, but zero jobs matched the hosted synthetic preferences; prepared outputs used user-provided QA vacancies and do not prove useful discovery.",
+    "No multi-day or unassisted first/second-task acceptance; weekly and three_weekly were saved but not dispatched in this hosted run.",
+    "One-time Dodo payment paths remain preserved; recurring monthly checkout-to-entitlement mapping and merchant acceptance remain incomplete.",
+    "The same 100-persona forecast is not measured NPS and does not achieve the requested +60 target.",
+    "This receipt does not certify video delivery, Facebook publication, Meta activation/spend or cold-email sends."
+  ]
+}
