@@ -50,7 +50,7 @@ function HomePage() {
     <section className="product-shell product-loop-intro">
       <p className="product-eyebrow">JOB LOOP BY JOBVANCE</p>
       <h1>Automate your <span>job search.</span></h1>
-      <p className="product-hero-intro">Tell us what you’ve done, which jobs you want and where you want to work. Job Loop searches connected sources and prepares a CV for each shortlisted role, ready to review in your dashboard.</p>
+      <p className="product-hero-intro">Accelerate your next career move. Upload your CV, choose your roles and locations, and set your schedule. Job Loop searches connected sources and prepares tailored CVs for shortlisted roles—ready to review and download in your dashboard.</p>
       <div className="product-actions"><StartLink /><Link className="product-text-link" to="/check">Try a free CV check <ArrowRight size={17} aria-hidden="true" /></Link></div>
       <p className="product-hero-note">Your account · Your search preferences · Your next applications</p>
     </section>
