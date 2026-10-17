@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jobvance PMF Simulation</title>
+<style>
+:root{--ink:#14232b;--muted:#5a6b73;--line:#d9e2e4;--bg:#fbfaf7;--card:#fff;--green:#215c43;--red:#a23b2c;--amber:#9a6a12;--soft:#eef4f1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e7eef0;--muted:#a3b3b9;--line:#2c3a40;--bg:#11181b;--card:#172126;--green:#6cc79a;--red:#f08a78;--amber:#e3b55c;--soft:#1b2a24}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px}h2{font-size:21px;margin:40px 0 12px;border-top:1px solid var(--line);padding-top:24px}h3{font-size:16px;margin:20px 0 6px}
+.lede{font-size:18px;color:var(--muted);margin:0 0 20px}
+.verdict{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--red);border-radius:10px;padding:16px 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}.stat b{display:block;font-size:26px}.stat span{color:var(--muted);font-size:13px}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:14px;display:block;overflow-x:auto}th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--muted);font-weight:600}
+td.wrap,th.wrap{white-space:normal;min-width:260px}
+.good{color:var(--green);font-weight:600}.bad{color:var(--red);font-weight:600}.warn{color:var(--amber);font-weight:600}
+blockquote{margin:8px 0;padding:8px 14px;border-left:3px solid var(--line);color:var(--muted);background:var(--card);border-radius:0 8px 8px 0}
+.small{font-size:13px;color:var(--muted)}ol li,ul li{margin-bottom:6px}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--soft);color:var(--green);margin-left:6px}
+</style></head><body><main>
+<h1>Jobvance: 100-visitor PMF simulation</h1>
+<p class="lede">17 October 2026 · live jobvance.io plus the pricing page built but not yet published · invented personas</p>
+
+<div class="verdict"><strong>Verdict: no product-market fit yet.</strong>
+<ul>
+<li>None of the 100 simulated visitors would be "very disappointed" to lose Jobvance. The PMF bar is 40%.</li>
+<li>Net Promoter Score is −88, and 11 of 100 would pay.</li>
+<li>They loved how honest and fast it is. What lost them is that the result is too thin to beat free ChatGPT.</li>
+<li>The homepage also leads with Job Loop, which most visitors can't try.</li>
+</ul>
+Trust is real, but it isn't yet a reason to come back. The fix is to deliver more truthful value per CV, not more features around it.</div>
+
+<h2>How this was run, and how far to trust it</h2>
+<ul>
+<li><b>Ground truth.</b>
+<ul>
+<li>I used the live CV check myself with an invented 4-year marketing CV and a Senior Digital Marketing job ad. Results: <b>14 seconds</b> to tailor, <b>3 changes</b> (2 one-word swaps and a reorder), no profile summary, and 5 good gap questions with nowhere to answer them. The PDF preview took 4 seconds and the download needed one tick.</li>
+<li>On mobile there is no overflow, but the "Tailor" button sits about 1.8 screens down.</li>
+<li>Job Loop couldn't be tried without creating an account.</li>
+</ul></li>
+<li><b>Visitors.</b> 100 invented personas:
+<ul>
+<li>45 UAE, 25 India, 11 USA, 8 UK, 11 other.</li>
+<li>53 on mobile, 47 on desktop.</li>
+<li>7 segments, each with its own urgency, tools, budget, privacy needs, traffic source and CV state.</li>
+</ul></li>
+<li><b>The simulation.</b> 5 independent Claude Sonnet agents, 20 personas each. Every agent read the same page snapshots and walkthrough and was told to respect real base rates: most visitors leave, a minority try, and very few pay on a first visit.</li>
+<li><b>Caveat.</b> Simulated users are not customers. They tend to be harsher than real people when told to be realistic, so treat the absolute numbers as directional. The <i>pattern</i> is reliable because my own hands-on test shows the same core problem: a thin result. Real PMF needs the survey described at the end, run with real users.</li>
+</ul>
+
+<h2>Scorecard</h2>
+<div class="grid">
+<div class="stat"><b class="bad">0%</b><span>"Very disappointed" if Jobvance went away (benchmark 40%)</span></div>
+<div class="stat"><b class="bad">−88</b><span>Net Promoter Score</span></div>
+<div class="stat"><b>39%</b><span>Tried the free tool (desktop 47%, mobile 32%)</span></div>
+<div class="stat"><b class="warn">3.05 / 5</b><span>Value rating among those who tried it</span></div>
+<div class="stat"><b class="bad">10%</b><span>Said it beats their current tool (50% same, 40% worse)</span></div>
+<div class="stat"><b>22%</b><span>Would come back within 7 days</span></div>
+<div class="stat"><b class="warn">11%</b><span>Would pay (6 for passes, 5 for Job Loop monthly if it could be bought)</span></div>
+<div class="stat"><b>$0.74</b><span>Pass revenue per visitor (median willingness to pay: $5 a month)</span></div>
+</div>
+
+<h3>Where the 100 went</h3>
+<table><tr><th>Stage</th><th>Visitors</th><th class="wrap">What happened</th></tr>
+<tr><td>Left from the homepage</td><td>13</td><td class="wrap">Headline promises automation; unclear what works without an account</td></tr>
+<tr><td>Left before starting the check</td><td>17</td><td class="wrap">Read more and never pasted anything: trust, effort, or mobile pasting</td></tr>
+<tr><td>Hit Job Loop sign-up and stopped</td><td>14</td><td class="wrap">Wanted proof of job coverage and a sample dashboard before making an account</td></tr>
+<tr><td>Quit while entering CV or job</td><td>8</td><td class="wrap">Mostly mobile: pasting a CV and a whole job ad on a phone</td></tr>
+<tr><td>Left after seeing the result</td><td>16</td><td class="wrap">Saw "3 small changes" and judged it no better than ChatGPT</td></tr>
+<tr><td>Stopped at pricing</td><td>12</td><td class="wrap">3 free CVs a month felt too few to judge; Job Loop plans can't be bought</td></tr>
+<tr><td>Stopped at download</td><td>4</td><td class="wrap">Plain PDF looked worse than their Canva or Kickresume CV</td></tr>
+<tr><td>Completed and satisfied</td><td>16</td><td class="wrap">Most still not "very disappointed" if it vanished</td></tr></table>
+
+<h3>By segment</h3>
+<table><tr><th>Segment</th><th>n</th><th>Understood</th><th>Tried</th><th>Value</th><th>NPS</th><th>Would pay</th><th>$ / visitor</th></tr>
+<tr><td>Students and new graduates</td><td>20</td><td class="bad">35%</td><td>35%</td><td>2.5</td><td>−80</td><td>10%</td><td>$0.45</td></tr>
+<tr><td>Early career (2–5 yrs)</td><td>20</td><td>60%</td><td>40%</td><td>2.5</td><td>−95</td><td>10%</td><td>$0.95</td></tr>
+<tr><td>Mid-career (6–12 yrs)</td><td>18</td><td>61%</td><td class="good">50%</td><td>2.67</td><td>−83</td><td>11%</td><td>$0.50</td></tr>
+<tr><td>Laid off, urgent</td><td>14</td><td>57%</td><td>36%</td><td>2.57</td><td>−93</td><td>14%</td><td>$0.64</td></tr>
+<tr><td>Career switchers / MBA</td><td>12</td><td>58%</td><td>42%</td><td>2.5</td><td>−92</td><td>8%</td><td>$0.75</td></tr>
+<tr><td>Senior executives</td><td>10</td><td class="bad">40%</td><td>30%</td><td>2.5</td><td>−100</td><td class="good">20%</td><td class="good">$1.90</td></tr>
+<tr><td>Coaches / universities</td><td>6</td><td>50%</td><td>33%</td><td>2.67</td><td>−67</td><td>0%</td><td>$0</td></tr></table>
+<p class="small">The most valuable segments, senior and mid-career, are also the most demanding. They pay for repositioning and discretion, not for word swaps.</p>
+
+<h2>What they loved: your real moat</h2>
+<ul>
+<li><b>Every change shown beside the original</b>, with "Keep my original". This was the most-cited "aha".</li>
+<li><b>The honesty guard.</b> "It left out an AI suggestion that added something not in my CV", and it rejects "led" where you wrote "supported". Several said Gemini and ChatGPT quietly invent tools and claims.</li>
+<li><b>Speed and polish:</b> about 14 seconds to tailor, an exact PDF preview in 4 seconds, a one-tick download, and the job title read from the ad.</li>
+<li><b>Privacy options:</b> "Compare without AI" runs on the device.</li>
+<li><b>One-time passes, nothing renews</b>, with a 7-day money-back promise. These were praised wherever pricing was seen.</li>
+</ul>
+<p>Truthful AI tailoring is a defensible position. The product just doesn't yet turn it into a result people can feel.</p>
+
+<h2>The gaps, ranked by impact on product-market fit</h2>
+<table><tr><th>#</th><th class="wrap">Gap</th><th>Evidence</th><th class="wrap">Fix</th></tr>
+<tr><td>1</td><td class="wrap"><b>The result is too thin.</b> 3 small edits, no summary, no achievement rewrite. People who tried it rated it 3/5, and only 10% said it beats their alternative (35 use ChatGPT).</td><td>25 frictions; 11 "reframe / rewrite more" asks</td><td class="wrap"><b>"Deep tailor".</b> Answer the 5 gap questions inline, and the AI rewrites again using those confirmed facts. Add a cited profile summary and stronger achievement bullets, still validated line by line. This turns honesty into visible value.</td></tr>
+<tr><td>2</td><td class="wrap"><b>No proof it works.</b> People coming from Jobscan, Teal or Rezi expect a score. "How do I know it worked?"</td><td>22 frictions; 16 top asks</td><td class="wrap">An honest <b>requirement-coverage view</b>, not a fake ATS %. List each job requirement as covered, partly covered or missing, with the CV line as evidence, and show coverage before and after tailoring.</td></tr>
+<tr><td>3</td><td class="wrap"><b>The homepage sells what most people can't use.</b> "Automate your job search" leads to an account wall, 10 places and selected feeds only. Students understood it least (35%).</td><td>52 frictions; 23 asks for a coverage list or sample dashboard; 14 stopped at sign-up</td><td class="wrap">Lead with the tool that works with no account: a before/after example and "Tailor my CV" above the fold. Present Job Loop honestly as a beta, with a published list of employers and countries covered and a sample dashboard. (This reverses Codex's Job Loop-first homepage, so it's your call.)</td></tr>
+<tr><td>4</td><td class="wrap"><b>Mobile input is painful.</b> 53% of visitors are on phones and only 32% of them tried it: pasting a CV and a whole ad on a phone.</td><td>46 frictions</td><td class="wrap">Remember the uploaded CV on the device; accept a <b>job link</b> (fetch the public ad, with opt-in); put the Tailor button within one screen.</td></tr>
+<tr><td>5</td><td class="wrap"><b>Trust in an unknown brand.</b> The AI provider isn't named, and there are no reviews and no founder face.</td><td>53 AI-provider and 45 unknown-company concerns</td><td class="wrap">Name the AI provider and the "no retention" setting on /check. Add a short About with a real founder, a sample output, and testimonials once real users exist.</td></tr>
+<tr><td>6</td><td class="wrap"><b>Pricing arrives before value.</b> 3 free a month is too few to judge a thin result; median willingness to pay is $5 a month; the Job Loop plans can't be bought.</td><td>28 frictions</td><td class="wrap">Hold the cut to 3 a month until gaps 1 and 2 ship, or give a first-week allowance. Add regional pricing for India and Pakistan, and a <b>coach plan</b> (6 of 6 coaches asked for one; about $20–49 a month for 10–40 clients).</td></tr>
+<tr><td>7</td><td class="wrap"><b>Plain output design.</b> It looks worse than Canva, Kickresume or Enhancv.</td><td>28 frictions</td><td class="wrap">2–3 ATS-safe templates: a clean one-column, a modern one with an accent, and a compact one-page.</td></tr>
+<tr><td>8</td><td class="wrap"><b>Missing companions:</b> a cover letter, building a first CV with no account, and several jobs at once.</td><td>3 + 9 + 2 asks</td><td class="wrap">A cover letter from the same verified facts (cheap to add). A guided first CV inside the free check.</td></tr></table>
+
+<h2>In their words</h2>
+<blockquote>"It's honest and quick. The edits were tiny though. I copied two of them into my own CV rather than download the PDF." (student, mobile)</blockquote>
+<blockquote>"Nice that it does not fabricate things. But I came from Jobscan, and here I got no number at all. How do I know it worked?" (mid-career)</blockquote>
+<blockquote>"It is tidy and honest, I will give it that. But my writer rewrote my whole story, and this changed a couple of words." (mid-career switcher)</blockquote>
+<blockquote>"I came to tailor a CV. I got a pitch about a loop and a sign-up. Teal is already open in my other tab." (career switcher)</blockquote>
+<blockquote>"Saw it on LinkedIn, opened it on the bus, and nope. I'm not typing all this on my phone." (student)</blockquote>
+<blockquote>"It did not make stuff up, which is exactly what I want for consulting. If the next two come out like this I'm buying the nine dollar one." (student, the closest to a convert)</blockquote>
+<blockquote>"I just want to know what it costs for forty people. A contact form is not an answer." (career coach)</blockquote>
+
+<h2>Recommended next 30 days</h2>
+<ol>
+<li><b>Ship "Deep tailor" and the requirement-coverage view</b> (gaps 1–2), about 1 week of build. This is the single change most likely to move "very disappointed" from zero.</li>
+<li><b>Re-cut the homepage around the instant tool</b>, with Job Loop as an honest beta that has a coverage list (gap 3). This needs your decision against Codex's direction.</li>
+<li><b>Mobile:</b> a job-link field and a remembered CV (gap 4).</li>
+<li><b>Trust strip</b> on /check: the named AI provider, "not stored", and a sample before/after (gap 5).</li>
+<li><b>Pricing:</b> keep passes, delay the free-tier cut until steps 1–2 ship, and add a coach plan and regional prices (gap 6).</li>
+<li><b>Measure real PMF.</b> After a user's second tailored CV, ask the Sean Ellis question in the app. You need at least 40 answers.</li>
+</ol>
+<p>Targets: 40% "very disappointed" among users with 2 or more CVs, 40% returning within 7 days, and 3% or more of activated users buying a pass.</p>
+
+<p class="small">Data: <code>personas.json</code> (100 invented personas), <code>results_b1–b5.jsonl</code> (one simulated visit per persona) and <code>summary.json</code> are in this folder. The page snapshots are in <code>site/</code>.</p>
+</main></body></html>

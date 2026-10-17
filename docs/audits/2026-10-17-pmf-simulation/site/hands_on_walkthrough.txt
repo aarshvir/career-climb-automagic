@@ -1,0 +1,23 @@
+HANDS-ON WALKTHROUGH OF THE LIVE PRODUCT (jobvance.io, 17 Oct 2026, desktop Chrome, guest, invented CV)
+
+Homepage (/): headline "Automate your job search." Job Loop is the main product (needs an account; free beta; ten cloud places; selected employer feeds only; broad web search and inbox not connected; scheduled runs use rules-based preparation, optional AI needs consent per run). Secondary link: "Try a free CV check".
+
+CV check (/check), no account:
+- Step 1 of 3: upload a CV (PDF/Word/TXT up to 5 MB) or paste it; paste the job description. Job title and company were filled in automatically from the ad. Buttons: "Tailor my CV for this job" and "Compare without AI".
+- Clicked "Tailor my CV for this job": result in 14 seconds.
+- Test CV: a 4-year marketing executive in Dubai (social media calendars, monthly Excel campaign reports, product launches with retail partners, influencer collaborations). Job: Senior Digital Marketing Specialist (performance campaigns on Meta and Google, ROI reporting, retail launches, influencer partnerships; 4+ years; Excel, Google Analytics, Meta Ads Manager).
+- What the AI changed (exactly 3 changes):
+  1. "Prepared monthly campaign reports in Excel" -> "Prepared monthly campaign performance reports in Excel".
+  2. "Supported influencer collaborations" -> "Supported influencer partnerships".
+  3. Reordered bullets so the most relevant come first.
+  No profile summary was added ("We left out 1 AI suggestion that added something not in your CV"). Skills line unchanged. Each change shows "Your original" with a "Keep my original" button.
+- It also showed 5 "Quick questions (answer only if true)": e.g. "Have you planned and run paid campaigns on Meta and Google?", "Have you measured campaign ROI in your monthly reporting?". There is no box to answer them inside the question list; answering means typing your own example into "Add something the job asks for" (optional) or editing the CV text yourself. The AI does not rewrite again using your answers.
+- Step 3 Download: an exact PDF preview appeared automatically in 4 seconds (1 page). One checkbox "I have checked this CV. It is accurate and safe to share with employers." enables Download PDF / Word / TXT and a "Requirement report". "Tailor for another job" starts the next application from the approved CV. Saving needs an account.
+- The PDF layout is a plain single-column text CV (bold name, section headings with a rule, bullets). No templates, no design choice, no photo, no colour.
+- Total time for a first-time user: about 2-3 minutes including reading.
+- Not available: cover letter, LinkedIn profile help, ATS score or match percentage (deliberately not shown), interview prep, job search inside the check, Arabic CVs untested, no mobile app.
+
+Job Loop: could not be tried without creating an account (sign-in required). Public pages describe it as a beta with ten cloud places, selected employer feeds, rules-based preparation, optional AI per run.
+
+Free limits currently shown on the live site: 2 AI-tailored CVs a day without an account, 8 when signed in.
+Pending change (built, not yet published): free tier becomes 3 AI-tailored CVs a month signed in (1 a day as guest), with one-time passes: Sprint $9 / 7 days / 25 CVs, Job Search $19 / 30 days / 100 CVs, Career Move $39 / 90 days / 300 CVs, 7-day money-back if fewer than 5 used. Job Loop monthly plans ($29 / $59 / $99 for 1 run a week / 3 a week / 1 a day) are shown as proposals, not for sale.
