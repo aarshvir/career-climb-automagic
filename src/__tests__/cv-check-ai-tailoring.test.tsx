@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -66,6 +66,19 @@ describe('reading the role from the job ad', () => {
 });
 
 describe('AI tailoring in the check', () => {
+  it('admits only one AI request when two clicks occur before React updates', async () => {
+    let resolve!: (value: typeof tailored) => void;
+    mocks.tailor.mockImplementation(() => new Promise(done => { resolve = done; }));
+    show(); fill();
+    const button = screen.getByRole('button', { name: /Tailor my CV for this job/ });
+    act(() => {
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(mocks.tailor).toHaveBeenCalledTimes(1);
+    await act(async () => { resolve(tailored); });
+    expect(await screen.findByRole('heading', { name: 'What changed for this job' })).toBeInTheDocument();
+  });
   it('sends only the source CV, job and role, then shows each change beside the original', async () => {
     mocks.tailor.mockResolvedValue(tailored);
     show(); fill();
@@ -162,14 +175,15 @@ describe('deep tailor from answers the candidate confirms', () => {
     expect(improve).toBeDisabled();
     fireEvent.change(screen.getByLabelText(question), { target: { value: answerText } });
     expect(improve).toBeDisabled();
-    fireEvent.click(screen.getByLabelText(/This is true and I can talk about it in an interview/));
+    fireEvent.change(screen.getByLabelText('Where this answer belongs in your original CV'), { target: { value: '5' } });
+    fireEvent.click(screen.getByLabelText(/This is accurate for the selected CV line/));
     expect(improve).toBeEnabled();
     return improve;
   }
   it('sends only confirmed answers, with the original CV, and marks what came from them', async () => {
     fireEvent.click(await tailorThenAnswer());
     await screen.findByText(/New line · from your answer/);
-    expect(mocks.tailor).toHaveBeenLastCalledWith({ cvText: source, jobDescription: vacancy, jobTitle: 'Transformation Analyst', company: 'Example Bank', facts: [answerText] });
+    expect(mocks.tailor).toHaveBeenLastCalledWith({ cvText: source, jobDescription: vacancy, jobTitle: 'Transformation Analyst', company: 'Example Bank', facts: [answerText], factSources: [5] });
     expect(reviewed()).toBe(deepText);
     expect(screen.getByText(`From your answer: “${answerText}”`)).toBeInTheDocument();
     expect(screen.getByText(/1 change uses your answers/)).toBeInTheDocument();
@@ -177,8 +191,42 @@ describe('deep tailor from answers the candidate confirms', () => {
   it('withdraws the confirmation when an answer is edited', async () => {
     const improve = await tailorThenAnswer();
     fireEvent.change(screen.getByLabelText(question), { target: { value: `${answerText} Edited.` } });
-    expect(screen.getByLabelText(/This is true and I can talk about it in an interview/)).not.toBeChecked();
+    expect(screen.getByLabelText(/This is accurate for the selected CV line/)).not.toBeChecked();
     expect(improve).toBeDisabled();
+  });
+  it('withdraws confirmation when the chosen source changes', async () => {
+    const improve = await tailorThenAnswer();
+    fireEvent.change(screen.getByLabelText('Where this answer belongs in your original CV'), { target: { value: '6' } });
+    expect(screen.getByLabelText(/This is accurate for the selected CV line/)).not.toBeChecked();
+    expect(improve).toBeDisabled();
+  });
+  it('never removes the first matching line when an addition is duplicated', async () => {
+    const improve = await tailorThenAnswer();
+    mocks.tailor.mockReset(); mocks.tailor.mockResolvedValue({ ...deep, text: `${deepText}\n${added}` });
+    fireEvent.click(improve); await screen.findByText(/New line · from your answer/);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove this line' }));
+    expect(reviewed()).toBe(`${deepText}\n${added}`);
+    expect(await screen.findByText(/appears more than once/)).toBeInTheDocument();
+  });
+  it('does not spend another allowance when new answers exceed the five-answer limit', async () => {
+    const questions = ['Did you prepare reports?', 'Did you support planning?', 'Did you analyze sales?', 'Did you coordinate meetings?', 'Did you train colleagues?'];
+    mocks.tailor.mockResolvedValueOnce({ ...tailored, questions }).mockResolvedValueOnce({ ...deep, questions: ['Did you support another project?'] });
+    show(); fill(); fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+    questions.forEach((question, index) => {
+      fireEvent.change(screen.getByLabelText(question), { target: { value: `I supported the reporting task for project ${index}.` } });
+      fireEvent.change(screen.getAllByLabelText('Where this answer belongs in your original CV')[index], { target: { value: '5' } });
+      fireEvent.click(screen.getAllByLabelText(/This is accurate for the selected CV line/)[index]);
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Improve my CV with these answers' }));
+    await screen.findByLabelText('Did you support another project?');
+    fireEvent.change(screen.getByLabelText('Did you support another project?'), { target: { value: 'I supported a different project in the same role.' } });
+    fireEvent.change(screen.getByLabelText('Where this answer belongs in your original CV'), { target: { value: '5' } });
+    fireEvent.click(screen.getByLabelText(/This is accurate for the selected CV line/));
+    fireEvent.click(screen.getByRole('button', { name: 'Improve my CV with these answers' }));
+    expect(await screen.findByText(/No AI request was made/)).toBeInTheDocument();
+    expect(mocks.tailor).toHaveBeenCalledTimes(2);
+    expect(reviewed()).toBe(deepText);
   });
   it('removes a new line, and undo brings back the previous version with its changes', async () => {
     fireEvent.click(await tailorThenAnswer());
@@ -197,7 +245,8 @@ describe('deep tailor from answers the candidate confirms', () => {
     fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
     await screen.findByRole('heading', { name: 'What changed for this job' });
     fireEvent.change(screen.getByLabelText(question), { target: { value: answerText } });
-    fireEvent.click(screen.getByLabelText(/This is true and I can talk about it in an interview/));
+    fireEvent.change(screen.getByLabelText('Where this answer belongs in your original CV'), { target: { value: '5' } });
+    fireEvent.click(screen.getByLabelText(/This is accurate for the selected CV line/));
     fireEvent.click(screen.getByRole('button', { name: 'Improve my CV with these answers' }));
     await screen.findByText(/Your current CV is unchanged/);
     expect(reviewed()).toBe(tailoredText);

@@ -31,7 +31,7 @@ export default function MvpHeader() {
       catch { setError("Sign out failed. Please retry."); }
       finally { setBusy(false); }
     }}>{busy ? "Signing out…" : "Sign out"}</Button>
-  </> : <><Button asChild size="sm" variant="ghost"><Link to="/auth?next=%2Fapplications">Sign in</Link></Button><Button asChild size="sm"><Link to="/loop">Start Job Loop <ArrowUpRight size={14} /></Link></Button></>;
+  </> : <><Button asChild size="sm" variant="ghost"><Link to="/auth?next=%2Floop">Sign in</Link></Button><Button asChild size="sm"><Link to="/onboarding">Start Job Loop <ArrowUpRight size={14} /></Link></Button></>;
   return <header className="jv-header">
     <a className="jv-skip" href="#main-content">Skip to content</a>
     <div className="jv-header-inner">

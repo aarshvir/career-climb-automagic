@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { StaticRouter, Routes, Route } from 'react-router-dom';
+import { StaticRouter, Routes, Route, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '../src/contexts/AuthContext';
@@ -8,8 +8,6 @@ import Header from '../src/components/layout/MvpHeader';
 import Footer from '../src/components/layout/MvpFooter';
 import ProductPage from '../src/pages/ProductPage';
 import AudienceLanding from '../src/pages/AudienceLanding';
-import CvCheck from '../src/pages/CvCheck';
-import PilotLanding from '../src/pages/PilotLanding';
 import JobLoopOverview from '../src/pages/JobLoopOverview';
 import HelpCenter from '../src/pages/HelpCenter';
 import Walkthroughs from '../src/pages/Walkthroughs';
@@ -19,8 +17,8 @@ import { publicPages, type PublicPage } from '../src/lib/public-route-manifest';
 function element(page:PublicPage) {
   if(page.kind==='product')return <ProductPage kind={page.key as Parameters<typeof ProductPage>[0]['kind']} />;
   if(page.kind==='audience')return <AudienceLanding audience={page.key as Parameters<typeof AudienceLanding>[0]['audience']} />;
-  if(page.kind==='check')return <CvCheck />;
-  if(page.kind==='pilot')return <PilotLanding />;
+  if(page.kind==='check')return <main className="product-page"><section className="product-shell product-inner"><h1>CV Check, in your Jobvance account.</h1><p>Compare your CV with a job, review tailored wording and download your approved version. Keep it ready for your next application.</p><Link className="product-button" to="/auth?mode=signup&next=%2Fcheck">Create my account</Link><p><Link to="/auth?next=%2Fcheck">Already have an account? Sign in</Link></p></section></main>;
+  if(page.kind==='pilot')return <JobLoopOverview />;
   if(page.kind==='loop-overview')return <JobLoopOverview />;
   if(page.kind==='help')return <HelpCenter />;
   if(page.kind==='walkthroughs')return <Walkthroughs />;

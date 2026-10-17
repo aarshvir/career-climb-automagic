@@ -75,12 +75,12 @@ describe('Job Loop access and proposed plans', () => {
   it('keeps current free access separate from unavailable monthly proposals', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
     expect(screen.getByRole('heading', { name: 'Start your Job Loop' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Start my Job Loop' })).toHaveAttribute('href', '/loop');
+    expect(screen.getByRole('link', { name: 'Start my Job Loop' })).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
-    expect(screen.getByText(/Cloud preparation is limited to ten accounts/)).toBeInTheDocument();
-    const proposals = screen.getByRole('region', { name: 'Planned monthly subscriptions' });
-    expect(proposals).toHaveTextContent('not available to buy');
-    expect(proposals).toHaveTextContent('the free beta does not include these paid allowances');
+    expect(screen.queryByText(/beta|ten accounts|no account needed/i)).not.toBeInTheDocument();
+    const proposals = screen.getByRole('region', { name: 'Job Loop monthly plans' });
+    expect(proposals).toHaveTextContent('not available for purchase yet');
+    expect(proposals).toHaveTextContent('no subscription starts automatically');
     for (const price of ['$29', '$59', '$99']) expect(proposals).toHaveTextContent(price);
     expect(within(proposals).getAllByText('USD / month')).toHaveLength(3);
     expect(proposals).toHaveTextContent('1 Job Loop run a week');
@@ -88,7 +88,7 @@ describe('Job Loop access and proposed plans', () => {
     expect(proposals).toHaveTextContent('1 Job Loop run a day');
     expect(within(proposals).queryByRole('link')).not.toBeInTheDocument();
     expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.getByText(/does not become a paid subscription automatically/)).toBeInTheDocument();
+    expect(screen.getByText(/No subscription starts without your explicit purchase/)).toBeInTheDocument();
   });
 });
 
@@ -104,11 +104,11 @@ describe('Job Loop first homepage', () => {
     expect(stages[1]).toHaveTextContent('roles and locations');
     expect(stages[2]).toHaveTextContent('Review your dashboard');
     expect(stages[2]).toHaveTextContent('approve your documents');
-    for (const link of screen.getAllByRole('link', { name: 'Start my Job Loop' })) expect(link).toHaveAttribute('href', '/loop');
+    for (const link of screen.getAllByRole('link', { name: 'Start my Job Loop' })) expect(link).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: /Try a free CV check/ })).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
-    expect(screen.getByText(/Scheduled runs use rules-based preparation/)).toHaveTextContent('AI preparation needs your consent for each run');
-    expect(screen.getByText(/Broad web search and inbox access are not currently connected/)).toBeInTheDocument();
+    expect(screen.getByText(/Choose weekly, three-times-weekly or daily searches/)).toHaveTextContent('confirm the AI provider once for recurring preparation');
+    expect(screen.getByText(/Search coverage depends on those sources/)).toBeInTheDocument();
   });
 });
 

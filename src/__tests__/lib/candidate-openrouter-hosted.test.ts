@@ -11,11 +11,16 @@ function mockedHost(mode = 'passed') {
   let tag = '', started: Record<string, unknown> | null = null;
   const snapshot = { recordVersion: 0, profile: null as { sourceText: string } | null, claims: [] as unknown[], opportunities: [] as unknown[], runs: [] as unknown[], packets: [] as unknown[],
     models: [{ provider: 'openai', model: 'gpt-6.1-sol', ready: mode !== 'disabled', transport: 'openrouter' }], capabilities: { cloudWorker: true, webSearch: mode === 'paid-search' }, employerSources: mode.startsWith('feed') ? [{ provider: 'greenhouse', board: 'production-board', company: 'Production Board Employer' }] : [], gmail: { connected: false }, schedule: null, budget: { scope: 'shared_ai_search', capUsd: 50, remainingUsd: 20 } };
+  if (mode === 'six-feeds' || mode === 'too-many-feeds') snapshot.employerSources = Array.from({ length: mode === 'six-feeds' ? 6 : 9 }, (_, index) => ({ provider: index < 4 ? 'greenhouse' : 'ashby', board: `production-board-${index}`, company: `Production Employer ${index}` }));
+  if (mode === 'lever-third-page') snapshot.employerSources = [{ provider: 'lever', board: 'production-board', company: 'Production Board Employer' }];
   const requests: { pathname: string; body: Record<string, unknown> | null }[] = [];
   const fetcher = vi.fn(async (input: string, init: RequestInit) => {
     const url = new URL(input), body = init.body ? JSON.parse(String(init.body)) : null;
     requests.push({ pathname: url.pathname, body });
     const answer = (value: unknown, status = 200) => new Response(JSON.stringify(value), { status });
+    if (url.origin === 'https://api.ashbyhq.com') { expect(init.headers).toBeUndefined(); return answer({ jobs: [{ company: 'Public Subsidiary', isListed: true }] }); }
+    if (url.origin === 'https://api.lever.co') { expect(init.headers).toBeUndefined(); return answer(Array.from({ length: 100 }, () => ({ company: url.searchParams.get('skip') === '200' ? 'Generated QA Employer' : 'Public Subsidiary' }))); }
+    if (url.origin === 'https://boards-api.greenhouse.io' && mode === 'feed-late-collision') return answer({ jobs: [...Array.from({ length: 100 }, () => ({ company: 'Public Subsidiary' })), { company: 'Generated QA Employer' }] });
     if (url.origin === 'https://boards-api.greenhouse.io') { expect(init.headers).toBeUndefined(); return answer({ jobs: [{ company: mode === 'feed-collision' ? 'Generated QA Employer' : 'Public Subsidiary', title: 'Graduate Operations Analyst', location: { name: 'Dubai' }, content: 'Public feed role.' }] }); }
     if (url.pathname === '/auth/v1/signup') { tag = body.data.qa_run_id; return answer({ user: { id: actorId }, access_token: session }); }
     if (url.pathname === '/auth/v1/user') return answer({ id: actorId, user_metadata: { qa_fixture: true, qa_run_id: tag } });
@@ -75,6 +80,25 @@ describe('one-run hosted candidate harness scope', () => {
     const result = await verifyCandidateOpenRouter({ execute: true, sourceReader: async () => publicSource, fetcher: host.fetcher, sleep: async () => {} });
     expect(result).toMatchObject({ status: 'stopped', runStartRequests: 0, failure: { check: 'feed-exclusions-do-not-restrict-fictional-manual-facts-or-company' } });
     expect(host.requests.some(item => item.body?.action === 'start_run')).toBe(false);
+  });
+  it('proves all six configured boards including Ashby before a single mocked run', async () => {
+    const host = mockedHost('six-feeds');
+    const result = await verifyCandidateOpenRouter({ execute: true, sourceReader: async () => publicSource, fetcher: host.fetcher, sleep: async () => {} });
+    expect(result).toMatchObject({ status: 'passed', runStartRequests: 1, feedExclusionProof: { feedCount: 6, observedRows: 6 } });
+    expect(host.requests.filter(item => item.pathname.includes('/posting-api/'))).toHaveLength(2);
+  });
+  it.each(['feed-late-collision', 'lever-third-page'])('rejects a company collision beyond the old first-page proof: %s', async mode => {
+    const host = mockedHost(mode);
+    const result = await verifyCandidateOpenRouter({ execute: true, sourceReader: async () => publicSource, fetcher: host.fetcher, sleep: async () => {} });
+    expect(result).toMatchObject({ status: 'stopped', runStartRequests: 0, failure: { check: 'feed-exclusions-do-not-restrict-fictional-manual-facts-or-company' } });
+    expect(host.requests.some(item => item.body?.action === 'start_run')).toBe(false);
+    if (mode === 'lever-third-page') expect(host.requests.filter(item => item.pathname.includes('/postings/'))).toHaveLength(3);
+  });
+  it('keeps the eight-board safety bound and loads actual adapter scan limits', async () => {
+    const host = mockedHost('too-many-feeds');
+    const result = await verifyCandidateOpenRouter({ execute: true, sourceReader: async () => publicSource, fetcher: host.fetcher, sleep: async () => {} });
+    expect(result).toMatchObject({ status: 'stopped', runStartRequests: 0, failure: { check: 'bounded-configured-employer-feeds' } });
+    expect((await loadDiscoveryMatcher()).feedLimits).toMatchObject({ feeds: 8, bytes: 5000000, scanned: 1000, leverPages: 3 });
   });
   it('loads the source matcher rather than a harness copy of the exclusion logic', async () => {
     const loaded = await loadDiscoveryMatcher();

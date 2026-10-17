@@ -46,6 +46,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     }
     setBusy(true);
     try {
+      if (!embedded && mode === 'sign-up') rememberLoopReturn(searchParams.get('next'));
       if (mode === 'sign-up') {
         const result = await signUpWithEmail(email, password);
         if (result.error) setError(result.error);
@@ -120,7 +121,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           <div className="ap-review-stamp"><Check size={16} aria-hidden="true" /> Reviewed by you</div>
         </div>
         <p className="ap-story-footnote"><LockKeyhole size={16} aria-hidden="true" /> Choose what you save in your account.</p>
-        <Link to="/check" className="ap-story-link">Try the free CV check without an account <ArrowRight size={17} aria-hidden="true" /></Link>
+        <Link to="/job-loop" className="ap-story-link">See how Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
       </aside>}
       <div className="ap-auth-panel">
         <div className="ap-auth-heading">
@@ -177,7 +178,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
             </>
           )}
         </div>
-        {!embedded && <p className="ap-auth-footnote"><LockKeyhole size={14} aria-hidden="true" /> Account saving is optional. Free CV checks need no account.</p>}
+        {!embedded && <p className="ap-auth-footnote"><LockKeyhole size={14} aria-hidden="true" /> Your account keeps your CVs, search preferences and applications together.</p>}
       </div>
     </Container>
   );

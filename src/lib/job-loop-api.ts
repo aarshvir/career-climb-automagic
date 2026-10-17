@@ -131,12 +131,15 @@ function serviceFailure(payload: unknown, fallback: string): LoopServiceError {
   const code = payload && typeof payload === 'object' && 'code' in payload && typeof payload.code === 'string' && /^LOOP_[A-Z_]{1,80}$/.test(payload.code) ? payload.code : null;
   return new LoopServiceError(publicFailure(payload, fallback), code);
 }
-export async function callJobLoop(userId: string, action: LoopAction): Promise<LoopResponse> {
+export async function callJobLoop(userId: string, action: LoopAction, stillAuthorized?: () => boolean): Promise<LoopResponse> {
   const expectedGeneration = action.expectedGeneration;
   const factAction = action.action === 'save_cv_variant_fact' || action.action === 'withdraw_cv_variant_fact' || action.action === 'read_cv_variant_facts';
   const variantAction = action.action === 'save_cv_variant' || action.action === 'read_cv_variants' || factAction;
   const linkAuthority = (action.action === 'link_saved_check'||action.action === 'start_selected_run'||variantAction) ? trackingDraftAuthority(userId) : null;
   function stillCurrent() {
+    // A page can bind its original draft/owner lifetime across SDK awaits.
+    // This supplements, and never replaces, the server and session checks.
+    if (stillAuthorized && !stillAuthorized()) throw new Error('Your setup or sign-in changed. Review your current saved work before continuing.');
     if (linkAuthority !== null && (linkAuthority < 0 || trackingDraftAuthority(userId) !== linkAuthority)) throw new Error('Your sign-in changed. Reopen the saved application before continuing.');
     const currentGeneration = variantAction ? trackingLoopGeneration(userId) : undefined;
     if (currentGeneration !== undefined && currentGeneration !== expectedGeneration) throw new Error('Your saved workspace changed. Reopen your CV variants before continuing.');

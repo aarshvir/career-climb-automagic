@@ -1,4 +1,5 @@
 import { validateCvSelection } from './job-loop-variant-execution.ts';
+import { validateLoopRewriteReceipts, type LoopClaimRewrite } from './job-loop-deep-tailor.ts';
 import type { LoopAction, LoopAssessment, LoopClaim, LoopClaimInput, LoopContact, LoopOpportunity, LoopOpportunityInput, LoopPacket, LoopProfile, LoopProfileInput } from './job-loop-types.ts';
 import { normalizeFollowUp, validateScheduleInput } from './job-loop-schedule.ts';
 import { readDiscoveryMinimumExperience } from '../../../src/lib/employer-discovery.ts';
@@ -273,7 +274,7 @@ export async function fingerprintLoopInputs(profile: LoopProfileInput, claims: L
   const bytes = new TextEncoder().encode(canonical({ profile, claims: [...claims].sort((a, b) => a.id.localeCompare(b.id)), opportunities }));
   return [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(v => v.toString(16).padStart(2, '0')).join('');
 }
-export type ComposeLoopPacketInput = { profile: LoopProfile; claims: LoopClaim[]; opportunity: LoopOpportunity; assessment?: LoopAssessment; selectedClaimIds?: string[]; runId: string; packetId?: string; inputHash?: string; createdAt?: string; model?: LoopPacket['model'] };
+export type ComposeLoopPacketInput = { profile: LoopProfile; claims: LoopClaim[]; opportunity: LoopOpportunity; assessment?: LoopAssessment; selectedClaimIds?: string[]; proposedRewrites?: LoopClaimRewrite[]; runId: string; packetId?: string; inputHash?: string; createdAt?: string; model?: LoopPacket['model'] };
 /** A portable CV selects complete confirmed facts, never crops sentences or
  * removes an employment/education context merely to improve keyword overlap. */
 export function boundedRulesClaimIds(profile:LoopProfile,claims:LoopClaim[],assessment:LoopAssessment):string[]{
@@ -296,6 +297,10 @@ export async function composePacket(input: ComposeLoopPacketInput): Promise<Loop
   const wanted = input.selectedClaimIds ?? boundedRulesClaimIds(profile,input.claims,assessment);
   if (wanted.length > 100 || new Set(wanted).size !== wanted.length || wanted.some(id => !allowed.some(c => c.id === id))) fail('Model selection contains repeated, unknown, withdrawn or unapproved claim IDs.');
   const picked = wanted.map(id => allowed.find(c => c.id === id)!);
+  // Revalidate at composition, including replayed metered responses. Suggestions
+  // change display wording only; immutable source claims and revisions stay intact.
+  const rewrites = validateLoopRewriteReceipts(input.proposedRewrites, allowed, wanted);
+  const wording = new Map(rewrites.map(rewrite => [rewrite.claimId, rewrite.text]));
   // Never erase an approved employment/internship context or education merely to raise overlap.
   for (const c of allowed) if (['education', 'employment', 'internship'].includes(c.kind) && !picked.some(p => p.kind === c.kind && p.context === c.context)) { if (!picked.some(p => p.id === c.id)) picked.push(c); }
   const unique: LoopClaim[] = [];
@@ -311,7 +316,7 @@ export async function composePacket(input: ComposeLoopPacketInput): Promise<Loop
   for (const kind of CLAIM_KINDS) {
     const section = unique.filter(c => c.kind === kind); if (!section.length) continue;
     cv.push('', headings[kind]);
-    for (const context of [...new Set(section.map(c => c.context))]) { cv.push(context); for (const c of section.filter(c => c.context === context)) cv.push(`• ${c.phrasing}`); }
+    for (const context of [...new Set(section.map(c => c.context))]) { cv.push(context); for (const c of section.filter(c => c.context === context)) cv.push(`• ${wording.get(c.id) ?? c.phrasing}`); }
   }
   if (cv.join('\n').length < 80) holds.push('CV_TEXT_TOO_SHORT');
   if (cv.join('\n').length > 60000) holds.push('CV_TEXT_TOO_LONG');
@@ -330,7 +335,7 @@ export async function composePacket(input: ComposeLoopPacketInput): Promise<Loop
   const draft = named ? [`Hello ${contact!.name},`, '', contact!.inExistingThread ? `Following up in our existing thread about the ${title} role.` : opening, quote ? `Your vacancy highlights: “${quote}”` : '', '', 'Relevant examples from my background:', facts, '', 'Could you clarify the role scope and the next appropriate step?', '', redact(profile.name, profile)].join('\n') : '';
   const flags = [...assessment.flags];
   if (contact?.inExistingThread) flags.push('REPLY_IN_EXISTING_THREAD_ONLY');
-  const evidence = ['JOBVANCE — GROUNDED PACKET REVIEW', 'Relevance is a heuristic. Claims are user-confirmed, not independently verified.', ...(profile.discreetSearch ? ['DISCREET SEARCH REVIEW\nBefore external use, review current-employer details, the intended contact and confidential information in every document and message. This preference is a review reminder; it does not automatically block contacts or guarantee confidentiality.'] : []), ...unique.map(c => `${c.id} revision ${c.revision} / ${c.kind} / ${c.context} / ${c.resultStatus}\nApproved wording: ${c.phrasing}\nSource (${c.sourceKind === 'user_answer' ? 'user-attested answer' : 'reviewed CV passage'}): ${redact(c.sourceQuote, profile)}`), 'EVIDENCE GAPS', ...assessment.gaps, 'NEXT ACTION', named ? contact!.inExistingThread ? 'Review a reply in the existing thread; no cold outreach.' : 'Review the exact recipient, wording and attachment before any draft creation.' : 'Find and confirm a named contact, or submit your reviewed CV through the employer’s own application route. Outreach is held; no generic recruiter draft was created.'].join('\n\n');
+  const evidence = ['JOBVANCE — GROUNDED PACKET REVIEW', 'Relevance is a heuristic. Claims are user-confirmed, not independently verified.', ...(profile.discreetSearch ? ['DISCREET SEARCH REVIEW\nBefore external use, review current-employer details, the intended contact and confidential information in every document and message. This preference is a review reminder; it does not automatically block contacts or guarantee confidentiality.'] : []), ...unique.map(c => `${c.id} revision ${c.revision} / ${c.kind} / ${c.context} / ${c.resultStatus}\nApproved wording: ${c.phrasing}${wording.has(c.id) ? `\nProposed wording for this CV (review required): ${wording.get(c.id)}` : ""}\nSource (${c.sourceKind === 'user_answer' ? 'user-attested answer' : 'reviewed CV passage'}): ${redact(c.sourceQuote, profile)}`), 'EVIDENCE GAPS', ...assessment.gaps, 'NEXT ACTION', named ? contact!.inExistingThread ? 'Review a reply in the existing thread; no cold outreach.' : 'Review the exact recipient, wording and attachment before any draft creation.' : 'Find and confirm a named contact, or submit your reviewed CV through the employer’s own application route. Outreach is held; no generic recruiter draft was created.'].join('\n\n');
   const inputHash = input.inputHash ?? await fingerprintLoopInputs(profile, input.claims, [opportunity]);
   if (!/^[0-9a-f]{64}$/.test(inputHash)) fail('Invalid immutable input fingerprint.');
   return { id: input.packetId ?? crypto.randomUUID(), runId: reference(input.runId), opportunityId: reference(opportunity.id), title, company, inputHash, profileRevision: profile.revision, claimVersions: Object.fromEntries(unique.map(c => [c.id, c.revision])), cvText: cv.join('\n'), evidenceText: evidence, coverLetterText: letter, connectionNote: named && !contact!.inExistingThread ? `Hello ${contact!.name}, I am interested in the ${title} role. May I ask about its scope and the appropriate application route?`.slice(0, 298) : '', messageText: draft, emailSubject: named && contact!.email ? `${title}${company ? ` — ${company}` : ''}` : '', emailBody: named && contact!.email ? draft : '', contact: named ? contact : null, assessment: { ...assessment, flags }, status: holds.length ? 'held' : 'review_required', holdReasons: holds, pageCount: null, createdAt: input.createdAt ?? new Date().toISOString(), approvedAt: null, model: input.model ?? { provider: 'rules', model: 'literal-approved-claims', method: 'literal approved phrasing; no model-authored facts' }, artifacts: {} };

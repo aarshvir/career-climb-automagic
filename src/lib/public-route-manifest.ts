@@ -7,7 +7,7 @@ export const publicPages: PublicPage[] = [
   ...careerGuides.map(guide=>({path:`/guides/${guide.slug}`,kind:'guide' as const,key:guide.slug,title:`${guide.title} | Jobvance`,description:guide.description,modified:guide.updatedAt})),
 ];
 
-export const clientOnlyPaths = ['/applications','/loop','/dashboard','/admin','/admin2','/auth','/auth/callback','/auth/forgot-password','/auth/reset'];
+export const clientOnlyPaths = ['/applications','/loop','/onboarding','/dashboard','/admin','/admin2','/auth','/auth/callback','/auth/forgot-password','/auth/reset'];
 export const routeRedirects: Record<string,string> = {
   '/blog':'/guides', '/product':'/job-loop','/jobs':'/job-loop','/resume-management':'/dashboard?tab=cv','/resumes':'/dashboard?tab=cv','/job-preferences':'/dashboard?tab=tailor','/preferences':'/dashboard?tab=tailor','/settings':'/dashboard?tab=billing','/plan-selection':'/pricing','/thank-you':'/dashboard?tab=billing',
 };

@@ -1,12 +1,11 @@
 import { ApiError, TAILOR_LIMITS } from '../_shared/core.ts';
 import { adminClient, boundedBody, configuredBillingMode, cors, json, serve } from '../_shared/runtime.ts';
 import { callRouter, prepareRouterRequest, ROUTER_MODELS, RouterUncertain, type RouterModel } from '../_shared/jobvance-openrouter.ts';
-import { supportRateHash } from '../_shared/jobvance-guest-support.ts';
 import { assembleTailoredCv, parseProposal, TAILOR_SCHEMA, TAILOR_SYSTEM_PROMPT, TailorInputError, tailorUserPrompt, validateTailorRequest } from '../_shared/cv-tailor.ts';
 
-// Source-bound tailoring for guests and signed-in candidates. Nothing about the
+// Source-bound tailoring for signed-in candidates. Nothing about the
 // CV, vacancy or model output is stored or logged; only the cost reservation.
-// Allowances: 3 a month signed in, 1 a day as a guest, then an active pass (fair use 40 a day).
+// Allowances: 3 a month signed in, then an active pass (fair use 40 a day).
 
 /** Same owner settings as configuredLoopEnv: routing is off unless the private row is valid and enabled. */
 async function routerSettings(admin: ReturnType<typeof adminClient>): Promise<{ enabled: boolean; model: RouterModel }> {
@@ -45,21 +44,20 @@ serve(async req => {
     throw new ApiError(400, 'TAILOR_INVALID', error instanceof TailorInputError ? error.message : 'Send your CV and the job description.');
   }
   const admin = adminClient();
-  // Optional sign-in: a valid user token uses the monthly allowance or a pass; the anon key means guest.
+  // Auth is enforced here even though gateway verify_jwt is disabled for SDK compatibility.
   let userId: string | null = null;
   const token = /^Bearer\s+(\S+)$/i.exec(req.headers.get('Authorization') ?? '')?.[1];
   if (token) { try { const { data } = await admin.auth.getUser(token); userId = data.user?.id ?? null; } catch { userId = null; } }
+  if (!userId) throw new ApiError(401, 'TAILOR_AUTH_REQUIRED', 'Sign in to your Jobvance account to tailor your CV.');
   const settings = await routerSettings(admin);
   if (!settings.enabled) throw new ApiError(503, 'TAILOR_PAUSED', 'AI tailoring is paused right now. Your CV comparison still works.');
   const model = settings.model;
   const request = prepareRouterRequest(name => Deno.env.get(name), model, [
     { role: 'system', content: TAILOR_SYSTEM_PROMPT },
-    { role: 'user', content: tailorUserPrompt(input.cvText, input.jobTitle, input.company, input.jobDescription, input.facts) },
+    { role: 'user', content: tailorUserPrompt(input.cvText, input.jobTitle, input.company, input.jobDescription, input.facts, input.factSources) },
   ], TAILOR_SCHEMA, OUTPUT_TOKENS, 'medium');
-  const ip = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-  const rateHash = userId ? null : await supportRateHash(ip, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
   const reserved = await admin.rpc('jobvance_tailor_reserve', {
-    p_user: userId, p_rate_hash: rateHash, p_request: input.requestId, p_provider: 'openrouter', p_model: model, p_micros: request.reservedMicros,
+    p_user: userId, p_rate_hash: null, p_request: input.requestId, p_provider: 'openrouter', p_model: model, p_micros: request.reservedMicros,
     p_billing_mode: configuredBillingMode(), p_free_monthly: TAILOR_LIMITS.freeMonthly, p_pass_daily: TAILOR_LIMITS.passDaily,
     p_guest_daily: TAILOR_LIMITS.guestDaily, p_guest_global_daily: TAILOR_LIMITS.guestGlobalDaily,
   });
@@ -79,6 +77,6 @@ serve(async req => {
   let proposal;
   try { proposal = parseProposal(result.content); }
   catch { throw new ApiError(502, 'TAILOR_UNREADABLE', 'The AI suggestions could not be used this time. Your CV comparison still works.'); }
-  const tailored = assembleTailoredCv(input.cvText, proposal, input.facts);
+  const tailored = assembleTailoredCv(input.cvText, proposal, input.facts, input.factSources);
   return json(req, { tailored: { text: tailored.text, changes: tailored.changes, questions: tailored.questions, rejectedCount: tailored.rejected.length }, model: result.model });
 });

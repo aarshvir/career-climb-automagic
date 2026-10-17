@@ -13,8 +13,8 @@ const workspacePaths: readonly string[] = ['/dashboard', '/dashboard?tab=cv', '/
 // Choosing a pass while signed out returns to the Pricing page with that plan shown, never to checkout.
 type PricingReturn = '/pricing' | `/pricing?plan=${PassPlanKey}`;
 const pricingPaths: readonly string[] = ['/pricing', ...passPlans.map(plan => `/pricing?plan=${plan.key}`)];
-type PrivateReturn = LoopReturn | AdminReturn | WorkspaceReturn | SavedCheckContinuationPath | ApplicationSourcePath | '/applications' | PricingReturn;
-const privateReturnPaths = [...loopPaths, ...adminPaths, ...workspacePaths, '/applications', ...pricingPaths];
+type PrivateReturn = LoopReturn | AdminReturn | WorkspaceReturn | SavedCheckContinuationPath | ApplicationSourcePath | '/applications' | '/onboarding' | '/check' | PricingReturn;
+const privateReturnPaths = [...loopPaths, ...adminPaths, ...workspacePaths, '/applications', '/onboarding', '/check', ...pricingPaths];
 const isPrivateReturn = (value: unknown): value is PrivateReturn => typeof value === 'string' && (privateReturnPaths.includes(value) || isSavedCheckContinuationPath(value) || isApplicationSourcePath(value));
 
 /** Carry only the workspace's fixed tab, never other query data or fragments. */

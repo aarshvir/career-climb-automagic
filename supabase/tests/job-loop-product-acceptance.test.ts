@@ -220,6 +220,20 @@ describe('actual discovery worker with intercepted employer HTTP fixtures', () =
     for (let i = 0; i < 12; i++) if (!await processLoopPhase(h.repo, second.id, env, fetcher)) break;
     expect(h.packets).toHaveLength(1); expect(second.data.reusedPacketIds).toEqual([h.packets[0].id]); expect(h.mock.upload).not.toHaveBeenCalled();
     expect(fetcher).toHaveBeenCalledTimes(2); expect(h.mock.reserve).not.toHaveBeenCalled();
+    // A later incomplete/failed source read is not evidence that the job closed,
+    // but must not silently recycle it as a freshly discovered match either.
+    const unavailable = h.newRun(0); delete unavailable.selected_opportunity_ids; delete unavailable.selected_generation;
+    const failedFeed = vi.fn(async () => new Response('', {status:503}));
+    for (let i = 0; i < 12; i++) if (!await processLoopPhase(h.repo, unavailable.id, env, failedFeed)) break;
+    expect(h.record.data.opportunities[0].verification).toBe('unverified');
+    expect(unavailable.data.reusedPacketIds).toEqual([]); expect(h.packets).toHaveLength(1); expect(h.mock.upload).not.toHaveBeenCalled();
+    expect(unavailable.data.messages?.join(' ')).toContain('availability is unknown');
+    // The same source can recover without duplicating rows or charging/preparing
+    // unchanged packets again. Prior exports and application history survive.
+    const recovered = h.newRun(0); delete recovered.selected_opportunity_ids; delete recovered.selected_generation;
+    for (let i = 0; i < 12; i++) if (!await processLoopPhase(h.repo, recovered.id, env, fetcher)) break;
+    expect(h.record.data.opportunities).toHaveLength(1); expect(h.record.data.opportunities[0].verification).toBe('listed_on_source');
+    expect(recovered.data.reusedPacketIds).toEqual([h.packets[0].id]); expect(h.packets).toHaveLength(1); expect(h.mock.upload).not.toHaveBeenCalled();
   });
 });
 

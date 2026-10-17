@@ -1,0 +1,157 @@
+{
+  "checkedAt": "2026-10-17T14:03:50.019Z",
+  "scope": "Actual read-only public source GETs through the current readEmployerFeed adapter with an explicitly created combined target profile. No candidate account, paid search or model calls. Match totals are observed matches for this profile, not market coverage, customer quality, link availability guarantees or NPS.",
+  "profile": {
+    "targetTitles": [
+      "Software Engineer",
+      "Account Executive",
+      "Data Analyst",
+      "Product Manager",
+      "Finance Manager",
+      "Graduate Analyst"
+    ],
+    "locations": [
+      "US",
+      "UK",
+      "India",
+      "UAE",
+      "Remote"
+    ],
+    "experienceYears": null,
+    "compensation": {
+      "currency": "",
+      "period": "annual",
+      "minimum": null
+    }
+  },
+  "sources": [
+    "https://developers.ashbyhq.com/docs/public-job-posting-api",
+    "https://docs.greenhouse.io/job-board",
+    "https://github.com/lever/postings-api"
+  ],
+  "reports": [
+    {
+      "provider": "greenhouse",
+      "board": "careem",
+      "company": "Careem",
+      "total": 14,
+      "matched": 0,
+      "truncated": false,
+      "locations": [],
+      "sample": []
+    },
+    {
+      "provider": "greenhouse",
+      "board": "gocardless",
+      "company": "GoCardless",
+      "total": 32,
+      "matched": 0,
+      "truncated": false,
+      "locations": [],
+      "sample": []
+    },
+    {
+      "provider": "greenhouse",
+      "board": "duolingo",
+      "company": "Duolingo",
+      "total": 63,
+      "matched": 8,
+      "truncated": false,
+      "locations": [
+        "Pittsburgh, PA",
+        "New York, NY; Pittsburgh, PA",
+        "New York, NY"
+      ],
+      "sample": [
+        {
+          "title": "Product Manager, MBA Intern",
+          "url": "https://careers.duolingo.com/jobs/8888045002?gh_jid=8888045002",
+          "location": "Pittsburgh, PA"
+        },
+        {
+          "title": "Senior Product Manager, DET",
+          "url": "https://careers.duolingo.com/jobs/8530395002?gh_jid=8530395002",
+          "location": "New York, NY; Pittsburgh, PA"
+        }
+      ]
+    },
+    {
+      "provider": "greenhouse",
+      "board": "toast",
+      "company": "Toast",
+      "total": 318,
+      "matched": 58,
+      "truncated": false,
+      "locations": [
+        "Los Angeles, CA ",
+        "Seattle, WA ",
+        "San Francisco, CA ",
+        "Austin, TX",
+        "Chicago, IL",
+        "Los Angeles, CA",
+        "Chicago, IL ",
+        "Atlanta, GA"
+      ],
+      "sample": [
+        {
+          "title": "Bilingual Strategic Cuisines Account Executive (Mandarin) - Los Angeles East",
+          "url": "https://careers.toasttab.com/jobs?gh_jid=8233307",
+          "location": "Los Angeles, CA "
+        },
+        {
+          "title": "Bilingual Strategic Cuisines Account Executive (Mandarin ) - West Coast",
+          "url": "https://careers.toasttab.com/jobs?gh_jid=7976926",
+          "location": "Seattle, WA "
+        }
+      ]
+    },
+    {
+      "provider": "ashby",
+      "board": "notion",
+      "company": "Notion",
+      "total": 128,
+      "matched": 18,
+      "truncated": false,
+      "locations": [
+        "Hybrid, San Francisco, California, United States",
+        "Hybrid, Hyderabad, India, India",
+        "San Francisco, California, United States"
+      ],
+      "sample": [
+        {
+          "title": "Software Engineer, AI Connections (Developer Platform)",
+          "url": "https://jobs.ashbyhq.com/notion/1fc309c8-da20-4ff2-84c7-8b863ece2b0a",
+          "location": "Hybrid, San Francisco, California, United States"
+        },
+        {
+          "title": "Software Engineer, Developer Experience",
+          "url": "https://jobs.ashbyhq.com/notion/49bdf081-6e20-4323-8c73-6d6b19544ff5",
+          "location": "Hybrid, Hyderabad, India, India"
+        }
+      ]
+    },
+    {
+      "provider": "ashby",
+      "board": "zapier",
+      "company": "Zapier",
+      "total": 11,
+      "matched": 2,
+      "truncated": false,
+      "locations": [
+        "Remote, NAMER, United States"
+      ],
+      "sample": [
+        {
+          "title": "Finance Manager, Marketing",
+          "url": "https://jobs.ashbyhq.com/zapier/cb1aec2c-05cd-4598-8117-bd1f7ed9a49f",
+          "location": "Remote, NAMER, United States"
+        },
+        {
+          "title": "Account Executive, Mid Market",
+          "url": "https://jobs.ashbyhq.com/zapier/d4576c10-a27e-47fa-a056-30c898b9e672",
+          "location": "Remote, NAMER, United States"
+        }
+      ]
+    }
+  ]
+}

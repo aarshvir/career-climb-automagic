@@ -1,0 +1,2669 @@
+{
+  "generatedAt": "2026-10-17T14:08:22.979Z",
+  "kind": "fixed_persona_discovery_capability_inventory",
+  "inputs": {
+    "personas": {
+      "path": "docs/audits/2026-10-17-pmf-simulation/personas.json",
+      "sha256": "e1b18aeb7f6f1e3c40385201a6b20ff14d69175448ef2cf6ef40af6e4fd2dd4d"
+    },
+    "realismRules": {
+      "path": "docs/audits/2026-10-17-pmf-simulation/AGENT_BRIEF.md",
+      "sha256": "878174d428cdb0a1d0356d56ae091e9c09fb817c57ed73497529f66c724a542d"
+    },
+    "sourceReadback": {
+      "path": "docs/audits/2026-10-17-discovery/live-source-readback.json",
+      "checkedAt": "2026-10-17T14:03:50.019Z"
+    }
+  },
+  "method": "No network requests. The unchanged 100 original personas are inventoried against only the saved public listing examples. Authored role probes are disclosed. No NPS, willingness-to-pay, retention or conversion is predicted.",
+  "counts": {
+    "personas": 100,
+    "countries": {
+      "UAE": 45,
+      "USA": 11,
+      "Saudi Arabia": 5,
+      "UK": 8,
+      "India": 25,
+      "Pakistan": 3,
+      "Philippines": 2,
+      "Egypt": 1
+    },
+    "fields": {
+      "healthcare admin": 9,
+      "data analytics": 4,
+      "software engineering": 7,
+      "consulting": 9,
+      "product management": 5,
+      "marketing": 9,
+      "HR": 3,
+      "construction/real estate": 16,
+      "finance": 6,
+      "logistics": 6,
+      "education": 8,
+      "sales": 7,
+      "customer service": 7,
+      "operations": 3,
+      "hospitality": 1
+    },
+    "devices": {
+      "desktop": 47,
+      "mobile": 53
+    },
+    "cvStates": {
+      "messy CV with long paragraphs": 27,
+      "one-page student CV": 7,
+      "no proper CV yet": 18,
+      "outdated CV from 2+ years ago": 15,
+      "two-page CV with many achievements": 18,
+      "polished, recent CV": 15
+    },
+    "partialTitleLocationWitness": 2,
+    "notEstablishedInSavedSample": 98
+  },
+  "missingGroundTruth": [
+    "New account-to-quiz-to-confirmed-facts-to-recurring-schedule browser observation",
+    "New deployed public-page snapshot",
+    "Actual repeated delivery observation; calendar compression is not fourteen-day product use",
+    "Actual recurring billing journey before any trial-to-paid claim"
+  ],
+  "nps": null,
+  "trialToPaid": null,
+  "rows": [
+    {
+      "persona_id": "P001",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "healthcare admin",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P002",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "data analytics",
+      "original_device": "desktop",
+      "original_cv_state": "one-page student CV",
+      "authored_role_probes": [
+        "Data Analyst",
+        "Analytics Engineer",
+        "Business Intelligence Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P003",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "software engineering",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Software Engineer",
+        "Software Developer"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P004",
+      "segment": "student_or_fresh_grad",
+      "original_country": "USA",
+      "original_field": "consulting",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P005",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "product management",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Product Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P006",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "software engineering",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Software Engineer",
+        "Software Developer"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P007",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "marketing",
+      "original_device": "desktop",
+      "original_cv_state": "one-page student CV",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P008",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "HR",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Human Resources Manager",
+        "Human Resources Specialist",
+        "Recruiter"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P009",
+      "segment": "student_or_fresh_grad",
+      "original_country": "Saudi Arabia",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P010",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UK",
+      "original_field": "marketing",
+      "original_device": "mobile",
+      "original_cv_state": "one-page student CV",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P011",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "consulting",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P012",
+      "segment": "student_or_fresh_grad",
+      "original_country": "India",
+      "original_field": "finance",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Finance Manager",
+        "Financial Analyst",
+        "Accountant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P013",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "software engineering",
+      "original_device": "mobile",
+      "original_cv_state": "one-page student CV",
+      "authored_role_probes": [
+        "Software Engineer",
+        "Software Developer"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P014",
+      "segment": "student_or_fresh_grad",
+      "original_country": "India",
+      "original_field": "logistics",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Logistics Manager",
+        "Logistics Coordinator",
+        "Supply Chain Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P015",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UK",
+      "original_field": "education",
+      "original_device": "mobile",
+      "original_cv_state": "one-page student CV",
+      "authored_role_probes": [
+        "Teacher",
+        "Education Coordinator",
+        "Academic Administrator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P016",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "HR",
+      "original_device": "desktop",
+      "original_cv_state": "one-page student CV",
+      "authored_role_probes": [
+        "Human Resources Manager",
+        "Human Resources Specialist",
+        "Recruiter"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P017",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "healthcare admin",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P018",
+      "segment": "student_or_fresh_grad",
+      "original_country": "UAE",
+      "original_field": "healthcare admin",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P019",
+      "segment": "student_or_fresh_grad",
+      "original_country": "India",
+      "original_field": "finance",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Finance Manager",
+        "Financial Analyst",
+        "Accountant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P020",
+      "segment": "student_or_fresh_grad",
+      "original_country": "India",
+      "original_field": "consulting",
+      "original_device": "mobile",
+      "original_cv_state": "one-page student CV",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P021",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "sales",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Account Executive",
+        "Sales Representative",
+        "Sales Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P022",
+      "segment": "early_career",
+      "original_country": "Saudi Arabia",
+      "original_field": "software engineering",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Software Engineer",
+        "Software Developer"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P023",
+      "segment": "early_career",
+      "original_country": "India",
+      "original_field": "logistics",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Logistics Manager",
+        "Logistics Coordinator",
+        "Supply Chain Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P024",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P025",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "product management",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Product Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P026",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "logistics",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Logistics Manager",
+        "Logistics Coordinator",
+        "Supply Chain Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P027",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "education",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Teacher",
+        "Education Coordinator",
+        "Academic Administrator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P028",
+      "segment": "early_career",
+      "original_country": "UK",
+      "original_field": "customer service",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Customer Service Representative",
+        "Customer Support Specialist"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P029",
+      "segment": "early_career",
+      "original_country": "Saudi Arabia",
+      "original_field": "consulting",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P030",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "operations",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Operations Manager",
+        "Operations Analyst",
+        "Operations Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P031",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "sales",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Account Executive",
+        "Sales Representative",
+        "Sales Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P032",
+      "segment": "early_career",
+      "original_country": "India",
+      "original_field": "customer service",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Customer Service Representative",
+        "Customer Support Specialist"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P033",
+      "segment": "early_career",
+      "original_country": "India",
+      "original_field": "product management",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Product Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P034",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "healthcare admin",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P035",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "education",
+      "original_device": "desktop",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Teacher",
+        "Education Coordinator",
+        "Academic Administrator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P036",
+      "segment": "early_career",
+      "original_country": "India",
+      "original_field": "marketing",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P037",
+      "segment": "early_career",
+      "original_country": "India",
+      "original_field": "sales",
+      "original_device": "mobile",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Account Executive",
+        "Sales Representative",
+        "Sales Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P038",
+      "segment": "early_career",
+      "original_country": "USA",
+      "original_field": "healthcare admin",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P039",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "finance",
+      "original_device": "desktop",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Finance Manager",
+        "Financial Analyst",
+        "Accountant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P040",
+      "segment": "early_career",
+      "original_country": "UAE",
+      "original_field": "customer service",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Customer Service Representative",
+        "Customer Support Specialist"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P041",
+      "segment": "mid_career",
+      "original_country": "UK",
+      "original_field": "hospitality",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Hotel Manager",
+        "Guest Services",
+        "Hospitality Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P042",
+      "segment": "mid_career",
+      "original_country": "Saudi Arabia",
+      "original_field": "consulting",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P043",
+      "segment": "mid_career",
+      "original_country": "India",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P044",
+      "segment": "mid_career",
+      "original_country": "USA",
+      "original_field": "product management",
+      "original_device": "desktop",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Product Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "partial_title_location_witness_only",
+      "public_listing_witnesses": [
+        {
+          "title": "Product Manager, MBA Intern",
+          "location": "Pittsburgh, PA",
+          "url": "https://careers.duolingo.com/jobs/8888045002?gh_jid=8888045002",
+          "board": "duolingo"
+        },
+        {
+          "title": "Senior Product Manager, DET",
+          "location": "New York, NY; Pittsburgh, PA",
+          "url": "https://careers.duolingo.com/jobs/8530395002?gh_jid=8530395002",
+          "board": "duolingo"
+        }
+      ],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P045",
+      "segment": "mid_career",
+      "original_country": "India",
+      "original_field": "marketing",
+      "original_device": "desktop",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P046",
+      "segment": "mid_career",
+      "original_country": "India",
+      "original_field": "consulting",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P047",
+      "segment": "mid_career",
+      "original_country": "USA",
+      "original_field": "software engineering",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Software Engineer",
+        "Software Developer"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "partial_title_location_witness_only",
+      "public_listing_witnesses": [
+        {
+          "title": "Software Engineer, AI Connections (Developer Platform)",
+          "location": "Hybrid, San Francisco, California, United States",
+          "url": "https://jobs.ashbyhq.com/notion/1fc309c8-da20-4ff2-84c7-8b863ece2b0a",
+          "board": "notion"
+        }
+      ],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P048",
+      "segment": "mid_career",
+      "original_country": "India",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P049",
+      "segment": "mid_career",
+      "original_country": "USA",
+      "original_field": "construction/real estate",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P050",
+      "segment": "mid_career",
+      "original_country": "UK",
+      "original_field": "construction/real estate",
+      "original_device": "mobile",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P051",
+      "segment": "mid_career",
+      "original_country": "UAE",
+      "original_field": "customer service",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Customer Service Representative",
+        "Customer Support Specialist"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P052",
+      "segment": "mid_career",
+      "original_country": "India",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P053",
+      "segment": "mid_career",
+      "original_country": "India",
+      "original_field": "education",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Teacher",
+        "Education Coordinator",
+        "Academic Administrator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P054",
+      "segment": "mid_career",
+      "original_country": "UAE",
+      "original_field": "consulting",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P055",
+      "segment": "mid_career",
+      "original_country": "USA",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P056",
+      "segment": "mid_career",
+      "original_country": "UAE",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P057",
+      "segment": "mid_career",
+      "original_country": "UAE",
+      "original_field": "finance",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Finance Manager",
+        "Financial Analyst",
+        "Accountant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P058",
+      "segment": "mid_career",
+      "original_country": "UAE",
+      "original_field": "finance",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Finance Manager",
+        "Financial Analyst",
+        "Accountant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P059",
+      "segment": "senior_executive",
+      "original_country": "USA",
+      "original_field": "construction/real estate",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P060",
+      "segment": "senior_executive",
+      "original_country": "UAE",
+      "original_field": "healthcare admin",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P061",
+      "segment": "senior_executive",
+      "original_country": "India",
+      "original_field": "data analytics",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Data Analyst",
+        "Analytics Engineer",
+        "Business Intelligence Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P062",
+      "segment": "senior_executive",
+      "original_country": "USA",
+      "original_field": "marketing",
+      "original_device": "mobile",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P063",
+      "segment": "senior_executive",
+      "original_country": "Pakistan",
+      "original_field": "customer service",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Customer Service Representative",
+        "Customer Support Specialist"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P064",
+      "segment": "senior_executive",
+      "original_country": "UAE",
+      "original_field": "software engineering",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Software Engineer",
+        "Software Developer"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P065",
+      "segment": "senior_executive",
+      "original_country": "India",
+      "original_field": "operations",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Operations Manager",
+        "Operations Analyst",
+        "Operations Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P066",
+      "segment": "senior_executive",
+      "original_country": "USA",
+      "original_field": "logistics",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Logistics Manager",
+        "Logistics Coordinator",
+        "Supply Chain Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P067",
+      "segment": "senior_executive",
+      "original_country": "UAE",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P068",
+      "segment": "senior_executive",
+      "original_country": "India",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P069",
+      "segment": "career_switcher_or_mba",
+      "original_country": "UAE",
+      "original_field": "operations",
+      "original_device": "mobile",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Operations Manager",
+        "Operations Analyst",
+        "Operations Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P070",
+      "segment": "career_switcher_or_mba",
+      "original_country": "Philippines",
+      "original_field": "education",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Teacher",
+        "Education Coordinator",
+        "Academic Administrator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P071",
+      "segment": "career_switcher_or_mba",
+      "original_country": "UAE",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P072",
+      "segment": "career_switcher_or_mba",
+      "original_country": "UAE",
+      "original_field": "finance",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Finance Manager",
+        "Financial Analyst",
+        "Accountant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P073",
+      "segment": "career_switcher_or_mba",
+      "original_country": "India",
+      "original_field": "product management",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Product Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P074",
+      "segment": "career_switcher_or_mba",
+      "original_country": "India",
+      "original_field": "education",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Teacher",
+        "Education Coordinator",
+        "Academic Administrator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P075",
+      "segment": "career_switcher_or_mba",
+      "original_country": "Saudi Arabia",
+      "original_field": "software engineering",
+      "original_device": "mobile",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Software Engineer",
+        "Software Developer"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P076",
+      "segment": "career_switcher_or_mba",
+      "original_country": "India",
+      "original_field": "consulting",
+      "original_device": "desktop",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P077",
+      "segment": "career_switcher_or_mba",
+      "original_country": "USA",
+      "original_field": "consulting",
+      "original_device": "mobile",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Consultant",
+        "Strategy Consultant"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P078",
+      "segment": "career_switcher_or_mba",
+      "original_country": "UAE",
+      "original_field": "data analytics",
+      "original_device": "desktop",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Data Analyst",
+        "Analytics Engineer",
+        "Business Intelligence Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P079",
+      "segment": "career_switcher_or_mba",
+      "original_country": "UK",
+      "original_field": "sales",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Account Executive",
+        "Sales Representative",
+        "Sales Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P080",
+      "segment": "career_switcher_or_mba",
+      "original_country": "India",
+      "original_field": "education",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Teacher",
+        "Education Coordinator",
+        "Academic Administrator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P081",
+      "segment": "laid_off_urgent",
+      "original_country": "India",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P082",
+      "segment": "laid_off_urgent",
+      "original_country": "UK",
+      "original_field": "sales",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Account Executive",
+        "Sales Representative",
+        "Sales Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P083",
+      "segment": "laid_off_urgent",
+      "original_country": "Egypt",
+      "original_field": "customer service",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Customer Service Representative",
+        "Customer Support Specialist"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P084",
+      "segment": "laid_off_urgent",
+      "original_country": "UAE",
+      "original_field": "marketing",
+      "original_device": "desktop",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P085",
+      "segment": "laid_off_urgent",
+      "original_country": "UAE",
+      "original_field": "marketing",
+      "original_device": "mobile",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P086",
+      "segment": "laid_off_urgent",
+      "original_country": "Pakistan",
+      "original_field": "sales",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Account Executive",
+        "Sales Representative",
+        "Sales Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P087",
+      "segment": "laid_off_urgent",
+      "original_country": "UAE",
+      "original_field": "construction/real estate",
+      "original_device": "desktop",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P088",
+      "segment": "laid_off_urgent",
+      "original_country": "UAE",
+      "original_field": "sales",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Account Executive",
+        "Sales Representative",
+        "Sales Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P089",
+      "segment": "laid_off_urgent",
+      "original_country": "Pakistan",
+      "original_field": "education",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Teacher",
+        "Education Coordinator",
+        "Academic Administrator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P090",
+      "segment": "laid_off_urgent",
+      "original_country": "UAE",
+      "original_field": "marketing",
+      "original_device": "desktop",
+      "original_cv_state": "outdated CV from 2+ years ago",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P091",
+      "segment": "laid_off_urgent",
+      "original_country": "UAE",
+      "original_field": "logistics",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Logistics Manager",
+        "Logistics Coordinator",
+        "Supply Chain Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P092",
+      "segment": "laid_off_urgent",
+      "original_country": "UAE",
+      "original_field": "HR",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Human Resources Manager",
+        "Human Resources Specialist",
+        "Recruiter"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P093",
+      "segment": "laid_off_urgent",
+      "original_country": "Philippines",
+      "original_field": "construction/real estate",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Construction Manager",
+        "Civil Engineer",
+        "Real Estate Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P094",
+      "segment": "laid_off_urgent",
+      "original_country": "India",
+      "original_field": "marketing",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Marketing Manager",
+        "Marketing Specialist",
+        "Marketing Coordinator"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P095",
+      "segment": "career_coach_or_university",
+      "original_country": "India",
+      "original_field": "healthcare admin",
+      "original_device": "desktop",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Individual account flow does not establish multi-client administration, invoicing or institutional access"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P096",
+      "segment": "career_coach_or_university",
+      "original_country": "UAE",
+      "original_field": "customer service",
+      "original_device": "mobile",
+      "original_cv_state": "messy CV with long paragraphs",
+      "authored_role_probes": [
+        "Customer Service Representative",
+        "Customer Support Specialist"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Individual account flow does not establish multi-client administration, invoicing or institutional access"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P097",
+      "segment": "career_coach_or_university",
+      "original_country": "UAE",
+      "original_field": "logistics",
+      "original_device": "desktop",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Logistics Manager",
+        "Logistics Coordinator",
+        "Supply Chain Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Individual account flow does not establish multi-client administration, invoicing or institutional access"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P098",
+      "segment": "career_coach_or_university",
+      "original_country": "UAE",
+      "original_field": "healthcare admin",
+      "original_device": "desktop",
+      "original_cv_state": "polished, recent CV",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Individual account flow does not establish multi-client administration, invoicing or institutional access"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P099",
+      "segment": "career_coach_or_university",
+      "original_country": "UK",
+      "original_field": "healthcare admin",
+      "original_device": "desktop",
+      "original_cv_state": "no proper CV yet",
+      "authored_role_probes": [
+        "Healthcare Administrator",
+        "Medical Administrator",
+        "Healthcare Operations Manager"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Guided CV creation must reach confirmed facts and a selected recurring CV, not stop at saved text",
+        "Individual account flow does not establish multi-client administration, invoicing or institutional access",
+        "Verify understandable source/provider consent and recoverable progress before scoring trust"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    },
+    {
+      "persona_id": "P100",
+      "segment": "career_coach_or_university",
+      "original_country": "USA",
+      "original_field": "data analytics",
+      "original_device": "mobile",
+      "original_cv_state": "two-page CV with many achievements",
+      "authored_role_probes": [
+        "Data Analyst",
+        "Analytics Engineer",
+        "Business Intelligence Analyst"
+      ],
+      "location_assumption": "The original country is used only as a labelled search probe. Residence does not establish desired work location or work authorisation.",
+      "evidence_status": "not_established_in_saved_sample",
+      "public_listing_witnesses": [],
+      "caveat": "The saved readback retains two examples per board. No witness is not proof of zero jobs. A title/location witness is not proof this persona qualifies or would pay.",
+      "remaining_acceptance": [
+        "No fourteen-day delivery observation",
+        "No personal work-authorisation or language eligibility established",
+        "No persona-specific job description or prepared CV observed",
+        "Actual mobile completion must include quiz, source review, fact confirmation and schedule activation",
+        "Individual account flow does not establish multi-client administration, invoicing or institutional access"
+      ],
+      "scored_nps": null,
+      "trial_to_paid": null,
+      "simulated_days_observed": 0
+    }
+  ]
+}

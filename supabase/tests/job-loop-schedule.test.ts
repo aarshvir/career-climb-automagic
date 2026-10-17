@@ -35,8 +35,8 @@ describe('recurring schedule and grounded preparation boundaries',()=>{
     expect(normalizeFollowUp('2026-10-15')).toBe('2026-10-15');expect(normalizeFollowUp('2026-10-15T12:00:00+04:00')).toBe('2026-10-15T08:00:00.000Z');
     for(const value of ['2026-02-30','2026-10-15T12:00:00','2026-10-15T24:00:00Z','2026-02-30T12:00:00Z'])expect(()=>normalizeFollowUp(value)).toThrow();
   });
-  it('uses only three documented feed defaults and preserves encoded employer conditions in full text',async()=>{
-    expect(employerFeeds(()=>undefined).map(item=>item.board)).toEqual(['careem','gocardless','duolingo']);
+  it('uses six verified bounded feed defaults and preserves encoded employer conditions in full text',async()=>{
+    expect(employerFeeds(()=>undefined).map(item=>item.board)).toEqual(['careem','gocardless','duolingo','toast','notion','zapier']);
     const fetcher=vi.fn(async()=>new Response(JSON.stringify({jobs:[{id:1,title:'Business Analyst',absolute_url:opportunity.url,location:{name:opportunity.location},content:'&lt;p&gt;Prepare business analysis and document assumptions.&lt;/p&gt;&lt;p&gt;We do not provide sponsorship. Applicants need at least five years of experience.&lt;/p&gt;'}]})));
     const result=await readEmployerFeed({provider:'greenhouse',board:'fictional',company:'Fictional employer'},fetcher);expect(result.opportunities[0].description).toContain('We do not provide sponsorship.');expect(result.opportunities[0].description).not.toContain('&lt;');expect(result.opportunities[0].description).not.toContain('<p>');expect(fetcher).toHaveBeenCalledTimes(1);
     expect(matchesDiscoveryTarget(profile,result.opportunities[0])).toBe(true);expect(matchesDiscoveryTarget(profile,{...result.opportunities[0],location:'London'})).toBe(false);
@@ -56,7 +56,7 @@ describe('recurring schedule and grounded preparation boundaries',()=>{
     const manual={...senior,id:'manual-choice',source:'manual' as const,title:'Unrelated Director',location:'London',description:'Minimum 15 years of experience required.'};
     expect(selectPreparationOpportunities(early,[claim],[optional,senior,manual]).map(item=>item.id)).toEqual(['manual-choice','optional-years']);
   });
-  it('refreshes changed automatic source facts without preparing or reusing a newly conflicting role',async()=>{
+  it('marks a previously saved automatic job unverified when its refreshed role is filtered out, without reusing it',async()=>{
     const early={...profile,audience:'student' as const,targetTitles:['Graduate Business Analyst'],experienceYears:null};
     const automatic={...opportunity,sourceKey:'greenhouse:fictional:1'};
     const manual={...opportunity,id:'manual-independent',source:'manual' as const,sourceKey:'manual:independent',title:'Unrelated Director',location:'London'};
@@ -73,7 +73,11 @@ describe('recurring schedule and grounded preparation boundaries',()=>{
     expect(state.opportunities).toEqual([]);
     expect(state.lanes.find(item=>item.name==='Targeted shortlist')?.count).toBe(0);
     const refreshed=commit.mock.calls[0][5] as LoopOpportunity[];
-    expect(refreshed[0]).toMatchObject({id:automatic.id,title:'Senior Business Analyst',status:'saved',sourceKey:automatic.sourceKey});
+    // The bounded source reader retains matching rows; a filtered row is not fresh
+    // evidence available to reconciliation. Keep the last observed facts honestly
+    // unverified, never infer expiry, and never reuse the old automatic packet.
+    expect(refreshed[0]).toMatchObject({id:automatic.id,title:automatic.title,description:automatic.description,checkedAt:automatic.checkedAt,verification:'unverified',status:'saved',sourceKey:automatic.sourceKey});
+    expect(refreshed.some(item=>item.verification==='closed_confirmed')).toBe(false);
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
   it('rechecks a resumed automatic preparation before any provider or document work',async()=>{

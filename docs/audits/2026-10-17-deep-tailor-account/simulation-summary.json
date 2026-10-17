@@ -1,0 +1,119 @@
+{
+  "generatedAt": "2026-10-17T14:21:58.709101+00:00",
+  "provenance": "two-independent-agent-contexts-source-informed-simulated-forecast",
+  "fixedInputs": [
+    {
+      "path": "docs/audits/2026-10-17-pmf-simulation/personas.json",
+      "sha256": "e1b18aeb7f6f1e3c40385201a6b20ff14d69175448ef2cf6ef40af6e4fd2dd4d"
+    },
+    {
+      "path": "docs/audits/2026-10-17-pmf-simulation/AGENT_BRIEF.md",
+      "sha256": "878174d428cdb0a1d0356d56ae091e9c09fb817c57ed73497529f66c724a542d"
+    }
+  ],
+  "reviewFiles": [
+    {
+      "path": "docs/audits/2026-10-17-deep-tailor-account/persona-review-1.jsonl",
+      "sha256": "ba65784658d4d994118d1068c32364f15a819788dfe821ce1643abba241013e8",
+      "count": 50
+    },
+    {
+      "path": "docs/audits/2026-10-17-deep-tailor-account/persona-review-2.jsonl",
+      "sha256": "8dcca1659970287a2e1c90650eaef1850d85318976e296326104994b69e9d904",
+      "count": 50
+    }
+  ],
+  "personaCount": 100,
+  "uniquePersonaCount": 100,
+  "firstPersonaId": "P001",
+  "lastPersonaId": "P100",
+  "segments": {
+    "student_or_fresh_grad": 20,
+    "early_career": 20,
+    "mid_career": 18,
+    "senior_executive": 10,
+    "career_switcher_or_mba": 12,
+    "laid_off_urgent": 14,
+    "career_coach_or_university": 6
+  },
+  "recommendationForecast": {
+    "promoters": 0,
+    "passives": 25,
+    "detractors": 75,
+    "index": -75,
+    "target": 60,
+    "targetAchieved": false,
+    "meanScore": 5.52,
+    "histogram": {
+      "3": 5,
+      "4": 16,
+      "5": 33,
+      "6": 21,
+      "7": 18,
+      "8": 7
+    }
+  },
+  "wouldPayRecurringForecast": {
+    "conditional": 45,
+    "no": 55
+  },
+  "veryDisappointedForecast": {
+    "no": 90,
+    "conditional": 10
+  },
+  "actualParticipants": 0,
+  "observedDays": 0,
+  "confirmedPurchases": 0,
+  "measuredNps": null,
+  "method": "Two separately assigned agent contexts assessed unchanged invented personas P001-P050 and P051-P100 with individual journey, rationale, blockers, confidence and evidence. The original realism brief and prior results remain unchanged. Ratings were not tuned to the requested +60 target. Conditional willingness is not counted as a purchase or a very-disappointed survey response. These are counterfactual forecasts, not 100 independent browser sessions.",
+  "groundTruth": "Account-first quiz with reviewed CV/contact/experience and corrected owner/auth/lifecycle-bound record handoff; separate fact, variant and schedule confirmations; prior v34 three cadences/variants/recurring AI backend; new source-bound Deep Tailor and six public employer boards in current integrated source; recurring checkout mapping unfinished; no industry/visa filters; no repeated multi-day observation.",
+  "limitations": [
+    "Source-informed subjective forecast has no statistical sampling or real-customer confidence interval.",
+    "Residence does not establish work authorisation or desired job location.",
+    "Six named boards do not establish broad field/geography coverage or a personal daily shortlist.",
+    "No new measured trial conversion, recurring retention, interview result or customer NPS.",
+    "Prior hosted recurring-backend evidence is separate from the current not-yet-deployed account/deep-tailoring changes."
+  ],
+  "currentValidation": {
+    "applicationTypeScript": "passed",
+    "sourceDenoCases": 28,
+    "generatedDenoCases": 28,
+    "denoStatus": "passed",
+    "productionBuild": "passed",
+    "hostingGroups": 12,
+    "hostingStatus": "passed",
+    "fullSuite": {
+      "status": "passed",
+      "cases": 2560,
+      "files": 142,
+      "durationSeconds": 43.12,
+      "evidenceSource": "Coordinator confirmed exact-current-runtime final full-suite result after meaningful stale source/harness and awaited navigation-assertion corrections."
+    },
+    "browser": {
+      "status": "bounded_local_desktop_observation",
+      "steps": [
+        "explicit roles",
+        "location",
+        "compensation",
+        "contact line",
+        "experience years",
+        "CV text",
+        "deliberate private save",
+        "record handoff"
+      ],
+      "hostedSignupObservedInThisChange": false,
+      "unassistedParticipants": 0
+    },
+    "backendDeployment": "pending",
+    "siteDeployment": "pending"
+  },
+  "openRequirements": [
+    "Broader useful discovery and work-right/industry relevance",
+    "Pre-save quiz refresh recovery",
+    "Actual unassisted account-to-first/second recurring output acceptance",
+    "Repeated multi-day usefulness and retention",
+    "Recurring subscription mapping and live merchant acceptance",
+    "Older result pagination and per-application grouped review",
+    "Requested marketing/video/Facebook/Meta delivery is tracked separately; no activation inferred here"
+  ]
+}

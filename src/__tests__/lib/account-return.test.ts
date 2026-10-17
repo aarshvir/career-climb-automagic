@@ -29,7 +29,12 @@ describe('account destinations', () => {
     expect(takeLoopReturn(1000)).toBeNull();
     rememberLoopReturn('/loop', 1000);
     rememberLoopReturn('/check', 1001);
-    expect(takeLoopReturn(1002)).toBeNull();
+    expect(takeLoopReturn(1002)).toBe('/check');
+    rememberLoopReturn('/onboarding', 1003);
+    expect(takeLoopReturn(1004)).toBe('/onboarding');
+    rememberLoopReturn('/loop', 1005);
+    rememberLoopReturn('/onboarding?email=private@example.test', 1006);
+    expect(takeLoopReturn(1007)).toBeNull();
   });
   it('accepts only bounded administration return routes, preserving the evidence range', () => {
     for (const path of ['/admin', '/admin2', '/admin?days=7', '/admin2?days=30', '/admin2?days=90']) {

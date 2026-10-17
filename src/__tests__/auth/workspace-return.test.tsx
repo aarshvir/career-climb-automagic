@@ -30,6 +30,7 @@ vi.mock('@/components/ui/sonner', () => ({ Toaster: () => null }));
 vi.mock('@/pages/ProductPage', () => ({ default: () => <p>Public page</p> }));
 vi.mock('@/pages/Workspace', () => ({ default: () => <WorkspaceDestination /> }));
 vi.mock('@/pages/JobLoop', () => ({ default: () => <WorkspaceDestination /> }));
+vi.mock('@/pages/CvCheck', () => ({ default: () => <WorkspaceDestination /> }));
 
 function WorkspaceDestination() {
   const location = useLocation();
@@ -59,6 +60,37 @@ beforeEach(() => {
 afterEach(() => { cleanup(); sessionStorage.clear(); localStorage.clear(); window.history.replaceState(null, '', '/'); });
 
 describe('protected legacy workspace return through real app routes', () => {
+  it('requires account creation before opening CV Check and returns an existing user to the check', async () => {
+    const view = open('/check');
+    await screen.findByRole('heading', { name: 'Create your Jobvance account' });
+    expect(new URLSearchParams(window.location.search).get('next')).toBe('/check');
+    expect(screen.queryByTestId('workspace-path')).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Sign in' }));
+    await finishEmail(view);
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/check$/);
+  });
+  it('preserves the account-only CV Check destination through Google sign-in', async () => {
+    const view = open('/check');
+    await screen.findByRole('heading', { name: 'Create your Jobvance account' });
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Continue with Google' }));
+    expect(JSON.parse(sessionStorage.getItem('jobvance_account_return_v1')!).path).toBe('/check');
+    view.unmount(); state.user = owner; open('/auth/callback?code=synthetic-return-code');
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/check$/);
+    expect(sessionStorage.getItem('jobvance_account_return_v1')).toBeNull();
+  });
+  it('remembers only the exact quiz route before an email confirmation redirect', async () => {
+    state.signUpWithEmail.mockResolvedValue({ requiresEmailConfirmation: true });
+    open('/auth?mode=signup&next=%2Fonboarding');
+    await screen.findByRole('heading', { name: 'Create your Jobvance account' });
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Email address'), owner.email);
+    await user.type(screen.getByLabelText('Password'), 'FixturePassword123');
+    await user.type(screen.getByLabelText('Confirm password'), 'FixturePassword123');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await screen.findByRole('heading', { name: 'Check your email' });
+    expect(JSON.parse(sessionStorage.getItem('jobvance_account_return_v1')!).path).toBe('/onboarding');
+    expect(localStorage.length).toBe(0);
+  });
   it.each([
     ['/applications', 'tracker'], ['/resume-management', 'cv'], ['/resumes', 'cv'],
     ['/job-preferences', 'tailor'], ['/preferences', 'tailor'], ['/settings', 'billing'], ['/thank-you', 'billing'],

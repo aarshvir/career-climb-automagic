@@ -21,7 +21,7 @@ export interface HelpTopic {
 export const helpTopics: HelpTopic[] = [
   {
     id: 'first-check', category: 'Free CV check', title: 'Tailor your CV to one real job',
-    summary: 'Start without an account. You need your CV and the full ad for one job you want. The check has three stages: Add your CV and the job, Review changes, and Download.',
+    summary: 'Sign in to your Jobvance account. You need your CV and the full ad for one job you want. The check has three stages: Add your CV and the job, Review changes, and Download.',
     steps: [
       'Open the free CV check. In Add your CV and the job, choose Upload your CV (PDF, Word or text, up to 5 MB) or paste into Your CV. Read the text, fix any reading errors in dates and headings, and remove anything you would not share with an employer.',
       'Paste the full ad into The job description, including responsibilities, requirements and conditions. Job title is read from the ad, so check it and correct it if needed. Company (optional) can stay empty.',
@@ -48,7 +48,7 @@ export const helpTopics: HelpTopic[] = [
       'Select Preview my CV draft and read Review your draft. The builder arranges your answers without adding facts. Label academic work, estimates and courses still in progress correctly. Add more detail if the draft is shorter than 80 characters.',
       'Select Use this CV draft. If a source CV is already open, first confirm Replace my current source CV draft with these answers. My saved record changes only when I save it. Use Undo CV builder replacement while the draft is still unchanged if you need the previous source back.',
       'Read the copied source, select Continue with this text, check your name, Target roles and Locations, then choose private saving separately. Confirm only accurate, shareable facts before running preparation. Building a draft does not save it, approve it or start a run.',
-      'Prefer to try one vacancy without an account? You can write a plain text draft with education, experience and project headings, then paste it into the free CV Check. Review the proposed changes and final document before downloading.',
+      'Prefer to prepare for one vacancy first? You can write a plain text draft with education, experience and project headings, then paste it into the free CV Check. Review the proposed changes and final document before downloading.',
     ],
     fields: [{ label: 'Starting example', help: 'University analytics project, 2026. In a four-person team, I cleaned the survey data and built the charts. Our proposed improvement was an estimate; no business result was measured.' }],
     notes: ['Your builder answers stay in this tab. Unsaved answers can recover during in-app navigation for up to 30 minutes; refresh, closing the tab, signing out or changing accounts clears this local recovery. Saving your career record is a separate choice.', 'The guided builder arranges your own answers locally. It does not call an AI provider or create qualifications, employers or achievements.'],
@@ -163,12 +163,12 @@ export const helpTopics: HelpTopic[] = [
     steps: [
       'Save or discard all career record and claim edits. Check that at least one active fact is both confirmed and shareable, and add the vacancy you want to prepare for.',
       'On Today, read Prepare a cloud run. Choose Preparation provider. Source-based preparation · no AI uses cleared facts without an external model. An available AI model needs explicit permission for that selected provider and processing route.',
-      'Select Prepare today’s applications only when the service reports it available. If cloud processing is not configured, the pilot is full or the allowance is exhausted, use saved records and manual tracking or the free check. Preparation waits for the selected provider to be available rather than switching providers.',
+      'Select Prepare today’s applications only when the service reports it available. If cloud processing is not configured, processing capacity is unavailable or the allowance is exhausted, use saved records and manual tracking or the free check. Preparation waits for the selected provider to be available rather than switching providers.',
       'Read Run history & source coverage. Check the status and message for each source and task. For partial, blocked or failed runs, review any usable results and note what still needs to finish. Use Resume run when available after addressing the stated issue. Use Cancel run for a queued or running job, then refresh to confirm its state.',
       'Open Optional recurring preparation only if you want it. Check Preparation cadence, Local preparation time and Schedule timezone, then opt in and select Enable recurring preparation. Read the actual saved next run. Pause schedule stops future scheduling and retains the current run. Cancel schedule also cancels its latest scheduled run if that run is queued or running. A separately started manual run has its own Cancel run. Refresh records to confirm the result.',
       'Open Optional Gmail access only if you need it and access is available. Select chosen permissions, connect, and confirm the returned mailbox. Reading recruitment messages requires separate run consent; draft creation requires its own checks. Use Disconnect Gmail to stop future connection use.',
     ],
-    notes: ['Cloud runs can continue after the page closes. Refresh records to inspect actual progress; closing the tab is not a cancel action. Recurring preparation currently uses the rules method and the same pilot allowance. Google account sign-in alone does not authorize mailbox reading. No messages or applications are sent automatically.'],
+    notes: ['Cloud runs can continue after the page closes. Refresh records to inspect actual progress; closing the tab is not a cancel action. Recurring preparation supports weekly, three-times-weekly and daily schedules, using the explicitly selected CV and consented AI provider or rules method. Google account sign-in alone does not authorize mailbox reading. No messages or applications are sent automatically.'],
     action: { label: 'Manage my application preparation', to: '/loop' }, related: [{ label: 'Privacy choices', id: 'privacy' }, { label: 'Interrupted draft', id: 'recovery' }],
   },
   {
@@ -245,7 +245,7 @@ export default function HelpCenter() {
   return <main className="help-center">
     <Helmet><title>{meta.title}</title><meta name="description" content={meta.description} /><link rel="canonical" href="https://jobvance.io/help" /></Helmet>
     <nav className="hc-breadcrumb" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">Help center</span></nav>
-    <header className="hc-hero"><p className="hc-eyebrow"><BookOpen size={16} aria-hidden="true" /> HELP AT THE NEXT STEP</p><h1>What would you like to get done?</h1><p>Find the next click, understand a field, or get back to your draft. You can read every guide here without an account. Sign in when you want to save and reuse your work.</p><Link className="hc-text-link" to="/walkthroughs">Try an interactive walkthrough <ArrowRight size={16} aria-hidden="true" /></Link></header>
+    <header className="hc-hero"><p className="hc-eyebrow"><BookOpen size={16} aria-hidden="true" /> HELP AT THE NEXT STEP</p><h1>What would you like to get done?</h1><p>Find the next click, understand a field, or get back to your draft. Read a guide, then sign in to set up your Job Loop or use CV Check.</p><Link className="hc-text-link" to="/walkthroughs">Try an interactive walkthrough <ArrowRight size={16} aria-hidden="true" /></Link></header>
     <section className="hc-start" aria-label="Choose a starting task">
       <a href="#first-check" onClick={reset}><FileText size={22} aria-hidden="true" /><strong>Check your CV against a job</strong><span>Start with the free check.</span><ArrowRight size={16} aria-hidden="true" /></a>
       <a href="#job-loop-start" onClick={reset}><ClipboardList size={22} aria-hidden="true" /><strong>Save experience for your next application</strong><span>Set up your Job Loop record.</span><ArrowRight size={16} aria-hidden="true" /></a>

@@ -27,10 +27,11 @@ function report() {
     sentMessages: 0, applicationSubmissions: 0, payments: 0, schedulesCreated: 0, accountsDeleted: 0, credentialsPrintedOrSaved: false,
     recordsRetainedForReconciliation: true, checks: [], limits: ['One synthetic vacancy proves this bounded path only, not live vacancy coverage or customer value.', 'Candidate API does not expose provider-returned model IDs or raw token usage.', 'No concurrent budget load test is performed. Unknown/pending usage is retained; this harness never retries or resumes a run.'] };
 }
-async function boundedJson(response) {
-  if (!response.body || Number(response.headers.get('Content-Length') || 0) > 2500000) throw new Stop('bounded-response');
+async function boundedJson(response, maximumBytes = 2500000, budget = null) {
+  if (!response.body || Number(response.headers.get('Content-Length') || 0) > maximumBytes) throw new Stop('bounded-response');
   const reader = response.body.getReader(); const chunks = []; let size = 0;
-  while (true) { const part = await reader.read(); if (part.done) break; size += part.value.byteLength; if (size > 2500000) { await reader.cancel(); throw new Stop('bounded-response'); } chunks.push(Buffer.from(part.value)); }
+  while (true) { const part = await reader.read(); if (part.done) break; size += part.value.byteLength; if (size > maximumBytes) { await reader.cancel(); throw new Stop('bounded-response'); } chunks.push(Buffer.from(part.value)); }
+  if (budget) budget.remaining -= size;
   try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw new Stop('valid-json-response'); }
 }
 /** Compile the actual self-contained source matcher, rather than copying its
@@ -53,28 +54,35 @@ export async function loadDiscoveryMatcher() {
   if (hash(source) !== declaredHash('src/lib/employer-discovery.ts') || hash(adapterSource) !== declaredHash('supabase/functions/_shared/job-loop-providers.ts') || hash(engineSource) !== declaredHash('supabase/functions/_shared/job-loop-engine.ts')) throw new Stop('source-proof-matches-release-manifest');
   // The public feed may override its configured company. Include the actual
   // response companies too; a metadata-only company proof would be incomplete.
-  if (!adapterSource.includes('company: text(row.company,200)||feed.company||feed.board') || !adapterSource.includes('entries.slice(0, 100)')) throw new Stop('employer-company-mapping-contract-unchanged');
+  if (!adapterSource.includes('company: text(row.company,200)||feed.company||feed.board') || !adapterSource.includes('entries.slice(0, EMPLOYER_FEED_LIMITS.scanned)')) throw new Stop('employer-company-mapping-contract-unchanged');
+  const adapterAst = ts.createSourceFile('adapter.ts', adapterSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const limitsDeclaration = adapterAst.statements.filter(node => ts.isVariableStatement(node) && node.declarationList.declarations.some(declaration => declaration.name.getText(adapterAst) === 'EMPLOYER_FEED_LIMITS'));
+  if (limitsDeclaration.length !== 1) throw new Stop('actual-employer-feed-limits-found');
+  const limitExports = {};
+  new Script(ts.transpileModule(limitsDeclaration[0].getText(adapterAst), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText).runInNewContext({ exports: limitExports }, { timeout: 1000 });
+  const feedLimits = limitExports.EMPLOYER_FEED_LIMITS;
+  if (!feedLimits || feedLimits.feeds !== 8 || feedLimits.bytes !== 5000000 || feedLimits.scanned !== 1000 || feedLimits.leverPages !== 3) throw new Stop('bounded-employer-feed-proof-contract');
   const ast = ts.createSourceFile('matcher.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const functions = ast.statements.filter(node => ts.isFunctionDeclaration(node) && node.name?.text === 'matchesDiscoveryTarget');
   if (functions.length !== 1) throw new Stop('actual-discovery-matcher-found');
   const emitted = ts.transpileModule(ast.statements.filter(node=>!ts.isImportDeclaration(node)).map(node=>node.getText(ast)).join('\n'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
   const exports = {};
   new Script(emitted).runInNewContext({ exports }, { timeout: 1000 });
-  if (typeof exports.matchesDiscoveryTarget !== 'function') throw new Stop('actual-discovery-matcher-loaded');
+  if (typeof exports.matchesDiscoveryTarget !== 'function' || typeof exports.readDiscoveryMinimumExperience !== 'function') throw new Stop('actual-discovery-matcher-loaded');
   const engineAst = ts.createSourceFile('engine.ts', engineSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   // All actual profile/claim helpers are retained. Unused schedule imports are
   // removed so this isolated proof has no module, network or filesystem access.
   const engineModule = ts.transpileModule(engineAst.statements.filter(node => !ts.isImportDeclaration(node)).map(node => node.getText(engineAst)).join('\n'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
   function validateFixtures(profile, claims) {
-    const context = { exports: {}, serialized: JSON.stringify({ profile, claims }) };
+    const context = { exports: {}, readDiscoveryMinimumExperience: exports.readDiscoveryMinimumExperience, serialized: JSON.stringify({ profile, claims }) };
     new Script(`${engineModule}\nconst fixture=JSON.parse(serialized); const profile=exports.validateProfile(fixture.profile); for(const claim of fixture.claims) exports.validateClaim(claim,profile);`).runInNewContext(context, { timeout: 1000 });
   }
-  return { matches: exports.matchesDiscoveryTarget, validateFixtures, sourceSha256: hash(source), adapterSha256: hash(adapterSource), engineSha256: hash(engineSource) };
+  return { matches: exports.matchesDiscoveryTarget, validateFixtures, feedLimits, sourceSha256: hash(source), adapterSha256: hash(adapterSource), engineSha256: hash(engineSource) };
 }
 function feedIdentities(sources) {
-  if (!Array.isArray(sources) || sources.length > 4) throw new Stop('bounded-configured-employer-feeds');
+  if (!Array.isArray(sources) || sources.length > 8) throw new Stop('bounded-configured-employer-feeds');
   return sources.map(source => {
-    if (!source || !['greenhouse', 'lever'].includes(source.provider) || typeof source.board !== 'string' || !/^[a-z\d_-]{1,80}$/i.test(source.board) || typeof source.company !== 'string' || source.company.length > 200) throw new Stop('supported-public-feed-identities');
+    if (!source || !['greenhouse', 'lever', 'ashby'].includes(source.provider) || typeof source.board !== 'string' || !/^[a-z\d_-]{1,80}$/i.test(source.board) || typeof source.company !== 'string' || source.company.length > 200) throw new Stop('supported-public-feed-identities');
     return { provider: source.provider, board: source.board, company: source.company };
   });
 }
@@ -82,13 +90,17 @@ async function exclusionProof(sources, profile, manual, fetcher, matcher) {
   const companies = sources.flatMap(source => [source.company || source.board, source.board]);
   let observedRows = 0;
   for (const feed of sources) {
-    const url = feed.provider === 'greenhouse' ? `https://boards-api.greenhouse.io/v1/boards/${feed.board}/jobs?content=true` : `https://api.lever.co/v0/postings/${feed.board}?mode=json&limit=100`;
-    // Public employer GET only. Never attach Supabase or provider credentials.
-    const response = await fetcher(url, { method: 'GET', redirect: 'error', credentials: 'omit', signal: AbortSignal.timeout(15000) });
-    if (!response.ok) throw new Stop('public-employer-feed-proof-readable', response.status);
-    const payload = await boundedJson(response), rows = feed.provider === 'greenhouse' ? payload?.jobs : payload;
-    if (!Array.isArray(rows)) throw new Stop('public-employer-feed-proof-shape');
-    for (const row of rows.slice(0, 100)) { const company = typeof row?.company === 'string' ? row.company.slice(0, 200) : ''; companies.push(company || feed.company || feed.board); observedRows++; }
+    const budget = { remaining: matcher.feedLimits.bytes }; let scanned = 0;
+    for (let page = 0; page < (feed.provider === 'lever' ? matcher.feedLimits.leverPages : 1); page++) {
+      const url = feed.provider === 'greenhouse' ? `https://boards-api.greenhouse.io/v1/boards/${feed.board}/jobs?content=true` : feed.provider === 'ashby' ? `https://api.ashbyhq.com/posting-api/job-board/${feed.board}` : `https://api.lever.co/v0/postings/${feed.board}?mode=json&limit=100${page ? `&skip=${page * 100}` : ''}`;
+      // Public employer GET only. Never attach Supabase or provider credentials.
+      const response = await fetcher(url, { method: 'GET', redirect: 'error', credentials: 'omit', signal: AbortSignal.timeout(15000) });
+      if (!response.ok) throw new Stop('public-employer-feed-proof-readable', response.status);
+      const payload = await boundedJson(response, budget.remaining, budget), rows = feed.provider === 'lever' ? payload : payload?.jobs;
+      if (!Array.isArray(rows)) throw new Stop('public-employer-feed-proof-shape');
+      for (const row of rows.slice(0, Math.max(0, matcher.feedLimits.scanned - scanned))) { const company = typeof row?.company === 'string' ? row.company.slice(0, 200) : ''; companies.push(company || feed.company || feed.board); observedRows++; scanned++; }
+      if (feed.provider !== 'lever' || rows.length < 100 || budget.remaining < 1) break;
+    }
   }
   const terms = [...new Set(companies.map(company => company.trim().slice(0, 150).toLowerCase()))];
   if (terms.some(term => !term) || terms.length > 100) throw new Stop('employer-exclusions-fit-real-profile-contract');
@@ -97,7 +109,7 @@ async function exclusionProof(sources, profile, manual, fetcher, matcher) {
   if (terms.some(term => manualText.includes(term) || profile.sourceText.toLowerCase().includes(term))) throw new Stop('feed-exclusions-do-not-restrict-fictional-manual-facts-or-company');
   // Worst-case matching title/location forces this test to rely on the explicit
   // exclusions. It covers every declared board/company and all response-company
-  // overrides in the adapter's first 100 rows, including malformed job rows.
+  // overrides across the adapter's bounded scan and all three Lever pages, including malformed job rows.
   for (const company of companies) if (matcher.matches(profile, { title: profile.targetTitles[0], location: profile.locations[0], company, description: 'Public feed exclusion challenge.' }) !== false) throw new Stop('actual-engine-blocks-every-feed-company-and-board');
   if (matcher.matches(profile, manual) !== true) throw new Stop('actual-engine-still-matches-fictional-manual-vacancy');
   return { feedCount: sources.length, observedRows, exclusionCount: terms.length };

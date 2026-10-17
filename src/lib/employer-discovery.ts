@@ -27,6 +27,10 @@ function normalText(value: string): string { return value.normalize('NFKC').toLo
 function tokens(value: string): string[] { return normalText(value).match(/[\p{L}\p{N}]+/gu) ?? []; }
 function roleTerms(value: string): string[] {
   const normalized = normalText(value)
+    .replace(/\bsoftware developer\b/g, 'software engineer')
+    .replace(/\b(?:ml|machine[ -]learning)\b/g, 'machine learning')
+    .replace(/\b(?:hr|human resources)\b/g, 'human resources')
+    .replace(/\b(?:qa|quality assurance)\b/g, 'quality assurance')
     .replace(/\bc\s*\+\s*\+/g, ' cplusplus ').replace(/\bc\s*#/g, ' csharp ').replace(/\.net\b/g, ' dotnet ')
     .replace(/\b(front|back)[ -]end\b/g, '$1end').replace(/\bfull[ -]stack\b/g, 'fullstack')
     .replace(/\bentry[ -]level\b|\bvice[ -]president\b/g, ' ')
@@ -34,13 +38,15 @@ function roleTerms(value: string): string[] {
   return [...new Set(tokens(normalized).filter(word => !ROLE_STOP.has(word) && !LEVEL_WORDS.has(word)).map(word => ROLE_NORMALIZATIONS[word] ?? word))];
 }
 function matchRole(targets: string[], title: string): Pick<DiscoveryMatchEvidence, 'role' | 'seniority'> {
-  const titleTerms = new Set(roleTerms(title));
+  const orderedTitleTerms = roleTerms(title); const titleTerms = new Set(orderedTitleTerms);
   let roleMatched = false;
   for (const target of targets) {
     const terms = roleTerms(target);
     if (!terms.length || !terms.every(term => titleTerms.has(term))) continue;
-    roleMatched = true;
-    if (EARLY.test(target) && SENIOR.test(title) || SENIOR.test(target) && EARLY.test(title)) continue;
+    if (EARLY.test(target) && SENIOR.test(title) || SENIOR.test(target) && EARLY.test(title)) { roleMatched = true; continue; }
+    // "Engineering Manager, Product" is not a Product Manager, nor is
+    // "Product Operations Manager". Preserve the requested role phrase.
+    if (!` ${orderedTitleTerms.join(' ')} `.includes(` ${terms.join(' ')} `)) continue;
     return { role: 'matched', seniority: EARLY.test(title) || SENIOR.test(title) ? 'compatible' : 'unknown' };
   }
   return { role: roleMatched ? 'matched' : 'mismatch', seniority: roleMatched ? 'conflict' : 'unknown' };
@@ -50,12 +56,22 @@ function matchRole(targets: string[], title: string): Pick<DiscoveryMatchEvidenc
 const CITY_COUNTRIES: [string, string][] = [
   ['dubai', 'united arab emirates'], ['abu dhabi', 'united arab emirates'],
   ['london', 'united kingdom'], ['new york', 'united states'],
+  ['san francisco', 'united states'], ['los angeles', 'united states'], ['seattle', 'united states'],
+  ['boston', 'united states'], ['austin', 'united states'], ['chicago', 'united states'],
+  ['atlanta', 'united states'], ['denver', 'united states'], ['miami', 'united states'],
+  ['washington dc', 'united states'], ['pittsburgh', 'united states'],
+  ['bengaluru', 'india'], ['bangalore', 'india'], ['mumbai', 'india'], ['hyderabad', 'india'],
+  ['pune', 'india'], ['chennai', 'india'], ['new delhi', 'india'], ['gurugram', 'india'], ['noida', 'india'],
+  ['leeds', 'united kingdom'], ['manchester', 'united kingdom'], ['edinburgh', 'united kingdom'],
+  ['sharjah', 'united arab emirates'], ['riyadh', 'saudi arabia'], ['jeddah', 'saudi arabia'],
+  ['doha', 'qatar'], ['manama', 'bahrain'], ['muscat', 'oman'], ['kuwait city', 'kuwait'],
 ];
-const COUNTRY_NAMES = ['united arab emirates', 'united kingdom', 'united states', 'south africa', 'canada', 'australia', 'india', 'singapore', 'france', 'germany', 'saudi arabia'];
+const COUNTRY_NAMES = ['united arab emirates', 'united kingdom', 'united states', 'south africa', 'canada', 'australia', 'india', 'singapore', 'france', 'germany', 'saudi arabia', 'qatar', 'bahrain', 'oman', 'kuwait', 'pakistan', 'bangladesh', 'jordan', 'new zealand'];
 function placeText(value: string): string {
   return normalText(value).replace(/\bu\.?a\.?e\.?\b/g, 'united arab emirates')
     .replace(/\bu\.?k\.?\b/g, 'united kingdom').replace(/\b(?:u\.?s\.?a?\.?)\b/g, 'united states')
-    .replace(/\bnyc\b/g, 'new york').replace(/\bthe\b/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    .replace(/\bnyc\b/g, 'new york').replace(/\bksa\b/g, 'saudi arabia')
+    .replace(/\bbangalore\b/g, 'bengaluru').replace(/\bthe\b/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 }
 function hasPlace(value: string, place: string): boolean { return ` ${value} `.includes(` ${place} `); }
 function placeTerms(value: string): Set<string> {
@@ -190,7 +206,12 @@ function matchCompensation(preference: DiscoveryProfile['compensation'], descrip
 /** Discovery admission is a relevance guard, never eligibility or pay verification.
  * Callers retain candidate-controlled manual vacancies independently of this guard. */
 export function inspectDiscoveryTarget(profile: DiscoveryProfile, opportunity: DiscoveryOpportunity): DiscoveryMatchEvidence {
-  const excluded = profile.excludedTerms.some(term => term.trim() && normalText(`${opportunity.title}\n${opportunity.company}\n${opportunity.description}\n${opportunity.url}`).includes(normalText(term.trim())));
+  const sourceText = normalText(`${opportunity.title}\n${opportunity.company}\n${opportunity.description}\n${opportunity.url}`).replace(/\s+/g,' ');
+  const excluded = profile.excludedTerms.some(term => {
+    const escaped = normalText(term.trim()).replace(/\s+/g,' ').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // A short excluded term such as AI must not exclude "retail" or "chair".
+    return !!escaped && new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u').test(sourceText);
+  });
   const role = matchRole(profile.targetTitles, opportunity.title);
   const location = matchLocation(profile.locations, opportunity);
   const minimumExperienceYears = readDiscoveryMinimumExperience(opportunity.description);
@@ -200,3 +221,26 @@ export function inspectDiscoveryTarget(profile: DiscoveryProfile, opportunity: D
   return { matches: !excluded && role.role === 'matched' && role.seniority !== 'conflict' && (location === 'matched' || location === 'not_requested' || acceptsUnknownRemote) && experience !== 'below_stated_minimum' && compensation !== 'below_minimum', ...role, location, experience, minimumExperienceYears, compensation, excluded };
 }
 export function matchesDiscoveryTarget(profile: DiscoveryProfile, opportunity: DiscoveryOpportunity): boolean { return inspectDiscoveryTarget(profile, opportunity).matches; }
+
+/** Plain-language explanations of observed constraints, never invented skill,
+ * visa, salary or employer endorsement claims. Safe to render next to a match. */
+export function explainDiscoveryMatch(profile: DiscoveryProfile, opportunity: DiscoveryOpportunity): { reasons: string[]; missing: string[] } {
+  const evidence = inspectDiscoveryTarget(profile, opportunity);
+  const reasons: string[] = []; const missing: string[] = [];
+  if (evidence.role === 'matched') reasons.push('The job title matches one of your chosen role directions.');
+  else missing.push('The title does not match a complete role direction you selected.');
+  if (evidence.location === 'matched') reasons.push(`The listed location (${opportunity.location}) matches your location preferences.`);
+  else if (evidence.location === 'mismatch') missing.push('The listed location or remote-work restriction conflicts with your preferences.');
+  else if (evidence.location === 'unknown') missing.push('The permitted working location still needs confirmation.');
+  if (evidence.seniority === 'conflict') missing.push('The advertised seniority conflicts with your chosen role level.');
+  if (evidence.experience === 'within_stated_years') reasons.push(`Your stated years of experience meet the advertised ${evidence.minimumExperienceYears}-year minimum; the type of experience still needs review.`);
+  else if (evidence.experience === 'below_stated_minimum') missing.push(`The description states a minimum of ${evidence.minimumExperienceYears} years of experience, above your stated experience.`);
+  else missing.push('Experience requirements have not been fully verified.');
+  if (evidence.compensation === 'at_or_above_minimum') reasons.push('The stated base-pay range meets your minimum in the same currency.');
+  else if (evidence.compensation === 'range_overlaps_minimum') missing.push('Only part of the stated base-pay range meets your minimum.');
+  else if (evidence.compensation === 'below_minimum') missing.push('The stated base-pay range is below your minimum.');
+  else if (evidence.compensation === 'unknown') missing.push('Comparable base pay is not stated clearly enough to check your minimum.');
+  if (evidence.excluded) missing.push('The posting contains an employer or term you excluded.');
+  missing.push('Review role-specific requirements and work authorisation before applying.');
+  return { reasons, missing };
+}

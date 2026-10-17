@@ -110,6 +110,8 @@ export function validateRewrite(after: string, sources: string[]): string | null
   if (!value) return "Empty rewrite.";
   if (value.length > Math.max(260, source.length * 1.8)) return "Rewrite is much longer than its source.";
   if (/\n/u.test(value)) return "Rewrite must stay on one line.";
+  const qualifiedSource = sources.some(item => /\b(?:no|not|never|without|didn't|cannot|can't|hasn't|haven't|wasn't|weren't|projected|estimated|expected|potential|forecast|forecasted|would|could|may|might|planned|proposed)\b/iu.test(item));
+  if (qualifiedSource && !sources.some(item => normalise(item.trim()) === normalise(value))) return "Keep the exact wording of negative, uncertain or projected evidence.";
   const allowedNumbers = new Set(numbers(source));
   const extraNumber = numbers(value).find(token => !allowedNumbers.has(token));
   if (extraNumber) return `Adds a number not in your CV (${extraNumber}).`;
@@ -136,12 +138,15 @@ function citedFacts(value: unknown, facts: string[]): number[] {
   return [...new Set(value.filter((item): item is number => Number.isInteger(item) && item >= 1 && item <= facts.length))].slice(0, MAX_FACTS);
 }
 
-export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: string[] = []): TailorResult {
+export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: string[] = [], factSources: number[] = []): TailorResult {
   const lines = sourceLines(cv);
   const byN = new Map(lines.map(line => [line.n, line]));
   const text = new Map(lines.map(line => [line.n, line.text]));
   const changes: TailorChange[] = [], rejected: TailorRejection[] = [];
   const factText = (cited: number[]) => cited.map(number => facts[number - 1]);
+  // Confirming that an answer is true does not authorize putting it under any employer.
+  // The candidate binds each answer to an exact original source line before the model runs.
+  const factsBelongTo = (cited: number[], sources: number[]) => cited.every(number => sources.includes(factSources[number - 1]));
 
   const seenRewrite = new Set<number>();
   for (const rewrite of (proposal.rewrites ?? []).slice(0, 80)) {
@@ -153,7 +158,7 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
     if (proposed === sourceBody) continue;
     // A rewrite may only use its own line, plus answers the candidate confirmed and the model cited.
     const cited = citedFacts(rewrite.facts, facts);
-    const problem = validateRewrite(proposed, [sourceBody, ...factText(cited)]);
+    const problem = !factsBelongTo(cited, [rewrite.n]) ? "An answer belongs to a different CV line." : validateRewrite(proposed, [sourceBody, ...factText(cited)]);
     if (problem) { rejected.push({ n: rewrite.n, text: proposed, reason: problem }); continue; }
     const after = source.kind === "bullet" ? `${bulletPrefix(source.text)}${proposed}` : proposed;
     text.set(rewrite.n, after);
@@ -183,6 +188,7 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
     let problem: string | null = null;
     if (!anchor || (anchor.kind !== "role" && anchor.kind !== "bullet")) problem = "A new line must sit under one of your roles.";
     else if (!cited.length) problem = "A new line must come from one of your answers.";
+    else if (!factsBelongTo(cited, [addition.after])) problem = "An answer belongs to a different CV line.";
     else if (added >= MAX_FACTS) problem = "Too many new lines.";
     else problem = validateRewrite(value, factText(cited));
     if (problem || !anchor) { rejected.push({ n: Number.isInteger(addition.after) ? addition.after : null, text: value, reason: problem ?? "Not placed." }); continue; }
@@ -200,7 +206,7 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
     const cited = [...new Set((proposal.summary.sources ?? []).filter(n => { const line = byN.get(n); return line && line.kind !== "blank" && line.kind !== "heading"; }))];
     const citedAnswers = citedFacts(proposal.summary.facts, facts);
     const value = proposal.summary.text.trim().replace(/\s+/gu, " ");
-    const problem = !cited.length ? "A summary must cite lines from your CV." : value.length > 420 ? "Summary too long." : validateRewrite(value, [...cited.map(n => byN.get(n)!.text), ...factText(citedAnswers)]);
+    const problem = !cited.length ? "A summary must cite lines from your CV." : !factsBelongTo(citedAnswers, cited) ? "A summary must cite each answer's chosen CV line." : value.length > 420 ? "Summary too long." : validateRewrite(value, [...cited.map(n => byN.get(n)!.text), ...factText(citedAnswers)]);
     if (problem) rejected.push({ n: null, text: value, reason: problem });
     else { summaryText = value; summarySources = cited; summaryFacts = citedAnswers; }
   }
@@ -248,9 +254,9 @@ Rules:
 - questions: up to 5 short plain-English questions about important job requirements that neither the CV nor the answers show (e.g. "Did you run the lean workshops yourself, or support someone who did?"). Never suggest the answer, and never repeat a question an answer already covers.
 Write in the CV's language and spelling (UK or US). No markdown.`;
 
-export function tailorUserPrompt(cv: string, jobTitle: string, company: string, jobDescription: string, facts: string[] = []): string {
+export function tailorUserPrompt(cv: string, jobTitle: string, company: string, jobDescription: string, facts: string[] = [], factSources: number[] = []): string {
   const lines = sourceLines(cv).filter(line => line.kind !== "blank").map(line => `${line.n} [${line.kind}] ${line.text}`).join("\n");
-  const answers = facts.length ? `\n\nANSWERS THE CANDIDATE CONFIRMED ARE TRUE:\n${facts.map((fact, index) => `A${index + 1}: ${fact}`).join("\n")}` : "";
+  const answers = facts.length ? `\n\nANSWERS THE CANDIDATE CONFIRMED ARE TRUE:\nEach answer belongs only to its candidate-chosen CV line. Cite that line in summaries; use an answer in a rewrite or addition only at that exact line. Do not move achievements between roles.\n${facts.map((fact, index) => `A${index + 1} [CV line ${factSources[index] ?? 'unassigned; do not use'}]: ${fact}`).join("\n")}` : "";
   return `TARGET ROLE: ${jobTitle}${company ? ` at ${company}` : ""}\n\nJOB DESCRIPTION:\n${jobDescription.slice(0, 12000)}\n\nCV LINES:\n${lines}${answers}`;
 }
 
@@ -281,7 +287,7 @@ export const TAILOR_SCHEMA: Record<string, unknown> = {
   },
 };
 
-export type TailorRequest = { requestId: string; cvText: string; jobDescription: string; jobTitle: string; company: string; consent: true; facts: string[] };
+export type TailorRequest = { requestId: string; cvText: string; jobDescription: string; jobTitle: string; company: string; consent: true; facts: string[]; factSources: number[] };
 const UUID = /^[a-f\d]{8}-[a-f\d]{4}-4[a-f\d]{3}-[89ab][a-f\d]{3}-[a-f\d]{12}$/;
 export class TailorInputError extends Error {}
 /** Strict request shape: exactly these fields (answers optional), bounded sizes, explicit consent. */
@@ -289,16 +295,19 @@ export function validateTailorRequest(value: unknown): TailorRequest {
   const fields = ["requestId", "cvText", "jobDescription", "jobTitle", "company", "consent"];
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new TailorInputError("Send your CV and the job description.");
   const item = value as Record<string, unknown>;
-  const expected = Object.prototype.hasOwnProperty.call(item, "facts") ? [...fields, "facts"] : fields;
+  const expected = Object.prototype.hasOwnProperty.call(item, "facts") ? [...fields, "facts", "factSources"] : fields;
   if (Object.keys(item).length !== expected.length || expected.some(field => !Object.prototype.hasOwnProperty.call(item, field))) throw new TailorInputError("Send your CV and the job description.");
   if (item.consent !== true) throw new TailorInputError("Confirm that your CV and the job can be sent to our AI provider.");
   if (typeof item.requestId !== "string" || !UUID.test(item.requestId)) throw new TailorInputError("Start a new request.");
   const text = (name: string, min: number, max: number) => { const v = item[name]; if (typeof v !== "string" || v.includes("\0") || v.trim().length < min || v.length > max) throw new TailorInputError(`Check ${name === "cvText" ? "your CV" : name === "jobDescription" ? "the job description" : "the role"} text.`); return v; };
-  let facts: string[] = [];
+  let facts: string[] = [], factSources: number[] = [];
   if (expected.length > fields.length) {
     const raw = item.facts;
     if (!Array.isArray(raw) || raw.length < 1 || raw.length > MAX_FACTS || raw.some(fact => typeof fact !== "string" || fact.includes("\0") || fact.trim().length < 10 || fact.length > 400)) throw new TailorInputError(`Check your answers: up to ${MAX_FACTS}, each 10 to 400 characters.`);
     facts = raw.map(fact => (fact as string).trim().replace(/\s+/gu, " "));
+    const cvLines = sourceLines(text("cvText", 80, 30000));
+    if (!Array.isArray(item.factSources) || item.factSources.length !== facts.length || item.factSources.some(n => !Number.isInteger(n) || !cvLines.some(line => line.n === n && ['role', 'bullet', 'text'].includes(line.kind)))) throw new TailorInputError("Choose the CV role or line each answer belongs to.");
+    factSources = item.factSources as number[];
   }
-  return { requestId: item.requestId, cvText: text("cvText", 80, 30000), jobDescription: text("jobDescription", 80, 20000), jobTitle: text("jobTitle", 2, 200), company: typeof item.company === "string" && item.company.length <= 200 ? item.company : "", consent: true, facts };
+  return { requestId: item.requestId, cvText: text("cvText", 80, 30000), jobDescription: text("jobDescription", 80, 20000), jobTitle: text("jobTitle", 2, 200), company: typeof item.company === "string" && item.company.length <= 200 ? item.company : "", consent: true, facts, factSources };
 }

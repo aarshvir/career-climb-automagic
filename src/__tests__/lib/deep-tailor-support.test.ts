@@ -16,12 +16,32 @@ describe('tailoring request', () => {
     expect(invoke.mock.calls[0][1].body).not.toHaveProperty('facts');
     await requestTailoredCv({ ...input, facts: [] });
     expect(invoke.mock.calls[1][1].body).not.toHaveProperty('facts');
-    await requestTailoredCv({ ...input, facts: ['I built the Power BI dashboard myself.'] });
-    expect(invoke.mock.calls[2][1].body).toMatchObject({ facts: ['I built the Power BI dashboard myself.'], consent: true });
+    await requestTailoredCv({ ...input, facts: ['I built the Power BI dashboard myself.'], factSources: [2] });
+    expect(invoke.mock.calls[2][1].body).toMatchObject({ facts: ['I built the Power BI dashboard myself.'], factSources: [2], consent: true });
   });
   it('reads changes from servers that do not send answer numbers', async () => {
     const result = await requestTailoredCv(input);
     expect(result.changes[0].facts).toEqual([]);
+  });
+  it('rejects unbound answers before sending anything', async () => {
+    await expect(requestTailoredCv({ ...input, facts: ['I built the Power BI dashboard myself.'] })).rejects.toThrow(/Choose the CV role/);
+    expect(invoke).not.toHaveBeenCalled();
+  });
+  it('rejects server answer citations for the wrong source or missing answer', async () => {
+    for (const facts of [[1], [2]]) {
+      invoke.mockResolvedValue({ data: { ...response, tailored: { ...response.tailored, changes: [{ ...response.tailored.changes[0], n: 3, facts }] } }, error: null });
+      await expect(requestTailoredCv({ ...input, facts: ['I built the Power BI dashboard myself.'], factSources: [2] })).rejects.toThrow(/answer references/);
+    }
+  });
+  it('snapshots confirmed answers before awaiting the response', async () => {
+    let resolve!: (value: unknown) => void;
+    invoke.mockImplementation(() => new Promise(done => { resolve = done; }));
+    const facts = ['I built the Power BI dashboard myself.'], factSources = [2];
+    const pending = requestTailoredCv({ ...input, facts, factSources });
+    facts[0] = 'Unconfirmed later edit'; factSources[0] = 3;
+    expect(invoke.mock.calls[0][1].body).toMatchObject({ facts: ['I built the Power BI dashboard myself.'], factSources: [2] });
+    resolve({ data: response, error: null });
+    await pending;
   });
 });
 

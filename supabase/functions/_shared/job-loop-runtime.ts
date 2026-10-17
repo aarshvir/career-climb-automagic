@@ -1,3 +1,4 @@
+import type { LoopClaimRewrite } from './job-loop-deep-tailor.ts';
 import { ApiError, uuid } from './core.ts';
 import { validateAction, validateProfile, validateClaim, validateOpportunity, suggestClaims, assessOpportunity, composePacket, eligibleLoopClaims, fingerprintLoopInputs } from './job-loop-engine.ts';
 import { renderPacket } from './job-loop-render.ts';
@@ -8,6 +9,7 @@ import { LIMITS, RULES_MODEL, digest, stableUuid, modelOptions, modelConfigurati
 import { beginGmail, createGmailDraft, gmailConfigured, readRecruitmentInbox,previewGmailTicket,finalizeGmailTicket } from '../job-loop-oauth/gmail.ts';
 import type { LoopCvSelection, LoopAction, LoopClaim, LoopLane, LoopOpportunity, LoopResponse, LoopSnapshot } from './job-loop-types.ts';
 import { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
+import { reconcileDiscovery } from './job-loop-discovery.ts';
 import { generationBoundAction } from './job-loop-request.ts';
 import { sameCvSelection, validateCvSelection } from './job-loop-variant-execution.ts';
 import { selectedRunOpportunities, selectedPhaseOpportunities } from './job-loop-selection.ts';
@@ -395,20 +397,18 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
       const found:LoopOpportunity[]=[];
       const feeds=employerFeeds(env);
       if(!feeds.length)state.lanes!.push(lane('Employer API sources','not_connected',0,'No tested employer boards have been configured.'));
-      const feedsRead=await Promise.allSettled(feeds.map(feed=>readEmployerFeed(feed,fetcher)));
+      const feedsRead=await Promise.allSettled(feeds.map(feed=>readEmployerFeed(feed,fetcher,profile)));
       feedsRead.forEach((result,index)=>{if(result.status==='fulfilled'){found.push(...result.value.opportunities);state.lanes!.push(lane(`${feeds[index].provider}:${feeds[index].board}`,result.value.truncated?'partial':'completed',result.value.opportunities.length,`Published-list records read: ${result.value.total}. Listing evidence does not certify eligibility or guarantee the posting remains open.${result.value.truncated?' Source response was capped.':''}`));}else state.lanes!.push(lane(`${feeds[index].provider}:${feeds[index].board}`,'blocked',0,'Source read failed or was blocked; it was not treated as an empty market.'));});
       if(searchReady(env)){
         const queries=profile.targetTitles.slice(0,LIMITS.queries).map(title=>`${title} jobs ${profile.locations.join(' ')}`.slice(0,250));let count=0;let errors=0;
         for(let index=0;index<queries.length;index++){try{const result=await metered(repo,run,`search:${index}`,'tavily',TAVILY_CREDIT_MICROS,()=>searchTavily(queries[index],env,fetcher),env);if(result.error){errors++;continue;}for(const item of result.results){if(item.content.trim().length<80)continue;const sourceKey=`url:${await digest(item.url)}`;found.push({id:await stableUuid(sourceKey),title:item.title,company:'Employer not yet verified',location:'',url:item.url,description:item.content,contact:null,source:'web_search',sourceKey,checkedAt:new Date().toISOString(),verification:'unverified',status:'saved',followUpAt:null,notes:'Search text is discovery evidence only. Confirm the employer and full vacancy before using this opportunity.'});count++;}}catch(error){errors++;state.messages!.push(error instanceof ApiError?error.message:'A search query could not be confirmed.');}}
         state.lanes!.push(lane('Broad web search',errors||profile.targetTitles.length>LIMITS.queries?'partial':queries.length?'completed':'not_run',count,`${queries.length} bounded title/location queries attempted of ${profile.targetTitles.length} target titles. Search results and snippets are not proof that a vacancy is open.`));
       }else state.lanes!.push(lane('Broad web search','not_connected',0,'Search is disabled or its server key is missing. No market-wide search is claimed.'));
-      const known=await repo.record(run.user_id);const indexed=new Map(known.data.opportunities.map(item=>[item.sourceKey,item]));const newFound:LoopOpportunity[]=[];
-      let admitted=0;
-      // Refresh source facts on existing discoveries even if they no longer fit;
-      // retain their history, then apply the current target before preparation/reuse.
-      for(const opportunity of found){const matches=matchesDiscoveryTarget(profile,opportunity);const existing=indexed.get(opportunity.sourceKey);if(existing&&existing.source!=='manual'){const refreshed={...opportunity,id:existing.id,status:existing.status,notes:existing.notes,followUpAt:existing.followUpAt};indexed.set(opportunity.sourceKey,refreshed);newFound.push(refreshed);if(matches)admitted++;}else if(matches&&!existing&&indexed.size<100){indexed.set(opportunity.sourceKey,opportunity);newFound.push(opportunity);admitted++;}}
-      state.lanes!.push(lane('Targeted shortlist','completed',admitted,'Only declared role/location matches without a stated seniority, experience or comparable pay conflict are added. Unknown conditions remain unknown. Limited sources do not establish the size of the wider job market; eligibility and source conditions still need your review.'));
-      const all=[...indexed.values()].filter(item=>['saved','prepared'].includes(item.status)&&item.verification!=='closed_confirmed'&&(item.source==='manual'||matchesDiscoveryTarget(profile,item)));
+      const known=await repo.record(run.user_id);const discovery=reconcileDiscovery(profile,known.data.opportunities,found);const newFound=discovery.updates;
+      const all=discovery.preparation;
+      state.lanes!.push(lane('Targeted shortlist',discovery.deferred?'partial':'completed',all.filter(item=>item.source!=='manual').length,'Only declared role/location matches without a stated seniority, experience or comparable pay conflict are added. Exact source URLs are deduplicated. Automatically found jobs need a fresh source observation for this run; unknown conditions remain unknown. Limited sources do not establish the size of the wider job market.'));
+      if(discovery.stale)state.messages!.push(`${discovery.stale} previously listed opportunit${discovery.stale===1?'y was':'ies were'} not confirmed in this source read. History is retained; availability is unknown and automatic preparation was skipped.`);
+      if(discovery.deferred)state.messages!.push(`${discovery.deferred} new matching opportunities could not be saved because the workspace contains 100 opportunities. Existing application history was preserved.`);
       const existingPackets=(await repo.collections(run.user_id)).packets.filter(item=>['review_required','approved'].includes(item.status));
       const reusable=new Map<string,string>();
       for(const opportunity of all){const currentHash=await packetInputHash(profile,run.snapshot.claims,opportunity,run.snapshot.cvSelection),packet=existingPackets.find(item=>item.data.opportunityId===opportunity.id&&item.data.inputHash===currentHash);if(packet)reusable.set(opportunity.id,packet.id);}
@@ -431,18 +431,18 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
         const existing=(await repo.collections(run.user_id)).packets.find(item=>['review_required','approved'].includes(item.status)&&item.data.opportunityId===opportunity.id&&item.data.inputHash===hash);
         if(existing){state.reusedPacketIds=[...new Set([...(state.reusedPacketIds??[]),existing.id])];state.messages!.push('An unchanged selected packet was retained without another preparation charge.');await repo.commit(run,run.phase+1,'running',state);return true;}
       }
-      const assessment=assessOpportunity(profile,run.snapshot.claims,opportunity);const allowed=eligibleLoopClaims(profile,run.snapshot.claims).filter(claim=>assessment.claimIds.includes(claim.id));let selectedClaimIds:string[]|undefined;let modelQuestions:{question:string;claimIds:string[]}[]=[];
+      const assessment=assessOpportunity(profile,run.snapshot.claims,opportunity);const allowed=eligibleLoopClaims(profile,run.snapshot.claims).filter(claim=>assessment.claimIds.includes(claim.id));let selectedClaimIds:string[]|undefined;let proposedRewrites:LoopClaimRewrite[]=[];let modelQuestions:{question:string;claimIds:string[]}[]=[];
       if(run.provider!=='rules'){
         if((modelConfiguration(run.provider,run.model,env).transport??'direct')!==(run.consents.processingRoute??'direct'))throw new ApiError(409,'LOOP_PROCESSING_ROUTE_CHANGED','The processing route changed after approval. No paid call was made; start again with explicit route consent.');
         const request=prepareModelRequest(run.provider,run.model,env,opportunity,allowed);const result=await metered(repo,run,`model:${opportunity.id}`,run.provider,request.reservedMicros,()=>callModel(request,fetcher),env);
-        if(result.error)throw new ApiError(422,'LOOP_MODEL_OUTPUT_INVALID',result.error);selectedClaimIds=result.claimIds;modelQuestions=result.reviewQuestions??[];
+        if(result.error)throw new ApiError(422,'LOOP_MODEL_OUTPUT_INVALID',result.error);selectedClaimIds=result.claimIds;proposedRewrites=result.rewrites??[];modelQuestions=result.reviewQuestions??[];
       }
-      const packetId=await stableUuid(`${run.id}:${opportunity.id}`);const packet=await composePacket({profile,claims:run.snapshot.claims,opportunity,assessment,selectedClaimIds,runId:run.id,packetId,inputHash:await packetInputHash(profile,run.snapshot.claims,opportunity,run.snapshot.cvSelection),createdAt:run.created_at,model:{provider:run.provider,model:run.model,method:run.provider==='rules'?RULES_MODEL:'approved-claim-id-selection-v1'}});
+      const packetId=await stableUuid(`${run.id}:${opportunity.id}`);const packet=await composePacket({profile,claims:run.snapshot.claims,opportunity,assessment,selectedClaimIds,proposedRewrites,runId:run.id,packetId,inputHash:await packetInputHash(profile,run.snapshot.claims,opportunity,run.snapshot.cvSelection),createdAt:run.created_at,model:{provider:run.provider,model:run.model,method:run.provider==='rules'?RULES_MODEL:'source-bound-deep-tailoring-v1'}});
       if(run.snapshot.cvSelection)packet.cvSelection=structuredClone(run.snapshot.cvSelection);
       packet.interviewBrief=buildInterviewBrief(profile,run.snapshot.claims,opportunity,packet);
       if(modelQuestions.length){
         packet.interviewBrief=modelQuestions.map((item,index)=>({title:`AI review question ${index+1} — check before use`,prompt:item.question,evidenceClaimIds:item.claimIds,sourceQuote:item.claimIds.map(id=>allowed.find(claim=>claim.id===id)?.sourceQuote??'').join('\n')})).concat(packet.interviewBrief.slice(modelQuestions.length));
-        packet.model.method='OpenRouter; approved evidence selection and reviewable questions; calculations remain deterministic';
+        packet.model.method='OpenRouter; source-bound Deep Tailor suggestions and reviewable questions; calculations remain deterministic';
       }
       packet.evidenceText+='\n\nINTERVIEW PREPARATION — FACTUAL PROMPTS, NOT PERFORMANCE SCORING\n'+packet.interviewBrief.map(item=>`${item.title}\n${item.prompt}\nSource: ${item.sourceQuote}\nEvidence IDs: ${item.evidenceClaimIds.join(', ')||'vacancy/conditions only'}`).join('\n\n');
       if(opportunity.source==='web_search'&&opportunity.verification==='unverified'){packet.holdReasons.push('The employer and complete vacancy are unverified. Add confirmed source text before using this packet.');packet.status='held';}

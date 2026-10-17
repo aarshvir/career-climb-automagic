@@ -236,15 +236,13 @@ describe('tailor-for-job allowance', () => {
       p_free_monthly: 3, p_pass_daily: 40, p_guest_daily: 1, p_guest_global_daily: 200 });
     expect(rpc('jobvance_tailor_reserve')[0].args).not.toHaveProperty('p_user_daily');
   });
-  it('reserves as a guest with a keyed hash only', async () => {
+  it.each([null, 'Bearer invalid-token', 'Bearer fixture-anon-key'])('requires an account before reservation or provider work (%s)', async authorization => {
     reserveFails('TAILOR_GUEST_LIMIT');
-    const response = await tailor()(request(body(), null, origin));
-    const payload = await response.json();
-    expect(payload).toMatchObject({ code: 'TAILOR_GUEST_LIMIT' });
-    expect(payload.error).toMatch(/passes from \$9 on the Pricing page/);
-    const args = rpc('jobvance_tailor_reserve')[0].args;
-    expect(args.p_user).toBeNull();
-    expect(args.p_rate_hash).toMatch(/^[a-f0-9]{64}$/);
+    const response = await tailor()(request(body(), authorization, origin));
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({ code: 'TAILOR_AUTH_REQUIRED' });
+    expect(rpc('jobvance_tailor_reserve')).toHaveLength(0);
+    expect(fetches).toHaveLength(0);
   });
   it.each([
     ['TAILOR_PASS_DAILY_LIMIT', 429, /fair-use limit of 40/],

@@ -19,8 +19,8 @@ const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
 const ApplicationsHome = lazy(() => import("@/pages/ApplicationsHome"));
 const Workspace = lazy(() => import("@/pages/Workspace"));
 const JobLoop = lazy(() => import("@/pages/JobLoop"));
+const LoopOnboarding = lazy(() => import("@/pages/LoopOnboarding"));
 const AudienceLanding = lazy(() => import("@/pages/AudienceLanding"));
-const PilotLanding = lazy(() => import("@/pages/PilotLanding"));
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
 const AdminPortal = lazy(() => import("@/pages/admin/AdminPortal"));
 const JobLoopOverview = lazy(() => import('@/pages/JobLoopOverview'));
@@ -45,6 +45,12 @@ function ProtectedWorkspace() {
   ) : (
     <Navigate to={`/auth?next=${encodeURIComponent(workspaceReturnPath(location.search))}`} replace />
   );
+}
+function ProtectedCvCheck() {
+  const { user, loading, authError, retryConnection } = useAuth();
+  if (authError) return <main className="p-8"><p role="alert">Your sign-in could not be restored.</p><button onClick={retryConnection}>Retry sign-in recovery</button><p><Link to="/auth?next=%2Fcheck">Open sign-in</Link></p></main>;
+  if (loading) return <p className="p-8" role="status">Opening your CV Check…</p>;
+  return user ? <CvCheck key={user.id} /> : <Navigate to="/auth?mode=signup&next=%2Fcheck" replace />;
 }
 function ProtectedApplications() {
   const location = useLocation();
@@ -88,8 +94,9 @@ export default function MvpApp() {
                 >
                   <Routes>
                     <Route path="/" element={<ProductPage kind="home" />} />
-                    <Route path="/pilot" element={<PilotLanding />} />
-                    <Route path="/check" element={<CvCheck />} />
+                    <Route path="/pilot" element={<Navigate to="/job-loop" replace />} />
+                    <Route path="/check" element={<ProtectedCvCheck />} />
+                    <Route path="/onboarding" element={<LoopOnboarding />} />
                     <Route path="/loop" element={<ProtectedJobLoop />} />
                     <Route path="/job-loop" element={<JobLoopOverview />} />
                     <Route path="/guides" element={<CareerGuides />} />

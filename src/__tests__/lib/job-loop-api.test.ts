@@ -17,6 +17,26 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers();vi.restoreAllMocks(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
 
 describe('cloud loop API privacy and owner boundaries', () => {
+  it('revokes a setup intent during a delayed SDK session read before any control mutation', async () => {
+    let session!: (value: unknown) => void;
+    let authority = 1;
+    sdk.session.mockImplementationOnce(() => new Promise(resolve => { session = resolve; }));
+    const original = authority;
+    const action: LoopAction = { action: 'save_profile', expectedVersion: 7, saveConsent: true, profile: { audience: 'professional', name: 'Alex Example', contactLine: '', targetTitles: ['Analyst'], locations: ['US'], experienceYears: null, languages: [], pageTarget: 1, discreetSearch: true, sourceText: 'Alex Example\nEducation\nStudied biology and documented local plant species for a university fieldwork project.', excludedTerms: [], compensation: { currency: '', period: 'annual', minimum: null } } };
+    const pending = callJobLoop('owner-a', action, () => authority === original);
+    authority += 2; // A to B to A: owner text matches, original lifetime does not.
+    session({ user: { id: 'owner-a' } });
+    await expect(pending).rejects.toThrow('setup or sign-in changed');
+    expect(sdk.invoke).not.toHaveBeenCalled();
+  });
+  it('rejects a setup receipt when its page authority changes during the control request', async () => {
+    let finish!: (value: unknown) => void; let current = true;
+    sdk.invoke.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const pending = callJobLoop('owner-a', { action: 'suggest_claims' }, () => current);
+    await vi.waitFor(() => expect(sdk.invoke).toHaveBeenCalledOnce()); current = false;
+    finish({ data: { message: 'A stale result' }, error: null });
+    await expect(pending).rejects.toThrow('setup or sign-in changed');
+  });
   it('keeps the paid route consent across browser parsing and server action validation',async()=>{
     const action={action:'start_run',expectedGeneration:0,requestId:'00000000-0000-4000-8000-000000000001',provider:'openai',model:'gpt-6.1-sol',modelConsent:true,inboxConsent:false,processingRoute:'openrouter'} as const;
     sdk.invoke.mockImplementationOnce(async(_name,options)=>{expect(validateControlInput(options.body)).toEqual(action);return{data:{message:'Synthetic action confirmed'},error:null};});

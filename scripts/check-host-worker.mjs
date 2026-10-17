@@ -39,7 +39,7 @@ const index = await readFile(join(dist, 'index.html'));
 const undecodedHead = await request('/dashboard', { method: 'HEAD' });
 assert.equal(undecodedHead.status, 200);
 assert.equal(decodedAssets, 0, 'HEAD must not decode an asset body.');
-for (const path of ['/dashboard?tab=cv', '/auth/callback?code=synthetic', '/auth/reset']) {
+for (const path of ['/dashboard?tab=cv', '/onboarding', '/auth/callback?code=synthetic', '/auth/reset']) {
   const response = await request(path);
   assert.equal(response.status, 200, `SPA route ${path} must serve the frontend.`);
   checkHeaders(response);
@@ -66,26 +66,30 @@ for(const page of publicRender.pages){
   if(page.path==='/') assert.ok(!/href="\/check\?audience=/.test(html),'Examples must not select a persona for a neutral visitor.');
   if(page.path==='/pricing') {
     assert.ok(html.includes('Free to start: 3 tailored CVs a month. Passes from $9, one-time.'));
-    for(const price of ['$9','$19','$39'])assert.ok(html.includes(price),'The public offer must show each pass price.');
-    assert.ok(!/\$15|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable or legacy purchases.');
-    for (const text of ['Planned monthly subscriptions', 'These plans are proposals, not available to buy.', 'the free beta does not include these paid allowances', 'USD / month', 'Not available for purchase.']) {
-      assert.ok(html.includes(text), `Pricing must distinguish current access from proposed monthly plans: ${text}`);
-    }
     // React inserts this exact empty comment between adjacent text nodes ($ and price).
     // Normalize only that separator; require each price inside its actual visible card.
     const pricingHtml = html.replaceAll('<!-- -->', '');
+    for(const price of [9,19,39])assert.ok(pricingHtml.includes(`<p class="product-price">$${price}<span>One-time`),'The public offer must show each one-time pass price in its card.');
+    assert.ok(!/\$15|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable or legacy purchases.');
+    for (const text of ['Job Loop monthly plans', 'Monthly subscriptions are not available for purchase yet.', 'no subscription starts automatically', 'USD / month', 'Not available for purchase.']) {
+      assert.ok(html.includes(text), `Pricing must distinguish current access from unavailable monthly subscriptions: ${text}`);
+    }
     for (const price of [29, 59, 99]) {
       assert.ok(pricingHtml.includes(`<p class="product-price">$${price}<span>USD / month</span></p>`), `Proposed card must display $${price} USD per month.`);
     }
     assert.ok(!/<form\b/i.test(html), 'The public pricing page must not collect purchase details.');
-    assert.ok(!/<(?:a|button)\b[^>]*>[\s]*?(?:Buy|Subscribe|Pay|Checkout)\b/i.test(html), 'Proposed plans must not expose purchase actions.');
-    assert.ok(!/(?:href|action)="[^"]*(?:\/(?:checkout|billing|subscribe)(?:[/?"]|$)|checkout\.paddle|buy\.stripe)/i.test(html), 'Proposed plans must not link to a checkout destination.');
+    const monthlySection = html.match(/<section\b[^>]*aria-labelledby="proposed-plans-title"[^>]*>([\s\S]*?)<\/section>/)?.[1];
+    assert.ok(monthlySection, 'Monthly plans must remain in their own visible section.');
+    assert.ok(!/<(?:a|button)\b[^>]*>[\s]*?(?:Buy|Subscribe|Pay|Checkout)\b/i.test(monthlySection), 'Unavailable monthly plans must not expose purchase actions.');
+    assert.ok(!/(?:href|action)="[^"]*(?:\/(?:checkout|billing|subscribe)(?:[/?"]|$)|checkout\.paddle|buy\.stripe)/i.test(monthlySection), 'Unavailable monthly plans must not link to a checkout destination.');
   }
   if(page.path==='/check') {
-    assert.ok(html.includes('Tailor your CV to one job'),'The initial check page must explain its purpose before JavaScript/auth resolves.');
-    assert.ok(html.includes('Your tailored CV with each change listed beside your original wording'),'The check explanation must describe reviewable output.');
-    assert.ok(html.includes('If you choose AI tailoring, the CV text and job description are sent to our AI provider'),'The initial explanation must disclose optional external processing.');
-    assert.ok(html.includes('runs entirely on your device. Saving to an account is optional.'),'Local comparison and optional saving must stay clear.');
+    assert.ok(html.includes('CV Check, in your Jobvance account.'),'The initial check page must explain its account requirement before JavaScript/auth resolves.');
+    assert.ok(html.includes('Compare your CV with a job, review tailored wording and download your approved version.'),'The account entry must describe review and approval before download.');
+    assert.ok(html.includes('href="/auth?mode=signup&amp;next=%2Fcheck"'),'Creating an account must retain the exact check destination.');
+    assert.ok(html.includes('href="/auth?next=%2Fcheck"'),'Existing accounts must have a sign-in return to the check.');
+    assert.ok(!/<textarea\b|<input\b[^>]*type="file"/i.test(html),'Public pre-authentication HTML must not expose CV-source entry controls.');
+    assert.ok(!/no account needed|saving to an account is optional|without an account/i.test(html),'Public CV Check must not advertise a guest product.');
   }
   if(page.kind==='guide'){assert.ok(!html.includes('We could not find that guide.'));assert.ok(html.includes('BlogPosting'));assert.ok(html.includes('Sources and further reading'));}
   for(const match of html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)){

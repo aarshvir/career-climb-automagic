@@ -47,7 +47,7 @@ describe('server-only provider contracts',()=>{
     const fetcher=vi.fn(async()=>json({jobs:[{id:12,title:'Graduate analyst',absolute_url:'https://careers.example.com/12',content:'<p>Academic project analysis and careful coursework reporting.</p>'.repeat(3)}]}));const result=await readEmployerFeed({provider:'greenhouse',board:'fictional',company:'Fictional employer'},fetcher);expect(result.opportunities[0].verification).toBe('listed_on_source');expect(result.opportunities[0].company).toBe('Fictional employer');expect(fetcher).toHaveBeenCalledTimes(1);
     await expect(readEmployerFeed({provider:'greenhouse',board:'fictional'},async()=>json({success:true}))).rejects.toThrow(/published job listing/);
     await expect(readEmployerFeed({provider:'lever',board:'../private'},fetcher)).rejects.toThrow(/Invalid employer/);
-    await expect(readEmployerFeed({provider:'lever',board:'fictional'},async()=>new Response('['+' '.repeat(1000001)+']'))).rejects.toBeInstanceOf(UncertainProviderCall);
+    await expect(readEmployerFeed({provider:'lever',board:'fictional'},async()=>new Response('['+' '.repeat(5000001)+']'))).rejects.toBeInstanceOf(UncertainProviderCall);
   });
   it('allows only server-configured public feed identifiers and blocks unsafe URLs',()=>{
     expect(employerFeeds(env({JOB_LOOP_EMPLOYER_FEEDS:'[{"provider":"greenhouse","board":"../../private"}]'}))).toEqual([]);

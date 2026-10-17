@@ -27,14 +27,16 @@ export class TailorUnavailable extends Error {
 }
 
 const messages: Record<number, string> = {
+  401: 'Sign in to your Jobvance account to tailor your CV.',
   429: 'You have reached your AI tailoring limit for now. Compare without AI and editing still work. Passes start at $9 on the Pricing page.',
   503: 'AI tailoring is unavailable right now. Your CV comparison still works.',
 };
 
 /** Sends the CV and vacancy (and any answers the candidate confirmed) for source-bound tailoring. Explicit consent is required by the server. */
-export async function requestTailoredCv(input: { cvText: string; jobDescription: string; jobTitle: string; company: string; facts?: string[] }): Promise<TailoredCv> {
+export async function requestTailoredCv(input: { cvText: string; jobDescription: string; jobTitle: string; company: string; facts?: string[]; factSources?: number[] }): Promise<TailoredCv> {
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const body = { requestId: crypto.randomUUID(), cvText: input.cvText, jobDescription: input.jobDescription, jobTitle: input.jobTitle, company: input.company, consent: true, ...(input.facts?.length ? { facts: input.facts } : {}) };
+  const body = { requestId: crypto.randomUUID(), cvText: input.cvText, jobDescription: input.jobDescription, jobTitle: input.jobTitle, company: input.company, consent: true, ...(input.facts?.length ? { facts: [...input.facts], factSources: [...(input.factSources ?? [])] } : {}) };
+  if (body.facts && (body.facts.length > 5 || body.factSources?.length !== body.facts.length || body.factSources.some(n => !Number.isInteger(n) || n < 1))) throw new TailorUnavailable('Choose the CV role or line each answer belongs to.', 'TAILOR_INVALID');
   const result = await Promise.race([
     supabase.functions.invoke('tailor-for-job', { body }),
     new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new TailorUnavailable('AI tailoring took too long. Your CV comparison still works.', 'TAILOR_TIMEOUT')), 140000); }),
@@ -50,6 +52,7 @@ export async function requestTailoredCv(input: { cvText: string; jobDescription:
   }
   const parsed = responseSchema.safeParse(result.data);
   if (!parsed.success) throw new TailorUnavailable('The AI suggestions could not be checked. Your CV comparison still works.', 'TAILOR_UNREADABLE');
+  if (parsed.data.tailored.changes.some(change => change.facts.some(n => n > (body.facts?.length ?? 0) || (change.kind === 'summary' ? !change.sources.includes(body.factSources![n - 1]) : change.n !== body.factSources![n - 1])))) throw new TailorUnavailable('The answer references could not be checked. Your current CV is unchanged.', 'TAILOR_UNREADABLE');
   return parsed.data.tailored;
 }
 
