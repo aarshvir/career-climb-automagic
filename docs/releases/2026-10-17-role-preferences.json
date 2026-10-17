@@ -1,0 +1,88 @@
+{
+  "source": "9346ac5d054a69e4cf288f746092d39ebd3c5398",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_00dd07cd356c819186166e5d200220b7",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 38,
+    "source": {
+      "commit_sha": "9346ac5d054a69e4cf288f746092d39ebd3c5398"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000138881f48d900f945edda32b",
+      "content_hash": "sha256:cd48c58ff0df36a9ee0d18f7add8ffbb9f56779c1840c5f5f3c71dcf1e45b442",
+      "size_bytes": 15011840,
+      "file_count": 132
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad39920b2308191ba1715503abe081a",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_00dd07cd356c819186166e5d200220b7",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-17T15:50:20.354009+00:00"
+  },
+  "backend": {
+    "worker": {
+      "version": 15,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "files": [
+        {
+          "name": "index.js",
+          "match": true
+        },
+        {
+          "name": "deno.json",
+          "match": true
+        }
+      ]
+    },
+    "control": {
+      "version": 20,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "files": [
+        {
+          "name": "index.js",
+          "match": true
+        },
+        {
+          "name": "deno.json",
+          "match": true
+        }
+      ]
+    }
+  },
+  "validation": {
+    "tests": 2605,
+    "testFiles": 144,
+    "independentFocusedTests": 158,
+    "typescript": "passed",
+    "sourceDeno": 28,
+    "generatedDeno": 28,
+    "hostingGroups": 12,
+    "browser": "isolated exact preference save passed"
+  },
+  "rollback": {
+    "tag": "jobvance-before-role-preferences-2026-10-17",
+    "savedVersion": "v37",
+    "backendBackups": "role-preferences-before-*.json"
+  },
+  "limitations": [
+    "Bounded role catalogue and English broad-level patterns; no automatic profession inference from Google identity",
+    "Browser used synthetic auth/storage; no fresh hosted authenticated or mobile journey",
+    "No paid providers, migrations, billing or candidate-data changes"
+  ],
+  "site": "https://jobvance.io"
+}
