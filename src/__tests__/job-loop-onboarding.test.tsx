@@ -51,8 +51,8 @@ afterEach(() => { cleanup(); clearLoopWorkingDraft(); vi.restoreAllMocks(); });
 describe('Job Loop source-first onboarding', () => {
   it('offers first value to guests before private saving needs sign-in', () => {
     mocks.user = null; render(tree());
-    expect(screen.getByRole('link', { name: 'Prepare my first application' })).toHaveAttribute('href', '/check?audience=professional');
-    expect(screen.getByRole('link', { name: 'Sign in to my saved Job Loop' })).toHaveAttribute('href', '/auth?next=%2Floop');
+    expect(screen.getByRole('link', { name: 'Try a CV check first' })).toHaveAttribute('href', '/check?audience=professional');
+    expect(screen.getByRole('link', { name: 'Set up my Job Loop' })).toHaveAttribute('href', '/auth?next=%2Floop');
     expect(mocks.call).not.toHaveBeenCalled();
   });
   it('shows one first action and saves no invented preparation or search result', async () => {
@@ -60,7 +60,7 @@ describe('Job Loop source-first onboarding', () => {
     expect(await screen.findByRole('button', { name: /Import or paste my CV/ })).toBeEnabled();
     expect(screen.queryByRole('button', { name: 'Prepare today’s applications' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Enable recurring preparation' })).not.toBeInTheDocument();
-    expect(screen.getByText(/0 of 4 saved steps ready/)).toBeInTheDocument();
+    expect(within(screen.getByRole('list', { name: 'Job Loop journey' })).getAllByRole('listitem')).toHaveLength(3);
     expect(screen.getByText(/No employer API sources are reported as configured/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open the free CV check' })).toHaveAttribute('href', '/check?audience=professional');
     expect(mocks.call.mock.calls.every(([, action]) => action.action === 'get')).toBe(true);
@@ -142,7 +142,7 @@ describe('Job Loop source-first onboarding', () => {
   });
   it('skips a passage without creating a claim and clears obsolete suggestion edits after replacing the source', async () => {
     current.profile = savedProfile(); current.recordVersion = 1; render(tree()); const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: 'Career record' })); await user.click(screen.getByRole('button', { name: 'Suggest literal passages' }));
+    await user.click(await screen.findByRole('button', { name: 'My CV & experience' })); await user.click(screen.getByRole('button', { name: 'Suggest literal passages' }));
     const first = await screen.findByText(quote, { selector: 'blockquote' });
     await user.selectOptions(within(first.closest('form')!).getByLabelText('Evidence context'), 'academic_project');
     await user.click(screen.getByRole('button', { name: 'Skip this passage' }));
@@ -155,8 +155,8 @@ describe('Job Loop source-first onboarding', () => {
     current.profile = savedProfile(); current.recordVersion = 1; current.claims = [{ ...suggestion(quote), confirmed: true, shareable: true, id: 'synthetic-saved-fact', status: 'active', revision: 1, createdAt: '2026-10-13T00:00:00Z' }];
     render(tree()); const user = userEvent.setup();
     expect(await screen.findByRole('heading', { name: 'Pick up where you left off.' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Add my first real vacancy/ })).toBeEnabled();
-    await user.click(screen.getByRole('button', { name: 'Career record' }));
+    expect(screen.getByRole('button', { name: /Set up my job search/ })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: 'My CV & experience' }));
     expect(screen.getByLabelText('My name')).toHaveValue('Fictional saved name');
     expect(screen.getByLabelText('Target roles')).toHaveValue('Operations analyst');
     expect(screen.getByText('Review or replace your source CV').closest('details')).not.toHaveAttribute('open');

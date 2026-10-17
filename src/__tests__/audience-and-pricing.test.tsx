@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -44,20 +44,17 @@ describe('audience entry points', () => {
 describe('current offer', () => {
   it('starts free and offers only the three one-time passes, never the legacy pack or a subscription', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    expect(screen.getAllByRole('heading', { level: 2 }).slice(0, 4).map(heading => heading.textContent)).toEqual(['Free', 'Sprint', 'Job Search', 'Career Move']);
-    expect(screen.getByRole('link', { name: /Check my CV against a job/ })).toHaveAttribute('href', '/check');
-    expect(screen.queryByText(/\$15|\$29|ten application packs|per month, billed|cancel anytime|free trial/i)).not.toBeInTheDocument();
+    const passes = screen.getByRole('region', { name: /AI CV tailoring/ });
+    expect(within(passes).getAllByRole('heading', { level: 3 }).map(heading => heading.textContent)).toEqual(['Free', 'Sprint', 'Job Search', 'Career Move']);
+    expect(within(passes).getByRole('link', { name: /Check my CV against a job/ })).toHaveAttribute('href', '/check');
+    expect(within(passes).queryByText(/\$15|\$29|ten application packs|per month, billed|cancel anytime|free trial/i)).not.toBeInTheDocument();
     expect(screen.getByText('One-time payment. No subscription, nothing renews.')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
   it('states the new free allowance everywhere the old beta line was', () => {
-    render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByText('Free to start: 3 tailored CVs a month. Passes from $9, one-time.')).toBeInTheDocument();
-    expect(screen.queryByText(/free while in beta/i)).not.toBeInTheDocument();
-    cleanup();
     render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByText('Free to start: 3 tailored CVs a month. Passes from $9, one-time.')).toBeInTheDocument();
-    expect(screen.queryByText(/2 tailored CVs a day|8 when signed in|during beta/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/2 tailored CVs a day|8 when signed in/i)).not.toBeInTheDocument();
   });
   it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);
@@ -74,26 +71,44 @@ describe('current offer', () => {
   });
 });
 
-describe('neutral homepage start', () => {
-  it('changes the visible example without changing any check destination or requiring an audience setup', () => {
+describe('Job Loop access and proposed plans', () => {
+  it('keeps current free access separate from unavailable monthly proposals', () => {
+    render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
+    expect(screen.getByRole('heading', { name: 'Start your Job Loop' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Start my Job Loop' })).toHaveAttribute('href', '/loop');
+    expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
+    expect(screen.getByText(/Cloud preparation is limited to ten accounts/)).toBeInTheDocument();
+    const proposals = screen.getByRole('region', { name: 'Planned monthly subscriptions' });
+    expect(proposals).toHaveTextContent('not available to buy');
+    expect(proposals).toHaveTextContent('the free beta does not include these paid allowances');
+    for (const price of ['$29', '$59', '$99']) expect(proposals).toHaveTextContent(price);
+    expect(within(proposals).getAllByText('USD / month')).toHaveLength(3);
+    expect(proposals).toHaveTextContent('1 Job Loop run a week');
+    expect(proposals).toHaveTextContent('3 Job Loop runs a week');
+    expect(proposals).toHaveTextContent('1 Job Loop run a day');
+    expect(within(proposals).queryByRole('link')).not.toBeInTheDocument();
+    expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByText(/does not become a paid subscription automatically/)).toBeInTheDocument();
+  });
+});
+
+describe('Job Loop first homepage', () => {
+  it('explains the ordered search journey and offers a separate neutral CV Check entry', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
-    const examples = screen.getByRole('group', { name: 'Compare examples' });
-    const expectedExamples = [
-      ['Project experience', 'Graduate data analyst'],
-      ['Career change', 'Business analyst'],
-      ['Work experience', 'Operations analyst'],
-    ];
-    for (const [label, role] of expectedExamples) {
-      fireEvent.click(within(examples).getByRole('button', { name: label }));
-      expect(within(examples).getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
-      expect(screen.getByRole('heading', { name: role })).toBeInTheDocument();
-      expect(screen.getByRole('status')).toHaveTextContent('This changes the example only; everyone starts with the same CV check.');
-      const starts = screen.getAllByRole('link').filter(link => link.getAttribute('href')?.startsWith('/check'));
-      expect(starts.length).toBeGreaterThan(0);
-      for (const start of starts) expect(start).toHaveAttribute('href', '/check');
-    }
-    expect(screen.getByText(/There is no separate student or professional setup to choose/)).toBeInTheDocument();
-    expect(screen.getByText(/Start with your CV or choose a saved CV check/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Automate your job search.');
+    const stages = within(screen.getByRole('list', { name: 'Your Job Loop journey' })).getAllByRole('listitem');
+    expect(stages).toHaveLength(3);
+    expect(stages[0]).toHaveTextContent('Add your experience');
+    expect(stages[0]).toHaveTextContent('build your first CV from guided questions');
+    expect(stages[1]).toHaveTextContent('Choose your search');
+    expect(stages[1]).toHaveTextContent('roles and locations');
+    expect(stages[2]).toHaveTextContent('Review your dashboard');
+    expect(stages[2]).toHaveTextContent('approve your documents');
+    for (const link of screen.getAllByRole('link', { name: 'Start my Job Loop' })) expect(link).toHaveAttribute('href', '/loop');
+    expect(screen.getByRole('link', { name: /Try a free CV check/ })).toHaveAttribute('href', '/check');
+    for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
+    expect(screen.getByText(/Scheduled runs use rules-based preparation/)).toHaveTextContent('AI preparation needs your consent for each run');
+    expect(screen.getByText(/Broad web search and inbox access are not currently connected/)).toBeInTheDocument();
   });
 });
 
@@ -101,7 +116,7 @@ describe('published draft privacy guidance', () => {
   it('links the concise guest privacy explanation to the full storage choices', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByRole('link', { name: 'How your CV is handled' })).toHaveAttribute('href', '/privacy');
-    expect(screen.getByText(/Your free check runs on your device/)).toHaveTextContent(/Sign in when you want to save an approved version privately/);
+    expect(screen.getByText(/Review the experience and vacancy you want to reuse before saving/)).toHaveTextContent('You approve each document');
   });
   it('publishes the consented tab-storage exposure and requires renewed approval after restoration', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);
@@ -109,6 +124,9 @@ describe('published draft privacy guidance', () => {
     expect(paragraph).toHaveTextContent(/Anyone using the same browser tab may access this copy/);
     expect(paragraph).toHaveTextContent(/Restoring a draft clears its approval/);
     expect(paragraph).toHaveTextContent(/does not save the check to your account/);
+    const models = screen.getByRole('heading', { name: 'Optional models and search' }).nextElementSibling;
+    expect(models).toHaveTextContent('comparison without AI runs on your device');
+    expect(models).toHaveTextContent('AI tailoring sends your CV and vacancy text');
     const local = screen.getByRole('heading', { name: 'Your free check' }).nextElementSibling;
     expect(local).toHaveTextContent(/Without optional tab-storage permission, refreshing or closing the tab clears the draft/);
   });

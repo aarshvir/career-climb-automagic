@@ -192,3 +192,11 @@
 @media (max-width:360px) { .jl-downloads { grid-template-columns:1fr; } .jl-panel { padding:21px 16px; } .jl-actions > .jl-button { width:100%; } }
 @media (max-width:650px) { .jl-progress-path { grid-template-columns:1fr 1fr; } .jl-progress-path button { min-height:116px; } .jl-next-cards { grid-template-columns:1fr; } .jl-activity-list { margin-top:17px; } .jl-activity-list li { gap:10px; } .jl-actor { min-width:58px; padding-inline:6px; } }
 @media (prefers-reduced-motion:reduce) { .job-loop-page *, .job-loop-page *::before { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+
+.jl-progress-path.jl-progress-path--three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.jl-progress-path--three li { min-width:0; }
+.jl-progress-path--three small { overflow-wrap:anywhere; }
+.jl-cv-builder { scroll-margin-top:100px; }
+.jl-cv-builder > .jl-button { margin-top:18px; }
+#jl-recurring-panel { scroll-margin-top:100px; }
+@media (max-width:650px) { .jl-progress-path.jl-progress-path--three { grid-template-columns:1fr; } }

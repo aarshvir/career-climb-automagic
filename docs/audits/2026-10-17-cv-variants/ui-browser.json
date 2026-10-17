@@ -1,0 +1,42 @@
+{
+  "recordedAtUtc": "2026-10-17T04:43:42.076Z",
+  "kind": "Assisted local actual-component browser observation with synthetic auth/persistence adapter; not hosted persistence or worker execution",
+  "desktop": [
+    "First source save with current fact selection, explicit device recovery and simulated committed-save response interruption",
+    "Full refresh recovered exact request; fresh retry acknowledgement returned one saved variant",
+    "Three saved variants disable additional creation while edit remains available",
+    "Final source: interrupted revision save, newer draft edit, original retry, second refresh, same original retry, inspect confirmed current source, explicit Continue and fresh consent saved revision3 to same variant; count remained3"
+  ],
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "documentWidth": 375,
+    "observed": "Second distinct source removed inherited passage selection and saved as empty-fact draft with honest readiness text; saved source wrapped without horizontal overflow",
+    "scope": "Observed before final receipt-association correction; final desktop path and complete component tests include that correction"
+  },
+  "screenshots": [
+    {
+      "name": "cv-variant-ui-mobile.png",
+      "sha256": "4651c9552f43ceb4f435b2a091fd5e7f61aa9649734cf1352c1c97dfd6e1b29b"
+    },
+    {
+      "name": "cv-variant-ui-desktop.png",
+      "sha256": "297399b6b6409a0949ae3e1aed392430cd42a3706f3470e5704fbaf54ca46525"
+    }
+  ],
+  "cleanup": {
+    "viewportReset": true,
+    "createdTabClosed": true,
+    "localServerStopped": true,
+    "port8088ListenerAbsent": true
+  },
+  "notPerformed": [
+    "Hosted authentication/persistence",
+    "Actual worker/preparation/export",
+    "Paid model/search calls",
+    "Production candidate mutations",
+    "Unassisted customer tasks"
+  ]
+}

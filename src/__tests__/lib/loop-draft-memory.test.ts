@@ -5,6 +5,20 @@ import { clearTrackingDraftMemory, setTrackingDraftOwner, trackingDraftAuthority
 function draft(lifecycleGeneration = 0): LoopWorkingDraft { return { lifecycleGeneration, profile: { ...blankLoopProfile('mba'), sourceText: 'Fictional private record draft' }, profileDirty: true, lists: { targets: 'Synthetic role', locations: '', languages: '', excluded: '' }, claimDrafts: { synthetic: { chosenKind: 'academic_project', value: { sourceKind: 'user_answer', sourceQuote: 'Synthetic project', phrasing: 'Synthetic project', context: 'Fictional course', kind: 'academic_project', resultStatus: 'not_measured', confirmed: true, shareable: true } } }, suggestions: [], newClaimKey: 0, opportunity: { title: 'Fictional vacancy', company: '', location: '', jobUrl: '', description: '', withContact: false, contact: { name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: true, inExistingThread: false } } }; }
 describe('private route-draft recovery', () => {
   beforeEach(clearLoopWorkingDraft);
+  it('does not recover builder answers retained by a stale owner after SDK authority was revoked', () => {
+    clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a');
+    const value = { ...draft(4), builderAnswers: { name: 'Alex Example', contact: '', summary: '', experience: 'Private project notes', education: '', skills: '' }, builderAuthority: trackingDraftAuthority('owner-a') };
+    retainLoopWorkingDraft('owner-a', value, 1000);
+    expect(recoverLoopWorkingDraft('owner-a', 4, 1001)?.builderAnswers?.name).toBe('Alex Example');
+    setTrackingDraftOwner('owner-b');
+    // A stale UI effect can observe the revoked owner's sentinel; matching two
+    // sentinels must never establish a fresh authenticated lifetime.
+    retainLoopWorkingDraft('owner-a', { ...value, builderAuthority: trackingDraftAuthority('owner-a') }, 1002);
+    expect(recoverLoopWorkingDraft('owner-a', 4, 1003)).toBeNull();
+    setTrackingDraftOwner('owner-a');
+    expect(recoverLoopWorkingDraft('owner-a', 4, 1004)).toBeNull();
+    clearTrackingDraftMemory();
+  });
   it('recovers the exact imported identity with edited wording, without silently detaching it', () => {
     clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a');
     const value = draft(4); value.pendingCheckLink = { ownerId: 'owner-a', authority: trackingDraftAuthority('owner-a'), generation: 4, checkId: '11111111-1111-4111-8111-111111111111', vacancy: { title: 'Original role', company: 'Original company', description: 'Original vacancy' } };

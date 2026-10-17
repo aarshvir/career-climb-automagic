@@ -1,0 +1,156 @@
+{
+  "recordedAtUtc": "2026-10-17T07:48:31.189Z",
+  "status": "unpublished source; both variant migrations unapplied; public v32 and backend unchanged",
+  "baseCommit": "64f275176decccf96cc8c1c010a331e83a4a08d4",
+  "rollbackTag": "jobvance-before-cv-variant-facts-2026-10-17",
+  "scope": "Independent per-variant fact storage/history, original-intent authenticated control/browser contracts and current sharing/withdrawal resolver. No candidate fact UI or variant run selection.",
+  "validation": {
+    "vitest": {
+      "passed": 2227,
+      "files": 126,
+      "added": 165,
+      "addedHelper": 53,
+      "addedSql": 42,
+      "addedBrowserApi": 57,
+      "addedControlPGlite": 13
+    },
+    "appTypeScript": "passed",
+    "sourceDeno": {
+      "passed": 28,
+      "added": 6
+    },
+    "generatedDeno": {
+      "passed": 28,
+      "added": 6
+    },
+    "nativePostgres": {
+      "passed": 9,
+      "receipt": "facts-native-postgres.json",
+      "clusterStopped": true,
+      "ownedPostgresProcessesAfter": 0
+    },
+    "independentReview": {
+      "receipt": "facts-independent-review.json",
+      "reviewedFiles": 15,
+      "passed": 165,
+      "authored": 70,
+      "hashesMatch": true
+    },
+    "productionBuild": {
+      "result": "passed complete build without retry",
+      "summaries": [
+        {
+          "publicPages": 38,
+          "guideArticles": 20,
+          "structuredDataHashes": 58,
+          "externalRequests": 0
+        },
+        {
+          "assets": 125,
+          "staticBytes": 6225952,
+          "workerBytes": 8328721,
+          "compressedBytes": 2819079,
+          "compressedLimitBytes": 3145728
+        }
+      ]
+    },
+    "hosting": {
+      "result": "passed",
+      "publicPages": 38,
+      "guideArticles": 20,
+      "checks": [
+        "security-headers-and-jsonld-hashes",
+        "private-client-routes",
+        "rendered-public-content",
+        "canonical-redirects",
+        "real-notfound-status",
+        "asset-bytes-and-mime",
+        "etag-and-cache",
+        "head",
+        "missing-and-private-paths",
+        "unsafe-methods",
+        "project-identity",
+        "compressed-size"
+      ],
+      "compressedBytes": 2819079
+    }
+  },
+  "corrections": [
+    "Future record versions could skip semantic validation and become current during a concurrent write; both new fact and existing variant save now reject them before persistence.",
+    "Fresh-save receipt cannot claim a newer current variant source without exact replay.",
+    "Native first attempt completed zero cases due missing semicolons in new fixture transaction commands; fixed fixture and reverified vendor before complete nine-group pass."
+  ],
+  "sourceSha256": {
+    "supabase/migrations/20261017080000_job_loop_cv_variant_facts.sql": "847f7079085b6a90e94a05b866043fa7696803243fa7f5818653a8ee64393308",
+    "supabase/functions/_shared/job-loop-cv-variant-facts.ts": "4645c9e0b8b7183fa856400af71bc12082541c9427e32aa67a00440cd55dbd44",
+    "supabase/functions/_shared/job-loop-engine.ts": "cebda065c04c33dec7e2f727a6416ecb51d25d7dcc989cf777b4d34db95a312a",
+    "supabase/functions/_shared/job-loop-runtime.ts": "c6c9fbd4fcaab390727e2556c03574116b4d638a7916ecda8d56017b96ee1ca1",
+    "supabase/functions/_shared/job-loop-repository.ts": "7b014b598970f107a3545f444e8fe0d402dfcfe4d0f96b6092883f55319e51e5",
+    "supabase/functions/_shared/job-loop-request.ts": "3fe54a36f55f94595f213744b09c05426866fd3968387f34c0ca044cd4fec4aa",
+    "supabase/functions/_shared/job-loop-types.ts": "1f9cbd507230ccdfda61d6cd24663e17c568db809f69b9742451263e0d869405",
+    "src/lib/job-loop-api.ts": "143a803c3403e08f171dd3f9cfd1c80a08e06095a9fb795786e6346745d9b20e",
+    "scripts/test-check-tracking-postgres.mjs": "465147b48ce6dbe2275cab986eda4d11ab88a4867dee33ac8047053de2ad15bc",
+    "scripts/fixtures/cv-variant-facts-native-cases.mjs": "52af1a203a053be96940edd2ca0ee64c92464ba5ab59a85c3734dcdf85eb3362",
+    "src/__tests__/lib/job-loop-cv-variant-facts-api.test.ts": "43800ed981f8ad28f0b02d9ee4b1edc18b8ed0b893419e8b251bde7d229a7dba",
+    "supabase/tests/job-loop-cv-variant-facts-runtime.test.ts": "5d4a24b6c16510dd512aab18039df6d7f9b772c86085a4e6c5b17fb474a97142",
+    "supabase/tests/job-loop-cv-variant-facts-sql.test.ts": "d60e42f054fb7da3b10768b3a4a6b7acee784dca08c7ae0fd12e619c8c74d1cb",
+    "supabase/tests/job-loop-cv-variant-facts.test.ts": "d70be8b12537a5e61fc25347bbeeece4b057126ae1778cea7267338c4b10ce16",
+    "supabase/tests/job-loop-edge.deno.ts": "2d55ca3371379d16681cfc799e574b8fe7443e88daf0006d48059b22a817b0e0"
+  },
+  "generatedBundles": [
+    {
+      "function": "job-loop-control",
+      "artifact": "docs/supabase-loop-ui/job-loop-control.js",
+      "bytes": 92874,
+      "sha256": "8ff6f071c3f93e3fd2d1cdea5f14a3cdd8e04e8bfc7df53a94a9329b2e454eeb",
+      "deployed": false
+    },
+    {
+      "function": "job-loop-worker",
+      "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
+      "bytes": 1116455,
+      "sha256": "929074a9f16a31716712ef1a1fd9d7272e2b4145d1862766a85698a745165aa7",
+      "deployed": false
+    },
+    {
+      "function": "job-loop-oauth",
+      "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
+      "bytes": 41304,
+      "sha256": "7f59508056a07647cbc1607908a3cd07f34182bea6a613412dfb70b3b0193ffc",
+      "deployed": false
+    },
+    {
+      "function": "jobvance-admin",
+      "artifact": "docs/supabase-loop-ui/jobvance-admin.js",
+      "bytes": 10981,
+      "sha256": "dfb621c08804f7c1d90f9a3bab54ff7caa1d5c564608d43c7600f7c9d4750bc2",
+      "deployed": false
+    },
+    {
+      "function": "jobvance-review-worker",
+      "artifact": "docs/supabase-loop-ui/jobvance-review-worker.js",
+      "bytes": 21246,
+      "sha256": "f32179a391ccc4d1893f9571f68fc90124af664a5cd6b43ca2c22a1b9984716e",
+      "deployed": false
+    },
+    {
+      "function": "jobvance-guest-support",
+      "artifact": "docs/supabase-loop-ui/jobvance-guest-support.js",
+      "bytes": 5327,
+      "sha256": "d2faa1698b41d6d823e8530388743d8a70eb45184f0c0b37150b1192a7fcd0dc",
+      "deployed": false
+    }
+  ],
+  "buildArtifactSha256": {
+    "dist/server/index.js": "dc0316e570b01aa33f12985b45a01cacd0feb4330286a87303d4ddefed76076d",
+    "dist/.openai/hosting.json": "d04e93c4e284b53771a25ebf4f6cc53437a859cccc1c3ca3e5675c314cc6a4ec"
+  },
+  "limitations": [
+    "No candidate fact editor/browser journey or refresh-recovery implementation in this slice.",
+    "No manual/scheduled variant/fact admission, worker snapshot, packet reuse/approval/download integration.",
+    "Native tests use isolated schemas and created records; PGlite is not multi-connection proof; Deno/browser API use intercepted or mocked service responses.",
+    "No production migration, deployment, candidate mutation, hosted/unassisted first or second task, fresh liveHTTP check, provider call, purchase or spending.",
+    "Public v32/backend control16/worker12/tailor1/OAuth5 and GC configuration remain unchanged.",
+    "Earlier customer simulation retains original synthetic scope and scores."
+  ]
+}

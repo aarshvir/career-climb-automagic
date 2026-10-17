@@ -1,0 +1,835 @@
+{
+  "generatedAt": "2026-10-16T20:51:41.214Z",
+  "method": "10 career contexts crossed with 10 distinct constraints; deterministic actual engine and renderer tests. No scored personas, paid models, real customers, browser sessions, hosted persistence, or unassisted acceptance.",
+  "intendedScenarios": 100,
+  "observedScenarios": 100,
+  "counts": {
+    "review-ready": 50,
+    "protected-hold": 20,
+    "blocked": 10,
+    "gap": 10,
+    "format-limitation": 10
+  },
+  "scenarios": [
+    {
+      "id": "SIM-001",
+      "customerKind": "student-first-role",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-002",
+      "customerKind": "student-first-role",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-003",
+      "customerKind": "student-first-role",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-004",
+      "customerKind": "student-first-role",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-005",
+      "customerKind": "student-first-role",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-006",
+      "customerKind": "student-first-role",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-007",
+      "customerKind": "student-first-role",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-008",
+      "customerKind": "student-first-role",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-009",
+      "customerKind": "student-first-role",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-010",
+      "customerKind": "student-first-role",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-011",
+      "customerKind": "mba-operations",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-012",
+      "customerKind": "mba-operations",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-013",
+      "customerKind": "mba-operations",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-014",
+      "customerKind": "mba-operations",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-015",
+      "customerKind": "mba-operations",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-016",
+      "customerKind": "mba-operations",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-017",
+      "customerKind": "mba-operations",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-018",
+      "customerKind": "mba-operations",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-019",
+      "customerKind": "mba-operations",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-020",
+      "customerKind": "mba-operations",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-021",
+      "customerKind": "early-career-engineer",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-022",
+      "customerKind": "early-career-engineer",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-023",
+      "customerKind": "early-career-engineer",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-024",
+      "customerKind": "early-career-engineer",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-025",
+      "customerKind": "early-career-engineer",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-026",
+      "customerKind": "early-career-engineer",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-027",
+      "customerKind": "early-career-engineer",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-028",
+      "customerKind": "early-career-engineer",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-029",
+      "customerKind": "early-career-engineer",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-030",
+      "customerKind": "early-career-engineer",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-031",
+      "customerKind": "experienced-manager",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-032",
+      "customerKind": "experienced-manager",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-033",
+      "customerKind": "experienced-manager",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-034",
+      "customerKind": "experienced-manager",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-035",
+      "customerKind": "experienced-manager",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-036",
+      "customerKind": "experienced-manager",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-037",
+      "customerKind": "experienced-manager",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-038",
+      "customerKind": "experienced-manager",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-039",
+      "customerKind": "experienced-manager",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-040",
+      "customerKind": "experienced-manager",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-041",
+      "customerKind": "career-switcher",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-042",
+      "customerKind": "career-switcher",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-043",
+      "customerKind": "career-switcher",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-044",
+      "customerKind": "career-switcher",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-045",
+      "customerKind": "career-switcher",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-046",
+      "customerKind": "career-switcher",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-047",
+      "customerKind": "career-switcher",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-048",
+      "customerKind": "career-switcher",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-049",
+      "customerKind": "career-switcher",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-050",
+      "customerKind": "career-switcher",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-051",
+      "customerKind": "career-returner",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-052",
+      "customerKind": "career-returner",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-053",
+      "customerKind": "career-returner",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-054",
+      "customerKind": "career-returner",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-055",
+      "customerKind": "career-returner",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-056",
+      "customerKind": "career-returner",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-057",
+      "customerKind": "career-returner",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-058",
+      "customerKind": "career-returner",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-059",
+      "customerKind": "career-returner",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-060",
+      "customerKind": "career-returner",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-061",
+      "customerKind": "international-graduate",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-062",
+      "customerKind": "international-graduate",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-063",
+      "customerKind": "international-graduate",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-064",
+      "customerKind": "international-graduate",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-065",
+      "customerKind": "international-graduate",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-066",
+      "customerKind": "international-graduate",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-067",
+      "customerKind": "international-graduate",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-068",
+      "customerKind": "international-graduate",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-069",
+      "customerKind": "international-graduate",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-070",
+      "customerKind": "international-graduate",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-071",
+      "customerKind": "contractor",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-072",
+      "customerKind": "contractor",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-073",
+      "customerKind": "contractor",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-074",
+      "customerKind": "contractor",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-075",
+      "customerKind": "contractor",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-076",
+      "customerKind": "contractor",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-077",
+      "customerKind": "contractor",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-078",
+      "customerKind": "contractor",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-079",
+      "customerKind": "contractor",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-080",
+      "customerKind": "contractor",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-081",
+      "customerKind": "senior-specialist",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-082",
+      "customerKind": "senior-specialist",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-083",
+      "customerKind": "senior-specialist",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-084",
+      "customerKind": "senior-specialist",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-085",
+      "customerKind": "senior-specialist",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-086",
+      "customerKind": "senior-specialist",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-087",
+      "customerKind": "senior-specialist",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-088",
+      "customerKind": "senior-specialist",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-089",
+      "customerKind": "senior-specialist",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-090",
+      "customerKind": "senior-specialist",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-091",
+      "customerKind": "first-time-volunteer",
+      "condition": "ready",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-092",
+      "customerKind": "first-time-volunteer",
+      "condition": "remote",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-093",
+      "customerKind": "first-time-volunteer",
+      "condition": "unknown-pay",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-094",
+      "customerKind": "first-time-volunteer",
+      "condition": "discreet",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-095",
+      "customerKind": "first-time-volunteer",
+      "condition": "unconfirmed-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-096",
+      "customerKind": "first-time-volunteer",
+      "condition": "private-fact",
+      "outcome": "protected-hold",
+      "reason": "Unconfirmed or private evidence cannot become an exportable factual CV."
+    },
+    {
+      "id": "SIM-097",
+      "customerKind": "first-time-volunteer",
+      "condition": "no-existing-cv",
+      "outcome": "blocked",
+      "reason": "Current Loop profile requires 80 source characters; guided no-CV creation is a separate unmet customer requirement."
+    },
+    {
+      "id": "SIM-098",
+      "customerKind": "first-time-volunteer",
+      "condition": "missing-target",
+      "outcome": "gap",
+      "reason": "Profile validation accepts zero target titles; broad discovery needs admission/guidance for a role query. Manual selected-vacancy preparation may reasonably omit general targets."
+    },
+    {
+      "id": "SIM-099",
+      "customerKind": "first-time-volunteer",
+      "condition": "chinese-script",
+      "outcome": "format-limitation",
+      "pdfReady": false,
+      "docxParsed": true,
+      "txtExact": true
+    },
+    {
+      "id": "SIM-100",
+      "customerKind": "first-time-volunteer",
+      "condition": "projected-result",
+      "outcome": "review-ready",
+      "pdfReady": true,
+      "docxParsed": true,
+      "txtExact": true
+    }
+  ]
+}

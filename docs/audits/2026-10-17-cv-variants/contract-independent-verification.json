@@ -1,0 +1,803 @@
+{
+  "numTotalTestSuites": 4,
+  "numPassedTestSuites": 4,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 58,
+  "numPassedTests": 58,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1792200838471,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL rejects JSON array masquerading as a saved fact sourceKind",
+          "status": "passed",
+          "title": "rejects JSON array masquerading as a saved fact sourceKind",
+          "duration": 23.782200000000103,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL rejects JSON array masquerading as a saved fact kind",
+          "status": "passed",
+          "title": "rejects JSON array masquerading as a saved fact kind",
+          "duration": 16.235599999999977,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL rejects JSON array masquerading as a saved fact resultStatus",
+          "status": "passed",
+          "title": "rejects JSON array masquerading as a saved fact resultStatus",
+          "duration": 13.357600000000048,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL returns committed exact save after later withdraw while refusing new stale intent",
+          "status": "passed",
+          "title": "returns committed exact save after later withdraw while refusing new stale intent",
+          "duration": 34.035699999999906,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL returns committed exact save after later source while refusing new stale intent",
+          "status": "passed",
+          "title": "returns committed exact save after later source while refusing new stale intent",
+          "duration": 24.920900000000074,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL returns committed exact save after later remove while refusing new stale intent",
+          "status": "passed",
+          "title": "returns committed exact save after later remove while refusing new stale intent",
+          "duration": 25.41689999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL returns original receipt with current later revision without clearing or reverting current data",
+          "status": "passed",
+          "title": "returns original receipt with current later revision without clearing or reverting current data",
+          "duration": 27.47070000000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL rejects conflicting payload for a committed ID even after current source withdrawal",
+          "status": "passed",
+          "title": "rejects conflicting payload for a committed ID even after current source withdrawal",
+          "duration": 20.04880000000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL rejects new current-version request referencing withdrawn facts before persistence",
+          "status": "passed",
+          "title": "rejects new current-version request referencing withdrawn facts before persistence",
+          "duration": 15.620300000000043,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL uses the locked SQL version fence when sharing changes after semantic preflight",
+          "status": "passed",
+          "title": "uses the locked SQL version fence when sharing changes after semantic preflight",
+          "duration": 16.569300000000112,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL uses original lifecycle authority when erasure starts after preflight",
+          "status": "passed",
+          "title": "uses original lifecycle authority when erasure starts after preflight",
+          "duration": 16.50739999999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL withholds save data when erasure starts after its SQL operation but before response",
+          "status": "passed",
+          "title": "withholds save data when erasure starts after its SQL operation but before response",
+          "duration": 19.606399999999894,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL withholds read data when erasure starts after its SQL operation but before response",
+          "status": "passed",
+          "title": "withholds read data when erasure starts after its SQL operation but before response",
+          "duration": 21.151299999999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL reads exact owned variants without initializing an absent owner",
+          "status": "passed",
+          "title": "reads exact owned variants without initializing an absent owner",
+          "duration": 17.493099999999913,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant control against actual isolated SQL"
+          ],
+          "fullName": "independent CV variant control against actual isolated SQL captures the original intent before the first await so later caller mutation cannot replace consent or source",
+          "status": "passed",
+          "title": "captures the original intent before the first await so later caller mutation cannot replace consent or source",
+          "duration": 15.90150000000017,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1792200839895,
+      "endTime": 1792200840202.9016,
+      "status": "passed",
+      "message": "",
+      "name": "supabase/tests/job-loop-cv-variants-independent.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed sends exact private-save intent without an owner override or preparation action",
+          "status": "passed",
+          "title": "sends exact private-save intent without an owner override or preparation action",
+          "duration": 3.671299999999974,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed reads exact generation without initializing or opening the global record",
+          "status": "passed",
+          "title": "reads exact generation without initializing or opening the global record",
+          "duration": 0.5246999999999389,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe save before auth/data transmission: {\"userId\":\"11111111-1111-4111-a111-111111111111\"}",
+          "status": "passed",
+          "title": "rejects unsafe save before auth/data transmission: {\"userId\":\"11111111-1111-4111-a111-111111111111\"}",
+          "duration": 1.4652999999999565,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe save before auth/data transmission: {\"requestHash\":\"forged\"}",
+          "status": "passed",
+          "title": "rejects unsafe save before auth/data transmission: {\"requestHash\":\"forged\"}",
+          "duration": 0.5114000000000942,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe save before auth/data transmission: {\"sourceHash\":\"forged\"}",
+          "status": "passed",
+          "title": "rejects unsafe save before auth/data transmission: {\"sourceHash\":\"forged\"}",
+          "duration": 0.4408000000000811,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe save before auth/data transmission: {\"saveConsent\":false}",
+          "status": "passed",
+          "title": "rejects unsafe save before auth/data transmission: {\"saveConsent\":false}",
+          "duration": 0.3267000000000735,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe save before auth/data transmission: {\"saveConsent\":\"true\"}",
+          "status": "passed",
+          "title": "rejects unsafe save before auth/data transmission: {\"saveConsent\":\"true\"}",
+          "duration": 0.2660000000000764,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe save before auth/data transmission: {}",
+          "status": "passed",
+          "title": "rejects unsafe save before auth/data transmission: {}",
+          "duration": 0.2095000000000482,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe save before auth/data transmission: {\"expectedVersion\":1.5}",
+          "status": "passed",
+          "title": "rejects unsafe save before auth/data transmission: {\"expectedVersion\":1.5}",
+          "duration": 0.22460000000000946,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe save before auth/data transmission: {\"profile\":{\"audience\":\"professional\",\"name\":\"Alex Example\",\"contactLine\":\"\",\"sourceText\":\"Example Group\\nHelped prepare an operations tracker covering six workstreams.\\nEducation: Business studies.\",\"targetTitles\":[\"Analyst\"],\"locations\":[\"Remote\"],\"languages\":[\"English\"],\"experienceYears\":null,\"pageTarget\":1,\"discreetSearch\":true,\"excludedTerms\":[],\"compensation\":{\"currency\":\"\",\"period\":\"monthly\",\"minimum\":null},\"approved\":true}}",
+          "status": "passed",
+          "title": "rejects unsafe save before auth/data transmission: {\"profile\":{\"audience\":\"professional\",\"name\":\"Alex Example\",\"contactLine\":\"\",\"sourceText\":\"Example Group\\nHelped prepare an operations tracker covering six workstreams.\\nEducation: Business studies.\",\"targetTitles\":[\"Analyst\"],\"locations\":[\"Remote\"],\"languages\":[\"English\"],\"experienceYears\":null,\"pageTarget\":1,\"discreetSearch\":true,\"excludedTerms\":[],\"compensation\":{\"currency\":\"\",\"period\":\"monthly\",\"minimum\":null},\"approved\":true}}",
+          "duration": 0.3406999999999698,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe passive read: {\"owner\":\"11111111-1111-4111-a111-111111111111\"}",
+          "status": "passed",
+          "title": "rejects unsafe passive read: {\"owner\":\"11111111-1111-4111-a111-111111111111\"}",
+          "duration": 0.2741999999999507,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe passive read: {}",
+          "status": "passed",
+          "title": "rejects unsafe passive read: {}",
+          "duration": 0.18070000000000164,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects unsafe passive read: {\"expectedGeneration\":-1}",
+          "status": "passed",
+          "title": "rejects unsafe passive read: {\"expectedGeneration\":-1}",
+          "duration": 0.11259999999992942,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed captures nested sources and original request before authentication awaits",
+          "status": "passed",
+          "title": "captures nested sources and original request before authentication awaits",
+          "duration": 61.39390000000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects owner A→B→A across save-before",
+          "status": "passed",
+          "title": "rejects owner A→B→A across save-before",
+          "duration": 62.638900000000035,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects owner A→B→A across save-after",
+          "status": "passed",
+          "title": "rejects owner A→B→A across save-after",
+          "duration": 62.34780000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects owner A→B→A across read-before",
+          "status": "passed",
+          "title": "rejects owner A→B→A across read-before",
+          "duration": 62.76330000000007,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects owner A→B→A across read-after",
+          "status": "passed",
+          "title": "rejects owner A→B→A across read-after",
+          "duration": 61.58870000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects a newer known lifecycle before dispatch",
+          "status": "passed",
+          "title": "rejects a newer known lifecycle before dispatch",
+          "duration": 63.62900000000013,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects a newer known lifecycle after dispatch",
+          "status": "passed",
+          "title": "rejects a newer known lifecycle after dispatch",
+          "duration": 62.94180000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed refuses negative SDK authority even when session adapters still show an owner",
+          "status": "passed",
+          "title": "refuses negative SDK authority even when session adapters still show an owner",
+          "duration": 0.4273000000000593,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: generation",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: generation",
+          "duration": 0.38020000000005894,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: request",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: request",
+          "duration": 0.17519999999990432,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: savedRevision",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: savedRevision",
+          "duration": 0.2399000000000342,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: recordVersion",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: recordVersion",
+          "duration": 0.2260999999998603,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: sourceHash",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: sourceHash",
+          "duration": 0.2058999999999287,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: source",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: source",
+          "duration": 0.20289999999999964,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: label",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: label",
+          "duration": 0.18629999999984648,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: hashFormat",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: hashFormat",
+          "duration": 0.2219000000000051,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects inconsistent save receipt: unexpectedNewRevision",
+          "status": "passed",
+          "title": "rejects inconsistent save receipt: unexpectedNewRevision",
+          "duration": 0.21749999999997272,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed retains the original receipt alongside a genuinely newer current variant after ambiguous retry",
+          "status": "passed",
+          "title": "retains the original receipt alongside a genuinely newer current variant after ambiguous retry",
+          "duration": 0.5337000000001808,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects a substituted opaque ID when updating a known variant",
+          "status": "passed",
+          "title": "rejects a substituted opaque ID when updating a known variant",
+          "duration": 0.27549999999996544,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects ambiguous response envelope: mixedSnapshot",
+          "status": "passed",
+          "title": "rejects ambiguous response envelope: mixedSnapshot",
+          "duration": 0.6822999999999411,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects ambiguous response envelope: mixedErasure",
+          "status": "passed",
+          "title": "rejects ambiguous response envelope: mixedErasure",
+          "duration": 0.19839999999999236,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects ambiguous response envelope: wrongWrapper",
+          "status": "passed",
+          "title": "rejects ambiguous response envelope: wrongWrapper",
+          "duration": 0.1856999999999971,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects ambiguous response envelope: unknownField",
+          "status": "passed",
+          "title": "rejects ambiguous response envelope: unknownField",
+          "duration": 0.14049999999997453,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects ambiguous response envelope: missing",
+          "status": "passed",
+          "title": "rejects ambiguous response envelope: missing",
+          "duration": 0.12319999999999709,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects invalid list: generation",
+          "status": "passed",
+          "title": "rejects invalid list: generation",
+          "duration": 0.21720000000004802,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects invalid list: variantGeneration",
+          "status": "passed",
+          "title": "rejects invalid list: variantGeneration",
+          "duration": 0.16259999999988395,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects invalid list: duplicates",
+          "status": "passed",
+          "title": "rejects invalid list: duplicates",
+          "duration": 0.20060000000012224,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects invalid list: tooMany",
+          "status": "passed",
+          "title": "rejects invalid list: tooMany",
+          "duration": 0.16840000000001965,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed rejects invalid list: negativeVersion",
+          "status": "passed",
+          "title": "rejects invalid list: negativeVersion",
+          "duration": 0.151299999999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "CV variant browser contract, not deployed"
+          ],
+          "fullName": "CV variant browser contract, not deployed allows an explicitly empty list without falling back to initializing get",
+          "status": "passed",
+          "title": "allows an explicitly empty list without falling back to initializing get",
+          "duration": 0.17309999999997672,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1792200839203,
+      "endTime": 1792200839654.2173,
+      "status": "passed",
+      "message": "",
+      "name": "src/__tests__/lib/job-loop-cv-variants-api.test.ts"
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-5-windows-x64-binaries.zip",
+  "bytes": 381531864,
+  "sha256": "80379b2c04d51c30225532e0ae04509899141e9957ed096fe749d7fd9df8f82f",
+  "provenance": [
+    "https://www.postgresql.org/download/windows/",
+    "https://www.enterprisedb.com/download-postgresql-binaries",
+    "https://github.com/EnterpriseDB/edb-installers/issues/731",
+    "https://www.postgresql.org/about/licence/"
+  ],
+  "suite": "cv-variant-facts",
+  "startedAt": "2026-10-17T07:44:05.497Z",
+  "checks": [
+    {
+      "name": "identical fact saves serialize to one identity and receipt, preserving global input",
+      "passed": true,
+      "distinctBackendPids": [
+        50288,
+        38012
+      ],
+      "blockingPids": [
+        50288
+      ]
+    },
+    {
+      "name": "conflicting simultaneous fact request rejects changed sharing intent",
+      "passed": true,
+      "distinctBackendPids": [
+        36740,
+        36244
+      ],
+      "blockingPids": [
+        36740
+      ]
+    },
+    {
+      "name": "variant source edit first rejects stale confirmation even with a fresh record version",
+      "passed": true,
+      "distinctBackendPids": [
+        23336,
+        31276
+      ],
+      "blockingPids": [
+        23336
+      ]
+    },
+    {
+      "name": "fact save first preserves original provenance across a subsequent variant edit",
+      "passed": true,
+      "distinctBackendPids": [
+        21292,
+        32556
+      ],
+      "blockingPids": [
+        21292
+      ]
+    },
+    {
+      "name": "withdrawal wins against stale reconfirmation and old save retry never reactivates the fact",
+      "passed": true,
+      "distinctBackendPids": [
+        12528,
+        44244
+      ],
+      "blockingPids": [
+        12528
+      ]
+    },
+    {
+      "name": "reconfirmation wins and a delayed withdrawal cannot revoke the newer fact revision",
+      "passed": true,
+      "distinctBackendPids": [
+        48844,
+        45260
+      ],
+      "blockingPids": [
+        48844
+      ]
+    },
+    {
+      "name": "erasure fences blocked fact saves and reads, then cascades all fact history",
+      "passed": true,
+      "distinctBackendPids": [
+        23092,
+        32852
+      ],
+      "blockingPids": [
+        23092,
+        17680
+      ],
+      "readBackendPid": 17680,
+      "readBlockingPids": [
+        23092
+      ]
+    },
+    {
+      "name": "fact save completes before erasure and cannot survive its later cascade",
+      "passed": true,
+      "distinctBackendPids": [
+        35308,
+        24948
+      ],
+      "blockingPids": [
+        35308
+      ]
+    },
+    {
+      "name": "legacy global writes serialize with fact saves and cannot discard independent facts",
+      "passed": true,
+      "distinctBackendPids": [
+        30712,
+        6160
+      ],
+      "blockingPids": [
+        30712
+      ]
+    }
+  ],
+  "limitations": [
+    "Native PostgreSQL sessions execute actual migrations; auth.users/auth.uid, unrelated pack columns and Storage tables use isolated fixtures. No worker, provider, document rendering or export runs here.",
+    "No hosted Supabase, PostgREST, real authentication or production candidate data is exercised.",
+    "The vendor repository publishes the ZIP digest; no detached publisher signature was located."
+  ],
+  "archiveVerifiedAt": "2026-10-17T07:44:05.803Z",
+  "extraction": {
+    "entries": 22033,
+    "extracted": 3016,
+    "expandedBytes": 1002085601
+  },
+  "port": 52169,
+  "harnessSha256": "07fdfad1c8fa68ebdfe2227f6d909e28098c9c19df0cbd8ce2ee8d6a836d3d91",
+  "migration": {
+    "name": "20261017080000_job_loop_cv_variant_facts.sql",
+    "sha256": "847f7079085b6a90e94a05b866043fa7696803243fa7f5818653a8ee64393308"
+  },
+  "casesSha256": "52af1a203a053be96940edd2ca0ee64c92464ba5ab59a85c3734dcdf85eb3362",
+  "version": "postgres (PostgreSQL) 17.11",
+  "executedSchemaSha256": "f7adba68e228525a83b79afbad00697e5ece57e39e711387d6ae0e91f4a7f09a",
+  "backendPids": [
+    30064,
+    50288,
+    38012,
+    36740,
+    36244,
+    23336,
+    31276,
+    5216,
+    21292,
+    32556,
+    12528,
+    44244,
+    44940,
+    48844,
+    45260,
+    38068,
+    23092,
+    32852,
+    17680,
+    35308,
+    24948,
+    30712,
+    6160
+  ],
+  "passed": true,
+  "clusterStopped": true,
+  "finishedAt": "2026-10-17T07:44:17.394Z",
+  "scope": "Actual local PostgreSQL concurrency; disposable owners, integrated earlier schemas; no hosted service, worker, Storage or customer task.",
+  "initialAttempt": "Zero completed groups: new fixture transaction commands lacked semicolons. Fixture corrected; complete unchanged-runtime retry passed all nine groups after re-verifying the pinned archive."
+}

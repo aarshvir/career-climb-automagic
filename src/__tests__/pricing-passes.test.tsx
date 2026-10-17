@@ -38,7 +38,7 @@ describe('Pricing page tiers', () => {
     }
     const teams = screen.getByRole('region', { name: 'Coaches & universities' });
     expect(within(teams).getByRole('link', { name: /Contact us/ })).toHaveAttribute('href', '/contact');
-    const faq = screen.getByRole('region', { name: 'Questions about passes' });
+    const faq = screen.getByRole('region', { name: 'Questions about pricing' });
     for (const question of ['What counts as a tailored CV?', 'What stays free?', 'Can I buy another pass while one is active?', 'What if a pass isn’t right for me?', 'Who will my invoice come from?']) {
       expect(within(faq).getByText(question)).toBeInTheDocument();
     }

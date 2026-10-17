@@ -4,8 +4,10 @@ import { readAuthSession } from '@/utils/authSession';
 import { listCvDocuments } from '@/lib/cv-documents';
 import { safeDocumentFilename } from '@/lib/document-download';
 import { LoopServiceError } from './loop-service-error';
-import { trackingDraftAuthority } from './tracking-draft-memory';
+import { trackingDraftAuthority, trackingLoopGeneration } from './tracking-draft-memory';
 import { generationBoundAction, validLoopGeneration } from '../../supabase/functions/_shared/job-loop-request';
+import { captureCvVariantSaveIntent, validateCvVariantSaveReceipt, validateCvVariantsRead } from '../../supabase/functions/_shared/job-loop-cv-variants';
+import { captureCvVariantFactSaveIntent, captureCvVariantFactWithdrawIntent, validateCvVariantFactReadScope, validateCvVariantFactReceipt, validateCvVariantFactsRead } from '../../supabase/functions/_shared/job-loop-cv-variant-facts';
 export { boundLoopAction } from '../../supabase/functions/_shared/job-loop-request';
 import type { LoopAction, LoopResponse } from '../../supabase/functions/_shared/job-loop-types';
 
@@ -61,6 +63,7 @@ const snapshotSchema = z.object({
   recurringReady:z.boolean().optional(),employerSources:z.array(z.object({provider:short,company:short,board:short})).max(4).optional(),
 });
 const responseSchema = z.object({ selectedRun:selectionSchema.extend({requestId:z.string().uuid(),runId:z.string().uuid()}).strict().optional(), existingState: z.enum(['active', 'absent', 'erasing']).optional(), snapshot: snapshotSchema.optional(), erasureGeneration: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
+  variantSave: z.unknown().optional(), cvVariants: z.unknown().optional(), variantFactSave: z.unknown().optional(), cvVariantFacts: z.unknown().optional(),
   checkLink: z.object({ checkId: z.string().uuid(), opportunityId: z.string().uuid(), reused: z.boolean() }).strict().optional(),
   url: z.string().max(8000).optional(), filename: short.optional(), message: text.optional(), error: text.optional(), code: short.optional(),
   gmailPreview: z.object({ email: short.nullable(), allowDrafts: z.boolean(), expiresAt: short }).optional() });
@@ -129,15 +132,33 @@ function serviceFailure(payload: unknown, fallback: string): LoopServiceError {
 }
 export async function callJobLoop(userId: string, action: LoopAction): Promise<LoopResponse> {
   const expectedGeneration = action.expectedGeneration;
-  const linkAuthority = (action.action === 'link_saved_check'||action.action === 'start_selected_run') ? trackingDraftAuthority(userId) : null;
+  const factAction = action.action === 'save_cv_variant_fact' || action.action === 'withdraw_cv_variant_fact' || action.action === 'read_cv_variant_facts';
+  const variantAction = action.action === 'save_cv_variant' || action.action === 'read_cv_variants' || factAction;
+  const linkAuthority = (action.action === 'link_saved_check'||action.action === 'start_selected_run'||variantAction) ? trackingDraftAuthority(userId) : null;
   function stillCurrent() {
     if (linkAuthority !== null && (linkAuthority < 0 || trackingDraftAuthority(userId) !== linkAuthority)) throw new Error('Your sign-in changed. Reopen the saved application before continuing.');
+    const currentGeneration = variantAction ? trackingLoopGeneration(userId) : undefined;
+    if (currentGeneration !== undefined && currentGeneration !== expectedGeneration) throw new Error('Your saved workspace changed. Reopen your CV variants before continuing.');
   }
   async function requireCurrentOwner() { stillCurrent(); await requireLoopOwner(userId); stillCurrent(); }
   if (generationBoundAction(action.action) && !validLoopGeneration(expectedGeneration)) throw new Error('Refresh Jobvance before continuing. Your saved work is retained.');
   // This repository disables strictNullChecks, which makes Zod's inferred
   // properties optional in TypeScript. Runtime schemas still require every field.
-  action = actionSchema.parse(action) as LoopAction;
+  if (action.action === 'save_cv_variant_fact' || action.action === 'withdraw_cv_variant_fact' || action.action === 'read_cv_variant_facts') {
+    const { action: kind, ...intent } = action;
+    if (kind === 'save_cv_variant_fact') action = { action: kind, ...captureCvVariantFactSaveIntent(intent) } as LoopAction;
+    else if (kind === 'withdraw_cv_variant_fact') action = { action: kind, ...captureCvVariantFactWithdrawIntent(intent) } as LoopAction;
+    else action = { action: kind, ...validateCvVariantFactReadScope(intent) };
+  } else if (action.action === 'save_cv_variant') {
+    const { action: _action, ...intent } = action;
+    action = { action: 'save_cv_variant', ...captureCvVariantSaveIntent(intent) } as LoopAction;
+  } else if (action.action === 'read_cv_variants') {
+    if (![Object.prototype, null].includes(Object.getPrototypeOf(action))
+      || Object.keys(action).some(key => !['action', 'expectedGeneration'].includes(key)) || !validLoopGeneration(expectedGeneration)) {
+      throw new Error('Refresh Jobvance before loading your saved CV variants.');
+    }
+    action = { action: 'read_cv_variants', expectedGeneration };
+  } else action = actionSchema.parse(action) as LoopAction;
   if (generationBoundAction(action.action)) action = { ...action, expectedGeneration };
   assertConsent(action);
   await requireCurrentOwner();
@@ -158,6 +179,30 @@ export async function callJobLoop(userId: string, action: LoopAction): Promise<L
   const parsed = responseSchema.safeParse(data);
   if (!parsed.success || (action.action === 'get' && !parsed.data.snapshot && parsed.data.erasureGeneration === undefined)) throw new Error(fallback);
   if (parsed.data.error) throw serviceFailure(parsed.data, fallback);
+  if (action.action === 'save_cv_variant_fact' || action.action === 'withdraw_cv_variant_fact' || action.action === 'read_cv_variant_facts') {
+    const key = action.action === 'read_cv_variant_facts' ? 'cvVariantFacts' : 'variantFactSave';
+    if (!data || typeof data !== 'object' || Array.isArray(data) || Object.keys(data).some(field => field !== key)) throw new Error(fallback);
+    const { action: kind, ...intent } = action;
+    try {
+      if (kind === 'read_cv_variant_facts') return { cvVariantFacts: validateCvVariantFactsRead(parsed.data.cvVariantFacts, validateCvVariantFactReadScope(intent)) };
+      const captured = kind === 'save_cv_variant_fact' ? captureCvVariantFactSaveIntent(intent) : captureCvVariantFactWithdrawIntent(intent);
+      return { variantFactSave: validateCvVariantFactReceipt(parsed.data.variantFactSave, captured) };
+    } catch { throw new Error('The fact change or saved facts could not be confirmed. Refresh and retry the same request.'); }
+  }
+  if (action.action === 'save_cv_variant' || action.action === 'read_cv_variants') {
+    // A variant receipt is not a full Loop snapshot or a preparation result.
+    // Validate the raw envelope as well: Zod ordinarily strips unknown fields.
+    const key = action.action === 'save_cv_variant' ? 'variantSave' : 'cvVariants';
+    if (!data || typeof data !== 'object' || Array.isArray(data)
+      || Object.keys(data).some(field => field !== key)) throw new Error(fallback);
+    try {
+      if (action.action === 'save_cv_variant') {
+        const { action: _action, ...intent } = action;
+        return { variantSave: validateCvVariantSaveReceipt(parsed.data.variantSave, intent) };
+      }
+      return { cvVariants: validateCvVariantsRead(parsed.data.cvVariants, expectedGeneration!) };
+    } catch { throw new Error('The saved CV variants could not be confirmed. Refresh and retry the same request.'); }
+  }
   if (action.action === 'link_saved_check') {
     const result = parsed.data, matches = result.snapshot?.opportunities.filter(item => item.sourceCheckId === action.checkId);
     if (!result.checkLink || result.checkLink.checkId !== action.checkId || result.snapshot?.lifecycleGeneration !== expectedGeneration

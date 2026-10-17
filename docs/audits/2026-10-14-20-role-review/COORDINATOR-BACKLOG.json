@@ -638,5 +638,71 @@
     ],
     "source_commit": "5bf52c4e5b749d80822b5973cc85b2adeea985c7",
     "receipt": "../../releases/2026-10-15-clarity-evidence.json"
+  },
+  "latest_owner_direction": {
+    "date": "2026-10-17",
+    "request": "RQ-33: Job Loop primary recurring product; CV Check acquisition; three-stage journey; guided CV creation; proposed $29/$59/$99 monthly plans; 100 synthetic customer cases.",
+    "implemented_scope": "Three-panel public/dashboard entry and guided exact-answer CV draft with owner/auth/generation-bound recovery, preview, replacement and undo. Local actual-worker first/second export acceptance plus real browser receipt of six generated files.",
+    "assessment": "../2026-10-17-loop-product-reset/ASSESSMENT.md",
+    "remaining": [
+      "Owned three-CV-variant contract and immutable run/schedule selection",
+      "Three chosen weekdays, 31-day daily entitlement and retry/missed-run rules",
+      "Explicit recurring AI processing consent and source-bound tailoring",
+      "Broader useful discovery, missing-target admission and unsupported PDF scripts",
+      "Hosted authenticated worker/Storage and unassisted first/second tasks",
+      "Existing pagination, grouped review, recovery and all previously tracked requirements"
+    ],
+    "commercial_state": "Proposed plans only; no checkout, subscriptions, paid provider test or production candidate mutation."
+  },
+  "latest_cv_variant_foundation": {
+    "date": "2026-10-17",
+    "status": "unpublished source only; migration unapplied; public v32 and backend unchanged",
+    "assessment": "../2026-10-17-cv-variants/ASSESSMENT.md",
+    "implemented": "Up to three owned private variant snapshots, exact revisions/ordered claim references, explicit save consent, idempotent request receipts, lifecycle-bound reads, existing erasure cascade, immutable strict intent capture and literal-source revalidation. Existing record, running work and approvals preserved.",
+    "validation": "1905 tests/115 files; app and targeted shared-source TypeScript; nine native PostgreSQL race groups; separate bounded agent review. No hosted or browser variant task.",
+    "remaining": "Authenticated control/client/UI, independent variant fact review, immutable manual/scheduled variant selection, current sharing revalidation, variant packet identity/reuse/approval/download, recurring entitlements/consent, combined exposure review and hosted first/second acceptance. All original uncompleted requirements remain open."
+  },
+  "latest_cv_variant_contract": {
+    "date": "2026-10-17",
+    "status": "unpublished source integration; migration unapplied; public v32 and backend unchanged",
+    "assessment": "../2026-10-17-cv-variants/CONTRACT-INTEGRATION.md",
+    "implemented": "Authenticated strict save/read actions, service-derived owner, immutable original browser intent, passive read, exact receipt/current-revision separation, owner/auth/lifecycle stale response guards and SQL-bound retry preservation.",
+    "validation": "2007 tests/118 files; app TypeScript; 22 source and 22 generated Deno cases; complete production build and 12 hosting groups; bounded separate review and 58 independently rerun tests. No new native or browser/hosted acceptance.",
+    "remaining": [
+      "Candidate UI and cross-route request recovery",
+      "Independent variant fact review",
+      "Immutable variant selection in manual/scheduled run, worker and packet identity",
+      "Current sharing and withdrawal revalidation",
+      "Recurring entitlements/AI consent and discovery",
+      "Combined exposure review and hosted first/second acceptance"
+    ]
+  },
+  "latest_cv_variant_ui": {
+    "date": "2026-10-17",
+    "status": "unpublished source only; migration unapplied; public v32/backend unchanged",
+    "assessment": "../2026-10-17-cv-variants/UI-INTEGRATION.md",
+    "implemented": "Deliberate three-variant source editor, exact current fact selection, original request and newer draft separation, conditional retry/continuation, opt-in session-bound refresh recovery and privacy disclosure. No global profile swap or run selection.",
+    "validation": "2062 tests/122 files and app TypeScript; 59 independently rerun. Actual assisted local desktop refresh/retry and mobile second-source save with synthetic adapters; no hosted/worker/export acceptance.",
+    "remaining": [
+      "Independent per-variant fact confirmation and current sharing authority",
+      "Immutable variant manual/schedule/worker/packet identity",
+      "Recurring entitlements/AI consent/discovery",
+      "Combined review and coordinated exposure",
+      "Hosted first/second customer acceptance and all original tracked requirements"
+    ]
+  },
+  "cvVariantFactAuthority": {
+    "date": "2026-10-17",
+    "status": "unpublished source only; both variant migrations unapplied; public v32/backend unchanged",
+    "assessment": "../2026-10-17-cv-variants/FACT-AUTHORITY.md",
+    "implemented": "Separate exact-source variant fact confirmation/sharing/withdrawal with immutable history, strict authenticated control/browser contracts, current authority resolver and original/current retry distinction. Future-version semantic validation bypass corrected in new fact and existing variant saves.",
+    "validation": "2227 tests/126 files, app TypeScript,28 source/28 generated Deno,9 native PostgreSQL groups;165 separately rerun incl70 independently authored. Build/hosting details in facts-verification.json.",
+    "remaining": [
+      "Candidate independent fact review/withdrawal UI and original-request recovery",
+      "Immutable chosen variant and ordered fact references in manual/scheduled admission, worker, packet reuse/approval/download",
+      "Recurring entitlement/cadence/AI consent/discovery",
+      "Combined review and coordinated exposure",
+      "Hosted/unassisted first/second tasks and every original open requirement"
+    ]
   }
 }

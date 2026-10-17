@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, ArrowUpRight, BookOpen, Briefcase, Check, CheckCircle2, CircleHelp, Download, FileText, GraduationCap, LockKeyhole, Plus, ShieldCheck, RefreshCw } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CheckCircle2, CircleHelp, FileText, LockKeyhole, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import "./ProductPage.css";
 import "./ProductRefresh.css";
 import SubscriptionPricing from "./SubscriptionPricing";
+import LoopJourney from "@/components/LoopJourney";
 import GuestSupport from "./GuestSupport";
 import './JobLoop.css';
 import { currentOffer } from '@/lib/current-offer';
@@ -13,12 +13,12 @@ import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
 type Kind = "home" | "pricing" | "how" | "faq" | "about" | "contact" | "privacy" | "terms" | "refund" | "help" | "notfound";
 const titles: Record<Kind, string> = {
-  home: "Prepare a CV for each job without starting over", pricing: "Free to start. Passes when you need more.", how: "How to prepare your first application", faq: "Questions about using Jobvance", about: "Why we built Jobvance", contact: "Get help with Jobvance", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "We couldn’t find that page",
+  home: "Automate your job search", pricing: "Job Loop access, plans and CV passes", how: "How Job Loop works", faq: "Questions about using Jobvance", about: "Why we built Jobvance", contact: "Get help with Jobvance", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "We couldn’t find that page",
 };
 const labels: Record<Kind, string> = { home: "Jobvance", pricing: "Access & pricing", how: "How it works", faq: "Questions & answers", about: "About Jobvance", contact: "Contact", privacy: "Your information", terms: "The details", refund: "Refunds", help: "Help with your application", notfound: "Page not found" };
 const intros: Partial<Record<Kind, string>> = {
   pricing: currentOffer.statement,
-  how: "Start with one CV and a real job description. Review the comparison, make your edits and download the version you approve.",
+  how: "Add your experience, choose the roles and locations you want, then review the jobs and documents prepared in your dashboard.",
   faq: "What the check does, what stays private, and what happens next.",
   about: "Applying for another role shouldn’t mean rebuilding your experience from scratch.",
   contact: "For questions about your documents, your account or service access.",
@@ -28,11 +28,6 @@ const intros: Partial<Record<Kind, string>> = {
   help: "Keep your source, vacancy and approved version together. Take the next step when you are ready.",
   notfound: "The address does not match an available page. Your next application can start here.",
 };
-const steps = [
-  { title: "Add your CV and the job", text: "Upload or paste your CV, then paste the job description. We read the job title from the ad." },
-  { title: "Check the changes", text: "Jobvance rewords and reorders what is already in your CV for this job. Each change shows the line it came from; keep your original wherever you prefer." },
-  { title: "Download", text: "Tick to confirm it is accurate, then download a formatted PDF or Word file for free. Sign in only if you want to save it." },
-];
 const faqs = [
   ["Can I check my CV without signing up?", "Yes. Check your CV and download the version you approve, all for free. Sign in only if you want to save it privately. No purchase is required."],
   ["Does a finding mean I meet a requirement?", "No. Matching words are a starting point. Read the requirement and the CV example yourself; the check cannot confirm your qualifications or predict what an employer will decide."],
@@ -46,107 +41,26 @@ const faqs = [
   ["How does the cloud Job Loop work?", "Sign in, save your career record, confirm the facts you can share and add real vacancies. Prepare separate CVs and drafts. Review and approve each document before downloading. Search, model and inbox connections depend on operator setup; the workspace shows which are available. You send messages and submit applications yourself."],
 ];
 
-type Audience = "student" | "mba" | "switcher";
-const audienceExamples = {
-  student: {
-    label: "Project experience", landingPath: "/for-students", loopPath: "/loop?audience=student", checkPath: "/check?audience=student", icon: GraduationCap, cardTitle: "Make your projects count", cardText: "Find the coursework, internships and projects worth including for your first job. Show what you did, even before you’ve had a full-time role.", cta: "Check my student CV",
-    intro: "Classes and applications compete for your time. Bring a CV built from projects, internships and activities, plus one vacancy. Review its wording and download the version you approve.",
-    role: "Graduate data analyst", firstVacancy: "Develop Python reports.", firstCv: "Developed Python reports for a university project.", firstSource: "ACADEMIC PROJECT",
-    secondVacancy: "Lead Python reporting.", secondCv: "Assisted in leading Python reporting during an internship.", secondSource: "INTERNSHIP CONTRIBUTION",
-    question: "Which work was your own contribution, and which work did you support?", caveat: "Academic project work does not establish a requirement for professional experience.",
-    originalFirst: "Coordinated university project meetings.", originalSecond: "Developed Python reports for a university project.", tailoredSecond: "Developed Python reporting for a university data project.", orderFocus: "Graduate reporting role in focus",
-  },
-  mba: {
-    label: "Career change", landingPath: "/for-mba", loopPath: "/loop?audience=mba", checkPath: "/check?audience=mba", icon: BookOpen, cardTitle: "Connect your MBA to the role", cardText: "Bring your earlier work and MBA projects together. Explain your own contribution when you’re applying to a different function or industry.", cta: "Check my MBA CV",
-    intro: "Coursework, recruiting and career decisions fill the week. Bring your previous work and MBA projects together for one vacancy. Check your contribution, review the gaps and approve your CV.",
-    role: "Business analyst", firstVacancy: "Produce stakeholder reports.", firstCv: "Prepared stakeholder reports in a prior analyst role.", firstSource: "PRIOR EMPLOYMENT",
-    secondVacancy: "Manage market research projects.", secondCv: "Supported a market research project during my MBA.", secondSource: "MBA TEAM PROJECT",
-    question: "What did you personally do in the MBA team project?", caveat: "MBA team-project support does not establish project-management ownership.",
-    originalFirst: "Coordinated interviews for an MBA team project.", originalSecond: "Prepared a market research summary for an MBA team project.", tailoredSecond: "Prepared the market research summary for an MBA team project, as part of the team.", orderFocus: "Market research role in focus",
-  },
-  switcher: {
-    label: "Work experience", landingPath: "/for-career-switchers", loopPath: "/loop?audience=professional", checkPath: "/check?audience=professional", icon: Briefcase, cardTitle: "Fit applications around work", cardText: "Reuse experience from your working life for a role at a new employer or a change of direction. Keep your CV versions and follow-ups together.", cta: "Check my career-switch CV",
-    intro: "Your working day is already full. Start with one vacancy and the experience you can substantiate. Review what transfers, clarify what you supported, and keep an approved version for your next application.",
-    role: "Operations analyst", firstVacancy: "Produce stakeholder reports.", firstCv: "Prepared stakeholder reports.", firstSource: "EMPLOYMENT EXPERIENCE",
-    secondVacancy: "Lead stakeholder reporting.", secondCv: "Assisted in leading stakeholder reporting.", secondSource: "SUPPORTING CONTRIBUTION",
-    question: "Did you lead this work, or support someone who did?", caveat: "Supporting work is not promoted into a claim of leading or owning it.",
-    originalFirst: "Coordinated team meeting schedules.", originalSecond: "Prepared monthly management reports.", tailoredSecond: "Prepared monthly management reporting for senior stakeholders.", orderFocus: "Reporting role in focus",
-  },
-} as const;
-const audiences: Audience[] = ["student", "mba", "switcher"];
-const fullLoopSteps = [
-  { title: "Your profile", text: "Build and confirm reusable career facts." },
-  { title: "Priorities", text: "Keep deadlines and any connected reply updates visible." },
-  { title: "Search & shortlist", text: "Find roles and check their sources." },
-  { title: "CVs & drafts", text: "Prepare a CV and message drafts per role." },
-  { title: "Review & apply", text: "You approve, send and apply." },
-  { title: "Next actions", text: "Keep deadlines and follow-ups together." },
-];
-
-function StartLink({ children = "Check my CV for free", light = false, to = "/check" }: { children?: React.ReactNode; light?: boolean; to?: string }) {
+function StartLink({ children = "Start my Job Loop", light = false, to = "/loop" }: { children?: React.ReactNode; light?: boolean; to?: string }) {
   return <Link to={to} className={`product-button${light ? " product-button--light" : ""}`}>{children}<ArrowRight size={18} aria-hidden="true" /></Link>;
 }
 
-function EvidencePreview({ audience }: { audience: Audience }) {
-  const example = audienceExamples[audience];
-  return <figure id="home-audience-example" className="product-preview" aria-labelledby="product-preview-caption">
-    <div className="product-preview-label"><span className="product-live-dot" aria-hidden="true" />A CV check in practice <span>Example application</span></div>
-    <div className="product-preview-window">
-      <div className="product-preview-bar"><span className="product-preview-logo" aria-hidden="true">jv</span><span>CV check / Evidence review</span><span className="product-preview-step">04 / 06</span></div>
-      <div className="product-preview-body">
-        <div className="product-preview-role"><div><span className="product-micro">ROLE IN FOCUS</span><h2>{example.role}</h2><p>{example.label} · CV review</p></div><FileText size={24} aria-hidden="true" /></div>
-        <div className="product-evidence-pair">
-          <div className="product-passage"><span className="product-micro">THE VACANCY SAYS</span><p>“{example.firstVacancy}”</p></div>
-          <div className="product-passage product-passage--cv"><span className="product-micro">YOUR CV SAYS · {example.firstSource}</span><p>“{example.firstCv}”</p><span className="product-status product-status--direct"><CheckCircle2 size={13} aria-hidden="true" />Direct wording found</span></div>
-        </div>
-        <div className="product-evidence-pair product-evidence-pair--second">
-          <div className="product-passage"><span className="product-micro">THE VACANCY SAYS</span><p>“{example.secondVacancy}”</p></div>
-          <div className="product-passage product-passage--cv"><span className="product-micro">YOUR CV SAYS · {example.secondSource}</span><p>“{example.secondCv}”</p><span className="product-status product-status--review"><CircleHelp size={13} aria-hidden="true" />Related passage—review needed</span></div>
-        </div>
-        <div className="product-preview-question"><CircleHelp size={17} aria-hidden="true" /><p>{example.question}</p></div>
-        <div className="product-preview-bottom"><span>You review the wording before downloading.</span><span><LockKeyhole size={12} aria-hidden="true" />Your review</span></div>
-      </div>
-    </div>
-    <figcaption id="product-preview-caption">See how the requirement compares with the CV passage. {example.caveat}</figcaption>
-  </figure>;
-}
-
-function StepList({ compact = false }: { compact?: boolean }) {
-  return <ol className={`product-steps${compact ? " product-steps--compact" : ""}`}>{steps.map((step, index) => <li key={step.title}><span className="product-step-number" aria-hidden="true">0{index + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p></div>{index === 5 && <Download size={21} aria-hidden="true" />}</li>)}</ol>;
-}
-
 function HomePage() {
-  const [audience, setAudience] = useState<Audience>("switcher");
-  const example = audienceExamples[audience];
   return <>
-    <section className="product-hero product-shell">
-      <div className="product-hero-copy">
-        <p className="product-eyebrow"><span aria-hidden="true" />YOUR CV + THE JOB YOU WANT</p>
-        <h1>A tailored CV for every job, <span>built only from what you’ve really done.</span></h1>
-        <p className="product-hero-intro">Paste your CV and the job. In about a minute you get a version written for that role, with every change traced back to your original CV. Edit anything, then download.</p>
-        <div className="product-actions"><StartLink to="/check">Tailor my CV for a job</StartLink></div>
-        <p className="product-hero-note"><Check size={15} aria-hidden="true" />{currentOffer.statement}</p>
-        <div className="product-hero-route" aria-label="How the free check works"><span><FileText size={15} aria-hidden="true" />CV + vacancy</span><ArrowRight size={14} aria-hidden="true" /><span>Review</span><ArrowRight size={14} aria-hidden="true" /><span><Download size={15} aria-hidden="true" />Download</span></div>
-        
-      </div>
-      <div className="product-hero-art">
-        <div className="product-audience-picker"><p id="home-audience-label">Compare examples</p><div role="group" aria-labelledby="home-audience-label" className="product-audience-buttons">{audiences.map(choice => { const option = audienceExamples[choice], Icon = option.icon; return <button key={choice} type="button" aria-pressed={audience === choice} aria-controls="home-audience-example" aria-label={option.label} onClick={() => setAudience(choice)}><Icon size={15} aria-hidden="true" /><span className="product-choice-full">{option.label}</span><span className="product-choice-short" aria-hidden="true">{choice === 'student' ? 'Projects' : choice === 'mba' ? 'Career change' : 'Work'}</span></button>; })}</div></div>
-        <EvidencePreview audience={audience} />
-        <p className="sr-only" role="status">{example.label} example application selected. This changes the example only; everyone starts with the same CV check.</p>
-      </div>
+    <section className="product-shell product-loop-intro">
+      <p className="product-eyebrow">JOB LOOP BY JOBVANCE</p>
+      <h1>Automate your <span>job search.</span></h1>
+      <p className="product-hero-intro">Tell us what you’ve done, which jobs you want and where you want to work. Job Loop searches connected sources and prepares a CV for each shortlisted role, ready to review in your dashboard.</p>
+      <div className="product-actions"><StartLink /><Link className="product-text-link" to="/check">Try a free CV check <ArrowRight size={17} aria-hidden="true" /></Link></div>
+      <p className="product-hero-note">Free beta · Account needed for Job Loop · No card required</p>
     </section>
-    <div className="product-assurances product-shell" aria-label="Included in your free check"><span><FileText size={18} aria-hidden="true" />Your CV beside the actual requirements</span><span><ShieldCheck size={18} aria-hidden="true" />Every change traced to your CV</span><span><Download size={18} aria-hidden="true" />PDF, Word and text downloads</span></div>
-    <section id="example" className="product-evidence-section product-shell">
-      <div className="product-section-copy"><p className="product-eyebrow">WHY START WITH THE VACANCY?</p><h2>Give your strongest relevant work a better place on the page.</h2><p>If a role needs reporting skills, don’t bury your reporting experience below something less relevant. Jobvance compares the vacancy with your original CV so you can decide what to bring forward.</p><p>If the evidence is missing, you’ll see the gap. Add an example only if you’ve actually done the work.</p><Link to="/how-it-works" className="product-text-link">See how the comparison works<ArrowRight size={17} aria-hidden="true" /></Link></div>
-      <div className="product-order-demo"><div className="product-order-heading"><span>WHAT A SMALL CHANGE CAN DO</span><span className="product-demo-tag">Before &amp; after</span></div><div className="product-order-sheet"><span className="product-micro">BEFORE · RELEVANT WORK IS BURIED</span><ol><li>{example.originalFirst}</li><li>{example.originalSecond}</li></ol></div><div className="product-order-transition"><ArrowRight size={21} aria-hidden="true" /><span>{example.orderFocus}</span></div><div className="product-order-sheet product-order-sheet--after"><span className="product-micro">AFTER · REWORDED FOR THE JOB, MOST RELEVANT FIRST</span><ol><li><mark>{example.tailoredSecond}</mark></li><li>{example.originalFirst}</li></ol></div><p className="product-demo-note">Same facts, wording closer to the job, a better order. You see your original beside every change. Example application, not a hiring result.</p></div>
+    <section className="product-shell product-loop-journey" aria-labelledby="home-loop-journey"><h2 id="home-loop-journey">Set it up once. Come back to your next applications.</h2><LoopJourney /></section>
+    <section className="product-shell product-get-started" aria-labelledby="loop-available-title">
+      <div><p className="product-eyebrow">WHAT YOU CAN USE TODAY</p><h2 id="loop-available-title">A recurring search, with a clear result for every run.</h2><p>Use selected employer feeds or add a vacancy yourself. Scheduled runs use rules-based preparation; optional AI preparation needs your consent for each run. Your dashboard shows the jobs found, documents prepared and any step that could not finish.</p><p>Broad web search and inbox access are not currently connected. The free pilot has ten cloud places, subject to available processing capacity. Choose an available schedule in your account and pause it when you need to.</p><Link to="/job-loop" className="product-text-link">Explore Job Loop <ArrowRight size={17} aria-hidden="true" /></Link></div>
+      <div className="product-privacy-summary"><LockKeyhole size={24} aria-hidden="true" /><h3>Your experience stays yours.</h3><p>Start with your CV or choose a saved CV check. Review the experience and vacancy you want to reuse before saving. You approve each document and apply on the employer’s site yourself.</p><Link to="/privacy" className="product-text-link">How your CV is handled<ArrowUpRight size={16} aria-hidden="true" /></Link></div>
     </section>
-    <section className="product-loop-feature" aria-labelledby="product-loop-title"><div className="product-shell product-loop-feature-grid">
-      <div><p className="product-eyebrow">WHEN YOU’RE APPLYING TO MORE THAN ONE ROLE</p><h2 id="product-loop-title">Your next application shouldn’t send you back to square one.</h2><p>Job Loop keeps confirmed experience, vacancies and follow-ups in a private workspace. Start with your CV or choose a saved CV check. Review the experience and vacancy you want to reuse before saving them.</p><Link to="/job-loop" className="product-text-link">Find out how Job Loop works<ArrowUpRight size={18} aria-hidden="true" /></Link><span className="product-loop-free">Free pilot · Review what you reuse</span></div>
-      <div className="product-loop-board"><div className="product-loop-board-top"><RefreshCw size={20} aria-hidden="true" /><span>YOUR SAVED EXPERIENCE</span><span>Use again</span></div><p className="product-loop-board-fact">The work you’ve done.<br />Ready for the next vacancy.</p><div className="product-loop-board-branches" aria-hidden="true"><span /><span /></div><div className="product-loop-board-jobs"><article><FileText size={20} aria-hidden="true" /><h3>A CV for each role</h3><p>Review the relevant facts and wording before you download.</p></article><article><CheckCircle2 size={20} aria-hidden="true" /><h3>A place for the follow-up</h3><p>Keep the next action and application status with the role.</p></article></div><p className="product-loop-board-note">Workflow illustration. You approve documents and submit applications yourself.</p></div>
-    </div></section>
-    <section className="product-audience-section product-shell" aria-labelledby="product-audience-title"><div className="product-section-heading"><div><p className="product-eyebrow">ONE CHECK, WHATEVER YOUR NEXT MOVE</p><h2 id="product-audience-title">Start with the experience you have.</h2></div><p>Projects, internships, MBA work or years in a job can all belong in your CV. Bring the version you have and a vacancy you want. There is no separate student or professional setup to choose.</p></div></section>
-    <section className="product-get-started product-shell" aria-labelledby="product-get-started-title"><div><p className="product-eyebrow">WHAT YOU NEED TO START</p><h2 id="product-get-started-title">Have your CV and one job description handy.</h2><p>Three steps: add your CV and the job, check the changes, download. You can paste your CV or upload a readable PDF, Word or text file.</p><div className="product-actions"><StartLink to="/check">Tailor my CV for a job</StartLink><Link to="/how-it-works" className="product-text-link">See how it works<ArrowRight size={17} aria-hidden="true" /></Link></div></div><div className="product-privacy-summary"><LockKeyhole size={24} aria-hidden="true" /><h3>Try it before you sign up.</h3><p>Your free check runs on your device. Sign in when you want to save an approved version privately.</p><Link to="/privacy" className="product-text-link">How your CV is handled<ArrowUpRight size={16} aria-hidden="true" /></Link></div></section>
-    <section className="product-final-section"><div className="product-shell"><p className="product-eyebrow">FOUND A ROLE YOU WANT?</p><h2>Let’s get your CV ready for it.</h2><div className="product-final-actions"><StartLink light to="/check">Tailor my CV for this job</StartLink><span>Free to start. Passes from $9.<br />You check every change.</span></div><span className="product-final-arrow" aria-hidden="true">↗</span></div></section>
+    <section className="product-shell product-loop-check" aria-labelledby="home-check-title"><div><p className="product-eyebrow">HAVE ONE VACANCY IN MIND?</p><h2 id="home-check-title">Try the free CV Check first.</h2><p>Bring a CV and a job description, review suggested changes and download your approved version. No account is needed. When you want an ongoing search, save your check and continue into Job Loop.</p></div><StartLink to="/check">Check my CV against a job</StartLink></section>
+    <section className="product-final-section"><div className="product-shell"><p className="product-eyebrow">YOUR NEXT ROLE</p><h2>Give your job search a routine.</h2><div className="product-final-actions"><StartLink light /><Link to="/pricing" className="product-text-link">See access and plans <ArrowRight size={17} aria-hidden="true" /></Link></div></div></section>
   </>;
 }
 
@@ -160,8 +74,8 @@ function LegalContent({ kind }: { kind: "privacy" | "terms" | "refund" }) {
     <h2>Payments</h2><p>Passes are sold through Dodo Payments, which acts as our merchant of record and payment processor. When you buy a pass, Dodo Payments collects your payment details, email address and billing location to take the payment, calculate sales tax, prevent fraud and send your invoice, under its own privacy policy. Jobvance never receives your full card number. Dodo Payments tells us the payment status, amount, tax and a payment reference so we can add or remove your pass. We keep these billing records for as long as accounting and tax rules require.</p>
     <h2>Support information</h2><p>Public support needs no account, name or email. Your message is stored privately for up to 90 days for manual administration review. A random private receipt code lets its holder read the status and any reply; keep it private and download it if you need to return. The code is never included in a page URL. Requests are removed by daily maintenance after expiry. An irreversible hash of a limited network identifier is used to limit new requests; raw IP addresses are not stored in the support table. Support messages are not sent to models and this form does not send email.</p>
     <h2>Deleting information</h2><p>You can delete an original CV or a tracker entry in your workspace. Original deletion does not remove separately saved application packs. Use Help & privacy in your Job Loop to erase its career record, generated documents, schedule and mailbox connection. Your sign-in account and separately saved workspace CVs remain. Minimal security and usage records remain to prevent old requests restoring deleted work and to retain committed spending; these records do not contain your CV text or document files. Record an account-wide or privacy request there or on the contact page; its receipt is visible and does not imply review. Necessary financial records may require retention.</p>
-    <h2>Your cloud Job Loop</h2><p>Saving a career record is an explicit choice. Its source text, target preferences, confirmed facts, vacancies, run reports and prepared documents are stored in your private Supabase account. Unsaved career record, claim and new-vacancy edits can be recovered during in-app navigation from this tab’s memory for up to thirty minutes. They are not written to browser storage, and refresh, closing the tab, sign-out or switching accounts clears them. Sharing and factual confirmations need review again after recovery. Runs use a saved version of your record. A correction or withdrawal requires a new review before a packet can be downloaded again; it cannot recall a file already downloaded.</p>
-    <h2>Optional models and search</h2><p>The free CV check and existing preparation packs do not call external AI. In the cloud loop, you can choose the available rules mode or consent to the selected Claude, OpenAI or Kimi provider for that run. A model labelled “via OpenRouter” sends the cleared input through OpenRouter to that named model provider, under a separate per-run processing choice. The available route is displayed before consent; changing the route requires renewed review. The model receives confirmed facts you marked shareable and vacancy text, rather than the entire raw source CV. Job search queries use target roles and locations. Availability depends on the configured accounts. Remove confidential or unnecessary sensitive information before saving or sharing.</p>
+    <h2>Your cloud Job Loop</h2><p>Saving a career record is an explicit choice. Its source text, target preferences, confirmed facts, vacancies, run reports and prepared documents are stored in your private Supabase account. Unsaved career record, claim and new-vacancy edits can be recovered during in-app navigation from this tab’s memory for up to thirty minutes. They are not written to browser storage, and refresh, closing the tab, sign-out or switching accounts clears them. Sharing and factual confirmations need review again after recovery. Runs use a saved version of your record. A correction or withdrawal requires a new review before a packet can be downloaded again; it cannot recall a file already downloaded.</p><p>If you separately enable CV variant recovery, the variant draft and its original save request can also be kept in this tab’s browser session storage for a thirty-minute recovery window. Recovery is limited to the same signed-in session and workspace. You must choose private-save permission again; recovery never starts a save or job run automatically. Turning this option off removes the stored recovery copy. Account changes and detected expiry clear it; if browser storage is unavailable, only page-memory recovery is offered.</p>
+    <h2>Optional models and search</h2><p>The CV Check comparison without AI runs on your device. Choosing AI tailoring sends your CV and vacancy text to the displayed provider after your consent. In the cloud loop, you can choose the available rules mode or consent to the selected Claude, OpenAI or Kimi provider for that run. A model labelled “via OpenRouter” sends the cleared input through OpenRouter to that named model provider, under a separate per-run processing choice. The available route is displayed before consent; changing the route requires renewed review. The model receives confirmed facts you marked shareable and vacancy text, rather than the entire raw source CV. Job search queries use target roles and locations. Availability depends on the configured accounts. Remove confidential or unnecessary sensitive information before saving or sharing.</p>
     <h2>Optional inbox access</h2><p>Signing in with Google does not connect your inbox. Connecting Gmail requires a separate Google permission screen. When configured, the loop can read relevant job-search messages and store selected summaries. Draft access is optional; creating a draft requires your approval of its recipient and attachment. Jobvance has no email-send or application-submit action. Disconnecting removes its stored connection credentials; it does not delete messages or drafts already in Gmail. Google permissions can also be revoked in your Google account.</p>
     <h2>Document access</h2><p>Approved documents are retained for your access after pack expiry. Public walkthroughs use example CVs and vacancies, not candidate records. <Link to="/contact">Contact and service availability</Link>.</p>
   </div>;
@@ -185,7 +99,7 @@ function LegalContent({ kind }: { kind: "privacy" | "terms" | "refund" }) {
 
 export default function ProductPage({ kind }: { kind: Kind }) {
   const { user } = useAuth();
-  const start = user ? "/dashboard" : "/auth";
+  const start = user ? "/loop" : "/auth?next=%2Floop";
   const support = import.meta.env.VITE_SUPPORT_EMAIL as string | undefined;
   const legal = kind === "privacy" || kind === "terms" || kind === "refund";
   const path = kind === 'home' ? '/' : kind === 'how' ? '/how-it-works' : `/${kind}`;
@@ -195,7 +109,8 @@ export default function ProductPage({ kind }: { kind: Kind }) {
     {kind === "home" ? <HomePage /> : <div className="product-shell product-inner">
       <header className="product-page-heading"><p className="product-eyebrow"><Link to="/">Jobvance</Link><span aria-hidden="true">/</span>{labels[kind]}</p><h1>{titles[kind]}</h1><p className="product-page-intro">{intros[kind]}</p></header>
       {kind === "pricing" ? <SubscriptionPricing /> : <div className="product-content-layout"><article className="product-main-content">
-        {(kind === "how" || kind === "help") && <><StepList compact /><div className="product-help-bottom"><StartLink>Check my CV against a job</StartLink><p>There’s no account or card needed for the check and download. You submit the application on the employer’s site.</p></div>{kind === "how" && <section className="product-how-loop"><h2>Applying to several roles? Save your work with Job Loop.</h2><p>You can reuse your chosen CV for another vacancy inside the free check. For ongoing preparation and tracking, set up Job Loop in your account by importing and confirming your experience.</p><Link className="product-text-link" to="/job-loop">See how Job Loop reuses your work<ArrowRight size={17} aria-hidden="true" /></Link></section>}</>}
+        {(kind === "how" || kind === "help") && <><LoopJourney /><div className="product-help-bottom"><StartLink /><p>Scheduled runs use rules-based preparation from connected sources. Optional AI preparation requires consent for each run. Review your documents before applying.</p><Link to="/check" className="product-text-link">Only need one CV? Try the free CV Check <ArrowRight size={17} aria-hidden="true" /></Link></div></>}
+
 
         {kind === "faq" && <div className="product-faqs">{faqs.map(([question, answer], index) => <details key={question}><summary><span className="product-faq-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><span>{question}</span><Plus size={20} aria-hidden="true" /></summary><p>{answer}</p></details>)}</div>}
         {kind === "about" && <div className="product-about"><p className="product-large-copy">Jobvance helps you prepare a CV for a job you want and keep track of what you send. You bring the experience and make the final call on the wording. Your experience stays the source of every application; employer decisions are theirs.</p><div className="product-about-principles"><span><FileText size={22} aria-hidden="true" />A visible source</span><span><CircleHelp size={22} aria-hidden="true" />Room for questions</span><span><CheckCircle2 size={22} aria-hidden="true" />Your final approval</span></div><StartLink /></div>}

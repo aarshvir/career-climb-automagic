@@ -1,3 +1,4 @@
+import type { LoopCvAnswers } from './loop-cv-builder';
 import type { LoopClaimInput, LoopContact, LoopProfileInput } from '../../supabase/functions/_shared/job-loop-types';
 import { validLoopGeneration } from '../../supabase/functions/_shared/job-loop-request';
 import { trackingDraftAuthority } from './tracking-draft-memory';
@@ -10,6 +11,8 @@ export const savedCheckVacancyFingerprint = (value: PendingSavedCheckLink['vacan
 export interface LoopClaimDraft { value: LoopClaimInput; chosenKind: LoopClaimInput['kind'] | '' }
 export interface LoopWorkingDraft {
   lifecycleGeneration: number;
+  builderAnswers?: LoopCvAnswers;
+  builderAuthority?: number;
   pendingCheckLink?: PendingSavedCheckLink | null;
   profile: LoopProfileInput; profileDirty: boolean; lists: { targets: string; locations: string; languages: string; excluded: string };
   claimDrafts: Record<string, LoopClaimDraft>; suggestions: { key: string; value: LoopClaimInput }[]; newClaimKey: number;
@@ -28,6 +31,7 @@ export function retainLoopWorkingDraft(ownerId: string, draft: LoopWorkingDraft,
 export function recoverLoopWorkingDraft(ownerId: string, expectedGeneration: number, now = Date.now()): LoopWorkingDraft | null {
   if (!validLoopGeneration(expectedGeneration) || !retained || retained.ownerId !== ownerId || retained.draft.lifecycleGeneration !== expectedGeneration || retained.expiresAt <= now || retained.expiresAt > now + TTL) { clearLoopWorkingDraft(); return null; }
   const draft = structuredClone(retained.draft);
+  if (draft.builderAnswers && (!Number.isSafeInteger(draft.builderAuthority) || draft.builderAuthority! < 0 || draft.builderAuthority !== trackingDraftAuthority(ownerId))) { clearLoopWorkingDraft(); return null; }
   const pending = draft.pendingCheckLink;
   // Never recover imported wording without its original attribution. Discard the
   // whole old draft if that attribution belongs to another confirmed auth life.

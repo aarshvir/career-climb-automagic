@@ -47,7 +47,7 @@ describe('cloud loop consent and accurate capabilities', () => {
     expect(screen.getByRole('button', { name: 'Enable recurring preparation' })).toBeDisabled();
   });
   it('carries audience preferences into a new record while leaving years and target titles unset', async () => {
-    current.profile = null; current.claims = []; render(tree('/loop?audience=professional')); await openTab('Career record');
+    current.profile = null; current.claims = []; render(tree('/loop?audience=professional')); await openTab('My CV & experience');
     expect(screen.getByLabelText('My situation')).toHaveValue('professional');
     expect(screen.getByLabelText('CV page preference')).toHaveValue('2');
     expect(screen.getByLabelText('Explicit experience years (optional)')).toHaveValue(null);
@@ -58,26 +58,26 @@ describe('cloud loop consent and accurate capabilities', () => {
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'save_profile')).toBe(false);
   });
   it('keeps an existing career record rather than replacing it with a landing-page preference', async () => {
-    render(tree('/loop?audience=professional')); await openTab('Career record');
+    render(tree('/loop?audience=professional')); await openTab('My CV & experience');
     expect(screen.getByLabelText('My situation')).toHaveValue('student');
     expect(screen.getByLabelText('My name')).toHaveValue('Fictional Casey');
   });
   it('preserves unsaved claim wording while moving between workspace sections', async () => {
-    render(tree()); await openTab('Career record'); const user = userEvent.setup();
+    render(tree()); await openTab('My CV & experience'); const user = userEvent.setup();
     await user.click(screen.getByText(/Developed Python reports for a fictional university project using synthetic data\. Assisted/, { selector: 'summary' }));
     const wording = screen.getAllByLabelText('Wording I can substantiate').find(element => (element as HTMLTextAreaElement).value === cv)!;
     await user.clear(wording); await user.type(wording, 'Synthetic unsaved contribution.');
-    await openTab('Opportunities'); await openTab('Career record');
+    await openTab('Opportunities'); await openTab('My CV & experience');
     expect(screen.getAllByLabelText('Wording I can substantiate').some(element => (element as HTMLTextAreaElement).value === 'Synthetic unsaved contribution.')).toBe(true);
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'save_claim')).toBe(false);
   });
   it('recovers same-owner record and claim drafts after navigating away without retaining consent', async () => {
-    const view = render(tree()); await openTab('Career record'); const user = userEvent.setup();
+    const view = render(tree()); await openTab('My CV & experience'); const user = userEvent.setup();
     await user.clear(screen.getByLabelText('Target roles')); await user.type(screen.getByLabelText('Target roles'), 'Synthetic second role');
     await user.click(screen.getByText(/Developed Python reports for a fictional university project using synthetic data\. Assisted/, { selector: 'summary' }));
     const wording = screen.getAllByLabelText('Wording I can substantiate').find(element => (element as HTMLTextAreaElement).value === cv)!;
     await user.clear(wording); await user.type(wording, 'Synthetic route draft.'); view.unmount();
-    render(tree()); await openTab('Career record');
+    render(tree()); await openTab('My CV & experience');
     expect(screen.getByLabelText('Target roles')).toHaveValue('Synthetic second role');
     expect(screen.getAllByLabelText('Wording I can substantiate').some(element => (element as HTMLTextAreaElement).value === 'Synthetic route draft.')).toBe(true);
     expect(screen.getByLabelText(/Save this reviewed text and profile privately/)).not.toBeChecked();
@@ -96,7 +96,7 @@ describe('cloud loop consent and accurate capabilities', () => {
     await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'save_schedule', expectedGeneration: 0, expectedScheduleVersion: 0, schedule: { cadence: 'weekdays', timezone: 'Asia/Dubai', localTime: '08:00', weeklyDay: null, provider: 'rules', model: 'grounded-rules-v1', modelConsent: false, inboxConsent: false }, recurringConsent: true }));
   });
   it('requires private-saving consent and keeps target text usable without local persistence', async () => {
-    const store = vi.spyOn(Storage.prototype, 'setItem'); render(tree()); await openTab('Career record'); const user = userEvent.setup();
+    const store = vi.spyOn(Storage.prototype, 'setItem'); render(tree()); await openTab('My CV & experience'); const user = userEvent.setup();
     await user.clear(screen.getByLabelText('Target roles')); await user.type(screen.getByLabelText('Target roles'), 'Product analyst\nData analyst');
     expect(screen.getByLabelText('Target roles')).toHaveValue('Product analyst\nData analyst');
     expect(screen.getByRole('button', { name: 'Save career record' })).toBeDisabled();
@@ -105,7 +105,7 @@ describe('cloud loop consent and accurate capabilities', () => {
     expect(store).not.toHaveBeenCalled(); expect(mocks.call.mock.calls.some(([, action]) => action.action === 'start_run')).toBe(false);
   });
   it('does not approve imported suggestions or silently label their evidence context', async () => {
-    render(tree()); await openTab('Career record'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: 'Suggest literal passages' }));
+    render(tree()); await openTab('My CV & experience'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: 'Suggest literal passages' }));
     await waitFor(() => expect(screen.getAllByLabelText('Source passage or my answer').some(element => (element as HTMLTextAreaElement).value === cv)).toBe(true));
     const passage = screen.getAllByLabelText('Source passage or my answer').find(element => (element as HTMLTextAreaElement).value === cv)!;
     const form = within(passage.closest('form')!);
@@ -135,7 +135,7 @@ describe('cloud loop consent and accurate capabilities', () => {
 describe('exact approvals and account lifecycle', () => {
   it('previews the exact saved PDF before approval without approving or downloading it', async () => {
     current.packets = [{ ...packet, artifacts: { pdf: { path: 'owner-a/packet-a/cv.pdf', sha256: 'synthetic-hash', byteSize: 100 } } }];
-    render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ }));
+    render(tree()); await openTab('Prepared CVs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ }));
     await user.click(screen.getByRole('button', { name: 'Open exact PDF preview' }));
     expect(await screen.findByTitle('Exact saved CV PDF preview')).toHaveAttribute('src', 'blob:synthetic-loop-preview');
     expect(mocks.preview).toHaveBeenCalledWith('owner-a', 'packet-a', 'exact-server-hash', expect.any(AbortSignal));
@@ -143,7 +143,7 @@ describe('exact approvals and account lifecycle', () => {
   });
   it('clears a cached PDF when the server revokes the packet after a vacancy-only change', async () => {
     current.packets = [{ ...packet, artifacts: { pdf: { path: 'owner-a/packet-a/cv.pdf', sha256: 'synthetic-hash', byteSize: 100 } } }];
-    render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByRole('button', { name: 'Open exact PDF preview' }));
+    render(tree()); await openTab('Prepared CVs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByRole('button', { name: 'Open exact PDF preview' }));
     expect(await screen.findByTitle('Exact saved CV PDF preview')).toBeInTheDocument();
     current = { ...current, recordVersion: 2, packets: [{ ...current.packets[0], status: 'revoked' }] };
     await user.click(screen.getByRole('button', { name: 'Refresh records' }));
@@ -154,7 +154,7 @@ describe('exact approvals and account lifecycle', () => {
   });
   it('keeps ready Word and text formats available when the approved PDF cannot meet its page preference', async () => {
     current.packets = [{ ...packet, status: 'approved', pageCount: 3, formatStatus: { pdf: { ready: false, reason: 'PAGE_TARGET_EXCEEDED', pageCount: 3 }, docx: { ready: true }, txt: { ready: true } } }];
-    render(tree()); await openTab('Outputs'); await userEvent.setup().click(screen.getByRole('button', { name: /Graduate analyst/ }));
+    render(tree()); await openTab('Prepared CVs'); await userEvent.setup().click(screen.getByRole('button', { name: /Graduate analyst/ }));
     expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Download DOCX' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();
@@ -163,14 +163,14 @@ describe('exact approvals and account lifecycle', () => {
   it('suppresses an exact preview returned after the account changes', async () => {
     current.packets = [{ ...packet, artifacts: { pdf: { path: 'owner-a/packet-a/cv.pdf', sha256: 'synthetic-hash', byteSize: 100 } } }];
     let finish!: (result: { blob: Blob; filename: string }) => void; mocks.preview.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
-    const view = render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByRole('button', { name: 'Open exact PDF preview' }));
+    const view = render(tree()); await openTab('Prepared CVs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByRole('button', { name: 'Open exact PDF preview' }));
     await waitFor(() => expect(mocks.preview).toHaveBeenCalledOnce());
     await act(async () => { mocks.user = { id: 'owner-b' }; current = { ...snapshot(), profile: null, claims: [], packets: [] }; view.rerender(tree()); });
     await act(async () => { finish({ blob: new Blob(['%PDF-fictional']), filename: 'fictional-preview.pdf' }); });
     expect(screen.queryByTitle('Exact saved CV PDF preview')).not.toBeInTheDocument(); expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
   it('requires both factual and disclosure review for the exact source-controlled packet', async () => {
-    current.packets = [{ ...packet }]; render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ }));
+    current.packets = [{ ...packet }]; render(tree()); await openTab('Prepared CVs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ }));
     expect(screen.getByLabelText('CV text for factual review')).toHaveAttribute('readonly');
     expect(screen.getByRole('button', { name: 'Approve exact packet' })).toBeDisabled(); await user.click(screen.getByLabelText(/I reviewed the complete CV and evidence/));
     expect(screen.getByRole('button', { name: 'Approve exact packet' })).toBeDisabled(); await user.click(screen.getByLabelText(/The final document and its figures/));
@@ -178,11 +178,11 @@ describe('exact approvals and account lifecycle', () => {
     await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'approve_packet', packetId: packet.id, inputHash: packet.inputHash, reviewedText: cv, confirmFacts: true, confirmDisclosure: true }));
   });
   it('blocks downloads when an apparently approved packet refers to a withdrawn claim', async () => {
-    current.claims[0].status = 'withdrawn'; current.packets = [{ ...packet, status: 'approved' }]; render(tree()); await openTab('Outputs'); await userEvent.setup().click(screen.getByRole('button', { name: /Graduate analyst/ }));
+    current.claims[0].status = 'withdrawn'; current.packets = [{ ...packet, status: 'approved' }]; render(tree()); await openTab('Prepared CVs'); await userEvent.setup().click(screen.getByRole('button', { name: /Graduate analyst/ }));
     expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled(); expect(screen.getByText(/does not match the current cleared record/)).toBeInTheDocument(); expect(mocks.download).not.toHaveBeenCalled();
   });
   it('does not present an approved status as download readiness when the measured document exceeds the page preference', async () => {
-    current.packets = [{ ...packet, status: 'approved', pageCount: 3 }]; render(tree()); await openTab('Outputs'); await userEvent.setup().click(screen.getByRole('button', { name: /Graduate analyst/ }));
+    current.packets = [{ ...packet, status: 'approved', pageCount: 3 }]; render(tree()); await openTab('Prepared CVs'); await userEvent.setup().click(screen.getByRole('button', { name: /Graduate analyst/ }));
     expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled(); expect(screen.getByText(/rendered page count or document checks are not cleared/)).toBeInTheDocument();
   });
   it('does not expose a previous owner’s delayed snapshot after switching accounts', async () => {
@@ -195,7 +195,7 @@ describe('exact approvals and account lifecycle', () => {
   });
   it('does not trigger a document download after an in-flight account switch', async () => {
     current.packets = [{ ...packet, status: 'approved' }]; let finish!: (response: { blob: Blob; filename: string }) => void;
-    mocks.download.mockImplementation(() => new Promise(resolve => { finish = resolve; })); const view = render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByRole('button', { name: 'Download TXT' }));
+    mocks.download.mockImplementation(() => new Promise(resolve => { finish = resolve; })); const view = render(tree()); await openTab('Prepared CVs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByRole('button', { name: 'Download TXT' }));
     await waitFor(() => expect(mocks.download).toHaveBeenCalledOnce());
     const signal=mocks.download.mock.calls[0][3] as AbortSignal;expect(signal.aborted).toBe(false);
     await act(async () => { mocks.user = { id: 'owner-b' }; current = { ...snapshot(), profile: null, claims: [], packets: [] }; view.rerender(tree()); });
@@ -206,7 +206,7 @@ describe('exact approvals and account lifecycle', () => {
     current.packets=[{...packet,status:'approved'}];
     let finish!:(response:{blob:Blob;filename:string})=>void;
     mocks.download.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;}));
-    render(tree());await openTab('Outputs');const user=userEvent.setup();await user.click(screen.getByRole('button',{name:/Graduate analyst/}));
+    render(tree());await openTab('Prepared CVs');const user=userEvent.setup();await user.click(screen.getByRole('button',{name:/Graduate analyst/}));
     let refreshed!:(response:{snapshot:LoopSnapshot})=>void;
     mocks.call.mockImplementationOnce(()=>new Promise(resolve=>{refreshed=resolve;}));
     await user.click(screen.getByRole('button',{name:'Refresh records'}));
@@ -226,7 +226,7 @@ describe('exact approvals and account lifecycle', () => {
     current.packets=[{...packet,status:'approved'}];
     let finish!:(response:{blob:Blob;filename:string})=>void;
     mocks.download.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;}));
-    const view=render(tree());await openTab('Outputs');const user=userEvent.setup();await user.click(screen.getByRole('button',{name:/Graduate analyst/}));await user.click(screen.getByRole('button',{name:'Download TXT'}));
+    const view=render(tree());await openTab('Prepared CVs');const user=userEvent.setup();await user.click(screen.getByRole('button',{name:/Graduate analyst/}));await user.click(screen.getByRole('button',{name:'Download TXT'}));
     await waitFor(()=>expect(mocks.download).toHaveBeenCalledOnce());
     const signal=mocks.download.mock.calls[0][3] as AbortSignal;expect(signal.aborted).toBe(false);
     view.unmount();expect(signal.aborted).toBe(true);
@@ -237,7 +237,7 @@ describe('exact approvals and account lifecycle', () => {
     current.gmail = { connected: true, email: 'fictional@example.test', status: 'Connected', allowDrafts: true }; current.capabilities.gmailRead = true; current.capabilities.gmailDrafts = true;
     current.packets = [{ ...packet, status: 'approved', contact: { name: 'Fictional Recruiter', title: 'Recruiter', email: 'recruiter@example.test', sourceUrl: 'https://example.test/fictional', sourceQuote: 'Fictional contact fixture', confirmedByUser: true, inExistingThread: false }, emailSubject: 'Fictional role', emailBody: 'Fictional message, not sent.' }];
     mocks.call.mockImplementation(async (_id, action) => action.action === 'gmail_create_draft' ? { message: 'Draft operation confirmed. Nothing sent.' } : { snapshot: current });
-    render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ }));
+    render(tree()); await openTab('Prepared CVs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ }));
     expect(screen.getByRole('button', { name: 'Create Gmail draft' })).toBeDisabled(); await user.click(screen.getByLabelText(/I checked the recipient, reviewed the message/));
     await user.click(screen.getByRole('button', { name: 'Create Gmail draft' })); await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Nothing sent'));
     await user.click(screen.getByRole('button', { name: 'Create Gmail draft' }));
@@ -318,7 +318,7 @@ describe('support receipts and scoped self-service erasure', () => {
   });
   it('hides a previously loaded private snapshot when refreshing reports pending erasure', async () => {
     render(tree());
-    await openTab('Career record');
+    await openTab('My CV & experience');
     expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue(cv);
     mocks.call.mockResolvedValueOnce({ erasureGeneration: 1 });
     await userEvent.setup().click(screen.getByRole('button', { name: 'Refresh records' }));
@@ -451,7 +451,7 @@ describe('browser-only Gmail return confirmation', () => {
   it('distinguishes configured draft capability from a read-only mailbox grant', async () => {
     current.gmail = { connected: true, email: 'fictional@example.test', status: 'Connected', allowDrafts: false }; current.capabilities.gmailDrafts = true;
     current.packets = [{ ...packet, status: 'approved', contact: { name: 'Fictional Recruiter', title: 'Recruiter', email: 'recruiter@example.test', sourceUrl: 'https://example.test/source', sourceQuote: 'Fictional public source', confirmedByUser: true, inExistingThread: false }, emailBody: 'Fictional unsent email' }];
-    render(tree()); await openTab('Outputs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByLabelText(/I checked the recipient, reviewed the message/));
+    render(tree()); await openTab('Prepared CVs'); const user = userEvent.setup(); await user.click(screen.getByRole('button', { name: /Graduate analyst/ })); await user.click(screen.getByLabelText(/I checked the recipient, reviewed the message/));
     expect(screen.getByRole('button', { name: 'Create Gmail draft' })).toBeDisabled(); expect(mocks.call.mock.calls.some(([, action]) => action.action === 'gmail_create_draft')).toBe(false);
   });
 });
@@ -460,7 +460,7 @@ describe('same-owner Job Loop lifetime changes', () => {
   it('does not restore an older lifetime draft when the same owner returns to a newly created workspace', async () => {
     current.lifecycleGeneration = 7;
     const view = render(tree());
-    await openTab('Career record');
+    await openTab('My CV & experience');
     const user = userEvent.setup();
     await user.clear(screen.getByLabelText('Target roles'));
     await user.click(screen.getByLabelText('Target roles'));
@@ -471,7 +471,7 @@ describe('same-owner Job Loop lifetime changes', () => {
     current = { ...snapshot(), lifecycleGeneration: 9, recordVersion: 3,
       profile: { ...profile, targetTitles: ['Fresh workspace target'] } };
     render(tree());
-    await openTab('Career record');
+    await openTab('My CV & experience');
 
     expect(screen.getByLabelText('Target roles')).toHaveValue('Fresh workspace target');
     expect(screen.queryByDisplayValue('OLD_LIFETIME_ROUTE_DRAFT')).not.toBeInTheDocument();
@@ -516,7 +516,7 @@ describe('same-owner Job Loop lifetime changes', () => {
     await user.selectOptions(screen.getByLabelText('Preparation provider'), 'openai');
     await user.click(screen.getByLabelText(/Allow this run’s active, confirmed and shareable/));
     await user.click(screen.getByLabelText(/For this run, check the connected recruitment messages/));
-    await openTab('Career record');
+    await openTab('My CV & experience');
     const source = screen.getByLabelText('Reviewed source CV or career record');
     const sourceDetails = source.closest('details')!;
     if (!sourceDetails.open) await user.click(sourceDetails.querySelector('summary')!);

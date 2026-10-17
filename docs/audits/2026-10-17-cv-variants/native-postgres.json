@@ -1,0 +1,167 @@
+{
+  "url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-5-windows-x64-binaries.zip",
+  "bytes": 381531864,
+  "sha256": "80379b2c04d51c30225532e0ae04509899141e9957ed096fe749d7fd9df8f82f",
+  "provenance": [
+    "https://www.postgresql.org/download/windows/",
+    "https://www.enterprisedb.com/download-postgresql-binaries",
+    "https://github.com/EnterpriseDB/edb-installers/issues/731",
+    "https://www.postgresql.org/about/licence/"
+  ],
+  "suite": "cv-variants",
+  "startedAt": "2026-10-16T22:42:28.806Z",
+  "checks": [
+    {
+      "name": "simultaneous identical saves create one variant and one receipt without altering source input",
+      "passed": true,
+      "distinctBackendPids": [
+        21464,
+        25460
+      ],
+      "blockingPids": [
+        21464
+      ]
+    },
+    {
+      "name": "same request with a conflicting payload waits then rejects without a second write",
+      "passed": true,
+      "distinctBackendPids": [
+        2056,
+        49948
+      ],
+      "blockingPids": [
+        2056
+      ]
+    },
+    {
+      "name": "competing final-slot saves serialize and a fourth variant cannot bypass the cap",
+      "passed": true,
+      "distinctBackendPids": [
+        26164,
+        39268
+      ],
+      "blockingPids": [
+        26164
+      ],
+      "variantsAfterCompetingWrites": 3,
+      "freshRetryRejected": "LOOP_VARIANT_LIMIT"
+    },
+    {
+      "name": "competing updates preserve the winning revision and reject stale revision even with fresh record version",
+      "passed": true,
+      "distinctBackendPids": [
+        14228,
+        44584
+      ],
+      "blockingPids": [
+        14228
+      ]
+    },
+    {
+      "name": "source claim edit winning first fences old record and old confirmed-claim references",
+      "passed": true,
+      "distinctBackendPids": [
+        27500,
+        38808
+      ],
+      "blockingPids": [
+        27500
+      ]
+    },
+    {
+      "name": "save winning first freezes its source snapshot while later source edits remain independent",
+      "passed": true,
+      "distinctBackendPids": [
+        19784,
+        28172
+      ],
+      "blockingPids": [
+        19784
+      ]
+    },
+    {
+      "name": "erasure winning before save rejects old intent and removes all variant receipts at finish",
+      "passed": true,
+      "distinctBackendPids": [
+        16112,
+        43356
+      ],
+      "blockingPids": [
+        16112
+      ],
+      "originalGeneration": 0,
+      "freshGeneration": 2
+    },
+    {
+      "name": "save winning before erasure completes atomically then cannot survive the erase cascade",
+      "passed": true,
+      "distinctBackendPids": [
+        10612,
+        41644
+      ],
+      "blockingPids": [
+        10612
+      ]
+    },
+    {
+      "name": "finish cascade blocks an old save and never restores variants or their source record",
+      "passed": true,
+      "distinctBackendPids": [
+        43360,
+        48248
+      ],
+      "blockingPids": [
+        43360
+      ]
+    }
+  ],
+  "limitations": [
+    "Native PostgreSQL sessions execute actual migrations; auth.users/auth.uid, unrelated pack columns and Storage tables use isolated fixtures. No worker, provider, document rendering or export runs here.",
+    "No hosted Supabase, PostgREST, real authentication or production candidate data is exercised.",
+    "The vendor repository publishes the ZIP digest; no detached publisher signature was located."
+  ],
+  "archiveVerifiedAt": "2026-10-16T22:42:29.071Z",
+  "extraction": {
+    "entries": 22033,
+    "extracted": 3016,
+    "expandedBytes": 1002085601
+  },
+  "harnessSha256": "2e32675ceff67bfa2d5ecae2963ebcd94f2fc1198fe3e90d91e29d4c4292d250",
+  "migration": {
+    "name": "20261017013000_job_loop_cv_variants.sql",
+    "sha256": "4adbe12e4ad3e910ae9226c6880e4ce9dbeb81d6bf4e58fc1205e642d89e5282"
+  },
+  "casesSha256": "463d2278be547ab02fa59b831189a1d4c6e49f2354d2d2b43ce3139f31bd6a0b",
+  "version": "postgres (PostgreSQL) 17.11",
+  "executedSchemaSha256": "816e99e7fdf9ee38b643e744797b3a2767dbd52c847e9e79a51c135de9da52af",
+  "backendPids": [
+    35196,
+    21464,
+    25460,
+    2056,
+    49948,
+    45396,
+    26164,
+    39268,
+    6800,
+    14228,
+    44584,
+    13060,
+    27500,
+    38808,
+    44352,
+    19784,
+    28172,
+    16112,
+    43356,
+    22076,
+    10612,
+    41644,
+    37124,
+    43360,
+    48248
+  ],
+  "passed": true,
+  "clusterStopped": true,
+  "finishedAt": "2026-10-16T22:42:51.679Z"
+}

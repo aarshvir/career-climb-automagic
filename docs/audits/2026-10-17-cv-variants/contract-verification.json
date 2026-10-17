@@ -1,0 +1,85 @@
+{
+  "recordedAtUtc": "2026-10-17T01:39:06.786Z",
+  "status": "unpublished source integration; migration unapplied; public v32 and backend unchanged",
+  "baseCommit": "b8c092c3ecb1f505ef14571773cbb1696a303635",
+  "rollbackTag": "jobvance-before-cv-variant-contract-2026-10-17",
+  "scope": "Authenticated variant save/read control, repository and browser API; no UI caller or run/schedule/packet selection",
+  "validation": {
+    "vitest": {
+      "passed": 2007,
+      "files": 118,
+      "added": 102,
+      "addedRuntime": 44,
+      "addedBrowser": 43,
+      "addedIndependentControlSql": 15
+    },
+    "appTypeScript": "passed",
+    "sourceDeno": {
+      "passed": 22
+    },
+    "generatedDeno": {
+      "passed": 22
+    },
+    "productionBuild": "passed Vite, prerender and packaging; no packaging retry required",
+    "hosting": {
+      "result": "passed",
+      "publicPages": 38,
+      "guideArticles": 20,
+      "checks": [
+        "security-headers-and-jsonld-hashes",
+        "private-client-routes",
+        "rendered-public-content",
+        "canonical-redirects",
+        "real-notfound-status",
+        "asset-bytes-and-mime",
+        "etag-and-cache",
+        "head",
+        "missing-and-private-paths",
+        "unsafe-methods",
+        "project-identity",
+        "compressed-size"
+      ],
+      "compressedBytes": 2806181
+    },
+    "independentReview": "CONTRACT-INDEPENDENT-REVIEW.md",
+    "reviewedHashesMatch": true
+  },
+  "initialFailure": "First generated Deno invocation lacked read permission for the local bundle and ran zero cases; unchanged suite passed after narrow --allow-read=docs/supabase-loop-ui permission.",
+  "nativeConcurrency": "Not rerun; existing nine foundation groups retain original scope; unchanged migration hash matches their receipt.",
+  "sourceSha256": {
+    "supabase/functions/_shared/job-loop-cv-variants.ts": "5a5edd0850dcd8862c9c7e7a6f00dee463a04a033d3d0a0538d31c6b70c7cbcc",
+    "supabase/functions/_shared/job-loop-runtime.ts": "896c3ee95afb0ad66124500536cec1c0824596d28a2fcca3a2aa36730382af3e",
+    "supabase/functions/_shared/job-loop-repository.ts": "a9ced39d350328686d40f993c979d47e4341ca118c748793f9101a004b54fbd8",
+    "supabase/functions/_shared/job-loop-engine.ts": "9fe2fde1222a37e0c4172c695bbb85478b32fd74a1c945c571565b890333e47b",
+    "supabase/functions/_shared/job-loop-request.ts": "f9e2dd58b5b43f2ab61eab5ae6955f7dc998e0cb47ad780c15f4a7a8b8a5a604",
+    "supabase/functions/_shared/job-loop-types.ts": "49fa203d44c2bf05e5c7ea8f3890afcb5ec4dc1c096c67bf880b57fd8a888d51",
+    "src/lib/job-loop-api.ts": "d5276957ab72bcd1b9af99f732d2cb9a7a19b9bb695b66f2cb14e7171be842dc",
+    "src/lib/tracking-draft-memory.ts": "55ef2b69214abee0bb71646a54ec94b517db7fe43a073a17283ef5ab4e296f98",
+    "src/__tests__/lib/job-loop-cv-variants-api.test.ts": "2b4d2ceb1d2ae904d348f62ce3e447abde2634200682e12adb83a8a3abebe2e6",
+    "supabase/tests/job-loop-cv-variants-independent.test.ts": "89c2d0c9f0fc4daf19fd09c5a8f2e644645fe747d4507ed7a0dd9c9f97541e9f",
+    "supabase/migrations/20261017013000_job_loop_cv_variants.sql": "4adbe12e4ad3e910ae9226c6880e4ce9dbeb81d6bf4e58fc1205e642d89e5282",
+    "supabase/tests/job-loop-cv-variants-runtime.test.ts": "3f11dad7d9973b00db1c2798214e8c90344d25c580a402ed5e393ec34281c7af",
+    "supabase/tests/job-loop-edge.deno.ts": "d0312aa57d4f5b4dd090b87b52248083e93fcc08e00a5945b8772018c21807f6",
+    "docs/supabase-loop-ui/job-loop-control.js": "45bae58021bcd84afa462f8473ed8956b561eb47e078c123b817a41892adca23",
+    "docs/supabase-loop-ui/job-loop-worker.js": "61fe89ad526f372f62d310a83f93510e44142f33d7a7ee00fbb21347768aa8df",
+    "docs/supabase-loop-ui/job-loop-oauth.js": "6d45b40ba89ff10d1c389b2d9230d170ec8aee273be99056c41a6a7bdfba8cb5",
+    "docs/supabase-loop-ui/manifest.json": "5e8e7cb4b1072dfb77151c5d2994fc158fe3e5bd990ea9da1bb223a031924a6f"
+  },
+  "notPerformed": [
+    "Migration application",
+    "Deployment or live HTTP check",
+    "Browser variant journey",
+    "Hosted authenticated persistence",
+    "Paid provider/search call",
+    "Production candidate mutation",
+    "New native PostgreSQL run"
+  ],
+  "remaining": [
+    "Candidate UI and cross-route request recovery",
+    "Independent variant fact review",
+    "Immutable variant selection in manual/scheduled run, worker and packet identity",
+    "Current sharing and withdrawal revalidation",
+    "Recurring entitlements/AI consent and discovery",
+    "Combined exposure review and hosted first/second acceptance"
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "reviewedAt": "2026-10-17T04:41:34.524Z",
+  "reviewer": "Independent acceptance/review agent; separate from runtime implementation authors",
+  "scope": "Source-only private CV variant UI, owner/session/lifecycle-bound optional recovery and actual JobLoop integration",
+  "result": "No remaining material blocker found within the bounded reviewed scope after listed corrections",
+  "verification": {
+    "runner": "Vitest 5.0.3",
+    "passed": 59,
+    "failed": 0,
+    "testFiles": [
+      {
+        "path": "src/__tests__/job-loop-cv-variants-integration.test.tsx",
+        "status": "passed",
+        "count": 1
+      },
+      {
+        "path": "src/__tests__/loop-cv-variants-independent.test.tsx",
+        "status": "passed",
+        "count": 9
+      },
+      {
+        "path": "src/__tests__/loop-cv-variants.test.tsx",
+        "status": "passed",
+        "count": 16
+      },
+      {
+        "path": "src/__tests__/auth/tracking-owner-boundary.test.tsx",
+        "status": "passed",
+        "count": 5
+      },
+      {
+        "path": "src/__tests__/lib/loop-cv-variant-recovery-independent.test.ts",
+        "status": "passed",
+        "count": 28
+      }
+    ],
+    "publicReceipt": "ui-independent-verification.json",
+    "sanitization": "Only absolute test filename prefixes removed; original retained in private sibling evidence"
+  },
+  "files": [
+    {
+      "path": "src/lib/loop-cv-variant-recovery.ts",
+      "sha256": "bc556fb53acc43f3f987edc2f8e7bf6f87e427b2837c8f2faf20378acf97fd24"
+    },
+    {
+      "path": "src/lib/tracking-draft-memory.ts",
+      "sha256": "c6ac5dc58baa51050734e7c41a952a58361e5c46126827bbfc83a3a631d3a960"
+    },
+    {
+      "path": "src/contexts/AuthContext.tsx",
+      "sha256": "145c728713a04d76afce8cad2e597142dafb67f175f8596c7f0f520b3d93e91c"
+    },
+    {
+      "path": "src/pages/LoopCvVariants.tsx",
+      "sha256": "8fa563a73f6899308172f70b9dae50c634fd3e6883ad07adc2645f52100abb55"
+    },
+    {
+      "path": "src/pages/JobLoop.tsx",
+      "sha256": "7994db698a143102fe5fb1d391b01b4fba71bbc6760f5d6e866b0881e315738a"
+    },
+    {
+      "path": "src/pages/ProductPage.tsx",
+      "sha256": "1208b2576ccf2665f48b753823d5b6424b6e4db3b7249fd52564baa133f94548"
+    },
+    {
+      "path": "src/__tests__/lib/loop-cv-variant-recovery-independent.test.ts",
+      "sha256": "38b4a516d774f22194b60dcf3b11b01a156902b7308617910064e6f09dfc2f57"
+    },
+    {
+      "path": "src/__tests__/loop-cv-variants.test.tsx",
+      "sha256": "02cf72586ea8771f7fc19c586839420ddff3642771b5308116df44b5e449115e"
+    },
+    {
+      "path": "src/__tests__/loop-cv-variants-independent.test.tsx",
+      "sha256": "8c2e7fa9564c3c3696927d4a439aa524efb68c47ab73bb9b8103ba34159e68e4"
+    },
+    {
+      "path": "src/__tests__/job-loop-cv-variants-integration.test.tsx",
+      "sha256": "a4bfbe1dba37206e40359134f7d68784928d5e824215822b92b5ae695e7a7685"
+    },
+    {
+      "path": "src/__tests__/auth/tracking-owner-boundary.test.tsx",
+      "sha256": "4f026eea0b923a47936c18ce5eab34c383639cebb679b2e16df687cf26118eba"
+    }
+  ],
+  "notEstablished": [
+    "Hosted persistence or actual authenticated browser acceptance",
+    "Variant-based run/packet and schedule binding",
+    "Independent variant fact confirmation",
+    "Plan entitlements and billing",
+    "Unassisted customer success or full-product sign-off"
+  ],
+  "report": "UI-INDEPENDENT-REVIEW.md"
+}

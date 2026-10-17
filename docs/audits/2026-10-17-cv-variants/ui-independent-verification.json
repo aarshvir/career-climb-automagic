@@ -1,0 +1,843 @@
+{
+  "numTotalTestSuites": 10,
+  "numPassedTestSuites": 10,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 59,
+  "numPassedTests": 59,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1792212048185,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "CV variants in the actual Job Loop page"
+          ],
+          "fullName": "CV variants in the actual Job Loop page uses exact variant actions, preserves the main draft and never adopts a variant receipt as a complete workspace snapshot",
+          "status": "passed",
+          "title": "uses exact variant actions, preserves the main draft and never adopts a variant receipt as a complete workspace snapshot",
+          "duration": 634.3104999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1792212049230,
+      "endTime": 1792212049864.3105,
+      "status": "passed",
+      "message": "",
+      "name": "src/__tests__/job-loop-cv-variants-integration.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries rejects same-batch edit then submit under earlier private-save consent",
+          "status": "passed",
+          "title": "rejects same-batch edit then submit under earlier private-save consent",
+          "duration": 121.04510000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries preserves newer wording when the earlier private save returns late",
+          "status": "passed",
+          "title": "preserves newer wording when the earlier private save returns late",
+          "duration": 55.87169999999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries retains the exact ambiguous request across route unmount and requires deliberate retry",
+          "status": "passed",
+          "title": "retains the exact ambiguous request across route unmount and requires deliberate retry",
+          "duration": 82.29340000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries does not display a late save from an earlier same-owner SDK session",
+          "status": "passed",
+          "title": "does not display a late save from an earlier same-owner SDK session",
+          "duration": 63.057300000000055,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries keeps newer edits made before retrying an earlier ambiguous save",
+          "status": "passed",
+          "title": "keeps newer edits made before retrying an earlier ambiguous save",
+          "duration": 85.20399999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries requires fresh list inspection and revision review to escape an unsuccessful original request without losing edits",
+          "status": "passed",
+          "title": "requires fresh list inspection and revision review to escape an unsuccessful original request without losing edits",
+          "duration": 104.80039999999985,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries requires explicit continuation before newer edits can update the newly confirmed variant",
+          "status": "passed",
+          "title": "requires explicit continuation before newer edits can update the newly confirmed variant",
+          "duration": 67.2623000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries recovers retained edits when mounted authority becomes ready after initial render",
+          "status": "passed",
+          "title": "recovers retained edits when mounted authority becomes ready after initial render",
+          "duration": 37.45219999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant UI boundaries"
+          ],
+          "fullName": "independent CV variant UI boundaries preserves the confirmed earlier save association across remount while newer create-draft edits await explicit continuation",
+          "status": "passed",
+          "title": "preserves the confirmed earlier save association across remount while newer create-draft edits await explicit continuation",
+          "duration": 123.63079999999991,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1792212048985,
+      "endTime": 1792212049725.6309,
+      "status": "passed",
+      "message": "",
+      "name": "src/__tests__/loop-cv-variants-independent.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants loads deliberately, starts with no selected facts or consent, and saves an exact draft without preparation",
+          "status": "passed",
+          "title": "loads deliberately, starts with no selected facts or consent, and saves an exact draft without preparation",
+          "duration": 142.28919999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants selects an exact current fact and clears passage selection when source changes",
+          "status": "passed",
+          "title": "selects an exact current fact and clears passage selection when source changes",
+          "duration": 60.76209999999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants rejects same-batch edits and A-to-B-to-A consent reuse",
+          "status": "passed",
+          "title": "rejects same-batch edits and A-to-B-to-A consent reuse",
+          "duration": 29.26030000000003,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants keeps newer edits after delayed save and explicitly continues them on the saved variant",
+          "status": "passed",
+          "title": "keeps newer edits after delayed save and explicitly continues them on the saved variant",
+          "duration": 81.52650000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants recovers an ambiguous original request through full unmount and requires fresh retry consent",
+          "status": "passed",
+          "title": "recovers an ambiguous original request through full unmount and requires fresh retry consent",
+          "duration": 79.20309999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants shows a newer saved revision returned by retry without replacing it with the original source",
+          "status": "passed",
+          "title": "shows a newer saved revision returned by retry without replacing it with the original source",
+          "duration": 100.6699000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants ignores a delayed save after owner changes",
+          "status": "passed",
+          "title": "ignores a delayed save after owner changes",
+          "duration": 29.171699999999873,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants ignores a delayed save after authority changes",
+          "status": "passed",
+          "title": "ignores a delayed save after authority changes",
+          "duration": 22.208699999999908,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants ignores a delayed save after generation changes",
+          "status": "passed",
+          "title": "ignores a delayed save after generation changes",
+          "duration": 40.08659999999986,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants ignores a delayed save after ready changes",
+          "status": "passed",
+          "title": "ignores a delayed save after ready changes",
+          "duration": 21.511299999999892,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants allows updating one of three existing variants while preventing a fourth create",
+          "status": "passed",
+          "title": "allows updating one of three existing variants while preventing a fourth create",
+          "duration": 49.54220000000009,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants keeps the last confirmed list when refresh fails and does not invent empty work",
+          "status": "passed",
+          "title": "keeps the last confirmed list when refresh fails and does not invent empty work",
+          "duration": 18.57809999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants does not promise refresh recovery without a verified session even after device opt-in",
+          "status": "passed",
+          "title": "does not promise refresh recovery without a verified session even after device opt-in",
+          "duration": 17.753799999999956,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants clears consent and blocks a selected fact whose current revision changes",
+          "status": "passed",
+          "title": "clears consent and blocks a selected fact whose current revision changes",
+          "duration": 38.466699999999946,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants requires a refreshed list and current acknowledgement before abandoning an uncertain request",
+          "status": "passed",
+          "title": "requires a refreshed list and current acknowledgement before abandoning an uncertain request",
+          "duration": 70.5462,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "private CV variants"
+          ],
+          "fullName": "private CV variants warns when incomplete pasted input cannot be retained for route recovery",
+          "status": "passed",
+          "title": "warns when incomplete pasted input cannot be retained for route recovery",
+          "duration": 13.875800000000027,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1792212048991,
+      "endTime": 1792212049806.8757,
+      "status": "passed",
+      "message": "",
+      "name": "src/__tests__/loop-cv-variants.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "tracking drafts follow confirmed auth ownership on every route"
+          ],
+          "fullName": "tracking drafts follow confirmed auth ownership on every route passes the stable SDK session identity on same-owner sign-in and token refresh",
+          "status": "passed",
+          "title": "passes the stable SDK session identity on same-owner sign-in and token refresh",
+          "duration": 85.01659999999993,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "tracking drafts follow confirmed auth ownership on every route"
+          ],
+          "fullName": "tracking drafts follow confirmed auth ownership on every route revokes the old owner synchronously on the SDK event, before React settles",
+          "status": "passed",
+          "title": "revokes the old owner synchronously on the SDK event, before React settles",
+          "duration": 76.93560000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "tracking drafts follow confirmed auth ownership on every route"
+          ],
+          "fullName": "tracking drafts follow confirmed auth ownership on every route cannot reauthorize a stale initial session after a newer signed-out event",
+          "status": "passed",
+          "title": "cannot reauthorize a stale initial session after a newer signed-out event",
+          "duration": 78.86660000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "tracking drafts follow confirmed auth ownership on every route"
+          ],
+          "fullName": "tracking drafts follow confirmed auth ownership on every route does not treat unknown or failed bootstrap as confirmed sign-out",
+          "status": "passed",
+          "title": "does not treat unknown or failed bootstrap as confirmed sign-out",
+          "duration": 78.10899999999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "tracking drafts follow confirmed auth ownership on every route"
+          ],
+          "fullName": "tracking drafts follow confirmed auth ownership on every route keeps draft authority when explicit sign-out fails and clears it on success",
+          "status": "passed",
+          "title": "keeps draft authority when explicit sign-out fails and clears it on success",
+          "duration": 79.29070000000002,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1792212049032,
+      "endTime": 1792212049430.2908,
+      "status": "passed",
+      "message": "",
+      "name": "src/__tests__/auth/tracking-owner-boundary.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions keeps a newer editable draft separate from the original immutable pending request",
+          "status": "passed",
+          "title": "keeps a newer editable draft separate from the original immutable pending request",
+          "duration": 84.51670000000001,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions does not silently grant refresh recovery when only page memory was requested",
+          "status": "passed",
+          "title": "does not silently grant refresh recovery when only page memory was requested",
+          "duration": 2.6410999999999376,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions preserves opted-in original request through unknown bootstrap and same-session module reload",
+          "status": "passed",
+          "title": "preserves opted-in original request through unknown bootstrap and same-session module reload",
+          "duration": 3.9367999999999483,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions keeps intentionally emptied fields without restoring current save consent",
+          "status": "passed",
+          "title": "keeps intentionally emptied fields without restoring current save consent",
+          "duration": 2.259999999999991,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions keeps token refresh within one session but revokes old writers for same-owner new sign-in",
+          "status": "passed",
+          "title": "keeps token refresh within one session but revokes old writers for same-owner new sign-in",
+          "duration": 1.4978999999999587,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects same-owner recovery after refresh into a different SDK session",
+          "status": "passed",
+          "title": "rejects same-owner recovery after refresh into a different SDK session",
+          "duration": 1.9945999999999913,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects an A→B→A delayed cleanup or retain without touching newer A work",
+          "status": "passed",
+          "title": "rejects an A→B→A delayed cleanup or retain without touching newer A work",
+          "duration": 1.144200000000069,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions cannot clear a newer pending request with an older completion ID",
+          "status": "passed",
+          "title": "cannot clear a newer pending request with an older completion ID",
+          "duration": 0.9493000000001075,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions refuses a newer lifecycle and cannot move recovery generation backwards",
+          "status": "passed",
+          "title": "refuses a newer lifecycle and cannot move recovery generation backwards",
+          "duration": 1.086999999999989,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions keeps page memory honestly when browser storage getter is denied",
+          "status": "passed",
+          "title": "keeps page memory honestly when browser storage getter is denied",
+          "duration": 1.8727999999999838,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions keeps page memory honestly when browser storage write is denied",
+          "status": "passed",
+          "title": "keeps page memory honestly when browser storage write is denied",
+          "duration": 1.0944000000000642,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions keeps page memory honestly when browser storage read is denied",
+          "status": "passed",
+          "title": "keeps page memory honestly when browser storage read is denied",
+          "duration": 1.1545999999999594,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions does not claim successful refresh recovery when the storage write silently does nothing",
+          "status": "passed",
+          "title": "does not claim successful refresh recovery when the storage write silently does nothing",
+          "duration": 0.9175999999999931,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects corrupt or stale stored recovery: expired",
+          "status": "passed",
+          "title": "rejects corrupt or stale stored recovery: expired",
+          "duration": 1.857900000000086,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects corrupt or stale stored recovery: future",
+          "status": "passed",
+          "title": "rejects corrupt or stale stored recovery: future",
+          "duration": 4.092100000000073,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects corrupt or stale stored recovery: wrongOwner",
+          "status": "passed",
+          "title": "rejects corrupt or stale stored recovery: wrongOwner",
+          "duration": 1.3844000000000278,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects corrupt or stale stored recovery: wrongGeneration",
+          "status": "passed",
+          "title": "rejects corrupt or stale stored recovery: wrongGeneration",
+          "duration": 1.0962000000000671,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects corrupt or stale stored recovery: pendingGeneration",
+          "status": "passed",
+          "title": "rejects corrupt or stale stored recovery: pendingGeneration",
+          "duration": 1.156400000000076,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects corrupt or stale stored recovery: extraApproval",
+          "status": "passed",
+          "title": "rejects corrupt or stale stored recovery: extraApproval",
+          "duration": 1.0552999999999884,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects corrupt or stale stored recovery: malformed",
+          "status": "passed",
+          "title": "rejects corrupt or stale stored recovery: malformed",
+          "duration": 1.2246000000000095,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions expires page memory at the same thirty-minute boundary",
+          "status": "passed",
+          "title": "expires page memory at the same thirty-minute boundary",
+          "duration": 0.7941000000000713,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions actively removes opted-in private draft bytes when their timer expires",
+          "status": "passed",
+          "title": "actively removes opted-in private draft bytes when their timer expires",
+          "duration": 1.068399999999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions rejects a malformed replacement without erasing the last valid original retry",
+          "status": "passed",
+          "title": "rejects a malformed replacement without erasing the last valid original retry",
+          "duration": 0.7688000000000557,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions ignores a delayed different-owner session observation without replacing current recovery authority",
+          "status": "passed",
+          "title": "ignores a delayed different-owner session observation without replacing current recovery authority",
+          "duration": 0.6928000000000338,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions still rejects old-session bytes when browser deletion is denied during sign-out",
+          "status": "passed",
+          "title": "still rejects old-session bytes when browser deletion is denied during sign-out",
+          "duration": 1.2988000000000284,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions uses only page memory without a confirmed session discriminator: missing",
+          "status": "passed",
+          "title": "uses only page memory without a confirmed session discriminator: missing",
+          "duration": 0.776299999999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions uses only page memory without a confirmed session discriminator: malformed",
+          "status": "passed",
+          "title": "uses only page memory without a confirmed session discriminator: malformed",
+          "duration": 0.7957000000000107,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "independent CV variant recovery lifetime and ambiguous-request regressions"
+          ],
+          "fullName": "independent CV variant recovery lifetime and ambiguous-request regressions uses only page memory without a confirmed session discriminator: foreignSubject",
+          "status": "passed",
+          "title": "uses only page memory without a confirmed session discriminator: foreignSubject",
+          "duration": 1.1066000000000713,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1792212048889,
+      "endTime": 1792212049014.1067,
+      "status": "passed",
+      "message": "",
+      "name": "src/__tests__/lib/loop-cv-variant-recovery-independent.test.ts"
+    }
+  ]
+}

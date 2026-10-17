@@ -1,0 +1,65 @@
+{
+  "site": "https://jobvance.io",
+  "sourceCommit": "2d332203572fa2459eca2b4342ebbc761fa51db3",
+  "savedVersion": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_a086ced122688191b42fa7143b8dc2d4",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 32,
+    "source": {
+      "commit_sha": "2d332203572fa2459eca2b4342ebbc761fa51db3"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_000000005f7482088c64f84721102f55",
+      "content_hash": "sha256:acce0fbe733690e29e8f90d1dfa6e8e2720ddaaf631b5db39f63fffe3b45a43c",
+      "size_bytes": 14602240,
+      "file_count": 130
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad29145f1a08191a2cdbbc58aed000d",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_a086ced122688191b42fa7143b8dc2d4",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-16T21:04:33.088331+00:00"
+  },
+  "validation": {
+    "tests": 1837,
+    "files": 113,
+    "typescript": "passed",
+    "build": "passed",
+    "hostingGroups": 12,
+    "browserDownloadsReceivedParsed": 6,
+    "syntheticScenarios": 100,
+    "actualParticipants": 0
+  },
+  "backend": "Unchanged: control16/worker12/tailor1/OAuth5; no migrations or GC query",
+  "scope": "Three-panel Job Loop entry/dashboard, guided exact-answer builder, proposed pricing and bounded local first/second acceptance",
+  "rollback": {
+    "tag": "jobvance-before-loop-product-reset-2026-10-17",
+    "commit": "4f261359c8ed29c03705a44fdd1188be13956c30",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d89a49129c78819196a99fdad150021b"
+  },
+  "limitations": [
+    "No fresh hosted auth/worker/Storage or unassisted task acceptance",
+    "No paid provider call or real candidate mutation",
+    "Three variants, three-weekday recurrence, recurring AI and paid entitlements remain open"
+  ],
+  "liveReadback": {
+    "status": "passed",
+    "publicPages": 5,
+    "exactJavaScriptAssets": 2,
+    "htmlNormalization": "Only the observed appended Cloudflare challenge script excluded; live HTML ETag absent and not asserted",
+    "receipt": "loop-product-live-verification.json"
+  }
+}

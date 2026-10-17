@@ -1,3 +1,4 @@
+import { observeCvVariantRecoverySession, cvVariantSessionIdentity } from '@/lib/loop-cv-variant-recovery';
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { configurationError, supabase } from '@/integrations/supabase/client';
@@ -56,7 +57,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!active) return;
       authRevision += 1;
       // Revoke old draft writers before React unmounts the previous owner's UI.
-      setTrackingDraftOwner(nextSession?.user.id ?? null);
+      setTrackingDraftOwner(nextSession?.user.id ?? null, cvVariantSessionIdentity(nextSession));
+      observeCvVariantRecoverySession(nextSession);
       setSession(nextSession);
       setAuthError(null);
       setLoading(false);
@@ -64,7 +66,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initialRevision = authRevision;
     void readAuthSession().then(nextSession => {
       if (!active || authRevision !== initialRevision) return;
-      setTrackingDraftOwner(nextSession?.user.id ?? null);
+      setTrackingDraftOwner(nextSession?.user.id ?? null, cvVariantSessionIdentity(nextSession));
+      observeCvVariantRecoverySession(nextSession);
       setSession(nextSession);
       setAuthError(null);
     }).catch(() => {
@@ -93,7 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) return { error: error.message };
       if (!data.session) return { error: 'Sign-in did not complete. Please try again.' };
-      setTrackingDraftOwner(data.session.user.id);
+      setTrackingDraftOwner(data.session.user.id, cvVariantSessionIdentity(data.session)); observeCvVariantRecoverySession(data.session);
       setSession(data.session);
       setAuthError(null);
       return {};
@@ -110,7 +113,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         options: { emailRedirectTo: getGoogleOAuthOptions().redirectTo },
       });
       if (error) return { error: error.message };
-      if (data.session) { setTrackingDraftOwner(data.session.user.id); setSession(data.session); setAuthError(null); }
+      if (data.session) { setTrackingDraftOwner(data.session.user.id, cvVariantSessionIdentity(data.session)); observeCvVariantRecoverySession(data.session); setSession(data.session); setAuthError(null); }
       return { requiresEmailConfirmation: !data.session };
     } catch (error) {
       return { error: authMessage(error, 'Account creation failed. Please try again.') };

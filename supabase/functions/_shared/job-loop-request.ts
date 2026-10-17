@@ -1,7 +1,8 @@
 import type { LoopAction } from './job-loop-types.ts';
 
 const BOUND_ACTIONS = new Set([
-  'start_run', 'start_selected_run', 'request_support', 'link_saved_check',
+  'start_run', 'start_selected_run', 'request_support', 'link_saved_check', 'save_cv_variant', 'read_cv_variants',
+  'save_cv_variant_fact', 'withdraw_cv_variant_fact', 'read_cv_variant_facts',
   'save_schedule', 'pause_schedule', 'cancel_schedule',
   'gmail_connect', 'gmail_disconnect', 'gmail_preview', 'gmail_finalize', 'gmail_create_draft',
   'erase_loop', 'erase_self',

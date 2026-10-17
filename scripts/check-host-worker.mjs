@@ -67,12 +67,25 @@ for(const page of publicRender.pages){
   if(page.path==='/pricing') {
     assert.ok(html.includes('Free to start: 3 tailored CVs a month. Passes from $9, one-time.'));
     for(const price of ['$9','$19','$39'])assert.ok(html.includes(price),'The public offer must show each pass price.');
-    assert.ok(!/\$15|\$29|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable or legacy purchases.');
+    assert.ok(!/\$15|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable or legacy purchases.');
+    for (const text of ['Planned monthly subscriptions', 'These plans are proposals, not available to buy.', 'the free beta does not include these paid allowances', 'USD / month', 'Not available for purchase.']) {
+      assert.ok(html.includes(text), `Pricing must distinguish current access from proposed monthly plans: ${text}`);
+    }
+    // React inserts this exact empty comment between adjacent text nodes ($ and price).
+    // Normalize only that separator; require each price inside its actual visible card.
+    const pricingHtml = html.replaceAll('<!-- -->', '');
+    for (const price of [29, 59, 99]) {
+      assert.ok(pricingHtml.includes(`<p class="product-price">$${price}<span>USD / month</span></p>`), `Proposed card must display $${price} USD per month.`);
+    }
+    assert.ok(!/<form\b/i.test(html), 'The public pricing page must not collect purchase details.');
+    assert.ok(!/<(?:a|button)\b[^>]*>[\s]*?(?:Buy|Subscribe|Pay|Checkout)\b/i.test(html), 'Proposed plans must not expose purchase actions.');
+    assert.ok(!/(?:href|action)="[^"]*(?:\/(?:checkout|billing|subscribe)(?:[/?"]|$)|checkout\.paddle|buy\.stripe)/i.test(html), 'Proposed plans must not link to a checkout destination.');
   }
   if(page.path==='/check') {
-    assert.ok(html.includes('Compare your CV with a job description'),'The initial check page must explain its purpose before JavaScript/auth resolves.');
-    assert.ok(html.includes('Similar wording does not prove you meet a requirement'));
-    assert.ok(html.includes('The check and downloads are free without an account.'));
+    assert.ok(html.includes('Tailor your CV to one job'),'The initial check page must explain its purpose before JavaScript/auth resolves.');
+    assert.ok(html.includes('Your tailored CV with each change listed beside your original wording'),'The check explanation must describe reviewable output.');
+    assert.ok(html.includes('If you choose AI tailoring, the CV text and job description are sent to our AI provider'),'The initial explanation must disclose optional external processing.');
+    assert.ok(html.includes('runs entirely on your device. Saving to an account is optional.'),'Local comparison and optional saving must stay clear.');
   }
   if(page.kind==='guide'){assert.ok(!html.includes('We could not find that guide.'));assert.ok(html.includes('BlogPosting'));assert.ok(html.includes('Sources and further reading'));}
   for(const match of html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)){
