@@ -5,6 +5,7 @@ import { digest } from './job-loop-providers.ts';
 import { eraseLoopArtifacts } from './job-loop-erasure.ts';
 import { validLoopGeneration } from './job-loop-request.ts';
 import { collectLoopArtifacts } from './job-loop-artifact-gc.ts';
+import { captureCvVariantSaveIntent, validateCvVariantSaveReceipt, validateCvVariantsRead } from './job-loop-cv-variants.ts';
 
 export type LoopAdmin = ReturnType<typeof adminClient>;
 export interface CareerRecord { profile: LoopProfile | null; claims: LoopClaim[]; opportunities: LoopOpportunity[]; inbox: LoopInboxSignal[] }
@@ -16,6 +17,13 @@ export interface UsageRow { id: string; reserved_micros: number; actual_micros: 
 export interface PacketRow { id: string; user_id: string; input_version: number; status: LoopPacket['status']; data: LoopPacket }
 export interface ScheduleRow { user_id:string;version:number;status:LoopSchedule['status'];settings:LoopScheduleInput;next_run_at:string|null;lease_token:string|null;lease_until:string|null;last_run_id:string|null;last_attempt_at:string|null;message:string }
 const ERRORS: [string, number, string][] = [
+  ['LOOP_VARIANT_CONSENT_REQUIRED',400,'Choose private saving for this CV variant.'],
+  ['LOOP_VARIANT_REVISION_CONFLICT',409,'This CV variant changed. Refresh it before saving.'],
+  ['LOOP_VARIANT_CLAIM_UNAVAILABLE',409,'A chosen fact changed or is no longer shareable. Review it again.'],
+  ['LOOP_VARIANT_SOURCE_CHANGED',409,'CV passage confirmation belongs to a different source. Review the new source first.'],
+  ['LOOP_VARIANT_UNAVAILABLE',404,'That CV variant or Job Loop is no longer available in your account.'],
+  ['LOOP_VARIANT_LIMIT',422,'You can save up to three CV variants. Update an existing variant.'],
+  ['LOOP_VARIANT_INVALID',422,'Review the CV variant name, source and selected facts before saving.'],
   ['LOOP_CHECK_LINK_CONSENT',400,'Choose to save this vacancy linked to the saved check.'],
   ['LOOP_CHECK_UNAVAILABLE',404,'This saved check is no longer available in your account. Reopen your saved checks before continuing.'],
   ['LOOP_CHECK_SOURCE_CHANGED',409,'The vacancy differs from the saved check. Restore its vacancy text or deliberately save a separate vacancy.'],
@@ -76,6 +84,22 @@ export class LoopRepository {
     await this.rpc('job_loop_assert_generation',{p_user:userId,p_generation:generation});
   }
   erasureStatus(userId:string) { return this.rpc<{state:'active'|'erasing'|'erased';generation:number}>('job_loop_erasure_status',{p_user:userId}); }
+  async readCvVariants(userId:string,generation:number) {
+    const result=await this.rpc<unknown>('job_loop_read_cv_variants_bound',{p_user:userId,p_generation:generation});
+    try{return validateCvVariantsRead(result,generation);}catch{throw new ApiError(503,'LOOP_VARIANT_RECEIPT_INVALID','The saved CV variant list could not be confirmed. Refresh before continuing.');}
+  }
+  async saveCvVariant(userId:string,value:unknown) {
+    const intent=captureCvVariantSaveIntent(value);
+    const result=await this.rpc<Record<string,unknown>>('job_loop_save_cv_variant_bound',{
+      p_user:userId,p_generation:intent.expectedGeneration,p_expected:intent.expectedVersion,p_request:intent.requestId,
+      p_variant:intent.variantId,p_variant_expected:intent.expectedVariantRevision,p_label:intent.label,p_profile:intent.profile,
+      p_claims:intent.claimRefs,p_save_consent:intent.saveConsent,
+    });
+    try{
+      if(!result||Object.prototype.hasOwnProperty.call(result,'generation'))throw new Error('Unexpected SQL receipt generation.');
+      return validateCvVariantSaveReceipt({...result,generation:intent.expectedGeneration},intent);
+    }catch{throw new ApiError(503,'LOOP_VARIANT_RECEIPT_INVALID','The CV save receipt could not be confirmed. Retry the original request before saving again.');}
+  }
   write(userId: string, expected: number, data: CareerRecord, inputsChanged: boolean) { return this.rpc<RecordRow>('job_loop_write_record',{ p_user:userId,p_expected:expected,p_data:data,p_inputs_changed:inputsChanged }); }
   async linkSavedCheck(userId: string, generation: number, expected: number, checkId: string, opportunity: LoopOpportunityInput, linkConsent: boolean) {
     const result = await this.rpc<{ record: RecordRow; opportunityId: string; reused: boolean }>('job_loop_link_saved_check', {

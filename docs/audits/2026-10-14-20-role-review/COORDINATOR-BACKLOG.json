@@ -661,5 +661,20 @@
     "implemented": "Up to three owned private variant snapshots, exact revisions/ordered claim references, explicit save consent, idempotent request receipts, lifecycle-bound reads, existing erasure cascade, immutable strict intent capture and literal-source revalidation. Existing record, running work and approvals preserved.",
     "validation": "1905 tests/115 files; app and targeted shared-source TypeScript; nine native PostgreSQL race groups; separate bounded agent review. No hosted or browser variant task.",
     "remaining": "Authenticated control/client/UI, independent variant fact review, immutable manual/scheduled variant selection, current sharing revalidation, variant packet identity/reuse/approval/download, recurring entitlements/consent, combined exposure review and hosted first/second acceptance. All original uncompleted requirements remain open."
+  },
+  "latest_cv_variant_contract": {
+    "date": "2026-10-17",
+    "status": "unpublished source integration; migration unapplied; public v32 and backend unchanged",
+    "assessment": "../2026-10-17-cv-variants/CONTRACT-INTEGRATION.md",
+    "implemented": "Authenticated strict save/read actions, service-derived owner, immutable original browser intent, passive read, exact receipt/current-revision separation, owner/auth/lifecycle stale response guards and SQL-bound retry preservation.",
+    "validation": "2007 tests/118 files; app TypeScript; 22 source and 22 generated Deno cases; complete production build and 12 hosting groups; bounded separate review and 58 independently rerun tests. No new native or browser/hosted acceptance.",
+    "remaining": [
+      "Candidate UI and cross-route request recovery",
+      "Independent variant fact review",
+      "Immutable variant selection in manual/scheduled run, worker and packet identity",
+      "Current sharing and withdrawal revalidation",
+      "Recurring entitlements/AI consent and discovery",
+      "Combined exposure review and hosted first/second acceptance"
+    ]
   }
 }

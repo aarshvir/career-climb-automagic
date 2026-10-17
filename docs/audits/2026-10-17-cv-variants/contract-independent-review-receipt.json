@@ -1,0 +1,42 @@
+{
+  "reviewedAtUtc": "2026-10-17T01:34:25.470Z",
+  "reviewer": "acceptance/review agent, separately from server and browser implementation authors",
+  "scope": "CV variant control, repository, browser and receipt integration; no UI/preparation/schedule integration",
+  "tests": {
+    "total": 58,
+    "passed": 58,
+    "failed": 0,
+    "browser": 43,
+    "actualControlWithPGlite": 15
+  },
+  "finding": {
+    "issue": "Response claim categories accepted one-element JSON arrays via String coercion",
+    "reproduced": 3,
+    "fixed": true,
+    "regressions": "sourceKind, kind, resultStatus require actual strings"
+  },
+  "sources": {
+    "supabase/functions/_shared/job-loop-cv-variants.ts": "5a5edd0850dcd8862c9c7e7a6f00dee463a04a033d3d0a0538d31c6b70c7cbcc",
+    "supabase/functions/_shared/job-loop-runtime.ts": "896c3ee95afb0ad66124500536cec1c0824596d28a2fcca3a2aa36730382af3e",
+    "supabase/functions/_shared/job-loop-repository.ts": "a9ced39d350328686d40f993c979d47e4341ca118c748793f9101a004b54fbd8",
+    "supabase/functions/_shared/job-loop-engine.ts": "9fe2fde1222a37e0c4172c695bbb85478b32fd74a1c945c571565b890333e47b",
+    "supabase/functions/_shared/job-loop-request.ts": "f9e2dd58b5b43f2ab61eab5ae6955f7dc998e0cb47ad780c15f4a7a8b8a5a604",
+    "supabase/functions/_shared/job-loop-types.ts": "49fa203d44c2bf05e5c7ea8f3890afcb5ec4dc1c096c67bf880b57fd8a888d51",
+    "src/lib/job-loop-api.ts": "d5276957ab72bcd1b9af99f732d2cb9a7a19b9bb695b66f2cb14e7171be842dc",
+    "src/lib/tracking-draft-memory.ts": "55ef2b69214abee0bb71646a54ec94b517db7fe43a073a17283ef5ab4e296f98",
+    "src/__tests__/lib/job-loop-cv-variants-api.test.ts": "2b4d2ceb1d2ae904d348f62ce3e447abde2634200682e12adb83a8a3abebe2e6",
+    "supabase/tests/job-loop-cv-variants-independent.test.ts": "89c2d0c9f0fc4daf19fd09c5a8f2e644645fe747d4507ed7a0dd9c9f97541e9f",
+    "supabase/migrations/20261017013000_job_loop_cv_variants.sql": "4adbe12e4ad3e910ae9226c6880e4ce9dbeb81d6bf4e58fc1205e642d89e5282"
+  },
+  "nativeConcurrency": "No new native run. Existing foundation receipt retains its original schema/storage scope.",
+  "productionMutations": false,
+  "paidCalls": false,
+  "runnerReceipt": "contract-independent-verification.json",
+  "runnerSanitization": "Only absolute workspace prefix removed from testResults.name; original unmodified runner output retained in private sibling evidence.",
+  "additionalAgentEvidence": {
+    "executor": "loop_backend_capabilities",
+    "tests": 44,
+    "scope": "server runtime contract",
+    "independentlyRerunByThisReviewer": false
+  }
+}

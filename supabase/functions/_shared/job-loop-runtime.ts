@@ -10,6 +10,7 @@ import type { LoopAction, LoopClaim, LoopLane, LoopOpportunity, LoopResponse, Lo
 import { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
 import { generationBoundAction } from './job-loop-request.ts';
 import { selectedRunOpportunities, selectedPhaseOpportunities } from './job-loop-selection.ts';
+import { captureCvVariantSaveIntent, resolveCvVariantClaims } from './job-loop-cv-variants.ts';
 export { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
 
 export function validateControlInput(value: unknown): LoopAction {
@@ -118,6 +119,32 @@ export async function getExistingLoopSnapshot(repo:LoopRepository,userId:string,
   return {existingState:'active',snapshot};
 }
 export async function controlLoop(repo:LoopRepository,userId:string,action:LoopAction,env:LoopEnv,fetcher:LoopFetch=fetch):Promise<LoopResponse> {
+  if(action.action==='save_cv_variant'||action.action==='read_cv_variants'){
+    // Validate and copy synchronously before the first authority/network await.
+    const captured=validateControlInput(structuredClone(action));
+    if(captured.action!=='save_cv_variant'&&captured.action!=='read_cv_variants')throw new ApiError(400,'LOOP_INVALID_ACTION','Choose a CV variant action.');
+    const generation=captured.expectedGeneration;
+    const active=async()=>{
+      const lifetime=await repo.existingLifecycle(userId);
+      if(lifetime?.state==='erasing')throw new ApiError(409,'LOOP_ERASURE_IN_PROGRESS','Your Job Loop is being erased.');
+      if(!lifetime||lifetime.state!=='active'||lifetime.generation!==generation)throw new ApiError(409,'LOOP_REQUEST_STALE','Your Job Loop was erased or restarted. Refresh before continuing.');
+    };
+    await active();
+    if(captured.action==='read_cv_variants'){
+      const cvVariants=await repo.readCvVariants(userId,generation);await active();return {cvVariants};
+    }
+    const {action:_action,...value}=captured;
+    const intent=captureCvVariantSaveIntent(value);
+    const record=await repo.record(userId,generation);
+    if(record.user_id!==userId||record.lifecycle_generation!==generation||!Number.isSafeInteger(record.version)||record.version<0)throw new ApiError(503,'LOOP_VARIANT_RECEIPT_INVALID','The current career record could not be confirmed.');
+    // A successful variant save always advances record.version. When versions
+    // differ, SQL can only replay the exact original receipt or reject a stale
+    // new request. Do not let later source edits/withdrawals hide earlier success.
+    if(record.version===intent.expectedVersion){
+      try{resolveCvVariantClaims(intent,record.data.profile,record.data.claims);}catch{throw new ApiError(422,'LOOP_VARIANT_CLAIM_INVALID','Review the selected facts against this exact CV source before saving.');}
+    }
+    const variantSave=await repo.saveCvVariant(userId,intent);await active();return {variantSave};
+  }
   if(action.action==='start_selected_run')action=validateControlInput(structuredClone(action));
   if(action.action==='get_existing')return getExistingLoopSnapshot(repo,userId,env);
   if(action.action==='get'){

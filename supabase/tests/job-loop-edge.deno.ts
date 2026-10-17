@@ -9,7 +9,9 @@ const owner='11111111-1111-4111-a111-111111111111',runId='22222222-2222-4222-a22
 (globalThis as unknown as {EdgeRuntime:{waitUntil(promise:Promise<unknown>):void}}).EdgeRuntime={waitUntil:promise=>{pending.push(promise);}};
 function assert(value:unknown,message:string):asserts value{if(!value)throw new Error(message);}
 let selectedFixtureRun:import('../functions/_shared/job-loop-repository.ts').RunRow|null=null;
-function setup(){selectedFixtureRun=null;for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;existingLifecycleAbsent=false;existingRecordAbsent=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
+let cvVariantReceipt:Record<string,unknown>|null=null;
+let cvVariantSaveFailure:string|null=null,cvVariantEraseAfterRpc=false;
+function setup(){selectedFixtureRun=null;cvVariantReceipt=null;cvVariantSaveFailure=null;cvVariantEraseAfterRpc=false;for(const [key,value] of Object.entries({SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-service-only',APP_URL:'https://jobvance.fixture.invalid',ALLOWED_ORIGINS:'https://jobvance.fixture.invalid',JOB_LOOP_ENABLED:'true',JOB_LOOP_PAID_APIS_ENABLED:'false',JOB_LOOP_GMAIL_ENABLED:'false'}))Deno.env.set(key,value);Deno.env.delete('JOB_LOOP_WORKER_SECRET');calls.length=0;pending.length=0;writeFailure=false;existingLifecycleAbsent=false;existingRecordAbsent=false;record.version=0;record.input_version=0;record.data={profile:null,claims:[],opportunities:[],inbox:[]};}
 let writeFailure=false;
 let existingLifecycleAbsent=false,existingRecordAbsent=false;
 let maintenanceTicketValid=false;
@@ -30,6 +32,24 @@ globalThis.fetch=async(input:Request|string|URL,init?:RequestInit)=>{
   if(url.pathname==='/rest/v1/rpc/job_loop_assert_generation'){assert(body?.p_user===owner,'Generation guard binds authenticated owner.');return body?.p_generation===lifecycle.generation?Response.json(null):Response.json({message:'LOOP_REQUEST_STALE'},{status:400});}
   if(['/rest/v1/rpc/job_loop_open_record','/rest/v1/rpc/job_loop_read_record'].includes(url.pathname)){assert(body?.p_user===owner,'Atomic record read binds authenticated owner.');return Response.json({...record,lifecycle_generation:lifecycle.generation});}
   if(url.pathname==='/rest/v1/job_loop_lifecycle'){assert(url.searchParams.get('user_id')===`eq.${owner}`&&!body,'Passive lifecycle read binds owner without creating metadata.');return Response.json(existingLifecycleAbsent?null:{...lifecycle,user_id:owner});}
+  if(url.pathname==='/rest/v1/rpc/job_loop_save_cv_variant_bound'){
+    assert(body?.p_user===owner&&body.p_generation===lifecycle.generation,'Variant save derives the authenticated owner and retains the original lifetime.');
+    assert(body.p_request==='66666666-6666-4666-a666-666666666666'&&body.p_expected===1&&body.p_variant===null&&body.p_variant_expected===0&&body.p_save_consent===true,'Variant save sends the captured original intent to the atomic RPC.');
+    assert(JSON.stringify(body.p_claims)===JSON.stringify([{id:'claim-one',revision:1}])&&typeof body.p_profile==='object'&&body.p_label==='Operations CV','Variant references, profile and label reach the actual SDK HTTP body.');
+    if(cvVariantSaveFailure)return Response.json({message:cvVariantSaveFailure,code:'P0001'},{status:400});
+    if(cvVariantReceipt){if(cvVariantEraseAfterRpc)lifecycle={state:'erasing',generation:lifecycle.generation+1};return Response.json({...cvVariantReceipt,recordVersion:record.version,reused:true});}
+    const sourceHash='b'.repeat(64),variant={id:'77777777-7777-4777-a777-777777777777',generation:lifecycle.generation,revision:1,label:body.p_label,profile:structuredClone(body.p_profile),claims:structuredClone(record.data.claims),sourceHash,createdAt:'2026-10-17T00:00:00Z',updatedAt:'2026-10-17T00:00:00Z'};
+    record.version++;
+    cvVariantReceipt={variant,recordVersion:record.version,requestId:body.p_request,requestHash:'a'.repeat(64),sourceHash,savedRevision:1,reused:false};
+    if(cvVariantEraseAfterRpc)lifecycle={state:'erasing',generation:lifecycle.generation+1};
+    return Response.json(cvVariantReceipt);
+  }
+  if(url.pathname==='/rest/v1/rpc/job_loop_read_cv_variants_bound'){
+    assert(body?.p_user===owner&&body.p_generation===lifecycle.generation,'Variant read derives owner and binds the original generation.');
+    const response={generation:lifecycle.generation,recordVersion:record.version,variants:cvVariantReceipt?[cvVariantReceipt.variant]:[]};
+    if(cvVariantEraseAfterRpc)lifecycle={state:'erasing',generation:lifecycle.generation+1};
+    return Response.json(response);
+  }
   if(url.pathname==='/rest/v1/job_loop_records'){assert(url.searchParams.get('user_id')===`eq.${owner}`||body?.user_id===owner,'Every record query binds the authenticated owner.');return init?.method==='POST'?new Response(null,{status:201}):Response.json(existingRecordAbsent?null:record);}
   if(url.pathname==='/rest/v1/job_loop_runs'&&selectedFixtureRun){assert(url.searchParams.get('user_id')===`eq.${owner}`,'Selected run reads derive owner.');return Response.json(url.searchParams.has('request_id')?selectedFixtureRun:[selectedFixtureRun]);}
   if(url.pathname==='/rest/v1/job_loop_runs'&&url.searchParams.has('request_id'))return Response.json(null);
@@ -191,4 +211,82 @@ Deno.test('actual selected preparation handler binds third vacancy, server hashe
  const retry=await handlers[0](req(action));assert(retry.status===200,'Same request retains later progress.');const next=await retry.json();assert(next.selectedRun.runId===runId&&next.snapshot.opportunities[2].notes==='Keep later progress','Retry does not replace the application.');
  assert(calls.every(c=>new URL(c.url).hostname==='supabase.fixture.invalid'),'No real provider or customer request.');
  lifecycle={state:'active',generation:0};
+});
+
+function cvVariantAction(){
+  setup();lifecycle={state:'active',generation:7};record.version=1;record.input_version=1;
+  const quote='Prepared an operations report and documented its assumptions.';
+  const profile={audience:'professional' as const,name:'Example Candidate',contactLine:'',targetTitles:['Operations analyst'],locations:['Dubai'],experienceYears:null,languages:['English'],pageTarget:1 as const,discreetSearch:true,sourceText:'Example Candidate\nEXPERIENCE\nExample employer\n'+quote,excludedTerms:[],compensation:{currency:'',period:'monthly' as const,minimum:null}};
+  record.data.profile={...profile,revision:1,updatedAt:'2026-10-17T00:00:00Z'};
+  record.data.claims=[{id:'claim-one',revision:1,status:'active',createdAt:'2026-10-17T00:00:00Z',sourceKind:'cv_passage',sourceQuote:quote,phrasing:quote,context:'Example employer',kind:'employment',resultStatus:'not_measured',confirmed:true,shareable:true}];
+  return {action:'save_cv_variant',expectedGeneration:7,expectedVersion:1,requestId:'66666666-6666-4666-a666-666666666666',variantId:null,expectedVariantRevision:0,label:'Operations CV',profile,claimRefs:[{id:'claim-one',revision:1}],saveConsent:true};
+}
+function assertVariantOnlyCalls(){
+  assert(calls.every(call=>new URL(call.url).hostname==='supabase.fixture.invalid'),'Every variant request uses intercepted fixture HTTP only.');
+  assert(!calls.some(call=>/\/functions\/|open_record|write_record|start_.*run|reserve|\/storage\/|job_loop_(packets|usage|connections|schedules|pilot|runs)/.test(new URL(call.url).pathname)),'Variant actions never initialize work, dispatch a worker, spend, upload, prepare or approve a CV.');
+  assert(pending.length===0,'No worker background task was scheduled.');
+}
+Deno.test('actual variant save/read handlers derive owner and compose exact source receipt without preparation',async()=>{
+  const action=cvVariantAction(),before=JSON.stringify(record.data);
+  const response=await handlers[0](req(action)),body=await response.json();
+  assert(response.status===200&&body.variantSave.generation===7&&body.variantSave.requestId===action.requestId&&!body.variantSave.reused,'Variant save returns the original generation/request receipt.');
+  assert(body.variantSave.recordVersion===2&&body.variantSave.savedRevision===1&&body.variantSave.variant.profile.sourceText===action.profile.sourceText,'Saved revision and exact reviewed source remain available.');
+  assert(JSON.stringify(record.data)===before&&record.input_version===1,'Fixture save advances record ordering only, not source or preparation input.');
+  const read=await handlers[0](req({action:'read_cv_variants',expectedGeneration:7})),readBody=await read.json();
+  assert(read.status===200&&readBody.cvVariants.generation===7&&readBody.cvVariants.recordVersion===2&&readBody.cvVariants.variants.length===1,'Bound read returns one exact current variant.');
+  assert(readBody.cvVariants.variants[0].id===body.variantSave.variant.id&&readBody.cvVariants.variants[0].claims[0].id==='claim-one','The response retains variant and source-fact identity.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+Deno.test('actual variant retry retains its original intent after later source and record edits',async()=>{
+  const action=cvVariantAction();const first=await handlers[0](req(action));assert(first.status===200,'Initial variant save succeeds.');
+  record.version=5;record.input_version=2;record.data.profile!.sourceText='A later independent source edit';record.data.claims[0].revision=2;record.data.claims[0].confirmed=false;
+  const response=await handlers[0](req(action)),body=await response.json();
+  assert(response.status===200&&body.variantSave.reused&&body.variantSave.recordVersion===5&&body.variantSave.savedRevision===1,'Lost-response retry reaches the atomic receipt with the original version.');
+  assert(body.variantSave.variant.profile.sourceText===action.profile.sourceText&&record.data.profile!.sourceText==='A later independent source edit','Retry exposes the original saved variant without restoring stale workspace content.');
+  assert(calls.filter(call=>call.url.endsWith('/rpc/job_loop_save_cv_variant_bound')).length===2,'Both attempts reach bound atomic save rather than guessing success client-side.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+Deno.test('actual variant handlers reject missing identity, forged ownership, consent and generation before variant access',async()=>{
+  const action=cvVariantAction();
+  assert((await handlers[0](req(action,null))).status===401,'Save requires authentication.');
+  assert((await handlers[0](req({action:'read_cv_variants',expectedGeneration:7},null))).status===401,'Read requires authentication.');
+  assert(calls.length===0,'No persistence without identity.');
+  for(const patch of [{userId:owner},{saveConsent:false},{saveConsent:'true'},{expectedGeneration:undefined},{expectedVariantRevision:1},{claimRefs:[{id:'claim-one',revision:1,confirmed:true}]}])assert((await handlers[0](req({...action,...patch}))).status===400,'Forged or incomplete save intent is rejected.');
+  for(const input of [{action:'read_cv_variants',expectedGeneration:7,userId:owner},{action:'read_cv_variants'}])assert((await handlers[0](req(input))).status===400,'Read cannot choose owner or omit its original lifetime.');
+  assert(calls.every(call=>call.url.endsWith('/auth/v1/user')),'Structurally invalid requests never access stored source or variants.');
+  assert((await handlers[0](req({...action,expectedGeneration:6}))).status===409,'Stale save generation fails closed.');
+  assert((await handlers[0](req({action:'read_cv_variants',expectedGeneration:6}))).status===409,'Stale read generation fails closed.');
+  assert(!calls.some(call=>/job_loop_(save|read)_cv_variants?_bound/.test(call.url)),'Stale generation never reaches variant SQL.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+Deno.test('actual variant handler returns a public conflict when atomic save rejects a stale variant revision',async()=>{
+  const action=cvVariantAction();cvVariantSaveFailure='LOOP_VARIANT_REVISION_CONFLICT';
+  const response=await handlers[0](req(action)),body=await response.json();
+  assert(response.status===409&&body.code==='LOOP_VARIANT_REVISION_CONFLICT','Atomic revision conflict has its intended public response.');
+  assert(!body.variantSave&&!JSON.stringify(body).includes(action.profile.sourceText),'A rejection never returns an apparently saved variant or private source text.');
+  assert(record.version===1&&cvVariantReceipt===null,'Rejected fixture save produces no receipt or record change.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
+});
+Deno.test('actual variant save and read discard returned source when erasure wins before response publication',async()=>{
+  for(const mode of ['save','read']){
+    const action=cvVariantAction();
+    if(mode==='read')assert((await handlers[0](req(action))).status===200,'Read race begins with a saved fixture variant.');
+    cvVariantEraseAfterRpc=true;
+    const response=await handlers[0](req(mode==='save'?action:{action:'read_cv_variants',expectedGeneration:7})),body=await response.json();
+    assert(response.status===409&&body.code==='LOOP_ERASURE_IN_PROGRESS','Response is rejected after erasure starts.');
+    assert(!body.variantSave&&!body.cvVariants&&!JSON.stringify(body).includes(action.profile.sourceText),'Erased-lifetime source cannot be published from a delayed response.');
+    assertVariantOnlyCalls();
+  }
+  lifecycle={state:'active',generation:0};
+});
+Deno.test('actual variant reads do not initialize missing work and fresh saves reject withdrawn facts before atomic persistence',async()=>{
+  cvVariantAction();existingLifecycleAbsent=true;
+  const missing=await handlers[0](req({action:'read_cv_variants',expectedGeneration:7})),missingBody=await missing.json();
+  assert(missing.status===409&&missingBody.code==='LOOP_REQUEST_STALE','An absent workspace cannot return fabricated saved variants.');
+  assert(!calls.some(call=>new URL(call.url).pathname.includes('/rpc/')),'Missing workspace read does not initialize lifecycle, a record or storage.');
+  const action=cvVariantAction();record.data.claims[0].shareable=false;
+  const withdrawn=await handlers[0](req(action)),withdrawnBody=await withdrawn.json();
+  assert(withdrawn.status===422&&withdrawnBody.code==='LOOP_VARIANT_CLAIM_INVALID','Current withdrawn facts require explicit review.');
+  assert(!calls.some(call=>call.url.endsWith('/rpc/job_loop_save_cv_variant_bound')),'A fresh invalid fact never reaches atomic save.');
+  assertVariantOnlyCalls();lifecycle={state:'active',generation:0};
 });

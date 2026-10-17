@@ -2,6 +2,7 @@ import type { LoopAction, LoopAssessment, LoopClaim, LoopClaimInput, LoopContact
 import { normalizeFollowUp, validateScheduleInput } from './job-loop-schedule.ts';
 import { readDiscoveryMinimumExperience } from '../../../src/lib/employer-discovery.ts';
 import { generationBoundAction, validLoopGeneration } from './job-loop-request.ts';
+import { validateCvVariantSaveIntent } from './job-loop-cv-variants.ts';
 
 const CLAIM_KINDS = ['employment', 'internship', 'academic_project', 'personal_project', 'volunteering', 'education', 'skill'] as const;
 const STATUSES = ['saved', 'prepared', 'applied', 'interview', 'offer', 'rejected', 'withdrawn'] as const;
@@ -149,12 +150,18 @@ export function validateAction(value: unknown): LoopAction {
   };
   keys.start_selected_run = ['expectedVersion','requestId','opportunityIds','prepareConsent','provider','model','modelConsent','processingRoute'];
   keys.link_saved_check = ['expectedVersion', 'checkId', 'opportunity', 'linkConsent'];
+  keys.save_cv_variant = ['expectedVersion','requestId','variantId','expectedVariantRevision','label','profile','claimRefs','saveConsent'];
+  keys.read_cv_variants = [];
   if (typeof action !== 'string' || !Object.prototype.hasOwnProperty.call(keys, action)) fail('Unsupported action. Sending and application submission are unavailable.');
   if (generationBoundAction(action)) keys[action].push('expectedGeneration');
   const a = obj(value, ['action', ...keys[action]]);
   if (generationBoundAction(action) && !validLoopGeneration(a.expectedGeneration)) fail('Refresh Jobvance before continuing. This action needs the current workspace lifetime.');
   if (keys[action].some(key => !(key === 'id' && action === 'save_claim') && !(key === 'processingRoute' && (action === 'start_run'||action === 'start_selected_run')) && !Object.prototype.hasOwnProperty.call(a, key))) fail('An action is missing required inputs.');
   if ('expectedVersion' in a) version(a.expectedVersion);
+  if (action === 'save_cv_variant') {
+    const { action: _action, ...intent } = a;
+    return { action, ...validateCvVariantSaveIntent(intent) };
+  }
   if ('expectedScheduleVersion' in a) version(a.expectedScheduleVersion);
   for (const name of ['id', 'runId', 'packetId']) if (name in a) reference(a[name]);
   if ('requestId' in a && (typeof a.requestId !== 'string' || !UUID.test(a.requestId))) fail('Invalid request ID.');

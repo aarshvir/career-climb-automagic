@@ -1,5 +1,7 @@
 # Owned CV variant storage foundation
 
+Subsequent source integration: [authenticated control and browser contract](CONTRACT-INTEGRATION.md) registers save/read actions and strict response boundaries. The foundation evidence below retains its original scope; migration and coordinated exposure remain pending.
+
 17 October 2026. **Unpublished source work. Public v32 and the v31 backend remain unchanged. The new migration is not applied.**
 
 This is the next bounded part of the owner's three-variant Job Loop request. It does not make the proposed plans purchasable or establish a complete recurring service. No existing CV, packet or schedule is silently moved to a different source.

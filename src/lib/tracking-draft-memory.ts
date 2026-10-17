@@ -40,6 +40,8 @@ export function setTrackingDraftOwner(next: string | null) {
  * identity. In particular, an old render/cleanup cannot re-adopt its old owner. */
 export function registerTrackingDraftOwner(next: string | null) { if (owner === undefined) setTrackingDraftOwner(next); }
 export function trackingDraftAuthority(ownerId: string) { return ownerId === owner ? authority : -1; }
+/** Observe only; an async operation must never advance recovery authority. */
+export function trackingLoopGeneration(ownerId: string) { return ownerId === owner ? loopGeneration : undefined; }
 export function trackingDraftScope(surface: 'workspace' | 'loop', ownerId: string, applicationId: string, lifecycleGeneration?: number): TrackingDraftScope {
   return { surface, ownerId, applicationId, authority: trackingDraftAuthority(ownerId), ...(surface === 'loop' ? { lifecycleGeneration } : {}) };
 }

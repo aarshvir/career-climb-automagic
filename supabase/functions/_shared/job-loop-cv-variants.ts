@@ -1,7 +1,7 @@
 import { validateClaim, validateProfile } from './job-loop-engine.ts';
-import type { LoopClaim, LoopProfileInput } from './job-loop-types.ts';
+import type { LoopClaim, LoopProfileInput, LoopCvVariant, LoopCvVariantSaveReceipt, LoopCvVariants } from './job-loop-types.ts';
 
-/** Source-only contract foundation. Not registered as a public control action.
+/** CV variant contract. Candidate UI integration is deliberately separate.
  * Authentication, ownership, lifecycle locks, limits and SQL fingerprints remain
  * server responsibilities; saving a variant never grants preparation approval. */
 export interface CvVariantSaveIntent {
@@ -91,9 +91,73 @@ export function resolveCvVariantClaims(
     }
     const { id, revision, status, createdAt, ...input } = claim;
     const validated = validateClaim(input, intent.profile as LoopProfileInput);
-    if (Object.keys(validated).some(key => validated[key] !== input[key])) {
+    if ((Object.keys(validated) as Array<keyof typeof validated>).some(key => validated[key] !== input[key])) {
       throw new Error('The saved fact needs confirmation with its complete source context.');
     }
     return { ...validated, id, revision, status, createdAt };
   });
+}
+
+function sameJson(left: unknown, right: unknown): boolean {
+  const stable = (value: unknown): string => value && typeof value === 'object'
+    ? Array.isArray(value) ? `[${value.map(stable).join(',')}]` : `{${Object.keys(value).sort().map(key=>`${JSON.stringify(key)}:${stable((value as Record<string,unknown>)[key])}`).join(',')}}`
+    : JSON.stringify(value);
+  return stable(left) === stable(right);
+}
+function completeObject(value: unknown, keys: string[]): Record<string, unknown> {
+  const result=object(value,keys);
+  if(keys.some(key=>!Object.prototype.hasOwnProperty.call(result,key)))throw new Error('The saved CV variant receipt is incomplete.');
+  return result;
+}
+function hash(value: unknown): string {
+  if(typeof value!=='string'||!/^[a-f0-9]{64}$/.test(value))throw new Error('The saved CV variant fingerprint is invalid.');
+  return value;
+}
+function instant(value: unknown): string {
+  if(typeof value!=='string'||value.length>80||!Number.isFinite(Date.parse(value)))throw new Error('The saved CV variant date is invalid.');
+  return value;
+}
+export function validateCvVariantSnapshot(value: unknown, generation: number): LoopCvVariant {
+  const v=completeObject(value,['id','generation','revision','label','profile','claims','sourceHash','createdAt','updatedAt']);
+  if(revision(v.generation)!==generation)throw new Error('The CV variant belongs to a different workspace lifetime.');
+  if(typeof v.label!=='string'||v.label!==v.label.trim()||!v.label||v.label.length>80||/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/u.test(v.label))throw new Error('The saved CV variant name is invalid.');
+  const profile=validateProfile(v.profile);
+  if(!sameJson(profile,v.profile))throw new Error('The saved CV source is not canonical.');
+  if(!Array.isArray(v.claims)||v.claims.length>150)throw new Error('The saved CV facts are invalid.');
+  const ids=new Set<string>();
+  const claims=v.claims.map(value=>{
+    const c=completeObject(value,['id','revision','status','createdAt','sourceKind','sourceQuote','phrasing','context','kind','resultStatus','confirmed','shareable']);
+    if(typeof c.id!=='string'||!CLAIM_ID.test(c.id)||ids.has(c.id)||c.status!=='active'||c.confirmed!==true||c.shareable!==true)throw new Error('The saved CV fact authority is invalid.');
+    ids.add(c.id);
+    const {id,revision:claimRevision,status,createdAt,...input}=c;
+    // Structural validation only: archived facts may later require fresh
+    // confirmation. A receipt is never current approval or sharing authority.
+    const savedInput={...input};
+    for(const [key,max,min] of [['sourceQuote',3000,8],['phrasing',1500,8],['context',200,1]] as const){
+      const text=savedInput[key];if(typeof text!=='string'||text.length>max||text.trim().length<min||/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u202a-\u202e\u2066-\u2069]/u.test(text))throw new Error('The saved CV fact text is invalid.');
+    }
+    if(typeof input.sourceKind!=='string'||!['cv_passage','user_answer'].includes(input.sourceKind)
+      ||typeof input.kind!=='string'||!['employment','internship','academic_project','personal_project','volunteering','education','skill'].includes(input.kind)
+      ||typeof input.resultStatus!=='string'||!['measured','projected','not_measured'].includes(input.resultStatus))throw new Error('The saved CV fact category is invalid.');
+    return {...savedInput,id,revision:revision(claimRevision,1),status,createdAt:instant(createdAt)} as LoopClaim;
+  });
+  return {id:uuid(v.id),generation,revision:revision(v.revision,1),label:v.label,profile,claims,sourceHash:hash(v.sourceHash),createdAt:instant(v.createdAt),updatedAt:instant(v.updatedAt)};
+}
+export function validateCvVariantSaveReceipt(value: unknown, intent: Immutable<CvVariantSaveIntent>): LoopCvVariantSaveReceipt {
+  const r=completeObject(value,['variant','recordVersion','requestId','requestHash','sourceHash','savedRevision','reused','generation']);
+  if(revision(r.generation)!==intent.expectedGeneration||uuid(r.requestId)!==intent.requestId||typeof r.reused!=='boolean')throw new Error('The CV save receipt belongs to a different request.');
+  const variant=validateCvVariantSnapshot(r.variant,intent.expectedGeneration),savedRevision=revision(r.savedRevision,1),recordVersion=revision(r.recordVersion);
+  if(savedRevision!==intent.expectedVariantRevision+1||recordVersion<intent.expectedVersion+1||(!r.reused&&recordVersion!==intent.expectedVersion+1)
+    ||variant.revision<savedRevision||(!r.reused&&variant.revision!==savedRevision)||(intent.variantId!==null&&variant.id!==intent.variantId))throw new Error('The CV save receipt does not match the original revision.');
+  const sourceHash=hash(r.sourceHash);
+  if(variant.revision===savedRevision&&(!sameJson(variant.profile,intent.profile)||variant.label!==intent.label
+    ||!sameJson(variant.claims.map(claim=>({id:claim.id,revision:claim.revision})),intent.claimRefs)||variant.sourceHash!==sourceHash))throw new Error('The CV save receipt does not match the original source.');
+  return {variant,recordVersion,requestId:intent.requestId,requestHash:hash(r.requestHash),sourceHash,savedRevision,reused:r.reused,generation:intent.expectedGeneration};
+}
+export function validateCvVariantsRead(value: unknown, generation: number): LoopCvVariants {
+  const r=completeObject(value,['generation','recordVersion','variants']);
+  if(revision(r.generation)!==generation||!Array.isArray(r.variants)||r.variants.length>3)throw new Error('The CV variant list could not be confirmed.');
+  const variants=r.variants.map(value=>validateCvVariantSnapshot(value,generation));
+  if(new Set(variants.map(v=>v.id)).size!==variants.length)throw new Error('The CV variant list contains conflicting identities.');
+  return {generation,recordVersion:revision(r.recordVersion),variants};
 }
