@@ -18,14 +18,14 @@ function open() { return render(<MemoryRouter initialEntries={['/onboarding']}><
 async function complete() {
   await screen.findByLabelText('Target roles');
   fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: 'Business analyst' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
   fireEvent.change(screen.getByLabelText('Cities or countries'), { target: { value: 'United States' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
   fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Example' } });
   fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: source } });
-  fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 }
 beforeEach(() => {
   vi.clearAllMocks(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a', 'session-a');
@@ -63,11 +63,11 @@ describe('account-first owned onboarding', () => {
   it('keeps accepted account suggestions when a CV is added in the later experience step', async () => {
     state.user = { id: 'owner-a', user_metadata: { job_title: 'Product manager' } };
     open(); await screen.findByLabelText('Target roles');
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     fireEvent.change(screen.getByLabelText('Search or add a location'), { target: { value: 'United States' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: 'Alex Example\nData analyst' } });
     for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByLabelText('Target roles')).toHaveValue('Product manager');
@@ -76,12 +76,12 @@ describe('account-first owned onboarding', () => {
     open(); await screen.findByLabelText('Target roles');
     fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Find any director-level roles' } });
     fireEvent.change(screen.getByLabelText('Paste your CV for role suggestions'), { target: { value: 'Alex Example\nData analyst' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     await screen.findByLabelText('Cities or countries');
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByLabelText('Target roles')).toHaveValue('Find any director-level roles');
   });
-  it('includes uncommitted broad roles and custom locations on Continue and preserves them on Back', async () => {
+  it('includes uncommitted broad roles and custom locations on Next and preserves them on Back', async () => {
     open(); await screen.findByLabelText('Target roles');
     const roles = screen.getByRole('combobox', { name: 'Search or add a role' });
     expect(roles).toHaveAttribute('list', 'oq-roles-options');
@@ -89,11 +89,11 @@ describe('account-first owned onboarding', () => {
     fireEvent.keyDown(roles, { key: 'Enter' });
     expect(screen.getByRole('button', { name: 'Remove Any director-level role' })).toBeInTheDocument();
     fireEvent.change(roles, { target: { value: 'Climate policy adviser' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     fireEvent.change(screen.getByRole('combobox', { name: 'Search or add a location' }), { target: { value: 'Remote' } });
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
     fireEvent.change(screen.getByRole('combobox', { name: 'Search or add a location' }), { target: { value: 'United States' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByLabelText('Cities or countries')).toHaveValue('Remote\nUnited States');
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
@@ -102,14 +102,14 @@ describe('account-first owned onboarding', () => {
   it('preserves commas within custom role and city names across steps and the actual save', async () => {
     open(); await screen.findByLabelText('Target roles');
     fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Director, Engineering' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     fireEvent.change(screen.getByLabelText('Search or add a location'), { target: { value: 'Portland, Maine' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Example' } });
     fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: source } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /Save this CV text/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Save my setup' }));
     await screen.findByRole('heading', { name: 'Your setup is saved.' });
@@ -119,7 +119,7 @@ describe('account-first owned onboarding', () => {
     open(); await screen.findByLabelText('Target roles');
     fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: Array.from({ length: 10 }, (_, i) => `Role ${i}`).join('\n') } });
     fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Custom eleventh role' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByRole('alert')).toHaveTextContent('one and ten');
     expect(screen.getByLabelText('Target roles')).toHaveValue(Array.from({ length: 10 }, (_, i) => `Role ${i}`).concat('Custom eleventh role').join('\n'));
   });
@@ -197,7 +197,7 @@ describe('account-first owned onboarding', () => {
     expect(screen.getByLabelText('Years of relevant experience (optional)')).toHaveValue(null);
     fireEvent.change(screen.getByLabelText('Contact line for your CV (optional)'), { target: { value: 'alex@example.test' } });
     fireEvent.change(screen.getByLabelText('Years of relevant experience (optional)'), { target: { value: '4.5' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /Save this CV text/ })); fireEvent.click(screen.getByRole('button', { name: 'Save my setup' }));
     await screen.findByRole('heading', { name: 'Your setup is saved.' });
     expect(state.call.mock.calls.at(-1)![1].profile).toMatchObject({ contactLine: 'alex@example.test', experienceYears: 4.5 });
