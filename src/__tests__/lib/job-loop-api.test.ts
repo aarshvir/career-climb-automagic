@@ -7,6 +7,7 @@ vi.mock('@/lib/cv-documents', () => ({ listCvDocuments: sdk.cvs }));
 import { callJobLoop, getLoopDownload, getLoopPreview, isLoopHttpsUrl, loadLoopSavedCvs, safeLoopDownloadUrl, safeLoopGmailUrl, LOOP_ARTIFACT_TIMEOUT_MS, LOOP_ARTIFACT_MAX_BYTES } from '@/lib/job-loop-api';
 import { validateAction as validateControlInput } from '../../../supabase/functions/_shared/job-loop-engine';
 import { LoopServiceError } from '@/lib/loop-service-error';
+import { employerFeeds, EMPLOYER_FEED_LIMITS } from '../../../supabase/functions/_shared/job-loop-providers';
 
 beforeEach(() => {
   vi.clearAllMocks(); vi.stubEnv('VITE_SUPABASE_URL', 'https://qa.supabase.co');
@@ -17,6 +18,23 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers();vi.restoreAllMocks(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
 
 describe('cloud loop API privacy and owner boundaries', () => {
+  it.each(['get', 'get_existing'] as const)('loads %s with the actual default and maximum employer source lists', async action => {
+    const defaults = employerFeeds(() => undefined);
+    const maximum = employerFeeds(key => key === 'JOB_LOOP_EMPLOYER_FEEDS' ? JSON.stringify(Array.from({ length: EMPLOYER_FEED_LIMITS.feeds }, (_, i) => ({ provider: 'greenhouse', board: `board-${i}`, company: `Employer ${i}` }))) : undefined);
+    expect(defaults.length).toBeGreaterThan(4);
+    expect(maximum).toHaveLength(EMPLOYER_FEED_LIMITS.feeds);
+    for (const employerSources of [defaults, maximum, []]) {
+      const snapshot = { lifecycleGeneration: 0, recordVersion: 0, profile: null, claims: [], opportunities: [], runs: [], packets: [], inbox: [], models: [], capabilities: { cloudWorker: true, rulesEngine: true, webSearch: false, gmailRead: false, gmailDrafts: false, monthlyUsageCapUsd: 50, dailyRunLimit: 3 }, gmail: { connected: false, email: null, status: 'Not connected', allowDrafts: false }, employerSources };
+      sdk.invoke.mockResolvedValueOnce({ data: { snapshot, ...(action === 'get_existing' ? { existingState: 'active' } : {}) }, error: null });
+      expect((await callJobLoop('owner-a', { action })).snapshot?.employerSources).toEqual(employerSources);
+      if (employerSources === maximum) {
+        for (const invalidSources of [[...maximum, { provider: 'greenhouse', board: 'overflow', company: 'Overflow' }], [{ provider: 'greenhouse', board: 42, company: 'Malformed' }]]) {
+          sdk.invoke.mockResolvedValueOnce({ data: { snapshot: { ...snapshot, employerSources: invalidSources }, ...(action === 'get_existing' ? { existingState: 'active' } : {}) }, error: null });
+          await expect(callJobLoop('owner-a', { action })).rejects.toThrow();
+        }
+      }
+    }
+  });
   it('revokes a setup intent during a delayed SDK session read before any control mutation', async () => {
     let session!: (value: unknown) => void;
     let authority = 1;
@@ -81,11 +99,11 @@ describe('cloud loop API privacy and owner boundaries', () => {
   });
   it('requires actual capability/record fields instead of treating malformed service data as an empty successful snapshot', async () => {
     sdk.invoke.mockResolvedValue({ data: { snapshot: { recordVersion: 0, models: [], capabilities: {} } }, error: null });
-    await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('still being configured');
+    await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('could not load your Job Loop');
   });
   it('uses only the public JSON error field, never raw SDK debug output', async () => {
     sdk.invoke.mockResolvedValue({ data: null, error: { message: 'SYNTHETIC_PRIVATE_DEBUG', context: new Response(JSON.stringify({ debug: 'SYNTHETIC_PRIVATE_DEBUG' }), { status: 503 }) } });
-    await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('still being configured');
+    await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('could not load your Job Loop');
     sdk.invoke.mockResolvedValue({ data: null, error: { message: 'SYNTHETIC_PRIVATE_DEBUG', context: new Response(JSON.stringify({ error: 'A configured processing allowance is unavailable.' }), { status: 503 }) } });
     await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('configured processing allowance');
   });
@@ -132,7 +150,7 @@ describe('cloud loop API privacy and owner boundaries', () => {
   });
   it('does not surface raw exceptions thrown by SDK or auth initialization', async () => {
     sdk.invoke.mockRejectedValue(new Error('SYNTHETIC_PRIVATE_DEBUG'));
-    await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('still being configured');
+    await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('could not load your Job Loop');
     sdk.session.mockRejectedValue(new Error('SYNTHETIC_PRIVATE_DEBUG'));
     await expect(callJobLoop('owner-a', { action: 'get' })).rejects.toThrow('sign in again');
   });
@@ -143,7 +161,7 @@ describe('cloud loop API privacy and owner boundaries', () => {
   it('retains validated schedule, budget and attributed activity instead of silently dropping progress fields',async()=>{
     const snapshot={recordVersion:1,profile:null,claims:[],opportunities:[],runs:[],packets:[],inbox:[],models:[],capabilities:{cloudWorker:true,rulesEngine:true,webSearch:false,gmailRead:false,gmailDrafts:false,monthlyUsageCapUsd:50,dailyRunLimit:3,scheduler:true,packetsPerRun:2},gmail:{connected:false,email:null,status:'Not connected',allowDrafts:false},schedule:{version:1,status:'active',cadence:'daily',timezone:'Asia/Dubai',localTime:'08:30',weeklyDay:null,provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false,nextRunAt:'2026-10-12T04:30:00Z',lastRunId:null,lastAttemptAt:null,message:'Enabled by you.'},budget:{month:'2026-10',capUsd:50,committedUsd:10,remainingUsd:40,scope:'shared_ai_search',maxPilotUsers:10},pilot:{enrolled:true,activeUsers:1,maxUsers:10},activity:[{id:'activity-one',kind:'application_status',actor:'candidate',at:'2026-10-11T10:00:00Z',summary:'You marked this opportunity applied.',opportunityId:'role-one',runId:null}]};
     sdk.invoke.mockResolvedValue({data:{snapshot},error:null});expect((await callJobLoop('owner-a',{action:'get'})).snapshot).toEqual(snapshot);
-    sdk.invoke.mockResolvedValue({data:{snapshot:{...snapshot,budget:{...snapshot.budget,capUsd:51}}},error:null});await expect(callJobLoop('owner-a',{action:'get'})).rejects.toThrow('still being configured');
+    sdk.invoke.mockResolvedValue({data:{snapshot:{...snapshot,budget:{...snapshot.budget,capUsd:51}}},error:null});await expect(callJobLoop('owner-a',{action:'get'})).rejects.toThrow('could not load your Job Loop');
   });
   it('fetches only the exact owner-scoped current PDF preview and retains the immutable review hash',async()=>{
     const inputHash='a'.repeat(64),url='https://qa.supabase.co/storage/v1/object/sign/job-loop-artifacts/owner-a/packet/hash/pdf?token=synthetic';

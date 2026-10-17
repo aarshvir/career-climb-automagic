@@ -61,7 +61,8 @@ const snapshotSchema = z.object({
   pilot:z.object({enrolled:z.boolean(),activeUsers:z.number().int().min(0).max(10),maxUsers:z.number().int().min(1).max(10)}).optional(),
   activity:z.array(z.object({id,kind:short,actor:z.enum(['candidate','jobvance']),at:short,summary:short,opportunityId:id.nullable(),runId:id.nullable()})).max(200).optional(),
   support:z.array(z.object({id,category:z.enum(['help','privacy','bug']),message:z.string().max(2000),status:z.enum(['received','in_review','resolved']),createdAt:short})).max(20).optional(),
-  recurringReady:z.boolean().optional(),employerSources:z.array(z.object({provider:short,company:short,board:short})).max(4).optional(),
+  // Match the server's bounded employer feed list; contract tests use its real defaults and maximum.
+  recurringReady:z.boolean().optional(),employerSources:z.array(z.object({provider:short,company:short,board:short})).max(8).optional(),
 });
 const responseSchema = z.object({ selectedRun:selectionSchema.extend({requestId:z.string().uuid(),runId:z.string().uuid()}).strict().optional(), existingState: z.enum(['active', 'absent', 'erasing']).optional(), snapshot: snapshotSchema.optional(), erasureGeneration: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(), runId: id.optional(), suggestions: z.array(claimSchema).max(1000).optional(),
   variantSave: z.unknown().optional(), cvVariants: z.unknown().optional(), variantFactSave: z.unknown().optional(), cvVariantFacts: z.unknown().optional(),
@@ -167,7 +168,7 @@ export async function callJobLoop(userId: string, action: LoopAction, stillAutho
   assertConsent(action);
   await requireCurrentOwner();
   stillCurrent();
-  const fallback = action.action === 'get' ? 'The Job Loop service is still being configured or could not be reached. Your free CV check and existing workspace remain available.' : 'This action could not be confirmed. Refresh your Job Loop before retrying.';
+  const fallback = action.action === 'get' ? 'We could not load your Job Loop. Retry to reconnect and load your saved work.' : 'This action could not be confirmed. Refresh your Job Loop before retrying.';
   let result: { data: unknown; error: unknown };
   try { result = await supabase.functions.invoke<unknown>('job-loop-control', { body: action }); }
   catch { await requireCurrentOwner(); throw new Error(fallback); }
