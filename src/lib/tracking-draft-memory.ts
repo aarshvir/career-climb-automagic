@@ -1,3 +1,4 @@
+import { syncCvVariantRecoveryOwner, syncCvVariantRecoveryGeneration, resetCvVariantRecovery } from './loop-cv-variant-recovery';
 import { useEffect, useRef, useState } from 'react';
 
 export interface TrackingDraft { status: string; followUp: string; notes: string }
@@ -7,6 +8,7 @@ const statuses = new Set(['saved', 'prepared', 'applied', 'interview', 'offer', 
 const fields = ['status', 'followUp', 'notes'] as const;
 type EditableField = typeof fields[number];
 let owner: string | null | undefined;
+let sessionIdentity: string | null | undefined;
 let authority = 0, loopGeneration: number | undefined;
 let timer: ReturnType<typeof setTimeout> | null = null;
 const drafts = new Map<string, { scope: TrackingDraftScope; value: TrackingDraft; fields: EditableField[]; expiresAt: number }>();
@@ -31,10 +33,12 @@ function pruneExpired(now = Date.now()) {
   scheduleExpiry(now);
 }
 /** AuthProvider calls this only on confirmed SDK identity changes. A failed or
- * unknown bootstrap must not replace this authority. No private browser storage. */
-export function setTrackingDraftOwner(next: string | null) {
-  if (owner === next) return;
-  owner = next; authority++; loopGeneration = undefined; drafts.clear(); scheduleExpiry();
+ * unknown bootstrap must not replace this authority. Tracking notes stay in memory;
+ * variant recovery uses a separate, explicitly opted-in session store. */
+export function setTrackingDraftOwner(next: string | null, confirmedSessionIdentity?: string | null) {
+  if (owner === next && (confirmedSessionIdentity === undefined || confirmedSessionIdentity === sessionIdentity)) return;
+  sessionIdentity = confirmedSessionIdentity;
+  owner = next; authority++; syncCvVariantRecoveryOwner(next, authority); loopGeneration = undefined; drafts.clear(); scheduleExpiry();
 }
 /** Resolved parents may initialize a standalone tree, never replace a newer SDK
  * identity. In particular, an old render/cleanup cannot re-adopt its old owner. */
@@ -49,7 +53,7 @@ export function setTrackingLoopGeneration(ownerId: string, generation: number) {
   if (owner !== ownerId || !validGeneration(generation) || loopGeneration === generation) return;
   // A delayed older response cannot move recovery authority backwards.
   if (loopGeneration !== undefined && generation < loopGeneration) return;
-  loopGeneration = generation;
+  loopGeneration = generation; syncCvVariantRecoveryGeneration(ownerId, generation);
   for (const [key, row] of drafts) if (row.scope.surface === 'loop') drafts.delete(key);
   scheduleExpiry();
 }
@@ -81,7 +85,7 @@ export function pruneTrackingApplications(surface: TrackingDraftScope['surface']
   for (const [key, row] of drafts) if (row.scope.surface === surface && !present.has(row.scope.applicationId)) drafts.delete(key);
   scheduleExpiry();
 }
-export function clearTrackingDraftMemory() { drafts.clear(); owner = undefined; authority++; loopGeneration = undefined; scheduleExpiry(); }
+export function clearTrackingDraftMemory() { resetCvVariantRecovery(); drafts.clear(); owner = undefined; sessionIdentity = undefined; authority++; loopGeneration = undefined; scheduleExpiry(); }
 
 /** The row key includes trackingDraftIdentity(scope). Only editable fields are
  * recovered; status attestation remains fresh local component state. */

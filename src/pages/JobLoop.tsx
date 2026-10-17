@@ -15,6 +15,7 @@ import { copyLoopSourceDetails } from '@/lib/loop-source-intake';
 import { LoopActivity, LoopDiscoverySources, LoopSchedule, LoopWorkspaceOverview } from './JobLoopPanels';
 import LoopSelectedPreparation from './LoopSelectedPreparation';
 import LoopCvBuilder from './LoopCvBuilder';
+import LoopCvVariants from './LoopCvVariants';
 import { blankLoopCvAnswers, type LoopCvAnswers } from '@/lib/loop-cv-builder';
 import { LoopErasure, LoopSupportForm } from './LoopSupport';
 import LoopPacketPreview from './LoopPacketPreview';
@@ -513,6 +514,10 @@ export default function JobLoop() {
         </details></>}
       </>}
       {snapshot && <div className="jl-tab-panel" hidden={tab !== 'record'}>
+        <LoopCvVariants snapshot={snapshot} owner={user.id} authority={trackingAuthority} ready={!authLoading && !authError} busy={!!busy} hidden={tab !== 'record'} captureGuard={() => {
+          const atOwner = owner.current, atAuthority = trackingDraftAuthority(user.id), atGeneration = generation.current, atLifecycle = lifecycleGeneration.current;
+          return () => mounted.current && importAuthReady.current && owner.current === atOwner && trackingDraftAuthority(user.id) === atAuthority && generation.current === atGeneration && lifecycleGeneration.current === atLifecycle;
+        }} />
         {savedImportScope && <LoopSavedCheckImport key={`${savedImportScope.ownerId}:${savedImportScope.authority}:${savedImportScope.generation}`} scope={savedImportScope} intentId={importIntentId} busy={!!busy} blockedReason={savedCheckBlocked} draftKey={savedCheckDraftKey} needsReplacement={savedCheckNeedsReplacement} copyHeader={savedCheckCopyHeader} isCurrent={savedCheckScopeCurrent} onUse={useSavedCheck} onClose={() => setSavedCheckIntent(null)} />}
         {savedCheckUndo && savedCheckScopeCurrent(savedCheckUndo.scope) && savedCheckUndo.recordVersion === snapshot.recordVersion && <section className="jl-panel" aria-label="Restore the draft before saved-check import"><h2>Restore your previous draft</h2><p>The previous CV and vacancy draft are kept only on this page, until you save, leave or saved records change. Restoring replaces edits made since the copy; sharing confirmations stay cleared.</p><details><summary>Review the draft to restore</summary><p>{savedCheckUndo.before.opportunity.title || 'No vacancy title'} · {savedCheckUndo.before.opportunity.company || 'No company'}</p><pre>{savedCheckUndo.before.profile.sourceText}</pre><pre>{savedCheckUndo.before.opportunity.description}</pre></details><Consent checked={restoreImportConfirmed} onChange={setRestoreImportConfirmed} disabled={!!busy || !!savedCheckBlocked}>Replace my current local CV and vacancy fields with the previous draft.</Consent><button type="button" className="jl-button" disabled={!!busy || !!savedCheckBlocked || !restoreImportConfirmed} onClick={undoSavedCheckImport}>Undo saved-check import</button>{savedCheckBlocked && <p className="jl-help">{savedCheckBlocked}</p>}</section>}
         <LoopCvBuilder key={`builder:${user.id}:${trackingAuthority}:${snapshot.lifecycleGeneration}`} answers={builderAnswers} onChange={answers => { formRevision.current++; setBuilderAnswers(answers); }} source={profile.sourceText} disabled={!!busy || authLoading || !!authError || trackingAuthority < 0} onUse={text => {

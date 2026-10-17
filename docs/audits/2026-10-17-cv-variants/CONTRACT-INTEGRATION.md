@@ -1,5 +1,7 @@
 # CV variant authenticated control and browser contract
 
+Subsequent source slice: [candidate editor and recovery](UI-INTEGRATION.md). The evidence below retains its original contract-only scope; coordinated exposure remains pending.
+
 17 October 2026. **Unpublished source integration. Public v32 and control16/worker12/tailor1/OAuth5 remain unchanged. The existing variant migration is still unapplied.**
 
 The storage foundation now has authenticated `save_cv_variant` and passive `read_cv_variants` actions, strict repository response validation and a browser API boundary. No candidate-facing UI calls these actions yet. Saving three useful, independently reviewed CVs and choosing them for recurring preparation remain unfinished.

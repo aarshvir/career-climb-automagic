@@ -676,5 +676,19 @@
       "Recurring entitlements/AI consent and discovery",
       "Combined exposure review and hosted first/second acceptance"
     ]
+  },
+  "latest_cv_variant_ui": {
+    "date": "2026-10-17",
+    "status": "unpublished source only; migration unapplied; public v32/backend unchanged",
+    "assessment": "../2026-10-17-cv-variants/UI-INTEGRATION.md",
+    "implemented": "Deliberate three-variant source editor, exact current fact selection, original request and newer draft separation, conditional retry/continuation, opt-in session-bound refresh recovery and privacy disclosure. No global profile swap or run selection.",
+    "validation": "2062 tests/122 files and app TypeScript; 59 independently rerun. Actual assisted local desktop refresh/retry and mobile second-source save with synthetic adapters; no hosted/worker/export acceptance.",
+    "remaining": [
+      "Independent per-variant fact confirmation and current sharing authority",
+      "Immutable variant manual/schedule/worker/packet identity",
+      "Recurring entitlements/AI consent/discovery",
+      "Combined review and coordinated exposure",
+      "Hosted first/second customer acceptance and all original tracked requirements"
+    ]
   }
 }

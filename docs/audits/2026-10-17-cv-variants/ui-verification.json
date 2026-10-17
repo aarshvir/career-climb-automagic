@@ -1,0 +1,99 @@
+{
+  "recordedAtUtc": "2026-10-17T04:43:42.077Z",
+  "baseCommit": "8b371efebfeb224af75fffa48623fdaecd652f04",
+  "rollbackTag": "jobvance-before-cv-variant-ui-2026-10-17",
+  "status": "unpublished source; migration unapplied; public v32 and backend unchanged",
+  "validation": {
+    "vitest": {
+      "passed": 2062,
+      "files": 122,
+      "added": 55,
+      "addedEditor": 16,
+      "addedIndependentEditor": 9,
+      "addedRecovery": 28,
+      "addedJobLoop": 1,
+      "addedAuth": 1
+    },
+    "appTypeScript": "passed",
+    "independent": {
+      "passed": 59,
+      "files": 5,
+      "receipt": "ui-independent-review.json",
+      "hashesMatch": true
+    },
+    "productionBuild": {
+      "passed": true,
+      "publicPages": 38,
+      "guideArticles": 20,
+      "structuredDataHashes": 58,
+      "externalRequests": 0,
+      "assets": 125,
+      "staticBytes": 6218376,
+      "workerBytes": 8318621,
+      "compressedBytes": 2815167,
+      "compressedLimitBytes": 3145728
+    },
+    "hosting": {
+      "result": "passed",
+      "publicPages": 38,
+      "guideArticles": 20,
+      "checks": [
+        "security-headers-and-jsonld-hashes",
+        "private-client-routes",
+        "rendered-public-content",
+        "canonical-redirects",
+        "real-notfound-status",
+        "asset-bytes-and-mime",
+        "etag-and-cache",
+        "head",
+        "missing-and-private-paths",
+        "unsafe-methods",
+        "project-identity",
+        "compressed-size"
+      ],
+      "compressedBytes": 2815167
+    },
+    "browserReceipt": "ui-browser.json"
+  },
+  "sourceSha256": {
+    "src/lib/loop-cv-variant-recovery.ts": "bc556fb53acc43f3f987edc2f8e7bf6f87e427b2837c8f2faf20378acf97fd24",
+    "src/lib/tracking-draft-memory.ts": "c6ac5dc58baa51050734e7c41a952a58361e5c46126827bbfc83a3a631d3a960",
+    "src/contexts/AuthContext.tsx": "145c728713a04d76afce8cad2e597142dafb67f175f8596c7f0f520b3d93e91c",
+    "src/pages/LoopCvVariants.tsx": "8fa563a73f6899308172f70b9dae50c634fd3e6883ad07adc2645f52100abb55",
+    "src/pages/JobLoop.tsx": "7994db698a143102fe5fb1d391b01b4fba71bbc6760f5d6e866b0881e315738a",
+    "src/pages/ProductPage.tsx": "1208b2576ccf2665f48b753823d5b6424b6e4db3b7249fd52564baa133f94548",
+    "src/__tests__/lib/loop-cv-variant-recovery-independent.test.ts": "38b4a516d774f22194b60dcf3b11b01a156902b7308617910064e6f09dfc2f57",
+    "src/__tests__/loop-cv-variants.test.tsx": "02cf72586ea8771f7fc19c586839420ddff3642771b5308116df44b5e449115e",
+    "src/__tests__/loop-cv-variants-independent.test.tsx": "8c2e7fa9564c3c3696927d4a439aa524efb68c47ab73bb9b8103ba34159e68e4",
+    "src/__tests__/job-loop-cv-variants-integration.test.tsx": "a4bfbe1dba37206e40359134f7d68784928d5e824215822b92b5ae695e7a7685",
+    "src/__tests__/auth/tracking-owner-boundary.test.tsx": "4f026eea0b923a47936c18ce5eab34c383639cebb679b2e16df687cf26118eba"
+  },
+  "artifactSha256": {
+    "dist/server/index.js": "6fd350d6c6f542318ee422afef7a3a18f10b96d19fa4d5b9b18259244f214535",
+    "dist/.openai/hosting.json": "d04e93c4e284b53771a25ebf4f6cc53437a859cccc1c3ca3e5675c314cc6a4ec"
+  },
+  "unchangedBackend": {
+    "migrationSha256": "4adbe12e4ad3e910ae9226c6880e4ce9dbeb81d6bf4e58fc1205e642d89e5282",
+    "newNativeRun": false,
+    "newDenoRun": false,
+    "generatedHandlersRefreshed": false
+  },
+  "notPerformed": [
+    "Hosted authentication/persistence",
+    "Actual worker/preparation/export",
+    "Paid model/search calls",
+    "Production candidate mutations",
+    "Unassisted customer tasks",
+    "Production deployment",
+    "New live HTTP verification",
+    "Schema application"
+  ],
+  "remaining": [
+    "Independent per-variant fact confirmation/current withdrawal authority",
+    "Immutable variant manual/scheduled run and worker/packet binding",
+    "Recurring entitlements/consent/discovery",
+    "Combined exposure review",
+    "Hosted and unassisted first/second customer acceptance",
+    "All other original open requirements"
+  ]
+}

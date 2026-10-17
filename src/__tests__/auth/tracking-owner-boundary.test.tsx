@@ -32,13 +32,27 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('tracking drafts follow confirmed auth ownership on every route', () => {
+  it('passes the stable SDK session identity on same-owner sign-in and token refresh', async () => {
+    const id = '10000000-0000-4000-8000-000000000001';
+    const secondId = '10000000-0000-4000-8000-000000000002';
+    const token = (sessionId: string, suffix: string) => ({...session, access_token: 'header.' + btoa(JSON.stringify({sub:session.user.id,session_id:sessionId})) + '.' + suffix});
+    sdk.getSession.mockResolvedValue({data:{session:token(id,'first')},error:null});
+    const {result} = renderHook(useAuth,{wrapper:AuthProvider});
+    await waitFor(() => expect(result.current.user?.id).toBe(session.user.id));
+    expect(sdk.setOwner).toHaveBeenLastCalledWith(session.user.id,id);
+    act(() => sdk.listener!('TOKEN_REFRESHED',token(id,'refreshed')));
+    expect(sdk.setOwner).toHaveBeenLastCalledWith(session.user.id,id);
+    act(() => sdk.listener!('SIGNED_IN',token(secondId,'new-session')));
+    expect(sdk.setOwner).toHaveBeenLastCalledWith(session.user.id,secondId);
+  });
+
   it('revokes the old owner synchronously on the SDK event, before React settles', async () => {
     const { result } = renderHook(useAuth, { wrapper: AuthProvider });
     await waitFor(() => expect(result.current.user?.id).toBe(session.user.id));
-    expect(sdk.setOwner).toHaveBeenLastCalledWith(session.user.id);
+    expect(sdk.setOwner).toHaveBeenLastCalledWith(session.user.id, null);
     act(() => {
       sdk.listener!('SIGNED_OUT', null);
-      expect(sdk.setOwner).toHaveBeenLastCalledWith(null);
+      expect(sdk.setOwner).toHaveBeenLastCalledWith(null, null);
     });
     expect(result.current.user).toBeNull();
   });
@@ -51,7 +65,7 @@ describe('tracking drafts follow confirmed auth ownership on every route', () =>
     act(() => sdk.listener!('SIGNED_OUT', null));
     await act(async () => { finish({ data: { session }, error: null }); });
     expect(result.current.user).toBeNull();
-    expect(sdk.setOwner.mock.calls).toEqual([[null]]);
+    expect(sdk.setOwner.mock.calls).toEqual([[null, null]]);
   });
 
   it('does not treat unknown or failed bootstrap as confirmed sign-out', async () => {
