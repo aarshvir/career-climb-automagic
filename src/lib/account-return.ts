@@ -18,17 +18,17 @@ const privateReturnPaths = [...loopPaths, ...adminPaths, ...workspacePaths, '/ap
 const isPrivateReturn = (value: unknown): value is PrivateReturn => typeof value === 'string' && (privateReturnPaths.includes(value) || isSavedCheckContinuationPath(value) || isApplicationSourcePath(value));
 
 /** Carry only the workspace's fixed tab, never other query data or fragments. */
-export function workspaceReturnPath(search: string): WorkspaceReturn | ApplicationSourcePath {
+export function workspaceReturnPath(search: string): WorkspaceReturn | ApplicationSourcePath | '/loop' {
   const exact = `/dashboard${search}`;
   if (isApplicationSourcePath(exact)) return exact;
   const tabs = new URLSearchParams(search).getAll('tab');
   const path = `/dashboard?tab=${tabs[0] ?? ''}`;
-  return tabs.length === 1 && workspacePaths.includes(path) ? path as WorkspaceReturn : '/dashboard';
+  return tabs.length === 1 && workspacePaths.includes(path) ? path as WorkspaceReturn : '/loop';
 }
 
 /** Bounded destinations and opaque selectors only; never CV text or tokens. */
 export function accountDestination(value: string | null): PrivateReturn | '/check' {
-  return isPrivateReturn(value) ? value : value === '/check' ? '/check' : '/dashboard';
+  return value === '/dashboard' ? '/loop' : isPrivateReturn(value) ? value : '/loop';
 }
 
 export function rememberLoopReturn(value: string | null, now = Date.now()): void {
@@ -44,6 +44,6 @@ export function takeLoopReturn(now = Date.now()): PrivateReturn | null {
     sessionStorage.removeItem(KEY);
     if (!raw || raw.length > 200) return null;
     const value = JSON.parse(raw);
-    return isPrivateReturn(value.path) && typeof value.expiresAt === 'number' && value.expiresAt > now && value.expiresAt <= now + TTL ? value.path : null;
+    return isPrivateReturn(value.path) && typeof value.expiresAt === 'number' && value.expiresAt > now && value.expiresAt <= now + TTL ? accountDestination(value.path) : null;
   } catch { return null; }
 }

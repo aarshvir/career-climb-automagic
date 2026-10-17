@@ -41,6 +41,7 @@ function ProtectedWorkspace() {
         Loading your account…
       </p>
     );
+  if (workspaceReturnPath(location.search) === '/loop') return <Navigate to="/loop" replace />;
   return user ? (
     <Workspace key={user.id} />
   ) : (

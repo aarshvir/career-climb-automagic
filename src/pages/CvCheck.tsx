@@ -1,3 +1,4 @@
+import ProductNavigation from '@/components/ProductNavigation';
 import { registerTrackingDraftOwner, trackingDraftAuthority } from '@/lib/tracking-draft-memory';
 import { readApplicationSource } from '@/lib/application-source-selection';
 import { savedCheckContinuationPath } from '@/lib/saved-check-continuation';
@@ -600,6 +601,7 @@ function CvCheckWorkspace() {
 
   return <main className={`cv-check-page${step === 1 ? ' check-first-step' : ''}`}>
     <Helmet><title>{checkMeta.title}</title><meta name="description" content={checkMeta.description} /><link rel="canonical" href="https://jobvance.io/check" /></Helmet>
+    <ProductNavigation active="check" />
     <div ref={intro} className="check-intro"><div><p className="check-eyebrow"><ShieldCheck size={15} /> Free CV tailoring <span>NO CARD NEEDED</span></p><h1>Tailor your CV to a job.</h1><p className="check-intro-description">Add your CV and the job description. Get a version for that role in about a minute, with every change traced back to your original CV.</p></div>
     </div>
     {hasExactSelection && openedSelection !== `${user?.id}:${sourceRoute.search}` && <section className="mb-5 rounded-xl border bg-white p-5" aria-label="Selected saved check">

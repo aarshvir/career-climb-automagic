@@ -372,7 +372,7 @@ describe('support receipts and scoped self-service erasure', () => {
       current = { ...snapshot(), profile: null, claims: [], packets: [] };
       view.rerender(tree());
     });
-    await screen.findByRole('button', { name: /Import or paste my CV/ });
+    await screen.findByRole('button', { name: 'Set up directly without questions' });
     await act(async () => { rejectOld(new LoopServiceError('OWNER_A_PRIVATE_ERASURE_STATE', 'LOOP_ERASURE_IN_PROGRESS')); });
 
     expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument();
@@ -581,7 +581,7 @@ describe('same-owner Job Loop lifetime changes', () => {
     expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'gmail_preview', ticket: 'local-previous-lifetime-ticket', expectedGeneration: 7 });
     current = { ...snapshot(), lifecycleGeneration: 9, recordVersion: 3, profile: null, claims: [], packets: [] };
     await userEvent.setup().click(screen.getByRole('button', { name: 'Refresh records' }));
-    await screen.findByRole('button', { name: /Import or paste my CV/ });
+    await screen.findByRole('button', { name: 'Set up directly without questions' });
     await act(async () => { finishPreview({ gmailPreview: { email: 'OLD_LIFETIME_MAILBOX@example.test', allowDrafts: true, expiresAt: new Date(Date.now() + 60000).toISOString() } }); });
 
     expect(screen.queryByText('OLD_LIFETIME_MAILBOX@example.test')).not.toBeInTheDocument();

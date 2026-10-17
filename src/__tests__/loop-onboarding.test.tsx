@@ -35,6 +35,93 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearTrackingDraftMemory(); });
 
 describe('account-first owned onboarding', () => {
+  it('restores a typed but unadded role after leaving and remounting without a cloud write', async () => {
+    const view = open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Director, Engineering' } });
+    view.unmount(); open();
+    expect(await screen.findByLabelText('Search or add a role')).toHaveValue('Director, Engineering');
+    fireEvent.change(screen.getByLabelText('Paste your CV for role suggestions'), { target: { value: 'Alex Example\nData analyst' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Director, Engineering');
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing', 'get_existing']);
+  });
+  it('resumes the same step, selected roles and pending location after remount', async () => {
+    const view = open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Any director-level role' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.change(screen.getByLabelText('Search or add a location'), { target: { value: 'Portland, Maine' } });
+    view.unmount(); open();
+    expect(await screen.findByLabelText('Search or add a location')).toHaveValue('Portland, Maine');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Where would you like to work?');
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByLabelText('Cities or countries')).toHaveValue('Portland, Maine');
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Any director-level role');
+  });
+  it('restores review answers but requires fresh private-save consent', async () => {
+    const view = open(); await complete();
+    fireEvent.click(screen.getByRole('checkbox', { name: /Save this CV text/ }));
+    view.unmount(); open();
+    expect(await screen.findByRole('checkbox', { name: /Save this CV text/ })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'Save my setup' })).toBeDisabled();
+    expect(screen.getByText((_text, element) => element?.tagName === 'PRE' && element.textContent === source)).toBeInTheDocument();
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing', 'get_existing']);
+  });
+  it('restores exact guided-builder answers without restoring a preview or applying them automatically', async () => {
+    const view = open(); await complete(); fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    fireEvent.change(screen.getByLabelText('What name should appear on your CV?'), { target: { value: 'Alex Example' } });
+    fireEvent.change(screen.getByLabelText('What have you studied or trained in?'), { target: { value: 'Studied biology with fieldwork.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Preview my CV draft' }));
+    view.unmount(); open();
+    expect(await screen.findByLabelText('What have you studied or trained in?')).toHaveValue('Studied biology with fieldwork.');
+    expect(screen.getByLabelText('What name should appear on your CV?')).toHaveValue('Alex Example');
+    expect(screen.getByLabelText('Your CV text')).toHaveValue(source);
+    expect(screen.queryByRole('button', { name: 'Use this CV draft' })).not.toBeInTheDocument();
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing', 'get_existing']);
+  });
+  it.each(['owner switch', 'new session'])('does not restore private answers after %s', async reason => {
+    const view = open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Private target title' } });
+    view.unmount();
+    if (reason === 'owner switch') setTrackingDraftOwner('owner-b', 'session-b');
+    setTrackingDraftOwner('owner-a', 'session-a2'); open();
+    expect(await screen.findByLabelText('Search or add a role')).toHaveValue('');
+  });
+  it('keeps an absent-record draft after a first empty generation-zero dashboard initialization', async () => {
+    const view = open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Research assistant' } });
+    view.unmount(); setTrackingLoopGeneration('owner-a', 0);
+    state.call.mockResolvedValue({ existingState: 'active', snapshot: snapshot(null, 0, 1) });
+    open(); expect(await screen.findByLabelText('Search or add a role')).toHaveValue('Research assistant');
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing', 'get_existing']);
+  });
+  it('discards retained answers after observing a new lifecycle during remount', async () => {
+    state.call.mockResolvedValue({ existingState: 'active', snapshot: snapshot(null, 3, 1) });
+    const view = open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Former lifecycle title' } });
+    view.unmount(); state.call.mockResolvedValue({ existingState: 'active', snapshot: snapshot(null, 4, 0) });
+    open(); expect(await screen.findByLabelText('Search or add a role')).toHaveValue('');
+  });
+  it('does not rebind an already mounted absent-record draft to a later erased lifecycle', async () => {
+    const view = open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Old lifecycle title' } });
+    act(() => { setTrackingLoopGeneration('owner-a', 4); });
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Old lifecycle title edited late' } });
+    view.unmount(); state.call.mockResolvedValue({ existingState: 'active', snapshot: snapshot(null, 4, 0) });
+    open(); expect(await screen.findByLabelText('Search or add a role')).toHaveValue('');
+  });
+  it('defers private draft recovery until the fresh passive read resolves and respects a saved profile', async () => {
+    const view = open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Unsaved title' } });
+    view.unmount(); let resolve!: (value: unknown) => void;
+    state.call.mockImplementation(() => new Promise(done => { resolve = done; })); open();
+    expect(screen.queryByLabelText('Search or add a role')).not.toBeInTheDocument();
+    await act(async () => { resolve({ existingState: 'active', snapshot: snapshot(savedProfile, 0, 2) }); });
+    expect(await screen.findByRole('heading', { name: 'Your Job Loop is ready to continue.' })).toBeInTheDocument();
+    expect(screen.queryByDisplayValue('Unsaved title')).not.toBeInTheDocument();
+  });
   it('preselects only explicit account career fields and keeps them editable', async () => {
     state.user = { id: 'owner-a', user_metadata: { full_name: 'Data Analyst', email: 'director@example.test', job_title: 'Operations manager', target_titles: ['Product manager'] } };
     open(); await screen.findByLabelText('Target roles');

@@ -60,6 +60,32 @@ beforeEach(() => {
 afterEach(() => { cleanup(); sessionStorage.clear(); localStorage.clear(); window.history.replaceState(null, '', '/'); });
 
 describe('protected legacy workspace return through real app routes', () => {
+  it('opens the main Job Loop dashboard for a signed-in bare dashboard visit', async () => {
+    state.user = owner; open('/dashboard');
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/loop$/);
+  });
+  it('returns a signed-out bare dashboard visit to Job Loop after sign-in', async () => {
+    const view = open('/dashboard');
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    expect(new URLSearchParams(window.location.search).get('next')).toBe('/loop');
+    await finishEmail(view);
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/loop$/);
+  });
+  it.each([
+    '/dashboard?tab=billing&checkout=success',
+    '/dashboard?pack=afe62064-a331-4ce6-9e51-2849e091ba54',
+    '/dashboard?tracked=afe62064-a331-4ce6-9e51-2849e091ba54',
+  ])('preserves an explicit signed-in legacy destination %s', async path => {
+    state.user = owner; open(path);
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(path);
+  });
+  it('normalizes a signed-out payment return to billing without carrying payment query data', async () => {
+    const view = open('/dashboard?tab=billing&checkout=success');
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    expect(new URLSearchParams(window.location.search).get('next')).toBe('/dashboard?tab=billing');
+    await finishEmail(view);
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent('/dashboard?tab=billing');
+  });
   it('requires account creation before opening CV Check and returns an existing user to the check', async () => {
     const view = open('/check');
     await screen.findByRole('heading', { name: 'Create your Jobvance account' });
@@ -139,18 +165,18 @@ describe('protected legacy workspace return through real app routes', () => {
     expect(sessionStorage.length).toBe(0);
   });
 
-  it('keeps the ordinary sign-in default at /dashboard', async () => {
+  it('keeps the ordinary sign-in default at /loop', async () => {
     const view = open('/auth');
     await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
     await finishEmail(view);
-    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/dashboard$/);
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/loop$/);
   });
 
-  it('falls back to /dashboard for an arbitrary supplied email return', async () => {
+  it('falls back to /loop for an arbitrary supplied email return', async () => {
     const view = open(`/auth?next=${encodeURIComponent('//evil.example/dashboard?tab=tracker')}`);
     await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
     await finishEmail(view);
-    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/dashboard$/);
+    expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/loop$/);
   });
   it('preserves a saved-check selector through email sign-in without carrying its text', async () => {
     const path = '/loop?fromCheck=afe62064-a331-4ce6-9e51-2849e091ba54';

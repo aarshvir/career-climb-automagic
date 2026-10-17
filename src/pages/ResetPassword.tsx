@@ -50,7 +50,7 @@ const ResetPassword = () => {
     try {
       const result = await updatePassword(password);
       if (result.error) setError(result.error);
-      else navigate('/dashboard', { replace: true });
+      else navigate('/loop', { replace: true });
     } catch { setError('Password update failed. Please try again.'); }
     finally { setBusy(false); }
   };

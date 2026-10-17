@@ -28,7 +28,7 @@ function InlinePage({ onBeforeGoogle }: { onBeforeGoogle?: () => boolean }) {
 }
 function Location() { return <p data-testid="current-path">{useLocation().pathname}</p>; }
 function inlineTree(onBeforeGoogle?: () => boolean) {
-  return <MemoryRouter initialEntries={['/check']}><Location /><Routes><Route path="/check" element={<InlinePage onBeforeGoogle={onBeforeGoogle} />} /><Route path="/dashboard" element={<p>Dashboard</p>} /><Route path="/auth/forgot-password" element={<p>Separate password page</p>} /></Routes></MemoryRouter>;
+  return <MemoryRouter initialEntries={['/check']}><Location /><Routes><Route path="/check" element={<InlinePage onBeforeGoogle={onBeforeGoogle} />} /><Route path="/loop" element={<p>Job Loop dashboard</p>} /><Route path="/auth/forgot-password" element={<p>Separate password page</p>} /></Routes></MemoryRouter>;
 }
 function RestoredCheck() {
   const [restored] = useState(() => takeRetainedCheck());
@@ -36,7 +36,7 @@ function RestoredCheck() {
 }
 function callbackTree() {
   return <MemoryRouter initialEntries={['/auth/callback']}><Location /><Routes><Route path="/auth/callback" element={<AuthCallback />} />
-    <Route path="/check" element={<RestoredCheck />} /><Route path="/dashboard" element={<p>Dashboard</p>} /><Route path="/auth" element={<p>Sign-in page</p>} /></Routes></MemoryRouter>;
+    <Route path="/check" element={<RestoredCheck />} /><Route path="/loop" element={<p>Job Loop dashboard</p>} /><Route path="/auth" element={<p>Sign-in page</p>} /></Routes></MemoryRouter>;
 }
 beforeEach(() => {
   vi.clearAllMocks(); state.user = null;
@@ -115,6 +115,6 @@ describe('OAuth callback returns to the consented check without restoring approv
   it('does not navigate to an arbitrary stored return destination', async () => {
     sessionStorage.setItem('jobvance_check_oauth_return_v1', 'https://attacker.invalid'); window.history.replaceState(null, '', '/auth/callback');
     state.readAuthSession.mockResolvedValue({ user: { id: 'fixture-owner' } }); render(callbackTree());
-    expect(await screen.findByText('Dashboard')).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Return to your CV check' })).not.toBeInTheDocument();
+    expect(await screen.findByText('Job Loop dashboard')).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Return to your CV check' })).not.toBeInTheDocument();
   });
 });

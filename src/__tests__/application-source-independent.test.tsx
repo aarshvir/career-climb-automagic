@@ -127,9 +127,9 @@ describe('independent exact application source review', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Exact saved pack.*Approved — open & download/ }));
     expect(screen.getByText('Review: Exact saved pack')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();
-    fireEvent.click(screen.getByRole('button', { name: 'Applications' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Application tracker' }));
     expect(screen.queryByText('Review: Exact saved pack')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Tailor & download' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review & download' }));
     expect(screen.getByText('Review: Exact saved pack')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Download TXT' })).toBeEnabled();
   });

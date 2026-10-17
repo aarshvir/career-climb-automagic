@@ -62,8 +62,8 @@ describe('buying a pass', () => {
     expect(mocks.invoke).not.toHaveBeenCalled();
   });
   it('accepts only known plans as a sign-in return', () => {
-    expect(accountDestination('/pricing?plan=lifetime')).toBe('/dashboard');
-    expect(accountDestination('/pricing?plan=sprint_7d&next=https://attacker.example')).toBe('/dashboard');
+    expect(accountDestination('/pricing?plan=lifetime')).toBe('/loop');
+    expect(accountDestination('/pricing?plan=sprint_7d&next=https://attacker.example')).toBe('/loop');
     expect(accountDestination('/pricing')).toBe('/pricing');
   });
   it('starts a server-fixed checkout with only the plan key when signed in', async () => {

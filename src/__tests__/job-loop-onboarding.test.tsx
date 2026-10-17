@@ -25,7 +25,7 @@ let current: LoopSnapshot;
 function tree() { return <HelmetProvider><MemoryRouter initialEntries={['/loop?audience=professional']}><JobLoop /></MemoryRouter></HelmetProvider>; }
 async function startSource() {
   const user = userEvent.setup();
-  await user.click(await screen.findByRole('button', { name: /Import or paste my CV/ }));
+  await user.click(await screen.findByRole('button', { name: 'Set up directly without questions' }));
   await user.click(screen.getByLabelText('Reviewed source CV or career record')); await user.paste(source);
   await user.click(screen.getByRole('button', { name: 'Continue with this text' }));
   return user;
@@ -57,12 +57,14 @@ describe('Job Loop source-first onboarding', () => {
   });
   it('shows one first action and saves no invented preparation or search result', async () => {
     render(tree());
-    expect(await screen.findByRole('button', { name: /Import or paste my CV/ })).toBeEnabled();
+    expect(await screen.findByRole('button', { name: 'Set up directly without questions' })).toBeEnabled();
     expect(screen.queryByRole('button', { name: 'Prepare today’s applications' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Enable recurring preparation' })).not.toBeInTheDocument();
-    expect(within(screen.getByRole('list', { name: 'Job Loop journey' })).getAllByRole('listitem')).toHaveLength(3);
-    expect(screen.getByText(/No employer API sources are reported as configured/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Open the free CV check' })).toHaveAttribute('href', '/check?audience=professional');
+    expect(screen.getAllByRole('region', { name: 'Job Loop setup' })).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Start your setup' })).toHaveAttribute('href', '/onboarding');
+    expect(screen.queryByRole('list', { name: 'Job Loop journey' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/No employer API sources are reported as configured/)).not.toBeInTheDocument();
+    expect(within(screen.getByRole('navigation', { name: 'Choose a product' })).getByRole('link', { name: /CV Check/ })).toHaveAttribute('href', '/check');
     expect(mocks.call.mock.calls.every(([, action]) => action.action === 'get')).toBe(true);
   });
   it('copies reviewed header details while leaving role, location and experience choices unset', async () => {
@@ -77,7 +79,7 @@ describe('Job Loop source-first onboarding', () => {
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'save_profile')).toBe(false);
   });
   it('reads a local file without a server write or model processing', async () => {
-    render(tree()); const user = userEvent.setup(); await user.click(await screen.findByRole('button', { name: /Import or paste my CV/ }));
+    render(tree()); const user = userEvent.setup(); await user.click(await screen.findByRole('button', { name: 'Set up directly without questions' }));
     await user.upload(screen.getByLabelText('Read a local CV on this device'), new File(['fictional source'], 'fictional-cv.txt', { type: 'text/plain' }));
     await waitFor(() => expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue(source));
     expect(screen.getByLabelText('My name')).toHaveValue('Fictional Casey');

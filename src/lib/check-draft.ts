@@ -164,12 +164,12 @@ export function takeRetainedCheck(now = Date.now()): CheckDraft | null {
   return draft;
 }
 
-export function takeCheckAuthReturn(): "/check" | "/dashboard" {
+export function takeCheckAuthReturn(): "/check" | "/loop" {
   try {
     const value = sessionStorage.getItem(RETURN_KEY);
     sessionStorage.removeItem(RETURN_KEY);
-    return value === "/check" ? "/check" : "/dashboard";
-  } catch { return "/dashboard"; }
+    return value === "/check" ? "/check" : "/loop";
+  } catch { return "/loop"; }
 }
 
 export function checkAuthReturnAvailable(): boolean {

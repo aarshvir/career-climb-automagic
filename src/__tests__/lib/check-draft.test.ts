@@ -216,11 +216,11 @@ describe('retained drafts expire and discard malformed or oversized data', () =>
 describe('OAuth return paths are canonical and fail closed', () => {
   it.each(['https://attacker.invalid', '//attacker.invalid', '/check?next=https://attacker.invalid', '/dashboard?secret=fixture', '/auth', 'javascript:alert(1)', ''])('does not accept unsafe or arbitrary return value %s', value => {
     sessionStorage.setItem(RETURN_KEY, value);
-    expect(takeCheckAuthReturn()).toBe('/dashboard'); expect(sessionStorage.getItem(RETURN_KEY)).toBeNull();
+    expect(takeCheckAuthReturn()).toBe('/loop'); expect(sessionStorage.getItem(RETURN_KEY)).toBeNull();
   });
   it('accepts only the exact check path and consumes it once', () => {
     sessionStorage.setItem(RETURN_KEY, '/check');
-    expect(takeCheckAuthReturn()).toBe('/check'); expect(takeCheckAuthReturn()).toBe('/dashboard');
+    expect(takeCheckAuthReturn()).toBe('/check'); expect(takeCheckAuthReturn()).toBe('/loop');
   });
 });
 
@@ -241,7 +241,7 @@ describe('storage failures are honest and do not leave a half-retained draft', (
   });
   it('falls back safely when storage cannot be read', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new DOMException('Storage denied', 'SecurityError'); });
-    expect(takeRetainedCheck(NOW)).toBeNull(); expect(takeCheckAuthReturn()).toBe('/dashboard');
+    expect(takeRetainedCheck(NOW)).toBeNull(); expect(takeCheckAuthReturn()).toBe('/loop');
   });
   it('allows cleanup without throwing when storage is inaccessible', () => {
     vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => { throw new DOMException('Storage denied', 'SecurityError'); });

@@ -1,4 +1,5 @@
 import { readApplicationSource } from '@/lib/application-source-selection';
+import { workspaceReturnPath } from '@/lib/account-return';
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -35,6 +36,7 @@ import {
 import { downloadPack } from "@/lib/document-export";
 import { currentOffer } from "@/lib/current-offer";
 import TailorPlanLine from "@/components/TailorPlanLine";
+import ProductNavigation from "@/components/ProductNavigation";
 import { listLegacyCvs, downloadLegacyCv } from "@/lib/cv-legacy";
 import type { ApplicationPack, TrackedApplication } from "@/lib/cv-database";
 import {
@@ -55,16 +57,16 @@ import { clearTrackingDraft, pruneTrackingApplications, registerTrackingDraftOwn
 
 type Tab = "cv" | "tailor" | "tracker" | "billing";
 const tabs: { id: Tab; label: string; icon: typeof FileText }[] = [
-  { id: "cv", label: "Your CVs", icon: FolderOpen },
-  { id: "tailor", label: "Tailor & download", icon: FileText },
-  { id: "tracker", label: "Applications", icon: Briefcase },
-  { id: "billing", label: "Access", icon: Layers },
+  { id: "cv", label: "Saved CVs", icon: FolderOpen },
+  { id: "tailor", label: "Review & download", icon: FileText },
+  { id: "tracker", label: "Application tracker", icon: Briefcase },
+  { id: "billing", label: "Plan & allowance", icon: Layers },
 ];
 const sectionDetails: Record<Tab, { title: string; description: string; breadcrumb: string }> = {
-  cv: { title: "Your experience starts here.", description: "Keep a reviewed source CV ready for your next application.", breadcrumb: "Documents" },
-  tailor: { title: "Prepare your next application.", description: "Bring a real vacancy. Review the wording, then download the version you approve.", breadcrumb: "Application packs" },
-  tracker: { title: "Keep your next step in view.", description: "Record your applications, add a reminder and keep useful notes together.", breadcrumb: "Applications" },
-  billing: { title: "Your access.", description: "Use the free check or continue with your saved documents.", breadcrumb: "Access" },
+  cv: { title: "Your saved CVs.", description: "Manage the source documents you saved here for individual applications. Your Job Loop CVs and setup are in Job Loop.", breadcrumb: "Saved CVs" },
+  tailor: { title: "Review and download a CV.", description: "Prepare a CV for a job you already found, or open a saved version. Review it before approving and downloading.", breadcrumb: "Review & download" },
+  tracker: { title: "Your application tracker.", description: "Update the applications you recorded here, with notes and follow-up dates. See All applications for records across Jobvance.", breadcrumb: "Application tracker" },
+  billing: { title: "Your plan and document allowance.", description: "Check your preparation allowance and open the current plans. Your Job Loop schedule is managed in Job Loop.", breadcrumb: "Plan & allowance" },
 };
 const dateLabel = (value: string) => new Date(value).toLocaleDateString();
 
@@ -340,38 +342,38 @@ export default function Workspace() {
         Loading your account…
       </div>
     );
-  if (!user) return <Navigate to="/auth?next=%2Fdashboard" replace />;
+  if (!user) return <Navigate to={`/auth?next=${encodeURIComponent(workspaceReturnPath(sourceRoute.search))}`} replace />;
   const counts = workspaceCounts(data?.applications ?? []);
   return (
     <main className="jv-workspace">
+      <ProductNavigation active="check" />
       {hasExactSource && <section className="m-4 rounded-xl border bg-white p-5" aria-label="Selected application source"><h2 className="font-semibold">Selected application</h2>{!exactPack && !exactTracker ? <p role="alert">This application link is invalid. Choose it again from My applications.</p> : query.isLoading ? <p role="status">Loading your selected application…</p> : query.error ? <p role="alert">The selected application could not be loaded. Retry before opening it.</p> : requestedPack ? <><p>{requestedPack.job_title} · {requestedPack.company}</p><p>Read this saved CV again before approving or downloading. Opening replaces any unsaved CV review on this page.</p><Button disabled={busy} onClick={() => { setSelectedId(requestedPack.id); setReviewText(requestedPack.tailored_text); setConfirmed(false); }}>Review selected CV</Button></> : requestedTracker ? <p>{requestedTracker.job_title} · {requestedTracker.company}. Your exact tracking record is shown below.</p> : <p role="alert">This application is no longer available in this account. No other application was selected.</p>}<p className="mt-3"><Link to="/applications">Back to my applications</Link></p></section>}
       <div className="ws-shell">
         <aside className="ws-sidebar">
-          <div className="ws-sidebar-heading"><span className="ws-workspace-mark" aria-hidden="true">J</span><div><strong>Your workspace</strong><span>Prepare with care</span></div></div>
-          <Link to="/applications" className="ws-free-check">All my applications</Link>
-          <nav aria-label="Workspace sections" className="ws-navigation">
+          <div className="ws-sidebar-heading"><span className="ws-workspace-mark" aria-hidden="true">J</span><div><strong>CV documents</strong><span>For individual applications</span></div></div>
+          <Link to="/loop" className="ws-free-check ws-loop-return">
+            <RefreshCw size={20} aria-hidden="true" />
+            <span><strong>Back to Job Loop</strong><small>Your setup, scheduled search and matched jobs.</small></span>
+            <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+          <nav aria-label="CV document sections" className="ws-navigation">
             {tabs.map((t) => (
               <Button key={t.id} className="ws-nav-button" variant="ghost" onClick={() => setParams({ tab: t.id })} aria-current={tab === t.id ? "page" : undefined}>
                 <t.icon size={18} aria-hidden="true" /><span>{t.label}</span>
               </Button>
             ))}
           </nav>
-          <Link to="/loop" className="ws-free-check">
-            <RefreshCw size={20} aria-hidden="true" />
-            <span><strong>Your Job Loop</strong><small>One record. A CV for each role.</small></span>
-            <ArrowRight size={17} aria-hidden="true" />
-          </Link>
           <Link to="/check" className="ws-free-check">
             <ShieldCheck size={20} aria-hidden="true" />
-            <span><strong>Free CV evidence check</strong><small>Compare your CV with a vacancy.</small></span>
+            <span><strong>Start a CV Check</strong><small>Check a CV against one job, whenever you need.</small></span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
-          <p className="ws-sidebar-note">Your documents. Your review.<br />Your next move.</p>
+          <Link to="/applications" className="ws-all-applications">All applications</Link>
         </aside>
         <div className="ws-main">
-          <div className="ws-topbar"><span>Workspace <ChevronRight size={14} aria-hidden="true" /> {sectionDetails[tab].breadcrumb}</span><Button variant="ghost" size="sm" onClick={() => void query.refetch()} disabled={query.isFetching}><RefreshCw size={15} className={query.isFetching ? "animate-spin" : ""} aria-hidden="true" />Refresh</Button></div>
+          <div className="ws-topbar"><span>CV documents <ChevronRight size={14} aria-hidden="true" /> {sectionDetails[tab].breadcrumb}</span><Button variant="ghost" size="sm" onClick={() => void query.refetch()} disabled={query.isFetching}><RefreshCw size={15} className={query.isFetching ? "animate-spin" : ""} aria-hidden="true" />Refresh</Button></div>
           <div className="ws-content">
-            <header className="ws-page-heading"><p className="ws-eyebrow">YOUR JOB SEARCH, ORGANIZED</p><h1>{sectionDetails[tab].title}</h1><p>{sectionDetails[tab].description}</p></header>
+            <header className="ws-page-heading"><p className="ws-eyebrow">DOCUMENTS FOR INDIVIDUAL APPLICATIONS</p><h1>{sectionDetails[tab].title}</h1><p>{sectionDetails[tab].description}</p></header>
       {configurationError && (
         <Alert variant="destructive">
           <AlertDescription>
@@ -415,7 +417,7 @@ export default function Workspace() {
             ["Saved applications", counts.saved],
             ["Marked applied", counts.applied],
             ["Interviews", counts.interviews],
-            ["Saved preparations available", data.entitlement?.creditsRemaining ?? "Unavailable"],
+            ["Document preparations remaining", data.entitlement?.creditsRemaining ?? "Unavailable"],
           ].map(([label, count]) => (
             <Card key={String(label)} className="ws-summary-card">
               <CardContent className="p-4">
@@ -491,7 +493,7 @@ export default function Workspace() {
               {data?.cvs.length === 0 && (
                 <p className="ws-empty-state">
                   <FolderOpen size={28} aria-hidden="true" />
-                  No CVs saved yet. Upload one above to begin.
+                  No source CVs saved in this workspace. Manage CVs for your scheduled search in Job Loop.
                 </p>
               )}
               <div className="grid gap-3">
@@ -968,7 +970,7 @@ export default function Workspace() {
               <p>{data.entitlement ? `${data.entitlement.creditsRemaining} saved preparations available.` : 'Access could not be checked. Reload to try again.'} Previously approved documents remain available to download.</p>
               {data.entitlement?.expiresAt && <p>Existing preparation access ends {dateLabel(data.entitlement.expiresAt)}. Saved documents remain available.</p>}
               <p>{currentOffer.passes}</p>
-              <Link to="/pricing" className="underline">See passes and what’s free</Link>
+              <Link to="/pricing" className="underline">See plans and what’s included</Link>
             </CardContent>
           </Card>
         )}

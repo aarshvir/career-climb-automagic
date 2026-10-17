@@ -28,7 +28,7 @@ describe('saved check selection through sign-in', () => {
     `/loop?fromCheck=%61${id.slice(1)}`, '/loop?fromCheck=',
   ])('rejects noncanonical selector %s', value => {
     expect(isSavedCheckContinuationPath(value)).toBe(false);
-    expect(accountDestination(value)).toBe('/dashboard');
+    expect(accountDestination(value)).toBe('/loop');
     rememberLoopReturn(value, 1000);
     expect(takeLoopReturn(1001)).toBeNull();
   });

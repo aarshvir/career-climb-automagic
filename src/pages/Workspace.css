@@ -40,6 +40,8 @@
 .ws-nav-button svg { flex-shrink: 0; }
 .ws-free-check { display: flex; align-items: center; gap: 10px; margin-top: 26px; padding: 14px 12px; border: 1px solid #d9def4; border-radius: 11px; background: white; color: var(--ws-cobalt); text-decoration: none; transition: border-color .15s ease, background .15s ease; }
 .ws-free-check:hover { border-color: #8ba0ef; background: #f4f6ff; }
+.ws-loop-return { margin-top: 0; margin-bottom: 18px; border-color: #a9badf; }
+.ws-all-applications { display: inline-block; margin: 20px 12px 0; color: var(--ws-cobalt); text-underline-offset: 3px; }
 .ws-free-check > svg { flex-shrink: 0; }
 .ws-free-check > svg:last-child { margin-left: auto; }
 .ws-free-check span { min-width: 0; }

@@ -210,7 +210,11 @@ describe("Real workspace journey and truthful failures", () => {
   });
   it("requires actual file review, then approval before document export", async () => {
     mount();
-    await screen.findByText("No CVs saved yet. Upload one above to begin.");
+    await screen.findByText("No source CVs saved in this workspace. Manage CVs for your scheduled search in Job Loop.");
+    expect(screen.getByRole('heading', { name: 'Your saved CVs.' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Back to Job Loop/ })).toHaveAttribute('href', '/loop');
+    expect(screen.getByRole('link', { name: /Start a CV Check/ })).toHaveAttribute('href', '/check');
+    expect(screen.queryByText('Your experience starts here.')).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Choose CV file"), {
       target: {
         files: [new File([original], "cv.txt", { type: "text/plain" })],
@@ -326,7 +330,7 @@ describe("Real workspace journey and truthful failures", () => {
     state.data.entitlement = {creditsRemaining:0,expiresAt:null,billingConfigured:true,billingMode:'live',paymentProvider:provider};
     mount('/dashboard?tab=billing');
     await screen.findByText('Free to start: 3 tailored CVs a month. Passes from $9, one-time.');
-    expect(screen.getByRole('button', {name:'Access'})).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', {name:'Plan & allowance'})).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', {name:'Check a CV for free'})).toHaveAttribute('href', '/check');
     expect(screen.getByText(/0 saved preparations available/)).toHaveTextContent('Previously approved documents remain available to download.');
     expect(screen.queryByRole('button', {name:/buy|checkout|purchase|subscribe|payment/i})).not.toBeInTheDocument();
@@ -362,8 +366,8 @@ describe("Real workspace journey and truthful failures", () => {
     expect(screen.getByRole('button', {name:'Download PDF'})).toBeEnabled();
     fireEvent.click(screen.getByRole('button', {name:'Download PDF'}));
     await waitFor(() => expect(calls.download).toHaveBeenCalledWith(expect.objectContaining({id:'approved-pack',status:'approved'}), 'pdf'));
-    await waitFor(() => expect(screen.getByRole('button', {name:'Applications'})).toBeEnabled());
-    fireEvent.click(screen.getByRole('button', {name:'Applications'}));
+    await waitFor(() => expect(screen.getByRole('button', {name:'Application tracker'})).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', {name:'Application tracker'}));
     await screen.findByText('Recorded application');
     expect(screen.getByLabelText('Notes')).toHaveValue('Existing private note');
     expect(screen.getByRole('button', {name:'Save application'})).toBeEnabled();
