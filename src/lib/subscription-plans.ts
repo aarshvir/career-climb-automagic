@@ -1,14 +1,14 @@
 /** Public monthly terms. Actual purchase availability is established by the authenticated billing service. */
 export const subscriptionPlans = [
-  { id: 'weekly', name: 'Weekly', priceUsd: 29, interval: 'month',
+  { id: 'weekly', name: 'Starter', priceUsd: 29, interval: 'month',
     description: 'A steady search alongside work or study.',
     features: ['1 Job Loop run a week', 'Up to 3 saved CV variants', 'Guided CV creator', 'Matched jobs and prepared CVs in your dashboard'],
     proposedLimits: { weeklyRuns: 1, dailyRuns: null, cvVariants: 3 } },
-  { id: 'active', name: 'Active', priceUsd: 59, interval: 'month',
+  { id: 'active', name: 'Advanced', priceUsd: 59, interval: 'month',
     description: 'More frequent searches while you are actively looking.',
     features: ['3 Job Loop runs a week', 'Up to 3 saved CV variants', 'Guided CV creator', 'Matched jobs and prepared CVs in your dashboard'],
     proposedLimits: { weeklyRuns: 3, dailyRuns: null, cvVariants: 3 } },
-  { id: 'daily', name: 'Daily', priceUsd: 99, interval: 'month',
+  { id: 'daily', name: 'Pro Job Seeker', priceUsd: 99, interval: 'month',
     description: 'A daily search during a focused job hunt.',
     features: ['1 Job Loop run a day', 'Up to 3 saved CV variants', 'Guided CV creator', 'Matched jobs and prepared CVs in your dashboard'],
     proposedLimits: { weeklyRuns: null, dailyRuns: 1, cvVariants: 3 } },

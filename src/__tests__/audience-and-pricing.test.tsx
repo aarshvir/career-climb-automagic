@@ -86,7 +86,7 @@ describe('Job Loop access and monthly plans', () => {
     expect(proposals).toHaveTextContent('1 Job Loop run a week');
     expect(proposals).toHaveTextContent('3 Job Loop runs a week');
     expect(proposals).toHaveTextContent('1 Job Loop run a day');
-    expect(within(proposals).getByRole('link',{name:'Sign in for Weekly'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
+    expect(within(proposals).getByRole('link',{name:'Sign in for Starter'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
     expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
     expect(proposals).toHaveTextContent('does not cancel subscription billing');
   });

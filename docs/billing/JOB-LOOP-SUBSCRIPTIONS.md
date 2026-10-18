@@ -1,6 +1,6 @@
 # Monthly Job Loop billing operations
 
-The main product is Job Loop: Weekly $29/month, Active $59/month and Daily $99/month in USD, with fixed whole-unit local prices in eight additional currencies, tax included. No default trial. An account and a deliberate purchase are required. CV Check passes are separate and remain explicitly USD. [Current whole-price table, authority and acceptance](../audits/2026-10-18-loop-subscriptions/WHOLE-CURRENCY-PRICING.md). V47 uses new provider product versions; v46's fractional catalogue is historical for existing purchases.
+The main product is Job Loop: Starter $29/month (weekly), Advanced $59/month (three chosen weekdays) and Pro Job Seeker $99/month (daily) in USD, with fixed whole-unit local prices in eight additional currencies, tax included. No default trial. An account and a deliberate purchase are required. CV Check passes are separate and remain explicitly USD. [Current whole-price table, authority and acceptance](../audits/2026-10-18-loop-subscriptions/WHOLE-CURRENCY-PRICING.md). V47 uses new provider product versions; v46's fractional catalogue is historical for existing purchases.
 
 **Current connection is complete and Live payments are enabled.** The owner already saved the Live and isolated Test API/signing keys and approved the precise permissions, commercial terms and support mailbox. Do not request these handoffs again. The controls below document configuration and recovery; they are not pending owner tasks. The isolated Test gate is false and Test webhook disabled after acceptance.
 
@@ -15,9 +15,9 @@ Only the owner handles credentials. Product IDs are public identifiers and alrea
 
 | Plan | Product ID | Setting |
 | --- | --- | --- |
-| Weekly | pdt_0Nq0BYq7BdjAS4guEjnZR | DODO_PRODUCT_LOOP_WEEKLY |
-| Active | pdt_0Nq0Bq1C8qWpEc09hFc9l | DODO_PRODUCT_LOOP_ACTIVE |
-| Daily | pdt_0Nq0Bu1sW9DpHx9xCgY44 | DODO_PRODUCT_LOOP_DAILY |
+| Starter | pdt_0Nq0BYq7BdjAS4guEjnZR | DODO_PRODUCT_LOOP_WEEKLY |
+| Advanced | pdt_0Nq0Bq1C8qWpEc09hFc9l | DODO_PRODUCT_LOOP_ACTIVE |
+| Pro Job Seeker | pdt_0Nq0Bu1sW9DpHx9xCgY44 | DODO_PRODUCT_LOOP_DAILY |
 
 These are current v3 Live products. Keep all original products and localized rules for their owned historical quotes, ready URLs and subscriptions. Changing a rule on an existing Dodo product can reprice a ready checkout session: this was actually reproduced in Test Mode. Publish subsequent prices through separate new products and a new catalogue revision. Never edit prior product rules to implement a new price. Native Copy to Live Mode does not copy localized rules; configure and verify those separately before activation.
 
