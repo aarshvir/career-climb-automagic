@@ -1,6 +1,6 @@
 # Contact, plan names and consistent Job Loop result counts
 
-18 October 2026. Bounded corrections identified by the [48-hour product/payment reconciliation](../2026-10-18-chat-48h/product-evidence.md). Local validation is complete; publication is not claimed here. Job Loop remains the primary product. No backend, schema, payment, provider, media or advertising action accompanies this change.
+18 October 2026. Bounded corrections identified by the [48-hour product/payment reconciliation](../2026-10-18-chat-48h/product-evidence.md). **Published as v50**, runtime `59691d747f1fc1c1290a5c30fc6e2f9ec9a502ad`, at https://jobvance.io. [Exact release receipt](../../releases/2026-10-18-product-clarity.json). Job Loop remains the primary product. No backend, schema, payment, provider, media or advertising action accompanies this change. The validation below retains its original local scope.
 
 ## Corrections
 
@@ -26,4 +26,6 @@ Conditional legacy signed-in pilot/capacity wording and immutable walkthrough na
 
 ## Rollback
 
-Annotated tag `jobvance-before-product-clarity-2026-10-18` at `3433eac63daa443f9c20ccbd144df942b4c755b1` was pushed before source changes. Public v49 is retained as saved version `appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_400f0d9784a881919747f0fb60bf1f3e`, runtime `3f0ed1ca9b99cecaf78235527935d9ada72ad84a`. This is source rollback, not database/file/merchant restoration. No commit, publication or live byte readback is claimed by this local assessment.
+Annotated tag `jobvance-before-product-clarity-2026-10-18` at `3433eac63daa443f9c20ccbd144df942b4c755b1` was pushed before source changes. Public v49 is retained as saved version `appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_400f0d9784a881919747f0fb60bf1f3e`, runtime `3f0ed1ca9b99cecaf78235527935d9ada72ad84a`. This is source rollback, not database/file/merchant restoration.
+
+V50 deployment `appgdep_6ad4dd7437808191b3ac873ac440555f` succeeded at14:53:58 UTC; saved version `appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ce9413cbcf008191b0d7b049eba398fe`. Seven live guest HTML routes, including the actual Contact/Terms copy, and three exact entry/Job Loop/API assets matched the tested build. Only each observed appended Cloudflare challenge script was excluded from HTML comparison; no HTML ETag parity is claimed. Source preparation used a clean exact-commit checkout so in-progress audit work was not accidentally staged. Its complete copied artifact tree matched the already-tested build. The receipt binds exact source, local gzip archive, saved tar archive and live checks. Documentation-only receipt updates need no identical runtime redeployment.

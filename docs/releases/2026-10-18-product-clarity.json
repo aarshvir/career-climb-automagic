@@ -1,0 +1,282 @@
+{
+  "date": "2026-10-18",
+  "release": "v50",
+  "product": "Job Loop",
+  "scope": "Contact and plan copy plus consistent ready-document counts",
+  "source": "59691d747f1fc1c1290a5c30fc6e2f9ec9a502ad",
+  "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ce9413cbcf008191b0d7b049eba398fe",
+  "deployment": {
+    "id": "appgdep_6ad4dd7437808191b3ac873ac440555f",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ce9413cbcf008191b0d7b049eba398fe",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-18T14:53:58.329077+00:00"
+  },
+  "publicUrl": "https://jobvance.io",
+  "archiveStorage": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_000000002c1481fa8394f28525c72fff",
+    "content_hash": "sha256:7681ff5d3229ed52d64078f68e9e5da41ed7b0e44dc886cb7de0366539bdd57b",
+    "size_bytes": 15165440,
+    "file_count": 136
+  },
+  "changes": [
+    "Remove obsolete free-pilot description from current Contact support copy without adding a response promise",
+    "Align monthly Terms with Starter / Advanced / Pro Job Seeker; prices, cadence and financial authority unchanged",
+    "Share the exact page-authoritative v49 source/page readiness count between the Today overview and run history; no duplicate source checker"
+  ],
+  "verification": {
+    "focusedTests": 60,
+    "focusedFiles": 5,
+    "relatedTests": 137,
+    "relatedFiles": 6,
+    "overlap": "Audience/pricing overlaps; counts are not added as unique coverage",
+    "variantCases": 17,
+    "newCountRegressions": 3,
+    "independentTests": 50,
+    "typeScript": "passed",
+    "productionBuild": {
+      "publicPages": 38,
+      "guideArticles": 20,
+      "structuredDataHashes": 58,
+      "prerenderExternalRequests": 0,
+      "initialFullCommandExit": 1,
+      "initialPackagerFailure": "OneDrive symbolic-link guard",
+      "inspection": "139 entries, 134 files, 5 directories; dirent/lstat/readlink found zero links",
+      "recovery": "Unchanged packager retry passed; no guard weakened",
+      "assets": 132,
+      "workerBytes": 8596546,
+      "compressedWorkerBytes": 2909128,
+      "compressedLimitBytes": 3145728
+    },
+    "hostingGroups": 12,
+    "fullSuiteRerun": false,
+    "priorFullSuite": "v49's 3095 tests/164 files retain their original scope",
+    "liveExactHtmlPages": 7,
+    "liveExactJsAssets": 3,
+    "localDetails": "docs/audits/2026-10-18-product-clarity/verification.json"
+  },
+  "limits": [
+    "Guest HTTP exact-byte/readable Contact/Terms verification; no fresh authenticated hosted or unassisted task",
+    "Existing variant-only early-stage/global-facts next-step guidance gap remains open",
+    "No backend, schema, payment, provider, candidate, media or advertising mutation",
+    "No NPS or AV-quality uplift"
+  ],
+  "rollback": {
+    "tag": "jobvance-before-product-clarity-2026-10-18",
+    "source": "3433eac63daa443f9c20ccbd144df942b4c755b1",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_400f0d9784a881919747f0fb60bf1f3e",
+    "note": "Source rollback is separate from database, file or merchant restoration"
+  },
+  "sourcePreparation": {
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "commit_sha": "59691d747f1fc1c1290a5c30fc6e2f9ec9a502ad",
+    "archiveFilename": "product-clarity-artifact.tar.gz",
+    "localArchiveSha256": "e402f0b0b688b4acf76a67569737dd3736a8d4bfd3ef9032aef887458d75c801",
+    "localArchiveBytes": 4939312,
+    "localContainer": "gzip",
+    "packagedTreeExact": true,
+    "artifactTreeFiles": 136,
+    "artifactTreeSha256": "2bc6703d0972ffa9681ae525b9d33b194e3cd0a6bdb3078d32feeae3273624e1",
+    "note": "Clean detached checkout of exact pushed source excluded unrelated in-progress audit files; copied unchanged completed dist matches the tested tree. Supported source helper packaged it; native archiveStorage describes stored tar representation."
+  },
+  "liveVerification": {
+    "at": "2026-10-18T14:54:15.477Z",
+    "origin": "https://jobvance.io",
+    "passed": true,
+    "source": "59691d747f1fc1c1290a5c30fc6e2f9ec9a502ad",
+    "htmlPages": 7,
+    "exactJsAssets": 3,
+    "checks": [
+      {
+        "route": "/contact",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 13722,
+        "localBytes": 12784,
+        "sha256Compared": "cfa1c8aa5a5a6b03eb0b86bae2a7e9a1ca3ab4770e5184c7484554191d5185b8",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "8859c907b8d76d7dbb09d679fa59959edec551696ac1f0fcf0df113b561ecf60",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/terms",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 17577,
+        "localBytes": 16639,
+        "sha256Compared": "77953c488220fc502008642fa155ab8f27a143c6241d5df245552152c68c8a4a",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "b907df165872df071bb6f27036a3b986b814ad42c89f08686ad85c8ca7759fd3",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/pricing",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 32921,
+        "localBytes": 31983,
+        "sha256Compared": "9dea3d055be9bef97889f137d06899ef7f43666e8ac226429243e3c6dab99385",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "d14e82fd7f1ed77406260ba430c4da215f9daeedc726047813177c987833b322",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/loop",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 4269,
+        "localBytes": 3331,
+        "sha256Compared": "0a02407bfda5509541d9f255e8f57964c5ae34afe53c0457c14ab7cd992425ee",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "a5ccab5288375f7bb8feacaaa12418f184c8739b112c7c79b4d164b93d524536",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/dashboard",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 4269,
+        "localBytes": 3331,
+        "sha256Compared": "0a02407bfda5509541d9f255e8f57964c5ae34afe53c0457c14ab7cd992425ee",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "042f29aa0e306943ce19d35f863cfbafa6ae2a70571bf8d2296ea5ae10c16db2",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/auth?next=%2Floop",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 4269,
+        "localBytes": 3331,
+        "sha256Compared": "0a02407bfda5509541d9f255e8f57964c5ae34afe53c0457c14ab7cd992425ee",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "e1623fe96b767f93259f3574a222f82cef6dd3e35ec7d3ace9555afe5f1ae17a",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/job-loop",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 22911,
+        "localBytes": 21973,
+        "sha256Compared": "1d404a250ada9bccbefb7786e9319564062f382a12368aa1e4b292b9c00e8b82",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "656110a911ec5993613cf3b3fd9c9e286b2708a77331efcda091828cc33d43af",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/assets/index-C9lvRhw0.js",
+        "status": 200,
+        "kind": "exact_js",
+        "bytes": 500638,
+        "sha256": "e7d559c9f5d7302da15bc1871830204bd0ddd34ded99a7e74de3f4c6d04684ec",
+        "headers": {
+          "contentType": "text/javascript; charset=utf-8",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "etag": "W/\"e7d559c9f5d7302da15bc1871830204bd0ddd34ded99a7e74de3f4c6d04684ec\""
+        }
+      },
+      {
+        "route": "/assets/JobLoop-fjUw1RZe.js",
+        "status": 200,
+        "kind": "exact_js",
+        "bytes": 161125,
+        "sha256": "13ced154a7c28b1c487d61ff55b03d8859564cd0d9a16fab07bf01d80c1ac717",
+        "headers": {
+          "contentType": "text/javascript; charset=utf-8",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "etag": "W/\"13ced154a7c28b1c487d61ff55b03d8859564cd0d9a16fab07bf01d80c1ac717\""
+        }
+      },
+      {
+        "route": "/assets/job-loop-api-DJik36ue.js",
+        "status": 200,
+        "kind": "exact_js",
+        "bytes": 20624,
+        "sha256": "9693879d01e69acb1eaff01b87aa49c4c3ea4c7fa117574f15ed47c7cbf6a4b8",
+        "headers": {
+          "contentType": "text/javascript; charset=utf-8",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "etag": "W/\"9693879d01e69acb1eaff01b87aa49c4c3ea4c7fa117574f15ed47c7cbf6a4b8\""
+        }
+      }
+    ],
+    "limits": [
+      "Guest HTTP byte/route verification only; no authenticated candidate task",
+      "HTML ETag not claimed against altered challenge-injected bodies",
+      "No backend, candidate, provider, payment or advertising mutation"
+    ]
+  }
+}

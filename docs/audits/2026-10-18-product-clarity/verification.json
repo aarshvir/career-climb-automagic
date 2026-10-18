@@ -1,7 +1,7 @@
 {
   "date": "2026-10-18",
   "at": "2026-10-18T14:49:39.508408+00:00",
-  "status": "local_validation_complete_not_published",
+  "status": "local_validation_complete_release_recorded_separately",
   "baseHead": "3433eac63daa443f9c20ccbd144df942b4c755b1",
   "scope": "Contact copy, current plan Terms names, one page-authoritative ready-packet count",
   "sourceSha256": {
@@ -82,5 +82,6 @@
     "No browser/provider/backend/payment/marketing action",
     "No hosted authenticated or unassisted task",
     "No NPS or media pass"
-  ]
+  ],
+  "releaseReceipt": "docs/releases/2026-10-18-product-clarity.json"
 }
