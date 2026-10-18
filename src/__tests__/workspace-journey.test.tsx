@@ -329,7 +329,7 @@ describe("Real workspace journey and truthful failures", () => {
   it.each(['stripe', 'paddle'] as const)('does not expose checkout even when the backend reports %s billing ready', async provider => {
     state.data.entitlement = {creditsRemaining:0,expiresAt:null,billingConfigured:true,billingMode:'live',paymentProvider:provider};
     mount('/dashboard?tab=billing');
-    await screen.findByText('Job Loop from $29 a month: your job search on a schedule. CV Check is free to start, with optional one-time passes.');
+    await screen.findByText('Choose your Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.');
     expect(screen.getByRole('button', {name:'Plan & allowance'})).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', {name:'Check a CV for free'})).toHaveAttribute('href', '/check');
     expect(screen.getByText(/0 saved preparations available/)).toHaveTextContent('Previously approved documents remain available to download.');

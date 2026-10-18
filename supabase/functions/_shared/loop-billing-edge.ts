@@ -22,6 +22,9 @@ export function loopBillingRpc(admin: ReturnType<typeof adminClient>) {
         ['LOOP_BILLING_ACTIVE',409,'An existing subscription or checkout must be managed first.'],
         ['LOOP_BILLING_LIMIT',429,'Too many new checkout attempts. Reuse your existing checkout or contact support.'],
         ['LOOP_BILLING_UNBOUND',409,'This payment is not linked to a Job Loop checkout.'],
+        ['LOOP_BILLING_QUOTE_EXPIRED',409,'This price quote expired. Request a fresh price before checkout.'],
+        ['LOOP_BILLING_QUOTE_CONFLICT',409,'This price quote belongs to a different billing action. Refresh the selected price.'],
+        ['LOOP_BILLING_PRICE_CHANGED',409,'This monthly price changed. Refresh the quote before checkout.'],
       ];
       for (const [code,status,message] of codes) if (error.message.includes(code)) throw new ApiError(status,code,message);
       throw new ApiError(503,'LOOP_BILLING_PERSISTENCE','This billing update could not be confirmed. Retry with the same request.');
@@ -31,7 +34,7 @@ export function loopBillingRpc(admin: ReturnType<typeof adminClient>) {
 }
 export async function loopBillingProvider(config: DodoBillingConfig, endpoint: string, body?: Record<string, unknown>, method?: 'GET'|'POST'|'PATCH'): Promise<Record<string, unknown>> {
   const invalid = () => new ApiError(503,'PAYMENT_PROVIDER_ERROR','Billing is temporarily unavailable. Keep the same request while its outcome is checked.');
-  if (!/^(?:products\/pdt_|payments\/pay_|subscriptions\/sub_|refunds\/ref_|checkouts(?:\/cks_)?)[A-Za-z0-9_-]*$/.test(endpoint)) throw invalid();
+  if (!/^(?:products\/pdt_[A-Za-z0-9_-]+(?:\/localized-prices)?|payments\/pay_[A-Za-z0-9_-]+|subscriptions\/sub_[A-Za-z0-9_-]+|refunds\/ref_[A-Za-z0-9_-]+|checkouts(?:\/cks_[A-Za-z0-9_-]+|\/preview)?)$/.test(endpoint)) throw invalid();
   let response: Response;
   try {
     response = await fetch(`${config.apiBaseUrl}/${endpoint}`, { method: method ?? (body ? 'POST' : 'GET'), headers: { Authorization: `Bearer ${config.secretKey}`, Accept:'application/json', ...(body ? {'Content-Type':'application/json'} : {}) },

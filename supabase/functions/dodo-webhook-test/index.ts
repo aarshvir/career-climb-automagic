@@ -1,10 +1,10 @@
 import { ApiError } from '../_shared/core.ts';
-import { parseDodoEvent, validateDodoRefund, verifyDodoSignature } from '../_shared/dodo.ts';
+import { parseDodoEvent, verifyDodoSignature } from '../_shared/dodo.ts';
 import { adminClient, boundedBody, json, serve } from '../_shared/runtime.ts';
 import { loopBillingTestConfiguration } from '../_shared/loop-billing-test-config.ts';
 import { applyLoopBillingWebhook } from '../_shared/loop-billing-runtime.ts';
 import { loopBillingProvider, loopBillingRpc } from '../_shared/loop-billing-edge.ts';
-import { isLoopBillingMetadata, loopMetadata } from '../_shared/loop-billing.ts';
+import { isLoopBillingMetadata, loopMetadata, validateLoopRefund } from '../_shared/loop-billing.ts';
 
 serve(async req => {
   const config = loopBillingTestConfiguration(name => Deno.env.get(name));
@@ -19,9 +19,9 @@ serve(async req => {
   // whether the payment belongs to an allowlisted synthetic identity.
   if (event.type === 'refund.succeeded') {
     if (event.data.payload_type !== 'Refund') throw new ApiError(400, 'INVALID_PAYMENT_EVENT', 'Refund event cannot be verified.');
-    const refund = validateDodoRefund(event.data);
+    const refund = validateLoopRefund(event.data);
     const payment = await loopBillingProvider(config, `payments/${refund.paymentId}`);
-    if (payment.payment_id !== refund.paymentId) throw new ApiError(409, 'LOOP_TEST_PAYMENT_INVALID', 'The test payment could not be verified.');
+    if (payment.payment_id !== refund.paymentId || refund.currency!==null&&refund.currency!==payment.currency) throw new ApiError(409, 'LOOP_TEST_PAYMENT_INVALID', 'The test payment could not be verified.');
     metadata = payment.metadata;
     cache.set(`payments/${refund.paymentId}`, payment);
   }

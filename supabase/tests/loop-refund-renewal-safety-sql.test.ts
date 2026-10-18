@@ -119,6 +119,8 @@ describe('refunded access and independent provider billing authority',()=>{
       if(!/^job_loop_billing_[a-z_]+$/.test(name)||Object.keys(args).some(key=>!/^p_[a-z_]+$/.test(key)))throw Error('Unexpected SQL boundary');
       return await rpc('SELECT '+name+'('+Object.keys(args).map((key,index)=>key+'=>$'+(index+1)).join(',')+') r',Object.values(args)) as T;
     },provider:async(endpoint,_body,method)=>{
+      if(endpoint==='checkouts/cks_fixture')return{id:'cks_fixture',payment_id:'pay_fixture'};
+      if(endpoint==='payments/pay_fixture')return{payment_id:'pay_fixture',checkout_session_id:'cks_fixture',subscription_id:'sub_fixture',customer:{customer_id:'cus_fixture'},status:'succeeded',currency:'USD',total_amount:2900};
       expect(endpoint).toBe('subscriptions/sub_fixture');
       if(method==='PATCH'){patches++;cancelled=true;return{};}
       if(++gets===1)throw Error('Isolated provider read unavailable before any write');

@@ -53,7 +53,7 @@ describe('current offer', () => {
   });
   it('states the new free allowance everywhere the old beta line was', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByText('Job Loop from $29 a month: your job search on a schedule. CV Check is free to start, with optional one-time passes.')).toBeInTheDocument();
+    expect(screen.getByText('Choose your Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.')).toBeInTheDocument();
     expect(screen.queryByText(/2 tailored CVs a day|8 when signed in/i)).not.toBeInTheDocument();
   });
   it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
@@ -86,7 +86,7 @@ describe('Job Loop access and monthly plans', () => {
     expect(proposals).toHaveTextContent('1 Job Loop run a week');
     expect(proposals).toHaveTextContent('3 Job Loop runs a week');
     expect(proposals).toHaveTextContent('1 Job Loop run a day');
-    expect(within(proposals).getByRole('link',{name:'Sign in for Weekly'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly');
+    expect(within(proposals).getByRole('link',{name:'Sign in for Weekly'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
     expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
     expect(proposals).toHaveTextContent('does not cancel subscription billing');
   });

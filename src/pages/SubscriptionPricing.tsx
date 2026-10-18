@@ -20,6 +20,8 @@ const trustLines = [
   'Secure checkout by Dodo Payments, our merchant of record.',
 ];
 const faqs: [string, React.ReactNode][] = [
+  ['Can I pay for Job Loop in my currency?', 'Choose your billing country and payment currency above the Job Loop plans. Supported local prices are fixed monthly amounts, confirmed before purchase. Other countries can pay in US dollars and enter their actual billing country at secure checkout. One-time CV passes remain in US dollars.'],
+  ['Does changing the currency change my existing subscription?', 'No. Your current subscription and any existing checkout keep their original price and currency. Your billing section shows that original price. Choosing another currency here changes the prices for a new purchase only.'],
   ['What counts as a tailored CV?', 'Each time you choose “Tailor my CV for this job” and the AI prepares a version, that uses one. If the request fails before any AI work is done, it does not count. Comparing without AI, editing and downloading never use one.'],
   ['What stays free?', `Compare without AI, editing, PDF, Word and text downloads, and the applications tracker stay free with no limit. Signed in, you also get ${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs every calendar month (UTC). Job Loop access is shown in your account.`],
   ['Do passes include Job Loop runs?', 'No. Passes add AI-tailored CVs for the CV check. Job Loop monthly plans are separate and cover the recurring search pace you choose. Your account confirms checkout availability and paid access.'],
@@ -62,7 +64,7 @@ export default function SubscriptionPricing() {
       </section>
     </div>
     <section className="product-current-offer pricing-offer" aria-labelledby="passes-title">
-      <div className="pricing-section-head"><p className="product-eyebrow">AI CV TAILORING · AVAILABLE NOW</p><h2 id="passes-title">AI CV tailoring: free to start, passes when you need more</h2><p>{currentOffer.check}</p></div>
+      <div className="pricing-section-head"><p className="product-eyebrow">AI CV TAILORING · AVAILABLE NOW</p><h2 id="passes-title">AI CV tailoring: free to start, passes when you need more</h2><p>{currentOffer.check}</p><p>These optional one-time CV Check passes are priced in US dollars. The currency selector above applies to Job Loop subscriptions.</p></div>
       {picked && <p className="pricing-picked" role="status">You picked the {passPlan(picked).name} pass (${passPlan(picked).price}, {passPlan(picked).days} days). {user ? `Choose “Buy ${passPlan(picked).name}” when you are ready to pay.` : 'Sign in, then choose it again to pay.'}</p>}
       {params.get('checkout') === 'cancelled' && <p className="pricing-picked" role="status">Checkout was cancelled. You have not been charged.</p>}
       <div className="pricing-tiers">

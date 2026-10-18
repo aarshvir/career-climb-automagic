@@ -1,0 +1,303 @@
+{
+  "url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-5-windows-x64-binaries.zip",
+  "bytes": 381531864,
+  "sha256": "80379b2c04d51c30225532e0ae04509899141e9957ed096fe749d7fd9df8f82f",
+  "provenance": [
+    "https://www.postgresql.org/download/windows/",
+    "https://www.enterprisedb.com/download-postgresql-binaries",
+    "https://github.com/EnterpriseDB/edb-installers/issues/731",
+    "https://www.postgresql.org/about/licence/"
+  ],
+  "suite": "loop-provider-accounting",
+  "startedAt": "2026-10-18T10:24:11.347Z",
+  "checks": [
+    {
+      "name": "concurrent checkout retries acquire one original provider-creation claim",
+      "passed": true,
+      "distinctBackendPids": [
+        54560,
+        32116
+      ],
+      "blockingPids": [
+        54560
+      ]
+    },
+    {
+      "name": "first payment renewal and cancellation retain exact paid-through access",
+      "passed": true,
+      "paidPeriods": 2,
+      "cancellationKeptPaidAccess": true,
+      "expiredAccessRejected": true
+    },
+    {
+      "name": "concurrent duplicate renewal records one paid service period",
+      "passed": true,
+      "distinctBackendPids": [
+        20448,
+        57792
+      ],
+      "blockingPids": [
+        20448
+      ]
+    },
+    {
+      "name": "refund revocation wins a concurrent later activation and remains permanent",
+      "passed": true,
+      "distinctBackendPids": [
+        25596,
+        58304
+      ],
+      "blockingPids": [
+        25596
+      ]
+    },
+    {
+      "name": "fresh-session cancellation rejects a request after logout",
+      "passed": true,
+      "revokedSessionRejected": true
+    },
+    {
+      "name": "verified past-due grace survives retry and stops exactly at its deadline",
+      "passed": true,
+      "absoluteGraceDeadline": true,
+      "missingDeadlineDidNotExtend": true,
+      "expiredGraceRejected": true
+    },
+    {
+      "name": "uncertain cancellation recovery exposes original intent only to its current session",
+      "passed": true,
+      "originalRequestRecovered": true,
+      "newSessionCannotReuseIntent": true
+    },
+    {
+      "name": "two last-seat checkout reservations serialize without overselling capacity",
+      "passed": true,
+      "distinctBackendPids": [
+        17092,
+        29052
+      ],
+      "blockingPids": [
+        17092
+      ]
+    },
+    {
+      "name": "refund and replacement checkout serialize without allowing a second renewable mandate",
+      "passed": true,
+      "distinctBackendPids": [
+        54848,
+        52704
+      ],
+      "blockingPids": [
+        54848
+      ]
+    },
+    {
+      "name": "refunded consumed checkout cannot resume through its original request or status",
+      "passed": true,
+      "consumedOriginalRejected": true,
+      "checkoutRecoveryHidden": true,
+      "cancellationStillVisible": true
+    },
+    {
+      "name": "confirmed refunded cancellation serializes before deliberate replacement without restoring access",
+      "passed": true,
+      "distinctBackendPids": [
+        41724,
+        54640
+      ],
+      "blockingPids": [
+        41724
+      ]
+    },
+    {
+      "name": "safe pre-write cancellation retry grants one winner and ambiguous attempts never reacquire",
+      "passed": true,
+      "distinctBackendPids": [
+        30348,
+        50676
+      ],
+      "blockingPids": [
+        30348
+      ]
+    },
+    {
+      "name": "concurrent owned local quote retries retain one immutable price and fingerprint",
+      "passed": true,
+      "distinctBackendPids": [
+        49364,
+        41640
+      ],
+      "blockingPids": [
+        49364
+      ]
+    },
+    {
+      "name": "concurrent same quoted checkout acquires one provider creation claim and original local amount",
+      "passed": true,
+      "distinctBackendPids": [
+        49332,
+        18672
+      ],
+      "blockingPids": [
+        49332
+      ]
+    },
+    {
+      "name": "renewal and conflicting currency delivery serialize without converting or duplicating paid proof",
+      "passed": true,
+      "distinctBackendPids": [
+        29012,
+        55756
+      ],
+      "blockingPids": [
+        29012
+      ]
+    },
+    {
+      "name": "localized refund remains revoked after concurrent later activation with original currency receipt",
+      "passed": true,
+      "distinctBackendPids": [
+        58280,
+        33844
+      ],
+      "blockingPids": [
+        58280
+      ]
+    },
+    {
+      "name": "concurrent exact provider accounting retries preserve one original non-granting evidence tuple",
+      "passed": true,
+      "distinctBackendPids": [
+        21744,
+        57776
+      ],
+      "blockingPids": [
+        21744
+      ]
+    },
+    {
+      "name": "conflicting provider accounting snapshot waits then cannot rewrite the original payment",
+      "passed": true,
+      "distinctBackendPids": [
+        57308,
+        6388
+      ],
+      "blockingPids": [
+        57308
+      ]
+    },
+    {
+      "name": "accounting evidence serializes before exact local paid proof and cannot grant access by itself",
+      "passed": true,
+      "distinctBackendPids": [
+        52256,
+        43756
+      ],
+      "blockingPids": [
+        52256
+      ]
+    },
+    {
+      "name": "later accounting revaluation appends without repricing earlier payment or blocking its refund",
+      "passed": true,
+      "accountingAnchors": 2,
+      "earlierAnchorUnchanged": true,
+      "customerPriceUnchanged": true,
+      "oldPaymentRefundRevoked": true
+    }
+  ],
+  "limitations": [
+    "Native PostgreSQL sessions execute actual migrations; auth.users/auth.uid, unrelated pack columns and Storage tables use isolated fixtures. No worker, provider, document rendering or export runs here.",
+    "No hosted Supabase, PostgREST, real authentication or production candidate data is exercised.",
+    "The vendor repository publishes the ZIP digest; no detached publisher signature was located."
+  ],
+  "archiveVerifiedAt": "2026-10-18T10:24:11.640Z",
+  "extraction": {
+    "entries": 22033,
+    "extracted": 3016,
+    "expandedBytes": 1002085601
+  },
+  "harnessSha256": "330b6881e645995a072c32173f89cc67248c95307bb834596fc99ad83d3e8850",
+  "migration": {
+    "name": "20261018101948_job_loop_provider_accounting.sql",
+    "sha256": "3dc4a02f4a1491283db4b3dd09bdb34797df04c4554e006071fadf49066b89d8"
+  },
+  "casesSha256": "4e42207f5cc8ce968d10b2eb06ef5b819c3c08e8602b1020a2705b193c406b2e",
+  "version": "postgres (PostgreSQL) 17.11",
+  "productMigrations": [
+    {
+      "name": "20261017122000_job_loop_dodo_entitlements.sql",
+      "sha256": "5d53274698adc2c45feaf119c346a29c8aa1415a437fcc21ae59f8191420f132"
+    },
+    {
+      "name": "20261017130000_job_loop_variant_execution.sql",
+      "sha256": "d7c6dc60d83d1de4a77aba5e0c2b64d09bd64673cf379bbb69fd663298eca3bc"
+    },
+    {
+      "name": "20261017131000_job_loop_recurring_product.sql",
+      "sha256": "f4eb083320c9b9a64101293b9b35d67515490f2b5cfd9625b002af86748ce88f"
+    }
+  ],
+  "subscriptionMigration": {
+    "name": "20261018073501_job_loop_subscription_lifecycle.sql",
+    "sha256": "7b3294149ba3b62d2b7274c0d939be47314ab8c3d261e6d77839625acc8386af"
+  },
+  "refundMigration": {
+    "name": "20261018091955_job_loop_refund_renewal_safety.sql",
+    "sha256": "fb8f165f6690a3a9260d877842cc57b120dbc1405b0c2cec1944e59ce13f2643"
+  },
+  "refundCasesSha256": "96d19ae97f96498043375afd98e6daa060da7ac2dcdb12e240165c47ebc0d82d",
+  "localizedMigration": {
+    "name": "20261018095409_job_loop_localized_price_quotes.sql",
+    "sha256": "e219b605684eaec209f1cc8f50e7e5957138c1111fff341f6430608e20e7557c"
+  },
+  "localizedCasesSha256": "0608421abe46e9654229affc5381bfadae09f3a3503dbff8272d2791331c7953",
+  "accountingCasesSha256": "1c5fe1a60008bb39ca99f9943aff68dedebb6597a773cf2aa375bdc88f68aee8",
+  "executedSchemaSha256": "7525f7fff38b2619dc3f50f64c18c571d0f0de642e88fe669359d163e5e90767",
+  "backendPids": [
+    57312,
+    54560,
+    32116,
+    20448,
+    57792,
+    25596,
+    58304,
+    12772,
+    17092,
+    29052,
+    54848,
+    52704,
+    22344,
+    41724,
+    54640,
+    30348,
+    50676,
+    49364,
+    41640,
+    49332,
+    18672,
+    29012,
+    55756,
+    58280,
+    33844,
+    21744,
+    57776,
+    57308,
+    6388,
+    52256,
+    43756
+  ],
+  "passed": true,
+  "clusterStopped": true,
+  "finishedAt": "2026-10-18T10:24:29.980Z",
+  "sourceReceiptSha256": "0ead976b220488d7804f7b0bcc8a78c3757631435ed6cfd5fe0b12ccd32aa053",
+  "sanitization": {
+    "removed": [
+      "absolute fixture root",
+      "ephemeral server port",
+      "absolute data directory"
+    ],
+    "candidateRecords": "isolated created fixtures only; no candidate data or credentials included",
+    "scope": "Native isolated SQL concurrency, not hosted provider acceptance"
+  }
+}

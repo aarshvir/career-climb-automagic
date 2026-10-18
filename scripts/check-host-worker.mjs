@@ -65,14 +65,14 @@ for(const page of publicRender.pages){
   assert.equal(response.headers.get('X-Robots-Tag'),null);
   if(page.path==='/') assert.ok(!/href="\/check\?audience=/.test(html),'Examples must not select a persona for a neutral visitor.');
   if(page.path==='/pricing') {
-    assert.ok(html.includes('Job Loop from $29 a month: your job search on a schedule. CV Check is free to start, with optional one-time passes.'));
+    assert.ok(html.includes('Choose your Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.'));
     // React inserts this exact empty comment between adjacent text nodes ($ and price).
     // Normalize only that separator; require each price inside its actual visible card.
     const pricingHtml = html.replaceAll('<!-- -->', '');
     for(const price of [9,19,39])assert.ok(pricingHtml.includes(`<p class="product-price">$${price}<span>One-time`),'The public offer must show each one-time pass price in its card.');
     assert.ok(!/\$15|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable or legacy purchases.');
-    for (const text of ['Job Loop monthly plans', 'billed every month until you cancel', 'No trial or subscription starts automatically', 'USD / month', 'tax is included']) {
-      assert.ok(html.includes(text), `Pricing must explain the actual monthly billing contract: ${text}`);
+    for (const text of ['Job Loop monthly plans', 'billed every month until you cancel', 'No trial or subscription starts automatically', 'USD / month', 'Tax is included in the quoted monthly total', 'Existing subscriptions keep their original price and currency', 'Billing country or region', 'Payment currency']) {
+      assert.ok(pricingHtml.includes(text), `Pricing must explain the actual monthly billing contract: ${text}`);
     }
     for (const price of [29, 59, 99]) {
       assert.ok(pricingHtml.includes(`<p class="product-price">$${price}<span>USD / month</span></p>`), `Monthly card must display $${price} USD per month.`);
@@ -80,7 +80,8 @@ for(const page of publicRender.pages){
     assert.ok(!/<form\b/i.test(html), 'The public pricing page must not collect purchase details.');
     const monthlySection = html.match(/<section\b[^>]*aria-labelledby="loop-monthly-plans-title"[^>]*>([\s\S]*?)<\/section>/)?.[1];
     assert.ok(monthlySection, 'Monthly plans must remain in their own visible section.');
-    for (const plan of ['weekly','active','daily']) assert.ok(monthlySection.includes(`/auth?next=%2Fpricing%3FloopPlan%3D${plan}`), 'Signed-out monthly choices must return through an account to the exact selected plan.');
+    for (const plan of ['weekly','active','daily']) assert.ok(monthlySection.includes(`/auth?next=%2Fpricing%3FloopPlan%3D${plan}%26country%3DUS%26currency%3DUSD`), 'Signed-out monthly choices must retain the exact selected plan, country and currency through account entry.');
+    for (const currency of ['USD','EUR','GBP','INR','AED','CAD','AUD','SGD','JPY']) assert.ok(monthlySection.includes(`value="${currency}"`), `The public currency selector must include ${currency}.`);
     assert.ok(!/(?:href|action)="[^"]*(?:checkout\.dodopayments|test\.checkout\.dodopayments|checkout\.paddle|buy\.stripe)/i.test(monthlySection), 'Public HTML must not bypass authenticated billing with a provider checkout link.');
   }
   if(page.path==='/check') {

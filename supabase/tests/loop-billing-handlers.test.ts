@@ -5,16 +5,19 @@ import { webcrypto } from 'node:crypto';
 import { afterAll, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 import { dodoEnvironment, dodoEnvelope, dodoSign } from './dodo-fixtures';
 import { LOOP_BILLING_PRODUCT } from '../functions/_shared/loop-billing.ts';
+import { LOOP_LOCAL_PRICE_CATALOG_VERSION } from '../functions/_shared/loop-local-prices.ts';
+import { parseLoopQuote, storedLoopPrice, verifyLoopPricePreview, verifyLoopPriceRule } from '../functions/_shared/loop-billing-pricing.ts';
+import { loopBillingConfiguration } from '../functions/_shared/loop-billing.ts';
 type Handler=(req:Request)=>Promise<Response>;
 const owner='11111111-1111-4111-8111-111111111111',request='22222222-2222-4222-8222-222222222222',session='33333333-3333-4333-8333-333333333333';
 const sub='sub_FixtureLoop',checkout='cks_FixtureLoop',payment='pay_FixtureLoop',customer='cus_FixtureLoop';
 const token=`header.${Buffer.from(JSON.stringify({session_id:session})).toString('base64url')}.signature`;
-const state=vi.hoisted(()=>({rpcCalls:[] as {name:string,args:Record<string,unknown>}[],sessionValid:true,cancelled:false}));
+const state=vi.hoisted(()=>({rpcCalls:[] as {name:string,args:Record<string,unknown>}[],sessionValid:true,cancelled:false,replies:{} as Record<string,unknown>,providerReplies:{} as Record<string,unknown>}));
 vi.mock('https://esm.sh/@supabase/supabase-js@2.57.4',()=>({createClient:()=>({auth:{getUser:async(value:string)=>({data:{user:value.startsWith('header.')?{id:'11111111-1111-4111-8111-111111111111'}:null},error:null})},rpc:async(name:string,args:Record<string,unknown>)=>{
   state.rpcCalls.push({name,args});
   if(!state.sessionValid && name!=='job_loop_billing_event'&&name!=='job_loop_billing_order'&&name!=='job_loop_billing_apply_event')return{data:null,error:{message:'LOOP_BILLING_SESSION'}};
   const responses:Record<string,unknown>={job_loop_billing_event:{duplicate:false},job_loop_billing_status:{generation:0,subscription:null,checkout:null,entitlement:null},job_loop_billing_checkout_claim:{state:'creating',creationClaimAcquired:true},job_loop_billing_checkout_finalize:{},job_loop_billing_cancel_claim:{creationClaimAcquired:true},job_loop_billing_cancel_finalize:{status:'confirmed'},job_loop_billing_order:{user_id:'11111111-1111-4111-8111-111111111111',request_id:'22222222-2222-4222-8222-222222222222',generation:0,session_id:'cks_FixtureLoop',plan:'weekly',product_id:'pdt_FixtureWeekly'},job_loop_billing_apply_event:{duplicate:false}};
-  return{data:responses[name],error:null};
+  return{data:state.replies[name]??responses[name],error:null};
 }})}));
 let env:Record<string,string|undefined>,handlers:Handler[]=[];
 const fetches:{url:string,method:string,body:Record<string,unknown>|null}[]=[];
@@ -28,7 +31,10 @@ beforeAll(async()=>{
     const url=new URL(input instanceof Request?input.url:String(input));const method=init?.method??'GET';
     fetches.push({url:url.href,method,body:init?.body?JSON.parse(String(init.body)):null});
     if(url.origin!=='https://test.dodopayments.com')throw new Error('Unexpected real network blocked');
-    if(url.pathname==='/products/pdt_FixtureWeekly')return Response.json({product_id:'pdt_FixtureWeekly',is_recurring:true,price:{type:'recurring_price',price:2900,currency:'USD',payment_frequency_count:1,payment_frequency_interval:'Month',subscription_period_count:20,subscription_period_interval:'Year',trial_period_days:0,tax_inclusive:true}});
+    if(state.providerReplies[url.pathname])return Response.json(state.providerReplies[url.pathname]);
+    if(url.pathname==='/products/pdt_FixtureWeekly')return Response.json(localProduct());
+    if(url.pathname==='/products/pdt_FixtureWeekly/localized-prices')return Response.json(localRules());
+    if(url.pathname==='/checkouts/preview')return Response.json(localPreview());
     if(url.pathname==='/checkouts')return Response.json({session_id:checkout,checkout_url:`https://test.checkout.dodopayments.com/session/${checkout}`});
     if(url.pathname===`/checkouts/${checkout}`)return Response.json({id:checkout,payment_id:payment});
     if(url.pathname===`/payments/${payment}`)return Response.json(payFixture());
@@ -39,7 +45,7 @@ beforeAll(async()=>{
 });
 beforeEach(()=>{
   env={...dodoEnvironment(),JOBVANCE_LOOP_BILLING_ENABLED:'true',DODO_PRODUCT_LOOP_WEEKLY:'pdt_FixtureWeekly',DODO_PRODUCT_LOOP_ACTIVE:'pdt_FixtureActive',DODO_PRODUCT_LOOP_DAILY:'pdt_FixtureDaily',SUPABASE_URL:'https://supabase.fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'fixture-never-real'};
-  fetches.length=0;state.rpcCalls.length=0;state.sessionValid=true;state.cancelled=false;
+  fetches.length=0;state.rpcCalls.length=0;state.sessionValid=true;state.cancelled=false;state.replies={};state.providerReplies={};
 });
 afterAll(()=>vi.unstubAllGlobals());
 function req(body:unknown,bearer:string|null=token){return new Request('https://edge.fixture.invalid',{method:'POST',headers:{'Content-Type':'application/json',...(bearer?{Authorization:`Bearer ${bearer}`}:{})},body:JSON.stringify(body)});}
@@ -69,4 +75,44 @@ it('actual signed recurring payment takes new route and passes verified paid cyc
 it('actual cancellation PATCH targets paid-period-end only and requires exact original identity',async()=>{
   const response=await handlers[0](req({action:'cancel',requestId:request,expectedGeneration:0,expectedSubscriptionId:sub,expectedVersion:1,consent:true}));expect(response.status).toBe(200);expect(await response.json()).toMatchObject({status:'confirmed',subscriptionId:sub});
   expect(fetches.filter(call=>call.method==='PATCH')).toEqual([{url:`https://test.dodopayments.com/subscriptions/${sub}`,method:'PATCH',body:{cancel_at_next_billing_date:true}}]);
+});
+const localQuoteId='44444444-4444-4444-8444-444444444444',localRequest='55555555-5555-4555-8555-555555555555';
+function localProduct(){return{product_id:'pdt_FixtureWeekly',is_recurring:true,pricing_mode:'by_currency',price:{type:'recurring_price',price:2900,currency:'USD',payment_frequency_count:1,payment_frequency_interval:'Month',subscription_period_count:20,subscription_period_interval:'Year',trial_period_days:0,tax_inclusive:true}};}
+function localRules(){return{items:[{id:'lcp_FixtureINR',product_id:'pdt_FixtureWeekly',mode:'by_currency',currency:'INR',amount:279900,updated_at:'2026-10-18T08:00:00Z'}]};}
+function localPreview(){return{billing_country:'IN',currency:'INR',is_byop:false,payment_method_required:true,total_price:279900,current_breakup:{discount:0,total_amount:279900,tax:0},recurring_breakup:{discount:0,total_amount:279900,tax:0},product_cart:[{product_id:'pdt_FixtureWeekly',quantity:1,currency:'INR',is_subscription:true,is_usage_based:false,tax_inclusive:true,discount_amount:0,meters:[],addons:[]}],subscriptions:[{product_id:'pdt_FixtureWeekly',amount_due_now:279900,recurring_amount:279900,trial_period_days:0}]};}
+async function readyLocalQuote(){
+  const raw={quoteId:localQuoteId,requestId:localRequest,generation:0,mode:'test',productId:'pdt_FixtureWeekly',plan:'weekly',country:'IN',currency:'INR',amountMinor:279900,exponent:2,catalogVersion:LOOP_LOCAL_PRICE_CATALOG_VERSION,taxInclusive:true,interval:'month',initialAmountMinor:279900,recurringAmountMinor:279900,expiresAt:new Date(Date.now()+600000).toISOString()};
+  const pricing=storedLoopPrice({pricing:raw},'weekly'),config=loopBillingConfiguration(key=>env[key])!,rule=await verifyLoopPriceRule(localProduct(),localRules(),config,pricing),previewHash=await verifyLoopPricePreview(localPreview(),pricing);
+  return parseLoopQuote({...raw,...rule,previewHash});
+}
+it('actual local quote endpoint verifies auth, exact provider rule and a non-purchasing preview before issuing receipt',async()=>{
+  const q=await readyLocalQuote();state.replies.job_loop_billing_quote_candidate={quote:null,catalog:{...q}};state.replies.job_loop_billing_quote_issue=q;
+  const response=await handlers[0](req({action:'quote',requestId:localRequest,expectedGeneration:0,plan:'weekly',country:'IN',currency:'INR'}));expect(response.status).toBe(200);
+  expect(await response.json()).toMatchObject({quoteId:localQuoteId,requestId:localRequest,currency:'INR',amountMinor:279900,exponent:2});
+  expect(fetches.map(call=>new URL(call.url).pathname)).toEqual(['/products/pdt_FixtureWeekly','/products/pdt_FixtureWeekly/localized-prices','/checkouts/preview']);
+  expect(fetches.some(call=>call.url==='https://test.dodopayments.com/checkouts')).toBe(false);expect(state.rpcCalls[0].args).toMatchObject({p_user:owner,p_auth_session:session});
+});
+it('actual local checkout sends original quote metadata, billing country and currency without browser price authority',async()=>{
+  const q=await readyLocalQuote();state.replies.job_loop_billing_quote_read=q;state.replies.job_loop_billing_checkout_claim_v2={state:'creating',creationClaimAcquired:true,pricing:q,product_id:'pdt_FixtureWeekly'};
+  const response=await handlers[0](req({action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',quoteId:localQuoteId,consent:true}));expect(response.status).toBe(200);
+  expect(await response.json()).toMatchObject({pricing:{quoteId:localQuoteId,currency:'INR',amountMinor:279900}});
+  expect(fetches.find(call=>call.url==='https://test.dodopayments.com/checkouts')?.body).toMatchObject({billing_currency:'INR',billing_address:{country:'IN'},metadata:{...metadata,quote_id:localQuoteId},feature_flags:{allow_currency_selection:false,allow_customer_editing_country:false}});
+});
+it('actual local quote rejects a revoked auth session before any provider call',async()=>{
+  state.sessionValid=false;const response=await handlers[0](req({action:'quote',requestId:localRequest,expectedGeneration:0,plan:'weekly',country:'IN',currency:'INR'}));expect(response.status).toBe(401);expect(fetches).toHaveLength(0);
+});
+it('actual signed local refund reaches the Loop route and never the independent USD-only CV-pass grant',async()=>{
+  const q=await readyLocalQuote();state.replies.job_loop_billing_order={user_id:owner,request_id:request,generation:0,session_id:checkout,plan:'weekly',product_id:'pdt_FixtureWeekly',pricing:q};state.replies.job_loop_billing_apply_event_v2={duplicate:false};
+  state.providerReplies[`/subscriptions/${sub}`]={...subFixture(),currency:'INR',recurring_pre_tax_amount:250000,metadata:{...metadata,quote_id:localQuoteId}};
+  state.providerReplies[`/payments/${payment}`]={...payFixture(),currency:'INR',total_amount:279900,tax:29900};
+  const response=await handlers[1](signed('refund.succeeded',{payload_type:'Refund',refund_id:'ref_LocalActual',payment_id:payment,status:'succeeded',amount:279900,currency:'INR'}));expect(response.status).toBe(200);
+  expect(state.rpcCalls.find(call=>call.name==='job_loop_billing_apply_event_v2')?.args).toMatchObject({p_currency:'INR',p_paid_amount:279900,p_quote:localQuoteId,p_revoked:true});expect(state.rpcCalls.some(call=>call.name==='jobvance_apply_payment_event')).toBe(false);
+});
+it('actual signed local payment keeps customer INR money distinct from API USD accounting and net settlement',async()=>{
+  const q=await readyLocalQuote();state.replies.job_loop_billing_order={user_id:owner,request_id:request,generation:0,session_id:checkout,plan:'weekly',product_id:'pdt_FixtureWeekly',pricing:q,providerAccounting:[]};state.replies.job_loop_billing_apply_event_v2={duplicate:false};state.replies.job_loop_billing_accounting_bind={recorded:true};
+  state.providerReplies[`/subscriptions/${sub}`]={...subFixture(),currency:'USD',recurring_pre_tax_amount:2947,metadata:{...metadata,quote_id:localQuoteId}};
+  const paid={...payFixture(),currency:'INR',total_amount:279900,tax:42697,settlement_currency:'USD',settlement_amount:2834,settlement_tax:432};state.providerReplies[`/payments/${payment}`]=paid;
+  const response=await handlers[1](signed('payment.succeeded',paid));expect(response.status).toBe(200);
+  expect(state.rpcCalls.find(call=>call.name==='job_loop_billing_accounting_bind')?.args).toMatchObject({p_payment:payment,p_currency:'INR',p_amount:279900,p_accounting_currency:'USD',p_accounting_amount:2947,p_settlement_currency:'USD',p_settlement_amount:2834,p_settlement_tax:432});
+  expect(state.rpcCalls.find(call=>call.name==='job_loop_billing_apply_event_v2')?.args).toMatchObject({p_currency:'INR',p_paid_amount:279900,p_payment:payment});
 });

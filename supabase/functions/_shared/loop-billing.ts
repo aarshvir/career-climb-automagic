@@ -1,5 +1,6 @@
 import { ApiError, billingConfiguration, DODO_PRODUCT_ID, objectInput, uuid, type DodoBillingConfig } from './core.ts';
-import { DODO_PAYMENT_ID, DODO_SESSION_ID, validateDodoCheckoutSession } from './dodo.ts';
+import { DODO_PAYMENT_ID, DODO_REFUND_ID, DODO_SESSION_ID, validateDodoCheckoutSession } from './dodo.ts';
+import { isLoopLocalCurrency } from './loop-local-prices.ts';
 
 export const LOOP_BILLING_PRODUCT = 'jobvance_loop_monthly_v1';
 export const LOOP_BILLING_PLANS = {
@@ -37,7 +38,7 @@ export function loopBillingConfiguration(get: (key: string) => string | undefine
 }
 export function validateLoopBillingProduct(value: unknown, config: LoopBillingConfig, plan: LoopBillingPlan): void {
   const product = obj(value), price = obj(product.price);
-  if (product.product_id !== config.loopProducts[plan] || product.is_recurring !== true || !absent(product.pricing_mode) || price.type !== 'recurring_price' ||
+  if (product.product_id !== config.loopProducts[plan] || product.is_recurring !== true || !(absent(product.pricing_mode) || product.pricing_mode === 'by_currency') || price.type !== 'recurring_price' ||
     price.currency !== 'USD' || price.price !== LOOP_BILLING_PLANS[plan].amount || price.payment_frequency_count !== 1 || price.payment_frequency_interval !== 'Month' ||
     price.subscription_period_count !== 20 || price.subscription_period_interval !== 'Year' || !(absent(price.trial_period_days) || price.trial_period_days === 0) ||
     !(absent(price.discount) || price.discount === 0) || !(absent(price.discount_bps) || price.discount_bps === 0) || price.purchasing_power_parity === true || price.pay_what_you_want === true ||
@@ -52,37 +53,55 @@ export function loopCheckoutBody(config: LoopBillingConfig, userId: string, requ
 export interface LoopSubscription {
   subscriptionId: string; userId: string; requestId: string; generation: number; plan: LoopBillingPlan; productId: string; customerId: string;
   status: typeof LOOP_SUBSCRIPTION_STATUSES[number]; periodStart: string; validUntil: string; cancelAtPeriodEnd: boolean; taxInclusive: boolean;
+  currency: string; amountMinor: number; quoteId?: string;
 }
+/** This authority must come from the original server-owned order, never from a
+ * browser price or the current merchant catalogue. */
+export interface LoopBillingPriceAuthority { productId: string; currency: string; amountMinor: number; quoteId?: string }
+export interface LoopProviderAccountingAuthority { currency: 'USD'; amountMinor: number }
 export function loopMetadata(value: unknown) {
   const fields = obj(value);
   if (fields.product !== LOOP_BILLING_PRODUCT || typeof fields.generation !== 'string' || !/^\d{1,12}$/.test(fields.generation)) throw invalid();
   const generation = Number(fields.generation);
   if (!Number.isSafeInteger(generation) || generation < 0) throw invalid();
-  return { userId: uuid(fields.user_id, 'Account'), requestId: uuid(fields.request_id, 'Checkout request'), generation, plan: loopBillingPlan(fields.plan) };
+  return { userId: uuid(fields.user_id, 'Account'), requestId: uuid(fields.request_id, 'Checkout request'), generation, plan: loopBillingPlan(fields.plan),
+    ...(!absent(fields.quote_id) ? { quoteId: uuid(fields.quote_id, 'Price quote') } : {}) };
 }
 export function isLoopBillingMetadata(value: unknown): boolean { return !!value && typeof value === 'object' && !Array.isArray(value) && (value as Record<string, unknown>).product === LOOP_BILLING_PRODUCT; }
-export function validateLoopSubscription(value: unknown, config: LoopBillingConfig): LoopSubscription {
+export function validateLoopSubscription(value: unknown, config: LoopBillingConfig, originalPrice?: LoopBillingPriceAuthority, accounting?: LoopProviderAccountingAuthority): LoopSubscription {
   const sub = obj(value), identity = loopMetadata(sub.metadata), customer = obj(sub.customer);
-  if (typeof sub.subscription_id !== 'string' || !LOOP_SUBSCRIPTION_ID.test(sub.subscription_id) || sub.product_id !== config.loopProducts[identity.plan] ||
-    sub.quantity !== 1 || sub.currency !== 'USD' || !Number.isSafeInteger(sub.recurring_pre_tax_amount) || (sub.recurring_pre_tax_amount as number) < 1 ||
-    (sub.tax_inclusive === true ? (sub.recurring_pre_tax_amount as number) > LOOP_BILLING_PLANS[identity.plan].amount : sub.recurring_pre_tax_amount !== LOOP_BILLING_PLANS[identity.plan].amount) || sub.payment_frequency_count !== 1 ||
+  const currency = originalPrice?.currency ?? 'USD', amountMinor = originalPrice?.amountMinor ?? LOOP_BILLING_PLANS[identity.plan].amount;
+  const accountingRepresentation = !!originalPrice?.quoteId && currency !== 'USD' && sub.currency === 'USD' && accounting?.currency === 'USD' &&
+    Number.isSafeInteger(accounting.amountMinor) && accounting.amountMinor > 0 && accounting.amountMinor <= 1000000000 && sub.recurring_pre_tax_amount === accounting.amountMinor;
+  if (!Number.isSafeInteger(amountMinor) || amountMinor < 1 || amountMinor > 1000000000 || !/^[A-Z]{3}$/.test(currency) || identity.quoteId !== originalPrice?.quoteId ||
+    typeof sub.subscription_id !== 'string' || !LOOP_SUBSCRIPTION_ID.test(sub.subscription_id) || sub.product_id !== (originalPrice?.productId ?? config.loopProducts[identity.plan]) ||
+    sub.quantity !== 1 || !accountingRepresentation && sub.currency !== currency || !Number.isSafeInteger(sub.recurring_pre_tax_amount) || (sub.recurring_pre_tax_amount as number) < 1 ||
+    !accountingRepresentation && (sub.tax_inclusive === true ? (sub.recurring_pre_tax_amount as number) > amountMinor : sub.recurring_pre_tax_amount !== amountMinor) || sub.payment_frequency_count !== 1 ||
     sub.payment_frequency_interval !== 'Month' || sub.subscription_period_count !== 20 || sub.subscription_period_interval !== 'Year' || sub.trial_period_days !== 0 || sub.on_demand !== false ||
     !noDiscount(sub) || sub.tax_inclusive !== true || typeof sub.cancel_at_next_billing_date !== 'boolean' ||
     !LOOP_SUBSCRIPTION_STATUSES.includes(sub.status as never) || typeof customer.customer_id !== 'string' || !/^cus_[A-Za-z0-9_-]{1,100}$/.test(customer.customer_id)) throw invalid();
   const periodStart = date(sub.previous_billing_date), validUntil = date(sub.next_billing_date);
   if (!(Date.parse(validUntil) > Date.parse(periodStart)) || Date.parse(validUntil) - Date.parse(periodStart) > 35 * 86400000) throw invalid();
   return { ...identity, subscriptionId: sub.subscription_id, productId: sub.product_id as string, customerId: customer.customer_id,
-    status: sub.status as LoopSubscription['status'], periodStart, validUntil, cancelAtPeriodEnd: sub.cancel_at_next_billing_date, taxInclusive: sub.tax_inclusive };
+    status: sub.status as LoopSubscription['status'], periodStart, validUntil, cancelAtPeriodEnd: sub.cancel_at_next_billing_date, taxInclusive: sub.tax_inclusive, currency, amountMinor };
+}
+/** Stopping an already-owned mandate cannot grant access or change its price.
+ * The caller must first prove the exact original checkout/sub/customer binding.
+ * A changed accounting snapshot must not prevent that customer stopping charges. */
+export function validateLoopSubscriptionToStop(value: unknown, config: LoopBillingConfig, originalPrice: LoopBillingPriceAuthority): LoopSubscription {
+  const raw=obj(value);
+  const accounting=originalPrice.quoteId&&originalPrice.currency!=='USD'&&raw.currency==='USD'&&Number.isSafeInteger(raw.recurring_pre_tax_amount)?{currency:'USD' as const,amountMinor:raw.recurring_pre_tax_amount as number}:undefined;
+  return validateLoopSubscription(raw,config,originalPrice,accounting);
 }
 export interface LoopPaidPeriod { paymentId: string; sessionId: string | null; periodStart: string; validUntil: string; amount: number; revoked: boolean }
 export function validateLoopPaidPeriod(value: unknown, sub: LoopSubscription): LoopPaidPeriod {
   const payment = obj(value), customer = obj(payment.customer);
   const total = payment.total_amount, tax = payment.tax ?? 0;
   const ids = payment.subscription_ids;
-  if (typeof payment.payment_id !== 'string' || !DODO_PAYMENT_ID.test(payment.payment_id) || payment.status !== 'succeeded' || payment.currency !== 'USD' ||
+  if (typeof payment.payment_id !== 'string' || !DODO_PAYMENT_ID.test(payment.payment_id) || payment.status !== 'succeeded' || payment.currency !== sub.currency ||
     payment.subscription_id !== sub.subscriptionId || (!absent(ids) && (!Array.isArray(ids) || ids.length !== 1 || ids[0] !== sub.subscriptionId)) || payment.is_multi_subscription === true || payment.is_update_payment_method === true ||
     customer.customer_id !== sub.customerId || !noDiscount(payment) || !Number.isSafeInteger(total) || !Number.isSafeInteger(tax) || (tax as number) < 0 || (tax as number) > (total as number) ||
-    (sub.taxInclusive ? total !== LOOP_BILLING_PLANS[sub.plan].amount : (total as number) - (tax as number) !== LOOP_BILLING_PLANS[sub.plan].amount) || !Array.isArray(payment.service_periods) || payment.service_periods.length !== 1) throw invalid('This charge does not prove a paid Job Loop month.');
+    (sub.taxInclusive ? total !== sub.amountMinor : (total as number) - (tax as number) !== sub.amountMinor) || !Array.isArray(payment.service_periods) || payment.service_periods.length !== 1) throw invalid('This charge does not prove a paid Job Loop month.');
   const period = obj(payment.service_periods[0]);
   if (period.subscription_id !== sub.subscriptionId) throw invalid();
   const periodStart = date(period.starts_at), validUntil = date(period.ends_at);
@@ -93,16 +112,33 @@ export function validateLoopPaidPeriod(value: unknown, sub: LoopSubscription): L
   const revoked = (typeof payment.refund_status === 'string' && payment.refund_status !== 'none') || (Array.isArray(refunds) && refunds.some(item => obj(item).status === 'succeeded'));
   return { paymentId: payment.payment_id, sessionId, periodStart, validUntil, amount: total as number, revoked };
 }
+/** Loop refunds may use an owned localized currency. The caller must separately
+ * compare this signed currency to the API-read original payment; CV passes keep
+ * their independent USD-only refund validator. */
+export function validateLoopRefund(value: unknown) {
+  const refund=obj(value);
+  if(typeof refund.refund_id!=='string'||!DODO_REFUND_ID.test(refund.refund_id)||typeof refund.payment_id!=='string'||!DODO_PAYMENT_ID.test(refund.payment_id)||refund.status!=='succeeded'||
+    !Number.isSafeInteger(refund.amount)||(refund.amount as number)<1||(refund.amount as number)>1000000000||!absent(refund.currency)&&!isLoopLocalCurrency(refund.currency))throw new ApiError(400,'INVALID_REFUND','The refund context could not be verified.');
+  return{refundId:refund.refund_id,paymentId:refund.payment_id,amount:refund.amount as number,currency:absent(refund.currency)?null:refund.currency as string};
+}
 export function captureLoopBillingInput(value: unknown) {
   const input = objectInput(value);
-  const allowed = input.action === 'status' ? ['action'] : input.action === 'checkout' ? ['action','requestId','plan','expectedGeneration','consent'] : ['action','requestId','expectedSubscriptionId','expectedVersion','expectedGeneration','consent'];
-  if (Object.keys(input).some(key => !allowed.includes(key)) || !['status','checkout','cancel'].includes(String(input.action))) throw new ApiError(400, 'INVALID_INPUT', 'Choose a Job Loop billing action.');
-  if (input.action === 'status') return { action: 'status' as const };
+  const allowed = input.action === 'status' ? ['action','contractVersion'] : input.action === 'quote' ? ['action','requestId','plan','expectedGeneration','country','currency'] : input.action === 'checkout' ? ['action','requestId','plan','expectedGeneration','consent','quoteId'] : ['action','requestId','expectedSubscriptionId','expectedVersion','expectedGeneration','consent','contractVersion'];
+  if (Object.keys(input).some(key => !allowed.includes(key)) || !['status','quote','checkout','cancel'].includes(String(input.action))) throw new ApiError(400, 'INVALID_INPUT', 'Choose a Job Loop billing action.');
+  if (input.action === 'status') {
+    if (!absent(input.contractVersion) && input.contractVersion !== 2) throw new ApiError(400,'INVALID_INPUT','Refresh the billing page.');
+    return { action: 'status' as const, contractVersion: input.contractVersion === 2 ? 2 : 1 };
+  }
+  if (input.action === 'quote') {
+    if (!Number.isSafeInteger(input.expectedGeneration) || (input.expectedGeneration as number) < 0 || typeof input.country !== 'string' || !/^[A-Z]{2}$/.test(input.country) || typeof input.currency !== 'string' || !/^[A-Z]{3}$/.test(input.currency)) throw new ApiError(400,'INVALID_INPUT','Choose your billing country and currency.');
+    return { action:'quote' as const, requestId:uuid(input.requestId,'Price request'), generation:input.expectedGeneration as number, plan:loopBillingPlan(input.plan), country:input.country, currency:input.currency };
+  }
   if (input.consent !== true || !Number.isSafeInteger(input.expectedGeneration) || (input.expectedGeneration as number) < 0) throw new ApiError(400, 'LOOP_BILLING_CONSENT', 'Confirm this billing action for your current Job Loop.');
   const base = { requestId: uuid(input.requestId, 'Request'), generation: input.expectedGeneration as number };
-  if (input.action === 'checkout') return { ...base, action: 'checkout' as const, plan: loopBillingPlan(input.plan) };
+  if (input.action === 'checkout') return { ...base, action: 'checkout' as const, plan: loopBillingPlan(input.plan), ...(!absent(input.quoteId) ? { quoteId:uuid(input.quoteId,'Price quote') } : {}) };
   if (typeof input.expectedSubscriptionId !== 'string' || !LOOP_SUBSCRIPTION_ID.test(input.expectedSubscriptionId) || !Number.isSafeInteger(input.expectedVersion) || (input.expectedVersion as number) < 1) throw invalid('Refresh your subscription before cancelling.');
-  return { ...base, action: 'cancel' as const, subscriptionId: input.expectedSubscriptionId, version: input.expectedVersion as number };
+  if (!absent(input.contractVersion) && input.contractVersion !== 2) throw new ApiError(400,'INVALID_INPUT','Refresh the billing page.');
+  return { ...base, action: 'cancel' as const, subscriptionId: input.expectedSubscriptionId, version: input.expectedVersion as number, contractVersion:input.contractVersion === 2 ? 2 : 1 };
 }
 /** Decode only after auth.getUser verifies this token; SQL independently checks that session still exists. */
 export function verifiedAuthSession(req: Request): string {

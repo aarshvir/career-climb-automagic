@@ -6,4 +6,9 @@
 .loop-subscription-billing :is([aria-label="Current Job Loop subscription"],[aria-label="Confirm Job Loop purchase"]) p { margin-block:12px; line-height:1.8; }
 .loop-subscription-billing .product-button[aria-pressed="true"] { outline:2px solid var(--jl-blue); outline-offset:3px; }
 .loop-subscription-billing > div > .jl-button { margin:8px 12px 8px 0; }
+.loop-price-market { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:760px; margin-block:24px; }
+.loop-price-market label { display:grid; gap:8px; font-size:14px; font-weight:600; }
+.loop-price-market select { width:100%; min-width:0; min-height:46px; padding:10px; background:#fff; border:1px solid var(--product-line,#dce1e9); border-radius:7px; font:inherit; }
+.loop-price-market p { grid-column:1/-1; font-size:13px; line-height:1.7; }
 @media(max-width:580px) { .loop-subscription-billing [aria-label="Current Job Loop subscription"],.loop-subscription-billing [aria-label="Confirm Job Loop purchase"] { padding:18px; } .loop-subscription-billing .product-button { max-width:100%; } }
+@media(max-width:580px) { .loop-price-market {grid-template-columns:1fr;} .loop-price-market select {font-size:16px;} }

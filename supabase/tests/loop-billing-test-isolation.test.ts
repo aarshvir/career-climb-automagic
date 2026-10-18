@@ -11,18 +11,20 @@ const owner='11111111-1111-4111-8111-111111111111',other='44444444-4444-4444-844
 const sub='sub_IsolatedTest',checkout='cks_IsolatedTest',payment='pay_IsolatedTest';
 const token=`header.${Buffer.from(JSON.stringify({session_id:session})).toString('base64url')}.signature`;
 const liveSecret=`whsec_${randomBytes(32).toString('base64')}`;
-const state=vi.hoisted(()=>({user:'11111111-1111-4111-8111-111111111111',rpcCalls:[] as {name:string,args:Record<string,unknown>}[],validSession:true,cancelled:false}));
+const state=vi.hoisted(()=>({user:'11111111-1111-4111-8111-111111111111',rpcCalls:[] as {name:string,args:Record<string,unknown>}[],validSession:true,cancelled:false,pricing:null as Record<string,unknown>|null}));
 vi.mock('https://esm.sh/@supabase/supabase-js@2.57.4',()=>({createClient:()=>({auth:{getUser:async(value:string)=>({data:{user:value.startsWith('header.')?{id:state.user}:null},error:null})},rpc:async(name:string,args:Record<string,unknown>)=>{
   state.rpcCalls.push({name,args});
   if(!state.validSession && name==='job_loop_billing_status')return{data:null,error:{message:'LOOP_BILLING_SESSION_STALE'}};
   const result:Record<string,unknown>={job_loop_billing_event:{duplicate:false},job_loop_billing_checkout_claim:{state:'creating',creationClaimAcquired:true},job_loop_billing_checkout_finalize:{},job_loop_billing_checkout_fail:{},job_loop_billing_cancel_claim:{creationClaimAcquired:true},job_loop_billing_cancel_finalize:{status:'confirmed'},job_loop_billing_apply_event:{duplicate:false},job_loop_billing_status:{generation:0,subscription:null,checkout:null,entitlement:{active:true,plan:'daily',validUntil:'2026-11-18T08:00:00Z'}},job_loop_billing_order:{user_id:'11111111-1111-4111-8111-111111111111',request_id:'22222222-2222-4222-8222-222222222222',generation:0,session_id:'cks_IsolatedTest',plan:'weekly',product_id:'pdt_IsolatedWeekly'}};
+  if(name==='job_loop_billing_order'&&state.pricing)result[name]={...(result[name] as Record<string,unknown>),pricing:state.pricing};
+  if(name==='job_loop_billing_apply_event_v2')return{data:{duplicate:false},error:null};
   return{data:result[name],error:null};
 }})}));
 let env:Record<string,string|undefined>,handlers:Handler[]=[];
 const fetches:{url:string,method:string,body:Record<string,unknown>|null,key:string|null}[]=[];
-let metadata:Record<string,unknown>,providerOwner=owner,liveCheckout=false;
+let metadata:Record<string,unknown>,providerOwner=owner,liveCheckout=false,providerCurrency='USD';
 const subFixture=()=>({payload_type:'Subscription',subscription_id:sub,product_id:'pdt_IsolatedWeekly',quantity:1,currency:'USD',recurring_pre_tax_amount:2700,payment_frequency_count:1,payment_frequency_interval:'Month',subscription_period_count:20,subscription_period_interval:'Year',trial_period_days:0,on_demand:false,tax_inclusive:true,cancel_at_next_billing_date:state.cancelled,status:'active',previous_billing_date:'2026-10-18T08:00:00Z',next_billing_date:'2026-11-18T08:00:00Z',customer:{customer_id:'cus_IsolatedTest'},metadata:{...metadata,user_id:providerOwner}});
-const payFixture=()=>({payload_type:'Payment',payment_id:payment,checkout_session_id:checkout,status:'succeeded',currency:'USD',subscription_id:sub,subscription_ids:[sub],is_multi_subscription:false,is_update_payment_method:false,customer:{customer_id:'cus_IsolatedTest'},total_amount:2900,tax:200,metadata:{...metadata,user_id:providerOwner},service_periods:[{subscription_id:sub,starts_at:'2026-10-18T08:00:00Z',ends_at:'2026-11-18T08:00:00Z'}]});
+const payFixture=()=>({payload_type:'Payment',payment_id:payment,checkout_session_id:checkout,status:'succeeded',currency:providerCurrency,subscription_id:sub,subscription_ids:[sub],is_multi_subscription:false,is_update_payment_method:false,customer:{customer_id:'cus_IsolatedTest'},total_amount:providerCurrency==='USD'?2900:279900,tax:200,metadata:{...metadata,user_id:providerOwner},service_periods:[{subscription_id:sub,starts_at:'2026-10-18T08:00:00Z',ends_at:'2026-11-18T08:00:00Z'}]});
 function environment():Record<string,string|undefined>{return {
   // Aggressively enabled Live values must never supply the isolated test config.
   JOBVANCE_BILLING_ENABLED:'true',JOBVANCE_LOOP_BILLING_ENABLED:'true',JOBVANCE_BILLING_MODE:'live',JOBVANCE_PAYMENT_PROVIDER:'dodo',DODO_PAYMENTS_API_KEY:'dodo_live_DO_NOT_USE',DODO_PAYMENT_API_KEY:'dodo_live_ALIAS_DO_NOT_USE',DODO_PAYMENTS_WEBHOOK_KEY:liveSecret,DODO_PRODUCT_LOOP_WEEKLY:'pdt_LiveWeekly',DODO_PRODUCT_LOOP_ACTIVE:'pdt_LiveActive',DODO_PRODUCT_LOOP_DAILY:'pdt_LiveDaily',APP_URL:'https://live.fixture.invalid',
@@ -38,12 +40,12 @@ beforeAll(async()=>{
     if(url.pathname==='/checkouts')return Response.json({session_id:checkout,checkout_url:`https://${liveCheckout?'checkout':'test.checkout'}.dodopayments.com/session/${checkout}`});
     if(url.pathname===`/checkouts/${checkout}`)return Response.json({id:checkout,payment_id:payment});
     if(url.pathname===`/payments/${payment}`)return Response.json(payFixture());
-    if(url.pathname===`/subscriptions/${sub}`){if(method==='PATCH')state.cancelled=true;return Response.json(subFixture());}
+    if(url.pathname===`/subscriptions/${sub}`){if(method==='PATCH')state.cancelled=true;return Response.json({...subFixture(),currency:providerCurrency});}
     throw new Error('Unplanned Test provider endpoint');
   });
   await import('../functions/job-loop-billing-test/index.ts');await import('../functions/dodo-webhook-test/index.ts');
 });
-beforeEach(()=>{env=environment();metadata={product:LOOP_BILLING_PRODUCT,user_id:owner,request_id:request,generation:'0',plan:'weekly'};state.user=owner;state.rpcCalls.length=0;state.validSession=true;state.cancelled=false;providerOwner=owner;liveCheckout=false;fetches.length=0;});
+beforeEach(()=>{env=environment();metadata={product:LOOP_BILLING_PRODUCT,user_id:owner,request_id:request,generation:'0',plan:'weekly'};state.user=owner;state.rpcCalls.length=0;state.validSession=true;state.cancelled=false;state.pricing=null;providerOwner=owner;liveCheckout=false;providerCurrency='USD';fetches.length=0;});
 afterAll(()=>vi.unstubAllGlobals());
 function req(body:unknown,bearer:string|null=token){return new Request('https://edge.fixture.invalid',{method:'POST',headers:{'Content-Type':'application/json',...(bearer?{Authorization:`Bearer ${bearer}`}:{})},body:JSON.stringify(body)});}
 function signed(type:string,data:Record<string,unknown>,secret=dodoWebhookKey){const raw=dodoEnvelope(type,data),id='msg_IsolatedTest',timestamp=Math.floor(Date.now()/1000);return new Request('https://edge.fixture.invalid',{method:'POST',headers:{'Content-Type':'application/json','webhook-id':id,'webhook-timestamp':String(timestamp),'webhook-signature':dodoSign(raw,id,timestamp,secret)},body:raw});}
@@ -99,5 +101,12 @@ describe('actual isolated Test entrypoints',()=>{
   });
   it('actual cancellation writes only the exact Test subscription paid-period-end flag',async()=>{
     const response=await handlers[0](req({action:'cancel',requestId:request,expectedGeneration:0,expectedSubscriptionId:sub,expectedVersion:1,consent:true}));expect(response.status).toBe(200);expect(state.rpcCalls.find(call=>call.name==='job_loop_billing_cancel_claim')?.args.p_mode).toBe('test');expect(fetches.filter(call=>call.method==='PATCH')).toEqual([{url:`https://test.dodopayments.com/subscriptions/${sub}`,method:'PATCH',body:{cancel_at_next_billing_date:true},key:'Bearer fixture-isolated-test-key'}]);
+  });
+  it('actual Test refund wrapper accepts a bound explicit INR refund and keeps it isolated from Live',async()=>{
+    const quoteId='55555555-5555-4555-8555-555555555555';metadata={...metadata,quote_id:quoteId};providerCurrency='INR';state.pricing={quoteId,productId:'pdt_IsolatedWeekly',plan:'weekly',country:'IN',currency:'INR',amountMinor:279900,exponent:2,catalogVersion:'historical-local-v1',taxInclusive:true,interval:'month'};
+    const refund={payload_type:'Refund',refund_id:'ref_LocalIsolated',payment_id:payment,status:'succeeded',amount:279900,currency:'INR'};
+    const response=await handlers[1](signed('refund.succeeded',refund));expect(response.status).toBe(200);expect(await response.json()).toMatchObject({billingMode:'test',testModeOnly:true,received:true});
+    expect(state.rpcCalls.find(call=>call.name==='job_loop_billing_apply_event_v2')?.args).toMatchObject({p_mode:'test',p_currency:'INR',p_quote:quoteId,p_revoked:true,p_paid_amount:279900});expect(fetches.every(call=>call.url.startsWith('https://test.dodopayments.com/'))).toBe(true);
+    state.rpcCalls.length=0;fetches.length=0;expect((await handlers[1](signed('refund.succeeded',{...refund,currency:'JPY'}))).status).toBe(409);expect(state.rpcCalls).toHaveLength(0);expect(fetches).toHaveLength(1);
   });
 });
