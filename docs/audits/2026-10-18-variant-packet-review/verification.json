@@ -1,0 +1,128 @@
+{
+  "date": "2026-10-18",
+  "status": "validated_locally_uncommitted_undeployed",
+  "scope": "Frontend variant packet source review only",
+  "baseHead": "51f1402e88ebd95f0f0c262b9f0a647e8c6b9432",
+  "sourceFiles": {
+    "src/pages/JobLoop.tsx": "43f1388c56c3ea599547b2c0003d3c1b9f03a148a55a74e4d648c1a67b8e24d4",
+    "src/lib/loop-packet-sources.ts": "cdbbb5a3ca2c643a1bfefbb9e61fee95b479beb1a434e6566f1f2b4e11a936f0",
+    "src/__tests__/job-loop-variant-packet-review.test.tsx": "d843f5dda5a466d7abb340646ec6db1060d1a5808a1ba7c54a67db38803c6b38"
+  },
+  "reproduction": {
+    "before": "Actual JobLoop test failed: variant revision1/global profile revision2 preview incorrectly disabled",
+    "after": "Same fixture previews, explicitly confirms, approves exact packet and downloads",
+    "independentFactsNamespace": "vf_<fact UUID>"
+  },
+  "focused": {
+    "tests": 74,
+    "files": 4,
+    "passed": true,
+    "newCases": 14,
+    "command": "node node_modules/vitest/vitest.mjs run src/__tests__/job-loop-variant-packet-review.test.tsx src/__tests__/job-loop-journey.test.tsx src/__tests__/job-loop-cv-variants-integration.test.tsx src/__tests__/loop-variant-preparation.test.tsx --reporter=dot",
+    "negativeStateCheck": "Waits for settled stale-source warning, no checking status and no metadata-read error"
+  },
+  "fullSuite": {
+    "passed": true,
+    "tests": 3095,
+    "passedTests": 3095,
+    "failedTests": 0,
+    "pendingTests": 0,
+    "files": 164,
+    "passedFiles": 164,
+    "startedAt": "2026-10-18T14:06:57.678Z",
+    "finishedAt": "2026-10-18T14:07:54.772Z",
+    "command": "node node_modules/vitest/vitest.mjs run --reporter=json --outputFile=.tmp/variant-packet-review-full-tests.json",
+    "rawReport": ".tmp/variant-packet-review-full-tests.json",
+    "rawSha256": "49f50e9f5b97a73070e68a086d9c3f743be57b88247643ae8ddf67ae170c1aaf",
+    "note": "Actual result-file count, not nested suite count"
+  },
+  "typeScript": {
+    "passed": true,
+    "command": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json"
+  },
+  "productionBuild": {
+    "completePipeline": true,
+    "initialFullCommandExit": 1,
+    "command": "node 'C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js' run build",
+    "vitePassed": true,
+    "publicPages": 38,
+    "guideArticles": 20,
+    "structuredDataHashes": 58,
+    "prerenderExternalRequests": 0,
+    "initialPackagerFailure": "Symbolic links are not permitted in the public build output.",
+    "inspection": {
+      "at": "2026-10-18T14:10:07.587Z",
+      "entries": 139,
+      "files": 134,
+      "directories": 5,
+      "symlinks": 0,
+      "methods": [
+        "dirent",
+        "lstat",
+        "readlink"
+      ],
+      "readlinkErrorCodes": [
+        "EINVAL"
+      ],
+      "rawReport": ".tmp/variant-packet-review-dist-symlink-inspection.json",
+      "rawSha256": "a0f413475b118d2fd6df213734a4decb690b1d97578d16cd819f9354ab27fa33"
+    },
+    "recovery": "Unchanged node scripts/build-host-worker.mjs passed after actual zero-link inspection; no guard weakened",
+    "assets": 132,
+    "staticBytes": 6426317,
+    "workerBytes": 8596954,
+    "compressedBytes": 2910135,
+    "compressedLimitBytes": 3145728,
+    "workerSha256": "e1703732e878918bbdccf2907e9a1e67088124fd2fce4a3b2e4045bd855e4611",
+    "indexSha256": "5d69805355f8b39eb43e5bf3f8d97e6abc24af32479890e882189fb007e0ee2f",
+    "warnings": "Existing dependency use-client directives and plugin timing warnings; no source repair required"
+  },
+  "hosting": {
+    "passed": true,
+    "command": "node scripts/check-host-worker.mjs",
+    "groups": [
+      "security-headers-and-jsonld-hashes",
+      "private-client-routes",
+      "rendered-public-content",
+      "canonical-redirects",
+      "real-notfound-status",
+      "asset-bytes-and-mime",
+      "etag-and-cache",
+      "head",
+      "missing-and-private-paths",
+      "unsafe-methods",
+      "project-identity",
+      "compressed-size"
+    ]
+  },
+  "rollback": {
+    "tag": "jobvance-before-variant-packet-review-2026-10-18",
+    "commit": "51f1402e88ebd95f0f0c262b9f0a647e8c6b9432",
+    "annotated": true,
+    "pushed": true,
+    "remote": "github",
+    "publicBaseline": {
+      "release": "v48",
+      "runtimeSource": "e37c19f5b0208139e1d3cf01d67643e24f371a12",
+      "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7921fa6a21848191a550ca466a5bb8b4",
+      "deployment": "appgdep_6ad4afc39bcc819182294e49bac15b6a",
+      "receipt": "docs/releases/2026-10-18-plan-names.json"
+    },
+    "note": "Source rollback is separate from database/file restoration"
+  },
+  "noCommit": true,
+  "noDeployment": true,
+  "noBackendChange": true,
+  "noMigration": true,
+  "noProviderCall": true,
+  "noProductionCandidateMutation": true,
+  "noAdWrite": true,
+  "noMediaGenerated": true,
+  "limits": [
+    "Local mocked UI actions; not hosted acceptance",
+    "No new native PostgreSQL or Deno run",
+    "No fresh live HTTP source verification",
+    "No usability/NPS uplift inferred",
+    "Passive current-source reads deliberately fail closed on unavailable/mixed/stale authority"
+  ]
+}
