@@ -1,0 +1,272 @@
+{
+  "version": 46,
+  "source": "1a92c4d0ae4bd4f56478cb536f93fb2b256dc9c3",
+  "customUrl": "https://jobvance.io",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_fb63a88a7a408191aa2de56b185a96c2",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 46,
+    "source": {
+      "commit_sha": "1a92c4d0ae4bd4f56478cb536f93fb2b256dc9c3"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_000000005ba481f4aa7544e67d988192",
+      "content_hash": "sha256:82f4936ec89a3684276318b6eb9f6ab530341c5a68af720aca80a5526efbec3d",
+      "size_bytes": 15155200,
+      "file_count": 136
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad4a437db888191af8d41938fe0b819",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_fb63a88a7a408191aa2de56b185a96c2",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-18T10:49:47.475110+00:00"
+  },
+  "catalogue": {
+    "version": "loop-local-2026-10-18-v1",
+    "rateDate": "2026-10-16",
+    "publishedAt": "2026-10-18",
+    "currencies": [
+      "USD",
+      "EUR",
+      "GBP",
+      "INR",
+      "AED",
+      "CAD",
+      "AUD",
+      "SGD",
+      "JPY"
+    ],
+    "supportedBillingCountries": 28,
+    "amountsAreMinorUnits": true,
+    "prices": {
+      "USD": [
+        2900,
+        5900,
+        9900
+      ],
+      "EUR": [
+        2599,
+        5199,
+        8799
+      ],
+      "GBP": [
+        2199,
+        4399,
+        7399
+      ],
+      "INR": [
+        279900,
+        559900,
+        939900
+      ],
+      "AED": [
+        10999,
+        21999,
+        35999
+      ],
+      "CAD": [
+        4099,
+        8399,
+        13999
+      ],
+      "AUD": [
+        4199,
+        8499,
+        13999
+      ],
+      "SGD": [
+        3699,
+        7499,
+        12999
+      ],
+      "JPY": [
+        4599,
+        9299,
+        15599
+      ]
+    },
+    "jpyExponent": 0,
+    "otherExponents": 2,
+    "existingSubscriptionsRepriced": false,
+    "usdBaseChanged": false,
+    "oneTimeCvPassesRemainUsd": true
+  },
+  "migrations": [
+    {
+      "source": "20261018095409_job_loop_localized_price_quotes.sql",
+      "nativeVersion": "20261018100527",
+      "sha256": "e219b605684eaec209f1cc8f50e7e5957138c1111fff341f6430608e20e7557c"
+    },
+    {
+      "source": "20261018101948_job_loop_provider_accounting.sql",
+      "nativeVersion": "20261018102654",
+      "sha256": "3dc4a02f4a1491283db4b3dd09bdb34797df04c4554e006071fadf49066b89d8"
+    }
+  ],
+  "nativeReadback": [
+    {
+      "name": "job-loop-billing",
+      "version": 18,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "files": 11,
+      "exact": true
+    },
+    {
+      "name": "dodo-webhook",
+      "version": 20,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "files": 11,
+      "exact": true
+    },
+    {
+      "name": "job-loop-billing-test",
+      "version": 15,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "files": 12,
+      "exact": true
+    },
+    {
+      "name": "dodo-webhook-test",
+      "version": 15,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "files": 12,
+      "exact": true
+    }
+  ],
+  "databaseReadback": {
+    "routineBodiesExact": 19,
+    "fixedEmptySearchPaths": true,
+    "anonymousAuthenticatedRoutineExecution": false,
+    "newPrivateRlsTables": 3,
+    "directTableAccess": false,
+    "pricesPerMode": 27
+  },
+  "validation": {
+    "fullSuite": {
+      "tests": 3036,
+      "files": 161,
+      "passed": true
+    },
+    "applicationTypeScript": true,
+    "sourceDenoEntrypoints": 4,
+    "productionBuild": {
+      "pages": 38,
+      "passed": true
+    },
+    "hostingGroups": 12,
+    "liveHttp": {
+      "exactHtmlPages": 5,
+      "exactJsAssets": 3,
+      "onlyObservedCloudflareScriptExcluded": true
+    },
+    "focusedRunsOverlapFullSuite": true,
+    "nativePostgresGroups": 20,
+    "clusterStopped": true,
+    "independentUiRuntimeCases": 177
+  },
+  "providerAcceptance": {
+    "testQuotes": {
+      "verified": 27,
+      "representativeCountryPerCurrency": true
+    },
+    "liveNonPurchasingQuotes": {
+      "verified": 27,
+      "initialAndRecurringAmountExact": true
+    },
+    "testFirstPayments": [
+      {
+        "plan": "weekly",
+        "currency": "INR",
+        "amountMinor": 279900,
+        "paidPeriodConfirmed": true
+      },
+      {
+        "plan": "daily",
+        "currency": "JPY",
+        "amountMinor": 15599,
+        "paidPeriodConfirmed": true
+      }
+    ],
+    "testRenewal": {
+      "currency": "JPY",
+      "amountMinor": 15599,
+      "operatorAccelerated": true,
+      "successful": true,
+      "signedEventsAndExactPaidPeriod": true
+    },
+    "testRefund": {
+      "currency": "JPY",
+      "fullRenewalRefund": true,
+      "onlyExactRenewalPeriodRevoked": true,
+      "subscriptionRevocationSticky": true
+    },
+    "inrAcceleratedRenewal": {
+      "status": "Processing at last provider readback",
+      "successfulNotClaimed": true,
+      "noPaidExtension": true
+    },
+    "ownedCancellationsConfirmed": 2,
+    "livePurchases": 0,
+    "realMoneyMoved": false,
+    "unattendedAiSearchSpending": 0
+  },
+  "browserAcceptance": {
+    "desktop": "Actual production component with isolated auth/provider adapters: INR selection, quote, consent and original-request remount/retry; one creation/two opens.",
+    "mobile": "Actual Chrome 390x844/document375: INR quote, consent, remount/retry, activation and paid-through cancellation; no overflow.",
+    "livePublic": "Actual Jobvance.io country selection updates GBP and JPY prices; India screenshot retained.",
+    "hostedAuthenticatedLocalizedCheckout": false
+  },
+  "cleanup": {
+    "testBillingEnabled": false,
+    "testWebhookEnabled": false,
+    "testBillingDisabledStatus": 503,
+    "testWebhookDisabledStatus": 503,
+    "fixtureSessionsSignedOut": 2,
+    "remainingFixtureAuthSessions": 0,
+    "allNewFixtureRenewalsCancelled": true,
+    "financialRecordsRetained": true,
+    "liveBillingMode": "live",
+    "liveBillingConfigured": true,
+    "liveWebhookEnabled": true,
+    "liveWebhookEvents": 15
+  },
+  "rollback": {
+    "sourceTag": "jobvance-before-local-pricing-2026-10-18",
+    "sourceAt": "2408ac12ebe15e61a1d06139a49647f4536581aa",
+    "savedV45": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_8b3862902c208191a0375eabd1e4cc23",
+    "additiveFinancialHistoryMustRemain": true,
+    "sourceRollbackIsNotDbOrFileRestore": true
+  },
+  "unchanged": [
+    "Job Loop control/worker/OAuth/tailor source",
+    "discovery coverage",
+    "AI/search ledger and capacity",
+    "ads-Off approval gate",
+    "existing one-time CV pass currency"
+  ],
+  "limitations": [
+    "No live-card charge or real-money settlement",
+    "No natural monthly elapsed renewal",
+    "No all-country/tax-profile or all-browser certification",
+    "INR accelerated renewal stayed Processing at last readback; no paid time granted",
+    "No NPS uplift or broader product sign-off"
+  ]
+}
+
