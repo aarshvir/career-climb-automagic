@@ -1,6 +1,6 @@
 {
   "date": "2026-10-18",
-  "status": "validated_locally_uncommitted_undeployed",
+  "status": "local_validation_complete_release_recorded_separately",
   "scope": "Frontend variant packet source review only",
   "baseHead": "51f1402e88ebd95f0f0c262b9f0a647e8c6b9432",
   "sourceFiles": {
@@ -110,8 +110,6 @@
     },
     "note": "Source rollback is separate from database/file restoration"
   },
-  "noCommit": true,
-  "noDeployment": true,
   "noBackendChange": true,
   "noMigration": true,
   "noProviderCall": true,
@@ -124,5 +122,8 @@
     "No fresh live HTTP source verification",
     "No usability/NPS uplift inferred",
     "Passive current-source reads deliberately fail closed on unavailable/mixed/stale authority"
-  ]
+  ],
+  "noCommitAtValidation": true,
+  "noDeploymentAtValidation": true,
+  "releaseReceipt": "docs/releases/2026-10-18-variant-packet-review.json"
 }

@@ -1,6 +1,6 @@
 # Variant packet review source correction
 
-18 October 2026. Prepared and validated locally; **not committed or deployed by this work**. Job Loop remains the primary product. No backend, schema, payment, media or advertising change accompanies this correction.
+18 October 2026. The validated frontend correction is now **published as v49** at https://jobvance.io, runtime source `3f0ed1ca9b99cecaf78235527935d9ada72ad84a`. [Exact release receipt](../../releases/2026-10-18-variant-packet-review.json). Job Loop remains the primary product. No backend, schema, payment, media or advertising change accompanies this correction. The local validation record below predates publication and retains its original evidence scope.
 
 ## Problem and reproduction
 
@@ -33,4 +33,6 @@ The independent review found the negative-test pending-state gap; it was correct
 
 Annotated tag `jobvance-before-variant-packet-review-2026-10-18` is preserved at the pre-change HEAD `51f1402e88ebd95f0f0c262b9f0a647e8c6b9432` and pushed to the configured GitHub remote. Public v48 is retained: runtime source `e37c19f5b0208139e1d3cf01d67643e24f371a12`, saved version `appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7921fa6a21848191a550ca466a5bb8b4`; its release receipt remains authoritative. This source rollback is not database/file restoration.
 
-No hosted acceptance, live HTTP readback, fresh native PostgreSQL/Deno run, provider/search call, production candidate mutation, paid usage or media/advertising action was performed. Existing server authorities were inspected but not changed. The additional passive reads introduce a network-availability dependency; failures deliberately block source use until current verification succeeds. Local tests and packaging do not establish production success or a usability/NPS uplift. The coordinator must review and release the bounded site change separately.
+The site-only release succeeded at 14:15:53 UTC. Saved version `appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_400f0d9784a881919747f0fb60bf1f3e`, deployment `appgdep_6ad4d4856fb081919bd7ce760c0313dd`. Five live guest HTML routes, including `/loop` and the account return, and three exact entry/Job Loop/API JavaScript assets matched the tested build. HTML comparison excluded only each individually observed appended Cloudflare challenge script; no HTML ETag parity is claimed. The final release receipt binds source, saved archive and these checks. Documentation-only follow-up needs no identical runtime deployment.
+
+No authenticated hosted task, fresh native PostgreSQL/Deno run, provider/search call, production candidate mutation, paid usage or media/advertising action was performed. Existing server authorities were inspected but not changed. The additional passive reads introduce a network-availability dependency; failures deliberately block source use until current verification succeeds. Local tests, packaging and guest byte readback do not establish unassisted customer success or a usability/NPS uplift.

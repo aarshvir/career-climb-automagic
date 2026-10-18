@@ -1,0 +1,224 @@
+{
+  "date": "2026-10-18",
+  "release": "v49",
+  "product": "Job Loop",
+  "scope": "Frontend exact CV variant packet review",
+  "source": "3f0ed1ca9b99cecaf78235527935d9ada72ad84a",
+  "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_400f0d9784a881919747f0fb60bf1f3e",
+  "deployment": {
+    "id": "appgdep_6ad4d4856fb081919bd7ce760c0313dd",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_400f0d9784a881919747f0fb60bf1f3e",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-18T14:15:53.084806+00:00"
+  },
+  "publicUrl": "https://jobvance.io",
+  "archiveStorage": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000b87c82109033c9c1e41ccf42",
+    "content_hash": "sha256:3024423ae2331242422dde54a6a9eb94e235bef99d64a5c10526c1d7cdb51997",
+    "size_bytes": 15165440,
+    "file_count": 136
+  },
+  "changes": [
+    "Verify variant packets against their exact current owned variant revision/source hash and independently confirmed shareable facts",
+    "Preserve inherited global claim checks and legacy global-record packet authority",
+    "Fence passive source reads to owner/auth authority/lifecycle/record version; reject mixed or stale results",
+    "Resolve source evidence and fallback page preference from the chosen variant; preserve exact preview/approval/download guards"
+  ],
+  "verification": {
+    "fullTests": 3095,
+    "fullTestFiles": 164,
+    "focusedTests": 74,
+    "newRegressions": 14,
+    "typeScript": "passed",
+    "productionBuild": {
+      "publicPages": 38,
+      "guideArticles": 20,
+      "structuredDataHashes": 58,
+      "assets": 132,
+      "compressedWorkerBytes": 2910135,
+      "initialPackagerFailure": "OneDrive symbolic-link guard",
+      "inspection": "139 entries, 134 files, 5 directories; dirent/lstat/readlink found zero links",
+      "recovery": "Unchanged host packager retry passed; guard preserved"
+    },
+    "hostingGroups": 12,
+    "liveExactHtmlPages": 5,
+    "liveExactJsAssets": 3,
+    "htmlExclusion": "Only the individually observed appended Cloudflare challenge script",
+    "localDetails": "docs/audits/2026-10-18-variant-packet-review/verification.json",
+    "independentReview": "Separate agent runtime review; pending-state negative-test gap corrected before final full suite"
+  },
+  "limits": [
+    "Guest HTTP route/byte readback and mocked actual-page integration; no new authenticated hosted task",
+    "No new provider/search/payment call, candidate mutation or fresh native PostgreSQL/Deno acceptance",
+    "No backend/schema/payment/media/marketing change or usability/NPS uplift"
+  ],
+  "rollback": {
+    "tag": "jobvance-before-variant-packet-review-2026-10-18",
+    "source": "51f1402e88ebd95f0f0c262b9f0a647e8c6b9432",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7921fa6a21848191a550ca466a5bb8b4",
+    "note": "Source rollback is separate from database/file restoration"
+  },
+  "sourcePreparation": {
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "commit_sha": "3f0ed1ca9b99cecaf78235527935d9ada72ad84a",
+    "archiveFilename": "variant-packet-review-artifact.tar.gz",
+    "localArchiveSha256": "06ac8a5f6de4266851cd5204450312bcd4c22173da5f50f37b3393c8db1c6b15",
+    "localArchiveBytes": 4940458,
+    "localContainer": "gzip",
+    "commands": [],
+    "note": "Unchanged completed build packaged by supported Sites source helper; native archiveStorage describes stored tar representation"
+  },
+  "liveVerification": {
+    "at": "2026-10-18T14:17:04.388Z",
+    "origin": "https://jobvance.io",
+    "passed": true,
+    "checks": [
+      {
+        "route": "/loop",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 4269,
+        "localBytes": 3331,
+        "sha256Compared": "5d69805355f8b39eb43e5bf3f8d97e6abc24af32479890e882189fb007e0ee2f",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "ae6decf95366ec6e1237f0d3cdba50e1c1468d10df7d4dac546e2fa4ec3c1126",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/dashboard",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 4269,
+        "localBytes": 3331,
+        "sha256Compared": "5d69805355f8b39eb43e5bf3f8d97e6abc24af32479890e882189fb007e0ee2f",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "70326d538e0ed358959f4bf98995c07f321fe11d31bdf21f8657c3e1aa1fe17a",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/auth?next=%2Floop",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 4269,
+        "localBytes": 3331,
+        "sha256Compared": "5d69805355f8b39eb43e5bf3f8d97e6abc24af32479890e882189fb007e0ee2f",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "dfad4555fc5f52684b959600ed811cbb07fb22e62b3ad9aabe8215ba5c53c2a2",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/job-loop",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 22911,
+        "localBytes": 21973,
+        "sha256Compared": "4f956eff4f143a0f9026063c6f417c0646a395f6b364ad14ee19d660b9ddd764",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "bb655ad4f67eb057f57ec12af68832a4757f33e780b47ee2250a3aa90912f7ca",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/pricing",
+        "status": 200,
+        "kind": "exact_html",
+        "liveBytes": 32921,
+        "localBytes": 31983,
+        "sha256Compared": "3bbd33031bd31f3a62cd3445818e721fbedbcae50bb703d58a63c2859a3c9513",
+        "excluded": [
+          {
+            "kind": "observed_cloudflare_challenge_script",
+            "sha256": "7752b5854d7c5ab8de3ebb1cc5e04188805b07461be12de98af56ead72c7e5ff",
+            "characters": 938
+          }
+        ],
+        "headers": {
+          "contentType": "text/html; charset=utf-8",
+          "cacheControl": "no-cache",
+          "etag": null
+        }
+      },
+      {
+        "route": "/assets/index-BWfLR5kG.js",
+        "status": 200,
+        "kind": "exact_js",
+        "bytes": 500619,
+        "sha256": "7baa2601b34d0870d4797b9f7a24e538dedfcdcecde93ae771fc92d64c8455ac",
+        "headers": {
+          "contentType": "text/javascript; charset=utf-8",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "etag": "W/\"7baa2601b34d0870d4797b9f7a24e538dedfcdcecde93ae771fc92d64c8455ac\""
+        }
+      },
+      {
+        "route": "/assets/JobLoop-Cip5_lTM.js",
+        "status": 200,
+        "kind": "exact_js",
+        "bytes": 161474,
+        "sha256": "58dfff156a0bcaa287cc851bf436622f6d3c448dca381ff559345b179df5f7fc",
+        "headers": {
+          "contentType": "text/javascript; charset=utf-8",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "etag": "W/\"58dfff156a0bcaa287cc851bf436622f6d3c448dca381ff559345b179df5f7fc\""
+        }
+      },
+      {
+        "route": "/assets/job-loop-api-DJik36ue.js",
+        "status": 200,
+        "kind": "exact_js",
+        "bytes": 20624,
+        "sha256": "9693879d01e69acb1eaff01b87aa49c4c3ea4c7fa117574f15ed47c7cbf6a4b8",
+        "headers": {
+          "contentType": "text/javascript; charset=utf-8",
+          "cacheControl": "public, max-age=31536000, immutable",
+          "etag": "W/\"9693879d01e69acb1eaff01b87aa49c4c3ea4c7fa117574f15ed47c7cbf6a4b8\""
+        }
+      }
+    ]
+  }
+}
