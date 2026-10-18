@@ -1,0 +1,231 @@
+{
+  "version": 47,
+  "source": "d10200418c4a8cb64f60c8b13e33d59f970b96af",
+  "customUrl": "https://jobvance.io",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_bf309038723881918a8830f2b6941ec4",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 47,
+    "source": {
+      "commit_sha": "d10200418c4a8cb64f60c8b13e33d59f970b96af"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000732081f4894e0a321fd9c09c",
+      "content_hash": "sha256:efaf2249f6b322a5f31f0d802b7258266b761089e758adfea4c544b8f38f8ec1",
+      "size_bytes": 15155200,
+      "file_count": 136
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad4acf034d88191a5847ecddb5a7a97",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_bf309038723881918a8830f2b6941ec4",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-18T11:26:59.397254+00:00"
+  },
+  "catalogue": {
+    "version": "loop-local-2026-10-18-v3",
+    "pricesInMajorUnits": {
+      "USD": [
+        29,
+        59,
+        99
+      ],
+      "EUR": [
+        26,
+        52,
+        88
+      ],
+      "GBP": [
+        22,
+        44,
+        74
+      ],
+      "INR": [
+        2999,
+        5999,
+        8999
+      ],
+      "AED": [
+        109,
+        219,
+        359
+      ],
+      "CAD": [
+        41,
+        84,
+        139
+      ],
+      "AUD": [
+        42,
+        85,
+        139
+      ],
+      "SGD": [
+        37,
+        75,
+        129
+      ],
+      "JPY": [
+        4999,
+        8999,
+        15999
+      ]
+    },
+    "allNewAmountsWholeUnits": true,
+    "existingMonetarySnapshotsPreserved": true,
+    "datedRatesRetained": "2026-10-16",
+    "usdBaseUnchanged": true
+  },
+  "products": {
+    "live": {
+      "weekly": "pdt_0Nq0BYq7BdjAS4guEjnZR",
+      "active": "pdt_0Nq0Bq1C8qWpEc09hFc9l",
+      "daily": "pdt_0Nq0Bu1sW9DpHx9xCgY44"
+    },
+    "test": {
+      "weekly": "pdt_0Nq0BV2xKSAg0QsPs1wUB",
+      "active": "pdt_0Nq0BnhoTfxXqCVqJMlpM",
+      "daily": "pdt_0Nq0B9zr7zYSVFmTP0APS"
+    },
+    "oldProductsRetained": true,
+    "oldLiveProductsEdited": false,
+    "copyToLiveDoesNotCopyLocalizedRules": true,
+    "newLiveRulesExplicitlyAddedAndSaved": true
+  },
+  "providerFinding": {
+    "sameProductRuleEditRepricedUnpaidSession": true,
+    "observedOldTestEurAmountBefore": 8799,
+    "observedChangedAmount": 8800,
+    "oldTestRuleRestored": true,
+    "finalOldReadySessionAmount": 8799,
+    "finalNewQuoteAmount": 8800,
+    "fix": "Separate new provider products for all six mode/plan bindings; original products retained with their original rules.",
+    "legacyUsdRecoveryFix": "Existing unquoted request obtains original owner-scoped product before exact authenticated claim; ready/uncertain avoids provider reads or duplicate creation."
+  },
+  "migrations": [
+    {
+      "source": "20261018105918_job_loop_whole_currency_prices.sql",
+      "nativeVersion": "20261018110804",
+      "sha256": "c02fca8b884304464d4adf82d6220d415541137963b6f487805b213c46fb1c69"
+    },
+    {
+      "source": "20261018111136_job_loop_versioned_price_products.sql",
+      "nativeVersion": "20261018112251",
+      "sha256": "70828f9bfea9ad327d3139032a30343080ab8327e65654398d5808ea5f4e93f9"
+    }
+  ],
+  "database": {
+    "activeV3Prices": 54,
+    "activeV3DistinctProducts": 6,
+    "v1AndV2HistoryRetained": true,
+    "routineOrAclChanges": false,
+    "newTables": 0
+  },
+  "nativeReadback": [
+    {
+      "name": "job-loop-billing",
+      "version": 23,
+      "files": 11,
+      "verify_jwt": false,
+      "status": "ACTIVE",
+      "exact": true
+    },
+    {
+      "name": "dodo-webhook",
+      "version": 25,
+      "files": 11,
+      "verify_jwt": false,
+      "status": "ACTIVE",
+      "exact": true
+    },
+    {
+      "name": "job-loop-billing-test",
+      "version": 20,
+      "files": 12,
+      "verify_jwt": false,
+      "status": "ACTIVE",
+      "exact": true
+    },
+    {
+      "name": "dodo-webhook-test",
+      "version": 20,
+      "files": 12,
+      "verify_jwt": false,
+      "status": "ACTIVE",
+      "exact": true
+    }
+  ],
+  "validation": {
+    "tests": 3081,
+    "testFiles": 163,
+    "applicationTypeScript": true,
+    "sourceDenoEntrypoints": 4,
+    "actualSqlCases": 179,
+    "independentFocusedCases": 213,
+    "focusedCountsOverlapFullSuite": true,
+    "productionBuildPages": 38,
+    "hostingGroups": 12,
+    "exactLiveHtmlPages": 5,
+    "exactLiveJsAssets": 3,
+    "htmlExclusion": "Only observed appended Cloudflare challenge script",
+    "nativePostgresRaceRerun": false,
+    "nativeRaceScope": "Prior v46 routine evidence retained; current migrations only append/activate catalogue data.",
+    "packaging": "Initial OneDrive symlink guard failed; actual134 files/5dirs had zero dirent/lstat symlinks, unchanged packaging retry passed; no guard weakened."
+  },
+  "providerVerification": {
+    "testQuotes": 27,
+    "liveQuotes": 27,
+    "allInitialRecurringAmountsExact": true,
+    "representativeCountriesPerCurrency": true,
+    "originalUnpaidV1CheckoutPreserved": true,
+    "originalV1ReadyRetrySameSessionAndPrice": true,
+    "newCardEntries": 0,
+    "newProviderPayments": 0,
+    "liveCharges": 0
+  },
+  "browser": {
+    "liveIndia": "2999/5999/8999 no fractional amount",
+    "screenshot": "whole-pricing-live-india.png",
+    "oldTestCheckout": "EUR87.99 after restoration and versioned-product activation",
+    "previousMobileEvidence": "V46; not rerun as hosted mobile acceptance in v47"
+  },
+  "cleanup": {
+    "testBillingEnabled": false,
+    "testWebhookEnabled": false,
+    "newFixtureAuthSessionsRemaining": 0,
+    "newFixtureSignedOut": true,
+    "newUnpaidTestOrderRetained": true,
+    "newSubscriptions": 0,
+    "liveMode": "live",
+    "liveBillingConfigured": true,
+    "adsRemainOff": true
+  },
+  "rollback": {
+    "tag": "jobvance-before-whole-pricing-2026-10-18",
+    "sourceAt": "fe0b49f739279487e578a330ca129ef4dff0b5c5",
+    "savedV46": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_fb63a88a7a408191aa2de56b185a96c2",
+    "retainFinancialAndProductHistory": true,
+    "doNotEditOriginalProducts": true,
+    "coordinatedSourceBackendAndCurrentCatalogueRequired": true
+  },
+  "limits": [
+    "No new real-card or paid sandbox acceptance",
+    "No natural-month renewal proof",
+    "No new NPS/usability uplift",
+    "One-time CV Check passes remain USD",
+    "All other product/marketing requests remain open"
+  ]
+}
+
