@@ -1,0 +1,67 @@
+{
+  "at": "2026-10-18T08:06:34.167Z",
+  "pages": [
+    {
+      "path": "/",
+      "exact": true,
+      "cloudflareScriptExcluded": true
+    },
+    {
+      "path": "/pricing",
+      "exact": true,
+      "cloudflareScriptExcluded": true
+    },
+    {
+      "path": "/terms",
+      "exact": true,
+      "cloudflareScriptExcluded": true
+    },
+    {
+      "path": "/refund",
+      "exact": true,
+      "cloudflareScriptExcluded": true
+    },
+    {
+      "path": "/privacy",
+      "exact": true,
+      "cloudflareScriptExcluded": true
+    }
+  ],
+  "assets": [
+    {
+      "name": "index-MPGWoX3G.js",
+      "exact": true,
+      "bytes": 487582,
+      "sha256": "b8a0c81b5fd164d60844711bc5eaa3840bdf237313f61b32cad7621dcce079fd"
+    },
+    {
+      "name": "JobLoop-DDBsHl8u.js",
+      "exact": true,
+      "bytes": 158288,
+      "sha256": "0b79703a8198c66416f2513b098674c6b31c1ed16ef2a2f7556aec3ebadfe456"
+    },
+    {
+      "name": "ProductNavigation-CO0Ya8OF.js",
+      "exact": true,
+      "bytes": 855,
+      "sha256": "9f418e70cb89026cc6a675178a75a9a8fcf79840708bb543712b4689354eb705"
+    },
+    {
+      "name": "index-D41TBipY.css",
+      "exact": true,
+      "bytes": 194926
+    },
+    {
+      "name": "JobLoop-CIREC-E5.css",
+      "exact": true,
+      "bytes": 187
+    },
+    {
+      "name": "ProductNavigation-CVU25cjD.css",
+      "exact": true,
+      "bytes": 767
+    }
+  ],
+  "cloudflareScriptOnlyExclusion": true,
+  "status": "passed"
+}

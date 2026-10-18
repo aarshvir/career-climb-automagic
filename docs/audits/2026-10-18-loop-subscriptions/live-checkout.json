@@ -1,0 +1,58 @@
+{
+  "kind": "live-dodo-checkout-creation-not-payment",
+  "at": "2026-10-18T08:14:07.009Z",
+  "checks": [
+    {
+      "name": "fresh-synthetic-signup",
+      "passed": true
+    },
+    {
+      "name": "live-configured-status",
+      "passed": true
+    },
+    {
+      "name": "server-monthly-prices",
+      "passed": true
+    },
+    {
+      "name": "provider-validates-live-weekly-product-and-creates-checkout",
+      "passed": true
+    },
+    {
+      "name": "fixed-live-checkout-host",
+      "passed": true
+    },
+    {
+      "name": "same-request-reuses-exact-provider-session",
+      "passed": true
+    },
+    {
+      "name": "checkout-not-a-paid-entitlement",
+      "passed": true
+    },
+    {
+      "name": "second-plan-checkout-blocked-while-original-pending",
+      "passed": true
+    }
+  ],
+  "charges": 0,
+  "providerPayments": 0,
+  "checkoutCreationAttempts": 1,
+  "createdSyntheticAccounts": 1,
+  "liveConfigured": true,
+  "checkoutResponse": {
+    "status": 200,
+    "code": null
+  },
+  "checkoutUrlSha256": "861ef42b545f6aa4bd332c8c98c85f48b645c2207309988e89cafba0d345efac",
+  "secondPlanCode": "LOOP_CHECKOUT_PENDING",
+  "pendingReservation": {
+    "synthetic": true,
+    "paid": false,
+    "expiresWithoutPurchase": true,
+    "note": "One synthetic live checkout reservation remains until its existing capacity deadline. No checkout URL or credentials saved."
+  },
+  "status": "passed",
+  "signedOut": true,
+  "finishedAt": "2026-10-18T08:14:15.320Z"
+}

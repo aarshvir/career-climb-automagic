@@ -1,0 +1,86 @@
+{
+  "version": 44,
+  "source": "3ba187b0e703647542f077be54d6a8b13a28ac41",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_94e5006f68488191b32b27b5c66bcdfb",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 44,
+    "source": {
+      "commit_sha": "3ba187b0e703647542f077be54d6a8b13a28ac41"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_0000000062d481f4a5154f25dbfbc910",
+      "content_hash": "sha256:23c0f1500119942930457f0efb371c1e91996277d3d6c1fae69e97f714761ac2",
+      "size_bytes": 15114240,
+      "file_count": 136
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad47da9447c81919d5b0e43e983ea2e",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_94e5006f68488191b32b27b5c66bcdfb",
+    "status": "succeeded",
+    "url": "https://jobvance.io",
+    "updated_at": "2026-10-18T08:05:18.232234+00:00"
+  },
+  "at": "2026-10-18T08:21:39.148Z",
+  "liveCheckoutEnabled": true,
+  "liveProductsValidated": 3,
+  "liveCheckoutCreatedForSyntheticFixture": 1,
+  "liveCharges": 0,
+  "providerPaymentRenewalCancellationAcceptance": false,
+  "providerSignedSample": {
+    "event": "subscription.update_payment_method",
+    "messageId": "msg_3KrMgnOZO4rfxTLhK4edGRMKJZt",
+    "httpStatus": 200,
+    "financialGrant": false
+  },
+  "ownerCommercialApproval": {
+    "answer": "Confirmed — enable after final verification",
+    "date": "2026-10-18"
+  },
+  "ownerKeyPermissionApproval": {
+    "answer": "Yes, save those exact permissions",
+    "applied": true
+  },
+  "backend": {
+    "job-loop-billing": 2,
+    "dodo-webhook": 5,
+    "create-checkout": 10,
+    "get-entitlement": 11,
+    "control": 20,
+    "worker": 15,
+    "tailor": 4,
+    "OAuth": 5
+  },
+  "migration": {
+    "nativeVersion": "20261018075508",
+    "source": "20261018073501_job_loop_subscription_lifecycle.sql",
+    "sha256": "7b3294149ba3b62d2b7274c0d939be47314ab8c3d261e6d77839625acc8386af"
+  },
+  "rollback": {
+    "tag": "jobvance-before-loop-subscriptions-2026-10-18",
+    "source": "6a1fb3efa82004b57173adba015a20df10a2161d",
+    "savedV43": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d256db18458c8191a1d316a6dd935a05"
+  },
+  "verification": {
+    "fullTests": 2768,
+    "files": 151,
+    "typescript": true,
+    "build": true,
+    "sourceDenoEntrypoints": 4,
+    "nativeRaces": 8,
+    "hostingGroups": 12,
+    "isolatedDesktopMobile": true,
+    "initialHostedPassiveChecks": 15,
+    "liveCheckoutChecks": 8,
+    "liveProductAdmissionChecks": 3,
+    "liveHtml": 5,
+    "liveAssets": 6
+  },
+  "ads": "Remain Off pending exact revised video approval",
+  "next": "Isolated Dodo Test Mode provider payment/renewal/cancel/refund acceptance; no real charges."
+}

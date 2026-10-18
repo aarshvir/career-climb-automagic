@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-18T08:15:15.251Z",
+  "kind": "live-products-before-stale-generation-admission",
+  "checks": [
+    {
+      "plan": "weekly",
+      "liveProductValidatedBeforeStaleGenerationGuard": true,
+      "status": 409,
+      "code": "LOOP_REQUEST_STALE"
+    },
+    {
+      "plan": "active",
+      "liveProductValidatedBeforeStaleGenerationGuard": true,
+      "status": 409,
+      "code": "LOOP_REQUEST_STALE"
+    },
+    {
+      "plan": "daily",
+      "liveProductValidatedBeforeStaleGenerationGuard": true,
+      "status": 409,
+      "code": "LOOP_REQUEST_STALE"
+    }
+  ],
+  "charges": 0,
+  "checkoutCreations": 0,
+  "noFinancialRowsForActor": true,
+  "status": "passed",
+  "signedOut": true,
+  "finishedAt": "2026-10-18T08:15:19.007Z"
+}
