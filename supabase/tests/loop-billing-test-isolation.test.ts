@@ -76,7 +76,7 @@ describe('actual isolated Test entrypoints',()=>{
   it('actual checkout uses only Test key/product/return URL and SQL Test mode, with no browser mode override',async()=>{
     let response=await handlers[0](req({action:'checkout',plan:'weekly',requestId:request,expectedGeneration:0,consent:true,billingMode:'live'}));expect(response.status).toBe(400);expect(fetches).toHaveLength(0);
     response=await handlers[0](req({action:'checkout',plan:'weekly',requestId:request,expectedGeneration:0,consent:true}));expect(response.status).toBe(200);expect(await response.json()).toMatchObject({billingMode:'test',testModeOnly:true,url:`https://test.checkout.dodopayments.com/session/${checkout}`});
-    expect(fetches.every(call=>call.url.startsWith('https://test.dodopayments.com/')&&call.key==='Bearer fixture-isolated-test-key')).toBe(true);expect(fetches.find(call=>call.method==='POST')?.body).toMatchObject({product_cart:[{product_id:'pdt_IsolatedWeekly',quantity:1}],return_url:'https://test-return.fixture.invalid/pricing?loop_checkout=success'});
+    expect(fetches.every(call=>call.url.startsWith('https://test.dodopayments.com/')&&call.key==='Bearer fixture-isolated-test-key')).toBe(true);expect(fetches.find(call=>call.method==='POST')?.body).toMatchObject({product_cart:[{product_id:'pdt_IsolatedWeekly',quantity:1}],billing_currency:'USD',return_url:'https://test-return.fixture.invalid/pricing?loop_checkout=success'});
     expect(state.rpcCalls.find(call=>call.name==='job_loop_billing_checkout_claim')?.args.p_mode).toBe('test');
   });
   it('rejects a provider-returned Live checkout address and keeps the uncertain Test request',async()=>{

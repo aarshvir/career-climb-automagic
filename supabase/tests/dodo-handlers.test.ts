@@ -109,6 +109,7 @@ describe('create-checkout Dodo branch', () => {
     for (const call of fetches) expect(call.headers.get('Authorization')).toBe(`Bearer ${dodoApiKey}`);
     const body = fetches[1].body as Record<string, unknown>;
     expect(body.product_cart).toEqual([{ product_id: dodoProductId, quantity: 1 }]);
+    expect(body.billing_currency).toBe('USD');
     expect(body.metadata).toEqual({ user_id: dodoOwner, request_id: dodoRequestId, product: 'jobvance_ten_pack_v1' });
     expect(body.return_url).toBe('https://staging.fixture.invalid/dashboard?checkout=success');
     expect(body).not.toHaveProperty('customer');

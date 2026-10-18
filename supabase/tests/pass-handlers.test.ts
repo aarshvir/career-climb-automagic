@@ -97,6 +97,7 @@ describe('create-checkout with a pass plan', () => {
     expect(fetches.map(call => `${call.method} ${call.url}`)).toEqual([`GET https://test.dodopayments.com/products/${dodoPlanProducts[plan]}`, 'POST https://test.dodopayments.com/checkouts']);
     const body = fetches[1].body as Record<string, unknown>;
     expect(body.product_cart).toEqual([{ product_id: dodoPlanProducts[plan], quantity: 1 }]);
+    expect(body.billing_currency).toBe('USD');
     expect(body.metadata).toEqual({ user_id: dodoOwner, request_id: dodoRequestId, product: JOB_PASS_PRODUCT, plan });
     expect(body.return_url).toBe('https://staging.fixture.invalid/applications?checkout=success');
     expect(rpc('jobvance_begin_checkout')[0].args).toEqual({ p_user_id: dodoOwner, p_request_id: dodoRequestId, p_provider: 'dodo', p_billing_mode: 'test', p_plan: plan });

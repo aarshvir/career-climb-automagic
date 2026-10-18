@@ -129,7 +129,7 @@ describe('Dodo event parsing and validation', () => {
     expect(validateDodoPayment(dodoPayment({ total_amount: 2900, tax: null }), dodoProductId).totalAmount).toBe(2900);
   });
   it.each([
-    { status: 'processing' }, { status: 'failed' }, { currency: 'EUR' }, { total_amount: 2610, tax: 0 }, { total_amount: 3045, tax: 100 }, { total_amount: '3045' },
+    { status: 'processing' }, { status: 'failed' }, { currency: 'EUR' }, { currency: 'AED', total_amount: 11078 }, { total_amount: 2610, tax: 0 }, { total_amount: 3045, tax: 100 }, { total_amount: '3045' },
     { product_cart: [{ product_id: 'pdt_SomeOtherProduct', quantity: 1 }] }, { product_cart: [{ product_id: dodoProductId, quantity: 2 }] },
     { product_cart: [{ product_id: dodoProductId, quantity: 1 }, { product_id: dodoProductId, quantity: 1 }] }, { product_cart: null },
     { checkout_session_id: null }, { checkout_session_id: 'cks_bad id' }, { payment_id: 'txn_wrongprovider' },
@@ -168,6 +168,7 @@ describe('Dodo checkout shape', () => {
     if (config?.provider !== 'dodo') throw new Error('Dodo fixture configuration expected.');
     expect(dodoCheckoutBody(config, dodoOwner, dodoRequestId)).toEqual({
       product_cart: [{ product_id: dodoProductId, quantity: 1 }],
+      billing_currency: 'USD',
       return_url: 'https://staging.fixture.invalid/dashboard?checkout=success',
       cancel_url: 'https://staging.fixture.invalid/dashboard?checkout=cancelled',
       metadata: { user_id: dodoOwner, request_id: dodoRequestId, product: PASS.product },
@@ -223,6 +224,7 @@ describe('Dodo one-time passes', () => {
     expect(dodoExpectedProduct(passConfig, 'move_90d')).toEqual({ productId: dodoPlanProducts.move_90d, amount: 3900 });
     expect(dodoCheckoutBody(passConfig, dodoOwner, dodoRequestId, 'search_30d')).toEqual({
       product_cart: [{ product_id: dodoPlanProducts.search_30d, quantity: 1 }],
+      billing_currency: 'USD',
       return_url: 'https://staging.fixture.invalid/applications?checkout=success',
       cancel_url: 'https://staging.fixture.invalid/pricing?checkout=cancelled',
       metadata: { user_id: dodoOwner, request_id: dodoRequestId, product: JOB_PASS_PRODUCT, plan: 'search_30d' },

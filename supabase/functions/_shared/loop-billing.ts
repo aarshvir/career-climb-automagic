@@ -44,7 +44,7 @@ export function validateLoopBillingProduct(value: unknown, config: LoopBillingCo
     !absent(price.trial_amount) || price.trial_payment_method_optional === true || price.tax_inclusive !== true) throw new ApiError(503, 'LOOP_BILLING_PRODUCT_UNAVAILABLE', 'This monthly Job Loop plan is not ready for checkout.');
 }
 export function loopCheckoutBody(config: LoopBillingConfig, userId: string, requestId: string, generation: number, plan: LoopBillingPlan) {
-  return { product_cart: [{ product_id: config.loopProducts[plan], quantity: 1 }],
+  return { product_cart: [{ product_id: config.loopProducts[plan], quantity: 1 }], billing_currency: 'USD',
     return_url: `${config.appUrl}/pricing?loop_checkout=success`, cancel_url: `${config.appUrl}/pricing?loop_checkout=cancelled`,
     metadata: { product: LOOP_BILLING_PRODUCT, user_id: userId, request_id: requestId, plan, generation: String(generation) },
     feature_flags: { allow_discount_code: false, allow_currency_selection: false }, subscription_data: { trial_period_days: 0 } };

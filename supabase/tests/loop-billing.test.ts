@@ -55,6 +55,14 @@ describe('monthly Job Loop fixed product and authority',()=>{
     expect(body.subscription_data.trial_period_days).toBe(0);
     expect(body.return_url).toContain('/pricing?loop_checkout=success');
   });
+  it.each(['weekly','active','daily'] as const)('pins %s checkout billing currency without inventing a customer country',plan=>{
+    for(const mode of ['test','live'] as const){const body=loopCheckoutBody({...config(),mode},owner,request,0,plan);expect(body.billing_currency).toBe('USD');expect(body.feature_flags.allow_currency_selection).toBe(false);expect(body).not.toHaveProperty('billing_address');}
+  });
+  it('continues rejecting localized subscription and payment currency after explicitly requesting USD',()=>{
+    expect(()=>validateLoopSubscription(subscription({currency:'AED'}),config())).toThrow();
+    const sub=validateLoopSubscription(subscription(),config());
+    expect(()=>validateLoopPaidPeriod(payment({currency:'AED',total_amount:11078}),sub)).toThrow();
+  });
   it('rejects forged owner, amount, discount, missing consent and malformed generation before awaits',()=>{
     const base={action:'checkout',requestId:request,plan:'weekly',expectedGeneration:0,consent:true};
     for(const change of [{userId:owner},{amount:1},{plan:'sprint_7d'},{consent:false},{expectedGeneration:'0'},{requestId:'bad'}])expect(()=>captureLoopBillingInput({...base,...change})).toThrow();

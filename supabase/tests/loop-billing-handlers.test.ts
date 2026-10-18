@@ -55,7 +55,7 @@ it('actual checkout binds verified owner/session and ignores no browser identity
   response=await handlers[0](req({action:'checkout',plan:'weekly',requestId:request,expectedGeneration:0,consent:true}));expect(response.status).toBe(200);
   expect(await response.json()).toMatchObject({provider:'dodo',billingMode:'test',requestId:request,generation:0,plan:'weekly',sessionId:checkout});
   expect(state.rpcCalls[0].args).toMatchObject({p_user:owner,p_auth_session:session,p_generation:0});
-  expect(fetches.find(call=>call.method==='POST')?.body).toMatchObject({metadata,subscription_data:{trial_period_days:0}});
+  expect(fetches.find(call=>call.method==='POST')?.body).toMatchObject({metadata,billing_currency:'USD',subscription_data:{trial_period_days:0}});
 });
 it('unsigned webhook cannot query Dodo or touch subscription authority',async()=>{
   const response=await handlers[1](req({type:'payment.succeeded',data:payFixture()},null));expect(response.status).toBe(400);expect((await response.json()).code).toBe('BAD_SIGNATURE');expect(fetches).toHaveLength(0);expect(state.rpcCalls).toHaveLength(0);

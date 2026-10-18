@@ -45,6 +45,8 @@ export function dodoCheckoutBody(config: DodoBillingConfig, userId: string, requ
   const { productId } = dodoExpectedProduct(config, plan);
   return {
     product_cart: [{ product_id: productId, quantity: 1 }],
+    // Disabling the chooser does not prevent billing-country currency inference.
+    billing_currency: 'USD',
     return_url: plan ? `${config.appUrl}/applications?checkout=success` : `${config.appUrl}/dashboard?checkout=success`,
     cancel_url: plan ? `${config.appUrl}/pricing?checkout=cancelled` : `${config.appUrl}/dashboard?checkout=cancelled`,
     metadata: plan ? { user_id: userId, request_id: requestId, product: JOB_PASS_PRODUCT, plan } : { user_id: userId, request_id: requestId, product: PASS.product },
