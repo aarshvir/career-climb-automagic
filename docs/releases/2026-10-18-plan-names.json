@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-18",
+  "release": "v48",
+  "product": "Job Loop",
+  "source": "e37c19f5b0208139e1d3cf01d67643e24f371a12",
+  "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7921fa6a21848191a550ca466a5bb8b4",
+  "deployment": {
+    "id": "appgdep_6ad4afc39bcc819182294e49bac15b6a",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_7921fa6a21848191a550ca466a5bb8b4",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-18T11:39:02.757997+00:00"
+  },
+  "changes": [
+    "Starter / Advanced / Pro Job Seeker customer-facing plan names",
+    "Shared pricing cards, purchase consent, current subscription and checkout recovery names",
+    "Renamed current v3 Dodo Live and Test products; historical products retained"
+  ],
+  "plans": [
+    {
+      "id": "weekly",
+      "name": "Starter",
+      "providerName": "Job Loop Starter",
+      "usdMonthly": 29,
+      "runs": "one per week",
+      "liveProduct": "pdt_0Nq0BYq7BdjAS4guEjnZR",
+      "testProduct": "pdt_0Nq0BV2xKSAg0QsPs1wUB"
+    },
+    {
+      "id": "active",
+      "name": "Advanced",
+      "providerName": "Job Loop Advanced",
+      "usdMonthly": 59,
+      "runs": "three chosen weekdays per week",
+      "liveProduct": "pdt_0Nq0Bq1C8qWpEc09hFc9l",
+      "testProduct": "pdt_0Nq0BnhoTfxXqCVqJMlpM"
+    },
+    {
+      "id": "daily",
+      "name": "Pro Job Seeker",
+      "providerName": "Job Loop Pro Job Seeker",
+      "usdMonthly": 99,
+      "runs": "one per day",
+      "liveProduct": "pdt_0Nq0Bu1sW9DpHx9xCgY44",
+      "testProduct": "pdt_0Nq0B9zr7zYSVFmTP0APS"
+    }
+  ],
+  "verification": {
+    "focusedTests": 68,
+    "testFiles": 3,
+    "typeScript": "passed",
+    "productionBuild": {
+      "publicPages": 38,
+      "compressedWorkerBytes": 2910002,
+      "passed": true
+    },
+    "hostingGroups": 12,
+    "liveExactHtmlPages": 5,
+    "liveExactJsAssets": 3,
+    "htmlExclusion": "Only the observed appended Cloudflare challenge script",
+    "provider": "Native saved name and exact product-ID readback in Live and Test",
+    "browser": "Actual live pricing page showed all three names, INR2999/5999/8999 and correct run frequencies"
+  },
+  "limits": [
+    "No fresh full test suite, new payment, renewal or cancellation was run for this naming-only change",
+    "Backend handlers, schema, IDs, prices, existing subscriptions and ad state unchanged"
+  ],
+  "rollback": {
+    "tag": "jobvance-before-plan-names-2026-10-18",
+    "source": "1b67f2d9ce334fda6602c4f372504ef0baff5cec",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_bf309038723881918a8830f2b6941ec4",
+    "note": "Provider name rollback is separate; preserve all financial history"
+  }
+}
