@@ -1,0 +1,179 @@
+{
+  "version": 45,
+  "source": "49002a0a610417e8daf14e7dfdfaa1aff714d3d2",
+  "saved": {
+    "id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_8b3862902c208191a0375eabd1e4cc23",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "version_number": 45,
+    "source": {
+      "commit_sha": "49002a0a610417e8daf14e7dfdfaa1aff714d3d2"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_0000000097cc8243b9d3f4fd38b9c83c",
+      "content_hash": "sha256:d95dc561899e0a72b82d8019f756bba349697e818f966a8a9a69e8a2c03bbab9",
+      "size_bytes": 15114240,
+      "file_count": 136
+    },
+    "screenshot_url": null,
+    "deployment_id": null
+  },
+  "deployment": {
+    "id": "appgdep_6ad4928f76d88191b7d7dffb9d6df4bf",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_8b3862902c208191a0375eabd1e4cc23",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.clear-moon-9685.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-18T09:34:26.386953+00:00"
+  },
+  "customUrl": "https://jobvance.io",
+  "migration": {
+    "source": "20261018091955_job_loop_refund_renewal_safety.sql",
+    "nativeVersion": "20261018093128",
+    "sha256": "fb8f165f6690a3a9260d877842cc57b120dbc1405b0c2cec1944e59ce13f2643"
+  },
+  "nativeReadback": [
+    {
+      "name": "job-loop-billing",
+      "status": "ACTIVE",
+      "version": 13,
+      "verify_jwt": false,
+      "files": 8,
+      "exact": true
+    },
+    {
+      "name": "dodo-webhook",
+      "status": "ACTIVE",
+      "version": 15,
+      "verify_jwt": false,
+      "files": 8,
+      "exact": true
+    },
+    {
+      "name": "job-loop-billing-test",
+      "status": "ACTIVE",
+      "version": 9,
+      "verify_jwt": false,
+      "files": 9,
+      "exact": true
+    },
+    {
+      "name": "dodo-webhook-test",
+      "status": "ACTIVE",
+      "version": 9,
+      "verify_jwt": false,
+      "files": 9,
+      "exact": true
+    }
+  ],
+  "existingFunctionMetadata": [
+    {
+      "name": "get-entitlement",
+      "version": 20,
+      "status": "ACTIVE",
+      "codeRedeployedInThisRepair": false
+    },
+    {
+      "name": "create-checkout",
+      "version": 20,
+      "status": "ACTIVE",
+      "codeRedeployedInThisRepair": true,
+      "scope": "USD currency fix before the final refund-safety deployment"
+    },
+    {
+      "name": "job-loop-control",
+      "version": 32,
+      "status": "ACTIVE",
+      "codeRedeployedInThisRepair": false
+    },
+    {
+      "name": "job-loop-worker",
+      "version": 27,
+      "status": "ACTIVE",
+      "codeRedeployedInThisRepair": false
+    },
+    {
+      "name": "job-loop-oauth",
+      "version": 17,
+      "status": "ACTIVE",
+      "codeRedeployedInThisRepair": false
+    },
+    {
+      "name": "tailor-for-job",
+      "version": 16,
+      "status": "ACTIVE",
+      "codeRedeployedInThisRepair": false
+    }
+  ],
+  "environmentVersionNote": "Saving the Test gate created new platform function versions without changing their uploaded source; unchanged runtime handlers were not re-uploaded.",
+  "providerAcceptance": {
+    "mode": "test",
+    "initialPaymentsByPlan": {
+      "weekly": 2900,
+      "active": 5900,
+      "daily": 9900
+    },
+    "currency": "USD",
+    "successfulAcceleratedRenewals": 1,
+    "declinedAcceleratedRenewals": 1,
+    "refunds": 2,
+    "cancellationConfirmedPlans": 3,
+    "cancellationAfterRefund": true,
+    "originalCancellationRetryConfirmed": true,
+    "signedNotificationsReconciled": true,
+    "paidPeriodNotExtendedOnFailure": true,
+    "testDerivedLiveGrants": 0,
+    "realMoneyCharges": 0,
+    "naturalMonthlyElapsed": false,
+    "liveCardChargeTested": false,
+    "graceWindowObserved": false,
+    "observedFailureState": "on_hold",
+    "chromeCardIframeLimitation": true,
+    "iabTestCheckoutsCompleted": true,
+    "customerEmailDeliveryTested": false
+  },
+  "verification": {
+    "fullSuite": {
+      "tests": 2858,
+      "files": 155,
+      "finalAddedControlSqlCaseRunSeparately": true
+    },
+    "finalSqlTests": 28,
+    "nativePostgresGroups": 12,
+    "independentOverlappingTests": 177,
+    "sourceDenoEntrypoints": 4,
+    "typescript": true,
+    "productionBuild": true,
+    "publicPages": 38,
+    "hostingGroups": 12,
+    "liveHtml": 5,
+    "exactLiveJavascriptAssets": 3,
+    "nativeUploadedFiles": 34,
+    "nativeRoutineBodies": 6
+  },
+  "finalGates": {
+    "liveCheckoutEnabled": true,
+    "liveWebhookEnabled": true,
+    "liveWebhookEvents": 15,
+    "testBillingGate": false,
+    "testWebhookEnabled": false,
+    "syntheticSessionsSignedOut": 4,
+    "remainingSyntheticSessions": 0,
+    "syntheticSubscriptionFutureRenewalsAllCancelled": true
+  },
+  "rollback": {
+    "tag": "jobvance-before-billing-provider-acceptance-2026-10-18",
+    "source": "7cc84d9",
+    "savedV44": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_94e5006f68488191b32b27b5c66bcdfb",
+    "financialLedgersAndProviderGuardMustBeRetained": true
+  },
+  "ads": "Remain Off pending exact revised creative review and explicit approval",
+  "at": "2026-10-18T09:41:02.460Z"
+}
