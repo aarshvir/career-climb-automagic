@@ -99,8 +99,26 @@ describe('monthly checkout and cancellation orchestration',()=>{
   it('creates one bound checkout with actual auth session and immutable generation',async()=>{
     const p=ports();const reply=await controlLoopBilling(p.result,config(),owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',consent:true});
     expect(reply).toMatchObject({generation:0,plan:'weekly',sessionId:session,requestId:request});
-    expect(p.calls[0]).toEqual({name:'job_loop_billing_checkout_claim',args:{p_user:owner,p_auth_session:auth,p_generation:0,p_request:request,p_mode:'test',p_plan:'weekly',p_product:'pdt_FixtureWeekly'}});
-    expect(p.calls[1].name).toBe('job_loop_billing_checkout_finalize');
+    expect(p.calls.find(call=>call.name==='job_loop_billing_checkout_claim')).toEqual({name:'job_loop_billing_checkout_claim',args:{p_user:owner,p_auth_session:auth,p_generation:0,p_request:request,p_mode:'test',p_plan:'weekly',p_product:'pdt_FixtureWeekly'}});
+    expect(p.calls[p.calls.length-1].name).toBe('job_loop_billing_checkout_finalize');
+  });
+  it('recovers the original unquoted USD ready link after product rotation without rereading or recreating it',async()=>{
+    const p=ports(),rotated={...config(),loopProducts:{...config().loopProducts,weekly:'pdt_NextWeeklyVersion'}};
+    p.rpcResults.job_loop_billing_checkout_claim={state:'ready',creationClaimAcquired:false,session_id:session,checkout_url:`https://test.checkout.dodopayments.com/session/${session}`,created_at:from};
+    expect(await controlLoopBilling(p.result,rotated,owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',consent:true})).toMatchObject({requestId:request,sessionId:session});
+    expect(p.calls.find(call=>call.name==='job_loop_billing_checkout_claim')?.args).toMatchObject({p_auth_session:auth,p_generation:0,p_product:'pdt_FixtureWeekly'});expect(p.providerCalls).toHaveLength(0);
+    p.rpcResults.job_loop_billing_checkout_claim={state:'uncertain',creationClaimAcquired:false};
+    await expect(controlLoopBilling(p.result,rotated,owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',consent:true})).rejects.toMatchObject({code:'LOOP_CHECKOUT_RECOVERY_REQUIRED'});expect(p.providerCalls).toHaveLength(0);
+  });
+  it('uses only the configured new product for a genuinely new unquoted USD checkout',async()=>{
+    const p=ports(),next='pdt_NextWeeklyVersion',rotated={...config(),loopProducts:{...config().loopProducts,weekly:next}};delete p.rpcResults.job_loop_billing_order;
+    p.providerResults[`products/${next}`]=product({product_id:next});
+    await controlLoopBilling(p.result,rotated,owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',consent:true});
+    expect(p.calls.find(call=>call.name==='job_loop_billing_checkout_claim')?.args.p_product).toBe(next);expect(p.providerCalls.find(call=>call.endpoint==='checkouts')?.body).toMatchObject({billing_currency:'USD',product_cart:[{product_id:next,quantity:1}]});
+  });
+  it('does not read a provider or reveal a saved link when the exact original SQL claim rejects current authority',async()=>{
+    const p=ports(),rpc=p.result.rpc;p.result.rpc=async<T>(name,args)=>{if(name==='job_loop_billing_checkout_claim')throw new Error('LOOP_BILLING_SESSION');return rpc<T>(name,args);};
+    await expect(controlLoopBilling(p.result,config(),owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',consent:true})).rejects.toThrow('LOOP_BILLING_SESSION');expect(p.providerCalls).toHaveLength(0);
   });
   it('reuses a saved checkout and never duplicates an ambiguous provider attempt',async()=>{
     const p=ports();p.rpcResults.job_loop_billing_checkout_claim={state:'ready',creationClaimAcquired:false,session_id:session,checkout_url:`https://test.checkout.dodopayments.com/session/${session}`,created_at:from};

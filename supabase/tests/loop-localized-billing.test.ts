@@ -41,8 +41,8 @@ async function fixture(currency:keyof typeof LOOP_LOCAL_CURRENCIES='INR',histori
   return {q,ports,calls,reads,replies,values,order};
 }
 describe('fixed local currency money authority',()=>{
-  it('derives all 27 v2 whole-currency amounts from retained rates with exact integer rounding',()=>{
-    expect(LOOP_LOCAL_PRICE_CATALOG_VERSION).toBe('loop-local-2026-10-18-v2');
+  it('derives all 27 v3 whole-currency amounts from retained rates with exact integer rounding',()=>{
+    expect(LOOP_LOCAL_PRICE_CATALOG_VERSION).toBe('loop-local-2026-10-18-v3');
     const rational=(value:string)=>{const [whole,fraction='']=value.split('.');return{n:BigInt(whole+fraction),d:10n**BigInt(fraction.length)};};
     const nearest=(n:bigint,d:bigint)=>(2n*n+d)/(2n*d);
     const usd=rational(LOOP_LOCAL_PRICE_SOURCE.eurRates.USD);
@@ -93,6 +93,16 @@ describe('fixed local currency money authority',()=>{
   });
 });
 describe('authenticated immutable quote, checkout and lifecycle orchestration',()=>{
+  it('requires the configured new product for a fresh quote while preserving historical product snapshots separately',async()=>{
+    const f=await fixture(),next='pdt_NewVersion',rotated={...config(),loopProducts:{...config().loopProducts,weekly:next}};
+    const intent={action:'quote',requestId:quoteRequest,expectedGeneration:0,plan:'weekly',country:'IN',currency:'INR'};
+    await expect(controlLoopBilling(f.ports,rotated,owner,auth,intent)).rejects.toMatchObject({code:'LOOP_BILLING_PRICE_CHANGED'});expect(f.reads).toHaveLength(0);
+    const currentProduct=product({product_id:next}),currentRules={items:[{...rules().items[0],product_id:next}]},currentPreview=preview();currentPreview.product_cart[0].product_id=next;currentPreview.subscriptions[0].product_id=next;
+    Object.assign(f.q,{productId:next});const pricing=storedLoopPrice({pricing:f.q},'weekly');Object.assign(f.q,await verifyLoopPriceRule(currentProduct,currentRules,rotated,pricing),{previewHash:await verifyLoopPricePreview(currentPreview,pricing)});
+    f.replies.job_loop_billing_quote_candidate={quote:null,catalog:{...catalog(),productId:next}};f.values[`products/${next}`]=currentProduct;f.values[`products/${next}/localized-prices`]=currentRules;f.values['checkouts/preview']=currentPreview;
+    expect(await controlLoopBilling(f.ports,rotated,owner,auth,intent)).toMatchObject({quoteId,amountMinor:299900,catalogVersion:LOOP_LOCAL_PRICE_CATALOG_VERSION});
+    expect(f.calls.find(call=>call.name==='job_loop_billing_quote_issue')?.args.p_product).toBe(next);expect(f.reads.filter(call=>call.endpoint.startsWith('products/')).every(call=>call.endpoint.startsWith(`products/${next}`))).toBe(true);
+  });
   it('authenticates candidate before provider reads and issues only the exact reviewed server catalogue',async()=>{
     const f=await fixture(),result=await controlLoopBilling(f.ports,config(),owner,auth,{action:'quote',requestId:quoteRequest,expectedGeneration:0,plan:'weekly',country:'IN',currency:'INR'});
     expect(result).toEqual({...publicLoopPrice(parseLoopQuote(f.q)),quoteId,requestId:quoteRequest,generation:0,plan:'weekly',expiresAt:f.q.expiresAt});
@@ -119,13 +129,13 @@ describe('authenticated immutable quote, checkout and lifecycle orchestration',(
     expect(f.reads.some(call=>call.endpoint==='checkouts')).toBe(false);expect(f.calls.find(call=>call.name==='job_loop_billing_checkout_fail')?.args.p_retryable).toBe(true);
   });
   it.each(['INR','EUR'] as const)('resumes an original v1 %s ready checkout after quote expiry without repricing or another POST',async currency=>{
-    const f=await fixture(currency,true);f.q.expiresAt='2026-10-18T07:59:00.000Z';f.replies.job_loop_billing_checkout_claim_v2={...f.order,state:'ready',creationClaimAcquired:false,checkout_url:`https://test.checkout.dodopayments.com/session/${session}`,created_at:from};
-    expect(await controlLoopBilling(f.ports,config(),owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',quoteId,consent:true})).toMatchObject({pricing:{currency,amountMinor:historicalWeekly[currency],catalogVersion:'loop-local-2026-10-18-v1'}});
-    expect(f.reads).toHaveLength(0);
+    const f=await fixture(currency,true),rotated={...config(),loopProducts:{...config().loopProducts,weekly:'pdt_NewVersion'}};f.q.expiresAt='2026-10-18T07:59:00.000Z';f.replies.job_loop_billing_checkout_claim_v2={...f.order,state:'ready',creationClaimAcquired:false,checkout_url:`https://test.checkout.dodopayments.com/session/${session}`,created_at:from};
+    expect(await controlLoopBilling(f.ports,rotated,owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',quoteId,consent:true})).toMatchObject({pricing:{currency,amountMinor:historicalWeekly[currency],catalogVersion:'loop-local-2026-10-18-v1'}});
+    expect(f.calls.find(call=>call.name==='job_loop_billing_checkout_claim_v2')?.args.p_product).toBe(productId);expect(f.reads).toHaveLength(0);
   });
   it('holds an ambiguous original checkout without repricing or repeating any provider write',async()=>{
-    const f=await fixture('INR',true);f.replies.job_loop_billing_checkout_claim_v2={...f.order,state:'uncertain',creationClaimAcquired:false,session_id:null};
-    await expect(controlLoopBilling(f.ports,config(),owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',quoteId,consent:true})).rejects.toMatchObject({code:'LOOP_CHECKOUT_RECOVERY_REQUIRED'});expect(f.reads).toHaveLength(0);
+    const f=await fixture('INR',true),rotated={...config(),loopProducts:{...config().loopProducts,weekly:'pdt_NewVersion'}};f.replies.job_loop_billing_checkout_claim_v2={...f.order,state:'uncertain',creationClaimAcquired:false,session_id:null};
+    await expect(controlLoopBilling(f.ports,rotated,owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',quoteId,consent:true})).rejects.toMatchObject({code:'LOOP_CHECKOUT_RECOVERY_REQUIRED'});expect(f.reads).toHaveLength(0);
   });
   it('holds an unused old quote if the provider changed its rule, instead of silently charging the new price',async()=>{
     const f=await fixture('INR',true);f.values[`products/${productId}/localized-prices`]=rules();f.values['checkouts/preview']=preview();

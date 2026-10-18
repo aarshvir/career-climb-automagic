@@ -5,7 +5,6 @@ import { afterAll,beforeAll,beforeEach,describe,expect,it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { createHash,randomUUID } from 'node:crypto';
 import { checkLoopSchema } from './fixtures/check-loop-schema.mjs';
-import { LOOP_LOCAL_CURRENCIES,LOOP_LOCAL_PRICE_CATALOG_VERSION } from '../functions/_shared/loop-local-prices.ts';
 import { applyLoopBillingWebhook,controlLoopBilling,type LoopBillingPorts } from '../functions/_shared/loop-billing-runtime.ts';
 import { LOOP_BILLING_PRODUCT,loopBillingConfiguration } from '../functions/_shared/loop-billing.ts';
 import { dodoEnvironment } from './dodo-fixtures';
@@ -42,7 +41,7 @@ describe('whole-unit new price admission with immutable historical prices',()=>{
   it.each(Object.keys(prices))('issues all three exact whole-unit %s plans in both modes after activation',async currency=>{
     await activate();for(const mode of['test','live'])for(const[index,plan]of['weekly','three_weekly','daily'].entries()){
       const q=await quote(base(randomUUID(),{p_mode:mode,p_plan:plan,p_currency:currency}));expect(q).toMatchObject({catalogVersion:v2,currency,amountMinor:prices[currency as keyof typeof prices][index],exponent:currency==='JPY'?0:2});
-      const shared=LOOP_LOCAL_CURRENCIES[currency as keyof typeof LOOP_LOCAL_CURRENCIES];expect(q.catalogVersion).toBe(LOOP_LOCAL_PRICE_CATALOG_VERSION);expect(q.amountMinor).toBe(shared.amounts[plan==='three_weekly'?'active':plan as 'weekly'|'daily']);expect(q.exponent).toBe(shared.exponent);
+      // Historical v2 authority stays pinned when current product/catalogue changes.
       expect(q.amountMinor%10**q.exponent).toBe(0);if(currency==='INR')expect((q.amountMinor/100)%1000).toBe(999);
     }
   });
@@ -69,22 +68,17 @@ describe('whole-unit new price admission with immutable historical prices',()=>{
   it('pins new v2 actual payments to the new quoted total and rejects the old v1 amount',async()=>{
     await activate();const q=await quote(),requestId=randomUUID();await ready(q,requestId);await expect(apply(q,requestId,{p_paid_amount:279900})).rejects.toThrow('LOOP_BILLING_PAYMENT_CONFLICT');await apply(q,requestId);expect((await status()).subscription.pricing).toMatchObject({catalogVersion:v2,currency:'INR',amountMinor:299900});
   });
-  it('executes current v2 quote, checkout, retry and payment orchestration against the actual new SQL price authority',async()=>{
-    await activate();const product='pdt_0NpzVnWkzvNbKUPtHzZGo',requestId=randomUUID();let q:any,posts=0;
-    const environment=dodoEnvironment({JOBVANCE_LOOP_BILLING_ENABLED:'true',DODO_PRODUCT_LOOP_WEEKLY:product,DODO_PRODUCT_LOOP_ACTIVE:'pdt_active',DODO_PRODUCT_LOOP_DAILY:'pdt_daily'}),config={...loopBillingConfiguration(key=>environment[key])!,mode:'live' as const};
+  it('recovers a historical v2 ready checkout and reconciles exact payment after current products rotate',async()=>{
+    await activate();const product='pdt_0NpzVnWkzvNbKUPtHzZGo',requestId=randomUUID(),q=await quote();await ready(q,requestId);
+    const environment=dodoEnvironment({JOBVANCE_LOOP_BILLING_ENABLED:'true',DODO_PRODUCT_LOOP_WEEKLY:'pdt_current_v3_weekly',DODO_PRODUCT_LOOP_ACTIVE:'pdt_current_v3_active',DODO_PRODUCT_LOOP_DAILY:'pdt_current_v3_daily'}),config={...loopBillingConfiguration(key=>environment[key])!,mode:'live' as const};
     const from=new Date(start).toISOString(),until=new Date(end).toISOString();
     const payment=()=>({payload_type:'Payment',payment_id:'pay_whole',status:'succeeded',currency:'INR',subscription_id:'sub_whole',subscription_ids:['sub_whole'],customer:{customer_id:'cus_whole'},total_amount:299900,tax:0,checkout_session_id:'cks_whole',settlement_currency:'USD',settlement_amount:3025,settlement_tax:0,service_periods:[{subscription_id:'sub_whole',starts_at:from,ends_at:until}]});
     const ports:LoopBillingPorts={rpc:async<T>(name:string,args:Record<string,unknown>)=>await rpc(name,args) as T,provider:async(endpoint,body)=>{
-      if(endpoint===`products/${product}`)return{product_id:product,is_recurring:true,pricing_mode:'by_currency',price:{type:'recurring_price',price:2900,currency:'USD',payment_frequency_count:1,payment_frequency_interval:'Month',subscription_period_count:20,subscription_period_interval:'Year',trial_period_days:0,tax_inclusive:true}};
-      if(endpoint===`products/${product}/localized-prices`)return{items:[{id:'lcp_whole',product_id:product,mode:'by_currency',currency:'INR',amount:299900,updated_at:from}]};
-      if(endpoint==='checkouts/preview')return{billing_country:'IN',currency:'INR',is_byop:false,payment_method_required:true,total_price:299900,current_breakup:{discount:0,total_amount:299900,tax:0},recurring_breakup:{discount:0,total_amount:299900,tax:0},product_cart:[{product_id:product,quantity:1,currency:'INR',is_subscription:true,is_usage_based:false,tax_inclusive:true,discount_amount:0,meters:[],addons:[]}],subscriptions:[{product_id:product,amount_due_now:299900,recurring_amount:299900,trial_period_days:0}]};
-      if(endpoint==='checkouts'){posts++;expect(body).toMatchObject({billing_currency:'INR',metadata:{quote_id:q.quoteId},billing_address:{country:'IN'}});return{session_id:'cks_whole',checkout_url:'https://checkout.dodopayments.com/session/cks_whole'};}
       if(endpoint==='checkouts/cks_whole')return{id:'cks_whole',payment_id:'pay_whole'};if(endpoint==='payments/pay_whole')return payment();
       if(endpoint==='subscriptions/sub_whole')return{payload_type:'Subscription',subscription_id:'sub_whole',product_id:product,quantity:1,currency:'USD',recurring_pre_tax_amount:3120,payment_frequency_count:1,payment_frequency_interval:'Month',subscription_period_count:20,subscription_period_interval:'Year',trial_period_days:0,on_demand:false,tax_inclusive:true,cancel_at_next_billing_date:false,status:'active',previous_billing_date:from,next_billing_date:until,customer:{customer_id:'cus_whole'},metadata:{product:LOOP_BILLING_PRODUCT,user_id:owner,request_id:requestId,generation:'0',plan:'weekly',quote_id:q.quoteId}};
       throw Error('Unplanned provider boundary');
     }};
-    q=await controlLoopBilling(ports,config,owner,session,{action:'quote',requestId:randomUUID(),expectedGeneration:0,plan:'weekly',country:'IN',currency:'INR'});expect(q).toMatchObject({catalogVersion:v2,amountMinor:299900,currency:'INR'});
-    const intent={action:'checkout',requestId,expectedGeneration:0,plan:'weekly',quoteId:q.quoteId,consent:true};await controlLoopBilling(ports,config,owner,session,intent);await controlLoopBilling(ports,config,owner,session,intent);expect(posts).toBe(1);
+    const intent={action:'checkout',requestId,expectedGeneration:0,plan:'weekly',quoteId:q.quoteId,consent:true};expect(await controlLoopBilling(ports,config,owner,session,intent)).toMatchObject({url:'https://checkout.dodopayments.com/session/cks_whole',pricing:{catalogVersion:v2,currency:'INR',amountMinor:299900}});await controlLoopBilling(ports,config,owner,session,intent);
     await applyLoopBillingWebhook(ports,config,{type:'payment.succeeded',created:epoch,data:payment()},'whole_v2_initial');expect((await status()).subscription.pricing).toMatchObject({catalogVersion:v2,currency:'INR',amountMinor:299900});expect((await status()).entitlement).toMatchObject({active:true,plan:'weekly',maxWeeklyRuns:1});expect((await raw('SELECT currency,amount::int FROM jobvance_private.loop_subscription_periods')).rows).toEqual([{currency:'INR',amount:299900}]);
   });
   it('leaves both applied monetary authority migrations byte-for-byte unchanged',async()=>{

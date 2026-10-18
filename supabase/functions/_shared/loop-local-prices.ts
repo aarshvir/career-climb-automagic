@@ -2,7 +2,7 @@
  * service. These amounts are not client authority: SQL and Dodo independently
  * verify the exact selected price before checkout and when a payment settles.
  * Existing subscriptions retain their original currency and amount. */
-export const LOOP_LOCAL_PRICE_CATALOG_VERSION = 'loop-local-2026-10-18-v2';
+export const LOOP_LOCAL_PRICE_CATALOG_VERSION = 'loop-local-2026-10-18-v3';
 export type LoopLocalPlan = 'weekly' | 'active' | 'daily';
 
 export const LOOP_LOCAL_PRICE_SOURCE = {

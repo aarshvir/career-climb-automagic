@@ -64,9 +64,16 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
   }
   if (input.action === 'checkout') {
     let quote:LoopPriceQuote|null=null;
+    let legacyProduct=config.loopProducts[input.plan];
     if(input.quoteId){quote=parseLoopQuote(await ports.rpc('job_loop_billing_quote_read',{...base,p_generation:input.generation,p_mode:mode,p_quote:input.quoteId}));sameQuote(quote,input,mode);}
-    else validateLoopBillingProduct(await ports.provider(`products/${config.loopProducts[input.plan]}`), config, input.plan);
-    const order = record(await ports.rpc(quote?'job_loop_billing_checkout_claim_v2':'job_loop_billing_checkout_claim', { ...bound, p_mode: mode, p_plan: sqlPlan(input.plan), p_product: quote?.productId??config.loopProducts[input.plan],...(quote?{p_quote:quote.quoteId}:{}) }));
+    else {
+      // Product versions may rotate while an original USD checkout is still
+      // open. Its stored product remains authority; the exact SQL claim still
+      // authenticates this session/generation before any URL can be returned.
+      const original=await ports.rpc('job_loop_billing_order',{p_user:owner,p_request:input.requestId,p_mode:mode});
+      if(original)legacyProduct=storedLoopPrice(original,input.plan).productId;
+    }
+    const order = record(await ports.rpc(quote?'job_loop_billing_checkout_claim_v2':'job_loop_billing_checkout_claim', { ...bound, p_mode: mode, p_plan: sqlPlan(input.plan), p_product: quote?.productId??legacyProduct,...(quote?{p_quote:quote.quoteId}:{}) }));
     if(quote){const original=storedLoopPrice(order,input.plan);if(original.quoteId!==quote.quoteId||original.amountMinor!==quote.amountMinor||original.currency!==quote.currency||original.productId!==quote.productId)throw unavailable();}
     if (!['creating','ready','uncertain','failed'].includes(String(order.state))) throw new ApiError(409, 'LOOP_CHECKOUT_FINISHED', 'This checkout is no longer open. Refresh your subscription.');
     let session: { sessionId: string; url: string };
@@ -76,15 +83,15 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
     } else {
       if (order.creationClaimAcquired !== true) throw new ApiError(409, 'LOOP_CHECKOUT_RECOVERY_REQUIRED', 'This checkout needs recovery. Keep the same request and contact support if it remains unavailable.');
       // No undocumented provider idempotency is assumed: an ambiguous POST is never repeated.
-      if(quote){
-        try{
+      try{
+        if(quote){
           if(!(Date.parse(quote.expiresAt)>(ports.now?.()??Date.now())))throw new ApiError(409,'LOOP_BILLING_QUOTE_EXPIRED','This price quote expired. Request a fresh quote before checkout.');
           const verified=await verifiedPrice(ports,config,quote);
           if(verified.localizedPriceId!==quote.localizedPriceId||verified.providerRevision!==quote.providerRevision||verified.previewHash!==quote.previewHash)throw new ApiError(409,'LOOP_BILLING_PRICE_CHANGED','This price changed. Request a fresh quote before checkout.');
-        }catch(error){await ports.rpc('job_loop_billing_checkout_fail',{...bound,p_retryable:true});throw error;}
-      }
+        }else validateLoopBillingProduct(await ports.provider(`products/${legacyProduct}`),{...config,loopProducts:{...config.loopProducts,[input.plan]:legacyProduct}},input.plan);
+      }catch(error){await ports.rpc('job_loop_billing_checkout_fail',{...bound,p_retryable:true});throw error;}
       try {
-        session = validateDodoCheckoutSession(await ports.provider('checkouts', quote?quoteCheckoutBody(config, owner, input.requestId, input.generation, quote):loopCheckoutBody(config, owner, input.requestId, input.generation, input.plan)), mode);
+        session = validateDodoCheckoutSession(await ports.provider('checkouts', quote?quoteCheckoutBody(config, owner, input.requestId, input.generation, quote):loopCheckoutBody({...config,loopProducts:{...config.loopProducts,[input.plan]:legacyProduct}}, owner, input.requestId, input.generation, input.plan)), mode);
         await ports.rpc('job_loop_billing_checkout_finalize', { ...bound, p_session: session.sessionId, p_url: session.url });
       } catch (error) {
         await ports.rpc('job_loop_billing_checkout_fail', { ...bound, p_retryable: false }).catch(() => undefined);
