@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-18",
+  "at": "2026-10-18T14:49:39.508408+00:00",
+  "status": "local_validation_complete_not_published",
+  "baseHead": "3433eac63daa443f9c20ccbd144df942b4c755b1",
+  "scope": "Contact copy, current plan Terms names, one page-authoritative ready-packet count",
+  "sourceSha256": {
+    "src/pages/GuestSupport.tsx": "cd7013a853c7f40e5521af44b56ce7f4449d59e83acf80bada56e76bde7690fb",
+    "src/pages/ProductPage.tsx": "0510092d865f90d01ee6ff23c7a31e2f0ea49e6f1e1523ec7f2716e651284c36",
+    "src/pages/JobLoop.tsx": "86dca9fc312924af868c22bddd7ced94428090e5ec74c903d76dc1fbd8d15d31",
+    "src/pages/JobLoopPanels.tsx": "ccf17475a5cec9912509ce3ff7f85cfbb0713255b9073b0e99136325ab9b4dc3",
+    "src/__tests__/job-loop-variant-packet-review.test.tsx": "4049ab7a82a3e754cb2ddf1993a4a0aa6c5f0a730658cbb7c5659e7739fa5eff"
+  },
+  "focused": {
+    "tests": 60,
+    "files": 5,
+    "passed": true,
+    "variantCases": 17,
+    "newCases": 3,
+    "relatedRun": {
+      "tests": 137,
+      "files": 6,
+      "passed": true,
+      "overlap": "audience-and-pricing; do not sum as unique coverage"
+    }
+  },
+  "independentReview": {
+    "tests": 50,
+    "passed": true,
+    "scope": "source inspected; overlapping component tests; no bounded blocker reported"
+  },
+  "typeScript": {
+    "passed": true
+  },
+  "diffCheck": {
+    "passed": true
+  },
+  "productionBuild": {
+    "completePipeline": true,
+    "initialFullCommandExit": 1,
+    "initialFailure": "OneDrive symbolic-link guard in host packaging",
+    "vitePassed": true,
+    "prerender": {
+      "publicPages": 38,
+      "guideArticles": 20,
+      "structuredDataHashes": 58,
+      "externalRequests": 0
+    },
+    "inspection": {
+      "entries": 139,
+      "files": 134,
+      "directories": 5,
+      "links": 0,
+      "methods": [
+        "dirent",
+        "lstat",
+        "readlink"
+      ],
+      "readlinkErrors": {
+        "EINVAL": 139
+      }
+    },
+    "unchangedPackagerRetryPassed": true,
+    "assets": 132,
+    "workerBytes": 8596546,
+    "staticBytes": 6426006,
+    "compressedBytes": 2909128,
+    "compressedLimitBytes": 3145728,
+    "hostingGroups": 12
+  },
+  "fullSuite": {
+    "rerun": false,
+    "previousRelease": "v49 3095cases/164files; not fresh evidence for this patch"
+  },
+  "rollback": {
+    "tag": "jobvance-before-product-clarity-2026-10-18",
+    "source": "3433eac63daa443f9c20ccbd144df942b4c755b1",
+    "pushed": true,
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_400f0d9784a881919747f0fb60bf1f3e"
+  },
+  "limits": [
+    "No browser/provider/backend/payment/marketing action",
+    "No hosted authenticated or unassisted task",
+    "No NPS or media pass"
+  ]
+}

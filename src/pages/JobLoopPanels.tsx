@@ -10,10 +10,9 @@ type Perform = (action: LoopAction, success?: string) => Promise<LoopResponse | 
 const readable = (value: string) => value.replace(/_/g, ' ');
 const moment = loopDateLabel;
 
-export function LoopWorkspaceOverview({ snapshot, onOpen, onSchedule }: { snapshot: LoopSnapshot; onOpen: (section: Section, packetId?: string) => void; onSchedule?: () => void }) {
+export function LoopWorkspaceOverview({ snapshot, readyPacketCount, onOpen, onSchedule }: { snapshot: LoopSnapshot; readyPacketCount: number; onOpen: (section: Section, packetId?: string) => void; onSchedule?: () => void }) {
   const cleared = snapshot.claims.filter(claim => claim.status === 'active' && claim.confirmed && claim.shareable);
   const review = snapshot.packets.filter(packet => packet.status === 'review_required');
-  const approved = snapshot.packets.filter(packet => packet.status === 'approved' && !!snapshot.profile && packet.profileRevision === snapshot.profile.revision && Object.keys(packet.claimVersions).length > 0 && Object.entries(packet.claimVersions).every(([id, revision]) => cleared.some(claim => claim.id === id && claim.revision === revision)) && packet.holdReasons.length === 0 && (packet.formatStatus ? Object.values(packet.formatStatus).some(format => format.ready) : packet.pageCount !== null && packet.pageCount > 0 && packet.pageCount <= snapshot.profile.pageTarget));
   const due = snapshot.opportunities.filter(opportunity => loopFollowUpDue(opportunity.followUpAt) && !['offer', 'rejected', 'withdrawn'].includes(opportunity.status));
   const upcoming = snapshot.opportunities.filter(opportunity => opportunity.followUpAt && !loopFollowUpDue(opportunity.followUpAt) && !['offer', 'rejected', 'withdrawn'].includes(opportunity.status)).sort((a,b) => Date.parse(a.followUpAt) - Date.parse(b.followUpAt));
   const active=snapshot.runs.some(run=>['running','queued'].includes(run.status));
@@ -21,14 +20,14 @@ export function LoopWorkspaceOverview({ snapshot, onOpen, onSchedule }: { snapsh
   const stages = [
     { label: 'Add or build your CV', detail: snapshot.profile ? `${cleared.length} confirmed facts ready to reuse` : 'Upload a CV or answer guided questions', ready: !!snapshot.profile && cleared.length > 0, tab: 'record' as const },
     { label: 'Choose your jobs & schedule', detail: snapshot.profile ? `${snapshot.profile.targetTitles.join(', ') || 'Choose target roles'} · ${snapshot.profile.locations.join(', ') || 'Choose locations'}` : 'Tell us the roles and places you want', ready: snapshot.schedule?.status === 'active' && !!snapshot.profile?.targetTitles.length && !!snapshot.profile.locations.length && cleared.length > 0 && !!snapshot.capabilities.scheduler, tab: 'record' as const },
-    { label: 'Receive jobs & prepared CVs', detail: `${snapshot.opportunities.length} loaded jobs · ${review.length} CVs to review · ${approved.length} ready to download`, ready: approved.length > 0, tab: 'outputs' as const },
+    { label: 'Receive jobs & prepared CVs', detail: `${snapshot.opportunities.length} loaded jobs · ${review.length} CVs to review · ${readyPacketCount} ready to download`, ready: readyPacketCount > 0, tab: 'outputs' as const },
   ];
   const next: { title: string; detail: string; section: Section; packetId?: string;to?:string } = !snapshot.profile
     ? { title: 'Import or paste my CV', detail: 'Bring the text you already have. Check it before private saving.', section: 'record' }
     : cleared.length === 0 ? { title: 'Review facts from my CV', detail: 'Confirm useful source passages and what you permit for sharing.', section: 'record' }
     : review.length > 0 ? { title: `Review ${review.length} prepared ${review.length === 1 ? 'document' : 'documents'}`, detail: 'Inspect the complete document and evidence before exact approval.', section: 'outputs', packetId: review[0].id }
     : snapshot.opportunities.length === 0 ? { title: 'Set up my job search', detail: 'Check discovery sources and choose a schedule below. You can also add a vacancy yourself.', section: 'today' }
-    : approved.length > 0 ? { title: 'Review my prepared CVs', detail: 'Your ready documents stay here while your next search is prepared.', section: 'outputs' }
+    : readyPacketCount > 0 ? { title: 'Review my prepared CVs', detail: 'Your ready documents stay here while your next search is prepared.', section: 'outputs' }
     : { title: active ? 'Inspect current preparation' : canPrepare ? 'Prepare from my saved facts' : 'Use the free CV check', detail: active||canPrepare ? 'Check available sources and preparation controls below.' : 'Cloud preparation is unavailable here. Your saved record and manual tracking remain; the on-device check is available.', section: 'today',...(!active&&!canPrepare?{to:`/check?audience=${snapshot.profile.audience}`}:{}) };
   const nextContent=<><FileText size={21} aria-hidden="true" /><span><strong>{next.title}</strong><small>{next.detail}</small></span><ArrowRight size={17} aria-hidden="true" /></>;
   return <section className="jl-panel jl-overview" aria-labelledby="jl-overview-title"><div className="jl-row-heading"><div><p className="jl-eyebrow">{snapshot.profile ? 'WELCOME BACK · YOUR SAVED PROGRESS' : 'YOUR JOB SEARCH IN THREE STEPS'}</p><h2 id="jl-overview-title">{snapshot.profile ? 'Pick up where you left off.' : 'Set up once. Return to your next opportunities.'}</h2><p>{snapshot.profile ? 'Your saved experience and search preferences carry forward. Review each prepared CV before using it.' : 'Add your experience, choose the jobs and places you want, then receive search results and prepared CVs in this dashboard.'}</p></div><span className="jl-tag"><ShieldCheck size={13} aria-hidden="true" /> Private account</span></div>

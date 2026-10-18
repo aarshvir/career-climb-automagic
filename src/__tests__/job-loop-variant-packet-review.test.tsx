@@ -57,6 +57,39 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); vi.unstubAllGlobals(); });
 
 describe('variant packets use their own current source authority', () => {
+  it('counts an approved variant consistently in the dashboard, run history and exact review', async () => {
+    current.packets[0].status = 'approved'; variant.profile.pageTarget = 2; current.profile!.pageTarget = 1; current.packets[0].pageCount = 2;
+    render(tree());
+    await screen.findByRole('button', { name: /3\. Receive jobs & prepared CVs:.*1 ready to download/ });
+    expect(screen.getByText('0 opportunities · 1 ready downloads')).toBeInTheDocument();
+    await selectPacket(); await waitFor(() => expect(screen.getByRole('button', { name: 'Download PDF' })).toBeEnabled());
+    expect(previewButton()).toBeEnabled();
+  });
+  it('keeps dashboard counts at zero until the approved variant metadata is actually resolved', async () => {
+    current.packets[0].status = 'approved'; const pending = defer<{ cvVariantFacts: CvVariantFactsRead }>();
+    const original = mocks.call.getMockImplementation()!;
+    mocks.call.mockImplementation((id, action) => action.action === 'read_cv_variant_facts' ? pending.promise : original(id, action));
+    render(tree()); await waitFor(() => expect(mocks.call.mock.calls.some(([, action]) => action.action === 'read_cv_variant_facts')).toBe(true));
+    expect(screen.getByRole('button', { name: /3\. Receive jobs & prepared CVs:.*0 ready to download/ })).toBeInTheDocument();
+    expect(screen.getByText('0 opportunities · 0 ready downloads')).toBeInTheDocument();
+    await selectPacket(); expect(screen.getByText('Checking this saved CV and its current facts…')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled();
+    await act(async () => pending.resolve({ cvVariantFacts: factsRead() }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Download PDF' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
+    expect(screen.getByRole('button', { name: /3\. Receive jobs & prepared CVs:.*1 ready to download/ })).toBeInTheDocument();
+    expect(screen.getByText('0 opportunities · 1 ready downloads')).toBeInTheDocument();
+  });
+  it('removes ready counts while career edits block review and download', async () => {
+    current.packets[0].status = 'approved'; render(tree());
+    await screen.findByRole('button', { name: /3\. Receive jobs & prepared CVs:.*1 ready to download/ });
+    fireEvent.click(screen.getByRole('button', { name: 'My CV & experience' }));
+    fireEvent.change(screen.getByLabelText('My name'), { target: { value: 'Alex Changed' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
+    expect(screen.getByRole('button', { name: /3\. Receive jobs & prepared CVs:.*0 ready to download/ })).toBeInTheDocument();
+    expect(screen.getByText('0 opportunities · 0 ready downloads')).toBeInTheDocument();
+    await selectPacket(); expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled(); expect(previewButton()).toBeDisabled();
+  });
   it('reviews, previews, approves and downloads variant revision one after global profile revision two', async () => {
     render(tree()); await selectPacket(); await waitFor(() => expect(previewButton()).toBeEnabled());
     expect(screen.queryByText(/Source claim vf_.*no longer available/)).not.toBeInTheDocument();
@@ -110,7 +143,11 @@ describe('variant packets use their own current source authority', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Refresh records' })); await waitFor(() => expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled());
     await waitFor(() => expect(screen.queryByTitle('Exact saved CV PDF preview')).not.toBeInTheDocument()); expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:exact-variant-preview');
     await waitFor(() => expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'read_cv_variant_facts')).toHaveLength(2));
+    await settledStaleSource();
     expect(previewButton()).toBeDisabled(); expect(mocks.save).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
+    expect(screen.getByRole('button', { name: /3\. Receive jobs & prepared CVs:.*0 ready to download/ })).toBeInTheDocument();
+    expect(screen.getByText('0 opportunities · 0 ready downloads')).toBeInTheDocument();
   });
   it('fails closed on unavailable source metadata and can recover through a current workspace refresh', async () => {
     const original = mocks.call.getMockImplementation()!; let unavailable = true;
@@ -125,9 +162,16 @@ describe('variant packets use their own current source authority', () => {
     current = { ...current, recordVersion: 8 }; fireEvent.click(screen.getByRole('button', { name: 'Refresh records' })); await waitFor(() => expect(previewButton()).toBeEnabled());
   });
   it('keeps legacy packets bound to global profile and claim revisions without variant reads', async () => {
-    const inherited: LoopClaim = { ...fact, id: 'legacy-claim' }; current.claims = [inherited]; delete current.packets[0].cvSelection; current.packets[0].claimVersions = { 'legacy-claim': 1 };
-    render(tree()); await selectPacket(); expect(previewButton()).toBeDisabled();
+    const inherited: LoopClaim = { ...fact, id: 'legacy-claim' }; current.claims = [inherited]; delete current.packets[0].cvSelection; current.packets[0].claimVersions = { 'legacy-claim': 1 }; current.packets[0].status = 'approved';
+    render(tree());
+    await screen.findByRole('button', { name: /3\. Receive jobs & prepared CVs:.*0 ready to download/ });
+    expect(screen.getByText('0 opportunities · 0 ready downloads')).toBeInTheDocument();
+    await selectPacket(); expect(previewButton()).toBeDisabled(); expect(screen.getByRole('button', { name: 'Download PDF' })).toBeDisabled();
     current = { ...current, profile: { ...current.profile!, revision: 1 } }; fireEvent.click(screen.getByRole('button', { name: 'Refresh records' })); await waitFor(() => expect(previewButton()).toBeEnabled());
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
+    expect(screen.getByRole('button', { name: /3\. Receive jobs & prepared CVs:.*1 ready to download/ })).toBeInTheDocument();
+    expect(screen.getByText('0 opportunities · 1 ready downloads')).toBeInTheDocument();
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'read_cv_variants' || action.action === 'read_cv_variant_facts')).toBe(false);
   });
 });
