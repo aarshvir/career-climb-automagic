@@ -44,6 +44,11 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
+# Authenticated owner/session-bound recurring Job Loop billing.
+[functions.job-loop-billing]
+enabled = true
+verify_jwt = false
+
 [functions.check-email-provider]
 enabled = false
 verify_jwt = true

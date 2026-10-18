@@ -65,23 +65,23 @@ for(const page of publicRender.pages){
   assert.equal(response.headers.get('X-Robots-Tag'),null);
   if(page.path==='/') assert.ok(!/href="\/check\?audience=/.test(html),'Examples must not select a persona for a neutral visitor.');
   if(page.path==='/pricing') {
-    assert.ok(html.includes('Free to start: 3 tailored CVs a month. Passes from $9, one-time.'));
+    assert.ok(html.includes('Job Loop from $29 a month: your job search on a schedule. CV Check is free to start, with optional one-time passes.'));
     // React inserts this exact empty comment between adjacent text nodes ($ and price).
     // Normalize only that separator; require each price inside its actual visible card.
     const pricingHtml = html.replaceAll('<!-- -->', '');
     for(const price of [9,19,39])assert.ok(pricingHtml.includes(`<p class="product-price">$${price}<span>One-time`),'The public offer must show each one-time pass price in its card.');
     assert.ok(!/\$15|Checkout not available|proposed price/.test(html),'The public offer must not contain unavailable or legacy purchases.');
-    for (const text of ['Job Loop monthly plans', 'Monthly subscriptions are not available for purchase yet.', 'no subscription starts automatically', 'USD / month', 'Not available for purchase.']) {
-      assert.ok(html.includes(text), `Pricing must distinguish current access from unavailable monthly subscriptions: ${text}`);
+    for (const text of ['Job Loop monthly plans', 'billed every month until you cancel', 'No trial or subscription starts automatically', 'USD / month', 'tax is included']) {
+      assert.ok(html.includes(text), `Pricing must explain the actual monthly billing contract: ${text}`);
     }
     for (const price of [29, 59, 99]) {
-      assert.ok(pricingHtml.includes(`<p class="product-price">$${price}<span>USD / month</span></p>`), `Proposed card must display $${price} USD per month.`);
+      assert.ok(pricingHtml.includes(`<p class="product-price">$${price}<span>USD / month</span></p>`), `Monthly card must display $${price} USD per month.`);
     }
     assert.ok(!/<form\b/i.test(html), 'The public pricing page must not collect purchase details.');
-    const monthlySection = html.match(/<section\b[^>]*aria-labelledby="proposed-plans-title"[^>]*>([\s\S]*?)<\/section>/)?.[1];
+    const monthlySection = html.match(/<section\b[^>]*aria-labelledby="loop-monthly-plans-title"[^>]*>([\s\S]*?)<\/section>/)?.[1];
     assert.ok(monthlySection, 'Monthly plans must remain in their own visible section.');
-    assert.ok(!/<(?:a|button)\b[^>]*>[\s]*?(?:Buy|Subscribe|Pay|Checkout)\b/i.test(monthlySection), 'Unavailable monthly plans must not expose purchase actions.');
-    assert.ok(!/(?:href|action)="[^"]*(?:\/(?:checkout|billing|subscribe)(?:[/?"]|$)|checkout\.paddle|buy\.stripe)/i.test(monthlySection), 'Unavailable monthly plans must not link to a checkout destination.');
+    for (const plan of ['weekly','active','daily']) assert.ok(monthlySection.includes(`/auth?next=%2Fpricing%3FloopPlan%3D${plan}`), 'Signed-out monthly choices must return through an account to the exact selected plan.');
+    assert.ok(!/(?:href|action)="[^"]*(?:checkout\.dodopayments|test\.checkout\.dodopayments|checkout\.paddle|buy\.stripe)/i.test(monthlySection), 'Public HTML must not bypass authenticated billing with a provider checkout link.');
   }
   if(page.path==='/check') {
     assert.ok(html.includes('CV Check, in your Jobvance account.'),'The initial check page must explain its account requirement before JavaScript/auth resolves.');

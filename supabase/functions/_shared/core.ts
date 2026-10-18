@@ -123,7 +123,12 @@ export function billingConfiguration(get: (key: string) => string | undefined): 
   const mode = get('JOBVANCE_BILLING_MODE');
   const provider = get('JOBVANCE_PAYMENT_PROVIDER') ?? 'paddle';
   if (provider !== 'paddle' && provider !== 'stripe' && provider !== 'dodo') return null;
-  const secretKey = get(provider === 'paddle' ? 'PADDLE_API_KEY' : provider === 'dodo' ? 'DODO_PAYMENTS_API_KEY' : 'STRIPE_SECRET_KEY') ?? '';
+  const canonicalDodoKey = get('DODO_PAYMENTS_API_KEY') || '';
+  const aliasDodoKey = get('DODO_PAYMENT_API_KEY') || '';
+  // The owner's existing secure entry used the singular name. Accept that known
+  // alias only when unambiguous; never silently choose between different keys.
+  if (provider === 'dodo' && canonicalDodoKey && aliasDodoKey && canonicalDodoKey !== aliasDodoKey) return null;
+  const secretKey = provider === 'dodo' ? canonicalDodoKey || aliasDodoKey : get(provider === 'paddle' ? 'PADDLE_API_KEY' : 'STRIPE_SECRET_KEY') ?? '';
   const webhookSecret = get(provider === 'paddle' ? 'PADDLE_WEBHOOK_SECRET' : provider === 'dodo' ? 'DODO_PAYMENTS_WEBHOOK_KEY' : 'STRIPE_WEBHOOK_SECRET') ?? '';
   const priceId = get('PADDLE_PRICE_ID') ?? '';
   const productId = get('DODO_PRODUCT_ID') || null;

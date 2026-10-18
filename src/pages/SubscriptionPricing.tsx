@@ -6,7 +6,7 @@ import { currentOffer } from '@/lib/current-offer';
 import { openPaymentCheckout } from '@/lib/payment-checkout';
 import { startPassCheckout } from '@/lib/pass-checkout';
 import { FAIR_USE_TAILORED_CVS_PER_DAY, FREE_TAILORED_CVS_PER_MONTH, isPassPlanKey, passPlan, passPlans, type PassPlanKey } from '@/lib/pass-plans';
-import { subscriptionPlans } from '@/lib/subscription-plans';
+import LoopSubscriptionBilling from '@/components/LoopSubscriptionBilling';
 
 const freeFeatures = [
   `${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month when signed in`,
@@ -22,7 +22,7 @@ const trustLines = [
 const faqs: [string, React.ReactNode][] = [
   ['What counts as a tailored CV?', 'Each time you choose “Tailor my CV for this job” and the AI prepares a version, that uses one. If the request fails before any AI work is done, it does not count. Comparing without AI, editing and downloading never use one.'],
   ['What stays free?', `Compare without AI, editing, PDF, Word and text downloads, and the applications tracker stay free with no limit. Signed in, you also get ${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs every calendar month (UTC). Job Loop access is shown in your account.`],
-  ['Do passes include Job Loop runs?', 'No. Passes add AI-tailored CVs for the CV check. Monthly Job Loop subscriptions are separate and not yet available for purchase.'],
+  ['Do passes include Job Loop runs?', 'No. Passes add AI-tailored CVs for the CV check. Job Loop monthly plans are separate and cover the recurring search pace you choose. Your account confirms checkout availability and paid access.'],
   ['Can I buy another pass while one is active?', `Yes. Its tailored CVs are added to what you have, and its days start when your current pass ends, so nothing is wasted. The pass that ends soonest is used first. For fair use, any account can tailor up to ${FAIR_USE_TAILORED_CVS_PER_DAY} CVs a day.`],
   ['What if a pass isn’t right for me?', <>If you have used fewer than 5 tailored CVs, ask within 7 days of buying and we will refund you in full. A refunded pass stops working, including any CVs left on it. <Link to="/refund">Read the refund policy</Link>.</>],
   ['Who will my invoice come from?', 'Dodo Payments sells passes for us as merchant of record. They take the payment, handle sales tax and email your invoice, and their name may appear on your card statement.'],
@@ -49,6 +49,7 @@ export default function SubscriptionPricing() {
   }
 
   return <>
+    <LoopSubscriptionBilling />
     <div className="product-current-offer product-current-offer--single">
       <section className="product-plan" aria-labelledby="loop-offer">
         <span className="product-eyebrow">JOB LOOP · ACCOUNT NEEDED</span>
@@ -90,7 +91,6 @@ export default function SubscriptionPricing() {
       {message && <p className={`pricing-message pricing-message--${message.kind}`} role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</p>}
       <ul className="pricing-trust" aria-label="About payment">{trustLines.map(line => <li key={line}><Check size={15} aria-hidden="true" />{line}</li>)}</ul>
     </section>
-    <section className="product-proposed-plans" aria-labelledby="proposed-plans-title"><h2 id="proposed-plans-title">Job Loop monthly plans</h2><p>Choose a pace for your search: weekly, three times a week or daily. Monthly subscriptions are not available for purchase yet. Continue with the access shown in your account; no subscription starts automatically.</p><div className="product-proposed-grid">{subscriptionPlans.map(plan => <article className="product-plan" key={plan.id}><span className="product-eyebrow">JOB LOOP</span><h3>{plan.name}</h3><p className="product-price">${plan.priceUsd}<span>USD / month</span></p><p>{plan.description}</p><ul>{plan.features.map(item => <li key={item}><Check size={17} aria-hidden="true" />{item}</li>)}</ul><p className="product-plan-note">Not available for purchase.</p></article>)}</div><p>A run means one search and preparation cycle, not a guaranteed number of jobs or interviews. A saved CV variant is a reusable starting CV; the document prepared for a vacancy is a separate output. Your account shows connected sources, preparation limits and processing availability.</p><p className="product-pricing-note">{currentOffer.future}</p></section>
     <div className="pricing-offer">
       <section className="pricing-teams" aria-labelledby="pricing-teams-title">
         <div><h2 id="pricing-teams-title">Coaches &amp; universities</h2><p>Supporting a group of job seekers? We can arrange passes for career coaches, bootcamps and university career services.</p></div>

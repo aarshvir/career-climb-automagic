@@ -1,6 +1,7 @@
 import { isSavedCheckContinuationPath, type SavedCheckContinuationPath } from './saved-check-continuation';
 import { isApplicationSourcePath, type ApplicationSourcePath } from './application-source-selection';
 import { passPlans, type PassPlanKey } from './pass-plans';
+import { subscriptionPlans, type LoopSubscriptionPlan } from './subscription-plans';
 
 const KEY = 'jobvance_account_return_v1';
 const TTL = 30 * 60 * 1000;
@@ -11,8 +12,8 @@ const adminPaths: readonly string[] = ['/admin', '/admin2', '/admin?days=7', '/a
 type WorkspaceReturn = '/dashboard' | `/dashboard?tab=${'cv' | 'tailor' | 'tracker' | 'billing'}`;
 const workspacePaths: readonly string[] = ['/dashboard', '/dashboard?tab=cv', '/dashboard?tab=tailor', '/dashboard?tab=tracker', '/dashboard?tab=billing'];
 // Choosing a pass while signed out returns to the Pricing page with that plan shown, never to checkout.
-type PricingReturn = '/pricing' | `/pricing?plan=${PassPlanKey}`;
-const pricingPaths: readonly string[] = ['/pricing', ...passPlans.map(plan => `/pricing?plan=${plan.key}`)];
+type PricingReturn = '/pricing' | `/pricing?plan=${PassPlanKey}` | `/pricing?loopPlan=${LoopSubscriptionPlan}`;
+const pricingPaths: readonly string[] = ['/pricing', ...passPlans.map(plan => `/pricing?plan=${plan.key}`), ...subscriptionPlans.map(plan => `/pricing?loopPlan=${plan.id}`)];
 type PrivateReturn = LoopReturn | AdminReturn | WorkspaceReturn | SavedCheckContinuationPath | ApplicationSourcePath | '/applications' | '/onboarding' | '/check' | PricingReturn;
 const privateReturnPaths = [...loopPaths, ...adminPaths, ...workspacePaths, '/applications', '/onboarding', '/check', ...pricingPaths];
 const isPrivateReturn = (value: unknown): value is PrivateReturn => typeof value === 'string' && (privateReturnPaths.includes(value) || isSavedCheckContinuationPath(value) || isApplicationSourcePath(value));

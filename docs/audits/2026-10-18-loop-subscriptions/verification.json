@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-18",
+  "status": "implementation-verified-live-connection-pending",
+  "fullSuite": {
+    "tests": 2768,
+    "files": 151,
+    "passed": true
+  },
+  "applicationTypeScript": true,
+  "productionBuild": {
+    "publicPages": 38,
+    "assets": 132,
+    "workerBytes": 8568034,
+    "compressedBytes": 2902309,
+    "limitBytes": 3145728
+  },
+  "hosting": {
+    "groups": 12,
+    "passed": true,
+    "stalePricingAssertionsUpdated": true
+  },
+  "deno": {
+    "sourceEntrypoints": 4,
+    "passed": true,
+    "generatedSuiteRun": false
+  },
+  "nativePostgres": {
+    "groups": 8,
+    "passed": true,
+    "version": "17.11",
+    "separateBackendPidsAndObservedBlocking": true,
+    "stopped": true,
+    "zeroOwnedProcesses": true,
+    "sourceMigrationSha256": "7b3294149ba3b62d2b7274c0d939be47314ab8c3d261e6d77839625acc8386af"
+  },
+  "browser": {
+    "actualProductionComponent": true,
+    "syntheticAuthProviderPersistence": true,
+    "desktop": [
+      "explicit exact monthly purchase consent",
+      "original checkout recovered with same request/session and one creation",
+      "renewal paid-period display",
+      "cancel retains paid-through access",
+      "original ambiguous cancellation recovered with fresh consent"
+    ],
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "documentWidth": 375,
+      "graceAndFulfillmentHold": true
+    },
+    "consoleWarningsErrors": 0,
+    "tabClosed": true,
+    "viewportReset": true,
+    "serverStopped": true
+  },
+  "hosted": {
+    "checks": 15,
+    "syntheticSignups": 1,
+    "providerCalls": 0,
+    "charges": 0,
+    "candidateEdits": 0,
+    "sessionSignedOut": true,
+    "billingConfigured": false,
+    "billingMode": "test",
+    "unsignedWebhookStatus": 503
+  },
+  "backend": {
+    "migrationVersion": "20261018075508",
+    "changedRoutineBodiesMatched": 12,
+    "billingTablesRlsNoClientAccess": 6,
+    "oldUnfencedEntrypointsRevoked": 4,
+    "functions": {
+      "job-loop-billing": {
+        "version": 2,
+        "filesMatched": 8
+      },
+      "dodo-webhook": {
+        "version": 5,
+        "filesMatched": 8
+      },
+      "create-checkout": {
+        "version": 10,
+        "filesMatched": 6
+      },
+      "get-entitlement": {
+        "version": 11,
+        "filesMatched": 4
+      }
+    },
+    "controlWorkerTailorOAuthUnchanged": true
+  },
+  "providerCatalogue": {
+    "liveMerchantApproved": true,
+    "liveMonthlyProductsCreated": 3,
+    "productMappingsSaved": true,
+    "trialDays": 0,
+    "taxInclusive": true,
+    "customerSubscriptionsCreated": 0
+  },
+  "open": [
+    "live webhook endpoint/signing key",
+    "verified Subscriptions Write scope",
+    "owner commercial/seller/support confirmation",
+    "effective live configuration",
+    "provider checkout/payment/renewal/cancel/refund acceptance",
+    "natural recurring-month operation",
+    "unassisted customer acceptance"
+  ],
+  "unchanged": {
+    "ads": "Off; revised-video approval required",
+    "paymentsActuallyTaken": 0,
+    "nps": "No uplift or measured NPS claim"
+  },
+  "rollback": {
+    "tag": "jobvance-before-loop-subscriptions-2026-10-18",
+    "source": "6a1fb3efa82004b57173adba015a20df10a2161d",
+    "savedSiteVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d256db18458c8191a1d316a6dd935a05"
+  }
+}

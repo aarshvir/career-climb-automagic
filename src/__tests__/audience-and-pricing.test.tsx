@@ -53,7 +53,7 @@ describe('current offer', () => {
   });
   it('states the new free allowance everywhere the old beta line was', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByText('Free to start: 3 tailored CVs a month. Passes from $9, one-time.')).toBeInTheDocument();
+    expect(screen.getByText('Job Loop from $29 a month: your job search on a schedule. CV Check is free to start, with optional one-time passes.')).toBeInTheDocument();
     expect(screen.queryByText(/2 tailored CVs a day|8 when signed in/i)).not.toBeInTheDocument();
   });
   it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
@@ -71,24 +71,24 @@ describe('current offer', () => {
   });
 });
 
-describe('Job Loop access and proposed plans', () => {
-  it('keeps current free access separate from unavailable monthly proposals', () => {
+describe('Job Loop access and monthly plans', () => {
+  it('leads with monthly Job Loop and requires an account before checking purchase availability', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
     expect(screen.getByRole('heading', { name: 'Start your Job Loop' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Start my Job Loop' })).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
     expect(screen.queryByText(/beta|ten accounts|no account needed/i)).not.toBeInTheDocument();
     const proposals = screen.getByRole('region', { name: 'Job Loop monthly plans' });
-    expect(proposals).toHaveTextContent('not available for purchase yet');
-    expect(proposals).toHaveTextContent('no subscription starts automatically');
+    expect(proposals).toHaveTextContent('No trial or subscription starts automatically');
+    expect(proposals).toHaveTextContent('billed every month until you cancel');
     for (const price of ['$29', '$59', '$99']) expect(proposals).toHaveTextContent(price);
     expect(within(proposals).getAllByText('USD / month')).toHaveLength(3);
     expect(proposals).toHaveTextContent('1 Job Loop run a week');
     expect(proposals).toHaveTextContent('3 Job Loop runs a week');
     expect(proposals).toHaveTextContent('1 Job Loop run a day');
-    expect(within(proposals).queryByRole('link')).not.toBeInTheDocument();
+    expect(within(proposals).getByRole('link',{name:'Sign in for Weekly'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly');
     expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.getByText(/No subscription starts without your explicit purchase/)).toBeInTheDocument();
+    expect(proposals).toHaveTextContent('does not cancel subscription billing');
   });
 });
 

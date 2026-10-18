@@ -1,0 +1,135 @@
+{
+  "url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-5-windows-x64-binaries.zip",
+  "bytes": 381531864,
+  "sha256": "80379b2c04d51c30225532e0ae04509899141e9957ed096fe749d7fd9df8f82f",
+  "provenance": [
+    "https://www.postgresql.org/download/windows/",
+    "https://www.enterprisedb.com/download-postgresql-binaries",
+    "https://github.com/EnterpriseDB/edb-installers/issues/731",
+    "https://www.postgresql.org/about/licence/"
+  ],
+  "root": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\.tmp\\isolated-pg-e7ff9108-68c3-403c-9090-b8d2901dc688",
+  "suite": "loop-subscriptions",
+  "startedAt": "2026-10-18T07:51:16.742Z",
+  "checks": [
+    {
+      "name": "concurrent checkout retries acquire one original provider-creation claim",
+      "passed": true,
+      "distinctBackendPids": [
+        25472,
+        36840
+      ],
+      "blockingPids": [
+        25472
+      ]
+    },
+    {
+      "name": "first payment renewal and cancellation retain exact paid-through access",
+      "passed": true,
+      "paidPeriods": 2,
+      "cancellationKeptPaidAccess": true,
+      "expiredAccessRejected": true
+    },
+    {
+      "name": "concurrent duplicate renewal records one paid service period",
+      "passed": true,
+      "distinctBackendPids": [
+        39320,
+        17784
+      ],
+      "blockingPids": [
+        39320
+      ]
+    },
+    {
+      "name": "refund revocation wins a concurrent later activation and remains permanent",
+      "passed": true,
+      "distinctBackendPids": [
+        52976,
+        34848
+      ],
+      "blockingPids": [
+        52976
+      ]
+    },
+    {
+      "name": "fresh-session cancellation rejects a request after logout",
+      "passed": true,
+      "revokedSessionRejected": true
+    },
+    {
+      "name": "verified past-due grace survives retry and stops exactly at its deadline",
+      "passed": true,
+      "absoluteGraceDeadline": true,
+      "missingDeadlineDidNotExtend": true,
+      "expiredGraceRejected": true
+    },
+    {
+      "name": "uncertain cancellation recovery exposes original intent only to its current session",
+      "passed": true,
+      "originalRequestRecovered": true,
+      "newSessionCannotReuseIntent": true
+    },
+    {
+      "name": "two last-seat checkout reservations serialize without overselling capacity",
+      "passed": true,
+      "distinctBackendPids": [
+        44692,
+        24628
+      ],
+      "blockingPids": [
+        44692
+      ]
+    }
+  ],
+  "limitations": [
+    "Native PostgreSQL sessions execute actual migrations; auth.users/auth.uid, unrelated pack columns and Storage tables use isolated fixtures. No worker, provider, document rendering or export runs here.",
+    "No hosted Supabase, PostgREST, real authentication or production candidate data is exercised.",
+    "The vendor repository publishes the ZIP digest; no detached publisher signature was located."
+  ],
+  "archiveVerifiedAt": "2026-10-18T07:51:17.087Z",
+  "extraction": {
+    "entries": 22033,
+    "extracted": 3016,
+    "expandedBytes": 1002085601
+  },
+  "port": 61420,
+  "dataDirectory": "C:\\Users\\user\\OneDrive\\Documents\\Projects\\Job CV linkedin\\jobvance-independent\\.tmp\\isolated-pg-e7ff9108-68c3-403c-9090-b8d2901dc688\\data-12d08772-6609-406a-b927-bb0459e914d7",
+  "harnessSha256": "9faef8d6fda7b7e0859a793531a272a091c7883ebf9146cba586df4012f1f20d",
+  "migration": {
+    "name": "20261018073501_job_loop_subscription_lifecycle.sql",
+    "sha256": "7b3294149ba3b62d2b7274c0d939be47314ab8c3d261e6d77839625acc8386af"
+  },
+  "casesSha256": "4e42207f5cc8ce968d10b2eb06ef5b819c3c08e8602b1020a2705b193c406b2e",
+  "version": "postgres (PostgreSQL) 17.11",
+  "productMigrations": [
+    {
+      "name": "20261017122000_job_loop_dodo_entitlements.sql",
+      "sha256": "5d53274698adc2c45feaf119c346a29c8aa1415a437fcc21ae59f8191420f132"
+    },
+    {
+      "name": "20261017130000_job_loop_variant_execution.sql",
+      "sha256": "d7c6dc60d83d1de4a77aba5e0c2b64d09bd64673cf379bbb69fd663298eca3bc"
+    },
+    {
+      "name": "20261017131000_job_loop_recurring_product.sql",
+      "sha256": "f4eb083320c9b9a64101293b9b35d67515490f2b5cfd9625b002af86748ce88f"
+    }
+  ],
+  "executedSchemaSha256": "884868fd98f14ec2d4d12bf465a5b25b13fed81486da6e871a186c4513833a57",
+  "backendPids": [
+    27700,
+    25472,
+    36840,
+    39320,
+    17784,
+    52976,
+    34848,
+    16476,
+    44692,
+    24628
+  ],
+  "passed": true,
+  "clusterStopped": true,
+  "finishedAt": "2026-10-18T07:52:03.328Z"
+}

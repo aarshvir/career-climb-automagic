@@ -1,14 +1,23 @@
 import { ApiError } from '../_shared/core.ts';
 import { dodoClaimedPlan, dodoExpectedProduct, dodoLedgerRefundAmount, parseDodoEvent, validateDodoPayment, validateDodoRefund, verifyDodoSignature, type VerifiedDodoRefund } from '../_shared/dodo.ts';
 import { adminClient, boundedBody, databaseError, dodoRequest, getBilling, json, serve } from '../_shared/runtime.ts';
+import { loopBillingConfiguration } from '../_shared/loop-billing.ts';
+import { applyLoopBillingWebhook } from '../_shared/loop-billing-runtime.ts';
+import { loopBillingProvider, loopBillingRpc } from '../_shared/loop-billing-edge.ts';
 
 serve(async req => {
-  const billing = getBilling();
-  if (!billing || billing.provider !== 'dodo') throw new ApiError(503, 'BILLING_UNAVAILABLE', 'Dodo payment processing is disabled.');
+  const legacyBilling = getBilling();
+  const loopBilling = loopBillingConfiguration(name => Deno.env.get(name));
+  const billing = legacyBilling?.provider === 'dodo' ? legacyBilling : loopBilling;
+  if (!billing) throw new ApiError(503, 'BILLING_UNAVAILABLE', 'Dodo payment processing is disabled.');
   const raw = await boundedBody(req, 262144);
   const webhookId = await verifyDodoSignature(raw, { id: req.headers.get('webhook-id'), timestamp: req.headers.get('webhook-timestamp'),
     signature: req.headers.get('webhook-signature') }, billing.webhookSecret);
   const event = parseDodoEvent(raw);
+  if (loopBilling) {
+    const result = await applyLoopBillingWebhook({ rpc: loopBillingRpc(adminClient()), provider: (endpoint, body, method) => loopBillingProvider(loopBilling, endpoint, body, method) }, loopBilling, event, webhookId, raw);
+    if (result) return json(req, result);
+  }
   if (event.type !== 'payment.succeeded' && event.type !== 'refund.succeeded') return json(req, { received: true, ignored: true });
   const action = event.type === 'payment.succeeded' ? 'paid' : 'refund';
   let payment: Record<string, unknown>;

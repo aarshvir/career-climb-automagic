@@ -1,0 +1,38 @@
+# Job Loop monthly subscriptions
+
+18 October 2026. Job Loop remains the main product. This release implements monthly purchase, verified paid-period renewal, billing status and cancellation for Weekly $29, Active $59 and Daily $99 USD. All support three CV variants; the existing server scheduling and recurring AI consent controls remain authoritative. CV Check passes remain separate one-time add-ons.
+
+## Delivered behavior
+
+Account sign-in preserves the chosen plan without starting checkout. A fresh billing read and explicit price/renewal consent precede a server-priced Dodo checkout. The original request, owner, real auth session, lifecycle generation and plan are immutable. Pending or ambiguous outcomes retain the original request; retry never blindly creates another checkout or cancellation. Logout, owner/session replacement and changed generation revoke stale authority and confirmation.
+
+Only a provider-read succeeded payment and its exact immutable service period grant a paid month. Subscription dates, a checkout redirect, a zero-value authorization and a still-processing payment cannot grant access. Duplicate deliveries are idempotent. Late genuine paid evidence remains recorded without undoing newer cancellation/hold state. Signed refund evidence revokes the bound payment. Past-due grace uses the provider's exact signed deadline, never a locally invented allowance.
+
+Cancellation stops future monthly renewal and preserves confirmed paid-through access. Schedule pause/cancel and billing cancellation are visibly separate. Billing cancellation remains available after career-data erasure and never recreates the workspace. Original uncertain cancellation can be recovered through fresh session-bound status after remount, with fresh confirmation. Capacity reservations and an honest paid-but-pending-fulfillment state preserve the ten-account limit without hiding late payments. No real customer payment or data was changed by verification.
+
+## Provider setup and release boundary
+
+Dodo's native Live Mode verification says payments are active and product, personal and bank checks are approved. Three live tax-inclusive recurring products were created and their exact IDs saved in Supabase. They renew every month with a twenty-year provider product term, no trial, discount, PPP or localized price. Creating products did not charge anyone. The saved singular `DODO_PAYMENT_API_KEY` is supported securely; two different aliases fail closed.
+
+The schema migration was applied as `20261018075508_job_loop_subscription_lifecycle` from local `20261018073501_job_loop_subscription_lifecycle.sql`, SHA-256 `7b3294149ba3b62d2b7274c0d939be47314ab8c3d261e6d77839625acc8386af`. All twelve changed routine bodies match source after whitespace normalization. Billing tables have RLS and no anon/authenticated access; billing routines have fixed search paths and service-only execution. Four old unfenced entrypoints have service execution revoked. Deployed handlers: Job Loop billing v2, Dodo webhook v5, create checkout v10 and get entitlement v11. All 26 uploaded files match native readback exactly. Initial provider tooling retained obsolete import-map paths; deployment was corrected with explicit local import maps and final source checks. Job Loop control20, worker15, tailor4 and OAuth5 were not redeployed.
+
+**Live checkout is not certified or enabled by this implementation receipt.** The live webhook endpoint and signing secret, Subscription Write scope and owner commercial/support confirmations still require completion. Fresh hosted status reports `billingConfigured=false`, mode test; unsigned webhook returns 503 `BILLING_UNAVAILABLE`. No real Dodo checkout, charge, provider renewal, refund, real cancellation or natural monthly operation has passed acceptance. Local/provider-adapter simulations are not that evidence. The owner has a prepared endpoint form; secret handling is a direct owner action. No test or live key was printed or saved locally.
+
+## Verification and review
+
+- Full suite: 2,768 tests in 151 files; app TypeScript; production build with 38 public pages; all twelve hosting groups passed.
+- Four final source entrypoints passed Deno checking with explicit SDK import maps. No generated Deno suite is claimed for this release.
+- Eight native PostgreSQL17.11 groups passed on the final migration, using separate backend PIDs and observed lock blocking: concurrent checkout, first payment/renewal/cancel/expiry, duplicate renewal, refund race, session revocation, exact grace, original cancellation recovery and last-seat capacity. Vendor archive digest was verified; cluster stopped and zero owned Postgres processes remained. A fixture originally assumed cancel revision1; it was corrected to query the actual revision, without weakening production guards.
+- Actual desktop browser: exact purchase consent, same checkout request/session on return with one creation, renewed paid-period display, paid-through cancellation and original ambiguous cancellation recovery. Mobile390x844/document375: grace and paid fulfillment hold; no horizontal overflow or captured browser warnings/errors. Actual component/client used synthetic auth/persistence/provider adapters. This is not a real Dodo payment journey. Temporary tab closed, viewport reset and preview server stopped.
+- Fifteen hosted probes passed: anonymous rejection/CORS, unsigned webhook gating, one fresh synthetic signup, passive status, fixed prices, unconsented checkout refusal and logged-out session denial. No Job Loop enrollment, provider call or charge was made. The synthetic session was signed out; no auth account was deleted.
+- Three agent contexts separately implemented SQL, edge and candidate UI, then cross-reviewed integration. See the two independent-review records. Corrections include stale confirmation rebind, reversed refresh results, late paid evidence ordering, tax-inclusive validation, payload-type checks and truthful effective access/fulfillment status.
+
+The existing hosting script had old one-time-primary and unavailable-monthly assertions. These were replaced with exact current monthly-first prices, account-return links and no provider-link bypass; all other byte/header/cache/security checks remain. An unchanged old assertion is not reported as a pass.
+
+Existing unrelated SECURITY DEFINER and leaked-password advisor warnings remain open. Private service-only RLS-without-policy notices are intentional; no new public billing-table or routine access was granted. The 100-persona forecast remains its original evidence and is not measured NPS or an uplift from this release.
+
+## Rollback and remaining acceptance
+
+Preserve saved v43 and pushed tag `jobvance-before-loop-subscriptions-2026-10-18` at `6a1fb3efa82004b57173adba015a20df10a2161d`, plus private before-schema and three handler receipts. Source/UI rollback is not database/file restoration. Once financial rows exist, retain paid periods, cancellation intent and audit evidence; do not restore old unfenced billing routines or bypass current session/capacity authority. Disabling new checkout does not cancel existing subscriptions; keep verified cancellation/webhook support available and reconcile provider state explicitly.
+
+Next: owner secure connection, effective live config and exact product validation, controlled provider test payment/renewal/cancel/refund, then an owner-operated real purchase/cancellation/refund if needed. Do not buy a plan or move money on the owner's behalf. Existing discovery breadth, grouped review, pagination, unsupported PDF scripts, natural repeated-day/unassisted acceptance, coordinated restore and marketing-video approval remain open. Ads stay Off.

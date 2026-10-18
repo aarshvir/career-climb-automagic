@@ -1,0 +1,82 @@
+{
+  "kind": "hosted-passive-billing-probes",
+  "at": "2026-10-18T07:59:28.230Z",
+  "checks": [
+    {
+      "name": "job-loop-billing-rejects-anonymous",
+      "passed": true
+    },
+    {
+      "name": "job-loop-billing-approved-origin",
+      "passed": true
+    },
+    {
+      "name": "create-checkout-rejects-anonymous",
+      "passed": true
+    },
+    {
+      "name": "create-checkout-approved-origin",
+      "passed": true
+    },
+    {
+      "name": "get-entitlement-rejects-anonymous",
+      "passed": true
+    },
+    {
+      "name": "get-entitlement-approved-origin",
+      "passed": true
+    },
+    {
+      "name": "unapproved-origin-denied",
+      "passed": true
+    },
+    {
+      "name": "unsigned-webhook-rejected",
+      "passed": true
+    },
+    {
+      "name": "synthetic-signup",
+      "passed": true
+    },
+    {
+      "name": "authenticated-fresh-status-without-initializing-job-loop",
+      "passed": true
+    },
+    {
+      "name": "fixed-monthly-server-prices",
+      "passed": true
+    },
+    {
+      "name": "incomplete-live-connection-stays-closed",
+      "passed": true
+    },
+    {
+      "name": "unconsented-checkout-rejected",
+      "passed": true
+    },
+    {
+      "name": "synthetic-session-signed-out",
+      "passed": true
+    },
+    {
+      "name": "logged-out-session-no-billing-data",
+      "passed": true
+    }
+  ],
+  "createdSyntheticAccounts": 1,
+  "providerCalls": 0,
+  "charges": 0,
+  "candidateEdits": 0,
+  "webhookProbe": {
+    "status": 503,
+    "code": "BILLING_UNAVAILABLE"
+  },
+  "billingConfigured": false,
+  "billingMode": "test",
+  "staleSessionResponse": {
+    "status": 401,
+    "code": "UNAUTHORIZED"
+  },
+  "finishedAt": "2026-10-18T07:59:40.274Z",
+  "status": "passed"
+}

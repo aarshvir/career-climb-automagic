@@ -1,4 +1,5 @@
 import ProductNavigation from '@/components/ProductNavigation';
+import LoopSubscriptionBilling from '@/components/LoopSubscriptionBilling';
 import { recoverOnboardingDraft } from '@/lib/loop-onboarding-memory';
 import { explainDiscoveryMatch } from '@/lib/employer-discovery';
 import LoopVariantPreparation from './LoopVariantPreparation';
@@ -601,6 +602,7 @@ export default function JobLoop() {
         </section>}
       </>}
       {snapshot && tab === 'settings' && <>
+        <LoopSubscriptionBilling key={`billing:${user.id}:${trackingAuthority}:${snapshot.lifecycleGeneration}`} compact />
         <LoopSupportForm key={`${user.id}:${snapshot.lifecycleGeneration}`} snapshot={snapshot} busy={!!busy} perform={perform} />
       </>}
       {((snapshot && tab === 'settings') || erasurePending) && <LoopErasure key={`${user.id}:${confirmationGeneration.current ?? erasureGeneration.current}`} busy={!!busy} continuing={erasurePending} perform={perform} onErased={() => { clearLoopWorkingDraft(); setClaimDrafts({}); setSuggestions([]); setDirtyClaims(new Set()); setNewClaimKey(current => current + 1); setSelectedId(null); setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setFacts(false); setDisclosure(false); setRecipientConsent(false); setModelConsent(false); setInboxConsent(false); setTab('today'); }} />}
