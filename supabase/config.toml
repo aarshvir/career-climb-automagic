@@ -49,6 +49,15 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
+# Isolated Dodo Test Mode acceptance; separate opt-in configuration gates runtime.
+[functions.job-loop-billing-test]
+enabled = true
+verify_jwt = false
+
+[functions.dodo-webhook-test]
+enabled = true
+verify_jwt = false
+
 [functions.check-email-provider]
 enabled = false
 verify_jwt = true
