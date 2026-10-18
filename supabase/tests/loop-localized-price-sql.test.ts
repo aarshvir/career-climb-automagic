@@ -5,10 +5,18 @@ import { afterAll,beforeAll,beforeEach,describe,expect,it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { checkLoopSchema } from './fixtures/check-loop-schema.mjs';
-import { LOOP_LOCAL_CURRENCIES,LOOP_LOCAL_PRICE_CATALOG_VERSION } from '../functions/_shared/loop-local-prices.ts';
 import { applyLoopBillingWebhook,controlLoopBilling,type LoopBillingPorts } from '../functions/_shared/loop-billing-runtime.ts';
 import { LOOP_BILLING_PRODUCT,loopBillingConfiguration } from '../functions/_shared/loop-billing.ts';
 import { dodoEnvironment } from './dodo-fixtures';
+
+// This file deliberately executes the already-applied v1 migration. Historical
+// price evidence must not change when today's customer catalogue advances.
+const LOOP_LOCAL_PRICE_CATALOG_VERSION='loop-local-2026-10-18-v1';
+const LOOP_LOCAL_CURRENCIES={
+  USD:{exponent:2,amounts:{weekly:2900,active:5900,daily:9900}},EUR:{exponent:2,amounts:{weekly:2599,active:5199,daily:8799}},GBP:{exponent:2,amounts:{weekly:2199,active:4399,daily:7399}},
+  INR:{exponent:2,amounts:{weekly:279900,active:559900,daily:939900}},AED:{exponent:2,amounts:{weekly:10999,active:21999,daily:35999}},CAD:{exponent:2,amounts:{weekly:4099,active:8399,daily:13999}},
+  AUD:{exponent:2,amounts:{weekly:4199,active:8499,daily:13999}},SGD:{exponent:2,amounts:{weekly:3699,active:7499,daily:12999}},JPY:{exponent:0,amounts:{weekly:4599,active:9299,daily:15599}},
+} as const;
 
 let db:PGlite,owner:string,session:string,quoteRequest:string,checkoutRequest:string,start:string,end:string,epoch:number;
 const file='20261018095409_job_loop_localized_price_quotes.sql';
@@ -90,7 +98,7 @@ describe('localized catalogue and immutable owned quote authority',()=>{
 });
 
 describe('localized initial payment, renewal, cancellation and permanent refund authority',()=>{
-  it('runs real quote/control/webhook orchestration through SQL for INR payment, renewed price, cancellation and explicit-currency refund',async()=>{
+  it('recovers a historical v1 checkout through real control/webhook SQL orchestration, renewal, cancellation and explicit-currency refund',async()=>{
     const environment=dodoEnvironment({JOBVANCE_LOOP_BILLING_ENABLED:'true',DODO_PRODUCT_LOOP_WEEKLY:'pdt_0NpzVnWkzvNbKUPtHzZGo',DODO_PRODUCT_LOOP_ACTIVE:'pdt_0NpzW2tG9N28jjBuUzYLB',DODO_PRODUCT_LOOP_DAILY:'pdt_0NpzWGsuzZZJfaeMXNPQV'});
     const config={...loopBillingConfiguration(key=>environment[key])!,mode:'live' as const};
     const product=config.loopProducts.weekly;let q:any,cancelled=false,renewed=false,posts=0,patches=0;
@@ -108,9 +116,9 @@ describe('localized initial payment, renewal, cancellation and permanent refund 
       if(endpoint==='subscriptions/sub_fixture'){if(method==='PATCH'){patches++;cancelled=true;}return subscription();}
       throw Error('Unplanned provider call');
     }};
-    q=await controlLoopBilling(ports,config,owner,session,{action:'quote',requestId:quoteRequest,expectedGeneration:0,plan:'weekly',country:'IN',currency:'INR'});
+    q=await issue();await ready(q);
     expect(q).toMatchObject({currency:'INR',amountMinor:279900,exponent:2});const intent={action:'checkout',requestId:checkoutRequest,expectedGeneration:0,plan:'weekly',quoteId:q.quoteId,consent:true};
-    expect(await controlLoopBilling(ports,config,owner,session,intent)).toMatchObject({pricing:{currency:'INR',amountMinor:279900}});await controlLoopBilling(ports,config,owner,session,intent);expect(posts).toBe(1);
+    expect(await controlLoopBilling(ports,config,owner,session,intent)).toMatchObject({pricing:{currency:'INR',amountMinor:279900}});await controlLoopBilling(ports,config,owner,session,intent);expect(posts).toBe(0);
     await applyLoopBillingWebhook(ports,config,{type:'payment.succeeded',created:epoch,data:payment()},'inr_initial');
     const statusV2=await controlLoopBilling(ports,config,owner,session,{action:'status',contractVersion:2});expect(statusV2).toMatchObject({subscription:{pricing:{currency:'INR',amountMinor:279900}}});
     await expect(controlLoopBilling(ports,config,owner,session,{action:'status'})).rejects.toMatchObject({code:'LOOP_BILLING_CONTRACT_REQUIRED'});

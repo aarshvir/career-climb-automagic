@@ -61,6 +61,9 @@ describe('monthly Job Loop billing boundary',()=>{
  it('reads original earlier-catalogue history without repricing it to the current selection',async()=>{
   const original={...price('EUR',requestId,'NZ'),amountMinor:2499,catalogVersion:'prior-catalogue'};mocks.invoke.mockResolvedValue({data:{...status(),subscription:{...sub,pricing:original}},error:null});expect((await readLoopBilling(scope())).subscription.pricing).toEqual(original);expect(mocks.invoke.mock.calls[0][1].body).toEqual({action:'status',contractVersion:2});
  });
+ it('accepts exact v1 fractional checkout recovery but rejects a receipt silently repriced to whole units',async()=>{
+  const original={...price('EUR',requestId,'DE'),amountMinor:2599,catalogVersion:'loop-local-2026-10-18-v1'},intent=captureLoopCheckoutIntent('weekly',0,requestId,requestId);mocks.invoke.mockResolvedValueOnce({data:{...receipt(),pricing:original},error:null});await expect(createLoopSubscriptionCheckout({...scope(),pricing:original},intent)).resolves.toMatchObject({pricing:original});mocks.invoke.mockResolvedValueOnce({data:{...receipt(),pricing:{...original,amountMinor:2600,catalogVersion:LOOP_LOCAL_PRICE_CATALOG_VERSION}},error:null});await expect(createLoopSubscriptionCheckout({...scope(),pricing:original},intent)).rejects.toThrow(/did not match/);
+ });
  it('rejects an accepted quote response after the owner session changes',async()=>{
   let finish:(v:unknown)=>void;mocks.invoke.mockReturnValue(new Promise(resolve=>finish=resolve));const waiting=requestLoopPriceQuote(scope(),captureLoopQuoteIntent({action:'quote',requestId,expectedGeneration:0,plan:'weekly',country:'IN',currency:'INR'}));await vi.waitFor(()=>expect(mocks.invoke).toHaveBeenCalled());setTrackingDraftOwner('owner','new-session');finish({data:{...price('INR',requestId,'IN'),requestId,generation:0,plan:'weekly',expiresAt:new Date(Date.now()+900000).toISOString()},error:null});await expect(waiting).rejects.toThrow(/sign-in changed/);
  });

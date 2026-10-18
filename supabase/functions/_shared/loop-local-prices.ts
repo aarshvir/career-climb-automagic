@@ -2,7 +2,7 @@
  * service. These amounts are not client authority: SQL and Dodo independently
  * verify the exact selected price before checkout and when a payment settles.
  * Existing subscriptions retain their original currency and amount. */
-export const LOOP_LOCAL_PRICE_CATALOG_VERSION = 'loop-local-2026-10-18-v1';
+export const LOOP_LOCAL_PRICE_CATALOG_VERSION = 'loop-local-2026-10-18-v2';
 export type LoopLocalPlan = 'weekly' | 'active' | 'daily';
 
 export const LOOP_LOCAL_PRICE_SOURCE = {
@@ -13,23 +13,23 @@ export const LOOP_LOCAL_PRICE_SOURCE = {
   // ECB quotes units per EUR; local/USD = local/EUR divided by USD/EUR.
   eurRates: { USD: '1.1253', EUR: '1', GBP: '0.84385', INR: '106.8640', CAD: '1.5935', AUD: '1.6171', SGD: '1.4395', JPY: '177.82' },
   aedPerUsd: '3.6725',
-  roundingPolicy: 'nearest-clean-ending-v1',
-  // INR/JPY: nearest 100-unit candidate minus one whole unit. Other local
-  // currencies: nearest 1-unit grid below 100, 10-unit grid below 1000,
-  // otherwise 100-unit grid, minus one minor unit. Ties go upwards.
+  roundingPolicy: 'nearest-whole-currency-ending-v2',
+  // INR/JPY: nearest 1000-unit candidate minus one whole currency unit.
+  // Other local currencies: nearest whole unit below 100, otherwise the
+  // nearest 10-unit candidate minus one whole currency unit. Ties go upwards.
   // USD keeps the previously approved base prices. No live FX runs in clients.
 } as const;
 
 export const LOOP_LOCAL_CURRENCIES = {
   USD: { label: 'US dollar', exponent: 2, amounts: { weekly: 2900, active: 5900, daily: 9900 } },
-  EUR: { label: 'Euro', exponent: 2, amounts: { weekly: 2599, active: 5199, daily: 8799 } },
-  GBP: { label: 'British pound', exponent: 2, amounts: { weekly: 2199, active: 4399, daily: 7399 } },
-  INR: { label: 'Indian rupee', exponent: 2, amounts: { weekly: 279900, active: 559900, daily: 939900 } },
-  AED: { label: 'UAE dirham', exponent: 2, amounts: { weekly: 10999, active: 21999, daily: 35999 } },
-  CAD: { label: 'Canadian dollar', exponent: 2, amounts: { weekly: 4099, active: 8399, daily: 13999 } },
-  AUD: { label: 'Australian dollar', exponent: 2, amounts: { weekly: 4199, active: 8499, daily: 13999 } },
-  SGD: { label: 'Singapore dollar', exponent: 2, amounts: { weekly: 3699, active: 7499, daily: 12999 } },
-  JPY: { label: 'Japanese yen', exponent: 0, amounts: { weekly: 4599, active: 9299, daily: 15599 } },
+  EUR: { label: 'Euro', exponent: 2, amounts: { weekly: 2600, active: 5200, daily: 8800 } },
+  GBP: { label: 'British pound', exponent: 2, amounts: { weekly: 2200, active: 4400, daily: 7400 } },
+  INR: { label: 'Indian rupee', exponent: 2, amounts: { weekly: 299900, active: 599900, daily: 899900 } },
+  AED: { label: 'UAE dirham', exponent: 2, amounts: { weekly: 10900, active: 21900, daily: 35900 } },
+  CAD: { label: 'Canadian dollar', exponent: 2, amounts: { weekly: 4100, active: 8400, daily: 13900 } },
+  AUD: { label: 'Australian dollar', exponent: 2, amounts: { weekly: 4200, active: 8500, daily: 13900 } },
+  SGD: { label: 'Singapore dollar', exponent: 2, amounts: { weekly: 3700, active: 7500, daily: 12900 } },
+  JPY: { label: 'Japanese yen', exponent: 0, amounts: { weekly: 4999, active: 8999, daily: 15999 } },
 } as const;
 export type LoopLocalCurrency = keyof typeof LOOP_LOCAL_CURRENCIES;
 

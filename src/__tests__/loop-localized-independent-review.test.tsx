@@ -25,7 +25,7 @@ describe('independent localized UI authority review',()=>{
     act(()=>{fireEvent.change(country,{target:{value:'JP'}});fireEvent.change(country,{target:{value:'IN'}});});
     await waitFor(()=>expect(mock.quote.mock.calls.length).toBeGreaterThan(1));expect(mock.quote.mock.calls[mock.quote.mock.calls.length-1][1]).toMatchObject({country:'IN',currency:'INR'});const next=await screen.findByRole('checkbox',{name:/I choose Weekly/});expect(next).not.toBeChecked();
     fireEvent.click(screen.getByRole('button',{name:/Continue to secure checkout/}));expect(mock.checkout).not.toHaveBeenCalled();
-    fireEvent.click(next);fireEvent.click(screen.getByRole('button',{name:/Continue to secure checkout/}));await waitFor(()=>expect(mock.checkout).toHaveBeenCalledTimes(1));expect(mock.checkout.mock.calls[0][0].pricing).toMatchObject({country:'IN',currency:'INR',amountMinor:279900});
+    fireEvent.click(next);fireEvent.click(screen.getByRole('button',{name:/Continue to secure checkout/}));await waitFor(()=>expect(mock.checkout).toHaveBeenCalledTimes(1));expect(mock.checkout.mock.calls[0][0].pricing).toMatchObject({country:'IN',currency:'INR',amountMinor:299900});
   });
   it('ignores an old generation quote that resolves after the fresh generation price',async()=>{
     const pending:{intent:any,resolve:(v:any)=>void}[]=[];mock.quote.mockImplementation((_scope,intent)=>new Promise(resolve=>pending.push({intent,resolve})));render(page());await waitFor(()=>expect(pending).toHaveLength(1));
@@ -41,7 +41,7 @@ describe('independent localized UI authority review',()=>{
   it('resumes only the original INR price and request instead of the newly selected JPY market',async()=>{
     mock.read.mockResolvedValue({...status(),checkout:{requestId:id(33),plan:'weekly',status:'ready',checkoutUrl:'https://checkout.dodopayments.com/original',pricing:money()}});render(page('/pricing?loopPlan=weekly&country=JP&currency=JPY'));
     await screen.findByText(/Original checkout price:/);expect(mock.quote).not.toHaveBeenCalled();expect(screen.getByRole('combobox',{name:'Billing country or region'})).toBeDisabled();
-    fireEvent.click(screen.getByRole('checkbox',{name:/I choose Weekly/}));fireEvent.click(screen.getByRole('button',{name:'Resume original secure checkout'}));await waitFor(()=>expect(mock.checkout).toHaveBeenCalledTimes(1));expect(mock.checkout.mock.calls[0][1]).toMatchObject({requestId:id(33),quoteId:id(11)});expect(mock.checkout.mock.calls[0][0].pricing).toMatchObject({currency:'INR',amountMinor:279900});
+    fireEvent.click(screen.getByRole('checkbox',{name:/I choose Weekly/}));fireEvent.click(screen.getByRole('button',{name:'Resume original secure checkout'}));await waitFor(()=>expect(mock.checkout).toHaveBeenCalledTimes(1));expect(mock.checkout.mock.calls[0][1]).toMatchObject({requestId:id(33),quoteId:id(11)});expect(mock.checkout.mock.calls[0][0].pricing).toMatchObject({currency:'INR',amountMinor:299900});
   });
   it('retains the original USD cancellation terms while the public cards show a JPY market',async()=>{
     const sub={subscriptionId:'sub_historical',plan:'weekly',status:'active',validUntil:'2030-11-18T10:00:00Z',periodStart:'2026-10-18T10:00:00Z',cancelAtPeriodEnd:false,revoked:false,graceUntil:null,version:7,pricing:money('USD',null,null)};
