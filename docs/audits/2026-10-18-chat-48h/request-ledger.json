@@ -1,0 +1,1617 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-18T14:58:31.773223Z",
+  "window": {
+    "start": "2026-10-16T14:38:20.000Z",
+    "end": "2026-10-18T14:38:20.000Z",
+    "timezoneDisplay": "Asia/Dubai",
+    "note": "Exact human-message event timestamps; attachments/replies reconciled, automated records excluded."
+  },
+  "counts": {
+    "humanMessages": 82,
+    "main": 48,
+    "replies": 34,
+    "individualAnswers": 37,
+    "excluded": {
+      "heartbeat": 9,
+      "environment": 8,
+      "navigation": 12,
+      "emptyWritingEdit": 1
+    }
+  },
+  "baseline": {
+    "publicVersion": 50,
+    "runtimeSource": "59691d747f1fc1c1290a5c30fc6e2f9ec9a502ad",
+    "documentationHead": "39180f2",
+    "receipt": "../../releases/2026-10-18-product-clarity.json",
+    "note": "v50 changes only Contact/Terms and ready counts; prior backend/payment receipts retain original scope."
+  },
+  "closureRule": "A request is accounted for when mapped to actual evidence and explicit finish condition. This is not a declaration that every outcome is complete.",
+  "requirements": [
+    {
+      "id": "R01",
+      "request": "Job Loop is primary; accounts required; CV Check supports acquisition",
+      "status": "delivered_bounded",
+      "delivered": "Main positioning, account gates, default dashboard and two-product distinction are delivered.",
+      "evidence": [
+        "product-evidence.md",
+        "../2026-10-17-journey-clarity/ASSESSMENT.md"
+      ],
+      "limits": "Clarity is not unassisted customer acceptance; no invented history or no-account product claim.",
+      "next": "Preserve these constraints in every product and marketing change.",
+      "sourceMessages": [
+        "H002",
+        "H005",
+        "H013",
+        "H014",
+        "H021",
+        "H052",
+        "H056"
+      ]
+    },
+    {
+      "id": "R02",
+      "request": "Three journey panels, optional guided setup, no-CV creation",
+      "status": "delivered_bounded",
+      "delivered": "Three stages, exact-answer builder, preview/replacement/undo and deliberate save exist; quiz is optional.",
+      "evidence": [
+        "product-evidence.md",
+        "../2026-10-17-journey-clarity/ASSESSMENT.md"
+      ],
+      "limits": "Same-tab setup memory is bounded; it is not durable refresh recovery or a compulsory quiz.",
+      "next": "Measure effort and first useful value; reduce actual abandonment.",
+      "sourceMessages": [
+        "H002",
+        "H013",
+        "H014",
+        "H016",
+        "H021"
+      ]
+    },
+    {
+      "id": "R03",
+      "request": "Three independent CV variants and immutable source selection",
+      "status": "delivered_bounded",
+      "delivered": "Owner/revision/fact-bound variants, selected manual/scheduled worker/packet identity and source-based review/download are implemented.",
+      "evidence": [
+        "../2026-10-17-recurring-backend/ASSESSMENT.md",
+        "../2026-10-18-variant-packet-review/ASSESSMENT.md"
+      ],
+      "limits": "No global profile swap; current sharing/withdrawal authority remains required. Fresh hosted end-to-end variant task after v49 not claimed.",
+      "next": "Retain protections and verify natural customer reuse.",
+      "sourceMessages": [
+        "H002",
+        "H003",
+        "H007"
+      ]
+    },
+    {
+      "id": "R04",
+      "request": "Weekly, three chosen weekdays and daily schedules",
+      "status": "delivered_bounded",
+      "delivered": "All three cadences, timezone/calendar behavior, entitlement, stable occurrences, retries, missed-run handling and cancellation are implemented.",
+      "evidence": [
+        "../2026-10-17-recurring-backend/ASSESSMENT.md",
+        "product-evidence.md"
+      ],
+      "limits": "Hosted evidence saved all cadences but dispatched only an operator-made-due daily task; natural weekly and repeated-day acceptance absent.",
+      "next": "Observe actual naturally due cadence and useful output without operator date changes.",
+      "sourceMessages": [
+        "H002",
+        "H003",
+        "H007"
+      ]
+    },
+    {
+      "id": "R05",
+      "request": "Recurring AI and source-bound Claude Deep Tailor",
+      "status": "partial",
+      "delivered": "Explicit recurring provider/model/route/source consent and source-bound rewrite integration were implemented and deployed.",
+      "evidence": [
+        "../2026-10-17-deep-tailor-account/ASSESSMENT.md",
+        "../2026-10-17-recurring-backend/ASSESSMENT.md",
+        "brief-reconciliation.md"
+      ],
+      "limits": "Rules must not silently upgrade; a useful nonempty hosted Deep Tailor rewrite and complete Loop per-requirement coverage/reusable gap-answer journey remain unproved.",
+      "next": "Demonstrate faithful nonempty rewrite, provenance, scoped answers, approval and received output.",
+      "sourceMessages": [
+        "H002",
+        "H003",
+        "H007",
+        "H014"
+      ]
+    },
+    {
+      "id": "R06",
+      "request": "Useful broader job discovery",
+      "status": "partial",
+      "delivered": "Six employer boards, ATS adapters, exact deduplication and bounded role/location/freshness filters exist.",
+      "evidence": [
+        "../2026-10-17-discovery/ASSESSMENT.md",
+        "brief-reconciliation.md"
+      ],
+      "limits": "Hosted Operations Analyst/Remote found zero matches; supplied QA vacancies do not prove discovery. No market-wide or LinkedIn coverage.",
+      "next": "Broaden lawful useful coverage, measure exact target fit, novelty, link availability and closed-job handling.",
+      "sourceMessages": [
+        "H014"
+      ]
+    },
+    {
+      "id": "R07",
+      "request": "Role suggestions, searchable/custom broad roles and locations",
+      "status": "delivered_bounded",
+      "delivered": "Explicit career fields/CV headings can suggest roles; searchable custom inputs and broad director/seniority requests plus locations shipped.",
+      "evidence": [
+        "../2026-10-17-role-preferences/ASSESSMENT.md"
+      ],
+      "limits": "Google name/email do not establish profession; catalogue/English bounds remain.",
+      "next": "Retain editable accepted choices and validate more target/eligibility cases.",
+      "sourceMessages": [
+        "H018"
+      ]
+    },
+    {
+      "id": "R08",
+      "request": "Visible Next, service-load error, Back/dashboard/product labels",
+      "status": "delivered_bounded",
+      "delivered": "v39 visible action bar, v40 six-source load fix, v41/v42 default/resume/product/sidebar continuity shipped.",
+      "evidence": [
+        "../2026-10-17-journey-clarity/ASSESSMENT.md",
+        "product-evidence.md"
+      ],
+      "limits": "30-minute same-tab memory clears on refresh/logout. Full-route ambiguous selected requests remain open.",
+      "next": "Finish durable route recovery and validate unassisted navigation.",
+      "sourceMessages": [
+        "H019",
+        "H020",
+        "H021"
+      ]
+    },
+    {
+      "id": "R09",
+      "request": "No obsolete pilot copy; correct plan names and ready counts",
+      "status": "delivered_bounded",
+      "delivered": "Three omissions fixed and deployed in v50: Contact free-pilot wording, Terms actual plan names and authoritative saved-variant ready count. Seven live HTML pages and three exact JS assets verified.",
+      "evidence": [
+        "../2026-10-18-product-clarity/ASSESSMENT.md",
+        "../2026-10-18-variant-packet-review/ASSESSMENT.md",
+        "../../releases/2026-10-18-product-clarity.json"
+      ],
+      "limits": "No fresh full-suite, authenticated hosted or unassisted task claimed. Conditional capacity/walkthrough wording and variant-only early-stage global-fact guidance remain open.",
+      "next": "Keep remaining copy/guidance gaps separate; preserve exact current source/approval authority.",
+      "sourceMessages": [
+        "H013",
+        "H014",
+        "H021",
+        "H072"
+      ]
+    },
+    {
+      "id": "R10",
+      "request": "First/second applications and natural recurring full journey",
+      "status": "partial",
+      "delivered": "Hosted synthetic signup/manual rules/daily AI dispatch and nine hash-matched Storage files plus local first/second browser exports exist.",
+      "evidence": [
+        "../2026-10-17-deep-tailor-account/ASSESSMENT.md",
+        "../2026-10-17-recurring-backend/ASSESSMENT.md",
+        "product-evidence.md"
+      ],
+      "limits": "No unassisted customers, natural seven/14-day value, useful broad discovery-to-nonempty-rewrite-to-export or employer submission proof.",
+      "next": "Run assisted then unassisted first/second and naturally recurring acceptance with exact provenance.",
+      "sourceMessages": [
+        "H003",
+        "H007",
+        "H013",
+        "H014"
+      ]
+    },
+    {
+      "id": "R11",
+      "request": "100 personas; desired recommendation/NPS above60",
+      "status": "goal_unmet",
+      "delivered": "100 fixed persona forecasts and raw rationale are retained; latest index is -75: zero promoters,25 passives,75 detractors.",
+      "evidence": [
+        "../2026-10-17-deep-tailor-account/ASSESSMENT.md",
+        "product-evidence.md"
+      ],
+      "limits": "This is simulated forecasting, not measured NPS,100 independent sessions or +60; later fixes earn no automatic uplift.",
+      "next": "Improve value, refresh ground truth and reassess unchanged personas honestly.",
+      "sourceMessages": [
+        "H002",
+        "H013",
+        "H014"
+      ]
+    },
+    {
+      "id": "R12",
+      "request": "Live29/59/99 monthly Job Loop subscriptions",
+      "status": "delivered_bounded",
+      "delivered": "Live Dodo products, quote-bound checkout, signed entitlement periods, cancellation, reconciliation and refund/failure controls are enabled.",
+      "evidence": [
+        "../2026-10-18-loop-subscriptions/PROVIDER-ACCEPTANCE.md",
+        "product-evidence.md"
+      ],
+      "limits": "Live flow checked without a real-card charge; Test acceptance is not Live customer revenue.",
+      "next": "Keep Live available; monitor actual signed lifecycle and errors.",
+      "sourceMessages": [
+        "H002",
+        "H003",
+        "H004",
+        "H005",
+        "H051",
+        "H055",
+        "H056",
+        "H057",
+        "H069"
+      ]
+    },
+    {
+      "id": "R13",
+      "request": "Full payment/renewal/cancellation testing",
+      "status": "delivered_bounded",
+      "delivered": "Actual Dodo Test initial payments for all three tiers, accelerated successful renewal, declined renewal/no extra period, refund and cancellation/retry observed.",
+      "evidence": [
+        "../2026-10-18-loop-subscriptions/PROVIDER-ACCEPTANCE.md",
+        "product-evidence.md"
+      ],
+      "limits": "Not natural monthly renewal, Live settlement or billing-email delivery. Localized INR renewal remained Processing; JPY succeeded.",
+      "next": "Retain these limits; do not repeat real charges or call Processing success.",
+      "sourceMessages": [
+        "H056",
+        "H069"
+      ]
+    },
+    {
+      "id": "R14",
+      "request": "Local currency with no decimals",
+      "status": "delivered_bounded",
+      "delivered": "Nine whole-unit currency catalogues and country choices;27 Live and27 Test quotes; versioned new products preserve old monetary snapshots.",
+      "evidence": [
+        "../2026-10-18-loop-subscriptions/WHOLE-CURRENCY-PRICING.md"
+      ],
+      "limits": "Dated fixed local prices, not continuous bank FX or every-country automatic detection; old exact subscriptions retain old price.",
+      "next": "Maintain catalogue/quote consistency and explicit currency choice.",
+      "sourceMessages": [
+        "H070",
+        "H071"
+      ]
+    },
+    {
+      "id": "R15",
+      "request": "Actual Starter, Advanced, Pro Job Seeker plan names",
+      "status": "delivered_bounded",
+      "delivered": "Customer UI and all six current Live/Test products renamed; Terms alignment in the verified clarity patch.",
+      "evidence": [
+        "../2026-10-18-loop-subscriptions/PLAN-NAMES.md",
+        "../2026-10-18-product-clarity/ASSESSMENT.md"
+      ],
+      "limits": "Internal IDs/cadences remain stable; no new commercial terms or forced historical repricing.",
+      "next": "Preserve current plan names and verified Terms consistency with the provider products.",
+      "sourceMessages": [
+        "H072"
+      ]
+    },
+    {
+      "id": "R16",
+      "request": "Beginner Dodo setup and secure key/webhook scopes",
+      "status": "answered_completed",
+      "delivered": "Live and separate Test API keys/signing secrets and exact necessary permissions were completed and used successfully; renewal/refund terms approved.",
+      "evidence": [
+        "../2026-10-18-loop-subscriptions/PROVIDER-ACCEPTANCE.md",
+        "product-evidence.md"
+      ],
+      "limits": "No secret belongs in chat/Git. All-read/write is unnecessary; completed owner steps are not pending again.",
+      "next": "Do not repeat credential handoffs; ask only for a genuinely new secure owner-only step.",
+      "sourceMessages": [
+        "H004",
+        "H051",
+        "H053",
+        "H054",
+        "H056",
+        "H057",
+        "H058",
+        "H059",
+        "H060",
+        "H061",
+        "H062",
+        "H064",
+        "H065",
+        "H066",
+        "H067",
+        "H068"
+      ]
+    },
+    {
+      "id": "R17",
+      "request": "Three versions; provider provenance and most-human comparison",
+      "status": "partial",
+      "delivered": "Three original A/B/C clips exist, all HeyGen; owner preferred B. Later Gemini attempt rejected; Higgsfield blocked; ElevenLabs Free unsuitable.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md",
+        "../2026-10-18-film-production-reset/ASSESSMENT.md"
+      ],
+      "limits": "Frame preference is not a full audiovisual or cross-provider benchmark. Original B was not Higgsfield.",
+      "next": "Show comparable actual accepted clips with genuine motion/audio review and qualified conclusions.",
+      "sourceMessages": [
+        "H010",
+        "H011",
+        "H013",
+        "H014",
+        "H024",
+        "H042",
+        "H049",
+        "H073"
+      ]
+    },
+    {
+      "id": "R18",
+      "request": "Requested B presenter opens Jobvance then full-screen demo",
+      "status": "open",
+      "delivered": "Exact55-second C01 script/screenplay/preflight exists; no accepted complete normal laptop opening with actual platform and narrated moving demo.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/START-HERE.md",
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "Old B, rejected B3/v5, silent storyboard and unexpected static A-roll do not fulfill the request.",
+      "next": "Finish source-consistent native capture/timed edit, bounded physical motion and continuous narration.",
+      "sourceMessages": [
+        "H005",
+        "H014",
+        "H028",
+        "H043",
+        "H049",
+        "H073",
+        "H075",
+        "H078",
+        "H080"
+      ]
+    },
+    {
+      "id": "R19",
+      "request": "Separate demo-only advertisement",
+      "status": "open",
+      "delivered": "Independent45-second C02 script/screenplay exists; complete narrated moving demo export does not.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/START-HERE.md",
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "Separate film means a genuine separate account-required walkthrough, not a cropped or silent reconstruction.",
+      "next": "Produce actual interactive setup/results/review/download film with coherent voice.",
+      "sourceMessages": [
+        "H014",
+        "H028",
+        "H075",
+        "H078",
+        "H080"
+      ]
+    },
+    {
+      "id": "R20",
+      "request": "Correct logo, tagline, platform/output-table/download demonstration",
+      "status": "partial",
+      "delivered": "Website tagline shipped; exact current-brand end-card rendered; product-capture rehearsal exists.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md",
+        "../../../../jobvance-marketing-launch/film-studio/START-HERE.md"
+      ],
+      "limits": "No accepted final-film logo/end-card/composite; no guaranteed ten jobs/day or fabricated live discoveries.",
+      "next": "Integrate real current logo and exact-source moving demo and inspect readable final export.",
+      "sourceMessages": [
+        "H028",
+        "H043",
+        "H075",
+        "H080",
+        "H081"
+      ]
+    },
+    {
+      "id": "R21",
+      "request": "15 dramatic concepts and proper filmmaking roles/workflow",
+      "status": "delivered_writing_only",
+      "delivered": "Fifteen ideas, separate strategist/copywriter/screenwriter handoffs, detailed scripts/shot plans, production contracts and staged review gates exist.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/START-HERE.md",
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "Written system is not a running completed filmmaking cycle or15 films.",
+      "next": "Run actual production and feed real defects/receipts back through the roles.",
+      "sourceMessages": [
+        "H002",
+        "H005",
+        "H075"
+      ]
+    },
+    {
+      "id": "R22",
+      "request": "Preflight before credits and3–4 real audiovisual reviews",
+      "status": "open",
+      "delivered": "Written/preflight consistency and short-preview ASR checks exist; current new-film AV passes are zero.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md",
+        "../../../../jobvance-marketing-launch/film-studio/UNEXPECTED-STATIC-RENDER-RECEIPT.json"
+      ],
+      "limits": "ASR/frames cannot prove listening, lip-sync, naturalness or whole-film quality. Unexpected static render was rejected/stopped.",
+      "next": "Review timed story, moving rough cut, picture/sound/product and exact final export; resolve real blockers.",
+      "sourceMessages": [
+        "H024",
+        "H049",
+        "H075",
+        "H078",
+        "H079"
+      ]
+    },
+    {
+      "id": "R23",
+      "request": "Use existing subscriptions/credits wisely",
+      "status": "partial",
+      "delivered": "Connections/terms completed. Paid main HeyGen Creator600 verified, latest595; conditional intended production ceiling55. No new plan purchase by agent.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md",
+        "../../../../jobvance-marketing-launch/film-studio/UNEXPECTED-STATIC-RENDER-RECEIPT.json"
+      ],
+      "limits": "Five-credit delta observed with unexpected7.4449s static render; exact initiator/itemized charge unverified. Intended motion/full voice not submitted.",
+      "next": "Keep exact credit/job records and strict action-time admission; no blind retries or unapproved purchases.",
+      "sourceMessages": [
+        "H010",
+        "H011",
+        "H012",
+        "H013",
+        "H014",
+        "H043",
+        "H045",
+        "H046",
+        "H047",
+        "H048",
+        "H050",
+        "H073",
+        "H074",
+        "H076",
+        "H077",
+        "H078",
+        "H079"
+      ]
+    },
+    {
+      "id": "R24",
+      "request": "Pause old B; show revised film before running",
+      "status": "held_by_latest_instruction",
+      "delivered": "Old campaign paused; exact replacement has no approval. Earlier Publish approval is superseded.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/meta-launch-receipt.json",
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "Latest stored campaign OFF; published ad switch ON but delivery Campaign off. No fresh delivery/spend assertion.",
+      "next": "Keep campaign off; show exact finished revised bytes and obtain explicit approval before activation.",
+      "sourceMessages": [
+        "H041",
+        "H042",
+        "H043",
+        "H078"
+      ]
+    },
+    {
+      "id": "R25",
+      "request": "Correct public Jobvance identity with IQ Bridge funding only",
+      "status": "partial",
+      "delivered": "Correct Job Vance Page/@jobvance.io saved in unpublished draft; Ads/Insights grants and funding access completed.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md",
+        "../../../../jobvance-marketing-launch/meta-launch-receipt.json"
+      ],
+      "limits": "Draft no longer displaying1815199 is not published validation. Wrong-brand workaround forbidden; existing links retained.",
+      "next": "After accepted final asset/owner approval, verify exact published identity/access/delivery.",
+      "sourceMessages": [
+        "H008",
+        "H011",
+        "H013",
+        "H014",
+        "H015",
+        "H017",
+        "H024",
+        "H026",
+        "H037",
+        "H038",
+        "H044"
+      ]
+    },
+    {
+      "id": "R26",
+      "request": "Personal Facebook; separate India portfolio/account; retain current links",
+      "status": "delivered_bounded",
+      "delivered": "Job Vance portfolio and India INR/Kolkata ad account created, retained unfunded; personal login preserved; IQ Bridge remains chosen funding.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "Creation is not full future India legal-country/billing/asset readiness. Owner withheld disconnect; no transfer.",
+      "next": "Preserve assets and links; verify missing future readiness only for an actual operation.",
+      "sourceMessages": [
+        "H027",
+        "H029",
+        "H031",
+        "H032",
+        "H033",
+        "H034",
+        "H035",
+        "H036",
+        "H037",
+        "H038",
+        "H039",
+        "H040"
+      ]
+    },
+    {
+      "id": "R27",
+      "request": "Replicate Instagram brand on Facebook; finish Page",
+      "status": "partial",
+      "delivered": "Page bio/category/site and public featured introduction exist.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "No complete current cover/CTA/feed replication or ongoing accepted content stream verified.",
+      "next": "Audit actual profile/cover/CTA against current Instagram; finish missing brand elements without duplicate intro.",
+      "sourceMessages": [
+        "H005",
+        "H011",
+        "H013",
+        "H014"
+      ]
+    },
+    {
+      "id": "R28",
+      "request": "Run approved ads and monitoring within budget",
+      "status": "held_by_latest_instruction",
+      "delivered": "Old ad published once then stopped; exact known scope/budget/end retained.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md",
+        "../../../../jobvance-marketing-launch/meta-launch-receipt.json"
+      ],
+      "limits": "INR400/day,5000cap; delegatedUSD10/day70total;24Oct13:00UTC end. No scaling, extension, duplicate or replacement campaigns. Relaunch held by owner.",
+      "next": "Once exact film approved, perform scoped action-time validation and verified delivery/spend; preserve caps/end.",
+      "sourceMessages": [
+        "H005",
+        "H006",
+        "H007",
+        "H008",
+        "H013",
+        "H014",
+        "H023",
+        "H024",
+        "H038",
+        "H041"
+      ]
+    },
+    {
+      "id": "R29",
+      "request": "Complete acquisition tracking and continuous marketing loop",
+      "status": "partial",
+      "delivered": "UTMs, durable SQLite outbox, uncertain-write protection, measurement contracts/CLI and scheduled operator exist.",
+      "evidence": [
+        "../2026-10-17-growth-loop/ASSESSMENT.md",
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "operations[] at14:39:55UTC; auth-return attribution, website events, activation/revenue/FX and full external production-to-learning cycle unverified. No-row metrics are unknown, not zero.",
+      "next": "Connect consent-aware sanitized events and accepted film/native publication receipts; verify actual outcomes.",
+      "sourceMessages": [
+        "H005",
+        "H009",
+        "H011",
+        "H024"
+      ]
+    },
+    {
+      "id": "R30",
+      "request": "Final marketing approach",
+      "status": "delivered_document",
+      "delivered": "Current private strategy rewritten to reflect primary Job Loop, live plans/whole prices, actual limits, correct brand, approved budget and review gate.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/FINAL-MARKETING-APPROACH.md",
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "A plan is not externally running ads or acquisition proof.",
+      "next": "Follow exact current documented constraints; report real delivery and customer-value evidence.",
+      "sourceMessages": [
+        "H006",
+        "H009",
+        "H011"
+      ]
+    },
+    {
+      "id": "R31",
+      "request": "Cold email/outreach",
+      "status": "draft_only",
+      "delivered": "Job Loop-first partnership copy and structured unsent draft prepared; no email sent.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/outreach/job-loop-partnership-draft.json",
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "Sender/domain/DNS, actual recipient batch/source, postal footer and opt-out/suppression remain unverified.",
+      "next": "Prepare a concrete bounded compliant batch before any send; do not use candidate records.",
+      "sourceMessages": [
+        "H005"
+      ]
+    },
+    {
+      "id": "R32",
+      "request": "Review Claude/Gemini and build worthwhile additions",
+      "status": "partial",
+      "delivered": "Briefs reconciled; safe source-bound product changes and durable marketing pieces adopted; separate open child features retained.",
+      "evidence": [
+        "brief-reconciliation.md"
+      ],
+      "limits": "Attachments are advice, not authority for a new card trial, mandatory quiz/no-account contradiction, fake vacancies, voice clone or auto-scaling.",
+      "next": "Deliver useful scoped coverage/answers, exclusions, digests/reminders/templates and actual external marketing handoffs.",
+      "sourceMessages": [
+        "H001",
+        "H013",
+        "H014",
+        "H016",
+        "H022",
+        "H055"
+      ]
+    },
+    {
+      "id": "R33",
+      "request": "Established feel, dramatic claims and exceptional quality",
+      "status": "goal_unmet",
+      "delivered": "Truthful stronger positioning and dramatic concepts adopted; rejected weak cuts remain rejected.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md",
+        "brief-reconciliation.md",
+        "../2026-10-18-product-clarity/ASSESSMENT.md"
+      ],
+      "limits": "No evidence for300% hiring,90%work,never-miss,guaranteed daily10,virality/top0.01%,fake tenure/testimonials or human-indistinguishability.",
+      "next": "Use demonstrated mechanism and strong craft; judge complete film and actual value without invented guarantees.",
+      "sourceMessages": [
+        "H013",
+        "H014",
+        "H028",
+        "H075",
+        "H079"
+      ]
+    },
+    {
+      "id": "R34",
+      "request": "Only genuine owner steps; completed approvals persist",
+      "status": "standing_constraint",
+      "delivered": "Completed Dodo/Higgsfield/Meta terms/access and paid HeyGen login retained. New recording Share step pending; first sharing produced rehearsal.",
+      "evidence": [
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md",
+        "product-evidence.md"
+      ],
+      "limits": "Latest prior Share confirmation applied to first stream, which ended; no new confirmation has arrived. Exact final creative approval comes after delivery.",
+      "next": "Continue unblocked work; do not repeat completed permissions or ask for secrets.",
+      "sourceMessages": [
+        "H012",
+        "H023",
+        "H024",
+        "H029",
+        "H030",
+        "H033",
+        "H035",
+        "H045",
+        "H046",
+        "H047",
+        "H048",
+        "H050",
+        "H053",
+        "H056",
+        "H057",
+        "H064",
+        "H074",
+        "H076",
+        "H077",
+        "H081"
+      ]
+    },
+    {
+      "id": "R35",
+      "request": "Last24–48h completeness and all remaining original requirements",
+      "status": "audit_delivered_work_open",
+      "delivered": "Exact82-human-message ledger and independent product/brief/marketing reconciliations produced; three additional bounded defects found and fixed for publication.",
+      "evidence": [
+        "product-evidence.md",
+        "brief-reconciliation.md",
+        "../../../../jobvance-marketing-launch/film-studio/48H-MARKETING-REQUEST-AUDIT.md"
+      ],
+      "limits": "Accounting for requests does not mean all outcomes completed. Earlier19-package/88finding backlog remains independently open.",
+      "next": "Maintain this ledger with real evidence and finish open rows; never replace execution with audit wording.",
+      "sourceMessages": [
+        "H001",
+        "H002",
+        "H003",
+        "H022",
+        "H024",
+        "H025",
+        "H063",
+        "H082"
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "id": "H001",
+      "at": "2026-10-16T20:40:11.318Z",
+      "kind": "main",
+      "summary": "Readonly Claude review and no code; later superseded",
+      "requirementIds": [
+        "R35",
+        "R32"
+      ]
+    },
+    {
+      "id": "H002",
+      "at": "2026-10-16T20:43:54.622Z",
+      "kind": "main",
+      "summary": "Primary Loop, journey, builder, variants, pricing/cadences, personas and agents",
+      "requirementIds": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R11",
+        "R21",
+        "R35",
+        "R12",
+        "R05"
+      ]
+    },
+    {
+      "id": "H003",
+      "at": "2026-10-17T08:07:14.981Z",
+      "kind": "main",
+      "summary": "Finish recurring backend, test/deploy, keep payments on",
+      "requirementIds": [
+        "R03",
+        "R04",
+        "R05",
+        "R10",
+        "R12",
+        "R35"
+      ]
+    },
+    {
+      "id": "H004",
+      "at": "2026-10-17T08:10:37.183Z",
+      "kind": "reply",
+      "summary": "Locate existing Dodo integration",
+      "requirementIds": [
+        "R12",
+        "R16"
+      ]
+    },
+    {
+      "id": "H005",
+      "at": "2026-10-17T10:54:33.552Z",
+      "kind": "main",
+      "summary": "Live product plus human-feeling continuous marketing and cold email",
+      "requirementIds": [
+        "R01",
+        "R12",
+        "R18",
+        "R21",
+        "R27",
+        "R28",
+        "R29",
+        "R31"
+      ]
+    },
+    {
+      "id": "H006",
+      "at": "2026-10-17T10:56:47.622Z",
+      "kind": "reply",
+      "summary": "US jobseekers and final-year students",
+      "requirementIds": [
+        "R28",
+        "R30"
+      ]
+    },
+    {
+      "id": "H007",
+      "at": "2026-10-17T11:21:00.693Z",
+      "kind": "main",
+      "summary": "Backend and ads priority",
+      "requirementIds": [
+        "R03",
+        "R04",
+        "R05",
+        "R10",
+        "R28"
+      ]
+    },
+    {
+      "id": "H008",
+      "at": "2026-10-17T11:33:44.453Z",
+      "kind": "reply",
+      "summary": "Use IQ Bridge as funding account",
+      "requirementIds": [
+        "R25",
+        "R28"
+      ]
+    },
+    {
+      "id": "H009",
+      "at": "2026-10-17T12:18:13.666Z",
+      "kind": "main",
+      "summary": "Explain automatic marketing loop",
+      "requirementIds": [
+        "R29",
+        "R30"
+      ]
+    },
+    {
+      "id": "H010",
+      "at": "2026-10-17T12:19:03.122Z",
+      "kind": "main",
+      "summary": "Advise provider quality rather than follow a tool name blindly",
+      "requirementIds": [
+        "R17",
+        "R23"
+      ]
+    },
+    {
+      "id": "H011",
+      "at": "2026-10-17T12:31:26.860Z",
+      "kind": "main",
+      "summary": "Create three versions, compare, fix Meta, strategy and Facebook",
+      "requirementIds": [
+        "R17",
+        "R25",
+        "R27",
+        "R29",
+        "R30",
+        "R23"
+      ]
+    },
+    {
+      "id": "H012",
+      "at": "2026-10-17T12:32:29.272Z",
+      "kind": "reply",
+      "summary": "Unclear voice-account connection labels",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H013",
+      "at": "2026-10-17T13:50:29.542Z",
+      "kind": "main",
+      "summary": "Review Claude impact; polished accounts/setup/persona goal",
+      "requirementIds": [
+        "R01",
+        "R02",
+        "R11",
+        "R32",
+        "R33",
+        "R09",
+        "R17",
+        "R23",
+        "R27",
+        "R25",
+        "R28",
+        "R10"
+      ]
+    },
+    {
+      "id": "H014",
+      "at": "2026-10-17T13:53:31.951Z",
+      "kind": "main",
+      "summary": "Implement Deep Tailor/account/setup/discovery/personas/films/Meta",
+      "requirementIds": [
+        "R05",
+        "R06",
+        "R10",
+        "R11",
+        "R18",
+        "R19",
+        "R25",
+        "R27",
+        "R28",
+        "R32",
+        "R01",
+        "R02",
+        "R09",
+        "R33",
+        "R17",
+        "R23"
+      ]
+    },
+    {
+      "id": "H015",
+      "at": "2026-10-17T14:13:48.964Z",
+      "kind": "reply",
+      "summary": "Approve Instagram-to-funding-account connection",
+      "requirementIds": [
+        "R25"
+      ]
+    },
+    {
+      "id": "H016",
+      "at": "2026-10-17T15:01:52.618Z",
+      "kind": "main",
+      "summary": "Quiz optional; assess Gemini advice",
+      "requirementIds": [
+        "R02",
+        "R32"
+      ]
+    },
+    {
+      "id": "H017",
+      "at": "2026-10-17T15:32:57.759Z",
+      "kind": "reply",
+      "summary": "Approve only Ads and Insights",
+      "requirementIds": [
+        "R25"
+      ]
+    },
+    {
+      "id": "H018",
+      "at": "2026-10-17T15:38:04.926Z",
+      "kind": "main",
+      "summary": "Role suggestions, searchable/custom/broad roles and locations",
+      "requirementIds": [
+        "R07"
+      ]
+    },
+    {
+      "id": "H019",
+      "at": "2026-10-17T15:52:16.784Z",
+      "kind": "main",
+      "summary": "Missing Next button",
+      "requirementIds": [
+        "R08"
+      ]
+    },
+    {
+      "id": "H020",
+      "at": "2026-10-17T16:01:37.935Z",
+      "kind": "main",
+      "summary": "Recurring service unavailable screenshot",
+      "requirementIds": [
+        "R08"
+      ]
+    },
+    {
+      "id": "H021",
+      "at": "2026-10-17T16:08:40.290Z",
+      "kind": "main",
+      "summary": "Confusing interrupted setup, Back/dashboard and product/sidebar labels",
+      "requirementIds": [
+        "R01",
+        "R02",
+        "R08",
+        "R09"
+      ]
+    },
+    {
+      "id": "H022",
+      "at": "2026-10-17T16:28:50.561Z",
+      "kind": "main",
+      "summary": "Build worthwhile recommendations; do not drop earlier work",
+      "requirementIds": [
+        "R32",
+        "R35"
+      ]
+    },
+    {
+      "id": "H023",
+      "at": "2026-10-17T16:45:31.383Z",
+      "kind": "main",
+      "summary": "Identify genuine owner steps and missing ads",
+      "requirementIds": [
+        "R28",
+        "R34"
+      ]
+    },
+    {
+      "id": "H024",
+      "at": "2026-10-17T16:46:33.036Z",
+      "kind": "main",
+      "summary": "Fix Meta, review/tracking/ads, show reels/providers, continue product",
+      "requirementIds": [
+        "R17",
+        "R22",
+        "R25",
+        "R28",
+        "R29",
+        "R34",
+        "R35"
+      ]
+    },
+    {
+      "id": "H025",
+      "at": "2026-10-17T16:51:29.793Z",
+      "kind": "main",
+      "summary": "Continue authorized work",
+      "requirementIds": [
+        "R35"
+      ]
+    },
+    {
+      "id": "H026",
+      "at": "2026-10-17T16:55:54.213Z",
+      "kind": "reply",
+      "summary": "Approve Page Ads/Insights request",
+      "requirementIds": [
+        "R25"
+      ]
+    },
+    {
+      "id": "H027",
+      "at": "2026-10-17T16:58:42.326Z",
+      "kind": "main",
+      "summary": "Create India Job Vance portfolio/account and link assets",
+      "requirementIds": [
+        "R26"
+      ]
+    },
+    {
+      "id": "H028",
+      "at": "2026-10-17T16:59:42.280Z",
+      "kind": "main",
+      "summary": "Revised B laptop/product/logo/tagline/demo; dramatic claims",
+      "requirementIds": [
+        "R18",
+        "R19",
+        "R20",
+        "R33"
+      ]
+    },
+    {
+      "id": "H029",
+      "at": "2026-10-17T17:06:22.117Z",
+      "kind": "reply",
+      "summary": "Approve portfolio terms/contact; later contact correction controls",
+      "requirementIds": [
+        "R26",
+        "R34"
+      ]
+    },
+    {
+      "id": "H030",
+      "at": "2026-10-17T17:06:36.441Z",
+      "kind": "main",
+      "summary": "Repeat pending question",
+      "requirementIds": [
+        "R34"
+      ]
+    },
+    {
+      "id": "H031",
+      "at": "2026-10-17T17:12:01.476Z",
+      "kind": "main",
+      "summary": "Correct portfolio name/contact; personal Facebook remains",
+      "requirementIds": [
+        "R26"
+      ]
+    },
+    {
+      "id": "H032",
+      "at": "2026-10-17T17:12:13.969Z",
+      "kind": "reply",
+      "summary": "Repeat corrected portfolio name/contact",
+      "requirementIds": [
+        "R26"
+      ]
+    },
+    {
+      "id": "H033",
+      "at": "2026-10-17T17:15:05.989Z",
+      "kind": "reply",
+      "summary": "Business legal details and approval to connect Page/Instagram",
+      "requirementIds": [
+        "R26",
+        "R34"
+      ]
+    },
+    {
+      "id": "H034",
+      "at": "2026-10-17T17:15:24.462Z",
+      "kind": "reply",
+      "summary": "Keep Facebook personal; explain portfolio",
+      "requirementIds": [
+        "R26"
+      ]
+    },
+    {
+      "id": "H035",
+      "at": "2026-10-17T17:17:14.124Z",
+      "kind": "main",
+      "summary": "Proceed separate portfolio/India account; only genuine questions",
+      "requirementIds": [
+        "R26",
+        "R34"
+      ]
+    },
+    {
+      "id": "H036",
+      "at": "2026-10-17T17:27:28.767Z",
+      "kind": "reply",
+      "summary": "Approve INR/Kolkata India ad account",
+      "requirementIds": [
+        "R26"
+      ]
+    },
+    {
+      "id": "H037",
+      "at": "2026-10-17T17:28:16.223Z",
+      "kind": "main",
+      "summary": "Link both pages without errors",
+      "requirementIds": [
+        "R25",
+        "R26"
+      ]
+    },
+    {
+      "id": "H038",
+      "at": "2026-10-17T17:34:17.812Z",
+      "kind": "main",
+      "summary": "Return funding to IQ Bridge; keep India account for later",
+      "requirementIds": [
+        "R25",
+        "R26",
+        "R28"
+      ]
+    },
+    {
+      "id": "H039",
+      "at": "2026-10-17T17:36:24.316Z",
+      "kind": "reply",
+      "summary": "Do not disconnect existing Page/Instagram link",
+      "requirementIds": [
+        "R26"
+      ]
+    },
+    {
+      "id": "H040",
+      "at": "2026-10-17T17:40:46.430Z",
+      "kind": "main",
+      "summary": "Preserve existing IQ Bridge asset links",
+      "requirementIds": [
+        "R26"
+      ]
+    },
+    {
+      "id": "H041",
+      "at": "2026-10-17T18:16:51.226Z",
+      "kind": "reply",
+      "summary": "Approve old B Publish; later pause supersedes",
+      "requirementIds": [
+        "R24",
+        "R28"
+      ]
+    },
+    {
+      "id": "H042",
+      "at": "2026-10-17T18:18:44.319Z",
+      "kind": "main",
+      "summary": "Show exact final B advertisement",
+      "requirementIds": [
+        "R17",
+        "R24"
+      ]
+    },
+    {
+      "id": "H043",
+      "at": "2026-10-17T18:19:32.253Z",
+      "kind": "main",
+      "summary": "Pause old B; finish requested revised asset and show before running",
+      "requirementIds": [
+        "R18",
+        "R20",
+        "R23",
+        "R24"
+      ]
+    },
+    {
+      "id": "H044",
+      "at": "2026-10-17T18:29:28.509Z",
+      "kind": "main",
+      "summary": "Public Instagram/FB Jobvance; IQ Bridge funding only",
+      "requirementIds": [
+        "R25"
+      ]
+    },
+    {
+      "id": "H045",
+      "at": "2026-10-17T18:33:58.713Z",
+      "kind": "reply",
+      "summary": "Higgsfield connected",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H046",
+      "at": "2026-10-17T18:38:26.477Z",
+      "kind": "reply",
+      "summary": "Approve Higgsfield account setup terms",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H047",
+      "at": "2026-10-17T22:38:46.859Z",
+      "kind": "reply",
+      "summary": "Approve presenter-media upload/screening rights",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H048",
+      "at": "2026-10-18T06:59:47.534Z",
+      "kind": "reply",
+      "summary": "Higgsfield plugin enabled",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H049",
+      "at": "2026-10-18T07:03:23.348Z",
+      "kind": "main",
+      "summary": "Clarify original B provenance, preserve style, run3–4 AV reviews",
+      "requirementIds": [
+        "R17",
+        "R18",
+        "R22"
+      ]
+    },
+    {
+      "id": "H050",
+      "at": "2026-10-18T07:07:43.242Z",
+      "kind": "reply",
+      "summary": "Higgsfield ChatGPT app connection complete",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H051",
+      "at": "2026-10-18T07:10:23.318Z",
+      "kind": "main",
+      "summary": "Dodo Live",
+      "requirementIds": [
+        "R12",
+        "R16"
+      ]
+    },
+    {
+      "id": "H052",
+      "at": "2026-10-18T07:18:41.596Z",
+      "kind": "main",
+      "summary": "Always keep Job Loop primary",
+      "requirementIds": [
+        "R01"
+      ]
+    },
+    {
+      "id": "H053",
+      "at": "2026-10-18T07:22:51.595Z",
+      "kind": "reply",
+      "summary": "Need beginner help finding secure Dodo controls",
+      "requirementIds": [
+        "R16",
+        "R34"
+      ]
+    },
+    {
+      "id": "H054",
+      "at": "2026-10-18T07:26:43.871Z",
+      "kind": "main",
+      "summary": "Explain minimum API permissions in detail",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H055",
+      "at": "2026-10-18T07:27:37.097Z",
+      "kind": "main",
+      "summary": "Review supplied Claude Dodo go-live brief",
+      "requirementIds": [
+        "R12",
+        "R32"
+      ]
+    },
+    {
+      "id": "H056",
+      "at": "2026-10-18T07:32:13.994Z",
+      "kind": "main",
+      "summary": "Live key saved; endpoint help; finish/test/deploy subscriptions",
+      "requirementIds": [
+        "R01",
+        "R12",
+        "R13",
+        "R16",
+        "R34"
+      ]
+    },
+    {
+      "id": "H057",
+      "at": "2026-10-18T08:06:05.876Z",
+      "kind": "reply",
+      "summary": "Beginner webhook help and approval of commercial renewal/refund/support terms",
+      "requirementIds": [
+        "R12",
+        "R16",
+        "R34"
+      ]
+    },
+    {
+      "id": "H058",
+      "at": "2026-10-18T08:07:00.803Z",
+      "kind": "reply",
+      "summary": "Endpoint URL help",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H059",
+      "at": "2026-10-18T08:08:38.831Z",
+      "kind": "reply",
+      "summary": "Signing secret and secure-copy help",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H060",
+      "at": "2026-10-18T08:09:56.503Z",
+      "kind": "reply",
+      "summary": "Live signing secret saved",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H061",
+      "at": "2026-10-18T08:10:46.039Z",
+      "kind": "reply",
+      "summary": "Approve exact necessary Dodo permissions",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H062",
+      "at": "2026-10-18T08:34:58.432Z",
+      "kind": "main",
+      "summary": "Question all-read/write permissions; answered with minimum scope",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H063",
+      "at": "2026-10-18T08:35:12.786Z",
+      "kind": "main",
+      "summary": "Audit previous24hours",
+      "requirementIds": [
+        "R35"
+      ]
+    },
+    {
+      "id": "H064",
+      "at": "2026-10-18T08:51:45.936Z",
+      "kind": "reply",
+      "summary": "Need help with Test key screen",
+      "requirementIds": [
+        "R16",
+        "R34"
+      ]
+    },
+    {
+      "id": "H065",
+      "at": "2026-10-18T08:55:25.968Z",
+      "kind": "reply",
+      "summary": "New Test key shown",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H066",
+      "at": "2026-10-18T08:56:24.335Z",
+      "kind": "reply",
+      "summary": "Test API key saved securely",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H067",
+      "at": "2026-10-18T08:57:51.563Z",
+      "kind": "reply",
+      "summary": "Test signing secret shown",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H068",
+      "at": "2026-10-18T08:58:26.104Z",
+      "kind": "reply",
+      "summary": "Test signing secret saved securely",
+      "requirementIds": [
+        "R16"
+      ]
+    },
+    {
+      "id": "H069",
+      "at": "2026-10-18T09:45:46.770Z",
+      "kind": "main",
+      "summary": "Live customer payments required; Test is separate acceptance",
+      "requirementIds": [
+        "R12",
+        "R13"
+      ]
+    },
+    {
+      "id": "H070",
+      "at": "2026-10-18T09:46:57.627Z",
+      "kind": "main",
+      "summary": "Local rounded currency request; fractional examples later superseded",
+      "requirementIds": [
+        "R14"
+      ]
+    },
+    {
+      "id": "H071",
+      "at": "2026-10-18T10:58:00.871Z",
+      "kind": "main",
+      "summary": "No decimals; whole local currency instruction",
+      "requirementIds": [
+        "R14"
+      ]
+    },
+    {
+      "id": "H072",
+      "at": "2026-10-18T11:32:08.551Z",
+      "kind": "main",
+      "summary": "Starter/Advanced/Pro Job Seeker names",
+      "requirementIds": [
+        "R15",
+        "R09"
+      ]
+    },
+    {
+      "id": "H073",
+      "at": "2026-10-18T11:40:58.893Z",
+      "kind": "main",
+      "summary": "Try Gemini subscription/browser for narration and product film",
+      "requirementIds": [
+        "R17",
+        "R18",
+        "R23"
+      ]
+    },
+    {
+      "id": "H074",
+      "at": "2026-10-18T12:18:12.420Z",
+      "kind": "reply",
+      "summary": "Approve narration terms and downloaded generated clip",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H075",
+      "at": "2026-10-18T13:00:58.408Z",
+      "kind": "main",
+      "summary": "Reject weak film; B physical laptop/fullscreen demo plus separate demo and filmmaking-agent system",
+      "requirementIds": [
+        "R18",
+        "R19",
+        "R20",
+        "R21",
+        "R22",
+        "R33"
+      ]
+    },
+    {
+      "id": "H076",
+      "at": "2026-10-18T13:34:52.780Z",
+      "kind": "reply",
+      "summary": "Use existing paid presenter/voice account",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H077",
+      "at": "2026-10-18T13:37:53.436Z",
+      "kind": "reply",
+      "summary": "Will provide separate paid login; later main Creator purchase controls",
+      "requirementIds": [
+        "R23",
+        "R34"
+      ]
+    },
+    {
+      "id": "H078",
+      "at": "2026-10-18T13:42:59.518Z",
+      "kind": "main",
+      "summary": "Paid login ready, produce both, review and show before running",
+      "requirementIds": [
+        "R18",
+        "R19",
+        "R22",
+        "R23",
+        "R24"
+      ]
+    },
+    {
+      "id": "H079",
+      "at": "2026-10-18T13:56:20.315Z",
+      "kind": "main",
+      "summary": "Main Creator600 allowance; preflight before credit use, exceptional quality",
+      "requirementIds": [
+        "R22",
+        "R23",
+        "R33"
+      ]
+    },
+    {
+      "id": "H080",
+      "at": "2026-10-18T13:56:20.331Z",
+      "kind": "main",
+      "summary": "Proper platform walkthrough",
+      "requirementIds": [
+        "R18",
+        "R19",
+        "R20"
+      ]
+    },
+    {
+      "id": "H081",
+      "at": "2026-10-18T14:00:58.130Z",
+      "kind": "reply",
+      "summary": "Browser sharing started for first rehearsal; that stream later ended",
+      "requirementIds": [
+        "R20",
+        "R34"
+      ]
+    },
+    {
+      "id": "H082",
+      "at": "2026-10-18T14:38:07.512Z",
+      "kind": "main",
+      "summary": "Ensure all prompts in last24–48hours executed and none missed",
+      "requirementIds": [
+        "R35"
+      ]
+    }
+  ],
+  "standingCorrections": [
+    "Job Loop primary; accounts required; guided quiz optional",
+    "Whole-unit currencies supersede fractional examples",
+    "Starter/Advanced/Pro Job Seeker supersede old customer plan names",
+    "IQ Bridge funding only; Job Vance Page and @jobvance.io public brand",
+    "Old B paused; exact finished new asset must be shown and explicitly approved",
+    "No disconnect/asset transfer, ad budget increase, campaign extension, unapproved purchase, candidate erasure or employer applications",
+    "Current main paid HeyGen595; observed5-credit delta/static-render incident retained; no fabricated AV passes",
+    "Product automation deadline18Oct23:59Dubai; marketing separate"
+  ],
+  "remainingOriginalRequirements": [
+    "Older-results pagination and exact retrieval",
+    "Grouped per-application composition/review and scoped answer reuse",
+    "Full-route ambiguous request recovery",
+    "Unsupported PDF scripts",
+    "Original inbox/discovery/receipt-ledger parity and model parity",
+    "Morning digest, weekly summary, delivered follow-up reminders",
+    "Three selectable ATS-safe templates",
+    "Coordinated restore and isolated Storage/collection acceptance",
+    "Actual unassisted first/second, natural recurring customer value and real satisfaction research"
+  ]
+}

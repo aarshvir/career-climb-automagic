@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-18T15:00:09Z",
+  "scope": "Document reconciliation integrity; no new runtime, payment, customer or audiovisual test",
+  "passed": true,
+  "window": {
+    "start": "2026-10-16T14:38:20.000Z",
+    "end": "2026-10-18T14:38:20.000Z",
+    "timezoneDisplay": "Asia/Dubai",
+    "note": "Exact human-message event timestamps; attachments/replies reconciled, automated records excluded."
+  },
+  "counts": {
+    "humanMessages": 82,
+    "main": 48,
+    "replies": 34,
+    "individualAnswers": 37,
+    "excluded": {
+      "heartbeat": 9,
+      "environment": 8,
+      "navigation": 12,
+      "emptyWritingEdit": 1
+    }
+  },
+  "requirements": 35,
+  "forwardLinks": 208,
+  "reverseLinks": 208,
+  "markdownRows": 82,
+  "evidencePaths": "all present",
+  "independentReview": "independent-review.md;82 exact raw-record hashes/timestamps/kinds verified; no raw private email/address copied",
+  "sha256": {
+    "REQUEST-AUDIT.md": "7daa174d8a49626dcf8693b87b0b218a7bd5646c1376fba1d74aaaf328aaf178",
+    "request-ledger.json": "60935e9a642fabc0a4118924ddca9026143d3ed17c0c0d6ffd42a1c13b48f93a",
+    "independent-review.md": "d887d19c52b66c59f8296955b23a50a11632e5772b9eae854476be1ca8a24ce3",
+    "product-evidence.md": "c90769d8eaac8b3dc2c41cd0443fcd61fd1291bc6a614265bbb4468144019d8e",
+    "brief-reconciliation.md": "2f702b900a9656785887aa7c09afcaf55669a45fe999f77a073410003b4775c3"
+  },
+  "currentRelease": {
+    "version": "v50",
+    "source": "59691d747f1fc1c1290a5c30fc6e2f9ec9a502ad",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ce9413cbcf008191b0d7b049eba398fe",
+    "deployment": "appgdep_6ad4dd7437808191b3ac873ac440555f",
+    "succeededAt": "2026-10-18T14:53:58.329077+00:00"
+  },
+  "runtimeValidation": "Retains v50 original60focused/137related/50independent overlapping cases;TS/build12hostinggroups/7HTML3JS; no new full-suite",
+  "errors": []
+}
