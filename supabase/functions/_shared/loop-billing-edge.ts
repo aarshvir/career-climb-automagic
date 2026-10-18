@@ -15,6 +15,8 @@ export function loopBillingRpc(admin: ReturnType<typeof adminClient>) {
         ['LOOP_BILLING_REVISION_CONFLICT',409,'This subscription changed. Refresh it before confirming cancellation.'],
         ['LOOP_BILLING_SUBSCRIPTION_CHANGED',409,'This subscription changed. Refresh it before confirming cancellation.'],
         ['LOOP_CHECKOUT_PENDING',409,'An existing checkout is still open or needs reconciliation. Resume it or contact support before starting another.'],
+        ['LOOP_SUBSCRIPTION_EXISTS',409,'An existing subscription may still renew or have an unresolved payment. Confirm its cancellation or contact support before another checkout.'],
+        ['LOOP_CHECKOUT_FINISHED',409,'This checkout already has a subscription. Refresh billing to manage its current state.'],
         ['LOOP_CANCELLATION_PENDING',409,'A cancellation is still being confirmed. Reuse its original request and refresh the subscription.'],
         ['LOOP_BILLING_PAID_PERIOD_REQUIRED',409,'This subscription has no verified paid month yet. Payment confirmation will be retried.'],
         ['LOOP_BILLING_ACTIVE',409,'An existing subscription or checkout must be managed first.'],

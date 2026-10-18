@@ -3,6 +3,7 @@ import { webcrypto } from 'node:crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { captureLoopBillingInput, LOOP_BILLING_PRODUCT, loopBillingConfiguration, loopCheckoutBody, validateLoopBillingProduct, validateLoopPaidPeriod, validateLoopSubscription, verifiedAuthSession, type LoopBillingConfig } from '../functions/_shared/loop-billing.ts';
 import { applyLoopBillingWebhook, controlLoopBilling, type LoopBillingPorts } from '../functions/_shared/loop-billing-runtime.ts';
+import { loopBillingRpc } from '../functions/_shared/loop-billing-edge.ts';
 import { dodoEnvironment } from './dodo-fixtures';
 beforeAll(() => { Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true }); });
 const owner='11111111-1111-4111-8111-111111111111', request='22222222-2222-4222-8222-222222222222', auth='33333333-3333-4333-8333-333333333333';
@@ -87,6 +88,14 @@ describe('monthly Job Loop fixed product and authority',()=>{
   });
 });
 describe('monthly checkout and cancellation orchestration',()=>{
+  it('returns an actionable conflict when server renewal safety blocks a racing new checkout',async()=>{
+    const rpc=loopBillingRpc({rpc:async()=>({data:null,error:{message:'LOOP_SUBSCRIPTION_EXISTS private SQL/provider context'}})} as unknown as Parameters<typeof loopBillingRpc>[0]);
+    await expect(rpc('job_loop_billing_checkout_claim',{})).rejects.toMatchObject({status:409,code:'LOOP_SUBSCRIPTION_EXISTS',message:expect.stringContaining('Confirm its cancellation')});
+  });
+  it('returns a finished-checkout conflict without reopening a consumed payment link',async()=>{
+    const rpc=loopBillingRpc({rpc:async()=>({data:null,error:{message:'LOOP_CHECKOUT_FINISHED'}})} as unknown as Parameters<typeof loopBillingRpc>[0]);
+    await expect(rpc('job_loop_billing_checkout_claim',{})).rejects.toMatchObject({status:409,code:'LOOP_CHECKOUT_FINISHED',message:expect.stringContaining('Refresh billing')});
+  });
   it('creates one bound checkout with actual auth session and immutable generation',async()=>{
     const p=ports();const reply=await controlLoopBilling(p.result,config(),owner,auth,{action:'checkout',requestId:request,expectedGeneration:0,plan:'weekly',consent:true});
     expect(reply).toMatchObject({generation:0,plan:'weekly',sessionId:session,requestId:request});
@@ -112,10 +121,35 @@ describe('monthly checkout and cancellation orchestration',()=>{
     const write=p.providerCalls.find(call=>call.method==='PATCH');expect(write?.body).toEqual({cancel_at_next_billing_date:true});
     expect(p.calls[0].args.p_version).toBe(1);expect(p.calls.find(call=>call.name==='job_loop_billing_cancel_finalize')?.args.p_confirmed).toBe(true);
   });
+  it('cancels an owned refunded subscription without granting or restoring revoked access',async()=>{
+    const p=ports();p.rpcResults.job_loop_billing_status={generation:0,subscription:{subscriptionId:subId,plan:'weekly',status:'active',validUntil:until,periodStart:from,cancelAtPeriodEnd:true,revoked:true,revision:2,graceUntil:null},entitlement:{active:false}};
+    const result=await controlLoopBilling(p.result,config(),owner,auth,{action:'cancel',requestId:request,expectedGeneration:0,expectedSubscriptionId:subId,expectedVersion:1,consent:true});
+    expect(result).toMatchObject({status:'confirmed',subscription:{subscriptionId:subId,cancelAtPeriodEnd:true,revoked:true}});
+    expect(p.providerCalls.filter(call=>call.method==='PATCH')).toHaveLength(1);expect(p.providerCalls.find(call=>call.method==='PATCH')?.body).toEqual({cancel_at_next_billing_date:true});
+    expect(p.calls.some(call=>call.name==='job_loop_billing_apply_event')).toBe(false);
+  });
   it('reconciles ambiguous cancellation by read without repeating the PATCH',async()=>{
     const p=ports();p.rpcResults.job_loop_billing_cancel_claim={creationClaimAcquired:false};p.rpcResults.job_loop_billing_cancel_finalize={status:'uncertain',subscriptionId:subId};
     const reply=await controlLoopBilling(p.result,config(),owner,auth,{action:'cancel',requestId:request,expectedGeneration:0,expectedSubscriptionId:subId,expectedVersion:1,consent:true});
     expect(reply).toMatchObject({status:'uncertain'});expect(p.providerCalls.some(call=>call.method==='PATCH')).toBe(false);
+  });
+  it('releases only a failed initial GET and retries that original cancellation with exactly one PATCH',async()=>{
+    const p=ports(),original=p.result.provider;let initialGetFails=true,patches=0;
+    p.result.provider=async(endpoint,body,method)=>{if(endpoint===`subscriptions/${subId}`&&!body&&initialGetFails){initialGetFails=false;throw new Error('Test read outage');}if(method==='PATCH')patches++;return original(endpoint,body,method);};
+    const intent={action:'cancel',requestId:request,expectedGeneration:0,expectedSubscriptionId:subId,expectedVersion:1,consent:true};
+    await expect(controlLoopBilling(p.result,config(),owner,auth,intent)).rejects.toMatchObject({status:503,code:'LOOP_CANCELLATION_RETRYABLE'});
+    expect(patches).toBe(0);expect(p.calls.filter(call=>call.name==='job_loop_billing_cancel_retryable')).toHaveLength(1);
+    expect(await controlLoopBilling(p.result,config(),owner,auth,intent)).toMatchObject({status:'confirmed'});expect(patches).toBe(1);
+    const claims=p.calls.filter(call=>call.name==='job_loop_billing_cancel_claim');expect(claims[0].args).toEqual(claims[1].args);
+  });
+  it('never releases or repeats a cancellation after any provider PATCH attempt times out',async()=>{
+    const p=ports(),original=p.result.provider;let patches=0;
+    p.rpcResults.job_loop_billing_cancel_finalize={status:'uncertain',subscriptionId:subId};
+    p.result.provider=async(endpoint,body,method)=>{if(method==='PATCH'){patches++;throw new Error('Ambiguous Test write');}return original(endpoint,body,method);};
+    const intent={action:'cancel',requestId:request,expectedGeneration:0,expectedSubscriptionId:subId,expectedVersion:1,consent:true};
+    expect(await controlLoopBilling(p.result,config(),owner,auth,intent)).toMatchObject({status:'uncertain'});p.rpcResults.job_loop_billing_cancel_claim={creationClaimAcquired:false};
+    expect(await controlLoopBilling(p.result,config(),owner,auth,intent)).toMatchObject({status:'uncertain'});
+    expect(patches).toBe(1);expect(p.calls.some(call=>call.name==='job_loop_billing_cancel_retryable')).toBe(false);
   });
   it('can cancel billing after career data generation changes while preserving original subscription identity',async()=>{
     const p=ports();await controlLoopBilling(p.result,config(),owner,auth,{action:'cancel',requestId:request,expectedGeneration:4,expectedSubscriptionId:subId,expectedVersion:1,consent:true});

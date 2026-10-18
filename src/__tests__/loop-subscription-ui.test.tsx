@@ -16,6 +16,40 @@ const renderPage=(path='/pricing',compact=false)=>render(<MemoryRouter initialEn
 beforeEach(()=>{clearTrackingDraftMemory();setTrackingDraftOwner('owner','session');m.auth={user:{id:'owner'},session:{user:{id:'owner'}},loading:false,authError:null};m.read.mockReset();m.checkout.mockReset();m.cancel.mockReset();m.open.mockReset();m.read.mockResolvedValue(status());});
 afterEach(()=>{cleanup();clearTrackingDraftMemory();});
 describe('Job Loop subscriptions journey',()=>{
+ it.each(['pending','active','on_hold','paused','past_due'])('keeps %s revoked subscription cancellable and blocks another checkout even after recorded access expires',async providerStatus=>{
+  m.read.mockResolvedValue({...status(),subscription:{...sub,status:providerStatus,revoked:true,validUntil:'2020-01-01T00:00:00Z'},entitlement:{active:false,plan:null,cadence:null,variantLimit:3,maxWeeklyRuns:0,validUntil:null}});
+  renderPage('/pricing?loopPlan=weekly');
+  expect(await screen.findByText('Status: Access revoked.')).toBeInTheDocument();
+  expect(screen.getByText(/monthly renewal has not been cancelled/)).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Cancel monthly renewal'})).toBeDisabled();
+  expect(screen.getByRole('checkbox',{name:/Cancel future monthly renewal/})).toHaveAccessibleName(/without restoring revoked access/);
+  expect(screen.getByRole('button',{name:'Choose Daily'})).toBeDisabled();
+  expect(screen.queryByRole('button',{name:/Continue to secure checkout/})).not.toBeInTheDocument();
+  expect(screen.queryByText(/Paid access through/)).not.toBeInTheDocument();expect(m.checkout).not.toHaveBeenCalled();
+ });
+ it('cancels future billing after a refund while preserving revoked access and exact confirmation identity',async()=>{
+  const refunded={...sub,revoked:true};m.read.mockResolvedValue({...status(),subscription:refunded,entitlement:{active:false,plan:null,cadence:null,variantLimit:3,maxWeeklyRuns:0,validUntil:null}});
+  m.cancel.mockResolvedValue({requestId:'receipt',generation:0,subscriptionId:sub.subscriptionId,status:'confirmed',subscription:{...refunded,cancelAtPeriodEnd:true,version:2}});
+  renderPage('/pricing?loopPlan=weekly');await screen.findByText('Status: Access revoked.');
+  fireEvent.click(screen.getByRole('checkbox',{name:/Cancel future monthly renewal/}));fireEvent.click(screen.getByRole('button',{name:'Cancel monthly renewal'}));
+  expect(await screen.findByText(/Renewal is cancelled/)).toBeInTheDocument();expect(m.cancel.mock.calls[0][1]).toMatchObject({expectedSubscriptionId:sub.subscriptionId,expectedVersion:1,expectedGeneration:0,consent:true});
+  expect(screen.getByText('Status: Access revoked.')).toBeInTheDocument();expect(screen.queryByText(/Paid access through/)).not.toBeInTheDocument();expect(screen.queryByText(/Your confirmed access ends/)).not.toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'Continue to secure checkout · $29/month'})).toBeDisabled();expect(m.checkout).not.toHaveBeenCalled();
+ });
+ it.each(['pending','on_hold','paused','past_due'])('keeps refunded %s recovery payment blocked after future renewal cancellation',async providerStatus=>{
+  m.read.mockResolvedValue({...status(),subscription:{...sub,status:providerStatus,revoked:true,cancelAtPeriodEnd:true},entitlement:{active:false,plan:null,cadence:null,variantLimit:3,maxWeeklyRuns:0,validUntil:null}});
+  renderPage('/pricing?loopPlan=weekly');await screen.findByText('Status: Access revoked.');
+  expect(screen.getByText(/provider may still be resolving an earlier payment/)).toBeInTheDocument();expect(screen.getByRole('button',{name:'Choose Daily'})).toBeDisabled();
+  expect(screen.queryByRole('button',{name:/Continue to secure checkout/})).not.toBeInTheDocument();expect(m.checkout).not.toHaveBeenCalled();
+ });
+ it('keeps an uncertain refund-related cancellation on the original request and prevents duplicate purchase',async()=>{
+  const refunded={...sub,revoked:true};m.read.mockResolvedValue({...status(),subscription:refunded});m.cancel.mockResolvedValue({status:'uncertain',subscription:refunded});
+  renderPage('/pricing?loopPlan=weekly');await screen.findByText('Status: Access revoked.');
+  fireEvent.click(screen.getByRole('checkbox',{name:/Cancel future monthly renewal/}));fireEvent.click(screen.getByRole('button',{name:'Cancel monthly renewal'}));
+  expect(await screen.findByRole('alert')).toHaveTextContent('awaiting confirmation');expect(screen.getByRole('button',{name:'Choose Daily'})).toBeDisabled();
+  const retry=screen.getByRole('button',{name:'Retry original cancellation'});expect(retry).toBeDisabled();fireEvent.click(screen.getByRole('checkbox',{name:/Cancel future monthly renewal/}));fireEvent.click(retry);
+  await waitFor(()=>expect(m.cancel).toHaveBeenCalledTimes(2));expect(m.cancel.mock.calls[0][1]).toEqual(m.cancel.mock.calls[1][1]);expect(m.checkout).not.toHaveBeenCalled();
+ });
  it('keeps Job Loop prices and account return exact, without auto starting a purchase',()=>{m.auth={user:null,session:null,loading:false,authError:null};renderPage();for(const id of ['weekly','active','daily'])expect(accountDestination(`/pricing?loopPlan=${id}`)).toBe(`/pricing?loopPlan=${id}`);expect(accountDestination('/pricing?loopPlan=daily&next=https://evil.test')).toBe('/loop');expect(screen.getByRole('link',{name:'Sign in for Daily'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Ddaily');expect(m.read).not.toHaveBeenCalled();expect(m.checkout).not.toHaveBeenCalled();expect(screen.queryByRole('button',{name:/secure checkout/})).not.toBeInTheDocument();});
  it('requires fresh monthly consent after selecting a plan, then opens only the confirmed receipt',async()=>{m.checkout.mockResolvedValue({provider:'dodo',billingMode:'live',url:'https://checkout.dodopayments.com/1',sessionId:'cks_fixture'});renderPage();await waitFor(()=>expect(m.read).toHaveBeenCalled());fireEvent.click(screen.getByRole('button',{name:'Choose Active'}));const next=screen.getByRole('button',{name:'Continue to secure checkout · $59/month'});expect(next).toBeDisabled();fireEvent.click(screen.getByRole('checkbox',{name:/I choose Active/}));fireEvent.click(next);await waitFor(()=>expect(m.open).toHaveBeenCalledTimes(1));expect(m.checkout.mock.calls[0][1]).toEqual({action:'checkout',plan:'active',expectedGeneration:0,requestId:expect.any(String),consent:true});expect(screen.getByRole('checkbox',{name:/I choose Active/})).not.toBeChecked();});
  it('keeps incomplete configuration and absent setup unavailable',async()=>{m.read.mockResolvedValue({...status(),billingConfigured:false,generation:null});renderPage('/pricing?loopPlan=daily');expect(await screen.findByText(/checkout is not available right now/)).toBeInTheDocument();expect(screen.getByRole('link',{name:'Continue my setup'})).toHaveAttribute('href','/onboarding');expect(screen.queryByRole('button',{name:/secure checkout/})).not.toBeInTheDocument();expect(m.checkout).not.toHaveBeenCalled();});

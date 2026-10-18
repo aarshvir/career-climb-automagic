@@ -55,18 +55,27 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
   }
   const claim = record(await ports.rpc('job_loop_billing_cancel_claim', { ...bound, p_mode: mode, p_subscription: input.subscriptionId, p_version: input.version }));
   let confirmed = false;
+  let writeAttempted = false;
   let sub: LoopSubscription | null = null;
   try {
     sub = validateLoopSubscription(await ports.provider(`subscriptions/${input.subscriptionId}`), config);
     if (sub.userId !== owner || sub.subscriptionId !== input.subscriptionId) throw new ApiError(409, 'LOOP_BILLING_IDENTITY_CHANGED', 'This subscription no longer matches your account.');
     confirmed = sub.cancelAtPeriodEnd || ['cancelled','failed','expired'].includes(sub.status);
     if (!confirmed && claim.creationClaimAcquired === true) {
+      writeAttempted = true;
       await ports.provider(`subscriptions/${input.subscriptionId}`, { cancel_at_next_billing_date: true }, 'PATCH');
       sub = validateLoopSubscription(await ports.provider(`subscriptions/${input.subscriptionId}`), config);
       if (sub.userId !== owner || sub.subscriptionId !== input.subscriptionId) throw unavailable();
       confirmed = sub.cancelAtPeriodEnd || ['cancelled','failed','expired'].includes(sub.status);
     }
   } catch (error) {
+    if (claim.creationClaimAcquired === true && !writeAttempted) {
+      // The only write-authorized caller failed before starting a provider write.
+      // Release that exact intent durably; an ambiguous PATCH can never use this path.
+      await ports.rpc('job_loop_billing_cancel_retryable', { ...bound, p_mode: mode, p_subscription: input.subscriptionId });
+      if (error instanceof ApiError && error.code === 'LOOP_BILLING_IDENTITY_CHANGED') throw error;
+      throw new ApiError(503, 'LOOP_CANCELLATION_RETRYABLE', 'Cancellation was not sent. Retry the same cancellation request after billing becomes available.');
+    }
     if (error instanceof ApiError && error.code === 'LOOP_BILLING_IDENTITY_CHANGED') throw error;
     // An ambiguous cancellation may have succeeded at Dodo. Keep its original durable intent.
   }

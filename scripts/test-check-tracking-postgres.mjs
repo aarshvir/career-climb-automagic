@@ -7,6 +7,7 @@ import { cvVariantsNativeCases } from './fixtures/cv-variants-native-cases.mjs';
 import { cvVariantFactsNativeCases } from './fixtures/cv-variant-facts-native-cases.mjs';
 import { recurringProductNativeCases } from './fixtures/recurring-product-native-cases.mjs';
 import { loopSubscriptionsNativeCases } from './fixtures/loop-subscriptions-native-cases.mjs';
+import { loopRefundRenewalSafetyNativeCases } from './fixtures/loop-refund-renewal-safety-native-cases.mjs';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { mkdir, readFile, realpath, stat, statfs, writeFile } from 'node:fs/promises';
@@ -32,15 +33,16 @@ const source = {
   ],
 };
 const args = process.argv.slice(2);
-assert(args.every(arg => arg === '--loop-subscriptions' || arg === '--recurring-product' || arg === '--prepare-only' || arg === '--check-loop' || arg === '--selected-preparation' || arg === '--cv-variants' || arg === '--cv-variant-facts' || arg.startsWith('--fixture-root=')), 'Unknown argument.');
+assert(args.every(arg => arg === '--refund-renewal-safety' || arg === '--loop-subscriptions' || arg === '--recurring-product' || arg === '--prepare-only' || arg === '--check-loop' || arg === '--selected-preparation' || arg === '--cv-variants' || arg === '--cv-variant-facts' || arg.startsWith('--fixture-root=')), 'Unknown argument.');
 const selectedPreparation = args.includes('--selected-preparation');
 const checkLoop = args.includes('--check-loop');
 const cvVariants = args.includes('--cv-variants');
-const loopSubscriptions=args.includes('--loop-subscriptions');
+const refundRenewalSafety=args.includes('--refund-renewal-safety');
+const loopSubscriptions=args.includes('--loop-subscriptions')||refundRenewalSafety;
 const recurringProduct=args.includes('--recurring-product')||loopSubscriptions;
 const cvVariantFacts = args.includes('--cv-variant-facts')||recurringProduct;
 assert([selectedPreparation, checkLoop, cvVariants, cvVariantFacts].filter(Boolean).length <= 1, 'Choose one native suite.');
-const suite = loopSubscriptions?'loop-subscriptions':recurringProduct?'recurring-product':cvVariantFacts ? 'cv-variant-facts' : cvVariants ? 'cv-variants' : selectedPreparation ? 'selected-preparation' : checkLoop ? 'check-loop' : 'check-tracking';
+const suite = refundRenewalSafety?'loop-refund-renewal-safety':loopSubscriptions?'loop-subscriptions':recurringProduct?'recurring-product':cvVariantFacts ? 'cv-variant-facts' : cvVariants ? 'cv-variants' : selectedPreparation ? 'selected-preparation' : checkLoop ? 'check-loop' : 'check-tracking';
 const selectedMigration = '20261015223000_job_loop_selected_preparation.sql';
 const cvVariantsMigration = '20261017013000_job_loop_cv_variants.sql';
 const cvVariantFactsMigration = '20261017080000_job_loop_cv_variant_facts.sql';
@@ -236,7 +238,7 @@ async function runNative() {
   const session = name => { const result = new Session(psql, port, name); sessions.push(result); return result; };
   evidence.port = port; evidence.dataDirectory = data;
   evidence.harnessSha256 = await digest(fileURLToPath(import.meta.url));
-  const migration = loopSubscriptions ? '20261018073501_job_loop_subscription_lifecycle.sql' : cvVariantFacts ? cvVariantFactsMigration : cvVariants ? cvVariantsMigration : selectedPreparation ? selectedMigration : checkLoop ? checkLoopMigration : checkTrackingMigration;
+  const migration = refundRenewalSafety ? '20261018091955_job_loop_refund_renewal_safety.sql' : loopSubscriptions ? '20261018073501_job_loop_subscription_lifecycle.sql' : cvVariantFacts ? cvVariantFactsMigration : cvVariants ? cvVariantsMigration : selectedPreparation ? selectedMigration : checkLoop ? checkLoopMigration : checkTrackingMigration;
   evidence.migration = { name: migration, sha256: await digest(path.join(repo, 'supabase/migrations', migration)) };
   if (cvVariants) evidence.casesSha256 = await digest(path.join(repo, 'scripts/fixtures/cv-variants-native-cases.mjs'));
   if (cvVariantFacts) evidence.casesSha256 = await digest(path.join(repo, 'scripts/fixtures/cv-variant-facts-native-cases.mjs'));
@@ -254,7 +256,8 @@ async function runNative() {
     if (cvVariants || cvVariantFacts) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', cvVariantsMigration), 'utf8');
     if (cvVariantFacts) schema += '\n' + await readFile(path.join(repo, 'supabase/migrations', cvVariantFactsMigration), 'utf8');
     if(recurringProduct){evidence.casesSha256=await digest(path.join(repo,'scripts/fixtures/recurring-product-native-cases.mjs'));evidence.productMigrations=[];for(const name of ['20261017122000_job_loop_dodo_entitlements.sql','20261017130000_job_loop_variant_execution.sql','20261017131000_job_loop_recurring_product.sql']){const filename=path.join(repo,'supabase/migrations',name);schema+='\n'+await readFile(filename,'utf8');evidence.productMigrations.push({name,sha256:await digest(filename)});}}
-    if(loopSubscriptions){schema+='\nCREATE TABLE auth.sessions(id uuid PRIMARY KEY,user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,not_after timestamptz);\n'+await readFile(path.join(repo,'supabase/migrations',migration),'utf8');evidence.casesSha256=await digest(path.join(repo,'scripts/fixtures/loop-subscriptions-native-cases.mjs'));}
+    if(loopSubscriptions){const base='20261018073501_job_loop_subscription_lifecycle.sql';schema+='\nCREATE TABLE auth.sessions(id uuid PRIMARY KEY,user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,not_after timestamptz);\n'+await readFile(path.join(repo,'supabase/migrations',base),'utf8');evidence.subscriptionMigration={name:base,sha256:await digest(path.join(repo,'supabase/migrations',base))};evidence.casesSha256=await digest(path.join(repo,'scripts/fixtures/loop-subscriptions-native-cases.mjs'));}
+    if(refundRenewalSafety){schema+='\n'+await readFile(path.join(repo,'supabase/migrations',migration),'utf8');evidence.refundCasesSha256=await digest(path.join(repo,'scripts/fixtures/loop-refund-renewal-safety-native-cases.mjs'));}
     evidence.executedSchemaSha256 = createHash('sha256').update(schema).digest('hex');
     await observer.query(schema);
     const owner = randomUUID(), other = randomUUID();
@@ -288,7 +291,7 @@ async function runNative() {
       const detail = await test(); evidence.checks.push({ name, passed: true, ...detail });
       console.log(JSON.stringify({ check: name, passed: true }));
     }
-    if(loopSubscriptions)await loopSubscriptionsNativeCases({observer,actor,check,blocking,quote});
+    if(loopSubscriptions){await loopSubscriptionsNativeCases({observer,actor,check,blocking,quote});if(refundRenewalSafety)await loopRefundRenewalSafetyNativeCases({observer,actor,check,blocking,quote});}
     else if(recurringProduct)await recurringProductNativeCases({observer,actor,check,blocking,quote});
     else if (cvVariantFacts) await cvVariantFactsNativeCases({ observer, actor, check, blocking, quote });
     else if (cvVariants) await cvVariantsNativeCases({ observer, actor, check, blocking, quote });
