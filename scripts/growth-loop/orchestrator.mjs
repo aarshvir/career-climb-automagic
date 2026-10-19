@@ -1,4 +1,5 @@
 import { validateCreativeManifest } from './creative-quality.mjs';
+import { validateCreativeStrategyBinding } from './marketing-strategy.mjs';
 import { decideGrowthAction, compareOrganic } from './measurement.mjs';
 import { TARGETS, digest, canonical } from './receipt-store.mjs';
 
@@ -11,10 +12,23 @@ function operation(manifest, platform, quality) {
     assetHashes: quality.assets.map(asset => asset.sha256), caption: caption(manifest), destinationUrl: manifest.destinationUrl,
   } };
 }
+/** Strategy is an upstream creative admission, never an owner approval or launch order.
+ * Recheck its exact evidence on both prepare and dispatch; historical receipts stay intact.
+ */
+export async function validatePublicationManifest(manifest, { assetRoot, now = Date.now() } = {}) {
+  try { manifest = JSON.parse(canonical(manifest)); }
+  catch { return validateCreativeManifest(manifest, { assetRoot, now }); }
+  const [quality, strategy] = await Promise.all([
+    validateCreativeManifest(manifest, { assetRoot, now }),
+    validateCreativeStrategyBinding(manifest?.strategy, { evidenceRoot: assetRoot, now }),
+  ]);
+  return { ...quality, ok: quality.ok && strategy.ok, reviewed: quality.ok && strategy.ok,
+    errors: [...quality.errors, ...strategy.errors], strategy };
+}
 /** Validate the actual local asset before queueing. No generation or network writes. */
 export async function preparePost(store, manifest, { assetRoot, platform, now = Date.now() }) {
   manifest = JSON.parse(canonical(manifest));
-  const quality = await validateCreativeManifest(manifest, { assetRoot, now });
+  const quality = await validatePublicationManifest(manifest, { assetRoot, now });
   if (!quality.ok) return { status: 'blocked', quality };
   const queued = store.enqueue(operation(manifest, platform, quality), now);
   return { ...queued, quality };
@@ -24,7 +38,7 @@ export async function preparePost(store, manifest, { assetRoot, platform, now = 
  */
 export async function dispatchPost(store, id, manifest, { assetRoot, now = Date.now() }) {
   manifest = JSON.parse(canonical(manifest));
-  const quality = await validateCreativeManifest(manifest, { assetRoot, now });
+  const quality = await validatePublicationManifest(manifest, { assetRoot, now });
   if (!quality.ok) return { status: 'blocked', quality };
   const row = store.get(id);
   if (row.body.kind !== 'organic_post' || digest(row.body) !== digest(operation(manifest, row.body.platform, quality))) throw new Error('Queued content differs from the current reviewed manifest');

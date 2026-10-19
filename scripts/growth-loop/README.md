@@ -4,11 +4,14 @@ Node 24 built-ins only. This is the durable local execution and measurement laye
 
 ## Run
 
+An upstream **Marketing Redesign Lead** now runs before ad concepts/copy/production. It combines dated primary customer research (or actual interviews), current competitor alternatives, current product proof and explicit decisions about Claude's latest inputs. It produces one versioned selected-angle brief. This is evidence-backed creative planning, not measured customer validation or permission to generate/spend/publish.
+
 Source of truth after installation: `jobvance-independent/scripts/growth-loop/`.
 State and final media live outside Git in the sibling `jobvance-marketing-launch/` directory. Set `--db` to its `state/growth.sqlite` and `--asset-root` to that directory. Paths are explicit; no account credentials belong in arguments or JSON.
 
 ```
 node scripts/growth-loop/cli.mjs status --db <absolute-private-db-path>
+node scripts/growth-loop/cli.mjs strategy-validate --brief <strategy.json> --evidence-root <private-media-root>
 node scripts/growth-loop/cli.mjs validate --manifest <manifest.json> --asset-root <media-root>
 node scripts/growth-loop/cli.mjs prepare --db <db> --manifest <manifest.json> --asset-root <media-root> --platform facebook
 node scripts/growth-loop/cli.mjs dispatch --db <db> --id <queued-id> --manifest <manifest.json> --asset-root <media-root>
@@ -22,6 +25,12 @@ node --test scripts/growth-loop/*.test.mjs
 CLI captures actual wall time; callers cannot backdate it. `assess` records evidence and may queue a stop recommendation; it does not pause Meta. `dispatch-pause` reevaluates the same evidence at current time before claiming one attempt. `observe --kind <kind> --input <file>` retains sanitized historical facts; it never promotes them into verified current metrics.
 
 ## Publication protocol
+
+Before a fresh `prepare` or `dispatch`, `validate` rechecks both creative quality and `manifest.strategy`. The binding is `{path, sha256, bytes, strategyId, revision, strategyDigest, angleId}` relative to the private asset/evidence root. The brief schema and freshness rules are in `marketing-strategy.mjs`; `marketing-strategy.fixture.mjs` is an explicitly synthetic test fixture, not production research. Each selected angle needs a researched pain, competitor alternative, current product proof and a test decision. Actual source files are rehashed; source classes and analyst summaries remain accountable attestations, not automated truth certification.
+
+Missing/stale/changed strategy evidence blocks a new queue/claim without consuming an external attempt. Historical confirmed/unknown receipts are retained. The independent `creative-quality.mjs` may still report a film's media/copy quality alone; that result is insufficient for fresh publication. Strategy admission never fills exact owner approval, relaxes media review, changes budgets or calls a platform. Add a new binding through a new pending manifest revision, then obtain exact owner approval; do not mutate approved content silently.
+
+Read the shared private `jobvance-marketing-coordination/README.md` and current Claude/Codex artifact deltas before each new strategy/creative cycle. Record adopt/adapt/defer/reject reasons and preserve the owner line, US/shared audience and current authority. A changed strategy triggers an impact assessment of the existing film before any duplicate generation.
 
 1. Review complete final media, copy, product accuracy and rights. Generate a version-1 manifest matching the documented validator contract. `digestCreativeManifest` binds exact copy, file hashes, review and provenance; approval identifies that digest. Agent review is allowed when actually completed and evidenced. Review fields are attestations, not a media decoder or proof of license.
 2. `prepare` validates actual bytes and queues only reviewed content for the exact approved brand. Identical content remains one operation even after a new review revision.
@@ -41,4 +50,4 @@ Organic comparisons need real comparable posts and a 14-day baseline; small samp
 
 ## Remaining integrations
 
-Native Facebook publication has an existing historical receipt. Instagram publishing authorization and Meta delivery must be verified at execution. Current Meta error 1815199 remains unresolved. Windsor returned an empty report and its trial lacks hourly refresh; neither is zero-spend evidence. Product activation aggregation and attribution are not yet connected. Existing presenter videos still require full audio/caption/lip-sync review; frame inspection alone is insufficient. Cold email stays draft-only pending the specific verified recipient/sender/opt-out setup. No customer data enters these files.
+Read the latest private native/delivery receipts before describing current state. New19October integrated B has completed bounded AV/phone review and remains for exact owner approval; earlier films and old frame-only reviews are historical. The saved Meta draft no longer shows1815199 in the latest observed editor, but this does not establish published validation, delivery or every placement preview. Campaign remains off. Website-event/conversion and product activation aggregation remain unverified; UTMs and missing Windsor rows are not proof. Cold email remains draft-only pending exact sender/recipient/opt-out verification. No candidate data enters this workflow.

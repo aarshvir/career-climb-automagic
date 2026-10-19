@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { ReceiptStore, TARGETS } from './receipt-store.mjs';
 import { digestCreativeManifest } from './creative-quality.mjs';
+import { writeMarketingStrategyFixture } from './marketing-strategy.fixture.mjs';
 import { preparePost, dispatchPost, assess, dispatchPause, status } from './orchestrator.mjs';
 
 const now = Date.parse('2026-10-19T14:00:00Z');
@@ -31,9 +32,11 @@ async function fixture(t) {
       review: { reviewer: 'fixture reviewer', reviewerType: 'human', reviewedAt, assetSha256: sha256, method: 'human_full_asset', coverage: 'full', visual: true, copyAndClaims: true, audio: true, captions: true, lipSync: true },
     }],
   };
+  const strategy = await writeMarketingStrategyFixture(assetRoot, { now: Date.parse('2026-10-17T12:00:00Z') });
+  manifest.strategy = strategy.binding;
   const approve = () => { manifest.approval = { revision: manifest.revision, manifestDigest: digestCreativeManifest(manifest), approvedBy: 'fixture approver', approvedAt: reviewedAt }; };
   approve();
-  return { assetRoot, dbPath, manifest, approve, open, store: open(), opts: { assetRoot, platform: 'facebook', now } };
+  return { assetRoot, dbPath, manifest, strategy, approve, open, store: open(), opts: { assetRoot, platform: 'facebook', now } };
 }
 const readback = attempt => ({ externalId: 'fixture-post', url: 'https://www.facebook.com/fixture-post', observedAt: new Date(now + 1000).toISOString(), target: TARGETS.facebook, bodyDigest: attempt.bodyDigest, verification: 'platform_readback' });
 
@@ -55,6 +58,45 @@ test('tampering with prepared bytes blocks dispatch without consuming the attemp
   const result = await dispatchPost(f.store, queued.id, f.manifest, f.opts);
   assert.equal(result.status, 'blocked'); assert.equal(f.store.get(queued.id).status, 'queued');
   assert.ok(result.quality.errors.some(e => e.code === 'ASSET_BYTES_MISMATCH'));
+});
+
+test('a fully reviewed creative cannot queue without its upstream strategy binding', async t => {
+  const f = await fixture(t); delete f.manifest.strategy; f.approve();
+  const result = await preparePost(f.store, f.manifest, f.opts);
+  assert.equal(result.status, 'blocked');
+  assert.ok(result.quality.errors.some(e => e.code === 'STRATEGY_BINDING_REQUIRED'));
+  assert.deepEqual(f.store.report().operations, []);
+});
+
+test('a grounded strategy cannot launder unsupported promises in the actual ad copy or transcript', async t => {
+  const f = await fixture(t);
+  for (const claim of ['Job Loop does 90% of the work.', 'Improve hiring chances by 300%.', 'Never miss a relevant job.']) {
+    f.manifest.copy.body = `Create an account for weekly Job Loop. ${claim}`;
+    f.manifest.copy.transcript = claim;
+    f.approve();
+    const result = await preparePost(f.store, f.manifest, f.opts);
+    assert.equal(result.status, 'blocked');
+    assert.ok(result.quality.errors.some(e => e.code === 'UNSUPPORTED_COPY'));
+  }
+  assert.deepEqual(f.store.report().operations, []);
+});
+
+test('changed upstream customer evidence blocks a queued creative before any attempt', async t => {
+  const f = await fixture(t); const queued = await preparePost(f.store, f.manifest, f.opts);
+  const source = f.strategy.brief.evidence.find(e => e.kind === 'research');
+  await writeFile(path.join(f.assetRoot, source.path), 'Changed source, not the originally admitted research.');
+  const result = await dispatchPost(f.store, queued.id, f.manifest, f.opts);
+  assert.equal(result.status, 'blocked');
+  assert.ok(result.quality.errors.some(e => e.code === 'EVIDENCE_BYTES_MISMATCH'));
+  assert.equal(f.store.get(queued.id).status, 'queued');
+});
+
+test('stale strategy proof is rechecked at dispatch without consuming a queued attempt', async t => {
+  const f = await fixture(t); const queued = await preparePost(f.store, f.manifest, f.opts);
+  const result = await dispatchPost(f.store, queued.id, f.manifest, { ...f.opts, now: Date.parse('2026-10-25T12:00:00Z') });
+  assert.equal(result.status, 'blocked');
+  assert.ok(result.quality.errors.some(e => e.code === 'STALE_EVIDENCE'));
+  assert.equal(f.store.get(queued.id).status, 'queued');
 });
 
 test('unapproved edits do not enter outbox, and newly approved changed content cannot replace queued intent', async t => {
@@ -134,6 +176,10 @@ test('CLI validate and prepare share actual bytes and durable state, and reject 
   const f = await fixture(t); const file = path.join(f.assetRoot, 'manifest.json'); await writeFile(file, JSON.stringify(f.manifest));
   const cliPath = fileURLToPath(new URL('./cli.mjs', import.meta.url));
   const run = args => spawnSync(process.execPath, [cliPath, ...args], { encoding: 'utf8' });
+  const strategyCheck = run(['strategy-validate', '--brief', path.join(f.assetRoot, f.manifest.strategy.path), '--evidence-root', f.assetRoot]);
+  assert.equal(strategyCheck.status, 0, strategyCheck.stderr);
+  assert.equal(JSON.parse(strategyCheck.stdout).readyForCreative, true);
+  assert.equal(JSON.parse(strategyCheck.stdout).publicationAllowed, false);
   const checked = run(['validate', '--manifest', file, '--asset-root', f.assetRoot]); assert.equal(checked.status, 0, checked.stderr); assert.equal(JSON.parse(checked.stdout).ok, true);
   const prepared = run(['prepare', '--db', f.dbPath, '--manifest', file, '--asset-root', f.assetRoot, '--platform', 'facebook']); assert.equal(prepared.status, 0, prepared.stderr);
   const queued = JSON.parse(prepared.stdout); assert.equal(f.store.get(queued.id).status, 'queued');

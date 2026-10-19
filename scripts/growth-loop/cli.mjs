@@ -2,8 +2,8 @@
 import { readFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { ReceiptStore } from './receipt-store.mjs';
-import { validateCreativeManifest } from './creative-quality.mjs';
-import { preparePost, dispatchPost, assess, dispatchPause, status } from './orchestrator.mjs';
+import { validateMarketingStrategyBrief } from './marketing-strategy.mjs';
+import { validatePublicationManifest, preparePost, dispatchPost, assess, dispatchPause, status } from './orchestrator.mjs';
 
 // No credentials are accepted. JSON files contain only creative/publication data or
 // aggregate evidence. Explicit paths keep private state out of the source checkout.
@@ -18,17 +18,19 @@ const allowed = {
   dispatch: ['db','manifest','asset-root','id'], assess: ['db','input','organic'],
   'dispatch-pause': ['db','input','id'], confirm: ['db','id','token','receipt'],
   uncertain: ['db','id','token','reason'], observe: ['db','kind','input'],
+  'strategy-validate': ['brief','evidence-root'],
 };
-if (!allowed[command] || Object.keys(options).some(key=>!allowed[command].includes(key))) throw new Error('Commands: status, validate, prepare, dispatch, assess, dispatch-pause, confirm, uncertain, observe');
+if (!allowed[command] || Object.keys(options).some(key=>!allowed[command].includes(key))) throw new Error('Commands: status, strategy-validate, validate, prepare, dispatch, assess, dispatch-pause, confirm, uncertain, observe');
 const required = key => { if (!options[key]) throw new Error(`Missing --${key}`); return options[key]; };
 const json = async key => JSON.parse(await readFile(required(key), 'utf8'));
 let store;
 try {
-  if (command !== 'validate') { const file = path.resolve(required('db')); await mkdir(path.dirname(file),{recursive:true}); store = new ReceiptStore(file); }
+  if (!['validate','strategy-validate'].includes(command)) { const file = path.resolve(required('db')); await mkdir(path.dirname(file),{recursive:true}); store = new ReceiptStore(file); }
   let result;
   const now = Date.now();
   if (command === 'status') result = status(store, now);
-  if (command === 'validate') result = await validateCreativeManifest(await json('manifest'),{assetRoot:required('asset-root'),now});
+  if (command === 'strategy-validate') result = await validateMarketingStrategyBrief(await json('brief'),{evidenceRoot:required('evidence-root'),now});
+  if (command === 'validate') result = await validatePublicationManifest(await json('manifest'),{assetRoot:required('asset-root'),now});
   if (command === 'prepare') result = await preparePost(store,await json('manifest'),{assetRoot:required('asset-root'),platform:required('platform'),now});
   if (command === 'dispatch') result = await dispatchPost(store,required('id'),await json('manifest'),{assetRoot:required('asset-root'),now});
   if (command === 'assess' || command === 'dispatch-pause') {

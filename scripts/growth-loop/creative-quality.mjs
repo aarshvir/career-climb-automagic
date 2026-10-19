@@ -74,6 +74,7 @@ export async function validateCreativeManifest(manifest, { assetRoot, now = Date
     [/\b(mandatory|required|compulsory)\s+quiz\b|\bquiz\s+(is\s+)?(mandatory|required|compulsory)\b/i, 'Guided setup is optional.'],
     [/\b(guaranteed?\s+(job|interview|offer|hiring)|100%\s+(success|placement)|automatically\s+appl(?:y|ies)|appl(?:y|ies)\s+for\s+you)\b/i, 'Do not promise outcomes or automatic employer applications.'],
     [/\b(beta|no-signup|no-account)\b/i, 'Use the approved account-required product positioning.'],
+    [/\b300\s*%|\b90\s*%\s*(?:of\s+)?(?:the\s+)?(?:work|effort)\b|\bnever\s+miss\s+(?:a|any|another)\s+(?:(?:suitable|matching|relevant)\s+)?(?:job|vacancy)\b/i, 'Numeric hiring/effort uplift and never-miss claims lack supporting product evidence.'],
   ];
   for (const [pattern, message] of prohibited) if (pattern.test(words)) fail('UNSUPPORTED_COPY', 'copy', message);
   const claims = manifest.claims;
