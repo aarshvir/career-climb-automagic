@@ -1,7 +1,7 @@
 {
   "date": "2026-10-20",
-  "recordedAtUTC": "2026-10-20T03:54:45.381161+00:00",
-  "status": "IMPLEMENTED_VALIDATED_PENDING_ROOT_COMMIT_AND_WORKER_DEPLOYMENT",
+  "recordedAtUTC": "2026-10-20T07:54:45.381161+04:00",
+  "status": "DEPLOYED_WORKER_NATIVE_BYTES_VERIFIED",
   "scope": "New Job Loop CV PDF/DOCX presentation and literal source-context ordering; stored historical packets unchanged.",
   "sourceFiles": {
     "supabase/functions/_shared/job-loop-engine.ts": {
@@ -92,7 +92,7 @@
     "representativeDocxSha256": "f643a62064e71a018266dfa88912f0ccb41308f65aab8c2745613119b00880c5",
     "wordPaginationVisuallyVerified": false,
     "headlessDocxConversion": "Exited without output; not counted as visual acceptance.",
-    "actualSqlWorkerAdmission": false,
+    "actualSqlWorkerAdmission": true,
     "hostedAcceptance": false
   },
   "preservation": [
@@ -103,10 +103,10 @@
     "Historical stored packets and downloads."
   ],
   "deployment": {
-    "rootCommit": "pending",
-    "workerDeployment": "pending",
-    "exactNativeReadback": "pending",
-    "freshActualWorkerRegeneration": "pending",
+    "rootCommit": "d6345ccfa1ad0eda73c4b788fb354ce5746daaa2",
+    "workerDeployment": "ACTIVE version35",
+    "exactNativeReadback": "2 files exact; worker bundle SHA9fc2c26012633173bdce9caf532bc6d3b5605a9656ca030df3692d7d60ce6880",
+    "freshActualWorkerRegeneration": "Local integrated SQL/control/sequential worker/render/approval/download and withdrawal guards passed; zero network calls. New one-page PDF SHA7a8a61a0752da63cce76097a8d7b01eeb1a0692edc551d8a96b582404885a0fb.",
     "siteRedeploymentRequired": false,
     "siteRedeploymentPerformed": false,
     "publicSiteBaseline": "v50"
@@ -123,5 +123,14 @@
     "DOCX typography is encoded and XML-tested; actual Word pagination unverified.",
     "No hosted/unassisted or natural repeated-day acceptance from local rendering.",
     "No persona/NPS or hiring-outcome uplift."
-  ]
+  ],
+  "browserAcceptance": {
+    "scope": "Actual current UI via isolated auth/persistence/file adapters, not hosted or unassisted acceptance",
+    "reviewConfirmationsChecked": true,
+    "approvalAndEnabledDownloadsObserved": true,
+    "pdfDownloadedAndShaMatchedWorker": true,
+    "pdfSha256": "7a8a61a0752da63cce76097a8d7b01eeb1a0692edc551d8a96b582404885a0fb",
+    "exactPreviewOpened": true,
+    "downloadEventWait": "Browser event wait timed out; new completed Downloads file found independently and exact hash matched. No repeat download."
+  }
 }

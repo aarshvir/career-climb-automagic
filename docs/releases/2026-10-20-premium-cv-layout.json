@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-10-20T03:55:54.489Z",
+  "sourceCommit": "d6345ccfa1ad0eda73c4b788fb354ce5746daaa2",
+  "sourceRollbackTag": "jobvance-before-premium-cv-layout-2026-10-20",
+  "beforeNativeBackup": "premium-cv-before-worker-2026-10-20.json",
+  "worker": {
+    "version": 35,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "artifactSha256": "9fc2c26012633173bdce9caf532bc6d3b5605a9656ca030df3692d7d60ce6880",
+    "filesExact": 2,
+    "nativeEzbrSha": "775b4913cf54d8f267cc08982730a8ec8950145f6c30903f5cdcfdd11499c288"
+  },
+  "tests": {
+    "full": 3116,
+    "files": 166,
+    "sourceDeno": 28,
+    "generatedDeno": 28,
+    "appTypeScript": "passed",
+    "newCases": 18
+  },
+  "unauthenticatedProbe": {
+    "status": 401,
+    "code": "LOOP_WORKER_UNAUTHORIZED"
+  },
+  "site": "Publicv50unchanged; backend-onlyrelease",
+  "limits": [
+    "No new hosted candidate writes or paid calls",
+    "Canonical local SQL/browser download evidence pending",
+    "Word pagination not visually verified",
+    "Existing historical packets unchanged"
+  ]
+}
