@@ -3,6 +3,7 @@
 // store the documents of a run they were admitted to, through the same lease,
 // generation, tombstone, GC and input-version checks that already govern pilots.
 // Actual migration SQL in PGlite; auth/storage are the repository's local fixtures.
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped PGlite JSON rows and the Supabase admin adapter fixture */
 import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { readFile } from 'node:fs/promises';
