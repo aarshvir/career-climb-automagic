@@ -1,0 +1,24 @@
+# Premium CV layout and source context order
+
+**20 October 2026 — implemented and validated locally; root commit and worker deployment pending.** This is a bounded document-quality repair for new Job Loop preparations. Public site v50, stored historical outputs, existing approvals, payments and advertising are unchanged at this checkpoint.
+
+## Delivered behaviour
+
+The actual PDF renderer now applies a genuine embedded bold name and role hierarchy, restrained blue section headings and rules, readable 10.1 pt body text, 19 mm margins, hanging bullet indentation and deliberate paragraph spacing. Wrapping uses the font's measured widths. Heading/role labels stay with following content; long paragraphs retain a two-line widow guard. A modest spacing preset can fit a near-full CV on one page without shrinking fonts or margins. Otherwise small two-page overflows prefer an existing role/section boundary instead of a skills-only tail. One or two pages remains a maximum, not a forced length.
+
+DOCX uses the same source blocks, hierarchy, colour, rules, indentation, leading, keep-next/widow settings and deliberate balanced break. Unsupported PDF scripts still fail that format honestly while DOCX/TXT remain available. An overlong PDF remains available for exact review with `PAGE_TARGET_EXCEEDED`; rendering grants no approval or extra access. TXT stays byte-for-byte equal to the composed CV, and the renderer does not invent, delete or reorder its source text.
+
+A separate composition fix preserves literal CV context order when relevance selection would otherwise put an older role before a newer role. It follows unambiguous literal source headers and their attached quotations, including exact multi-line headers; it does not parse dates or guess chronology. Ambiguous, repeated, independent-answer and mixed-source contexts keep their existing slots. The selected fact set, within-context relevance order, evidence order, claim revisions, input fingerprint, rewrite attachment and current withdrawal/sharing authority are preserved. Existing stored packets are not rewritten. A literal duplicated education label remains a disclosed presentation limit rather than silently deleting reviewed text.
+
+The extra typeface is unmodified DejaVu Sans Bold with genuine weight class 700, not overprinted text. Its SHA-256 is `e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724`. The existing full redistribution notice in `src/lib/document-dejavu-sans-LICENSE.txt` applies; the [official DejaVu license](https://dejavu-fonts.github.io/License.html) was checked before reuse.
+
+## Verification and review
+
+- **3,116 tests in 166 files passed** on the combined frozen source and generated bundles, including **18 new cases**: seven renderer and eleven context-order cases. Application TypeScript and **28 source plus 28 generated Deno cases** passed.
+- An initial full run overlapped bundle/manifest refresh and reported eleven source-manifest guard failures. After the generated output settled, fifteen unchanged focused cases and the final complete suite passed. No guard was weakened or bypassed.
+- The renderer tests decode actual PDF bytes to check complete text/order, genuine bold embedding and point sizes, margins/wrapping, long names/roles/unbroken links, one-page fit, genuine multi-page breaks and supported/unsupported scripts. DOCX XML, exact TXT, empty-source holds, format isolation and approval preservation are checked. The composition cases cover actual default rules selection, reversed selections, source order without date inference, independent answers, ambiguous/repeated headers, withdrawal and bound rewrites.
+- A separate reviewer reran **57 bounded cases**, overlapping the full suite. Actual local composed-and-rendered synthetic outputs were inspected as complete pages and at phone size. The final representative PDF is one complete page, SHA-256 `695234fd62881386cda49e06ad0195d926f7f8484442c135df5c4d56b349f86a`. Both PDF text and DOCX XML retain the full reviewed wording. Two earlier sparse two-page layouts were rejected before the current one-page fit.
+
+Word pagination was **not visually verified**. A local headless conversion attempt returned without an output; it is not treated as DOCX visual acceptance. The representative output is local composition/render review, not a new SQL/worker admission, hosted download or customer acceptance result. Root owns the subsequent commit, worker deployment, exact source readback and fresh actual-worker regeneration.
+
+No frontend source changed, so no frontend production build or identical site redeployment was needed or performed for this slice. No migration, billing change, paid generation, production candidate mutation, ad upload/activation or score uplift is claimed. Broader discovery, natural recurring/unassisted acceptance, remaining product requirements and the exact finished-creative owner approval gate stay open.

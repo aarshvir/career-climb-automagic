@@ -290,6 +290,74 @@ export function boundedRulesClaimIds(profile:LoopProfile,claims:LoopClaim[],asse
   }
   return selected.map(claim=>claim.id);
 }
+/** CV presentation follows unambiguous literal source contexts, not relevance
+ * ranking. Unanchored/user-answer contexts retain their original slots. This
+ * never changes chosen claims, their within-context order or any authority. */
+function literalCvContextPositions(source: string, claims: LoopClaim[]): Map<string, number> {
+  type Header = { context: string; start: number; end: number };
+  let offset = 0;
+  const lines = source.split('\n').map(raw => {
+    const text = raw.trim(), start = offset + raw.indexOf(text);
+    offset += raw.length + 1;
+    return { text, start, end: start + text.length };
+  }).filter(line => line.text);
+  const contexts = [...new Set(claims.map(claim => claim.context))];
+  const headers: Header[] = [];
+  const byContext = new Map<string, Header[]>();
+  for (const context of contexts) {
+    const parts = context.split(' | ');
+    const matches: Header[] = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].text === context) matches.push({ context, start: lines[i].start, end: lines[i].end });
+      // validateClaim can join a literal employer/title/date header from up to
+      // four source lines. Match those exact lines; never parse or sort dates.
+      else if (parts.length > 1 && parts.length <= 4 && parts.every((part, n) => lines[i + n]?.text === part)) {
+        matches.push({ context, start: lines[i].start, end: lines[i + parts.length - 1].end });
+      }
+    }
+    byContext.set(context, matches); headers.push(...matches);
+  }
+  headers.sort((a, b) => a.start - b.start);
+  const preceding = (position: number): Header[] => {
+    let low = 0, high = headers.length;
+    while (low < high) { const mid = (low + high) >>> 1; if (headers[mid].start <= position) low = mid + 1; else high = mid; }
+    for (let last = low - 1; last >= 0;) {
+      const start = headers[last].start; let first = last;
+      while (first > 0 && headers[first - 1].start === start) first--;
+      const found = headers.slice(first, last + 1).filter(header => header.end <= position || header.start === position);
+      if (found.length) return found;
+      last = first - 1;
+    }
+    return [];
+  };
+  const result = new Map<string, number>();
+  for (const context of contexts) {
+    const group = claims.filter(claim => claim.context === context);
+    // Mixed source/answer contexts stay in place as a unit. A layout decision
+    // must not assign a source position to an independent user answer.
+    if (group.some(claim => claim.sourceKind !== 'cv_passage') || !byContext.get(context)?.length) continue;
+    let anchor: number | null = null, ambiguous = false;
+    for (const claim of group) {
+      const matches = new Set<number>(); let count = 0;
+      for (let start = source.indexOf(claim.sourceQuote); start >= 0; start = source.indexOf(claim.sourceQuote, start + 1)) {
+        // Presentation-only work is bounded. Repetitive/ambiguous sources keep
+        // stable slots rather than changing validation or guessing chronology.
+        if (++count > 64) { ambiguous = true; break; }
+        const nearest = preceding(start);
+        if (nearest.some(header => header.context === context)) {
+          if (nearest.some(header => header.context !== context)) { ambiguous = true; break; }
+          matches.add(nearest[0].start);
+        }
+      }
+      if (ambiguous || matches.size !== 1) { ambiguous = true; break; }
+      const position = [...matches][0];
+      if (anchor !== null && anchor !== position) { ambiguous = true; break; }
+      anchor = position;
+    }
+    if (!ambiguous && anchor !== null) result.set(context, anchor);
+  }
+  return result;
+}
 export async function composePacket(input: ComposeLoopPacketInput): Promise<LoopPacket> {
   const { profile, opportunity } = input;
   const allowed = eligibleLoopClaims(profile, input.claims);
@@ -313,10 +381,15 @@ export async function composePacket(input: ComposeLoopPacketInput): Promise<Loop
   if (includesExcluded(profile.name + '\n' + profile.contactLine, profile)) holds.push('PROFILE_IDENTITY_REQUIRES_DISCLOSURE_REVIEW');
   const headings: Record<LoopClaimInput['kind'], string> = { employment: 'EMPLOYMENT', internship: 'INTERNSHIPS', academic_project: 'ACADEMIC PROJECTS', personal_project: 'PERSONAL PROJECTS', volunteering: 'VOLUNTEERING', education: 'EDUCATION', skill: 'CONFIRMED SKILLS' };
   const cv = [redact(profile.name, profile), redact(profile.contactLine, profile)].filter(Boolean);
+  const sourcePositions = literalCvContextPositions(profile.sourceText, unique);
   for (const kind of CLAIM_KINDS) {
     const section = unique.filter(c => c.kind === kind); if (!section.length) continue;
     cv.push('', headings[kind]);
-    for (const context of [...new Set(section.map(c => c.context))]) { cv.push(context); for (const c of section.filter(c => c.context === context)) cv.push(`• ${wording.get(c.id) ?? c.phrasing}`); }
+    const contexts = [...new Set(section.map(c => c.context))];
+    const anchored = contexts.filter(context => sourcePositions.has(context)).sort((a, b) => sourcePositions.get(a)! - sourcePositions.get(b)!);
+    let next = 0;
+    const presentationContexts = contexts.map(context => sourcePositions.has(context) ? anchored[next++] : context);
+    for (const context of presentationContexts) { cv.push(context); for (const c of section.filter(c => c.context === context)) cv.push(`• ${wording.get(c.id) ?? c.phrasing}`); }
   }
   if (cv.join('\n').length < 80) holds.push('CV_TEXT_TOO_SHORT');
   if (cv.join('\n').length > 60000) holds.push('CV_TEXT_TOO_LONG');

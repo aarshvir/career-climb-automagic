@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-20",
+  "recordedAtUTC": "2026-10-20T03:54:45.381161+00:00",
+  "status": "IMPLEMENTED_VALIDATED_PENDING_ROOT_COMMIT_AND_WORKER_DEPLOYMENT",
+  "scope": "New Job Loop CV PDF/DOCX presentation and literal source-context ordering; stored historical packets unchanged.",
+  "sourceFiles": {
+    "supabase/functions/_shared/job-loop-engine.ts": {
+      "sha256": "d68ef341ea1a4f47d93ba8db141746aec7ca73d8bb2774a70feaae2cbf1c59f0",
+      "bytes": 40509
+    },
+    "supabase/functions/_shared/job-loop-render.ts": {
+      "sha256": "134245865a00cd08c8e6c40d38041d9a8b7eece4edc051a1d7168b9bc80f1887",
+      "bytes": 11023
+    },
+    "supabase/functions/_shared/job-loop-document-layout.ts": {
+      "sha256": "ece383f0ee2527ec2298e611fbb6f10fc59c8230942e221de9d0f69908159cf5",
+      "bytes": 4048
+    },
+    "supabase/functions/_shared/job-loop-engine-font-bold.ts": {
+      "sha256": "ce497d7bf2bdef6e6574a375b1e2df73b543eb4593c0fa69df33c3d3411e3bd0",
+      "bytes": 941188
+    },
+    "src/__tests__/lib/job-loop-premium-render.test.ts": {
+      "sha256": "c1a2b8b297b43e8a3aa708ea21bfd342d7aa53089c1b733c50f61b11de0085fc",
+      "bytes": 11432
+    },
+    "supabase/tests/job-loop-cv-context-order.test.ts": {
+      "sha256": "689d771fd2e7d46baac2fc0e35c4188750ad97a89f250da9f4a71cd913c79685",
+      "bytes": 11980
+    },
+    "docs/supabase-loop-ui/job-loop-worker.js": {
+      "sha256": "9fc2c26012633173bdce9caf532bc6d3b5605a9656ca030df3692d7d60ce6880",
+      "bytes": 2081195
+    },
+    "docs/supabase-loop-ui/manifest.json": {
+      "sha256": "fed949369eff6994683a43f4d67454cefb21f288027aeb5da2aea1b8965a9f69",
+      "bytes": 70191
+    }
+  },
+  "validation": {
+    "combinedFullSuite": {
+      "status": "passed",
+      "tests": 3116,
+      "files": 166,
+      "reportedBy": "coordinator after frozen source and bundle validation"
+    },
+    "newCases": {
+      "renderer": 7,
+      "sourceContextOrder": 11,
+      "total": 18
+    },
+    "applicationTypeScript": "passed",
+    "sourceDeno": {
+      "status": "passed",
+      "cases": 28
+    },
+    "generatedDeno": {
+      "status": "passed",
+      "cases": 28
+    },
+    "independentReview": {
+      "status": "passed bounded review",
+      "cases": 57,
+      "overlapsFullSuite": true
+    },
+    "initialRun": {
+      "sourceManifestGuardFailures": 11,
+      "cause": "Full run overlapped generated bundle/manifest refresh.",
+      "unchangedFocusedRecoveryCases": 15,
+      "finalFullSuitePassed": true,
+      "guardBypass": false
+    },
+    "frontendProductionBuild": {
+      "performed": false,
+      "reason": "No frontend source change; worker/shared-source slice."
+    }
+  },
+  "font": {
+    "family": "DejaVu Sans Bold",
+    "binarySha256": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+    "binaryBytes": 705684,
+    "weightClass": 700,
+    "unmodified": true,
+    "licenseFile": "src/lib/document-dejavu-sans-LICENSE.txt",
+    "officialLicense": "https://dejavu-fonts.github.io/License.html",
+    "genuinePdfBoldSpansDecoded": true
+  },
+  "localVisualReview": {
+    "scope": "Complete local synthetic composed/rendered PDF pages and phone-size view; DOCX XML fidelity.",
+    "representativePdfSha256": "695234fd62881386cda49e06ad0195d926f7f8484442c135df5c4d56b349f86a",
+    "representativePdfPages": 1,
+    "representativeDocxSha256": "f643a62064e71a018266dfa88912f0ccb41308f65aab8c2745613119b00880c5",
+    "wordPaginationVisuallyVerified": false,
+    "headlessDocxConversion": "Exited without output; not counted as visual acceptance.",
+    "actualSqlWorkerAdmission": false,
+    "hostedAcceptance": false
+  },
+  "preservation": [
+    "Exact composed CV text/TXT and source wording.",
+    "Literal source context order only where unambiguous; no inferred date chronology.",
+    "Selected facts, within-context order, evidence order, claim versions, immutable input authority and rewrite attachment.",
+    "Current ownership, approval, withdrawal, sharing and unsupported-format/page-target guards.",
+    "Historical stored packets and downloads."
+  ],
+  "deployment": {
+    "rootCommit": "pending",
+    "workerDeployment": "pending",
+    "exactNativeReadback": "pending",
+    "freshActualWorkerRegeneration": "pending",
+    "siteRedeploymentRequired": false,
+    "siteRedeploymentPerformed": false,
+    "publicSiteBaseline": "v50"
+  },
+  "unchanged": [
+    "database schema",
+    "billing",
+    "production candidate records",
+    "advertising activation",
+    "owner final creative approval hold"
+  ],
+  "limitations": [
+    "Duplicate literal education label retained rather than silently deleting reviewed text.",
+    "DOCX typography is encoded and XML-tested; actual Word pagination unverified.",
+    "No hosted/unassisted or natural repeated-day acceptance from local rendering.",
+    "No persona/NPS or hiring-outcome uplift."
+  ]
+}
