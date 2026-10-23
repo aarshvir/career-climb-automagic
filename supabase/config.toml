@@ -85,6 +85,10 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
+[functions.jobvance-marketing]
+enabled = true
+verify_jwt = false
+
 # Internal review/status work consumes an action-bound, single-use owner ticket.
 [functions.jobvance-review-worker]
 enabled = true
