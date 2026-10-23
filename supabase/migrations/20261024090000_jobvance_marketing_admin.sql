@@ -144,15 +144,19 @@ INSERT INTO public.jobvance_marketing_ideas(slug,title,angle,status,source_path)
  ('concept-b5-wont','B5: This job tool won''t apply for you','Refusal hook that turns the no-auto-apply rule into the selling point.','idea','jobvance-ad-studio/runs/2026-10-18/04-scripts/b5-wont.md');
 
 INSERT INTO public.jobvance_marketing_creatives(idea_id,label,kind,format,file_name,sha256,approved,approved_at,notes)
-SELECT i.id, c.label, c.kind, c.format, c.file_name, c.sha256, c.approved, CASE WHEN c.approved THEN '2026-10-23T18:30:00Z'::timestamptz END, c.notes
+SELECT i.id, c.label, c.kind, c.format, c.file_name, c.sha256, c.approved, CASE WHEN c.approved THEN c.approved_at::timestamptz END, c.notes
 FROM (VALUES
- ('version-a-search-rewrite-repeat','A feed 4x5','video','4x5','Jobvance-A-Feed-4x5.mp4',NULL,true,'Approved by the owner in chat on 23 Oct.'),
- ('version-a-search-rewrite-repeat','A Reels 9x16 v2 (Reels-safe captions)','video','9x16','Jobvance-A-Reels-9x16-v2-upload.mp4','9b59165f4d2bedc81b667adddd3677a9fd9bb288342331b310705624d2801ac3',true,'Approved by the owner in chat on 23 Oct ("Yes, switch Reels on").'),
- ('version-b-job-hunt-dragging','B feed 4x5','video','4x5','Jobvance-B-Feed-4x5.mp4',NULL,true,'Approved by the owner in chat on 23 Oct.'),
- ('version-b-job-hunt-dragging','B Reels 9x16 v2 (Reels-safe captions)','video','9x16','Jobvance-B-Reels-9x16-v2-upload.mp4','7cecb3f0b2848af84cb912eb44a3ec366120aa49d87c24a9921ab3d0a9a58ea9',true,'Approved by the owner in chat on 23 Oct.'),
- ('version-a-search-rewrite-repeat','Copy C: the hard part is everything before applying','copy','text',NULL,NULL,true,'Primary-text option in both ads.'),
- ('version-a-search-rewrite-repeat','Copy D: can''t fix the job market, takes the repetitive part','copy','text',NULL,NULL,true,'Primary-text option in both ads.')
-) AS c(slug,label,kind,format,file_name,sha256,approved,notes)
+ ('version-a-search-rewrite-repeat','A feed 4x5','video','4x5','Jobvance-A-Feed-4x5.mp4',NULL,true,'2026-10-23T18:30:00Z','Approved by the owner in chat on 23 Oct. Replaced by v4 on 24 Oct.'),
+ ('version-a-search-rewrite-repeat','A Reels 9x16 v2 (Reels-safe captions)','video','9x16','Jobvance-A-Reels-9x16-v2-upload.mp4','9b59165f4d2bedc81b667adddd3677a9fd9bb288342331b310705624d2801ac3',true,'2026-10-23T18:30:00Z','Approved by the owner in chat on 23 Oct ("Yes, switch Reels on"). Replaced by v4 on 24 Oct.'),
+ ('version-b-job-hunt-dragging','B feed 4x5','video','4x5','Jobvance-B-Feed-4x5.mp4',NULL,true,'2026-10-23T18:30:00Z','Approved by the owner in chat on 23 Oct. Replaced by v4 on 24 Oct.'),
+ ('version-b-job-hunt-dragging','B Reels 9x16 v2 (Reels-safe captions)','video','9x16','Jobvance-B-Reels-9x16-v2-upload.mp4','7cecb3f0b2848af84cb912eb44a3ec366120aa49d87c24a9921ab3d0a9a58ea9',true,'2026-10-23T18:30:00Z','Approved by the owner in chat on 23 Oct. Replaced by v4 on 24 Oct.'),
+ ('version-a-search-rewrite-repeat','A feed 4x5 v4 (younger Liam voice, proof held earlier)','video','4x5','Jobvance-A-Feed-4x5-v4-upload.mp4','8e7b292ac0f3096cf3a7939697d1b04011af7357cadeef8a50a6231f3df255db',true,'2026-10-23T19:00:00Z','Live in Feeds since 24 Oct. Owner: "Yes, swap the Liam voice versions into the live A and B ads."'),
+ ('version-a-search-rewrite-repeat','A Reels 9x16 v4 (younger Liam voice, proof held earlier)','video','9x16','Jobvance-A-Reels-9x16-v4-upload.mp4','6100c60cebdea0d45d3575d6ee450808ecb3cbc6455c35c072f5f77b390196b8',true,'2026-10-23T19:00:00Z','Live in Stories and Reels since 24 Oct.'),
+ ('version-b-job-hunt-dragging','B feed 4x5 v4 (younger Liam voice, proof held earlier)','video','4x5','Jobvance-B-Feed-4x5-v4-upload.mp4','9481cc79c5d344881244bf96ce8f3b3dec288cbbed92bc9b35a223f00b3f0d58',true,'2026-10-23T19:00:00Z','Live in Feeds since 24 Oct.'),
+ ('version-b-job-hunt-dragging','B Reels 9x16 v4 (younger Liam voice, headline off the eyes)','video','9x16','Jobvance-B-Reels-9x16-v4-upload.mp4','731faf669c82d42f7ea2b37b2d54adcf12e7c287d5ca972a720f247af13eafcd',true,'2026-10-23T19:00:00Z','Live in Stories and Reels since 24 Oct.'),
+ ('version-a-search-rewrite-repeat','Copy C: the hard part is everything before applying','copy','text',NULL,NULL,true,'2026-10-23T18:30:00Z','Primary-text option in both ads.'),
+ ('version-a-search-rewrite-repeat','Copy D: can''t fix the job market, takes the repetitive part','copy','text',NULL,NULL,true,'2026-10-23T18:30:00Z','Primary-text option in both ads.')
+) AS c(slug,label,kind,format,file_name,sha256,approved,approved_at,notes)
 JOIN public.jobvance_marketing_ideas i ON i.slug=c.slug;
 
 INSERT INTO public.jobvance_marketing_launches(idea_id,name,meta_campaign_id,meta_adset_id,meta_ad_id,status,daily_budget_minor,currency,end_at)

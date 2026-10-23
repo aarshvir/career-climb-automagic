@@ -28,7 +28,9 @@ describe('private marketing workspace schema', () => {
       { name: 'Version A - Search Rewrite Repeat', meta_ad_id: '120252906172570325', status: 'ACTIVE', daily_budget_minor: 50000 },
       { name: 'Version B - Job hunt dragging', meta_ad_id: '120252994824010325', status: 'ACTIVE', daily_budget_minor: 50000 },
     ]);
-    expect((await q('SELECT count(*)::int AS n FROM public.jobvance_marketing_creatives WHERE approved')).rows[0].n).toBe(6);
+    expect((await q('SELECT count(*)::int AS n FROM public.jobvance_marketing_creatives WHERE approved')).rows[0].n).toBe(10);
+    const live = (await q("SELECT file_name FROM public.jobvance_marketing_creatives WHERE file_name LIKE '%-v4-upload.mp4' AND sha256 IS NOT NULL ORDER BY file_name")).rows.map(r => r.file_name);
+    expect(live).toEqual(['Jobvance-A-Feed-4x5-v4-upload.mp4', 'Jobvance-A-Reels-9x16-v4-upload.mp4', 'Jobvance-B-Feed-4x5-v4-upload.mp4', 'Jobvance-B-Reels-9x16-v4-upload.mp4']);
     const settings = (await q('SELECT version, auto_mode, max_daily_spend_minor, max_total_spend_minor FROM public.jobvance_marketing_settings')).rows[0];
     expect(settings).toEqual({ version: 0, auto_mode: false, max_daily_spend_minor: 150000, max_total_spend_minor: 700000 });
   });
