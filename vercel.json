@@ -20,7 +20,7 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://cdn.paddle.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://raw.githubusercontent.com/aarshvir/career-climb-automagic/; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.paddle.com; frame-src 'self' blob: https://*.paddle.com; worker-src 'self' blob:; media-src 'self' blob: https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ https://gvftdfriujrkpptdueyb.supabase.co/storage/v1/object/public/walkthroughs/; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self' https://cdn.paddle.com https://connect.facebook.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ https://www.facebook.com; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.paddle.com https://www.facebook.com https://connect.facebook.net; frame-src 'self' blob: https://*.paddle.com; worker-src 'self' blob:; media-src 'self' blob: https://raw.githubusercontent.com/aarshvir/career-climb-automagic/ https://gvftdfriujrkpptdueyb.supabase.co/storage/v1/object/public/walkthroughs/; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
         }
       ]
     }

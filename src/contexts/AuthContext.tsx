@@ -5,6 +5,7 @@ import { configurationError, supabase } from '@/integrations/supabase/client';
 import { clearUserAuthCache, getGoogleOAuthOptions, isInIframe, getEnvironmentType } from '@/utils/authUtils';
 import { readAuthSession } from '@/utils/authSession';
 import { setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
+import { noteAccountForMeta } from '@/lib/meta-pixel';
 
 interface AuthResult { error?: string }
 interface SignUpResult extends AuthResult { requiresEmailConfirmation?: boolean }
@@ -59,6 +60,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Revoke old draft writers before React unmounts the previous owner's UI.
       setTrackingDraftOwner(nextSession?.user.id ?? null, cvVariantSessionIdentity(nextSession));
       observeCvVariantRecoverySession(nextSession);
+      // Counts a newly created account once for ad measurement; makes no SDK call.
+      void noteAccountForMeta(nextSession?.user).catch(() => undefined);
       setSession(nextSession);
       setAuthError(null);
       setLoading(false);
