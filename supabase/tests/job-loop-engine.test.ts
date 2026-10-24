@@ -96,6 +96,21 @@ describe('cloud loop literal evidence and approvals', () => {
       expect(packet.status).toBe('review_required'); expect(packet.cvText).not.toContain(project); expect(packet.cvText).toContain(internship);
     }
   });
+  it('prints employer-facing section headings and never repeats a heading as its own context line', async () => {
+    const degree = 'BSc in Economics and Management.';
+    const skills = 'Excel and Power BI reporting.';
+    const p = { ...profile, sourceText: `${source}\nEDUCATION\nEducation\n${degree}\nSKILLS\nCore skills\n${skills}` };
+    const extra = [claim('edu-label', degree, 'education', 'Education'), claim('skill', skills, 'skill', 'Core skills')];
+    for (const c of extra) expect(validateClaim(claimInput(c), p).context).toBe(c.context);
+    const packet = await composePacket({ profile: p, claims: [...claims, ...extra], opportunity, runId: 'run-1', selectedClaimIds: ['project', 'skill'] });
+    const lines = packet.cvText.split(/\r?\n/);
+    expect(lines).toContain('SKILLS');
+    expect(packet.cvText).not.toContain('CONFIRMED SKILLS');
+    expect(lines.indexOf('EDUCATION')).toBeGreaterThan(-1);
+    expect(lines[lines.indexOf('EDUCATION') + 1]?.toLowerCase()).not.toBe('education');
+    for (let i = 1; i < lines.length; i++) expect(lines[i].trim() !== '' && lines[i].trim().toLowerCase() === lines[i - 1].trim().toLowerCase()).toBe(false);
+    expect(packet.cvText).toContain(degree); expect(packet.cvText).toContain(skills); expect(packet.cvText).toContain('Core skills');
+  });
   it('preserves academic/internship labels, education and all approved work contexts', async () => {
     const packet = await composePacket({ profile, claims, opportunity, runId: 'run-1', selectedClaimIds: ['project'] });
     expect(packet.cvText).toContain('ACADEMIC PROJECTS'); expect(packet.cvText).toContain('INTERNSHIPS'); expect(packet.cvText).toContain('EDUCATION');
