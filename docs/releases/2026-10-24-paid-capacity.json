@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-24",
+  "product": "Job Loop",
+  "sourceCommit": "6bd00d39bfe67c7145c0d7d0d1d812f3db3c5339",
+  "releaseType": "database_only",
+  "migration": {
+    "source": "20261024113134_job_loop_paid_capacity_100.sql",
+    "appliedVersion": "20261024114412",
+    "name": "job_loop_paid_capacity_100",
+    "sha256": "09beb309599da34089a55c4556b1eec9381b3f55d245d2593c9b11960e522975",
+    "success": true,
+    "exactChangedNativeRoutines": 5
+  },
+  "capacity": { "paid": 100, "freePilot": 10, "freePilotConsumesPaidCapacity": false, "paidCheckoutReservationsCountOncePerOwner": true },
+  "liveReadback": { "atUtc": "2026-10-24T11:44:56Z", "freePilotOccupancy": 5, "currentPaidAccounts": 0, "unexpiredPaidReservations": 0, "unresolvedFulfillment": 0 },
+  "verification": {
+    "focusedVitest": { "tests": 106, "files": 4, "newSqlSubchecksWithinOneTest": 13, "passed": true },
+    "nativePostgres": { "version": "17.11", "groups": 15, "additionalConcurrencyGroups": 2, "observedBlocking": true, "passed": true, "clusterStopped": true, "remainingPostgresProcesses": 0 },
+    "applicationTypeScript": "passed",
+    "changedRoutinesServiceOnly": true,
+    "fixedSearchPaths": true,
+    "securityAdvisorFindingsUnchanged": true,
+    "postApplyLiveQuote": { "plan": "weekly", "currency": "USD", "initialMinor": 2900, "recurringMinor": 2900, "createdAtUtc": "2026-10-24T11:45:54.576013Z", "purchaseConsentUnchecked": true, "checkoutCreated": false }
+  },
+  "preserved": { "monthlyAiSearchCapUsd": 50, "pricesAndCurrencies": true, "recurringConsentAndPlanAuthority": true, "existingFinancialRecords": true, "lifecycleAndGcFences": true },
+  "siteRedeployed": false,
+  "edgeFunctionsRedeployed": false,
+  "providerConfigurationChanged": false,
+  "realCardChargeMade": false,
+  "adsChanged": false,
+  "rollbackTag": "jobvance-before-paid-capacity-100-2026-10-24",
+  "limitations": ["Isolated SQL and Storage metadata checks, not 100 hosted customers or actual Storage bytes", "No new real-card purchase, natural renewal or NPS evidence", "Old free-pilot-only artifact guards must not be restored blindly after paid-only activation"]
+}
