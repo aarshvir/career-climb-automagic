@@ -80,8 +80,9 @@ CREATE TABLE public.jobvance_marketing_settings (
   singleton boolean PRIMARY KEY DEFAULT true CHECK(singleton),
   version bigint NOT NULL DEFAULT 0 CHECK(version >= 0),
   auto_mode boolean NOT NULL DEFAULT false,
-  max_daily_spend_minor bigint NOT NULL DEFAULT 150000 CHECK(max_daily_spend_minor BETWEEN 1 AND 10000000),
-  max_total_spend_minor bigint NOT NULL DEFAULT 700000 CHECK(max_total_spend_minor BETWEEN 1 AND 100000000),
+  -- Owner-approved 24 Oct: four ₹500/day ad sets (1.5x headroom per day) and a ₹13,000 campaign cap.
+  max_daily_spend_minor bigint NOT NULL DEFAULT 300000 CHECK(max_daily_spend_minor BETWEEN 1 AND 10000000),
+  max_total_spend_minor bigint NOT NULL DEFAULT 1300000 CHECK(max_total_spend_minor BETWEEN 1 AND 100000000),
   min_impressions integer NOT NULL DEFAULT 1500 CHECK(min_impressions BETWEEN 100 AND 1000000),
   pause_ctr_below_pct numeric(5,2) NOT NULL DEFAULT 0.40 CHECK(pause_ctr_below_pct BETWEEN 0 AND 10),
   cost_per_lpv_ratio numeric(4,2) NOT NULL DEFAULT 2.00 CHECK(cost_per_lpv_ratio BETWEEN 1.2 AND 10),
@@ -137,7 +138,7 @@ REVOKE ALL ON FUNCTION public.jobvance_marketing_audit_immutable() FROM PUBLIC, 
 INSERT INTO public.jobvance_marketing_ideas(slug,title,angle,status,source_path) VALUES
  ('version-a-search-rewrite-repeat','A: Search. Rewrite. Repeat?','Presenter names the repetitive job-search loop, then the four-step Job Loop demo.','launched','film-studio/revisions/2026-10-21-claude-loop-cut'),
  ('version-b-job-hunt-dragging','B: Job hunt dragging on for weeks?','Pain-question hook, owner line, then the Job Loop demo.','launched','film-studio/revisions/2026-10-22-version-B-pain'),
- ('version-c-drama','C: Dramatic real-life opening (woman presenter)','Stock cold open of job-search strain, a woman presenter with a matched voice, then one proof chain.','in_production','film-studio/revisions/2026-10-24-version-C-drama'),
+ ('version-c-drama','C: Dramatic real-life opening (woman presenter)','Stock cold open of job-search strain, a woman presenter with a matched voice, then one proof chain. Two openings (man first, partner first) in a Meta A/B test against B.','launched','film-studio/revisions/2026-10-24-version-C-drama'),
  ('concept-m2-the-loop','M2: The loop','Kinetic type loop concept from the 18 Oct agency run.','retired','jobvance-ad-studio/runs/2026-10-18/04-scripts/m2-the-loop.md'),
  ('concept-m1-let-me-show-you','M1: Let me show you','Presenter screen walkthrough concept from the 18 Oct agency run.','retired','jobvance-ad-studio/runs/2026-10-18/04-scripts/m1-let-me-show-you.md'),
  ('concept-b1-job-title-job-searcher','B1: Job title: job searcher','Deadpan job-title joke hook from the 18 Oct agency run.','idea','jobvance-ad-studio/runs/2026-10-18/04-scripts/b1-job-title-job-searcher.md'),
@@ -155,7 +156,13 @@ FROM (VALUES
  ('version-b-job-hunt-dragging','B feed 4x5 v4 (younger Liam voice, proof held earlier)','video','4x5','Jobvance-B-Feed-4x5-v4-upload.mp4','9481cc79c5d344881244bf96ce8f3b3dec288cbbed92bc9b35a223f00b3f0d58',true,'2026-10-23T19:00:00Z','Live in Feeds since 24 Oct.'),
  ('version-b-job-hunt-dragging','B Reels 9x16 v4 (younger Liam voice, headline off the eyes)','video','9x16','Jobvance-B-Reels-9x16-v4-upload.mp4','731faf669c82d42f7ea2b37b2d54adcf12e7c287d5ca972a720f247af13eafcd',true,'2026-10-23T19:00:00Z','Live in Stories and Reels since 24 Oct.'),
  ('version-a-search-rewrite-repeat','Copy C: the hard part is everything before applying','copy','text',NULL,NULL,true,'2026-10-23T18:30:00Z','Primary-text option in both ads.'),
- ('version-a-search-rewrite-repeat','Copy D: can''t fix the job market, takes the repetitive part','copy','text',NULL,NULL,true,'2026-10-23T18:30:00Z','Primary-text option in both ads.')
+ ('version-a-search-rewrite-repeat','Copy D: can''t fix the job market, takes the repetitive part','copy','text',NULL,NULL,true,'2026-10-23T18:30:00Z','Primary-text option in both ads.'),
+ ('version-c-drama','C feed 4x5 v2 (man first)','video','4x5','Jobvance-C-Feed-4x5-v2-upload.mp4','36227a6a82b9fd795158487a7c3be6d64ba65883d49842fe5be531083dbc9dd4',true,'2026-10-24T13:00:00Z','Owner: "Approved. Launch C as its own A/B test against B." Feeds of Version C - man first.'),
+ ('version-c-drama','C Reels 9x16 v2 (man first)','video','9x16','Jobvance-C-Reels-9x16-v2-upload.mp4','e939713882bac3e57260d5aecd714a3cec30d46503c7328c48e57bab0929da60',true,'2026-10-24T13:00:00Z','Stories and Reels of Version C - man first.'),
+ ('version-c-drama','C feed 4x5 v2 (partner first)','video','4x5','Jobvance-C-partnerfirst-Feed-4x5-v2-upload.mp4','5c509f958b6eca997d633619cb077b2f2f786bfbb7a1569e89689d2ec6d3c240',true,'2026-10-24T13:00:00Z','Feeds of Version C - partner first.'),
+ ('version-c-drama','C Reels 9x16 v2 (partner first)','video','9x16','Jobvance-C-partnerfirst-Reels-9x16-v2-upload.mp4','847c4380aaf6a253235f7e7ef6ce6bb9fa8a330eadf786f80b6b11eb1f8b76f1',true,'2026-10-24T13:00:00Z','Stories and Reels of Version C - partner first.'),
+ ('version-c-drama','C text A: auto-apply bots vs Jobvance hunts, checks fit, tailors','copy','text',NULL,NULL,true,'2026-10-24T13:00:00Z','Primary-text option in both C ads (LOCKED-SCRIPT-v2 section 4).'),
+ ('version-c-drama','C text B: Jobvance hands you the CV to approve instead','copy','text',NULL,NULL,true,'2026-10-24T13:00:00Z','Primary-text option in both C ads (LOCKED-SCRIPT-v2 section 4).')
 ) AS c(slug,label,kind,format,file_name,sha256,approved,approved_at,notes)
 JOIN public.jobvance_marketing_ideas i ON i.slug=c.slug;
 
@@ -163,7 +170,9 @@ INSERT INTO public.jobvance_marketing_launches(idea_id,name,meta_campaign_id,met
 SELECT i.id, l.name, '120252906111780325', l.adset, l.ad, 'ACTIVE', 50000, 'INR', '2026-10-30T13:00:00Z'::timestamptz
 FROM (VALUES
  ('version-a-search-rewrite-repeat','Version A - Search Rewrite Repeat','120252906157150325','120252906172570325'),
- ('version-b-job-hunt-dragging','Version B - Job hunt dragging','120252994824000325','120252994824010325')
+ ('version-b-job-hunt-dragging','Version B - Job hunt dragging','120252994824000325','120252994824010325'),
+ ('version-c-drama','Version C - man first','120253003770950325','120253003770960325'),
+ ('version-c-drama','Version C - partner first','120253003770930325','120253003770940325')
 ) AS l(slug,name,adset,ad)
 JOIN public.jobvance_marketing_ideas i ON i.slug=l.slug;
 
