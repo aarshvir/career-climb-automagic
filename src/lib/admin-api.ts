@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { readAuthSession } from '@/utils/authSession';
 import type { AdminAction, AdminResponse, AdminWindow } from '@/lib/admin-types';
+import { dashboardSchema } from '@/lib/admin-dashboard';
 
 const short = z.string().max(1000), id = z.string().min(1).max(128), count = z.number().int().nonnegative();
 const days = z.union([z.literal(7), z.literal(30), z.literal(90)]);
@@ -29,12 +30,13 @@ const snapshot = z.object({
 });
 const guestMeta=z.object({id,category:z.enum(['help','privacy','bug']),status,version:count,createdAt:short,updatedAt:short,expiresAt:short});
 const guestDetail=guestMeta.extend({message:z.string().max(2000),reply:z.string().max(2000)});
-const responseSchema = z.object({ snapshot: snapshot.optional(), providerStatus: provider.optional(), config: config.optional(), support: z.object({ id, status, version: count }).optional(), supportDetail: z.object({ id, message: z.string().max(2000) }).optional(),guestSupport:z.array(guestMeta.extend({hasReply:z.boolean()})).max(100).optional(),guestSupportDetail:guestDetail.optional() });
+const responseSchema = z.object({ snapshot: snapshot.optional(), dashboard: dashboardSchema.optional(), providerStatus: provider.optional(), config: config.optional(), support: z.object({ id, status, version: count }).optional(), supportDetail: z.object({ id, message: z.string().max(2000) }).optional(),guestSupport:z.array(guestMeta.extend({hasReply:z.boolean()})).max(100).optional(),guestSupportDetail:guestDetail.optional() });
 const actionSchema = z.discriminatedUnion('action', [
   z.object({action:z.literal('guest_support_list')}),
   z.object({action:z.literal('guest_support_detail'),id}),
   z.object({action:z.literal('guest_support_update'),id,expectedVersion:count,status,reply:z.string().max(2000).refine(value=>!value.includes('\0'))}),
   z.object({ action: z.literal('snapshot'), days }),
+  z.object({ action: z.literal('dashboard'), days }),
   z.object({ action: z.literal('update_config'), expectedVersion: count, config: configInput }),
   z.object({ action: z.literal('update_support'), id, expectedVersion: count, status }),
   z.object({ action: z.literal('support_detail'), id }),
@@ -83,6 +85,7 @@ export async function callAdmin(userId: string, action: AdminAction): Promise<Ad
   const parsed = responseSchema.safeParse(result.data);
   if (!parsed.success) throw failure(503);
   if (body.action === 'snapshot' && (!parsed.data.snapshot || parsed.data.snapshot.actor.id !== userId || parsed.data.snapshot.window.days !== body.days)) throw failure(503);
+  if (body.action === 'dashboard' && (!parsed.data.dashboard || parsed.data.dashboard.window.days !== body.days)) throw failure(503);
   if (body.action === 'update_config' && !parsed.data.config || body.action === 'update_support' && !parsed.data.support || body.action === 'provider_status' && !parsed.data.providerStatus) throw failure(503);
   if (body.action === 'support_detail' && (!parsed.data.supportDetail || parsed.data.supportDetail.id !== body.id)) throw failure(503);
   if(body.action==='guest_support_list'&&!parsed.data.guestSupport)throw failure(503);
