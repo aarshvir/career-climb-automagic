@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-25",
+  "site": "https://jobvance.io",
+  "publicVersion": 55,
+  "runtimeSource": "128555e5c595288d58f47093bb08e2d73ec7df37",
+  "backendSource": "949dd96f3ad19caf8da51469c776ec6517575687",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/29",
+  "reviewedClaudeHead": "f1097de6b1f92c571659a999ac22166c516016e5",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ed1f44cb4d70819195e16ba878c0b8de",
+  "deploymentId": "appgdep_6ade3711941881918c3b0a954374dde8",
+  "status": "succeeded",
+  "deployedAt": "2026-10-25T17:06:51.002074+00:00",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000bc4c8207badec3d2c2fbc9c3",
+    "content_hash": "sha256:6438fbc1ff3f63b9305b123038a1214a76d9a26dc8b31aefde815c1001006196",
+    "size_bytes": 15349760,
+    "file_count": 143
+  },
+  "changes": {
+    "routes": [
+      "/admin",
+      "/admin/today",
+      "/admin/revenue",
+      "/admin/growth",
+      "/admin/users",
+      "/admin/marketing",
+      "/admin/operations",
+      "/admin/support"
+    ],
+    "retainedOriginal": "/admin-original",
+    "retainedFounder": "/admin2",
+    "privateAuth": "Required account, fresh server membership, SDK session identity and synchronous auth-event epoch",
+    "measurement": "Known USD subtotals and original amounts; unknown FX/refunds stay unknown; current entitlement distinct from occupied reservations; bounded observed cohorts",
+    "marketing": "Read-only recorded figures. Missing/stale/incomplete sources never become measured zero."
+  },
+  "migration": {
+    "source": "supabase/migrations/20261025200000_jobvance_admin_dashboard.sql",
+    "sha256": "7554786783648add1bbdfde0d289768c60845454e65a2ac0e22339400c411e3a",
+    "appliedVersion": "20261025170058",
+    "name": "jobvance_admin_dashboard",
+    "nativeRoutineBodiesExact": 4,
+    "anonAuthenticatedExecution": false,
+    "fixedSearchPaths": true
+  },
+  "backend": {
+    "name": "jobvance-admin",
+    "version": 25,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "ownAuthentication": "auth.getUser plus fresh private membership and SQL role recheck",
+    "exactNativeFiles": 2,
+    "bundleSha256": "09a61fc5941938582af35183c48875f72c1cd073b0506b690053f051757f993a",
+    "bundleBytes": 11540,
+    "temporaryVersion24": "Superseded after owner smoke found extra audit metadata rejected by existing strict audit routine; v25 sends only allowlisted days."
+  },
+  "validation": {
+    "tests": 3285,
+    "files": 180,
+    "finalFullSuite": "vitest run --maxWorkers=2; unchanged assertions and timeout limits",
+    "independentUi": 53,
+    "sqlIntegration": 19,
+    "controller": 10,
+    "overlap": true,
+    "appTypeScript": "passed",
+    "changedFileLint": "zero errors/warnings",
+    "denoChecks": [
+      "source admin entry",
+      "generated admin bundle"
+    ],
+    "productionBuild": {
+      "publicPages": 37,
+      "guideArticles": 20,
+      "compressedWorkerBytes": 2947272,
+      "compressedLimitBytes": 3145728,
+      "hostingGroups": 12
+    },
+    "nativeSqlWindows": [
+      7,
+      30,
+      90
+    ],
+    "live": {
+      "privateRoutes": 10,
+      "publicRoutesOrFiles": 3,
+      "exactJavaScript": 66,
+      "exactCss": 15,
+      "unauthorized401": 2,
+      "ownerSignedIn": [
+        "overview",
+        "Today",
+        "revenue",
+        "growth",
+        "users and paying-only filter",
+        "marketing unknown/unconfigured",
+        "operations",
+        "support",
+        "original admin"
+      ],
+      "dateRanges": [
+        7,
+        30,
+        90
+      ],
+      "refresh": true,
+      "viewport": {
+        "width": 1920,
+        "height": 911
+      },
+      "mobile": "No fresh mobile acceptance claimed"
+    },
+    "initialFailures": [
+      "Three older guest-support auth mocks lacked actual SDK session/listener; mocks corrected without weakened guards.",
+      "OneDrive output guard failed; 141 files/five directories had zero dirent/lstat/readlink links and no resolved path escape; unchanged packager passed.",
+      "Early hosting check preceded finished artifact; final 12 groups passed.",
+      "Native receipt JSON subtraction query needed parentheses; corrected read-only query passed.",
+      "Inherited absolute import-map path rejected deployment; explicit included deno.json passed.",
+      "First owner smoke found ADMIN_AUDIT_INVALID; corrected handler plus actual original SQL audit integration regression passed and final v25 owner smoke succeeded.",
+      "A later parallel full-suite verification had seven timeout/async-wait failures; final unchanged 3285-case suite passed at concurrency two."
+    ],
+    "repositoryCi": "Inherited failure: main run40179613855 already reported 95 lint errors/50 warnings; not presented as green."
+  },
+  "rollback": {
+    "tag": "jobvance-before-admin-v2-2026-10-25",
+    "source": "2325fedda2662623580d616e8064d4135a740abb",
+    "savedVersion54": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f2ada38b47e8819198c2e7770fbd05aa",
+    "beforeAdminVersion": 23,
+    "privateNativeSourceBackup": true,
+    "note": "Frontend/source rollback is separate from database/file/merchant restoration; new read-only SQL remains additive."
+  },
+  "scope": {
+    "candidateWrites": false,
+    "merchantChanges": false,
+    "entitlementChanges": false,
+    "adChanges": false,
+    "providerCallsOrPurchases": false,
+    "gcChanges": false,
+    "allAuditFindingsComplete": false,
+    "privateTriage": "jobvance-marketing-coordination/2026-10-25-codex-platform-audit-triage.md"
+  },
+  "securityAdvisories": "Existing trigger-execution, leaked-password and service-only RLS notices retained; new admin routines are not exposed to public roles."
+}
