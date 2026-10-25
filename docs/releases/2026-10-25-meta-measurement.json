@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-25",
+  "release": "v51",
+  "product": "Job Loop",
+  "scope": "Public Meta Pixel and session-bound signup measurement",
+  "source": "c6bea363229cac1d2bc2c77447355d2689c3f120",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/27",
+  "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_70c091db68608191a2ea75866c0b46dd",
+  "archiveStorage": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_000000003da08207b4943a4bceb6b376",
+    "content_hash": "sha256:8b35c29be94645bf96500f3baf10e6b85a66409b48a89e0c3b2360fd9001bcd3",
+    "size_bytes": 15196160,
+    "file_count": 136
+  },
+  "deployment": {
+    "id": "appgdep_6adda16a3c048191b46235162b24196e",
+    "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "title": "Jobvance",
+    "version_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_70c091db68608191a2ea75866c0b46dd",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://jobvance-io.aarshvir.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6aca1c378fb88191aa656f8a85eee68a",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-25T06:28:10.423178+00:00"
+  },
+  "publicUrl": "https://jobvance.io",
+  "verification": {
+    "fullTests": 3153,
+    "files": 170,
+    "focusedTests": 36,
+    "focusedFiles": 3,
+    "typeScript": "passed",
+    "changedFileLint": {
+      "errors": 0,
+      "existingWarning": 1
+    },
+    "ci": "Existing repository lint failures remain; baseline main CI 40091398172 and PR CI both report 95 errors/50 warnings in unchanged legacy files. No check was weakened.",
+    "deno": "2.9.6 check of actual meta-conversions entrypoint passed",
+    "build": {
+      "publicPages": 38,
+      "guideArticles": 20,
+      "assets": 132,
+      "compressedBytes": 2915067,
+      "limitBytes": 3145728,
+      "packagingRecovery": "After a OneDrive symlink guard error, independent dirent/lstat/readlink inspection found 134 files, five directories, zero links. Unchanged host packager and all 12 hosting groups passed."
+    },
+    "live": {
+      "exactHtml": 5,
+      "exactJavaScript": 60,
+      "htmlNormalization": "Exclude only the observed appended Cloudflare challenge script and trim outer whitespace; no live ETag parity claimed.",
+      "browser": "Actual IAB Home and Plans PageView resources observed for correct pixel; live campaign tags/account-first redirect and opt-out reload verified. Actual callback loaded zero Meta scripts. Local production entry/callback checks also passed.",
+      "supabase": "ACTIVE meta-conversions v1: all three deployed files exact normalized-LF source match; POST not_configured200 and GET405 with expected CORS.",
+      "notVerified": [
+        "Actual new customer signup and browser/server event deduplication at Meta",
+        "CAPI delivery, because META_CAPI_ACCESS_TOKEN is absent",
+        "Private signed-in browser journey or new payment/renewal acceptance",
+        "Current ad delivery, spend, conversions or NPS"
+      ]
+    },
+    "rollback": {
+      "tag": "jobvance-before-meta-measurement-2026-10-25",
+      "savedPreviousVersion": "v50"
+    },
+    "unchanged": [
+      "100 paid-account capacity migration and 10 free pilot pool",
+      "Live Dodo payments, all existing financial records and quoted prices",
+      "Job Loop worker/control/tailor/OAuth handlers",
+      "Meta ad campaign, experiments, creatives, identity, budget and dates"
+    ]
+  }
+}
