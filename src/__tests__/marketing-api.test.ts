@@ -37,4 +37,14 @@ describe('marketing request identity', () => {
     await expect(callMarketing('owner',{action:'sync'})).rejects.toMatchObject({kind:'unauthenticated'});
     expect(mocks.invoke).not.toHaveBeenCalled();
   });
+  it('cancels before dispatch when A to B to A happens during initial verification', async () => {
+    mocks.getUser.mockImplementationOnce(async () => {
+      const original=mocks.session;
+      mocks.session=session('other'); mocks.listener!('SIGNED_IN',mocks.session);
+      mocks.session=original; mocks.listener!('SIGNED_IN',original);
+      return {data:{user:{id:'owner'}},error:null};
+    });
+    await expect(callMarketing('owner',{action:'create_idea',title:'Original idea',angle:''})).rejects.toMatchObject({kind:'unauthenticated'});
+    expect(mocks.invoke).not.toHaveBeenCalled();
+  });
 });

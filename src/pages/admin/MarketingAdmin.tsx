@@ -118,7 +118,7 @@ export default function MarketingAdmin() {
   const [loaded, setLoaded] = useState<{ scope: string; overview: MarketingOverview } | null>(null);
   // Hide the prior owner's data during render, before effects run on a session change.
   const overview = !authLoading && scope && loaded?.scope === scope ? loaded.overview : null;
-  const setOverview = (value: MarketingOverview | null) => setLoaded(value && scope ? { scope, overview: value } : null);
+  const setOverview = useCallback((value: MarketingOverview | null) => setLoaded(value && scope ? { scope, overview: value } : null), [scope]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<MarketingApiError | null>(null);
@@ -134,7 +134,7 @@ export default function MarketingAdmin() {
       .catch(reason => { if (generation.current === revision) { setOverview(null); setError(reason instanceof MarketingApiError ? reason : new MarketingApiError('unavailable', 'The marketing workspace could not be loaded.')); } })
       .finally(() => { if (generation.current === revision) setLoading(false); });
     return () => { generation.current += 1; };
-  }, [userId, scope, authLoading, refresh]);
+  }, [userId, scope, authLoading, refresh, setOverview]);
 
   const run: Run = useCallback(async action => {
     if (!userId || !scope || busy) return false;
@@ -153,7 +153,7 @@ export default function MarketingAdmin() {
       if (failure.kind === 'forbidden' || failure.kind === 'unauthenticated') setOverview(null);
       return false;
     } finally { if (generation.current === revision) setBusy(false); }
-  }, [userId, scope, busy]);
+  }, [userId, scope, busy, setOverview]);
 
   const owner = overview?.actor.role === 'owner';
   const connected = !!overview?.meta.configured;

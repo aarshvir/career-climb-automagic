@@ -29,11 +29,12 @@ export class MarketingApiError extends Error {
 export function marketingSessionScope(session: { user: { id: string }; access_token: string } | null | undefined): string | null {
   return session?.access_token ? `${session.user.id}:${cvVariantSessionIdentity(session) ?? session.access_token}` : null;
 }
-async function currentAccount(userId: string, expectedScope?: string) {
+async function currentAccount(userId: string, expectedScope?: string, capture?: (scope: string) => void) {
   try {
     const session = await readAuthSession();
     const scope = marketingSessionScope(session);
     if (!session || !scope || session.user.id !== userId || expectedScope && scope !== expectedScope) throw new Error();
+    capture?.(scope);
     const verified = await supabase.auth.getUser(session.access_token);
     const current = await readAuthSession();
     if (verified.error || verified.data.user?.id !== userId || marketingSessionScope(current) !== scope) throw new Error();
@@ -53,17 +54,22 @@ function failure(httpStatus: number, payload?: unknown): MarketingApiError {
 /** Calls only the fixed first-party function; access is re-verified by the server on every call. */
 export async function callMarketing(userId: string, action: MarketingAction): Promise<MarketingResponse> {
   const intent = structuredClone(action);
-  let scope: string | null = null, invalidated = false;
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (scope && marketingSessionScope(session) !== scope) invalidated = true;
+  let scope: string | null = null, observedScope: string | null = null, invalidated = false;
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const next = marketingSessionScope(session);
+    if (event === 'SIGNED_OUT' || session && session.user.id !== userId || scope && next !== scope || observedScope && next !== observedScope) invalidated = true;
+    if (next) observedScope = next;
   });
   try {
-  const original = await currentAccount(userId);
-  scope = original.scope;
+  const original = await currentAccount(userId, undefined, next => {
+    if (observedScope && observedScope !== next) invalidated = true;
+    scope = next;
+  });
+  if (invalidated) throw new MarketingApiError('unauthenticated', 'Your session changed. Refresh to verify access again.');
   let result: { data: unknown; error: unknown };
   try { result = await supabase.functions.invoke<unknown>('jobvance-marketing', { body: intent, headers: { Authorization: `Bearer ${original.session.access_token}` } }); }
   catch { throw failure(503); }
-  await currentAccount(userId, scope);
+  await currentAccount(userId, original.scope);
   if (invalidated) throw new MarketingApiError('unauthenticated', 'Your session changed. Refresh to verify access again.');
   if (result.error) {
     const context = (result.error as { context?: unknown }).context;
