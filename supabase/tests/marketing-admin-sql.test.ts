@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 
 // In-memory PostgreSQL only; the seed contains public Meta object ids, no secrets.
 let db: PGlite;
@@ -23,26 +23,27 @@ describe('private marketing workspace schema', () => {
   it('seeds the launched versions, approved files, launches and safe default settings', async () => {
     await as('service_role');
     expect((await q('SELECT count(*)::int AS n FROM public.jobvance_marketing_ideas')).rows[0].n).toBe(7);
-    const launches = (await q('SELECT name, meta_ad_id, status, daily_budget_minor FROM public.jobvance_marketing_launches ORDER BY name')).rows;
+    // Live status and figures stay unknown until the first complete read from Meta.
+    const launches = (await q('SELECT name, meta_ad_id, status, daily_budget_minor, metrics_state, last_synced_at FROM public.jobvance_marketing_launches ORDER BY name')).rows;
+    const seeded = { status: 'UNKNOWN', daily_budget_minor: 50000, metrics_state: 'unknown', last_synced_at: null };
     expect(launches).toEqual([
-      { name: 'Version A - Search Rewrite Repeat', meta_ad_id: '120252906172570325', status: 'ACTIVE', daily_budget_minor: 50000 },
-      { name: 'Version B - Job hunt dragging', meta_ad_id: '120252994824010325', status: 'ACTIVE', daily_budget_minor: 50000 },
-      { name: 'Version C - man first', meta_ad_id: '120253003770960325', status: 'ACTIVE', daily_budget_minor: 50000 },
-      { name: 'Version C - partner first', meta_ad_id: '120253003770940325', status: 'ACTIVE', daily_budget_minor: 50000 },
+      { name: 'Version A - Search Rewrite Repeat', meta_ad_id: '120252906172570325', ...seeded },
+      { name: 'Version B - Job hunt dragging', meta_ad_id: '120252994824010325', ...seeded },
+      { name: 'Version C - man first', meta_ad_id: '120253003770960325', ...seeded },
+      { name: 'Version C - partner first', meta_ad_id: '120253003770940325', ...seeded },
     ]);
     expect((await q('SELECT count(*)::int AS n FROM public.jobvance_marketing_creatives WHERE approved')).rows[0].n).toBe(16);
     const live = (await q("SELECT file_name FROM public.jobvance_marketing_creatives WHERE sha256 IS NOT NULL AND (file_name LIKE '%-v4-upload.mp4' OR file_name LIKE 'Jobvance-C-%') ORDER BY file_name")).rows.map(r => r.file_name);
     expect(live).toEqual(['Jobvance-A-Feed-4x5-v4-upload.mp4', 'Jobvance-A-Reels-9x16-v4-upload.mp4', 'Jobvance-B-Feed-4x5-v4-upload.mp4', 'Jobvance-B-Reels-9x16-v4-upload.mp4', 'Jobvance-C-Feed-4x5-v2-upload.mp4', 'Jobvance-C-Reels-9x16-v2-upload.mp4', 'Jobvance-C-partnerfirst-Feed-4x5-v2-upload.mp4', 'Jobvance-C-partnerfirst-Reels-9x16-v2-upload.mp4']);
-    const settings = (await q('SELECT version, auto_mode, max_daily_spend_minor, max_total_spend_minor FROM public.jobvance_marketing_settings')).rows[0];
-    expect(settings).toEqual({ version: 0, auto_mode: false, max_daily_spend_minor: 300000, max_total_spend_minor: 1300000 });
+    const settings = (await q('SELECT version, max_daily_spend_minor, max_total_spend_minor FROM public.jobvance_marketing_settings')).rows[0];
+    expect(settings).toEqual({ version: 0, max_daily_spend_minor: 300000, max_total_spend_minor: 1300000 });
   });
 
   it('keeps every table out of reach of browser roles', async () => {
     for (const role of ['anon', 'authenticated']) {
       await as(role);
-      for (const table of ['jobvance_marketing_ideas', 'jobvance_marketing_launches', 'jobvance_marketing_settings', 'jobvance_marketing_audit', 'jobvance_marketing_dispatch_tickets'])
+      for (const table of ['jobvance_marketing_ideas', 'jobvance_marketing_launches', 'jobvance_marketing_settings', 'jobvance_marketing_audit'])
         await expect(q(`SELECT 1 FROM public.${table} LIMIT 1`)).rejects.toThrow(/permission denied/);
-      await expect(q('SELECT public.jobvance_marketing_consume_ticket(gen_random_uuid())')).rejects.toThrow(/permission denied/);
     }
   });
 
@@ -51,16 +52,28 @@ describe('private marketing workspace schema', () => {
     const row = (await q("INSERT INTO public.jobvance_marketing_audit(action, details) VALUES('sync', '{\"launches\":2}') RETURNING id")).rows[0];
     await expect(q('UPDATE public.jobvance_marketing_audit SET action=$2 WHERE id=$1', [row.id, 'run_auto'])).rejects.toThrow(/MARKETING_AUDIT_IMMUTABLE/);
     await expect(q('DELETE FROM public.jobvance_marketing_audit WHERE id=$1', [row.id])).rejects.toThrow(/MARKETING_AUDIT_IMMUTABLE/);
-    await expect(q("INSERT INTO public.jobvance_marketing_audit(action) VALUES('delete_everything')")).rejects.toThrow();
+    for (const action of ['delete_everything', 'set_status', 'run_auto', 'auto_pause', 'auto_resume'])
+      await expect(q('INSERT INTO public.jobvance_marketing_audit(action) VALUES($1)', [action])).rejects.toThrow();
   });
 
-  it('accepts a scheduler ticket exactly once and never an expired one', async () => {
+  it('installs no scheduler, ticket or auto-mode switch', async () => {
     await as('service_role');
-    const ticket = (await q('INSERT INTO public.jobvance_marketing_dispatch_tickets DEFAULT VALUES RETURNING ticket')).rows[0].ticket;
-    expect((await q('SELECT public.jobvance_marketing_consume_ticket($1) AS ok', [ticket])).rows[0].ok).toBe(true);
-    expect((await q('SELECT public.jobvance_marketing_consume_ticket($1) AS ok', [ticket])).rows[0].ok).toBe(false);
-    const stale = (await q("INSERT INTO public.jobvance_marketing_dispatch_tickets(expires_at) VALUES(now() - interval '1 minute') RETURNING ticket")).rows[0].ticket;
-    expect((await q('SELECT public.jobvance_marketing_consume_ticket($1) AS ok', [stale])).rows[0].ok).toBe(false);
+    const objects = (await q("SELECT p.proname::text AS name FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname LIKE 'jobvance_marketing%' UNION ALL SELECT table_name::text FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'jobvance_marketing%' ORDER BY 1")).rows.map(r => r.name);
+    expect(objects).toEqual(['jobvance_marketing_audit', 'jobvance_marketing_audit_immutable', 'jobvance_marketing_creatives', 'jobvance_marketing_ideas', 'jobvance_marketing_launches', 'jobvance_marketing_metrics', 'jobvance_marketing_requests', 'jobvance_marketing_settings']);
+    const columns = (await q("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN('jobvance_marketing_settings','jobvance_marketing_launches')")).rows.map(r => r.column_name);
+    expect(columns).not.toEqual(expect.arrayContaining(['auto_mode']));
+    expect(columns.filter(name => /auto|paused/.test(String(name)))).toEqual([]);
+    for (const file of (await readdir('supabase/migrations')).filter(name => name.includes('marketing')))
+      expect(await readFile(`supabase/migrations/${file}`, 'utf8')).not.toMatch(/cron\.schedule|jobvance-marketing-auto|http_post/);
+  });
+
+  it('records figures as unknown until a complete read, never fresh without a sync time', async () => {
+    await as('service_role');
+    const id = (await q("SELECT id FROM public.jobvance_marketing_launches WHERE name='Version B - Job hunt dragging'")).rows[0].id;
+    await expect(q("UPDATE public.jobvance_marketing_launches SET metrics_state='fresh' WHERE id=$1", [id])).rejects.toThrow();
+    await expect(q("UPDATE public.jobvance_marketing_launches SET metrics_issue='zeroed' WHERE id=$1", [id])).rejects.toThrow();
+    await q("UPDATE public.jobvance_marketing_launches SET metrics_state='fresh', last_synced_at=now() WHERE id=$1", [id]);
+    await q("UPDATE public.jobvance_marketing_launches SET metrics_state='stale', metrics_issue='currency_mismatch' WHERE id=$1", [id]);
   });
 
   it('rejects approval without a timestamp, bad Meta ids and caps out of range', async () => {

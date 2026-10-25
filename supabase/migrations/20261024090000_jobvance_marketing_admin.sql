@@ -2,7 +2,8 @@ BEGIN;
 
 -- Private marketing workspace for /marketing-admin. Every table is reachable only
 -- through the jobvance-marketing function (service role); the function verifies
--- the caller against jobvance_admin_members on every request.
+-- the caller against jobvance_admin_members on every request. This release only reads
+-- from Meta: there is no auto mode, scheduler or ad-changing action.
 
 CREATE TABLE public.jobvance_marketing_ideas (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -43,11 +44,13 @@ CREATE TABLE public.jobvance_marketing_launches (
   daily_budget_minor bigint CHECK(daily_budget_minor IS NULL OR daily_budget_minor >= 0),
   currency text NOT NULL DEFAULT 'INR' CHECK(currency ~ '^[A-Z]{3}$'),
   end_at timestamptz,
-  paused_by text CHECK(paused_by IS NULL OR paused_by IN('owner','auto')),
-  paused_reason text CHECK(paused_reason IS NULL OR paused_reason IN('owner','daily_cap','total_cap','low_ctr','high_cost')),
+  -- Last complete, validated read from Meta. Incomplete or invalid reads never write figures.
   last_synced_at timestamptz,
+  metrics_state text NOT NULL DEFAULT 'unknown' CHECK(metrics_state IN('fresh','stale','unknown')),
+  metrics_issue text CHECK(metrics_issue IS NULL OR metrics_issue IN('invalid','incomplete','currency_mismatch','account_mismatch','meta_error')),
   created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CHECK(metrics_state = 'unknown' OR last_synced_at IS NOT NULL)
 );
 
 CREATE TABLE public.jobvance_marketing_metrics (
@@ -79,7 +82,7 @@ CREATE TABLE public.jobvance_marketing_requests (
 CREATE TABLE public.jobvance_marketing_settings (
   singleton boolean PRIMARY KEY DEFAULT true CHECK(singleton),
   version bigint NOT NULL DEFAULT 0 CHECK(version >= 0),
-  auto_mode boolean NOT NULL DEFAULT false,
+  -- Thresholds for the page's recommendations only; nothing here changes Meta.
   -- Owner-approved 24 Oct: four ₹500/day ad sets (1.5x headroom per day) and a ₹13,000 campaign cap.
   max_daily_spend_minor bigint NOT NULL DEFAULT 300000 CHECK(max_daily_spend_minor BETWEEN 1 AND 10000000),
   max_total_spend_minor bigint NOT NULL DEFAULT 1300000 CHECK(max_total_spend_minor BETWEEN 1 AND 100000000),
@@ -87,7 +90,6 @@ CREATE TABLE public.jobvance_marketing_settings (
   pause_ctr_below_pct numeric(5,2) NOT NULL DEFAULT 0.40 CHECK(pause_ctr_below_pct BETWEEN 0 AND 10),
   cost_per_lpv_ratio numeric(4,2) NOT NULL DEFAULT 2.00 CHECK(cost_per_lpv_ratio BETWEEN 1.2 AND 10),
   last_sync_at timestamptz,
-  last_auto_run_at timestamptz,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 INSERT INTO public.jobvance_marketing_settings(singleton) VALUES(true);
@@ -95,7 +97,7 @@ INSERT INTO public.jobvance_marketing_settings(singleton) VALUES(true);
 CREATE TABLE public.jobvance_marketing_audit (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   actor_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  action text NOT NULL CHECK(action IN('overview','sync','set_status','request_creation','create_idea','update_settings','run_auto','auto_pause','auto_resume')),
+  action text NOT NULL CHECK(action IN('sync','request_creation','create_idea','update_settings')),
   target_id uuid,
   details jsonb NOT NULL DEFAULT '{}'::jsonb CHECK(jsonb_typeof(details)='object' AND pg_column_size(details) <= 4000),
   at timestamptz NOT NULL DEFAULT now()
@@ -108,21 +110,10 @@ BEGIN RAISE EXCEPTION 'MARKETING_AUDIT_IMMUTABLE'; END $$;
 CREATE TRIGGER jobvance_marketing_audit_immutable BEFORE UPDATE OR DELETE ON public.jobvance_marketing_audit
 FOR EACH ROW EXECUTE FUNCTION public.jobvance_marketing_audit_immutable();
 
--- Single-use tickets let the hourly scheduler call the function without a stored secret.
-CREATE TABLE public.jobvance_marketing_dispatch_tickets (
-  ticket uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  expires_at timestamptz NOT NULL DEFAULT now() + interval '10 minutes'
-);
-CREATE FUNCTION public.jobvance_marketing_consume_ticket(p_ticket uuid) RETURNS boolean
-LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$
-  WITH used AS (DELETE FROM public.jobvance_marketing_dispatch_tickets WHERE ticket=p_ticket AND expires_at>now() RETURNING 1)
-  SELECT EXISTS(SELECT 1 FROM used)
-$$;
-
 DO $$
 DECLARE t text;
 BEGIN
-  FOREACH t IN ARRAY ARRAY['jobvance_marketing_ideas','jobvance_marketing_creatives','jobvance_marketing_launches','jobvance_marketing_metrics','jobvance_marketing_requests','jobvance_marketing_settings','jobvance_marketing_audit','jobvance_marketing_dispatch_tickets'] LOOP
+  FOREACH t IN ARRAY ARRAY['jobvance_marketing_ideas','jobvance_marketing_creatives','jobvance_marketing_launches','jobvance_marketing_metrics','jobvance_marketing_requests','jobvance_marketing_settings','jobvance_marketing_audit'] LOOP
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
     EXECUTE format('ALTER TABLE public.%I FORCE ROW LEVEL SECURITY', t);
     EXECUTE format('REVOKE ALL ON public.%I FROM PUBLIC, anon, authenticated', t);
@@ -130,11 +121,10 @@ BEGIN
     EXECUTE format('CREATE POLICY service_role_only ON public.%I TO service_role USING (true) WITH CHECK (true)', t);
   END LOOP;
 END $$;
-REVOKE ALL ON FUNCTION public.jobvance_marketing_consume_ticket(uuid) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.jobvance_marketing_consume_ticket(uuid) TO service_role;
 REVOKE ALL ON FUNCTION public.jobvance_marketing_audit_immutable() FROM PUBLIC, anon, authenticated;
 
--- What exists on 24 Oct 2026 (receipts in jobvance-marketing-coordination/).
+-- What exists on 24 Oct 2026 (receipts in jobvance-marketing-coordination/). Launch status
+-- stays UNKNOWN and figures unknown until the first complete read from Meta.
 INSERT INTO public.jobvance_marketing_ideas(slug,title,angle,status,source_path) VALUES
  ('version-a-search-rewrite-repeat','A: Search. Rewrite. Repeat?','Presenter names the repetitive job-search loop, then the four-step Job Loop demo.','launched','film-studio/revisions/2026-10-21-claude-loop-cut'),
  ('version-b-job-hunt-dragging','B: Job hunt dragging on for weeks?','Pain-question hook, owner line, then the Job Loop demo.','launched','film-studio/revisions/2026-10-22-version-B-pain'),
@@ -166,8 +156,8 @@ FROM (VALUES
 ) AS c(slug,label,kind,format,file_name,sha256,approved,approved_at,notes)
 JOIN public.jobvance_marketing_ideas i ON i.slug=c.slug;
 
-INSERT INTO public.jobvance_marketing_launches(idea_id,name,meta_campaign_id,meta_adset_id,meta_ad_id,status,daily_budget_minor,currency,end_at)
-SELECT i.id, l.name, '120252906111780325', l.adset, l.ad, 'ACTIVE', 50000, 'INR', '2026-10-30T13:00:00Z'::timestamptz
+INSERT INTO public.jobvance_marketing_launches(idea_id,name,meta_campaign_id,meta_adset_id,meta_ad_id,daily_budget_minor,currency,end_at)
+SELECT i.id, l.name, '120252906111780325', l.adset, l.ad, 50000, 'INR', '2026-10-30T13:00:00Z'::timestamptz
 FROM (VALUES
  ('version-a-search-rewrite-repeat','Version A - Search Rewrite Repeat','120252906157150325','120252906172570325'),
  ('version-b-job-hunt-dragging','Version B - Job hunt dragging','120252994824000325','120252994824010325'),

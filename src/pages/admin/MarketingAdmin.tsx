@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowUpRight, BriefcaseBusiness, Lightbulb, LockKeyhole, Megaphone, Pause, Play, RefreshCw, ShieldCheck, Sparkles, Wand2 } from 'lucide-react';
+import { ArrowUpRight, BriefcaseBusiness, Eye, Lightbulb, LockKeyhole, RefreshCw, ShieldCheck, Sparkles, Wand2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MarketingApiError, callMarketing, inr } from '@/lib/marketing-api';
-import type { MarketingAction, MarketingIdea, MarketingLaunch, MarketingOverview, MarketingRecommendation, MarketingSettingsInput } from '@/lib/marketing-types';
+import type { MarketingAction, MarketingIdea, MarketingLaunch, MarketingOverview, MarketingRecommendation, MarketingSettingsInput, MarketingTotals, MetricsIssue } from '@/lib/marketing-types';
 import { Badge, Empty, Notice, Panel } from './AdminShared';
 import { readable, utc } from './admin-format';
 import './AdminPortal.css';
@@ -14,6 +14,13 @@ type Run = (action: MarketingAction) => Promise<boolean>;
 const pct = (value: number | null) => value === null ? 'n/a' : `${value.toFixed(2)}%`;
 const statusTone = (status: string) => status === 'ACTIVE' ? 'good' : status === 'PAUSED' ? 'warning' : status === 'UNKNOWN' ? 'neutral' : 'bad';
 const ideaTone = (status: MarketingIdea['status']) => status === 'launched' ? 'good' : status === 'in_production' || status === 'ready' ? 'warning' : 'neutral';
+const issueText: Record<MetricsIssue, string> = {
+  invalid: 'Meta returned figures in an unexpected shape.',
+  incomplete: 'Meta had more pages of figures than this page reads.',
+  currency_mismatch: "The ad account's currency no longer matches this launch.",
+  account_mismatch: 'The ad, its ad set or campaign, or the account time zone no longer matches the record.',
+  meta_error: 'Meta did not answer the last read.',
+};
 
 function Confirm({ open, title, children, confirm, busy, onClose, onConfirm }: { open: boolean; title: string; children: ReactNode; confirm: string; busy: boolean; onClose: () => void; onConfirm: () => void }) {
   return <Dialog open={open} onOpenChange={value => { if (!value) onClose(); }}><DialogContent className="admin-message-dialog"><DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription asChild><div>{children}</div></DialogDescription></DialogHeader>
@@ -23,37 +30,32 @@ function Confirm({ open, title, children, confirm, busy, onClose, onConfirm }: {
 function SpendBars({ launch }: { launch: MarketingLaunch }) {
   const days = launch.daily.slice(-14);
   const top = Math.max(1, ...days.map(day => day.spendMinor));
-  if (!days.length) return <span className="admin-cell-note">No daily figures yet</span>;
+  if (!days.length) return <span className="admin-cell-note">No daily figures</span>;
   return <span aria-label={`Daily spend for the last ${days.length} days`} style={{ display: 'inline-flex', alignItems: 'flex-end', gap: 2, height: 26, marginTop: 6 }}>
     {days.map(day => <span key={day.day} title={`${day.day}: ${inr(day.spendMinor, launch.currency)}, ${day.landingPageViews} landing page views`} style={{ width: 6, height: Math.max(2, Math.round(day.spendMinor / top * 26)), background: '#2850df', borderRadius: 2, opacity: .8 }} />)}
   </span>;
 }
 
-function LaunchRow({ launch, idea, owner, connected, busy, run }: { launch: MarketingLaunch; idea?: MarketingIdea; owner: boolean; connected: boolean; busy: boolean; run: Run }) {
-  const [confirm, setConfirm] = useState<'ACTIVE' | 'PAUSED' | null>(null);
+function LaunchRow({ launch, idea }: { launch: MarketingLaunch; idea?: MarketingIdea }) {
   const t = launch.totals;
-  const firstLaunch = launch.status !== 'ACTIVE' && t.impressions === 0;
-  const next = launch.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
-  const blocked = !owner ? 'Only the owner can change ads.' : !connected ? 'Connect Meta to change ads from here.' : launch.status === 'DELETED' || launch.status === 'ARCHIVED' ? 'This ad is archived in Meta.' : '';
+  // Unknown figures are never shown as zero.
+  const figure = (value: (totals: MarketingTotals) => ReactNode, note?: (totals: MarketingTotals) => ReactNode) => t ? <td>{value(t)}{note && <span className="admin-cell-note">{note(t)}</span>}</td> : <td><span title="No complete read from Meta yet">Unknown</span></td>;
   return <tr>
     <td><strong>{launch.name}</strong><span className="admin-cell-note">{idea?.title ?? 'Unknown idea'} · Meta ad {launch.metaAdId}</span><SpendBars launch={launch} /></td>
-    <td><Badge tone={statusTone(launch.status)}>{readable(launch.status.toLowerCase())}</Badge><span className="admin-cell-note">{launch.effectiveStatus ? `Meta: ${readable(launch.effectiveStatus.toLowerCase())}` : 'Not synced yet'}{launch.pausedBy ? ` · paused by ${launch.pausedBy}${launch.pausedReason && launch.pausedReason !== 'owner' ? ` (${readable(launch.pausedReason)})` : ''}` : ''}</span></td>
+    <td><Badge tone={statusTone(launch.status)}>{readable(launch.status.toLowerCase())}</Badge><span className="admin-cell-note">{launch.effectiveStatus ? `Meta: ${readable(launch.effectiveStatus.toLowerCase())}` : 'Not read from Meta yet'}</span></td>
     <td>{inr(launch.dailyBudgetMinor, launch.currency)}<span className="admin-cell-note">{launch.endAt ? `ends ${utc(launch.endAt)}` : 'no end date'}</span></td>
-    <td>{inr(t.spendMinor, launch.currency)}<span className="admin-cell-note">{t.days} day{t.days === 1 ? '' : 's'} of data</span></td>
-    <td>{t.impressions.toLocaleString('en-IN')}<span className="admin-cell-note">reach {t.reach.toLocaleString('en-IN')}+</span></td>
-    <td>{pct(t.ctrPct)}<span className="admin-cell-note">{t.linkClicks.toLocaleString('en-IN')} link clicks</span></td>
-    <td>{t.landingPageViews.toLocaleString('en-IN')}<span className="admin-cell-note">{inr(t.costPerLpvMinor, launch.currency)} each</span></td>
-    <td><button type="button" className={`admin-button admin-button--small ${next === 'ACTIVE' ? 'admin-button--primary' : ''}`} disabled={busy || !!blocked} title={blocked || undefined} onClick={() => setConfirm(next)}>{next === 'PAUSED' ? <><Pause size={13} aria-hidden="true" />Pause</> : <><Play size={13} aria-hidden="true" />{firstLaunch ? 'Launch on Meta' : 'Resume'}</>}</button>{blocked && <span className="admin-cell-note">{blocked}</span>}
-      <Confirm open={confirm !== null} busy={busy} title={confirm === 'PAUSED' ? `Pause ${launch.name}?` : `${firstLaunch ? 'Launch' : 'Resume'} ${launch.name}?`} confirm={confirm === 'PAUSED' ? 'Pause in Meta' : 'Switch on in Meta'} onClose={() => setConfirm(null)} onConfirm={() => { const status = confirm!; setConfirm(null); void run({ action: 'set_status', launchId: launch.id, status }); }}>
-        {confirm === 'PAUSED' ? <p>The ad and its ad set stop delivering in Meta straight away. Nothing is deleted; you can resume it here.</p> : <p>This switches on the campaign, ad set and ad in Meta. It spends up to {inr(launch.dailyBudgetMinor, launch.currency)} a day until {launch.endAt ? utc(launch.endAt) : 'you pause it'}, inside the campaign's own spending limit. Only owner-approved videos can go live.</p>}
-      </Confirm></td>
+    {figure(x => inr(x.spendMinor, launch.currency), x => `${x.days} day${x.days === 1 ? '' : 's'} with delivery`)}
+    {figure(x => x.impressions.toLocaleString('en-IN'), x => `reach ${x.reach.toLocaleString('en-IN')}+`)}
+    {figure(x => x.linkClicks.toLocaleString('en-IN'))}
+    {figure(x => pct(x.ctrPct))}
+    {figure(x => x.landingPageViews.toLocaleString('en-IN'))}
+    {figure(x => inr(x.costPerLpvMinor, launch.currency))}
+    <td><Badge tone={launch.metrics === 'fresh' ? 'good' : launch.metrics === 'stale' ? 'warning' : 'neutral'}>{launch.metrics === 'fresh' ? 'Fresh' : launch.metrics === 'stale' ? 'Stale' : 'Unknown'}</Badge><span className="admin-cell-note">{launch.lastSyncedAt ? `as of ${utc(launch.lastSyncedAt)}` : 'never read completely'}{launch.metricsIssue ? ` · ${issueText[launch.metricsIssue]}` : ''}</span></td>
   </tr>;
 }
 
-function Recommendation({ rec, launch, owner, connected, busy, run }: { rec: MarketingRecommendation; launch?: MarketingLaunch; owner: boolean; connected: boolean; busy: boolean; run: Run }) {
-  const actionable = (rec.kind === 'pause' || rec.kind === 'spend_cap' || rec.kind === 'resume') && launch && owner && connected;
-  return <li className="admin-check-control" style={{ alignItems: 'center' }}><Sparkles size={17} aria-hidden="true" /><div style={{ flex: 1 }}><strong>{rec.title}</strong> <Badge tone={rec.severity === 'action' ? 'bad' : rec.severity === 'warning' ? 'warning' : 'neutral'}>{rec.severity === 'action' ? 'Action' : rec.severity === 'warning' ? 'Watch' : 'Info'}</Badge>{rec.autoEligible && <> <Badge tone="good">Auto mode can do this</Badge></>}<small>{rec.reason}</small></div>
-    {actionable && <button type="button" className="admin-button admin-button--small" disabled={busy} onClick={() => void run({ action: 'set_status', launchId: launch.id, status: rec.kind === 'resume' ? 'ACTIVE' : 'PAUSED' })}>{rec.kind === 'resume' ? 'Resume now' : 'Pause now'}</button>}</li>;
+function Recommendation({ rec }: { rec: MarketingRecommendation }) {
+  return <li className="admin-check-control" style={{ alignItems: 'center' }}><Sparkles size={17} aria-hidden="true" /><div style={{ flex: 1 }}><strong>{rec.title}</strong> <Badge tone={rec.severity === 'action' ? 'bad' : rec.severity === 'warning' ? 'warning' : 'neutral'}>{rec.severity === 'action' ? 'Action' : rec.severity === 'warning' ? 'Watch' : 'Info'}</Badge><small>{rec.reason}</small></div></li>;
 }
 
 function IdeaCard({ idea, overview, busy, run }: { idea: MarketingIdea; overview: MarketingOverview; busy: boolean; run: Run }) {
@@ -86,26 +88,25 @@ function NewIdea({ busy, run }: { busy: boolean; run: Run }) {
   </form>;
 }
 
-function AutoMode({ overview, owner, busy, run }: { overview: MarketingOverview; owner: boolean; busy: boolean; run: Run }) {
+function Thresholds({ overview, owner, busy, run }: { overview: MarketingOverview; owner: boolean; busy: boolean; run: Run }) {
   const s = overview.settings;
-  const [form, setForm] = useState<MarketingSettingsInput>({ autoMode: s.autoMode, maxDailySpendMinor: s.maxDailySpendMinor, maxTotalSpendMinor: s.maxTotalSpendMinor, minImpressions: s.minImpressions, pauseCtrBelowPct: s.pauseCtrBelowPct, costPerLpvRatio: s.costPerLpvRatio });
-  useEffect(() => { setForm({ autoMode: s.autoMode, maxDailySpendMinor: s.maxDailySpendMinor, maxTotalSpendMinor: s.maxTotalSpendMinor, minImpressions: s.minImpressions, pauseCtrBelowPct: s.pauseCtrBelowPct, costPerLpvRatio: s.costPerLpvRatio }); }, [s.version, s.autoMode, s.maxDailySpendMinor, s.maxTotalSpendMinor, s.minImpressions, s.pauseCtrBelowPct, s.costPerLpvRatio]);
+  const [form, setForm] = useState<MarketingSettingsInput>({ maxDailySpendMinor: s.maxDailySpendMinor, maxTotalSpendMinor: s.maxTotalSpendMinor, minImpressions: s.minImpressions, pauseCtrBelowPct: s.pauseCtrBelowPct, costPerLpvRatio: s.costPerLpvRatio });
+  useEffect(() => { setForm({ maxDailySpendMinor: s.maxDailySpendMinor, maxTotalSpendMinor: s.maxTotalSpendMinor, minImpressions: s.minImpressions, pauseCtrBelowPct: s.pauseCtrBelowPct, costPerLpvRatio: s.costPerLpvRatio }); }, [s.version, s.maxDailySpendMinor, s.maxTotalSpendMinor, s.minImpressions, s.pauseCtrBelowPct, s.costPerLpvRatio]);
   const rupees = (minor: number) => String(Math.round(minor / 100));
   const valid = form.maxDailySpendMinor >= 100 && form.maxTotalSpendMinor >= form.maxDailySpendMinor && form.minImpressions >= 100 && form.pauseCtrBelowPct >= 0 && form.pauseCtrBelowPct <= 10 && form.costPerLpvRatio >= 1.2 && form.costPerLpvRatio <= 10;
   const disabled = !owner || busy;
   return <form onSubmit={event => { event.preventDefault(); void run({ action: 'update_settings', expectedVersion: s.version, settings: form }); }}>
+    <div style={{ padding: '0 25px' }}><Notice tone="warning"><strong>Auto mode, pause and resume are not available yet.</strong><p>This page only reads from Meta, so make ad changes in Meta Ads Manager. Launching, pausing, resuming and auto mode come back only once each change is tied to the exact approved creative, fresh spend and account checks, and safe handling of overlapping or uncertain changes.</p></Notice></div>
     <div className="admin-control-grid">
-      <label className="admin-check-control" style={{ gridColumn: '1 / -1' }}><input type="checkbox" checked={form.autoMode} disabled={disabled} onChange={event => setForm({ ...form, autoMode: event.target.checked })} /><div><strong>Auto mode</strong><small>Every hour it syncs from Meta and acts on the recommendations marked "Auto mode can do this": it pauses ads over your caps or clearly losing to another ad, and resumes ads it paused once a cap clears. It never creates ads, never raises a budget, never switches on an ad you paused, and changes at most 4 ads per run. Every change is in the audit log.{!overview.meta.configured && ' Meta is not connected yet, so auto mode cannot act.'}</small></div></label>
       <label className="admin-field">Daily spend cap (₹)<input type="number" min={1} step={1} value={rupees(form.maxDailySpendMinor)} disabled={disabled} onChange={event => setForm({ ...form, maxDailySpendMinor: Math.round(Number(event.target.value) * 100) })} /><small>All ads together, per Meta account day. Meta can spend up to 75% over a day's budget, so keep this above your daily budgets.</small></label>
-      <label className="admin-field">Total spend cap (₹)<input type="number" min={1} step={1} value={rupees(form.maxTotalSpendMinor)} disabled={disabled} onChange={event => setForm({ ...form, maxTotalSpendMinor: Math.round(Number(event.target.value) * 100) })} /><small>Across every ad listed here. The campaign's own Meta spending limit still applies.</small></label>
-      <label className="admin-field">Impressions before judging an ad<input type="number" min={100} step={100} value={form.minImpressions} disabled={disabled} onChange={event => setForm({ ...form, minImpressions: Math.round(Number(event.target.value)) })} /><small>No pause recommendation before this, so early noise does not kill a good ad.</small></label>
-      <label className="admin-field">Pause below this link click-through rate (%)<input type="number" min={0} max={10} step={0.05} value={form.pauseCtrBelowPct} disabled={disabled} onChange={event => setForm({ ...form, pauseCtrBelowPct: Number(event.target.value) })} /></label>
-      <label className="admin-field">Pause when cost per landing page view is this many times the best ad<input type="number" min={1.2} max={10} step={0.1} value={form.costPerLpvRatio} disabled={disabled} onChange={event => setForm({ ...form, costPerLpvRatio: Number(event.target.value) })} /></label>
+      <label className="admin-field">Total spend cap (₹)<input type="number" min={1} step={1} value={rupees(form.maxTotalSpendMinor)} disabled={disabled} onChange={event => setForm({ ...form, maxTotalSpendMinor: Math.round(Number(event.target.value) * 100) })} /><small>Across every ad listed here. Only the campaign's own Meta spending limit actually stops spend.</small></label>
+      <label className="admin-field">Impressions before judging an ad<input type="number" min={100} step={100} value={form.minImpressions} disabled={disabled} onChange={event => setForm({ ...form, minImpressions: Math.round(Number(event.target.value)) })} /><small>No pause advice before this, so early noise does not kill a good ad.</small></label>
+      <label className="admin-field">Advise pausing below this link click-through rate (%)<input type="number" min={0} max={10} step={0.05} value={form.pauseCtrBelowPct} disabled={disabled} onChange={event => setForm({ ...form, pauseCtrBelowPct: Number(event.target.value) })} /></label>
+      <label className="admin-field">Advise pausing when cost per landing page view is this many times the best ad<input type="number" min={1.2} max={10} step={0.1} value={form.costPerLpvRatio} disabled={disabled} onChange={event => setForm({ ...form, costPerLpvRatio: Number(event.target.value) })} /></label>
     </div>
     <div className="admin-control-footer" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', padding: '0 25px 25px', alignItems: 'center' }}>
-      <button type="submit" className="admin-button admin-button--primary" disabled={disabled || !valid}>Save auto-mode settings</button>
-      <button type="button" className="admin-button" disabled={disabled || !overview.meta.configured} onClick={() => void run({ action: 'run_auto' })}><Wand2 size={14} aria-hidden="true" />Run the auto check now</button>
-      <span className="admin-cell-note">Version {s.version} · last auto check {utc(s.lastAutoRunAt)}{!owner && ' · only the owner can change these'}</span>
+      <button type="submit" className="admin-button admin-button--primary" disabled={disabled || !valid}>Save caps and thresholds</button>
+      <span className="admin-cell-note">Version {s.version} · these only shape the recommendations{!owner && ' · only the owner can change these'}</span>
     </div>
   </form>;
 }
@@ -153,10 +154,12 @@ export default function MarketingAdmin() {
   const owner = overview?.actor.role === 'owner';
   const connected = !!overview?.meta.configured;
   const ideaById = new Map(overview?.ideas.map(idea => [idea.id, idea]) ?? []);
-  const launchById = new Map(overview?.launches.map(launch => [launch.id, launch]) ?? []);
   const actionRecs = overview?.recommendations.filter(rec => rec.severity !== 'info') ?? [];
   const infoRecs = overview?.recommendations.filter(rec => rec.severity === 'info') ?? [];
-  const sections = [['summary', 'Summary'], ['recommendations', 'Recommendations'], ['launches', 'Meta ads'], ['ideas', 'Ideas'], ['queue', 'Production queue'], ['auto', 'Auto mode'], ['audit', 'Audit log']];
+  const totals = overview?.totals;
+  const allUnknown = !!overview?.launches.length && overview.launches.every(launch => !launch.totals);
+  const atLeast = (value: string) => allUnknown ? 'Unknown' : totals?.incompleteLaunches ? `At least ${value}` : value;
+  const sections = [['summary', 'Summary'], ['recommendations', 'Recommendations'], ['launches', 'Meta ads'], ['ideas', 'Ideas'], ['queue', 'Production queue'], ['controls', 'Caps and auto mode'], ['audit', 'Audit log']];
 
   return <div className="admin-workspace">
     <Helmet><title>Marketing · Private Jobvance</title><meta name="robots" content="noindex, nofollow, noarchive" /><meta name="googlebot" content="noindex, nofollow, noarchive" /></Helmet>
@@ -164,29 +167,30 @@ export default function MarketingAdmin() {
     <a href="#marketing-content" className="admin-skip">Skip to marketing content</a>
     <header className="admin-topbar"><Link to="/" className="admin-brand"><span><BriefcaseBusiness size={20} aria-hidden="true" /></span>Jobvance <small>private workspace</small></Link><div className="admin-topbar-links"><Badge><LockKeyhole size={12} aria-hidden="true" /> Private</Badge><Link to="/admin2">Founder overview</Link><Link to="/"><ArrowUpRight size={14} aria-hidden="true" /> Return to site</Link></div></header>
     <div className={`admin-layout ${overview ? '' : 'admin-layout--locked'}`}>
-      {overview && <aside className="admin-sidebar"><p className="admin-nav-label">Marketing</p><nav className="admin-section-nav" aria-label="Page sections">{sections.map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}</nav><div className="admin-sidebar-foot"><ShieldCheck size={19} aria-hidden="true" /><strong>Server-verified {overview.actor.role}</strong><p>Access is checked again for every request. Changes to ads need the owner role.</p></div></aside>}
+      {overview && <aside className="admin-sidebar"><p className="admin-nav-label">Marketing</p><nav className="admin-section-nav" aria-label="Page sections">{sections.map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}</nav><div className="admin-sidebar-foot"><ShieldCheck size={19} aria-hidden="true" /><strong>Server-verified {overview.actor.role}</strong><p>Access is checked again for every request. This page reads Meta and never changes an ad.</p></div></aside>}
       <main id="marketing-content" className="admin-main" tabIndex={-1}>
-        <div className="admin-page-head"><div><p className="admin-eyebrow">Private administration / Marketing</p><h1>Every idea, every ad, every rupee.</h1><p>From idea to production queue to live Meta ads, with recommendations and an auto mode that stays inside your caps.</p></div>
-          {overview && <div className="admin-head-controls"><button type="button" className="admin-button" disabled={busy || !connected} title={connected ? undefined : 'Connect Meta first'} onClick={() => void run({ action: 'sync' })}><RefreshCw size={15} aria-hidden="true" />Sync from Meta</button><button type="button" className="admin-icon-button" aria-label="Refresh marketing workspace" disabled={busy || loading} onClick={() => setRefresh(value => value + 1)}><RefreshCw size={17} aria-hidden="true" /></button></div>}</div>
+        <div className="admin-page-head"><div><p className="admin-eyebrow">Private administration / Marketing</p><h1>Every idea, every ad, every rupee.</h1><p>Ideas, the production queue and live Meta results in one read-only view. Pausing, resuming and auto mode are not available yet.</p></div>
+          {overview && <div className="admin-head-controls"><button type="button" className="admin-button" disabled={busy || !connected} title={connected ? 'Reads the latest figures from Meta. It changes nothing in Meta.' : 'Connect Meta first'} onClick={() => void run({ action: 'sync' })}><RefreshCw size={15} aria-hidden="true" />Sync now</button><button type="button" className="admin-icon-button" aria-label="Refresh marketing workspace" disabled={busy || loading} onClick={() => setRefresh(value => value + 1)}><RefreshCw size={17} aria-hidden="true" /></button></div>}</div>
         {(authLoading || loading) && !error && !overview && <div className="admin-loading" role="status"><span className="admin-loading-icon"><ShieldCheck size={25} aria-hidden="true" /></span><h2>{authLoading ? 'Checking your account…' : 'Verifying access…'}</h2><p>The marketing workspace opens after the server verifies this account's role.</p></div>}
         {error?.kind === 'forbidden' && !overview && <div className="admin-access-state" role="alert"><LockKeyhole size={30} aria-hidden="true" /><h2>Owner access required</h2><p>{error.message}</p><Link to="/dashboard" className="admin-button">Return to your workspace</Link></div>}
         {error && error.kind !== 'forbidden' && error.kind !== 'unauthenticated' && <Notice tone={error.kind === 'conflict' || error.kind === 'not_connected' ? 'warning' : 'error'} alert><strong>{error.kind === 'not_connected' ? 'Meta is not connected.' : error.kind === 'conflict' ? 'Not saved: something changed.' : 'This request could not be confirmed.'}</strong><p>{error.message}</p><button type="button" className="admin-button admin-button--small" disabled={busy} onClick={() => setRefresh(value => value + 1)}>Refresh</button></Notice>}
-        {overview && <>
+        {overview && totals && <>
           {notice && <Notice>{notice}</Notice>}
           {!connected && <Notice tone="warning"><strong>Meta is not connected yet.</strong><p>{overview.meta.message}</p></Notice>}
-          <div className="admin-evidence-line"><span><span className="admin-live-dot" aria-hidden="true" />Server overview · {utc(overview.generatedAt)}</span><span>Last Meta sync {utc(overview.settings.lastSyncAt)}</span></div>
-          <Panel id="summary" title="Summary" subtitle="Totals across every ad listed here, from the last sync with Meta.">
+          <div className="admin-evidence-line"><span><span className="admin-live-dot" aria-hidden="true" />Server overview · {utc(overview.generatedAt)}</span><span>Last complete Meta sync {utc(overview.settings.lastSyncAt)}</span><span><Eye size={13} aria-hidden="true" /> Read-only</span></div>
+          <Panel id="summary" title="Summary" subtitle="Totals across every ad listed here, from the last complete read of each ad.">
             <div className="admin-metrics">
-              <article className="admin-metric"><div className="admin-metric-label">Spend so far</div><strong className="admin-metric-value">{inr(overview.totals.spendMinor, overview.totals.currency)}</strong><div className="admin-metric-basis">of {inr(overview.settings.maxTotalSpendMinor, overview.totals.currency)} total cap · {inr(overview.totals.todaySpendMinor, overview.totals.currency)} today</div></article>
-              <article className="admin-metric"><div className="admin-metric-label">Impressions</div><strong className="admin-metric-value">{overview.totals.impressions.toLocaleString('en-IN')}</strong><div className="admin-metric-basis">{overview.totals.activeLaunches} ad{overview.totals.activeLaunches === 1 ? '' : 's'} switched on</div></article>
-              <article className="admin-metric"><div className="admin-metric-label">Landing page views</div><strong className="admin-metric-value">{overview.totals.landingPageViews.toLocaleString('en-IN')}</strong><div className="admin-metric-basis">{overview.totals.landingPageViews ? `${inr(Math.round(overview.totals.spendMinor / overview.totals.landingPageViews), overview.totals.currency)} each` : 'none yet'}</div></article>
+              <article className="admin-metric"><div className="admin-metric-label">Spend so far</div><strong className="admin-metric-value">{atLeast(inr(totals.spendMinor, totals.currency))}</strong><div className="admin-metric-basis">of {inr(overview.settings.maxTotalSpendMinor, totals.currency)} total cap · {allUnknown ? 'today unknown' : `${totals.incompleteLaunches ? 'at least ' : ''}${inr(totals.todaySpendMinor, totals.currency)} today`}</div></article>
+              <article className="admin-metric"><div className="admin-metric-label">Impressions</div><strong className="admin-metric-value">{atLeast(totals.impressions.toLocaleString('en-IN'))}</strong><div className="admin-metric-basis">{totals.activeLaunches} ad{totals.activeLaunches === 1 ? '' : 's'} active at the last read</div></article>
+              <article className="admin-metric"><div className="admin-metric-label">Landing page views</div><strong className="admin-metric-value">{atLeast(totals.landingPageViews.toLocaleString('en-IN'))}</strong><div className="admin-metric-basis">{allUnknown ? 'cost unknown' : totals.landingPageViews ? `${inr(Math.round(totals.spendMinor / totals.landingPageViews), totals.currency)} each` : 'none yet'}</div></article>
             </div>
+            {totals.incompleteLaunches > 0 && <div style={{ padding: '0 25px 25px' }}><Notice tone="warning"><strong>Figures for {totals.incompleteLaunches} ad{totals.incompleteLaunches === 1 ? ' are' : 's are'} unknown or stale.</strong><p>Unknown figures are left out rather than counted as zero, so the true totals may be higher. Sync now, or check Meta Ads Manager.</p></Notice></div>}
           </Panel>
-          <Panel id="recommendations" title="Recommendations" subtitle="Rules over your caps and live results. They are suggestions until you or auto mode act on them.">
-            {overview.recommendations.length === 0 ? <Empty title="Nothing to do right now">No ad needs a change. Sync from Meta for the latest figures.</Empty> : <ul style={{ display: 'grid', gap: 10, padding: '0 25px 25px', listStyle: 'none', margin: 0 }}>{[...actionRecs, ...infoRecs].map(rec => <Recommendation key={rec.id} rec={rec} launch={rec.launchId ? launchById.get(rec.launchId) : undefined} owner={owner} connected={connected} busy={busy} run={run} />)}</ul>}
+          <Panel id="recommendations" title="Recommendations" subtitle="Advice from your caps and the latest complete figures. Nothing is applied automatically: make any change in Meta Ads Manager.">
+            {overview.recommendations.length === 0 ? <Empty title="Nothing to do right now">No ad needs a change. Sync now for the latest figures.</Empty> : <ul style={{ display: 'grid', gap: 10, padding: '0 25px 25px', listStyle: 'none', margin: 0 }}>{[...actionRecs, ...infoRecs].map(rec => <Recommendation key={rec.id} rec={rec} />)}</ul>}
           </Panel>
-          <Panel id="launches" title="Meta ads" subtitle="Each row is one ad and its ad set in Meta. Buttons change Meta directly after you confirm.">
-            {overview.launches.length === 0 ? <Empty title="No launches yet">Launches appear here once an approved idea is set up in Meta.</Empty> : <div className="admin-table-scroll"><table><thead><tr><th>Ad</th><th>Status</th><th>Budget / day</th><th>Spend</th><th>Impressions</th><th>Link CTR</th><th>Landing page views</th><th>Control</th></tr></thead><tbody>{overview.launches.map(launch => <LaunchRow key={launch.id} launch={launch} idea={ideaById.get(launch.ideaId)} owner={owner} connected={connected} busy={busy} run={run} />)}</tbody></table></div>}
+          <Panel id="launches" title="Meta ads" subtitle="Each row is one ad as read from Meta. There are no pause or resume buttons yet; change ads in Meta Ads Manager.">
+            {overview.launches.length === 0 ? <Empty title="No launches yet">Launches appear here once an approved idea is set up in Meta.</Empty> : <div className="admin-table-scroll"><table><thead><tr><th>Ad</th><th>Live status</th><th>Budget / day</th><th>Spend</th><th>Impressions</th><th>Link clicks</th><th>Link CTR</th><th>Landing page views</th><th>Cost per view</th><th>Figures</th></tr></thead><tbody>{overview.launches.map(launch => <LaunchRow key={launch.id} launch={launch} idea={ideaById.get(launch.ideaId)} />)}</tbody></table></div>}
           </Panel>
           <Panel id="ideas" title="Ideas" subtitle="Every concept, script and version the agency has made, with its approved files.">
             <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', padding: '0 25px 25px' }}><NewIdea busy={busy} run={run} />{overview.ideas.map(idea => <IdeaCard key={idea.id} idea={idea} overview={overview} busy={busy} run={run} />)}</div>
@@ -194,13 +198,13 @@ export default function MarketingAdmin() {
           <Panel id="queue" title="Production queue" subtitle="Ideas sent to ad creation. The ad team picks them up and asks for your approval before launch.">
             {overview.requests.length === 0 ? <Empty title="The queue is empty">Use "Send to ad creation" on an idea to queue it.</Empty> : <div className="admin-table-scroll"><table><thead><tr><th>Idea</th><th>Status</th><th>Notes</th><th>Queued</th></tr></thead><tbody>{overview.requests.map(request => <tr key={request.id}><td><strong>{ideaById.get(request.ideaId)?.title ?? 'Unknown idea'}</strong></td><td><Badge tone={request.status === 'done' ? 'good' : request.status === 'cancelled' ? 'neutral' : 'warning'}>{readable(request.status)}</Badge></td><td>{request.note || '—'}</td><td>{utc(request.createdAt)}</td></tr>)}</tbody></table></div>}
           </Panel>
-          <Panel id="auto" title="Auto mode" subtitle="Hands-off running, inside hard limits you set." aside={<Badge tone={overview.settings.autoMode ? 'good' : 'neutral'}><Megaphone size={12} aria-hidden="true" /> {overview.settings.autoMode ? 'On' : 'Off'}</Badge>}>
-            <AutoMode overview={overview} owner={owner} busy={busy} run={run} />
+          <Panel id="controls" title="Caps and auto mode" subtitle="Your caps and thresholds shape the recommendations above." aside={<Badge tone="neutral">Auto mode: not available yet</Badge>}>
+            <Thresholds overview={overview} owner={owner} busy={busy} run={run} />
           </Panel>
-          <Panel id="audit" title="Audit log" subtitle="Every change, by you or auto mode. Entries cannot be edited or deleted.">
-            {overview.audit.length === 0 ? <Empty title="No changes yet">Changes appear here as they happen.</Empty> : <ul className="admin-audit-list">{overview.audit.map(entry => <li key={entry.id}><span className="admin-audit-dot" aria-hidden="true" /><div><strong>{readable(entry.action)}</strong> · {entry.actorId ? (entry.actorId === overview.actor.id ? 'you' : 'another admin') : 'auto mode'} · {utc(entry.at)}<span className="admin-cell-note">{Object.entries(entry.details).map(([key, value]) => `${key}: ${String(value)}`).join(' · ')}</span></div></li>)}</ul>}
+          <Panel id="audit" title="Audit log" subtitle="Every sync and every change on this page. Entries cannot be edited or deleted.">
+            {overview.audit.length === 0 ? <Empty title="No changes yet">Changes appear here as they happen.</Empty> : <ul className="admin-audit-list">{overview.audit.map(entry => <li key={entry.id}><span className="admin-audit-dot" aria-hidden="true" /><div><strong>{readable(entry.action)}</strong> · {entry.actorId ? (entry.actorId === overview.actor.id ? 'you' : 'another admin') : 'system'} · {utc(entry.at)}<span className="admin-cell-note">{Object.entries(entry.details).map(([key, value]) => `${key}: ${String(value)}`).join(' · ')}</span></div></li>)}</ul>}
           </Panel>
-          <footer className="admin-workspace-footer"><LockKeyhole size={13} aria-hidden="true" />Private marketing workspace · figures from Meta's last sync · every change is audited</footer>
+          <footer className="admin-workspace-footer"><LockKeyhole size={13} aria-hidden="true" />Private marketing workspace · reads from Meta, never changes it · every change here is audited</footer>
         </>}
       </main>
     </div>
