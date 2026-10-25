@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-25",
+  "site": "https://jobvance.io",
+  "publicVersion": 56,
+  "runtimeSource": "460ca6ad73e129469284fd7057b9603d3be5d2f6",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/30",
+  "reviewedHead": "1a941bdc8bc267c8a367122161f69083ad96e0d7",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f21faf0dc2188191a77540f26a1c18a7",
+  "deploymentId": "appgdep_6ade3d556ff8819199814ced406fef15",
+  "status": "succeeded",
+  "deployedAt": "2026-10-25T17:33:34.066766+00:00",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000f20882079fb767427357a997",
+    "content_hash": "sha256:d0b6d773f7cf845369db88bf7f3efd200871733fedcbf059798c31ea1851639e",
+    "size_bytes": 15360000,
+    "file_count": 143
+  },
+  "change": {
+    "condition": "pilot.enrolled === false and activeUsers >= maxUsers",
+    "locations": [
+      "overview full card",
+      "primary next step",
+      "disabled manual preparation note",
+      "legacy and saved-CV schedule panels",
+      "saved-CV preparation",
+      "current LOOP_PILOT_FULL error"
+    ],
+    "starter": {
+      "name": "Starter",
+      "usdMonthlyBase": 29,
+      "path": "/pricing?loopPlan=weekly",
+      "checkoutAutomatic": false
+    },
+    "copyCorrection": "Removed immediate paid-place guarantee; paid capacity is checked by the existing billing service.",
+    "enrolledUsers": "Prompt not shown; existing access checks retained."
+  },
+  "validation": {
+    "tests": 3288,
+    "files": 180,
+    "concurrency": 2,
+    "focused": 121,
+    "focusedOverlap": true,
+    "appTypeScript": "passed",
+    "changedFileLint": {
+      "errors": 0,
+      "warnings": 3,
+      "note": "Three existing untouched-hook warnings"
+    },
+    "inheritedCi": "PR run40215363275 failed with the existing repository-wide95lint errors/50warnings; not called green.",
+    "productionBuild": {
+      "publicPages": 37,
+      "guideArticles": 20,
+      "compressedBytes": 2947956,
+      "compressedLimitBytes": 3145728,
+      "hostingGroups": 12
+    },
+    "localBrowser": {
+      "components": "Actual overview/prompt/schedule and actual Pricing page under isolated synthetic capacity data/guest auth; actual Job Loop and authenticated billing seams are separately covered by focused tests.",
+      "desktop": {
+        "width": 1920,
+        "documentWidth": 1905
+      },
+      "mobile": {
+        "width": 390,
+        "height": 844,
+        "documentWidth": 375,
+        "ctaHeight": 44
+      },
+      "starterLinkClicked": true,
+      "guestReturn": "/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD",
+      "indiaReturn": "/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DIN%26currency%3DINR",
+      "viewportReset": true
+    },
+    "live": {
+      "at": "2026-10-25T17:33:59.630Z",
+      "privateRoutes": 11,
+      "publicRoutesOrFiles": 4,
+      "exactJavaScript": 66,
+      "exactCss": 15,
+      "unauthorized401": 2,
+      "existingOwnerLoopLoaded": true,
+      "ownerObservedAt": "2026-10-25T17:34:48.011Z",
+      "fullCapacityCondition": "Isolated data only; no production seats filled or paid entitlement created.",
+      "htmlNormalization": "Only the previously observed complete appended Cloudflare script template; no live ETag claimed."
+    }
+  },
+  "scope": {
+    "frontendOnly": true,
+    "migrations": 0,
+    "edgeDeployments": 0,
+    "merchantChanges": false,
+    "capacityChanges": false,
+    "priceChanges": false,
+    "candidateWrites": false,
+    "adChanges": false,
+    "providerGeneration": false,
+    "existingConsentsAndAccessChecks": "unchanged",
+    "broaderPrivacyRiskAudit": "set aside for this functional release"
+  },
+  "rollback": {
+    "tag": "jobvance-before-pilot-full-upgrade-2026-10-25",
+    "source": "154ec3e9383fa39b26b2d7034e59c1aca705f182",
+    "savedVersion55": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ed1f44cb4d70819195e16ba878c0b8de",
+    "backend": "Existing jobvance-admin25 and all other handlers unchanged",
+    "note": "Source/site rollback is separate from database/files/merchant restoration."
+  }
+}
