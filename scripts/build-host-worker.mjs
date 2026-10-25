@@ -112,7 +112,7 @@ export default {fetch(request){
   if(path===null)return reply(request,404,'Not found.');
   const withoutSlash=path.length>1?path.replace(/\\/+$/,''):path;
   if(path!==withoutSlash&&(PUBLIC_PATHS.has(withoutSlash)||CLIENT_PATHS.has(withoutSlash)))return reply(request,308,'Continue at the canonical address.',{Location:withoutSlash+url.search});
-  if(REDIRECTS[path])return reply(request,308,'Continue at the current page.',{Location:REDIRECTS[path]});
+  if(REDIRECTS[withoutSlash])return reply(request,308,'Continue at the current page.',{Location:REDIRECTS[withoutSlash]});
   if(path.startsWith('/blog/')){const guide='/guides/'+path.slice(6);return reply(request,308,'Continue at the guide library.',{Location:PUBLIC_PATHS.has(guide)?guide:'/guides'});}
   let served=path,asset=ASSETS[path];
   if(!asset){
