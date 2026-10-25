@@ -14,7 +14,7 @@ const NEW_ACCOUNT_WINDOW = 24 * 60 * 60 * 1000;
 const measuredPaths = new Set(['/', '/onboarding', '/auth', '/job-loop', '/pricing', '/how-it-works', '/faq', '/about', '/contact', '/privacy', '/terms', '/refund', '/help', '/guides', '/walkthroughs', '/for-students', '/for-mba', '/for-career-switchers']);
 const europeanZones = /^(Europe\/|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
 
-type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean };
+type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean; jobvanceLastPage?: string };
 declare global { interface Window { fbq?: Fbq; _fbq?: Fbq } interface Navigator { globalPrivacyControl?: boolean } }
 
 const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid'];
@@ -63,17 +63,18 @@ function ensurePixel(): Fbq | null {
   return fbq;
 }
 
-/** Called on each page change. Only the landing page view is sent (Meta drops repeat manual
- * PageViews in one page load), and a waiting sign-up is sent only from a public page. */
+// The signed-in account last seen, and its key once confirmed new; a sign-out or switch clears both.
+let currentAccount: string | null = null;
+let currentKey: string | null = null;
+
+/** Called on each page change: a PageView for public pages only, then any waiting sign-up.
+ * `trackSingle` avoids fbevents' one-PageView-per-document rule, as Meta's GTM template does. */
 export function trackMetaPage(pathname: string): void {
   if (!isMeasuredPath(pathname) || !isMeasuredPath(window.location.pathname)) return;
-  let fbq = window.fbq ?? null;
-  if (!fbq) {
-    fbq = ensurePixel();
-    if (!fbq) return;
-    fbq('track', 'PageView');
-  }
-  if (adsMeasurementAllowed()) flushRegistration(fbq);
+  const fbq = ensurePixel();
+  if (!fbq) return;
+  if (fbq.jobvanceLastPage !== pathname) { fbq.jobvanceLastPage = pathname; fbq('trackSingle', META_PIXEL_ID, 'PageView'); }
+  flushRegistration(fbq);
 }
 
 async function accountKey(userId: string): Promise<string> {
@@ -88,31 +89,41 @@ function sentKeys(): string[] {
 function flushRegistration(fbq: Fbq): void {
   let key: string | null = null;
   try { key = sessionStorage.getItem(PENDING_KEY); sessionStorage.removeItem(PENDING_KEY); } catch { return; }
-  if (!key || !/^[a-f\d]{32}$/.test(key) || sentKeys().includes(key)) return;
+  // A waiting sign-up belongs only to the account still signed in.
+  if (!key || key !== currentKey || sentKeys().includes(key)) return;
   // The server copy uses the same event ID, so Meta counts this sign-up once.
   fbq('track', 'CompleteRegistration', {}, { eventID: `reg_${key}` });
   try { localStorage.setItem(SENT_KEY, JSON.stringify([...sentKeys(), key].slice(-20))); } catch { /* may repeat on this device only */ }
-  sendServerRegistration();
+  sendServerRegistration(key);
 }
 
 const metaCookie = (name: '_fbp' | '_fbc') => document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1);
 
-/** Asks the meta-conversions function for the server copy once Meta has set its cookies. */
-function sendServerRegistration(delay = 2000): void {
+/** Asks the meta-conversions function for the server copy once Meta has set its cookies.
+ * Cancelled if the visitor signs out, switches account or opts out during the wait. */
+function sendServerRegistration(key: string, delay = 2000): void {
   const pageUrl = `${window.location.origin}${window.location.pathname}`; // the public page, even if the visitor moves on
   window.setTimeout(() => {
-    const body = { pageUrl, fbp: metaCookie('_fbp'), fbc: metaCookie('_fbc') };
-    void supabase.functions.invoke('meta-conversions', { body }).catch(() => undefined);
+    if (key !== currentKey || !adsMeasurementAllowed()) return;
+    void supabase.auth.getSession().then(async ({ data }) => {
+      const session = data.session;
+      if (!session || await accountKey(session.user.id) !== key || key !== currentKey || !adsMeasurementAllowed()) return;
+      const body = { pageUrl, fbp: metaCookie('_fbp'), fbc: metaCookie('_fbc') };
+      await supabase.functions.invoke('meta-conversions', { body, headers: { Authorization: `Bearer ${session.access_token}` } });
+    }).catch(() => undefined);
   }, delay);
 }
 
 /** A signed-in account created in the last day counts as a sign-up once per device. */
 export async function noteAccountForMeta(user: { id: string; created_at?: string } | null | undefined, now = Date.now()): Promise<void> {
+  if ((user?.id ?? null) !== currentAccount) { currentAccount = user?.id ?? null; currentKey = null; }
   if (!user?.created_at || !adsMeasurementAllowed()) return;
   const created = Date.parse(user.created_at);
   if (!Number.isFinite(created) || now - created > NEW_ACCOUNT_WINDOW || created - now > 5 * 60 * 1000) return;
   const key = await accountKey(user.id);
-  if (sentKeys().includes(key)) return;
+  // Signed out or switched account while hashing: this result is stale.
+  if (currentAccount !== user.id || sentKeys().includes(key)) return;
+  currentKey = key;
   try { sessionStorage.setItem(PENDING_KEY, key); } catch { return; }
   // Sent now from a public page; otherwise on the next one (never from a private page).
   if (isMeasuredPath(window.location.pathname)) { const fbq = ensurePixel(); if (fbq) flushRegistration(fbq); }
