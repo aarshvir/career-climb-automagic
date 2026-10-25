@@ -4,7 +4,7 @@ import { trackMetaPage } from '@/lib/meta-pixel';
 
 /** Starts the Meta Pixel on a public landing page and sends any waiting sign-up event. */
 export default function MetaPixelPages() {
-  const { pathname } = useLocation();
-  useEffect(() => { trackMetaPage(pathname); }, [pathname]);
+  const { pathname, search, hash } = useLocation();
+  useEffect(() => { trackMetaPage(pathname); }, [pathname, search, hash]);
   return null;
 }

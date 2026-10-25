@@ -4,17 +4,32 @@
 // history tracking is off, so nothing is reported as the visitor moves into private pages.
 // It never sends CV, vacancy, document, payment or email data.
 import { supabase } from '@/integrations/supabase/client';
+import { cvVariantSessionIdentity } from '@/lib/loop-cv-variant-recovery';
 
 export const META_PIXEL_ID = '1912745166266087';
 const OPT_OUT_KEY = 'jobvance_ads_opt_out_v1';
 const SENT_KEY = 'jobvance_meta_registrations_v1';
-const PENDING_KEY = 'jobvance_meta_registration_pending_v1';
 const NEW_ACCOUNT_WINDOW = 24 * 60 * 60 * 1000;
+type RegistrationScope = { owner: string; sessionId: string | null; epoch: number; key: string };
+let authority = { owner: null as string | null, sessionId: null as string | null, epoch: 0 };
+let pendingRegistration: RegistrationScope | null = null;
+let pageOptOut: boolean | undefined;
+const timers = new Set<number>();
+
+function revokePending(): void {
+  authority = { ...authority, epoch: authority.epoch + 1 };
+  pendingRegistration = null;
+  for (const timer of timers) window.clearTimeout(timer);
+  timers.clear();
+  // Old deployments stored a pending hash. It grants no authority after refresh.
+  try { sessionStorage.removeItem('jobvance_meta_registration_pending_v1'); } catch { /* no recovery */ }
+}
+const current = (scope: RegistrationScope) => authority.owner === scope.owner && authority.sessionId === scope.sessionId && authority.epoch === scope.epoch && adsMeasurementAllowed();
 
 const measuredPaths = new Set(['/', '/onboarding', '/auth', '/job-loop', '/pricing', '/how-it-works', '/faq', '/about', '/contact', '/privacy', '/terms', '/refund', '/help', '/guides', '/walkthroughs', '/for-students', '/for-mba', '/for-career-switchers']);
 const europeanZones = /^(Europe\/|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
 
-type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean };
+type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean; jobvanceLastPage?: string };
 declare global { interface Window { fbq?: Fbq; _fbq?: Fbq } interface Navigator { globalPrivacyControl?: boolean } }
 
 const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid'];
@@ -33,23 +48,46 @@ export function isMeasuredPath(pathname: string): boolean {
   return measuredPaths.has(path) || /^\/guides\/[a-z\d-]{1,120}$/.test(path);
 }
 
+/** Public route names do not make auth/payment references in their query safe. */
+function safePublicUrl(value: URL): boolean {
+  if (!isMeasuredPath(value.pathname) || value.hash && !/^#[a-z][a-z\d-]{0,80}$/i.test(value.hash)) return false;
+  for (const [key, content] of value.searchParams) {
+    if (attributionKeys.includes(key) && content.length <= 300 && ![...content].some(char => char.charCodeAt(0) < 32)) continue;
+    if (key === 'mode' && /^(signup|signin|login)$/.test(content)) continue;
+    if (key === 'next' && ['/', '/onboarding', '/loop', '/dashboard', '/applications'].includes(content)) continue;
+    if (['country', 'currency', 'plan', 'lang'].includes(key) && /^[a-z\d-]{2,30}$/i.test(content)) continue;
+    return false;
+  }
+  return true;
+}
+function safeMeasurementContext(): boolean {
+  if (!safePublicUrl(new URL(window.location.href))) return false;
+  try {
+    const referrer = document.referrer && new URL(document.referrer);
+    return !referrer || referrer.origin !== window.location.origin || safePublicUrl(referrer);
+  } catch { return false; }
+}
+
 export function adsOptedOut(): boolean {
-  try { return localStorage.getItem(OPT_OUT_KEY) === '1'; } catch { return false; }
+  if (pageOptOut === true) return true;
+  try { return localStorage.getItem(OPT_OUT_KEY) === '1'; } catch { return pageOptOut !== false; }
 }
 
 /** Visitors in Europe, with a do-not-share browser signal or a saved opt-out are never measured. */
 export function adsMeasurementAllowed(): boolean {
   if (typeof window === 'undefined' || navigator.globalPrivacyControl === true || adsOptedOut()) return false;
-  try { return !europeanZones.test(Intl.DateTimeFormat().resolvedOptions().timeZone ?? ''); } catch { return true; }
+  try { const zone = Intl.DateTimeFormat().resolvedOptions().timeZone; return !!zone && !europeanZones.test(zone); } catch { return false; }
 }
 
 export function setAdsOptOut(optOut: boolean): void {
+  pageOptOut = optOut;
+  revokePending();
   try { if (optOut) localStorage.setItem(OPT_OUT_KEY, '1'); else localStorage.removeItem(OPT_OUT_KEY); } catch { /* the choice applies to this page only */ }
-  window.fbq?.('consent', optOut ? 'revoke' : 'grant');
+  window.fbq?.('consent', adsMeasurementAllowed() ? 'grant' : 'revoke');
 }
 
 function ensurePixel(): Fbq | null {
-  if (!import.meta.env.PROD || !adsMeasurementAllowed()) return null;
+  if (!import.meta.env.PROD || !adsMeasurementAllowed() || !safeMeasurementContext()) return null;
   if (window.fbq) return window.fbq;
   const fbq = function (...args: unknown[]) { if (fbq.callMethod) fbq.callMethod(...args); else fbq.queue.push(args); } as Fbq;
   fbq.push = fbq; fbq.loaded = true; fbq.version = '2.0'; fbq.queue = [];
@@ -63,17 +101,16 @@ function ensurePixel(): Fbq | null {
   return fbq;
 }
 
-/** Called on each page change. Only the landing page view is sent (Meta drops repeat manual
- * PageViews in one page load), and a waiting sign-up is sent only from a public page. */
+/** Manual public PageViews use Meta's trackSingle API with automatic history disabled. */
 export function trackMetaPage(pathname: string): void {
-  if (!isMeasuredPath(pathname) || !isMeasuredPath(window.location.pathname)) return;
-  let fbq = window.fbq ?? null;
-  if (!fbq) {
-    fbq = ensurePixel();
-    if (!fbq) return;
-    fbq('track', 'PageView');
+  if (pathname !== window.location.pathname || !isMeasuredPath(pathname) || !safeMeasurementContext()) return;
+  const fbq = ensurePixel();
+  if (!fbq) return;
+  if (fbq.jobvanceLastPage !== pathname) {
+    fbq.jobvanceLastPage = pathname;
+    fbq('trackSingle', META_PIXEL_ID, 'PageView');
   }
-  if (adsMeasurementAllowed()) flushRegistration(fbq);
+  flushRegistration(fbq);
 }
 
 async function accountKey(userId: string): Promise<string> {
@@ -86,34 +123,50 @@ function sentKeys(): string[] {
 }
 
 function flushRegistration(fbq: Fbq): void {
-  let key: string | null = null;
-  try { key = sessionStorage.getItem(PENDING_KEY); sessionStorage.removeItem(PENDING_KEY); } catch { return; }
-  if (!key || !/^[a-f\d]{32}$/.test(key) || sentKeys().includes(key)) return;
+  const scope = pendingRegistration;
+  if (!scope || !current(scope) || !safeMeasurementContext() || sentKeys().includes(scope.key)) return;
+  pendingRegistration = null;
+  const { key } = scope;
   // The server copy uses the same event ID, so Meta counts this sign-up once.
   fbq('track', 'CompleteRegistration', {}, { eventID: `reg_${key}` });
   try { localStorage.setItem(SENT_KEY, JSON.stringify([...sentKeys(), key].slice(-20))); } catch { /* may repeat on this device only */ }
-  sendServerRegistration();
+  sendServerRegistration(scope);
 }
 
 const metaCookie = (name: '_fbp' | '_fbc') => document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1);
 
 /** Asks the meta-conversions function for the server copy once Meta has set its cookies. */
-function sendServerRegistration(delay = 2000): void {
+function sendServerRegistration(scope: RegistrationScope, delay = 2000): void {
   const pageUrl = `${window.location.origin}${window.location.pathname}`; // the public page, even if the visitor moves on
-  window.setTimeout(() => {
-    const body = { pageUrl, fbp: metaCookie('_fbp'), fbc: metaCookie('_fbc') };
-    void supabase.functions.invoke('meta-conversions', { body }).catch(() => undefined);
+  const timer = window.setTimeout(() => {
+    timers.delete(timer);
+    if (!current(scope) || !scope.sessionId) return;
+    void (async () => {
+      const { data, error } = await supabase.auth.getSession();
+      const session = data.session;
+      if (error || !session || !current(scope) || session.user.id !== scope.owner || cvVariantSessionIdentity(session) !== scope.sessionId) return;
+      const body = { pageUrl, fbp: metaCookie('_fbp'), fbc: metaCookie('_fbc') };
+      // Bind the verified original session; a later SDK auth switch cannot substitute another owner.
+      await supabase.functions.invoke('meta-conversions', { body, headers: { Authorization: `Bearer ${session.access_token}` } });
+    })().catch(() => undefined);
   }, delay);
+  timers.add(timer);
 }
 
 /** A signed-in account created in the last day counts as a sign-up once per device. */
-export async function noteAccountForMeta(user: { id: string; created_at?: string } | null | undefined, now = Date.now()): Promise<void> {
+export async function noteAccountForMeta(user: { id: string; created_at?: string } | null | undefined, now = Date.now(), sessionId: string | null = null): Promise<void> {
+  const owner = user?.id ?? null;
+  if (authority.owner !== owner || authority.sessionId !== sessionId) {
+    revokePending();
+    authority = { owner, sessionId, epoch: authority.epoch };
+  }
   if (!user?.created_at || !adsMeasurementAllowed()) return;
   const created = Date.parse(user.created_at);
   if (!Number.isFinite(created) || now - created > NEW_ACCOUNT_WINDOW || created - now > 5 * 60 * 1000) return;
+  const original = { owner: user.id, sessionId, epoch: authority.epoch, key: '' };
   const key = await accountKey(user.id);
-  if (sentKeys().includes(key)) return;
-  try { sessionStorage.setItem(PENDING_KEY, key); } catch { return; }
+  if (!current(original) || sentKeys().includes(key)) return;
+  pendingRegistration = { ...original, key };
   // Sent now from a public page; otherwise on the next one (never from a private page).
   if (isMeasuredPath(window.location.pathname)) { const fbq = ensurePixel(); if (fbq) flushRegistration(fbq); }
 }

@@ -3,10 +3,12 @@ import { adAttributionQuery, adsMeasurementAllowed, isMeasuredPath, META_PIXEL_I
 import { registrationEventId } from '../../supabase/functions/_shared/meta-conversions';
 
 const invoke = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: { sent: false }, error: null })));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke } } }));
+const getSession = vi.hoisted(() => vi.fn());
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke }, auth: { getSession } } }));
 
 const calls = () => (window.fbq?.queue ?? []).map(args => [...args]);
 const events = (name: string) => calls().filter(args => args[0] === 'track' && args[1] === name);
+const pageViews = () => calls().filter(args => args[0] === 'trackSingle' && args[1] === META_PIXEL_ID && args[2] === 'PageView');
 const zone = (timeZone: string) => vi.spyOn(Intl, 'DateTimeFormat').mockReturnValue({ resolvedOptions: () => ({ timeZone }) } as Intl.DateTimeFormat);
 
 beforeEach(() => {
@@ -16,6 +18,8 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/');
 });
 afterEach(() => {
+  void noteAccountForMeta(null);
+  setAdsOptOut(false);
   vi.unstubAllEnvs(); vi.restoreAllMocks();
   delete window.fbq; delete window._fbq;
   document.querySelectorAll('script[src*="fbevents"]').forEach(script => script.remove());
@@ -28,14 +32,23 @@ describe('Meta Pixel measurement boundaries', () => {
     for (const path of ['/auth/callback', '/auth/reset', '/auth/forgot-password', '/loop', '/check', '/dashboard', '/applications', '/admin', '/admin2', '/guides/a/b']) expect(isMeasuredPath(path)).toBe(false);
   });
 
-  it('loads once, reports only the landing page and turns off automatic collection and history tracking', () => {
+  it('loads once, reports public page transitions and turns off automatic collection and history tracking', () => {
     trackMetaPage('/');
     window.history.pushState(null, '', '/pricing');
     trackMetaPage('/pricing');
     expect(document.querySelectorAll('script[src="https://connect.facebook.net/en_US/fbevents.js"]')).toHaveLength(1);
     expect(window.fbq?.disablePushState).toBe(true);
     expect(calls().slice(0, 2)).toEqual([['set', 'autoConfig', false, META_PIXEL_ID], ['init', META_PIXEL_ID]]);
-    expect(events('PageView')).toHaveLength(1);
+    expect(pageViews()).toHaveLength(2);
+    expect(events('PageView')).toHaveLength(0);
+  });
+
+  it('does not send another public PageView after opt-out or a duplicate router notification', () => {
+    trackMetaPage('/'); trackMetaPage('/');
+    expect(pageViews()).toHaveLength(1);
+    setAdsOptOut(true);
+    window.history.pushState(null, '', '/pricing'); trackMetaPage('/pricing');
+    expect(pageViews()).toHaveLength(1);
   });
 
   it('sends nothing after the visitor moves from a public page into a private one', async () => {
@@ -116,10 +129,13 @@ describe('Meta sign-up event', () => {
       invoke.mockClear();
       document.cookie = '_fbp=fb.1.1729849200000.1234567890';
       window.history.replaceState(null, '', '/auth?mode=signup&utm_source=instagram');
-      await noteAccountForMeta(user, now);
+      const sessionId = '22222222-2222-4222-8222-222222222222';
+      const access_token = `fixture.${btoa(JSON.stringify({ sub: user.id, session_id: sessionId }))}.fixture`;
+      getSession.mockResolvedValue({ data: { session: { user, access_token } }, error: null });
+      await noteAccountForMeta(user, now, sessionId);
       expect(invoke).not.toHaveBeenCalled();
-      vi.advanceTimersByTime(2000);
-      expect(invoke).toHaveBeenCalledWith('meta-conversions', { body: { pageUrl: `${window.location.origin}/auth`, fbp: 'fb.1.1729849200000.1234567890', fbc: undefined } });
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(invoke).toHaveBeenCalledWith('meta-conversions', { body: { pageUrl: `${window.location.origin}/auth`, fbp: 'fb.1.1729849200000.1234567890', fbc: undefined }, headers: { Authorization: `Bearer ${access_token}` } });
       expect(events('CompleteRegistration')[0][3]).toEqual({ eventID: await registrationEventId(user.id) });
     } finally { vi.useRealTimers(); document.cookie = '_fbp=; expires=Thu, 01 Jan 1970 00:00:00 GMT'; }
   });
