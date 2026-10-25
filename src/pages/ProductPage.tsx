@@ -46,6 +46,16 @@ function StartLink({ children = "Start my Job Loop", light = false, to = "/onboa
   return <Link to={to} className={`product-button${light ? " product-button--light" : ""}`}>{children}<ArrowRight size={18} aria-hidden="true" /></Link>;
 }
 
+// Crawlable paths from the home page into the guides and audience pages (titles match career-guides.ts).
+const homeGuides: [string, string][] = [
+  ["cv-job-description-evidence", "Compare your CV with a job description using evidence"],
+  ["achievements-without-numbers", "How to write CV achievements without numbers"],
+  ["cv-pdf-or-docx", "Should you send your CV as PDF or DOCX?"],
+  ["role-filtering-before-applying", "Filter roles before spending time on an application"],
+  ["application-tracking-follow-up", "How to track applications and plan follow-ups"],
+  ["interview-stories-from-cv", "Turn your CV into clear interview stories"],
+];
+
 function HomePage() {
   return <>
     <section className="product-shell product-loop-intro">
@@ -59,6 +69,11 @@ function HomePage() {
     <section className="product-shell product-get-started" aria-labelledby="loop-available-title">
       <div><p className="product-eyebrow">WHAT YOU CAN USE TODAY</p><h2 id="loop-available-title">A recurring search, with a clear result for every run.</h2><p>Choose weekly, three-times-weekly or daily searches from connected employer feeds, or add a vacancy yourself. Select a saved CV and confirm the AI provider once for recurring preparation. Your dashboard shows the jobs found, documents prepared and any step that could not finish.</p><p>Your account shows the connected sources and next scheduled run. Search coverage depends on those sources; a run may find no suitable new vacancies. Pause or cancel your schedule whenever you need to.</p><Link to="/job-loop" className="product-text-link">Explore Job Loop <ArrowRight size={17} aria-hidden="true" /></Link></div>
       <div className="product-privacy-summary"><LockKeyhole size={24} aria-hidden="true" /><h3>Your experience stays yours.</h3><p>Start with your CV or choose a saved CV check. Review the experience and vacancy you want to reuse before saving. You approve each document and apply on the employer’s site yourself.</p><Link to="/privacy" className="product-text-link">How your CV is handled<ArrowUpRight size={16} aria-hidden="true" /></Link></div>
+    </section>
+    <section className="product-shell product-home-guides" aria-labelledby="home-guides-title">
+      <p className="product-eyebrow">CAREER GUIDES</p><h2 id="home-guides-title">Practical help for your next application.</h2>
+      <ul>{homeGuides.map(([slug, title]) => <li key={slug}><Link to={`/guides/${slug}`} className="product-text-link">{title}<ArrowUpRight size={15} aria-hidden="true" /></Link></li>)}</ul>
+      <p>Job Loop for <Link to="/for-students">students and graduates</Link>, <Link to="/for-mba">MBA career pivots</Link> and <Link to="/for-career-switchers">busy professionals</Link>. <Link to="/guides">See all career guides</Link>.</p>
     </section>
     <section className="product-shell product-loop-check" aria-labelledby="home-check-title"><div><p className="product-eyebrow">HAVE ONE VACANCY IN MIND?</p><h2 id="home-check-title">Try the free CV Check first.</h2><p>Bring a CV and a job description, review suggested changes and download your approved version. Sign in to keep your work together. For an ongoing search, save your check and continue into Job Loop.</p></div><StartLink to="/check">Check my CV against a job</StartLink></section>
     <section className="product-final-section"><div className="product-shell"><p className="product-eyebrow">YOUR NEXT ROLE</p><h2>Give your job search a routine.</h2><div className="product-final-actions"><StartLink light /><Link to="/pricing" className="product-text-link">See access and plans <ArrowRight size={17} aria-hidden="true" /></Link></div></div></section>

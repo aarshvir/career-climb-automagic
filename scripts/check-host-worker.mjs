@@ -102,6 +102,27 @@ for(const page of publicRender.pages){
 const pageDecodes=decodedAssets-decodedBeforePages;
 for(const path of ['/guides/no-such-article','/no-such-product','/unknown/deep/route'])assert.equal((await request(path)).status,404,'Unknown routes must not masquerade as successful pages.');
 for(const [path,target] of [['/blog','/guides'],['/jobs','/job-loop'],['/product','/job-loop'],['/guides/','/guides']]){const response=await request(path);assert.equal(response.status,308);assert.equal(response.headers.get('Location'),target);}
+for (const path of ['/pilot','/pilot/','/pilot?utm_source=review','/pilot/?utm_source=review']) {
+  for (const method of ['GET','HEAD']) {
+    const response=await request(path,{method});
+    assert.equal(response.status,308,`Retired entry ${path} must redirect permanently.`);
+    assert.equal(response.headers.get('Location'),'/job-loop','Keep the existing alias policy: redirect to the configured target without carrying query data.');
+    if(method==='HEAD') assert.equal(await response.text(),'');
+  }
+}
+const sitemap=await (await request('/sitemap.xml')).text();
+assert.equal((sitemap.match(/<url>/g)??[]).length,publicRender.pages.length);
+assert.ok(!sitemap.includes('https://jobvance.io/pilot'));
+assert.ok(!publicRender.pages.some(page=>page.path==='/pilot'));
+const home=await (await request('/')).text();
+const homeGuides=[...new Set([...home.matchAll(/href="(\/guides\/[^"?#]+)"/g)].map(match=>match[1]))];
+assert.equal(homeGuides.length,6,'Six article links must be in the actual initial HTML.');
+for(const path of homeGuides) assert.ok(publicRender.pages.some(page=>page.path===path&&page.kind==='guide'),'Every linked article must actually render.');
+for(const path of ['/for-students','/for-mba','/for-career-switchers']) assert.ok(home.includes(`href="${path}"`),'Existing audience guidance must be reachable from home.');
+const key='74fd2bde8727baaf27cf4f939db81717';
+const keyResponse=await request(`/${key}.txt`);
+assert.equal(keyResponse.status,200);assert.match(keyResponse.headers.get('Content-Type'),/^text\/plain; charset=utf-8$/);
+assert.equal(await keyResponse.text(),key,'The public IndexNow file must contain the exact key, not SPA HTML.');
 
 const names = await readdir(join(dist, 'assets'));
 const cases = [
@@ -156,6 +177,6 @@ for (const method of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
   assert.equal(response.headers.get('Cache-Control'), 'no-store');
   checkHeaders(response);
 }
-assert.equal(decodedAssets, 1 + pageDecodes + 1 + cases.length, 'ETag and HEAD requests must not decode additional assets.');
+assert.equal(decodedAssets, 1 + pageDecodes + 3 + cases.length, 'ETag and HEAD requests must not decode additional assets; sitemap and IndexNow key each decode once.');
 globalThis.atob = nativeAtob;
 console.log(JSON.stringify({ result: 'passed', publicPages:publicRender.pages.length, guideArticles:publicRender.pages.filter(page=>page.kind==='guide').length, checks: ['security-headers-and-jsonld-hashes','private-client-routes','rendered-public-content','canonical-redirects','real-notfound-status','asset-bytes-and-mime','etag-and-cache','head','missing-and-private-paths','unsafe-methods','project-identity','compressed-size'], compressedBytes }));

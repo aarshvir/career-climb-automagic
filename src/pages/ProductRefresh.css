@@ -282,3 +282,9 @@
 .product-page .pricing-offer .product-plan h3 { font-size:22px; font-weight:650; }
 @media(max-width:1000px) { .pricing-offer .pricing-tiers { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:640px) { .pricing-offer .pricing-tiers { grid-template-columns:1fr; } }
+.product-home-guides { padding-block:42px; border-top:1px solid #d9dfd4; }
+.product-home-guides h2 { font-size:32px; line-height:1.25; letter-spacing:-.025em; font-weight:650; }
+.product-home-guides ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 32px; margin-top:18px; list-style:none; padding:0; }
+.product-home-guides p:not(.product-eyebrow) { margin-top:16px; font-size:15px; line-height:1.7; }
+.product-home-guides p a { text-decoration:underline; }
+@media(max-width:640px) { .product-home-guides ul { grid-template-columns:1fr; } }
