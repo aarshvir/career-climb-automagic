@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-25",
+  "site": "https://jobvance.io",
+  "publicVersion": 54,
+  "runtimeSource": "40ca032ad0d7f3c53456a2a9a207a1b6db58c503",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/28",
+  "reviewedHead": "f4f9611e82f93300cd8c5ea7211949ced8b2d240",
+  "originalClaudeHead": "2ec4f2ce246a02be508a87c42b67ccce80c80cf0",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f2ada38b47e8819198c2e7770fbd05aa",
+  "deploymentId": "appgdep_6addc729661c81918bc62c3bd0b1862e",
+  "status": "succeeded",
+  "deployedAt": "2026-10-25T09:09:20.183839+00:00",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000605c82078d05ed7c75793103",
+    "content_hash": "sha256:836edeb32d732ed4e2640db52c6072550491fa03cabc00c4d4a1be550fbe06b7",
+    "size_bytes": 15226880,
+    "file_count": 139
+  },
+  "changes": {
+    "pilot": {
+      "status": 308,
+      "target": "/job-loop",
+      "trailingSlash": true,
+      "queryPolicy": "Existing alias behavior retained: query data is not forwarded",
+      "getAndHead": true
+    },
+    "sitemap": {
+      "urls": 37,
+      "pilot": false,
+      "guides": 20
+    },
+    "home": {
+      "articleLinks": 6,
+      "existingAudienceLinks": 3,
+      "serverRendered": true,
+      "jobLoopPrimary": true
+    },
+    "indexNow": {
+      "file": "/74fd2bde8727baaf27cf4f939db81717.txt",
+      "contentType": "text/plain; charset=utf-8",
+      "exactKeyVerified": true,
+      "publicVerificationKey": true
+    }
+  },
+  "validation": {
+    "tests": 3216,
+    "files": 176,
+    "focusedRerun": 30,
+    "typeScript": "passed",
+    "changedFileLint": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "productionBuild": {
+      "pages": 37,
+      "guides": 20,
+      "structuredDataHashes": 57,
+      "compressedBytes": 2924723
+    },
+    "hostingGroups": 12,
+    "actualGeneratedWorkerRegression": "/pilot/404 reproduced; normalized alias fix passes all8 GET/HEAD/slash/query cases",
+    "live": {
+      "redirectCases": 8,
+      "sitemapExact": true,
+      "indexNowKeyExact": true,
+      "htmlExact": 5,
+      "javaScriptExact": 63,
+      "cssExact": 14,
+      "privateMarketingRouteNoindex": true,
+      "htmlExclusion": "Only an actually observed appended Cloudflare challenge script",
+      "etagClaimed": false
+    },
+    "browser": {
+      "localDesktopWidth": 1920,
+      "localMobile": {
+        "width": 390,
+        "height": 844,
+        "documentWidth": 375
+      },
+      "liveHomepage": {
+        "width": 1920,
+        "documentWidth": 1905,
+        "articleLinks": 6,
+        "audienceLinks": 3,
+        "existingSignedInHeader": true
+      }
+    },
+    "initialTestFailure": "One existing UI-wait failure while build/tests ran together.30 unchanged focused cases and the unchanged final full suite passed. No timeout/expectation/guard weakened."
+  },
+  "rollback": {
+    "tag": "jobvance-before-seo-indexing-2026-10-25",
+    "source": "1177c061951fa870ba9d784f0567ffef7cfc83a0",
+    "savedVersion53": true
+  },
+  "preserved": [
+    "Account-required Job Loop primary journey",
+    "Public v53 marketing dashboard and v51 measurement safeguards",
+    "Live Dodo and100-paid-account capacity",
+    "Existing ads, identities, links, budgets and end dates",
+    "Database and all Edge function deployments"
+  ],
+  "followup": {
+    "owner": "Claude",
+    "actions": [
+      "IndexNow ping",
+      "Google Search Console sitemap resubmission and subsequent provider acceptance"
+    ],
+    "performedByThisRelease": false,
+    "indexAcceptanceVerified": false,
+    "searchConsoleFigures": "Earlier figures are Claude-reported; not independently re-certified in this release",
+    "rankingsOrTrafficUpliftClaimed": false
+  },
+  "scope": {
+    "databaseChanged": false,
+    "edgeFunctionsChanged": false,
+    "adChanged": false,
+    "paymentsChanged": false,
+    "paidProviderCalls": false,
+    "newCustomerRecords": false
+  }
+}
