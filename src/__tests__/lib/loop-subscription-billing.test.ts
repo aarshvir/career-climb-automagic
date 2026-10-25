@@ -15,7 +15,7 @@ const receipt=()=>({provider:'dodo',billingMode:'live',generation:0,requestId,pl
 const scope=()=>({ownerId:'owner',authority:trackingDraftAuthority('owner')});
 beforeEach(()=>{clearTrackingDraftMemory();setTrackingDraftOwner('owner','session-a');mocks.invoke.mockReset();mocks.require.mockReset();mocks.require.mockResolvedValue(undefined);});
 afterEach(()=>clearTrackingDraftMemory());
-describe('monthly Job Loop billing boundary',()=>{
+describe('monthly Automated Job Loop billing boundary',()=>{
  it('captures immutable original checkout and cancellation IDs without owner or prices in payload',async()=>{
   const intent=captureLoopCheckoutIntent('weekly',0,requestId);expect(Object.isFrozen(intent)).toBe(true);mocks.invoke.mockResolvedValue({data:receipt(),error:null});await createLoopSubscriptionCheckout(scope(),intent);
   expect(mocks.invoke).toHaveBeenCalledWith('job-loop-billing',{body:{action:'checkout',plan:'weekly',expectedGeneration:0,requestId,consent:true}});expect(mocks.require).toHaveBeenCalledTimes(2);

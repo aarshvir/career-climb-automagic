@@ -23,7 +23,7 @@ describe('exact check and Loop home relationship', () => {
     expect(row.vacancy).toBe('Exact saved vacancy'); expect(row.relatedSources?.[0]).toMatchObject({ id: `loop:7:${id}`, vacancy: 'Exact Loop vacancy', href: `/loop?opportunity=${id}&generation=7` });
     expect(row.documents.map(item => item.text)).toEqual(['Exact reviewed final wording', 'Original private input', 'Exact packet wording', 'Exact packet wording']);
     expect(row.documents.slice(2).map(item => item.state)).toEqual(['Held for review', 'Revoked output']);
-    expect(row.progress.map(item => [item.sourceLabel, item.status, item.notes])).toEqual([['Saved-check tracking', 'interview', 'Exact notes'], ['Job Loop progress', 'saved', 'Loop notes']]);
+    expect(row.progress.map(item => [item.sourceLabel, item.status, item.notes])).toEqual([['Saved-check tracking', 'interview', 'Exact notes'], ['Automated Job Loop progress', 'saved', 'Loop notes']]);
     expect(row.progress.map(item => item.href)).toEqual([`/dashboard?tracked=${id}`, `/loop?opportunity=${id}&generation=7`]);
     expect(resolveApplicationHomeSelection(rows, `loop:7:${id}`)).toBe(row);
     expect(resolveApplicationHomeSelection(rows, `loop:6:${id}`)).toBeUndefined();

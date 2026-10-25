@@ -48,9 +48,9 @@ describe('cloud loop consent and accurate capabilities', () => {
   });
   it('offers the Starter plan instead of a dead end when every free place is taken', async () => {
     current.pilot = { enrolled: false, activeUsers: 10, maxUsers: 10 }; current.capabilities.scheduler = true; render(tree());
-    expect(await screen.findByRole('heading', { name: 'Start Job Loop with Starter: $29 a month' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Start Automated Job Loop with Starter: $29 a month' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Start Starter, \$29\/month/ })).toHaveAttribute('href', '/pricing?loopPlan=weekly');
-    expect(screen.getByRole('link', { name: /Start Job Loop with Starter/ })).toHaveAttribute('href', '/pricing?loopPlan=weekly');
+    expect(screen.getByRole('link', { name: /Start Automated Job Loop with Starter/ })).toHaveAttribute('href', '/pricing?loopPlan=weekly');
     expect(screen.getAllByRole('link', { name: 'Start Starter for $29 a month' }).length).toBeGreaterThanOrEqual(2);
     expect(screen.queryByText(/until a place is available/)).not.toBeInTheDocument();
   });
@@ -319,21 +319,21 @@ describe('support receipts and scoped self-service erasure', () => {
       return { snapshot: current };
     });
     render(tree());
-    expect(await screen.findByRole('heading', { name: 'Finish erasing your Job Loop' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Finish erasing your Automated Job Loop' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Prepare today’s applications' })).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Reviewed source CV or career record')).not.toBeInTheDocument();
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_loop')).toBe(false);
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: 'Review remaining erasure' }));
-    const continuation = screen.getByRole('button', { name: 'Continue erasing Job Loop data' });
+    const continuation = screen.getByRole('button', { name: 'Continue erasing Automated Job Loop data' });
     expect(continuation).toBeDisabled();
-    await user.type(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope'), 'DELETE JOB LOOP');
+    await user.type(screen.getByLabelText('Type DELETE AUTOMATED JOB LOOP to confirm this scope'), 'DELETE AUTOMATED JOB LOOP');
     expect(continuation).toBeDisabled();
-    await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/));
+    await user.click(screen.getByLabelText(/I understand this removes my Automated Job Loop data/));
     await user.click(continuation);
 
     await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'erase_loop', expectedGeneration: generation, confirmErase: true }));
-    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Finish erasing your Automated Job Loop' })).not.toBeInTheDocument());
     expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'erase_loop')).toHaveLength(1);
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_self')).toBe(false);
   });
@@ -344,7 +344,7 @@ describe('support receipts and scoped self-service erasure', () => {
     mocks.call.mockResolvedValueOnce({ erasureGeneration: 1 });
     await userEvent.setup().click(screen.getByRole('button', { name: 'Refresh records' }));
 
-    expect(await screen.findByRole('heading', { name: 'Finish erasing your Job Loop' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Finish erasing your Automated Job Loop' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Reviewed source CV or career record')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('CV text for factual review')).not.toBeInTheDocument();
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_loop')).toBe(false);
@@ -363,21 +363,21 @@ describe('support receipts and scoped self-service erasure', () => {
     render(tree());
     await openTab('Help & privacy');
     const user = userEvent.setup();
-    await user.click(screen.getByRole('button', { name: 'Review Job Loop erasure' }));
-    await user.type(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope'), 'DELETE JOB LOOP');
-    await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/));
-    await user.click(screen.getByRole('button', { name: 'Erase my Job Loop data' }));
+    await user.click(screen.getByRole('button', { name: 'Review Automated Job Loop erasure' }));
+    await user.type(screen.getByLabelText('Type DELETE AUTOMATED JOB LOOP to confirm this scope'), 'DELETE AUTOMATED JOB LOOP');
+    await user.click(screen.getByLabelText(/I understand this removes my Automated Job Loop data/));
+    await user.click(screen.getByRole('button', { name: 'Erase my Automated Job Loop data' }));
 
-    expect(await screen.findByRole('heading', { name: 'Finish erasing your Job Loop' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope')).toHaveValue('DELETE JOB LOOP');
-    expect(screen.getByLabelText(/I understand this removes my Job Loop data/)).toBeChecked();
-    expect(screen.getByRole('button', { name: 'Continue erasing Job Loop data' })).toBeEnabled();
+    expect(await screen.findByRole('heading', { name: 'Finish erasing your Automated Job Loop' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Type DELETE AUTOMATED JOB LOOP to confirm this scope')).toHaveValue('DELETE AUTOMATED JOB LOOP');
+    expect(screen.getByLabelText(/I understand this removes my Automated Job Loop data/)).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Continue erasing Automated Job Loop data' })).toBeEnabled();
     expect(screen.queryByLabelText('Reviewed source CV or career record')).not.toBeInTheDocument();
     expect(attempts).toBe(1);
 
-    await user.click(screen.getByRole('button', { name: 'Continue erasing Job Loop data' }));
+    await user.click(screen.getByRole('button', { name: 'Continue erasing Automated Job Loop data' }));
     await waitFor(() => expect(attempts).toBe(2));
-    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Finish erasing your Automated Job Loop' })).not.toBeInTheDocument());
     expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'erase_loop').map(([, action]) => action.expectedGeneration)).toEqual([0, 0]);
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_self')).toBe(false);
   });
@@ -396,7 +396,7 @@ describe('support receipts and scoped self-service erasure', () => {
     await screen.findByRole('button', { name: 'Set up directly without questions' });
     await act(async () => { rejectOld(new LoopServiceError('OWNER_A_PRIVATE_ERASURE_STATE', 'LOOP_ERASURE_IN_PROGRESS')); });
 
-    expect(screen.queryByRole('heading', { name: 'Finish erasing your Job Loop' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Finish erasing your Automated Job Loop' })).not.toBeInTheDocument();
     expect(screen.queryByText('OWNER_A_PRIVATE_ERASURE_STATE')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Review remaining erasure' })).not.toBeInTheDocument();
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'erase_loop')).toBe(false);
@@ -408,13 +408,13 @@ describe('support receipts and scoped self-service erasure', () => {
     expect(await screen.findByText(/Reference synthetic-receipt-a/)).toBeInTheDocument(); expect(screen.getByText('received')).toBeInTheDocument();
     expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'request_support', expectedGeneration: 0, category: 'help', message: 'Synthetic download problem; no real personal data.' });
   });
-  it('requires a typed scope and explicit confirmation before erasing only Job Loop data', async () => {
+  it('requires a typed scope and explicit confirmation before erasing only Automated Job Loop data', async () => {
     render(tree()); await openTab('Help & privacy'); const user = userEvent.setup();
     expect(mocks.call.mock.calls.some(([,action]) => action.action === 'erase_loop')).toBe(false);
-    await user.click(screen.getByRole('button', { name: 'Review Job Loop erasure' }));
-    const erase = screen.getByRole('button', { name: 'Erase my Job Loop data' }); expect(erase).toBeDisabled();
-    await user.type(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope'), 'DELETE JOB LOOP'); expect(erase).toBeDisabled();
-    await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/)); await user.click(erase);
+    await user.click(screen.getByRole('button', { name: 'Review Automated Job Loop erasure' }));
+    const erase = screen.getByRole('button', { name: 'Erase my Automated Job Loop data' }); expect(erase).toBeDisabled();
+    await user.type(screen.getByLabelText('Type DELETE AUTOMATED JOB LOOP to confirm this scope'), 'DELETE AUTOMATED JOB LOOP'); expect(erase).toBeDisabled();
+    await user.click(screen.getByLabelText(/I understand this removes my Automated Job Loop data/)); await user.click(erase);
     await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'erase_loop', expectedGeneration: 0, confirmErase: true }));
     expect(mocks.call.mock.calls.some(([,action]) => action.action === 'erase_self')).toBe(false);
   });
@@ -477,7 +477,7 @@ describe('browser-only Gmail return confirmation', () => {
   });
 });
 
-describe('same-owner Job Loop lifetime changes', () => {
+describe('same-owner Automated Job Loop lifetime changes', () => {
   it('does not restore an older lifetime draft when the same owner returns to a newly created workspace', async () => {
     current.lifecycleGeneration = 7;
     const view = render(tree());
@@ -509,20 +509,20 @@ describe('same-owner Job Loop lifetime changes', () => {
     await user.click(screen.getByLabelText('What do you need help with?'));
     await user.paste('OLD_LIFETIME_UNSENT_SUPPORT_MESSAGE');
     await user.selectOptions(screen.getByLabelText('Request type'), 'privacy');
-    await user.click(screen.getByRole('button', { name: 'Review Job Loop erasure' }));
-    await user.type(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope'), 'DELETE JOB LOOP');
-    await user.click(screen.getByLabelText(/I understand this removes my Job Loop data/));
-    expect(screen.getByRole('button', { name: 'Erase my Job Loop data' })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: 'Review Automated Job Loop erasure' }));
+    await user.type(screen.getByLabelText('Type DELETE AUTOMATED JOB LOOP to confirm this scope'), 'DELETE AUTOMATED JOB LOOP');
+    await user.click(screen.getByLabelText(/I understand this removes my Automated Job Loop data/));
+    expect(screen.getByRole('button', { name: 'Erase my Automated Job Loop data' })).toBeEnabled();
 
     current = { ...snapshot(), lifecycleGeneration: 9, recordVersion: 3 };
     await user.click(screen.getByRole('button', { name: 'Refresh records' }));
     await waitFor(() => expect(screen.getByLabelText('What do you need help with?')).toHaveValue(''));
     expect(screen.getByLabelText('Request type')).toHaveValue('help');
-    expect(screen.queryByLabelText('Type DELETE JOB LOOP to confirm this scope')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Review Job Loop erasure' }));
-    expect(screen.getByLabelText('Type DELETE JOB LOOP to confirm this scope')).toHaveValue('');
-    expect(screen.getByLabelText(/I understand this removes my Job Loop data/)).not.toBeChecked();
-    expect(screen.getByRole('button', { name: 'Erase my Job Loop data' })).toBeDisabled();
+    expect(screen.queryByLabelText('Type DELETE AUTOMATED JOB LOOP to confirm this scope')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Review Automated Job Loop erasure' }));
+    expect(screen.getByLabelText('Type DELETE AUTOMATED JOB LOOP to confirm this scope')).toHaveValue('');
+    expect(screen.getByLabelText(/I understand this removes my Automated Job Loop data/)).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'Erase my Automated Job Loop data' })).toBeDisabled();
     expect(mocks.call.mock.calls.some(([, action]) => ['request_support', 'erase_loop'].includes(action.action))).toBe(false);
   });
 

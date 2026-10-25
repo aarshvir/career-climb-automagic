@@ -121,7 +121,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           <div className="ap-review-stamp"><Check size={16} aria-hidden="true" /> Reviewed by you</div>
         </div>
         <p className="ap-story-footnote"><LockKeyhole size={16} aria-hidden="true" /> Choose what you save in your account.</p>
-        <Link to="/job-loop" className="ap-story-link">See how Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
+        <Link to="/job-loop" className="ap-story-link">See how the Automated Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
       </aside>}
       <div className="ap-auth-panel">
         <div className="ap-auth-heading">

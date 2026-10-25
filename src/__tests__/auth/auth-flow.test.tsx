@@ -199,12 +199,12 @@ describe('signup and password recovery screens', () => {
     sdk.getSession.mockResolvedValue({ data: { session: signedIn }, error: null });
     render(<MemoryRouter initialEntries={['/auth/callback?code=example-once']}><Routes>
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/loop" element={<h1>Job Loop dashboard</h1>} />
+      <Route path="/loop" element={<h1>Automated Job Loop dashboard</h1>} />
     </Routes></MemoryRouter>);
     expect(screen.getByRole('status')).toHaveTextContent('Completing sign-in');
     expect(sdk.getSession).not.toHaveBeenCalled();
     await act(async () => { initialized({ error: null }); });
-    expect(await screen.findByText('Job Loop dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('Automated Job Loop dashboard')).toBeInTheDocument();
   });
 });
 

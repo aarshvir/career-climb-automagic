@@ -60,11 +60,11 @@ beforeEach(() => {
 afterEach(() => { cleanup(); sessionStorage.clear(); localStorage.clear(); window.history.replaceState(null, '', '/'); });
 
 describe('protected legacy workspace return through real app routes', () => {
-  it('opens the main Job Loop dashboard for a signed-in bare dashboard visit', async () => {
+  it('opens the main Automated Job Loop dashboard for a signed-in bare dashboard visit', async () => {
     state.user = owner; open('/dashboard');
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/loop$/);
   });
-  it('returns a signed-out bare dashboard visit to Job Loop after sign-in', async () => {
+  it('returns a signed-out bare dashboard visit to your Automated Job Loop after sign-in', async () => {
     const view = open('/dashboard');
     await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
     expect(new URLSearchParams(window.location.search).get('next')).toBe('/loop');

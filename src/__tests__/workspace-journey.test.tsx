@@ -210,9 +210,9 @@ describe("Real workspace journey and truthful failures", () => {
   });
   it("requires actual file review, then approval before document export", async () => {
     mount();
-    await screen.findByText("No source CVs saved in this workspace. Manage CVs for your scheduled search in Job Loop.");
+    await screen.findByText("No source CVs saved in this workspace. Manage CVs for your scheduled search in your Automated Job Loop.");
     expect(screen.getByRole('heading', { name: 'Your saved CVs.' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Back to Job Loop/ })).toHaveAttribute('href', '/loop');
+    expect(screen.getByRole('link', { name: /Back to your Automated Job Loop/ })).toHaveAttribute('href', '/loop');
     expect(screen.getByRole('link', { name: /Start a CV Check/ })).toHaveAttribute('href', '/check');
     expect(screen.queryByText('Your experience starts here.')).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Choose CV file"), {
@@ -329,7 +329,7 @@ describe("Real workspace journey and truthful failures", () => {
   it.each(['stripe', 'paddle'] as const)('does not expose checkout even when the backend reports %s billing ready', async provider => {
     state.data.entitlement = {creditsRemaining:0,expiresAt:null,billingConfigured:true,billingMode:'live',paymentProvider:provider};
     mount('/dashboard?tab=billing');
-    await screen.findByText('Choose your Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.');
+    await screen.findByText('Choose your Automated Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.');
     expect(screen.getByRole('button', {name:'Plan & allowance'})).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', {name:'Check a CV for free'})).toHaveAttribute('href', '/check');
     expect(screen.getByText(/0 saved preparations available/)).toHaveTextContent('Previously approved documents remain available to download.');

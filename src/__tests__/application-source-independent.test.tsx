@@ -150,7 +150,7 @@ describe('independent exact application source review', () => {
   });
   it('never shows current-lifetime tracking or output controls for an earlier Loop generation link', async () => {
     render(tree(<JobLoop />, `/loop?opportunity=${id}&generation=7`));
-    await screen.findByText(/This link belongs to an earlier Job Loop record/);
+    await screen.findByText(/This link belongs to an earlier Automated Job Loop record/);
     expect(screen.queryByLabelText('My application notes')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Review document attempt/ })).not.toBeInTheDocument();
     expect(mocks.loop.mock.calls.every(([, action]) => action.action === 'get')).toBe(true);

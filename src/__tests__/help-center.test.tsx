@@ -100,9 +100,9 @@ describe('task-focused public help', () => {
     expect(builder).toHaveTextContent('Undo CV builder replacement');
     expect(builder).toHaveTextContent('does not save it, approve it or start a run');
     expect(builder).toHaveTextContent('does not call an AI provider');
-    expect(within(builder as HTMLElement).getByRole('link', { name: /Build my first CV in Job Loop/ })).toHaveAttribute('href', '/loop');
+    expect(within(builder as HTMLElement).getByRole('link', { name: /Build my first CV in your Automated Job Loop/ })).toHaveAttribute('href', '/loop');
     expect(within(builder as HTMLElement).getByRole('link', { name: 'Try the free CV Check' })).toHaveAttribute('href', '/help#first-check');
-    const loopText = helpTopics.filter(topic => topic.category === 'Job Loop').flatMap(topic => topic.steps).join(' ');
+    const loopText = helpTopics.filter(topic => topic.category === 'Automated Job Loop').flatMap(topic => topic.steps).join(' ');
     expect(loopText).not.toContain('Open Outputs');
     expect(loopText).not.toContain('Open Career record');
     expect(container.querySelector('#job-loop-review')).toHaveTextContent('Open Prepared CVs');

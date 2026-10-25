@@ -1,4 +1,4 @@
-"""Job Loop sharing card from the project's editable drawing source.
+"""Automated Job Loop sharing card from the project's editable drawing source.
 
 No customer data, external images or implied customer history. The versioned URL
 refreshes future social previews; the legacy URL is corrected too.
@@ -18,7 +18,7 @@ d.line((77,79,96,60),fill='white',width=4)
 d.line((84,60,97,60,97,73),fill='white',width=4)
 d.text((125,43),'jobvance.',font=font(34,True),fill=ink)
 d.rounded_rectangle((960,49,1136,91),radius=21,fill='#e2f69e')
-d.text((996,56),'JOB LOOP',font=font(20,True),fill=ink)
+d.text((996,56),'AUTOMATED JOB LOOP',font=font(20,True),fill=ink)
 d.text((64,135),'Automate your job search.',font=font(60,True),fill=ink)
 d.text((67,224),'Your CV. Your preferences. A search on your schedule.',font=font(27),fill=muted)
 panels = [

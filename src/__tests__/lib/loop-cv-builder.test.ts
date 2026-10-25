@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { blankLoopCvAnswers, buildLoopCvText } from '../../lib/loop-cv-builder';
 
-describe('first Job Loop CV from personal answers', () => {
+describe('first Automated Job Loop CV from personal answers', () => {
   const entry = 'Studied biology at Example College. Completed a class project recording local plant species.';
   it('creates independent blank answers without supplying any personal facts', () => {
     const first = blankLoopCvAnswers(), second = blankLoopCvAnswers();

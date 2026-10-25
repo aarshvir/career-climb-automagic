@@ -21,7 +21,7 @@ describe('audience entry points', () => {
     render(page(audience));
     const start = screen.getByRole('link', { name: 'Check my CV against a job' });
     expect(start).toHaveAttribute('href', `/check?audience=${audience}`);
-    expect(screen.getByRole('link', { name: /See how Job Loop works/ })).toHaveAttribute('href', '/job-loop');
+    expect(screen.getByRole('link', { name: /See how the Automated Job Loop works/ })).toHaveAttribute('href', '/job-loop');
     expect(screen.getByRole('link', { name: /Sign in to save my experience/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].title);
     expect(screen.getByText('Example application')).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe('current offer', () => {
   });
   it('states the new free allowance everywhere the old beta line was', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByText('Choose your Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.')).toBeInTheDocument();
+    expect(screen.getByText('Choose your Automated Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.')).toBeInTheDocument();
     expect(screen.queryByText(/2 tailored CVs a day|8 when signed in/i)).not.toBeInTheDocument();
   });
   it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
@@ -71,32 +71,32 @@ describe('current offer', () => {
   });
 });
 
-describe('Job Loop access and monthly plans', () => {
-  it('leads with monthly Job Loop and requires an account before checking purchase availability', () => {
+describe('Automated Job Loop access and monthly plans', () => {
+  it('leads with monthly Automated Job Loop and requires an account before checking purchase availability', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: 'Start your Job Loop' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Start my Job Loop' })).toHaveAttribute('href', '/onboarding');
+    expect(screen.getByRole('heading', { name: 'Start your Automated Job Loop' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Start my Automated Job Loop' })).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
     expect(screen.queryByText(/beta|ten accounts|no account needed/i)).not.toBeInTheDocument();
-    const proposals = screen.getByRole('region', { name: 'Job Loop monthly plans' });
+    const proposals = screen.getByRole('region', { name: 'Automated Job Loop monthly plans' });
     expect(proposals).toHaveTextContent('No trial or subscription starts automatically');
     expect(proposals).toHaveTextContent('billed every month until you cancel');
     for (const price of ['$29', '$59', '$99']) expect(proposals).toHaveTextContent(price);
     expect(within(proposals).getAllByText('USD / month')).toHaveLength(3);
-    expect(proposals).toHaveTextContent('1 Job Loop run a week');
-    expect(proposals).toHaveTextContent('3 Job Loop runs a week');
-    expect(proposals).toHaveTextContent('1 Job Loop run a day');
+    expect(proposals).toHaveTextContent('1 Automated Job Loop run a week');
+    expect(proposals).toHaveTextContent('3 Automated Job Loop runs a week');
+    expect(proposals).toHaveTextContent('1 Automated Job Loop run a day');
     expect(within(proposals).getByRole('link',{name:'Sign in for Starter'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
     expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
     expect(proposals).toHaveTextContent('does not cancel subscription billing');
   });
 });
 
-describe('Job Loop first homepage', () => {
+describe('Automated Job Loop first homepage', () => {
   it('explains the ordered search journey and offers a separate neutral CV Check entry', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Automate your job search.');
-    const stages = within(screen.getByRole('list', { name: 'Your Job Loop journey' })).getAllByRole('listitem');
+    const stages = within(screen.getByRole('list', { name: 'Your Automated Job Loop journey' })).getAllByRole('listitem');
     expect(stages).toHaveLength(3);
     expect(stages[0]).toHaveTextContent('Add your experience');
     expect(stages[0]).toHaveTextContent('build your first CV from guided questions');
@@ -104,7 +104,7 @@ describe('Job Loop first homepage', () => {
     expect(stages[1]).toHaveTextContent('roles and locations');
     expect(stages[2]).toHaveTextContent('Review your dashboard');
     expect(stages[2]).toHaveTextContent('approve your documents');
-    for (const link of screen.getAllByRole('link', { name: 'Start my Job Loop' })) expect(link).toHaveAttribute('href', '/onboarding');
+    for (const link of screen.getAllByRole('link', { name: 'Start my Automated Job Loop' })) expect(link).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: /Try a free CV check/ })).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
     expect(screen.getByText(/Choose weekly, three-times-weekly or daily searches/)).toHaveTextContent('confirm the AI provider once for recurring preparation');

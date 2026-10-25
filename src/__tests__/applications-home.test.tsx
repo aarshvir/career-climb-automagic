@@ -44,10 +44,10 @@ describe('Applications home actual saved work', () => {
     expect(list().getAllByRole('button')).toHaveLength(1);
     const detail = within(screen.getByRole('region', { name: 'Application details' }));
     expect(detail.getByRole('link', { name: 'Open and edit' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
-    expect(detail.getByRole('link', { name: 'Open this Job Loop vacancy' })).toHaveAttribute('href', `/loop?opportunity=${trackedId}&generation=7`);
+    expect(detail.getByRole('link', { name: 'Open this Automated Job Loop vacancy' })).toHaveAttribute('href', `/loop?opportunity=${trackedId}&generation=7`);
     expect(detail.getByRole('link', { name: 'Update this vacancy progress' })).toHaveAttribute('href', `/loop?opportunity=${trackedId}&generation=7`);
     expect(detail.getByRole('link', { name: 'Update this tracking entry' })).toHaveAttribute('href', `/dashboard?tracked=${trackedId}`);
-    for (const text of ['LOOP_PROGRESS_NOTES', 'EXACT_TRACKER_NOTES', 'LOOP_VACANCY_TEXT', 'Exact check vacancy requirements', 'Job Loop progress', 'Saved-check tracking']) expect(detail.getByText(text)).toBeInTheDocument();
+    for (const text of ['LOOP_PROGRESS_NOTES', 'EXACT_TRACKER_NOTES', 'LOOP_VACANCY_TEXT', 'Exact check vacancy requirements', 'Automated Job Loop progress', 'Saved-check tracking']) expect(detail.getByText(text)).toBeInTheDocument();
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'Loop Employer' } });
     expect(list().getAllByRole('button')).toHaveLength(1);
     expect(mocks.loop).toHaveBeenCalledExactlyOnceWith('owner-a', { action: 'get_existing' });
@@ -55,12 +55,12 @@ describe('Applications home actual saved work', () => {
   it('keeps the exact selected vacancy through delayed check loading and later failed-source refresh', async () => {
     packs = []; trackers = []; const delayed = deferred<FreeCvCheck[]>(); mocks.checks.mockReturnValueOnce(delayed.promise); mocks.loop.mockResolvedValue(linkedResponse());
     render(tree(`/applications?item=${encodeURIComponent(`loop:7:${trackedId}`)}`));
-    await screen.findByRole('link', { name: 'Open this Job Loop vacancy' });
+    await screen.findByRole('link', { name: 'Open this Automated Job Loop vacancy' });
     expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument();
     await act(async () => delayed.resolve([check()])); await loaded();
     expect(screen.getByText('EXACT_FINAL_REVIEWED_CV')).toBeInTheDocument(); expect(screen.getByText('LOOP_PROGRESS_NOTES')).toBeInTheDocument();
     mocks.checks.mockRejectedValue(new Error('offline')); fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' }));
-    await screen.findByRole('button', { name: 'Retry saved cv checks' }); await screen.findByRole('link', { name: 'Open this Job Loop vacancy' });
+    await screen.findByRole('button', { name: 'Retry saved cv checks' }); await screen.findByRole('link', { name: 'Open this Automated Job Loop vacancy' });
     expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument(); expect(screen.getByText('LOOP_PROGRESS_NOTES')).toBeInTheDocument();
     expect(screen.getByText(/linked saved check is not in/)).toBeInTheDocument();
   });
@@ -70,7 +70,7 @@ describe('Applications home actual saved work', () => {
     mocks.loop.mockResolvedValue(linkedResponse(9)); fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' })); await loaded();
     expect(screen.getByRole('heading', { name: 'This application is no longer available here' })).toBeInTheDocument();
     expect(screen.queryByText('EXACT_FINAL_REVIEWED_CV')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Open this Job Loop vacancy' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open this Automated Job Loop vacancy' })).not.toBeInTheDocument();
   });
   it('retains joined relationship detail when the separate tracker source fails', async () => {
     packs = []; trackerRead = async () => ({ data: [], error: new Error('offline') }); mocks.loop.mockResolvedValue(linkedResponse());
@@ -176,22 +176,22 @@ describe('Applications home actual saved work', () => {
   });
   it('shows erasing separately and never opens old Loop documents', async () => {
     mocks.loop.mockResolvedValue({ existingState: 'erasing', erasureGeneration: 8 }); render(tree(`/applications?item=${encodeURIComponent(`loop:7:${id}`)}`)); await loaded();
-    expect(screen.getByText(/Your Job Loop erasure is unfinished/)).toBeInTheDocument();
+    expect(screen.getByText(/Your Automated Job Loop erasure is unfinished/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Review remaining erasure' })).toHaveAttribute('href', '/loop');
-    expect(screen.queryByRole('link', { name: 'Open this Job Loop vacancy' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open this Automated Job Loop vacancy' })).not.toBeInTheDocument();
   });
   it('fails closed when active Loop state is missing lifecycle generation', async () => {
     mocks.loop.mockResolvedValue({ existingState: 'active', snapshot: { opportunities: [], packets: [] } }); render(tree());
-    await screen.findByRole('button', { name: 'Retry job loop' });
+    await screen.findByRole('button', { name: 'Retry automated job loop' });
     expect(list().getByRole('button', { name: /Operations Analyst/ })).toBeInTheDocument();
   });
   it('replaces a selected old Loop lifetime with an unavailable state after a fresh generation read', async () => {
     const loop = (generation: number) => ({ existingState: 'active', snapshot: { lifecycleGeneration: generation, recordVersion: 1, profile: null, claims: [], packets: [], opportunities: [{ id, title: 'Loop Analyst', company: 'Loop Employer', description: 'LOOP_EXACT_VACANCY', url: '', checkedAt: date, notes: 'PRIVATE_OLD_LOOP_NOTE', status: 'saved', followUpAt: null }] } });
     mocks.loop.mockResolvedValue(loop(7)); render(tree(`/applications?item=${encodeURIComponent(`loop:7:${id}`)}`)); await loaded();
-    expect(screen.getByRole('link', { name: 'Open this Job Loop vacancy' })).toHaveAttribute('href', `/loop?opportunity=${id}&generation=7`);
+    expect(screen.getByRole('link', { name: 'Open this Automated Job Loop vacancy' })).toHaveAttribute('href', `/loop?opportunity=${id}&generation=7`);
     mocks.loop.mockResolvedValue(loop(9)); fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' })); await loaded();
     expect(screen.getByRole('heading', { name: 'This application is no longer available here' })).toBeInTheDocument();
-    expect(screen.queryByText('PRIVATE_OLD_LOOP_NOTE')).not.toBeInTheDocument(); expect(screen.queryByRole('link', { name: 'Open this Job Loop vacancy' })).not.toBeInTheDocument();
+    expect(screen.queryByText('PRIVATE_OLD_LOOP_NOTE')).not.toBeInTheDocument(); expect(screen.queryByRole('link', { name: 'Open this Automated Job Loop vacancy' })).not.toBeInTheDocument();
   });
   it('does not let an earlier same-owner refresh overwrite the newer authoritative result', async () => {
     render(tree()); await loaded(); const older = deferred<FreeCvCheck[]>(); mocks.checks.mockReturnValueOnce(older.promise).mockResolvedValue([check({ job_title: 'Newest role' })]);

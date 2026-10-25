@@ -25,7 +25,7 @@ beforeEach(() => {
   mocks.call.mockImplementation(async (_owner, action) => { if (action.action !== 'get') throw new Error('Unexpected setup write'); return { snapshot: structuredClone(current) }; });
 });
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); });
-describe('saved quiz continuation in the actual Job Loop', () => {
+describe('saved quiz continuation in the actual Automated Job Loop', () => {
   it('waits for the owned snapshot, opens the record, consumes the hint and preserves saved source without running', async () => {
     let resolve!: (value: unknown) => void;
     mocks.call.mockImplementationOnce(() => new Promise(done => { resolve = done; }));

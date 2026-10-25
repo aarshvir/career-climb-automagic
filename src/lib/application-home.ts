@@ -80,9 +80,9 @@ export function buildApplicationHome(ownerId: string, input: ApplicationHomeInpu
     const snapshot = input.loop.snapshot, generation = snapshot.lifecycleGeneration!;
     for (const row of snapshot.opportunities) {
       const packets = snapshot.packets.filter(packet => packet.opportunityId === row.id);
-      rows.push({ id: `loop:${generation}:${row.id}`, source: 'loop', sourceLabel: 'Job Loop vacancy', title: row.title, company: row.company, vacancy: row.description, employerUrl: applicationEmployerUrl(row.url), documents: packets.map(packet => packetDocument(packet, snapshot)),
+      rows.push({ id: `loop:${generation}:${row.id}`, source: 'loop', sourceLabel: 'Automated Job Loop vacancy', title: row.title, company: row.company, vacancy: row.description, employerUrl: applicationEmployerUrl(row.url), documents: packets.map(packet => packetDocument(packet, snapshot)),
         progress: [{ id: row.id, title: row.title, company: row.company, status: row.status, notes: row.notes, appliedAt: null, followUpAt: row.followUpAt, href: href(`/loop?opportunity=${row.id}&generation=${generation}`) }],
-        lastRecordedAt: recorded(row.checkedAt, ...packets.map(packet => packet.createdAt)), href: href(`/loop?opportunity=${row.id}&generation=${generation}`), action: 'Open this Job Loop vacancy', note: 'Documents show recent loaded output attempts. Earlier outputs may exist. Approval and available formats are checked again in Job Loop.',
+        lastRecordedAt: recorded(row.checkedAt, ...packets.map(packet => packet.createdAt)), href: href(`/loop?opportunity=${row.id}&generation=${generation}`), action: 'Open this Automated Job Loop vacancy', note: 'Documents show recent loaded output attempts. Earlier outputs may exist. Approval and available formats are checked again in your Automated Job Loop.',
       });
     }
     // Only a uniquely recorded server provenance link can join these sources.
@@ -106,13 +106,13 @@ export function buildApplicationHome(ownerId: string, input: ApplicationHomeInpu
       }
       checkRow.sourceLabel = 'Saved application';
       checkRow.relatedSources = [{ id: loopRow.id, href: loopRow.href, action: loopRow.action, title: loopRow.title, company: loopRow.company, vacancy: loopRow.vacancy, employerUrl: loopRow.employerUrl }];
-      checkRow.documents.push(...loopRow.documents.map(document => ({ ...document, id: `loop:${generation}:${document.id}`, label: 'Job Loop CV' })));
+      checkRow.documents.push(...loopRow.documents.map(document => ({ ...document, id: `loop:${generation}:${document.id}`, label: 'Automated Job Loop CV' })));
       checkRow.progress = [
         ...checkRow.progress.map(progress => ({ ...progress, sourceLabel: 'Saved-check tracking', action: 'Update this tracking entry' })),
-        ...loopRow.progress.map(progress => ({ ...progress, sourceLabel: 'Job Loop progress', action: 'Update this vacancy progress' })),
+        ...loopRow.progress.map(progress => ({ ...progress, sourceLabel: 'Automated Job Loop progress', action: 'Update this vacancy progress' })),
       ];
       checkRow.lastRecordedAt = recorded(checkRow.lastRecordedAt, loopRow.lastRecordedAt);
-      checkRow.note = 'This saved check and Job Loop vacancy have a recorded link. Each keeps its own wording and progress. ' + (loopRow.documents.length ? 'Recent Job Loop outputs are included below; earlier outputs may exist.' : 'No Job Loop output is included in the currently loaded results.');
+      checkRow.note = 'This saved check and Automated Job Loop vacancy have a recorded link. Each keeps its own wording and progress. ' + (loopRow.documents.length ? 'Recent Automated Job Loop outputs are included below; earlier outputs may exist.' : 'No Automated Job Loop output is included in the currently loaded results.');
       rows.splice(rows.indexOf(loopRow), 1);
     }
   }

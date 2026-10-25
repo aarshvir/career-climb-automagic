@@ -72,13 +72,13 @@ export function SeoHead({
       <meta property="og:url" content={canonical} />
       <meta property="og:locale" content={locale} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.' : description} />
+      <meta property="og:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Automated Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.' : description} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content={twitterHandle} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.' : description} />
+      <meta name="twitter:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Automated Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.' : description} />
       <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link rel="dns-prefetch" href="https://www.googletagmanager.com" />

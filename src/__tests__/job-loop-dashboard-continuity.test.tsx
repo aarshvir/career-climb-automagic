@@ -47,7 +47,7 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); clearOnboardingDraft(); });
 
-describe('Job Loop dashboard setup continuity', () => {
+describe('Automated Job Loop dashboard setup continuity', () => {
   it('keeps independent CV preparation and saved-check panels distinct when variants are enabled', async () => {
     snapshot.capabilities.cvVariants = true;
     const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -62,10 +62,10 @@ describe('Job Loop dashboard setup continuity', () => {
 
   it('shows one setup destination instead of competing empty overview, discovery and preparation panels', async () => {
     openDashboard();
-    const setup = await screen.findByRole('region', { name: 'Job Loop setup' });
-    expect(screen.getAllByRole('region', { name: 'Job Loop setup' })).toHaveLength(1);
+    const setup = await screen.findByRole('region', { name: 'Automated Job Loop setup' });
+    expect(screen.getAllByRole('region', { name: 'Automated Job Loop setup' })).toHaveLength(1);
     expect(within(setup).getByRole('link', { name: 'Start your setup' })).toHaveAttribute('href', '/onboarding');
-    expect(screen.queryByRole('list', { name: 'Job Loop journey' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Automated Job Loop journey' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Know where your shortlist comes from.' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Discovery and wider preparation' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Run history & source coverage' })).not.toBeInTheDocument();
@@ -83,8 +83,8 @@ describe('Job Loop dashboard setup continuity', () => {
 
   it.each([[0, 'Roles'], [1, 'Locations'], [4, 'Your CV']] as const)('resumes the actual unfinished step %s instead of restarting the CV journey', async (step, label) => {
     leaveSetupDraft(step); openDashboard();
-    const setup = await screen.findByRole('region', { name: 'Job Loop setup' });
-    expect(within(setup).getByRole('heading', { name: 'Continue setting up your Job Loop' })).toBeInTheDocument();
+    const setup = await screen.findByRole('region', { name: 'Automated Job Loop setup' });
+    expect(within(setup).getByRole('heading', { name: 'Continue setting up your Automated Job Loop' })).toBeInTheDocument();
     expect(setup).toHaveTextContent(`Step ${step + 1} of 6 · ${label}`);
     expect(setup).toHaveTextContent('Your answers are not saved to your account yet.');
     expect(within(setup).getByRole('link', { name: 'Resume setup' })).toHaveAttribute('href', '/onboarding');
@@ -102,18 +102,18 @@ describe('Job Loop dashboard setup continuity', () => {
     snapshot.profile = { ...blankLoopProfile('professional'), name: 'Alex Example', sourceText: 'Alex Example coordinated reporting and reviewed operational processes at Example Company.', targetTitles: ['Operations manager'], locations: ['Boston'], revision: 1, updatedAt: '2026-10-17T00:00:00Z' };
     leaveSetupDraft(1); openDashboard();
     expect(await screen.findByRole('heading', { name: 'Pick up where you left off.' })).toBeInTheDocument();
-    expect(screen.getByRole('list', { name: 'Job Loop journey' })).toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: 'Job Loop setup' })).not.toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Automated Job Loop journey' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Automated Job Loop setup' })).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Know where your shortlist comes from.' })).toBeInTheDocument();
   });
 
   it('identifies the two products and their different jobs without sending a Loop user to documents', async () => {
     openDashboard();
-    await waitFor(() => expect(screen.getByRole('region', { name: 'Job Loop setup' })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Automated Job Loop setup' })).toBeInTheDocument());
     const products = screen.getByRole('navigation', { name: 'Choose a product' });
     expect(within(products).getAllByRole('link')).toHaveLength(2);
-    expect(within(products).getByRole('link', { name: /Job Loop/ })).toHaveAttribute('href', '/loop');
-    expect(within(products).getByRole('link', { name: /Job Loop/ })).toHaveAttribute('aria-current', 'page');
+    expect(within(products).getByRole('link', { name: /Automated Job Loop/ })).toHaveAttribute('href', '/loop');
+    expect(within(products).getByRole('link', { name: /Automated Job Loop/ })).toHaveAttribute('aria-current', 'page');
     expect(within(products).getByRole('link', { name: /CV Check/ })).toHaveAttribute('href', '/check');
     expect(products).toHaveTextContent('Find jobs and prepare tailored CVs on your schedule.');
     expect(products).toHaveTextContent('Check your CV against a job you already found.');

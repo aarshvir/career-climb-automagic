@@ -274,7 +274,7 @@
 .pricing-offer .pricing-faq h2 { margin-bottom:10px; font-size:24px; }
 @media(max-width:1100px) { .pricing-offer .pricing-tiers { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:640px) { .pricing-offer .pricing-tiers { grid-template-columns:1fr; } .pricing-offer .pricing-teams { flex-direction:column; align-items:flex-start; } }
-/* Combined pricing: Job Loop card alone, then the passes block with its own heading. */
+/* Combined pricing: Automated Job Loop card alone, then the passes block with its own heading. */
 .product-current-offer--single { grid-template-columns:minmax(0,1fr); }
 .pricing-offer .pricing-section-head { margin:48px 0 22px; }
 .pricing-offer .pricing-section-head h2 { font-size:32px; line-height:1.25; letter-spacing:-.025em; font-weight:650; margin-top:8px; }

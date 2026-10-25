@@ -148,13 +148,13 @@ describe('bounded source replacement and optional-save repair', () => {
     const id = 'afe62064-a331-4ce6-9e51-2849e091ba54';
     mocks.list.mockResolvedValue([{ id, user_id: 'owner-a', request_id: id, job_title: 'Reporting analyst', company: 'Example employer', job_description: vacancy, original_text: source, reviewed_text: finalText, method_version: 'fixture-method', status: 'approved', created_at: '2026-10-15T00:00:00Z', updated_at: '2026-10-15T00:00:00Z' }]);
     const view = render(tree());
-    const link = await screen.findByRole('link', { name: 'Continue this saved check in Job Loop' });
+    const link = await screen.findByRole('link', { name: 'Continue this saved check in your Automated Job Loop' });
     expect(link).toHaveAttribute('href', `/loop?fromCheck=${id}`);
     expect(mocks.save).not.toHaveBeenCalled(); expect(mocks.tracker).not.toHaveBeenCalled();
     mocks.auth.user = { id: 'owner-b', email: 'owner-b@example.test' };
     setTrackingDraftOwner('owner-b');
     mocks.list.mockResolvedValue([]); view.rerender(tree());
-    await waitFor(() => expect(screen.queryByRole('link', { name: 'Continue this saved check in Job Loop' })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole('link', { name: 'Continue this saved check in your Automated Job Loop' })).not.toBeInTheDocument());
   });
 
 });

@@ -207,7 +207,7 @@ export const careerGuides: CareerGuide[] = [
       ] },
       { heading: "Recheck before preparing and before submitting", paragraphs: [
         "Open the original listing when you begin the packet and again before submission. Confirm it is still available and the requirements have not changed. Save the checked date and role reference. A job-board copy may remain accessible after the employer has closed the vacancy, so use the employer's destination where possible.",
-        "Choose one role from the active shortlist and compare the CV evidence in Jobvance's free check. If you use the Job Loop, save confirmed career facts and keep each role's packet separate. You decide which roles to apply for and complete submission yourself. A short, deliberate list is a starting point for action, not a hiring forecast."
+        "Choose one role from the active shortlist and compare the CV evidence in Jobvance's free check. If you use the Automated Job Loop, save confirmed career facts and keep each role's packet separate. You decide which roles to apply for and complete submission yourself. A short, deliberate list is a starting point for action, not a hiring forecast."
       ] }
     ], sources: [SOURCES.yale], relatedSlugs: ["verify-job-listing-source", "cv-job-description-evidence", "job-search-time-plan"]
   }),
@@ -237,7 +237,7 @@ export const careerGuides: CareerGuide[] = [
       ] },
       { heading: "Prepare only after the source check", paragraphs: [
         "Once you have a credible application route, read the full requirements and decide whether the role deserves a packet. Source credibility does not establish your eligibility or the attractiveness of the role. Those are separate checks. Keeping them separate prevents a legitimate employer name from overriding an unsuitable requirement or an unrealistic timeline.",
-        "In Jobvance, keep the real source link with the vacancy you review. Use the free check for your CV and the Job Loop for a deliberate shortlist when available. You still inspect the employer destination, approve the materials and submit them yourself. If a source cannot be confirmed, the next action is verification, not a stronger cover letter."
+        "In Jobvance, keep the real source link with the vacancy you review. Use the free check for your CV and the Automated Job Loop for a deliberate shortlist when available. You still inspect the employer destination, approve the materials and submit them yourself. If a source cannot be confirmed, the next action is verification, not a stronger cover letter."
       ] }
     ], sources: [SOURCES.fraud], relatedSlugs: ["uae-job-search-sources", "role-filtering-before-applying", "resume-privacy-before-upload"]
   }),
@@ -297,7 +297,7 @@ export const careerGuides: CareerGuide[] = [
       ] },
       { heading: "Submit and record the actual event", paragraphs: [
         "Complete submission through the employer's stated route. Keep any confirmation reference or email, the submitted CV version and the date. Mark the application as submitted only after the employer's system or another reliable record confirms it. A prepared pack is not an application, and a downloaded file is not a receipt.",
-        "Jobvance's free check helps with the CV review; the Job Loop can organise role-specific CVs and drafts when configured. You approve the materials and send or submit them yourself. Start with one vacancy, complete its packet and keep its record. If you need help, use the public contact page before adding unnecessary information or beginning another run."
+        "Jobvance's free check helps with the CV review; the Automated Job Loop can organise role-specific CVs and drafts when configured. You approve the materials and send or submit them yourself. Start with one vacancy, complete its packet and keep its record. If you need help, use the public contact page before adding unnecessary information or beginning another run."
       ], sourceIds: ["jobvance-workflow"] }
     ], sources: [SOURCES.harvard, SOURCES.workflow], relatedSlugs: ["reuse-second-application", "cv-pdf-or-docx", "application-tracking-follow-up"]
   }),
@@ -327,7 +327,7 @@ export const careerGuides: CareerGuide[] = [
       ] },
       { heading: "Keep two applications as two records", paragraphs: [
         "Save the approved second CV under a role-specific filename and keep the submitted version with its application record. Do not overwrite the first employer's packet. When an interview arrives, you need to know what that employer received. Store submission status and follow-up dates separately from preparation status.",
-        "Jobvance's Job Loop uses a reusable career record to prepare separate role packets, subject to configured connections. You review and approve each packet. If you are using only the free check, bring the new vacancy and review it independently. Your next action is to approve the second role's exact files, then submit through its required channel yourself."
+        "Jobvance's Automated Job Loop uses a reusable career record to prepare separate role packets, subject to configured connections. You review and approve each packet. If you are using only the free check, bring the new vacancy and review it independently. Your next action is to approve the second role's exact files, then submit through its required channel yourself."
       ], sourceIds: ["jobvance-workflow"] }
     ], sources: [SOURCES.workflow], relatedSlugs: ["first-application-pack", "cv-job-description-evidence", "application-tracking-follow-up"]
   }),
@@ -477,7 +477,7 @@ export const careerGuides: CareerGuide[] = [
       ] },
       { heading: "Reset the plan from actual progress", paragraphs: [
         "At the end of the week, review completed packets, unresolved conditions and upcoming deadlines. Ask where time went and which action mattered. Reduce active work if too many drafts remain unfinished. Reuse confirmed career facts next week, while preserving separate versions for each employer.",
-        "Jobvance's Job Loop can organise a reusable record, role packets and next actions when configured. It does not remove your review or submit applications for you. You can also use this plan with a simple note. Your next action is to schedule one realistic review block and select the verified role that deserves it."
+        "Jobvance's Automated Job Loop can organise a reusable record, role packets and next actions when configured. It does not remove your review or submit applications for you. You can also use this plan with a simple note. Your next action is to schedule one realistic review block and select the verified role that deserves it."
       ], sourceIds: ["jobvance-workflow"] }
     ], sources: [SOURCES.workflow], relatedSlugs: ["role-filtering-before-applying", "reuse-second-application", "confidential-career-switch"]
   }),
@@ -573,14 +573,14 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "cancelled-partial-job-loop-runs",
-    title: "What to do when Job Loop preparation stops",
+    title: "What to do when the Automated Job Loop preparation stops",
     description: "Find the status of a partial, cancelled or interrupted preparation run and decide whether to review, resume or ask for help.",
     audience: "All applicants", category: "Privacy & troubleshooting",
     summary: "If preparation stops or only some documents are ready, open the run history to see what finished and what needs attention. You may be able to review a completed document, resolve an issue and resume, or cancel the remaining work. Start with the recorded status and the message beside it.",
     takeaways: ["Read the recorded status and messages.", "Review existing outputs independently.", "Distinguish cancelling a run from cancelling a schedule."],
     sections: [
       { heading: "Inspect the current record first", paragraphs: [
-        "Open Run history and source coverage in Job Loop and read the status, current step and messages. Check which sources completed and which need attention. If you have just selected an action, refresh the records to see its result before deciding what to do next.",
+        "Open Run history and source coverage in your Automated Job Loop and read the status, current step and messages. Check which sources completed and which need attention. If you have just selected an action, refresh the records to see its result before deciding what to do next.",
         "Write down the specific unfinished step. It may concern a source, configuration, a budget stop or preparation. Avoid reducing every interruption to 'the app failed'. A precise observation helps you decide whether there is useful output to review and gives support a clearer description if you need assistance."
       ], sourceIds: ["jobvance-workflow"] },
       { heading: "Separate run completion from packet approval", paragraphs: [
@@ -597,7 +597,7 @@ export const careerGuides: CareerGuide[] = [
       ] },
       { heading: "Choose one next action", paragraphs: [
         "There are three useful paths: review a completed output, resume an eligible run after resolving the issue, or request help with the recorded problem. Choose the one supported by the interface. A run being partial does not establish that your application is weak; it describes the preparation process, not an employer decision.",
-        "Open your Job Loop to inspect history, or use the public contact page for general help without adding private material. If you simply need to prepare one CV while a connection is unavailable, the free check offers a separate review path. Approve the result yourself and submit through the employer's channel when the packet is ready."
+        "Open your Automated Job Loop to inspect history, or use the public contact page for general help without adding private material. If you simply need to prepare one CV while a connection is unavailable, the free check offers a separate review path. Approve the result yourself and submit through the employer's channel when the packet is ready."
       ] }
     ], sources: [SOURCES.workflow], relatedSlugs: ["first-application-pack", "application-tracking-follow-up", "cv-upload-failure-checklist"]
   }),
