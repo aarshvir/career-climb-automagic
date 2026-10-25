@@ -1,8 +1,8 @@
-// Meta Pixel advertising measurement: page visits plus the moment a new account is created.
-// It only starts on a fresh load of a public page, never on sign-in, reset, mailbox or
-// checkout return URLs (which can carry login codes or payment references). Once started,
-// Meta's own history tracking reports later in-app page changes; in-app addresses hold
-// only fixed paths and opaque IDs. It never sends CV, vacancy, document, payment or email data.
+// Meta Pixel advertising measurement: the public page a visit lands on, plus the moment a new
+// account is created. It only starts on a fresh load of a public page, never on sign-in, reset,
+// mailbox or checkout return URLs (which can carry login codes or payment references). Meta's
+// history tracking is off, so nothing is reported as the visitor moves into private pages.
+// It never sends CV, vacancy, document, payment or email data.
 import { supabase } from '@/integrations/supabase/client';
 
 export const META_PIXEL_ID = '1912745166266087';
@@ -14,7 +14,7 @@ const NEW_ACCOUNT_WINDOW = 24 * 60 * 60 * 1000;
 const measuredPaths = new Set(['/', '/onboarding', '/auth', '/job-loop', '/pricing', '/how-it-works', '/faq', '/about', '/contact', '/privacy', '/terms', '/refund', '/help', '/guides', '/walkthroughs', '/for-students', '/for-mba', '/for-career-switchers']);
 const europeanZones = /^(Europe\/|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
 
-type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string };
+type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean };
 declare global { interface Window { fbq?: Fbq; _fbq?: Fbq } interface Navigator { globalPrivacyControl?: boolean } }
 
 const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid'];
@@ -53,6 +53,7 @@ function ensurePixel(): Fbq | null {
   if (window.fbq) return window.fbq;
   const fbq = function (...args: unknown[]) { if (fbq.callMethod) fbq.callMethod(...args); else fbq.queue.push(args); } as Fbq;
   fbq.push = fbq; fbq.loaded = true; fbq.version = '2.0'; fbq.queue = [];
+  fbq.disablePushState = true; // No automatic PageViews when the app changes page.
   window.fbq = fbq; window._fbq = fbq;
   const script = document.createElement('script');
   script.async = true; script.src = 'https://connect.facebook.net/en_US/fbevents.js';
@@ -62,12 +63,12 @@ function ensurePixel(): Fbq | null {
   return fbq;
 }
 
-/** Called on each page change. Meta drops a second manual PageView in one page load,
- * so only the first is sent here; later page changes come from Meta's history tracking. */
+/** Called on each page change. Only the landing page view is sent (Meta drops repeat manual
+ * PageViews in one page load), and a waiting sign-up is sent only from a public page. */
 export function trackMetaPage(pathname: string): void {
+  if (!isMeasuredPath(pathname) || !isMeasuredPath(window.location.pathname)) return;
   let fbq = window.fbq ?? null;
   if (!fbq) {
-    if (!isMeasuredPath(pathname) || !isMeasuredPath(window.location.pathname)) return;
     fbq = ensurePixel();
     if (!fbq) return;
     fbq('track', 'PageView');
@@ -98,8 +99,9 @@ const metaCookie = (name: '_fbp' | '_fbc') => document.cookie.split(';').map(par
 
 /** Asks the meta-conversions function for the server copy once Meta has set its cookies. */
 function sendServerRegistration(delay = 2000): void {
+  const pageUrl = `${window.location.origin}${window.location.pathname}`; // the public page, even if the visitor moves on
   window.setTimeout(() => {
-    const body = { pageUrl: `${window.location.origin}${window.location.pathname}`, fbp: metaCookie('_fbp'), fbc: metaCookie('_fbc') };
+    const body = { pageUrl, fbp: metaCookie('_fbp'), fbc: metaCookie('_fbc') };
     void supabase.functions.invoke('meta-conversions', { body }).catch(() => undefined);
   }, delay);
 }
@@ -112,6 +114,6 @@ export async function noteAccountForMeta(user: { id: string; created_at?: string
   const key = await accountKey(user.id);
   if (sentKeys().includes(key)) return;
   try { sessionStorage.setItem(PENDING_KEY, key); } catch { return; }
-  // Sent now if the pixel runs or this is a public page; otherwise on the next public page.
-  if (window.fbq || isMeasuredPath(window.location.pathname)) { const fbq = ensurePixel(); if (fbq) flushRegistration(fbq); }
+  // Sent now from a public page; otherwise on the next one (never from a private page).
+  if (isMeasuredPath(window.location.pathname)) { const fbq = ensurePixel(); if (fbq) flushRegistration(fbq); }
 }

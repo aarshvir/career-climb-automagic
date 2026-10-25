@@ -28,14 +28,26 @@ describe('Meta Pixel measurement boundaries', () => {
     for (const path of ['/auth/callback', '/auth/reset', '/auth/forgot-password', '/loop', '/check', '/dashboard', '/applications', '/admin', '/admin2', '/guides/a/b']) expect(isMeasuredPath(path)).toBe(false);
   });
 
-  it('loads the pixel once with automatic page-content collection off and sends the first page view', () => {
+  it('loads once, reports only the landing page and turns off automatic collection and history tracking', () => {
     trackMetaPage('/');
     window.history.pushState(null, '', '/pricing');
     trackMetaPage('/pricing');
     expect(document.querySelectorAll('script[src="https://connect.facebook.net/en_US/fbevents.js"]')).toHaveLength(1);
+    expect(window.fbq?.disablePushState).toBe(true);
     expect(calls().slice(0, 2)).toEqual([['set', 'autoConfig', false, META_PIXEL_ID], ['init', META_PIXEL_ID]]);
-    // Later page changes are reported by Meta's own history tracking, which drops repeated manual PageViews.
     expect(events('PageView')).toHaveLength(1);
+  });
+
+  it('sends nothing after the visitor moves from a public page into a private one', async () => {
+    trackMetaPage('/');
+    const before = calls().length;
+    window.history.pushState(null, '', '/loop');
+    trackMetaPage('/loop');
+    await noteAccountForMeta({ id: 'a1b2c3', created_at: new Date().toISOString() });
+    expect(calls()).toHaveLength(before);
+    window.history.pushState(null, '', '/pricing');
+    trackMetaPage('/pricing');
+    expect(events('CompleteRegistration')).toHaveLength(1);
   });
 
   it('never starts on a private page or a sign-in return link', () => {
