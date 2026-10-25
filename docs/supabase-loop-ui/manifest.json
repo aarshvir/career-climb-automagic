@@ -7,7 +7,7 @@
                         "bytes":  99290,
                         "sources":  [
                                         {
-                                            "sha256":  "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
+                                            "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
                                             "path":  "src/lib/admin-types.ts"
                                         },
                                         {
@@ -135,7 +135,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-variant-execution.ts"
                                         },
                                         {
-                                            "sha256":  "c404b6e6ab13940bc53b29717df21f1bd116862574c48dd31e8985a13cc9b2fe",
+                                            "sha256":  "c353f5370a227cb6c0b56ee033599612f5ca37017a243a93f1e9adbadd9b5361",
                                             "path":  "supabase/functions/_shared/jobvance-admin.ts"
                                         },
                                         {
@@ -279,7 +279,7 @@
                         "bytes":  2081195,
                         "sources":  [
                                         {
-                                            "sha256":  "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
+                                            "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
                                             "path":  "src/lib/admin-types.ts"
                                         },
                                         {
@@ -407,7 +407,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-variant-execution.ts"
                                         },
                                         {
-                                            "sha256":  "c404b6e6ab13940bc53b29717df21f1bd116862574c48dd31e8985a13cc9b2fe",
+                                            "sha256":  "c353f5370a227cb6c0b56ee033599612f5ca37017a243a93f1e9adbadd9b5361",
                                             "path":  "supabase/functions/_shared/jobvance-admin.ts"
                                         },
                                         {
@@ -551,7 +551,7 @@
                         "bytes":  42461,
                         "sources":  [
                                         {
-                                            "sha256":  "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
+                                            "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
                                             "path":  "src/lib/admin-types.ts"
                                         },
                                         {
@@ -679,7 +679,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-variant-execution.ts"
                                         },
                                         {
-                                            "sha256":  "c404b6e6ab13940bc53b29717df21f1bd116862574c48dd31e8985a13cc9b2fe",
+                                            "sha256":  "c353f5370a227cb6c0b56ee033599612f5ca37017a243a93f1e9adbadd9b5361",
                                             "path":  "supabase/functions/_shared/jobvance-admin.ts"
                                         },
                                         {
@@ -818,12 +818,12 @@
                     },
                     {
                         "function":  "jobvance-admin",
-                        "sha256":  "772982648e81dc8163668cd6a5a7b4b5d3bc3157d7fd52f86d7468765e8278e9",
+                        "sha256":  "4d4c452f948595d139a77c0cf9915838364c32bb1d7e5151f89a9ef0550e6a55",
                         "artifact":  "docs/supabase-loop-ui/jobvance-admin.js",
-                        "bytes":  11295,
+                        "bytes":  11557,
                         "sources":  [
                                         {
-                                            "sha256":  "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
+                                            "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
                                             "path":  "src/lib/admin-types.ts"
                                         },
                                         {
@@ -951,7 +951,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-variant-execution.ts"
                                         },
                                         {
-                                            "sha256":  "c404b6e6ab13940bc53b29717df21f1bd116862574c48dd31e8985a13cc9b2fe",
+                                            "sha256":  "c353f5370a227cb6c0b56ee033599612f5ca37017a243a93f1e9adbadd9b5361",
                                             "path":  "supabase/functions/_shared/jobvance-admin.ts"
                                         },
                                         {
@@ -1095,7 +1095,7 @@
                         "bytes":  21563,
                         "sources":  [
                                         {
-                                            "sha256":  "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
+                                            "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
                                             "path":  "src/lib/admin-types.ts"
                                         },
                                         {
@@ -1223,7 +1223,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-variant-execution.ts"
                                         },
                                         {
-                                            "sha256":  "c404b6e6ab13940bc53b29717df21f1bd116862574c48dd31e8985a13cc9b2fe",
+                                            "sha256":  "c353f5370a227cb6c0b56ee033599612f5ca37017a243a93f1e9adbadd9b5361",
                                             "path":  "supabase/functions/_shared/jobvance-admin.ts"
                                         },
                                         {
@@ -1367,7 +1367,7 @@
                         "bytes":  5641,
                         "sources":  [
                                         {
-                                            "sha256":  "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
+                                            "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
                                             "path":  "src/lib/admin-types.ts"
                                         },
                                         {
@@ -1495,7 +1495,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-variant-execution.ts"
                                         },
                                         {
-                                            "sha256":  "c404b6e6ab13940bc53b29717df21f1bd116862574c48dd31e8985a13cc9b2fe",
+                                            "sha256":  "c353f5370a227cb6c0b56ee033599612f5ca37017a243a93f1e9adbadd9b5361",
                                             "path":  "supabase/functions/_shared/jobvance-admin.ts"
                                         },
                                         {
@@ -1634,12 +1634,12 @@
                     },
                     {
                         "function":  "jobvance-marketing",
-                        "sha256":  "d0a9eb298ccd104da7dfe625cafbf69ee030b0105688db34285eaeda4476a05e",
+                        "sha256":  "78d81fed1551a394c28a096c1dcf754f47337e4c373916a1af25cab0109414f5",
                         "artifact":  "docs/supabase-loop-ui/jobvance-marketing.js",
                         "bytes":  25426,
                         "sources":  [
                                         {
-                                            "sha256":  "1fc8b08d53e99cbf1a875692dee3fdcad136f51aa76c901457bfbdd1a231122c",
+                                            "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
                                             "path":  "src/lib/admin-types.ts"
                                         },
                                         {
@@ -1767,7 +1767,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-variant-execution.ts"
                                         },
                                         {
-                                            "sha256":  "c404b6e6ab13940bc53b29717df21f1bd116862574c48dd31e8985a13cc9b2fe",
+                                            "sha256":  "c353f5370a227cb6c0b56ee033599612f5ca37017a243a93f1e9adbadd9b5361",
                                             "path":  "supabase/functions/_shared/jobvance-admin.ts"
                                         },
                                         {
@@ -2026,6 +2026,10 @@
                        {
                            "sha256":  "09beb309599da34089a55c4556b1eec9381b3f55d245d2593c9b11960e522975",
                            "path":  "supabase/migrations/20261024113134_job_loop_paid_capacity_100.sql"
+                       },
+                       {
+                           "sha256":  "7554786783648add1bbdfde0d289768c60845454e65a2ac0e22339400c411e3a",
+                           "path":  "supabase/migrations/20261025200000_jobvance_admin_dashboard.sql"
                        }
                    ],
     "generator":  "deno@2.9.6 bundle --config=supabase/functions/job-loop-worker/deno.json --platform=deno --minify --external=jspdf --external=docx; pin npm specifiers",

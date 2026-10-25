@@ -6,21 +6,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AdminSnapshot } from '@/lib/admin-types';
 import { adminSnapshot } from './fixtures/admin-snapshot';
 vi.unmock('react-router-dom');
-const mocks = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string } | null, call: vi.fn() }));
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: mocks.user, loading: false }) }));
+const mocks = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string } | null, token: 'session-a', call: vi.fn() }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: mocks.user, session: mocks.user ? { user: mocks.user, access_token: mocks.token } : null, loading: false }) }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => undefined } } }) } } }));
 vi.mock('@/lib/admin-api', async importOriginal => { const original = await importOriginal<typeof import('@/lib/admin-api')>(); return { ...original, callAdmin: mocks.call }; });
 import AdminPortal from '@/pages/admin/AdminPortal';
 import { AdminApiError } from '@/lib/admin-api';
 function AccountRoute() { const location = useLocation(); return <div>Sign-in route: {location.search}</div>; }
-function tree(path = '/admin2?days=30') { return <HelmetProvider><MemoryRouter initialEntries={[path]}><Routes><Route path="/admin" element={<AdminPortal view="operations" />} /><Route path="/admin2" element={<AdminPortal view="founder" />} /><Route path="/auth" element={<AccountRoute />} /></Routes></MemoryRouter></HelmetProvider>; }
+function tree(path = '/admin2?days=30') { return <HelmetProvider><MemoryRouter initialEntries={[path]}><Routes><Route path="/admin-original" element={<AdminPortal view="operations" />} /><Route path="/admin2" element={<AdminPortal view="founder" />} /><Route path="/auth" element={<AccountRoute />} /></Routes></MemoryRouter></HelmetProvider>; }
 let current: AdminSnapshot;
-beforeEach(() => { vi.clearAllMocks(); vi.spyOn(window, 'scrollTo').mockImplementation(() => {}); mocks.user = { id: 'owner-a' }; current = adminSnapshot(); mocks.call.mockImplementation(async (_id, action) => ({ snapshot: { ...current, window: { ...current.window, days: action.days ?? 30 } } })); });
+beforeEach(() => { vi.clearAllMocks(); vi.spyOn(window, 'scrollTo').mockImplementation(() => {}); mocks.user = { id: 'owner-a' }; mocks.token = 'session-a'; current = adminSnapshot(); mocks.call.mockImplementation(async (_id, action) => ({ snapshot: { ...current, window: { ...current.window, days: action.days ?? 30 } } })); });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('private owner portals', () => {
   it('redirects an anonymous request to sign-in with only the fixed return route and range', async () => {
-    mocks.user = null; render(tree('/admin?days=90'));
-    expect(await screen.findByText('Sign-in route: ?next=%2Fadmin%3Fdays%3D90')).toBeInTheDocument(); expect(mocks.call).not.toHaveBeenCalled();
+    mocks.user = null; render(tree('/admin-original?days=90'));
+    expect(await screen.findByText('Sign-in route: ?next=%2Fadmin-original%3Fdays%3D90')).toBeInTheDocument(); expect(mocks.call).not.toHaveBeenCalled();
   });
   it('shows a helpful denial without private data or administration navigation', async () => {
     mocks.call.mockRejectedValue(new AdminApiError('forbidden', 'Denied')); render(tree());
@@ -39,7 +40,7 @@ describe('private owner portals', () => {
     expect(screen.getByText(/Saving does not purchase credits/)).toBeInTheDocument(); expect(screen.getAllByText(/2026-09-12 12:00 UTC/).length).toBeGreaterThan(2); expect(screen.getAllByText(/Source:/).length).toBeGreaterThan(5);
   });
   it('preserves the selected range between workspaces and refreshes its evidence', async () => {
-    render(tree('/admin?days=7')); const user = userEvent.setup(); await screen.findByRole('heading', { name: 'Support receipts' });
+    render(tree('/admin-original?days=7')); const user = userEvent.setup(); await screen.findByRole('heading', { name: 'Support receipts' });
     expect(screen.getByRole('link', { name: 'Founder' })).toHaveAttribute('href', '/admin2?days=7');
     await user.click(screen.getByRole('button', { name: '90 days' })); await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'snapshot', days: 90 }));
     expect(await screen.findByRole('link', { name: 'Founder' })).toHaveAttribute('href', '/admin2?days=90'); expect(screen.getByRole('button', { name: '90 days' })).toHaveAttribute('aria-pressed', 'true');
@@ -67,7 +68,7 @@ describe('private owner portals', () => {
   it('clears private records if membership is revoked before a support status save', async () => {
     current.operations.support = [{ id: '00000000-0000-4000-8000-000000000001', userId: 'candidate-a', emailDisplay: 'f***@example.invalid', category: 'help', status: 'received', createdAt: current.generatedAt, version: 2, messageAvailable: true }];
     mocks.call.mockImplementation(async (_id, action) => { if (action.action === 'update_support') throw new AdminApiError('forbidden', 'Membership revoked'); return { snapshot: current }; });
-    render(tree('/admin?days=30')); const user = userEvent.setup(); const status = await screen.findByLabelText('Status for support 00000000-0000-4000-8000-000000000001'); await user.selectOptions(status, 'in_review');
+    render(tree('/admin-original?days=30')); const user = userEvent.setup(); const status = await screen.findByLabelText('Status for support 00000000-0000-4000-8000-000000000001'); await user.selectOptions(status, 'in_review');
     expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'update_support')).toHaveLength(0); await user.click(screen.getByRole('button', { name: 'Save status' }));
     expect(await screen.findByRole('heading', { name: 'Administration access required' })).toBeInTheDocument(); expect(screen.queryByText('f***@example.invalid')).not.toBeInTheDocument(); expect(screen.queryByRole('navigation', { name: 'Administration workspaces' })).not.toBeInTheDocument();
   });
@@ -84,7 +85,7 @@ describe('private owner portals', () => {
     const id = '00000000-0000-4000-8000-000000000001', message = 'Fictional private request <img src=x onerror=alert(1)>.';
     current.operations.support = [{ id, userId: 'candidate-a', emailDisplay: 'f***@example.invalid', category: 'help', status: 'received', createdAt: current.generatedAt, version: 2, messageAvailable: true }];
     mocks.call.mockImplementation(async (_id, action) => action.action === 'support_detail' ? { supportDetail: { id, message } } : { snapshot: current });
-    render(tree('/admin?days=30')); const user = userEvent.setup(); const trigger = await screen.findByRole('button', { name: 'View saved message' });
+    render(tree('/admin-original?days=30')); const user = userEvent.setup(); const trigger = await screen.findByRole('button', { name: 'View saved message' });
     expect(mocks.call.mock.calls.some(([, action]) => action.action === 'support_detail')).toBe(false); expect(screen.queryByText(message)).not.toBeInTheDocument(); await user.click(trigger);
     const dialog = await screen.findByRole('dialog', { name: 'Saved support message' }); expect(await within(dialog).findByText(message)).toBeInTheDocument(); expect(within(dialog).queryByRole('img')).not.toBeInTheDocument(); expect(mocks.call).toHaveBeenCalledWith('owner-a', { action: 'support_detail', id });
     await user.click(within(dialog).getByRole('button', { name: 'Close message' })); expect(screen.queryByText(message)).not.toBeInTheDocument(); expect(trigger).toHaveFocus();
@@ -93,14 +94,14 @@ describe('private owner portals', () => {
     const id = '00000000-0000-4000-8000-000000000001'; let finish: (value: unknown) => void;
     current.operations.support = [{ id, userId: 'candidate-a', emailDisplay: 'f***@example.invalid', category: 'help', status: 'received', createdAt: current.generatedAt, version: 2, messageAvailable: true }];
     mocks.call.mockImplementation(async (_id, action) => action.action === 'support_detail' ? await new Promise(resolve => { finish = resolve; }) : { snapshot: current });
-    render(tree('/admin?days=30')); const user = userEvent.setup(); await user.click(await screen.findByRole('button', { name: 'View saved message' }));
+    render(tree('/admin-original?days=30')); const user = userEvent.setup(); await user.click(await screen.findByRole('button', { name: 'View saved message' }));
     const dialog = await screen.findByRole('dialog'); expect(within(dialog).getByRole('status')).toHaveTextContent('Verifying access'); await user.click(within(dialog).getByRole('button', { name: 'Close message' }));
     await act(async () => { finish({ supportDetail: { id, message: 'Fictional late private message' } }); }); expect(screen.queryByRole('dialog')).not.toBeInTheDocument(); expect(screen.queryByText('Fictional late private message')).not.toBeInTheDocument();
   });
   it('removes an open support message immediately when the account signs out', async () => {
     const id = '00000000-0000-4000-8000-000000000001', message = 'Fictional account-bound private message';
     current.operations.support = [{ id, userId: 'candidate-a', emailDisplay: 'f***@example.invalid', category: 'help', status: 'received', createdAt: current.generatedAt, version: 2, messageAvailable: true }]; mocks.call.mockImplementation(async (_id, action) => action.action === 'support_detail' ? { supportDetail: { id, message } } : { snapshot: current });
-    const rendered = render(tree('/admin?days=30')); const user = userEvent.setup(); await user.click(await screen.findByRole('button', { name: 'View saved message' })); await screen.findByText(message);
-    mocks.user = null; rendered.rerender(tree('/admin?days=30')); expect(screen.queryByText(message)).not.toBeInTheDocument(); expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    const rendered = render(tree('/admin-original?days=30')); const user = userEvent.setup(); await user.click(await screen.findByRole('button', { name: 'View saved message' })); await screen.findByText(message);
+    mocks.user = null; rendered.rerender(tree('/admin-original?days=30')); expect(screen.queryByText(message)).not.toBeInTheDocument(); expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

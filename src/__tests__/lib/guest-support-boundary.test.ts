@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AdminAction } from '@/lib/admin-types';
-const sdk = vi.hoisted(() => ({ invoke: vi.fn(), getUser: vi.fn(), session: vi.fn() }));
-vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke: sdk.invoke }, auth: { getUser: sdk.getUser } } }));
+const sdk = vi.hoisted(() => ({ invoke: vi.fn(), getUser: vi.fn(), session: vi.fn(), onAuthStateChange: vi.fn() }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke: sdk.invoke }, auth: { getUser: sdk.getUser, onAuthStateChange: sdk.onAuthStateChange } } }));
 vi.mock('@/utils/authSession', () => ({ readAuthSession: sdk.session }));
 import { createGuestSupport, guestReceiptCode, lookupGuestSupport, newGuestReference, parseGuestReceiptCode } from '@/lib/guest-support';
 import { callAdmin } from '@/lib/admin-api';
@@ -12,7 +12,8 @@ const receipt = { id: requestId, category: 'privacy', status: 'in_review', reply
 const guestDetail = { ...receipt, version: 3, message: 'Private support message' };
 beforeEach(() => {
   vi.clearAllMocks();
-  sdk.session.mockResolvedValue({ user: { id: 'owner-a' } });
+  sdk.session.mockResolvedValue({ user: { id: 'owner-a' }, access_token: 'synthetic-owner-session' });
+  sdk.onAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } });
   sdk.getUser.mockResolvedValue({ data: { user: { id: 'owner-a' } }, error: null });
   sdk.invoke.mockResolvedValue({ data: { receipt }, error: null });
 });
@@ -95,7 +96,7 @@ describe('staff guest support response boundary', () => {
     sdk.invoke.mockResolvedValue({ data: { guestSupport: [{ ...metadata, message: 'Unexpected private message', reply: 'Unexpected private reply', receiptKey: reference.receiptKey, rateHash: 'b'.repeat(64) }] }, error: null });
     const saved = await callAdmin('owner-a', { action: 'guest_support_list' });
     expect(saved).toEqual({ guestSupport: [metadata] });
-    expect(sdk.invoke).toHaveBeenCalledWith('jobvance-admin', { body: { action: 'guest_support_list' } });
+    expect(sdk.invoke).toHaveBeenCalledWith('jobvance-admin', { body: { action: 'guest_support_list' }, headers: { Authorization: 'Bearer synthetic-owner-session' } });
   });
 
   it.each(['guest_support_detail', 'guest_support_update'] as const)('requires a matching bounded private receipt from %s', async action => {

@@ -25,6 +25,7 @@ const LoopOnboarding = lazy(() => import("@/pages/LoopOnboarding"));
 const AudienceLanding = lazy(() => import("@/pages/AudienceLanding"));
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
 const AdminPortal = lazy(() => import("@/pages/admin/AdminPortal"));
+const AdminHome = lazy(() => import("@/pages/admin/home/AdminHome"));
 const MarketingAdmin = lazy(() => import("@/pages/admin/MarketingAdmin"));
 const JobLoopOverview = lazy(() => import('@/pages/JobLoopOverview'));
 const CareerGuides = lazy(() => import('@/pages/CareerGuides'));
@@ -77,7 +78,7 @@ function SiteChrome({ position }: { position: 'header' | 'footer' }) {
   const { pathname } = useLocation();
   // Private navigation is rendered only after a verified administration response.
   const path = pathname.replace(/\/+$/, '');
-  if (path === '/admin' || path === '/admin2' || path === '/marketing-admin') return null;
+  if (path === '/admin' || path.startsWith('/admin/') || path === '/admin-original' || path === '/admin2' || path === '/marketing-admin') return null;
   return position === 'header' ? <Header /> : <Footer />;
 }
 export default function MvpApp() {
@@ -149,7 +150,9 @@ export default function MvpApp() {
                     />
                     <Route path="/auth/reset" element={<ResetPassword />} />
                     <Route path="/dashboard" element={<ProtectedWorkspace />} />
-                    <Route path="/admin" element={<AdminPortal view="operations" />} />
+                    <Route path="/admin" element={<AdminHome />} />
+                    <Route path="/admin/:section" element={<AdminHome />} />
+                    <Route path="/admin-original" element={<AdminPortal view="operations" />} />
                     <Route path="/admin2" element={<AdminPortal view="founder" />} />
                     <Route path="/marketing-admin" element={<MarketingAdmin />} />
                     <Route

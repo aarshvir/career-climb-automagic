@@ -1,5 +1,5 @@
 import { ApiError } from './core.ts';
-import type { AdminAction, AdminConfigInput, AdminRole, AdminSnapshot, AdminResponse } from '../../../src/lib/admin-types.ts';
+import type { AdminAction, AdminConfigInput, AdminDashboard, AdminRole, AdminSnapshot, AdminResponse } from '../../../src/lib/admin-types.ts';
 import type { LoopEnv, LoopFetch } from './job-loop-providers.ts';
 import { checkOpenRouterKey } from './jobvance-openrouter.ts';
 
@@ -17,7 +17,7 @@ export function validateAdminAction(value: unknown): AdminAction {
   if(item.action==='guest_support_list'){exact(item,['action']);return {action:'guest_support_list'};}
   if(item.action==='guest_support_detail'){exact(item,['action','id']);if(typeof item.id!=='string'||!uuidPattern.test(item.id))invalid();return {action:'guest_support_detail',id:item.id};}
   if(item.action==='guest_support_update'){exact(item,['action','id','expectedVersion','status','reply']);if(typeof item.id!=='string'||!uuidPattern.test(item.id)||!Number.isSafeInteger(item.expectedVersion)||Number(item.expectedVersion)<0||typeof item.status!=='string'||!['received','in_review','resolved'].includes(item.status)||typeof item.reply!=='string'||item.reply.length>2000||item.reply.includes('\0'))invalid();return item as unknown as AdminAction;}
-  if (item.action === 'snapshot') { exact(item, ['action', 'days']); if (![7,30,90].includes(Number(item.days)) || typeof item.days !== 'number') invalid(); return item as unknown as AdminAction; }
+  if (item.action === 'snapshot' || item.action === 'dashboard') { exact(item, ['action', 'days']); if (![7,30,90].includes(Number(item.days)) || typeof item.days !== 'number') invalid(); return item as unknown as AdminAction; }
   if (item.action === 'provider_status') { exact(item, ['action']); return { action: 'provider_status' }; }
   if (item.action === 'support_detail') { exact(item,['action','id']); if (typeof item.id !== 'string' || !uuidPattern.test(item.id)) invalid(); return { action:'support_detail',id:item.id }; }
   if (item.action === 'update_support') {
@@ -76,6 +76,12 @@ export async function controlAdmin(db: AdminDatabase, actor: { id: string; role:
     if (snapshot.operations.scheduler.enabled && !snapshot.operations.scheduler.ready) snapshot.operations.scheduler.message = 'Globally enabled, but the server worker configuration is incomplete. No successful dispatch is inferred.';
     await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_details:{days:action.days}});
     return { snapshot };
+  }
+  if (action.action === 'dashboard') {
+    // Membership is rechecked inside the RPC; the existing audit action records the read.
+    const dashboard = await rpc<AdminDashboard>(db,'jobvance_admin_dashboard',{p_actor:actor.id,p_days:action.days});
+    await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_details:{days:action.days,view:'dashboard'}});
+    return { dashboard };
   }
   if (action.action === 'update_config') {
     if (actor.role !== 'owner') throw new ApiError(403,'ADMIN_FORBIDDEN','Only an owner can change global settings.');

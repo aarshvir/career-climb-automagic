@@ -78,4 +78,23 @@ describe('server administration authorization and input boundary',()=>{
     expect(response.snapshot?.operations.scheduler.ready).toBe(false);
     expect(m.rpc).toHaveBeenLastCalledWith('jobvance_admin_record_event',{p_actor:owner,p_action:'snapshot',p_details:{days:7}});
   });
+  it('routes bounded dashboard reads through the actor-checked RPC and records only safe read metadata',async()=>{
+    const m=database(); const fetcher=vi.fn();
+    for (const days of [7,30,90]) expect(validateAdminAction({action:'dashboard',days})).toEqual({action:'dashboard',days});
+    for (const input of [{action:'dashboard',days:null},{action:'dashboard',days:'30'},{action:'dashboard',days:365},{action:'dashboard',days:30,p_actor:'someone-else'}]) expect(()=>validateAdminAction(input)).toThrow(ApiError);
+    const response=await controlAdmin(m.db,{id:owner,role:'owner'},{action:'dashboard',days:90},()=>undefined,fetcher);
+    expect(response).toEqual({dashboard:{}});
+    expect(m.rpc.mock.calls).toEqual([
+      ['jobvance_admin_dashboard',{p_actor:owner,p_days:90}],
+      ['jobvance_admin_record_event',{p_actor:owner,p_action:'snapshot',p_details:{days:90,view:'dashboard'}}],
+    ]);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+  it('rejects a revoked dashboard role without returning data or auditing a successful read',async()=>{
+    const m=database(); const fetcher=vi.fn();
+    m.rpc.mockResolvedValueOnce({data:null,error:{message:'ADMIN_FORBIDDEN private details'}} as unknown as Awaited<ReturnType<typeof m.rpc>>);
+    await expect(controlAdmin(m.db,{id:owner,role:'owner'},{action:'dashboard',days:30},()=>undefined,fetcher)).rejects.toMatchObject({status:403,code:'ADMIN_FORBIDDEN'});
+    expect(m.rpc).toHaveBeenCalledExactlyOnceWith('jobvance_admin_dashboard',{p_actor:owner,p_days:30});
+    expect(fetcher).not.toHaveBeenCalled();
+  });
 });

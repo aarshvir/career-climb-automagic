@@ -8,8 +8,11 @@ const KEY = 'jobvance_account_return_v1';
 const TTL = 30 * 60 * 1000;
 type LoopReturn = '/loop' | '/loop?audience=student' | '/loop?audience=mba' | '/loop?audience=professional';
 const loopPaths: readonly string[] = ['/loop', '/loop?audience=student', '/loop?audience=mba', '/loop?audience=professional'];
-type AdminReturn = '/admin' | '/admin2' | `/admin?days=${7 | 30 | 90}` | `/admin2?days=${7 | 30 | 90}`;
-const adminPaths: readonly string[] = ['/admin', '/admin2', '/admin?days=7', '/admin?days=30', '/admin?days=90', '/admin2?days=7', '/admin2?days=30', '/admin2?days=90'];
+const adminSections = ['today', 'growth', 'users', 'revenue', 'marketing', 'operations', 'support'] as const;
+type AdminRoot = '/admin' | `/admin/${typeof adminSections[number]}` | '/admin-original' | '/admin2';
+type AdminReturn = AdminRoot | `${AdminRoot}?days=${7 | 30 | 90}`;
+const adminRoots = ['/admin', ...adminSections.map(section => `/admin/${section}`), '/admin-original', '/admin2'];
+const adminPaths: readonly string[] = adminRoots.flatMap(root => [root, ...[7, 30, 90].map(days => `${root}?days=${days}`)]);
 type WorkspaceReturn = '/dashboard' | `/dashboard?tab=${'cv' | 'tailor' | 'tracker' | 'billing'}`;
 const workspacePaths: readonly string[] = ['/dashboard', '/dashboard?tab=cv', '/dashboard?tab=tailor', '/dashboard?tab=tracker', '/dashboard?tab=billing'];
 // Choosing a pass while signed out returns to the Pricing page with that plan shown, never to checkout.
