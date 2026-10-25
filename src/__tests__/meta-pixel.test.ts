@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { adAttributionQuery, adsMeasurementAllowed, isMeasuredPath, META_PIXEL_ID, noteAccountForMeta, setAdsOptOut, trackMetaPage } from '@/lib/meta-pixel';
+import { registrationEventId } from '../../supabase/functions/_shared/meta-conversions';
+
+const invoke = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: { sent: false }, error: null })));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke } } }));
 
 const calls = () => (window.fbq?.queue ?? []).map(args => [...args]);
 const events = (name: string) => calls().filter(args => args[0] === 'track' && args[1] === name);
@@ -92,6 +96,20 @@ describe('Meta sign-up event', () => {
     window.history.replaceState(null, '', '/auth');
     await noteAccountForMeta(user, now);
     expect(events('CompleteRegistration')).toHaveLength(1);
+  });
+
+  it('asks the server for a copy with the same event ID and only the page path', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout'] });
+    try {
+      invoke.mockClear();
+      document.cookie = '_fbp=fb.1.1729849200000.1234567890';
+      window.history.replaceState(null, '', '/auth?mode=signup&utm_source=instagram');
+      await noteAccountForMeta(user, now);
+      expect(invoke).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(2000);
+      expect(invoke).toHaveBeenCalledWith('meta-conversions', { body: { pageUrl: `${window.location.origin}/auth`, fbp: 'fb.1.1729849200000.1234567890', fbc: undefined } });
+      expect(events('CompleteRegistration')[0][3]).toEqual({ eventID: await registrationEventId(user.id) });
+    } finally { vi.useRealTimers(); document.cookie = '_fbp=; expires=Thu, 01 Jan 1970 00:00:00 GMT'; }
   });
 
   it('ignores existing accounts signing in', async () => {

@@ -3,6 +3,8 @@
 // checkout return URLs (which can carry login codes or payment references). Once started,
 // Meta's own history tracking reports later in-app page changes; in-app addresses hold
 // only fixed paths and opaque IDs. It never sends CV, vacancy, document, payment or email data.
+import { supabase } from '@/integrations/supabase/client';
+
 export const META_PIXEL_ID = '1912745166266087';
 const OPT_OUT_KEY = 'jobvance_ads_opt_out_v1';
 const SENT_KEY = 'jobvance_meta_registrations_v1';
@@ -86,9 +88,20 @@ function flushRegistration(fbq: Fbq): void {
   let key: string | null = null;
   try { key = sessionStorage.getItem(PENDING_KEY); sessionStorage.removeItem(PENDING_KEY); } catch { return; }
   if (!key || !/^[a-f\d]{32}$/.test(key) || sentKeys().includes(key)) return;
-  // The event ID lets a future server-side copy of this event be counted once.
+  // The server copy uses the same event ID, so Meta counts this sign-up once.
   fbq('track', 'CompleteRegistration', {}, { eventID: `reg_${key}` });
   try { localStorage.setItem(SENT_KEY, JSON.stringify([...sentKeys(), key].slice(-20))); } catch { /* may repeat on this device only */ }
+  sendServerRegistration();
+}
+
+const metaCookie = (name: '_fbp' | '_fbc') => document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1);
+
+/** Asks the meta-conversions function for the server copy once Meta has set its cookies. */
+function sendServerRegistration(delay = 2000): void {
+  window.setTimeout(() => {
+    const body = { pageUrl: `${window.location.origin}${window.location.pathname}`, fbp: metaCookie('_fbp'), fbc: metaCookie('_fbc') };
+    void supabase.functions.invoke('meta-conversions', { body }).catch(() => undefined);
+  }, delay);
 }
 
 /** A signed-in account created in the last day counts as a sign-up once per device. */
