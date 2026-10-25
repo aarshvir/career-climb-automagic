@@ -9,7 +9,7 @@ export const publicPages: PublicPage[] = [
 
 export const clientOnlyPaths = ['/applications','/loop','/onboarding','/dashboard','/admin','/admin2','/auth','/auth/callback','/auth/forgot-password','/auth/reset'];
 export const routeRedirects: Record<string,string> = {
-  '/blog':'/guides', '/product':'/job-loop','/jobs':'/job-loop','/resume-management':'/dashboard?tab=cv','/resumes':'/dashboard?tab=cv','/job-preferences':'/dashboard?tab=tailor','/preferences':'/dashboard?tab=tailor','/settings':'/dashboard?tab=billing','/plan-selection':'/pricing','/thank-you':'/dashboard?tab=billing',
+  '/blog':'/guides', '/product':'/job-loop','/jobs':'/job-loop','/pilot':'/job-loop','/resume-management':'/dashboard?tab=cv','/resumes':'/dashboard?tab=cv','/job-preferences':'/dashboard?tab=tailor','/preferences':'/dashboard?tab=tailor','/settings':'/dashboard?tab=billing','/plan-selection':'/pricing','/thank-you':'/dashboard?tab=billing',
 };
 export function publicPage(path:string): PublicPage | undefined { return publicPages.find(page=>page.path===path); }
 export function escapedXml(value:string):string {return value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');}
