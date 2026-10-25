@@ -1,6 +1,6 @@
 # Marketing admin (jobvance.io/marketing-admin)
 
-The page is private. Each request re-checks the account against `jobvance_admin_members`: the `owner` (aarshvir@gmail.com) can do everything on the page, and an `operator` can view, sync and queue ideas.
+The page is private. Each request re-checks the account against `jobvance_admin_members`: the `owner` can do everything on the page, and an `operator` can view, sync and queue ideas.
 
 **This release is read-only towards Meta.** It reads ads, status and figures. It cannot launch, pause, resume or re-budget an ad, and there is no auto mode and no hourly job. Make every ad change in Meta Ads Manager.
 
@@ -11,7 +11,7 @@ The page is private. Each request re-checks the account against `jobvance_admin_
 | Summary | Spend against your caps, impressions and landing page views, across every ad. If any ad's figures are unknown or stale, totals say "At least" (or "Unknown") instead of counting them as zero. |
 | Recommendations | Plain-language advice from the rules below. Nothing is applied automatically. |
 | Meta ads | One row per ad, as read from Meta: live status, budget, spend, impressions, link clicks, link CTR, landing page views, cost per view, a 14-day spend strip, and whether the figures are fresh, stale or unknown, with the time of the last complete read. No buttons that change ads. |
-| Ideas | Every concept and version with its owner-approved files. **New idea**, **Send to ad creation**. |
+| Ideas | Recorded concepts and versions with their approval history. **New idea**, **Send to ad creation**. |
 | Production queue | Ideas waiting for the ad team. They are built with the locked workflow (`jobvance-ad-studio/ADVERTISING-WORKFLOW.md`), and you approve the exact files before anything goes live. |
 | Caps and auto mode | Daily cap, total cap, impressions needed before judging, CTR floor and cost ratio. These only shape the recommendations. Auto mode shows "not available yet". |
 | Audit log | Every sync and every change made on this page. Entries cannot be edited or deleted. |
@@ -46,7 +46,7 @@ Only ads with fresh figures are judged. Unknown or stale ads get a "figures unkn
 - **Spend cap.** Known spend today, or in total, has reached your cap, so pause running ads in Ads Manager. Known spend is a lower bound when some figures are unknown, so this can say a cap was reached. It never says spend is safely under a cap.
 - **Keep the best ad.** If every running ad would be flagged, the best one is marked "keep running for now".
 - **Winner.** One ad is clearly cheaper, so consider moving budget to it in Ads Manager.
-- **Refresh creative.** Average frequency is above 3.
+- **Refresh creative.** The lower bound from impressions divided by summed daily reach is above 3; verify actual unique-person frequency in Ads Manager.
 - **Not delivering.** Meta reports the ad as disapproved or with issues.
 
 ## Deferred (not in this release)

@@ -73,11 +73,14 @@ CREATE TABLE public.jobvance_marketing_requests (
   idea_id uuid NOT NULL REFERENCES public.jobvance_marketing_ideas(id) ON DELETE CASCADE,
   kind text NOT NULL DEFAULT 'create_ad' CHECK(kind='create_ad'),
   status text NOT NULL DEFAULT 'queued' CHECK(status IN('queued','in_progress','done','cancelled')),
-  note text NOT NULL DEFAULT '' CHECK(char_length(note) <= 1000 AND position(chr(0) in note) = 0),
+  -- PostgreSQL text already rejects NUL; evaluating chr(0) would reject every insert.
+  note text NOT NULL DEFAULT '' CHECK(char_length(note) <= 1000),
   created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE UNIQUE INDEX jobvance_marketing_one_open_request
+  ON public.jobvance_marketing_requests(idea_id) WHERE status IN ('queued','in_progress');
 
 CREATE TABLE public.jobvance_marketing_settings (
   singleton boolean PRIMARY KEY DEFAULT true CHECK(singleton),
@@ -122,6 +125,34 @@ BEGIN
   END LOOP;
 END $$;
 REVOKE ALL ON FUNCTION public.jobvance_marketing_audit_immutable() FROM PUBLIC, anon, authenticated;
+
+-- Replace one complete lifetime read atomically. A later completed read cannot be
+-- overwritten by an older in-flight sync; deleted/corrected provider days disappear.
+CREATE FUNCTION public.jobvance_marketing_commit_metrics(p_actor uuid, p_launch_id uuid, p_observed_at timestamptz, p_state jsonb, p_days jsonb)
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE latest timestamptz;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.jobvance_admin_members WHERE user_id=p_actor AND active AND role IN ('owner','operator')) THEN
+    RAISE EXCEPTION 'MARKETING_FORBIDDEN';
+  END IF;
+  IF p_observed_at IS NULL OR NOT isfinite(p_observed_at) OR p_observed_at > now()+interval '5 minutes'
+    OR jsonb_typeof(p_state) IS DISTINCT FROM 'object' OR jsonb_typeof(p_days) IS DISTINCT FROM 'array'
+    OR jsonb_array_length(p_days)>1000 THEN RAISE EXCEPTION 'MARKETING_INVALID_SNAPSHOT'; END IF;
+  SELECT last_synced_at INTO latest FROM public.jobvance_marketing_launches WHERE id=p_launch_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'MARKETING_NOT_FOUND'; END IF;
+  IF latest IS NOT NULL AND latest>p_observed_at THEN RETURN false; END IF;
+  DELETE FROM public.jobvance_marketing_metrics WHERE launch_id=p_launch_id;
+  INSERT INTO public.jobvance_marketing_metrics(launch_id,day,impressions,reach,clicks,link_clicks,landing_page_views,spend_minor)
+    SELECT p_launch_id,(d->>'day')::date,(d->>'impressions')::bigint,(d->>'reach')::bigint,(d->>'clicks')::bigint,
+      (d->>'linkClicks')::bigint,(d->>'landingPageViews')::bigint,(d->>'spendMinor')::bigint
+    FROM jsonb_array_elements(p_days) d;
+  UPDATE public.jobvance_marketing_launches SET status=p_state->>'status',effective_status=p_state->>'effectiveStatus',
+    daily_budget_minor=(p_state->>'dailyBudgetMinor')::bigint,end_at=(p_state->>'endAt')::timestamptz,
+    last_synced_at=p_observed_at,metrics_state='fresh',metrics_issue=NULL,updated_at=now() WHERE id=p_launch_id;
+  RETURN true;
+END $$;
+REVOKE ALL ON FUNCTION public.jobvance_marketing_commit_metrics(uuid,uuid,timestamptz,jsonb,jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.jobvance_marketing_commit_metrics(uuid,uuid,timestamptz,jsonb,jsonb) TO service_role;
 
 -- What exists on 24 Oct 2026 (receipts in jobvance-marketing-coordination/). Launch status
 -- stays UNKNOWN and figures unknown until the first complete read from Meta.

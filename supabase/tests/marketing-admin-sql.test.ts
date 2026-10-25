@@ -13,6 +13,7 @@ beforeAll(async () => {
   await db.exec(`
     CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS;
     CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY);
+    CREATE TABLE public.jobvance_admin_members(user_id uuid PRIMARY KEY,role text,active boolean);
     GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
   `);
   await db.exec(await readFile('supabase/migrations/20261024090000_jobvance_marketing_admin.sql', 'utf8'));
@@ -20,6 +21,39 @@ beforeAll(async () => {
 afterAll(async () => { await db?.close(); });
 
 describe('private marketing workspace schema', () => {
+  it('replaces complete metrics atomically, clears removed days and fences older reads', async () => {
+    await as('postgres');
+    const actor = '11111111-1111-4111-8111-111111111111';
+    await q("INSERT INTO public.jobvance_admin_members VALUES($1,'owner',true)", [actor]);
+    const id = (await q("SELECT id FROM public.jobvance_marketing_launches WHERE name='Version C - man first'")).rows[0].id;
+    await as('service_role');
+    const commit = (at: string, days: unknown[], who = actor) => q('SELECT public.jobvance_marketing_commit_metrics($1,$2,$3,$4,$5) AS saved', [who,id,at,JSON.stringify({status:'PAUSED',effectiveStatus:'PAUSED',dailyBudgetMinor:50000,endAt:null}),JSON.stringify(days)]);
+    const day = (date: string, spend = 123) => ({day:date,impressions:10,reach:8,clicks:2,linkClicks:1,landingPageViews:1,spendMinor:spend});
+    const start = Date.now() - 60000;
+    expect((await commit(new Date(start).toISOString(), [day('2026-10-23'),day('2026-10-24')])).rows[0].saved).toBe(true);
+    await commit(new Date(start+1000).toISOString(), [day('2026-10-24',150)]);
+    expect((await q('SELECT day::text,spend_minor::int FROM public.jobvance_marketing_metrics WHERE launch_id=$1',[id])).rows).toEqual([{day:'2026-10-24',spend_minor:150}]);
+    expect((await commit(new Date(start).toISOString(), [day('2026-10-23')])).rows[0].saved).toBe(false);
+    await expect(commit(new Date(start+2000).toISOString(),[day('2026-10-24',-1)])).rejects.toThrow();
+    expect((await q('SELECT spend_minor::int FROM public.jobvance_marketing_metrics WHERE launch_id=$1',[id])).rows[0].spend_minor).toBe(150);
+    await expect(commit(new Date(start+2000).toISOString(),[], '22222222-2222-4222-8222-222222222222')).rejects.toThrow(/MARKETING_FORBIDDEN/);
+    await commit(new Date(start+2000).toISOString(), []);
+    expect((await q('SELECT count(*)::int n FROM public.jobvance_marketing_metrics WHERE launch_id=$1',[id])).rows[0].n).toBe(0);
+    for (const role of ['anon','authenticated']) {
+      await as(role);
+      await expect(commit(new Date(start+3000).toISOString(),[])).rejects.toThrow(/permission denied/);
+    }
+    await as('postgres'); await q('UPDATE public.jobvance_admin_members SET active=false WHERE user_id=$1',[actor]); await as('service_role');
+    await expect(commit(new Date(start+3000).toISOString(),[])).rejects.toThrow(/MARKETING_FORBIDDEN/);
+    await q("UPDATE public.jobvance_marketing_launches SET status='UNKNOWN',effective_status=NULL,last_synced_at=NULL,metrics_state='unknown' WHERE id=$1",[id]);
+  });
+  it('can actually queue a production request with ordinary text', async () => {
+    await as('service_role');
+    const idea = (await q("SELECT id FROM public.jobvance_marketing_ideas WHERE status='idea' LIMIT 1")).rows[0].id;
+    const saved = await q("INSERT INTO public.jobvance_marketing_requests(idea_id,note) VALUES($1,$2) RETURNING status,note", [idea, 'A clear Job Loop walkthrough.']);
+    expect(saved.rows[0]).toEqual({ status: 'queued', note: 'A clear Job Loop walkthrough.' });
+    await expect(q("INSERT INTO public.jobvance_marketing_requests(idea_id,note) VALUES($1,'duplicate')",[idea])).rejects.toThrow(/unique constraint/);
+  });
   it('seeds the launched versions, approved files, launches and safe default settings', async () => {
     await as('service_role');
     expect((await q('SELECT count(*)::int AS n FROM public.jobvance_marketing_ideas')).rows[0].n).toBe(7);
@@ -59,7 +93,7 @@ describe('private marketing workspace schema', () => {
   it('installs no scheduler, ticket or auto-mode switch', async () => {
     await as('service_role');
     const objects = (await q("SELECT p.proname::text AS name FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname LIKE 'jobvance_marketing%' UNION ALL SELECT table_name::text FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'jobvance_marketing%' ORDER BY 1")).rows.map(r => r.name);
-    expect(objects).toEqual(['jobvance_marketing_audit', 'jobvance_marketing_audit_immutable', 'jobvance_marketing_creatives', 'jobvance_marketing_ideas', 'jobvance_marketing_launches', 'jobvance_marketing_metrics', 'jobvance_marketing_requests', 'jobvance_marketing_settings']);
+    expect(objects).toEqual(['jobvance_marketing_audit', 'jobvance_marketing_audit_immutable', 'jobvance_marketing_commit_metrics', 'jobvance_marketing_creatives', 'jobvance_marketing_ideas', 'jobvance_marketing_launches', 'jobvance_marketing_metrics', 'jobvance_marketing_requests', 'jobvance_marketing_settings']);
     const columns = (await q("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN('jobvance_marketing_settings','jobvance_marketing_launches')")).rows.map(r => r.column_name);
     expect(columns).not.toEqual(expect.arrayContaining(['auto_mode']));
     expect(columns.filter(name => /auto|paused/.test(String(name)))).toEqual([]);

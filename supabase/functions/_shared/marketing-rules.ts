@@ -17,7 +17,7 @@ export function totalsFor(days: MarketingDay[]): MarketingTotals {
     impressions, reach, linkClicks, landingPageViews, spendMinor,
     ctrPct: impressions > 0 ? Math.round(linkClicks / impressions * 10000) / 100 : null,
     costPerLpvMinor: landingPageViews > 0 ? Math.round(spendMinor / landingPageViews) : null,
-    // Reach is not additive across days, so this is an upper bound on frequency.
+    // Summed daily reach overcounts unique people: this is a lower bound on frequency.
     frequency: reach > 0 ? Math.round(impressions / reach * 100) / 100 : null,
     days: days.length, lastDay: sorted.length ? sorted[sorted.length - 1] : null,
   };
@@ -67,7 +67,7 @@ export function recommend(launches: MarketingLaunch[], settings: MarketingSettin
     if (t.ctrPct !== null && t.ctrPct < settings.pauseCtrBelowPct) pause(launch, `Link click-through rate is ${t.ctrPct.toFixed(2)}%, below your ${settings.pauseCtrBelowPct.toFixed(2)}% floor after ${t.impressions.toLocaleString('en-IN')} impressions.`);
     else if (bestCost !== null && best && best.id !== launch.id && (t.costPerLpvMinor === null ? t.spendMinor > bestCost * settings.costPerLpvRatio : t.costPerLpvMinor > bestCost * settings.costPerLpvRatio))
       pause(launch, t.costPerLpvMinor === null ? `It has spent ${money(t.spendMinor, launch.currency)} with no landing page views, while ${best.name} gets them for ${money(bestCost, launch.currency)} each.` : `Each landing page view costs ${money(t.costPerLpvMinor, launch.currency)}, more than ${settings.costPerLpvRatio}x ${best.name}'s ${money(bestCost, launch.currency)}.`);
-    if (t.frequency !== null && t.frequency > 3) recs.push({ id: `refresh:${launch.id}`, launchId: launch.id, kind: 'refresh_creative', severity: 'warning', title: `Refresh the creative for ${launch.name}`, reason: `People have seen it about ${t.frequency.toFixed(1)} times on average. A new cut usually lowers cost once frequency passes 3.` });
+    if (t.frequency !== null && t.frequency > 3) recs.push({ id: `refresh:${launch.id}`, launchId: launch.id, kind: 'refresh_creative', severity: 'warning', title: `Review the creative for ${launch.name}`, reason: `Impressions divided by summed daily reach is ${t.frequency.toFixed(1)}. This is a lower bound, not Meta's unique-person frequency. Check audience repetition and performance in Ads Manager before changing the cut.` });
   }
   if (best && bestCost !== null) {
     const runnerUp = withCost.filter(launch => launch.id !== best.id).sort((a, b) => a.totals.costPerLpvMinor! - b.totals.costPerLpvMinor!)[0];

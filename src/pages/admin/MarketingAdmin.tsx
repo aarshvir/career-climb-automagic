@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowUpRight, BriefcaseBusiness, Eye, Lightbulb, LockKeyhole, RefreshCw, ShieldCheck, Sparkles, Wand2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { MarketingApiError, callMarketing, inr } from '@/lib/marketing-api';
+import { MarketingApiError, callMarketing, inr, marketingSessionScope } from '@/lib/marketing-api';
 import type { MarketingAction, MarketingIdea, MarketingLaunch, MarketingOverview, MarketingRecommendation, MarketingSettingsInput, MarketingTotals, MetricsIssue } from '@/lib/marketing-types';
 import { Badge, Empty, Notice, Panel } from './AdminShared';
 import { readable, utc } from './admin-format';
@@ -45,7 +45,7 @@ function LaunchRow({ launch, idea }: { launch: MarketingLaunch; idea?: Marketing
     <td><Badge tone={statusTone(launch.status)}>{readable(launch.status.toLowerCase())}</Badge><span className="admin-cell-note">{launch.effectiveStatus ? `Meta: ${readable(launch.effectiveStatus.toLowerCase())}` : 'Not read from Meta yet'}</span></td>
     <td>{inr(launch.dailyBudgetMinor, launch.currency)}<span className="admin-cell-note">{launch.endAt ? `ends ${utc(launch.endAt)}` : 'no end date'}</span></td>
     {figure(x => inr(x.spendMinor, launch.currency), x => `${x.days} day${x.days === 1 ? '' : 's'} with delivery`)}
-    {figure(x => x.impressions.toLocaleString('en-IN'), x => `reach ${x.reach.toLocaleString('en-IN')}+`)}
+    {figure(x => x.impressions.toLocaleString('en-IN'), x => `sum of daily reach ${x.reach.toLocaleString('en-IN')} (not unique people)`)}
     {figure(x => x.linkClicks.toLocaleString('en-IN'))}
     {figure(x => pct(x.ctrPct))}
     {figure(x => x.landingPageViews.toLocaleString('en-IN'))}
@@ -112,9 +112,13 @@ function Thresholds({ overview, owner, busy, run }: { overview: MarketingOvervie
 }
 
 export default function MarketingAdmin() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const userId = user?.id;
-  const [overview, setOverview] = useState<MarketingOverview | null>(null);
+  const scope = marketingSessionScope(session);
+  const [loaded, setLoaded] = useState<{ scope: string; overview: MarketingOverview } | null>(null);
+  // Hide the prior owner's data during render, before effects run on a session change.
+  const overview = !authLoading && scope && loaded?.scope === scope ? loaded.overview : null;
+  const setOverview = (value: MarketingOverview | null) => setLoaded(value && scope ? { scope, overview: value } : null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<MarketingApiError | null>(null);
@@ -124,16 +128,16 @@ export default function MarketingAdmin() {
 
   useEffect(() => {
     const revision = ++generation.current;
-    setError(null); setLoading(true);
-    if (authLoading || !userId) return;
+    setError(null); setLoading(true); setBusy(false); setNotice('');
+    if (authLoading || !userId || !scope) return;
     void callMarketing(userId, { action: 'overview' }).then(result => { if (generation.current === revision) setOverview(result.overview); })
       .catch(reason => { if (generation.current === revision) { setOverview(null); setError(reason instanceof MarketingApiError ? reason : new MarketingApiError('unavailable', 'The marketing workspace could not be loaded.')); } })
       .finally(() => { if (generation.current === revision) setLoading(false); });
     return () => { generation.current += 1; };
-  }, [userId, authLoading, refresh]);
+  }, [userId, scope, authLoading, refresh]);
 
   const run: Run = useCallback(async action => {
-    if (!userId || busy) return false;
+    if (!userId || !scope || busy) return false;
     const revision = generation.current;
     setBusy(true); setNotice(''); setError(null);
     try {
@@ -149,7 +153,7 @@ export default function MarketingAdmin() {
       if (failure.kind === 'forbidden' || failure.kind === 'unauthenticated') setOverview(null);
       return false;
     } finally { if (generation.current === revision) setBusy(false); }
-  }, [userId, busy]);
+  }, [userId, scope, busy]);
 
   const owner = overview?.actor.role === 'owner';
   const connected = !!overview?.meta.configured;
@@ -192,7 +196,7 @@ export default function MarketingAdmin() {
           <Panel id="launches" title="Meta ads" subtitle="Each row is one ad as read from Meta. There are no pause or resume buttons yet; change ads in Meta Ads Manager.">
             {overview.launches.length === 0 ? <Empty title="No launches yet">Launches appear here once an approved idea is set up in Meta.</Empty> : <div className="admin-table-scroll"><table><thead><tr><th>Ad</th><th>Live status</th><th>Budget / day</th><th>Spend</th><th>Impressions</th><th>Link clicks</th><th>Link CTR</th><th>Landing page views</th><th>Cost per view</th><th>Figures</th></tr></thead><tbody>{overview.launches.map(launch => <LaunchRow key={launch.id} launch={launch} idea={ideaById.get(launch.ideaId)} />)}</tbody></table></div>}
           </Panel>
-          <Panel id="ideas" title="Ideas" subtitle="Every concept, script and version the agency has made, with its approved files.">
+          <Panel id="ideas" title="Ideas" subtitle="Recorded concepts and versions, with their approval history.">
             <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', padding: '0 25px 25px' }}><NewIdea busy={busy} run={run} />{overview.ideas.map(idea => <IdeaCard key={idea.id} idea={idea} overview={overview} busy={busy} run={run} />)}</div>
           </Panel>
           <Panel id="queue" title="Production queue" subtitle="Ideas sent to ad creation. The ad team picks them up and asks for your approval before launch.">

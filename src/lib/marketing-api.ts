@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { readAuthSession } from '@/utils/authSession';
+import { cvVariantSessionIdentity } from '@/lib/loop-cv-variant-recovery';
 import type { MarketingAction, MarketingResponse } from '@/lib/marketing-types';
 
 const short = z.string().max(2000), id = z.string().min(1).max(128), count = z.number().int().nonnegative(), when = z.string().max(64);
@@ -25,11 +26,18 @@ export class MarketingApiError extends Error {
   constructor(public kind: MarketingErrorKind, message: string) { super(message); this.name = 'MarketingApiError'; }
 }
 
-async function currentAccount(userId: string) {
+export function marketingSessionScope(session: { user: { id: string }; access_token: string } | null | undefined): string | null {
+  return session?.access_token ? `${session.user.id}:${cvVariantSessionIdentity(session) ?? session.access_token}` : null;
+}
+async function currentAccount(userId: string, expectedScope?: string) {
   try {
     const session = await readAuthSession();
-    const verified = await supabase.auth.getUser();
-    if (!session?.user || verified.error || !verified.data.user || session.user.id !== userId || verified.data.user.id !== userId) throw new Error();
+    const scope = marketingSessionScope(session);
+    if (!session || !scope || session.user.id !== userId || expectedScope && scope !== expectedScope) throw new Error();
+    const verified = await supabase.auth.getUser(session.access_token);
+    const current = await readAuthSession();
+    if (verified.error || verified.data.user?.id !== userId || marketingSessionScope(current) !== scope) throw new Error();
+    return { session, scope };
   } catch { throw new MarketingApiError('unauthenticated', 'Your session changed or expired. Sign in again to open the marketing workspace.'); }
 }
 function failure(httpStatus: number, payload?: unknown): MarketingApiError {
@@ -44,11 +52,19 @@ function failure(httpStatus: number, payload?: unknown): MarketingApiError {
 
 /** Calls only the fixed first-party function; access is re-verified by the server on every call. */
 export async function callMarketing(userId: string, action: MarketingAction): Promise<MarketingResponse> {
-  await currentAccount(userId);
+  const intent = structuredClone(action);
+  let scope: string | null = null, invalidated = false;
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (scope && marketingSessionScope(session) !== scope) invalidated = true;
+  });
+  try {
+  const original = await currentAccount(userId);
+  scope = original.scope;
   let result: { data: unknown; error: unknown };
-  try { result = await supabase.functions.invoke<unknown>('jobvance-marketing', { body: action }); }
+  try { result = await supabase.functions.invoke<unknown>('jobvance-marketing', { body: intent, headers: { Authorization: `Bearer ${original.session.access_token}` } }); }
   catch { throw failure(503); }
-  await currentAccount(userId);
+  await currentAccount(userId, scope);
+  if (invalidated) throw new MarketingApiError('unauthenticated', 'Your session changed. Refresh to verify access again.');
   if (result.error) {
     const context = (result.error as { context?: unknown }).context;
     const payload = context instanceof Response ? await context.clone().json().catch(() => null) : null;
@@ -57,6 +73,7 @@ export async function callMarketing(userId: string, action: MarketingAction): Pr
   const parsed = responseSchema.safeParse(result.data);
   if (!parsed.success || parsed.data.overview.actor.id !== userId) throw failure(503);
   return parsed.data as MarketingResponse;
+  } finally { subscription.unsubscribe(); }
 }
 
 export function inr(minor: number | null, currency = 'INR'): string {

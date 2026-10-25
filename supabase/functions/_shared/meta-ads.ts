@@ -34,10 +34,10 @@ const invalidData = () => new ApiError(502, 'META_DATA_INVALID', 'Meta returned 
 
 async function graph(config: MetaConfig, fetcher: MetaFetch, path: string, params: Record<string, string>): Promise<Record<string, unknown>> {
   const url = new URL(`https://graph.facebook.com/${config.version}/${path}`);
-  url.search = new URLSearchParams({ ...params, access_token: config.token }).toString();
+  url.search = new URLSearchParams(params).toString();
   let response: Response;
   try {
-    response = await fetcher(url.toString(), { method: 'GET', signal: AbortSignal.timeout(15000) });
+    response = await fetcher(url.toString(), { method: 'GET', headers: { Authorization: `Bearer ${config.token}` }, signal: AbortSignal.timeout(15000) });
   } catch {
     // Network errors can echo the URL, which carries the token: never surface them.
     throw new ApiError(503, 'META_UNAVAILABLE', 'Meta could not be reached. Try again shortly.');
@@ -95,7 +95,7 @@ export async function readAd(config: MetaConfig, fetcher: MetaFetch, adId: strin
 
 function insightDay(value: unknown, today: string): MarketingDay {
   const row = record(value);
-  if (!row || typeof row.date_start !== 'string' || !dayPattern.test(row.date_start) || row.date_stop !== row.date_start || row.date_start > today) throw invalidData();
+  if (!row || typeof row.date_start !== 'string' || !dayPattern.test(row.date_start) || !Number.isFinite(Date.parse(row.date_start)) || new Date(row.date_start).toISOString().slice(0, 10) !== row.date_start || row.date_stop !== row.date_start || row.date_start > today) throw invalidData();
   const actions = row.actions === undefined ? [] : Array.isArray(row.actions) ? row.actions.map(record) : null;
   if (!actions || actions.some(action => !action)) throw invalidData();
   const views = actions.filter(action => action?.action_type === 'landing_page_view');

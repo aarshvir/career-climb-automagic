@@ -38,7 +38,11 @@ beforeEach(() => {
   store = {
     rows: vi.fn(async () => structuredClone(rows)),
     updateLaunch: vi.fn(async (id, patch) => { rows.launches = rows.launches.map(row => row.id === id ? { ...row, ...patch } : row); }),
-    upsertMetrics: vi.fn(async metrics => { rows.metrics = [...rows.metrics.filter(m => !metrics.some(n => n.launch_id === m.launch_id && n.day === m.day)), ...metrics]; }),
+    commitMetrics: vi.fn(async (id, observedAt, state, days) => {
+      rows.metrics = [...rows.metrics.filter(m => m.launch_id !== id), ...days.map(day => ({ launch_id:id,day:day.day,impressions:day.impressions,reach:day.reach,clicks:day.clicks,link_clicks:day.linkClicks,landing_page_views:day.landingPageViews,spend_minor:day.spendMinor }))];
+      rows.launches = rows.launches.map(row => row.id === id ? { ...row,status:state.status,effective_status:state.effectiveStatus,daily_budget_minor:state.dailyBudgetMinor,end_at:state.endAt,last_synced_at:observedAt,metrics_state:'fresh',metrics_issue:null } : row);
+      return true;
+    }),
     insertIdea: vi.fn(async idea => { const id = 'dddddddd-0000-4000-8000-000000000001'; rows.ideas.push({ id, ...idea, status: 'idea', source_path: null, created_at: now.toISOString(), updated_at: now.toISOString() }); return id; }),
     setIdeaStatus: vi.fn(async (id, status) => { rows.ideas = rows.ideas.map(row => row.id === id ? { ...row, status } : row); }),
     insertRequest: vi.fn(async request => { const id = 'eeeeeeee-0000-4000-8000-000000000001'; rows.requests.push({ id, idea_id: request.idea_id, kind: 'create_ad', status: 'queued', note: request.note, created_at: now.toISOString() }); return id; }),
@@ -140,6 +144,7 @@ describe('marketing control', () => {
     expect(result.overview.launches.find(l => l.id === launchC)).toMatchObject({ metrics: 'fresh', totals: { spendMinor: 0, days: 0 } });
     expect(rows.settings.last_sync_at).toBe(now.toISOString());
     expect(calls.find(call => call.path.endsWith('/insights'))!.params.get('date_preset')).toBe('maximum');
+    expect(calls.every(call => !call.params.has('access_token') && new Headers(call.init?.headers).get('Authorization') === `Bearer ${token}`)).toBe(true);
     expect(result.result?.message).toMatch(/Nothing in Meta was changed/);
     expect(audits).toEqual([{ actor_id: owner.id, action: 'sync', target_id: null, details: { launches: 2, incomplete: 0 } }]);
   });
@@ -171,6 +176,7 @@ describe('marketing control', () => {
     ['malformed landing page views', { data: [day('2026-10-25', '5000', '1', { actions: [{ action_type: 'landing_page_view', value: 'many' }] })] }],
     ['multi-day row', { data: [day('2026-10-25', '5000', '1', { date_stop: '2026-10-26' })] }],
     ['future day', { data: [day('2026-10-27', '5000', '1')] }],
+    ['impossible calendar day', { data: [day('2026-02-31', '5000', '1')] }],
     ['duplicate day', { data: [day('2026-10-25', '5000', '1'), day('2026-10-25', '5000', '1')] }],
     ['next page without a cursor', { data: [], paging: { next: 'https://graph.facebook.com/next' } }],
   ])('treats %s as unknown: no zeros written and no successful sync stamped', async (_label, page) => {

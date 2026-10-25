@@ -8,7 +8,7 @@ import { normalizedTextDigest, SOURCE_HASH_ALGORITHM } from './source-text-hash.
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const [name, offsetText = '0', lengthText = '12000'] = process.argv.slice(2);
-if (!['job-loop-control', 'job-loop-worker', 'job-loop-oauth', 'jobvance-admin', 'jobvance-review-worker'].includes(name)) throw new Error('Choose a reviewed Jobvance function.');
+if (!['job-loop-control', 'job-loop-worker', 'job-loop-oauth', 'jobvance-admin', 'jobvance-review-worker', 'jobvance-marketing'].includes(name)) throw new Error('Choose a reviewed Jobvance function.');
 const offset = Number(offsetText), length = Number(lengthText);
 if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length < 1 || length > 36000) throw new Error('Chunk offset and length must be bounded nonnegative integers.');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');

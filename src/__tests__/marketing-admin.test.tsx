@@ -5,8 +5,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MarketingLaunch, MarketingOverview } from '@/lib/marketing-types';
 vi.unmock('react-router-dom');
-const mocks = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string } | null, call: vi.fn() }));
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: mocks.user, loading: false }) }));
+const mocks = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string } | null, token: 'session-a', call: vi.fn() }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: mocks.user, session: mocks.user ? { user: mocks.user, access_token: mocks.token } : null, loading: false }) }));
 vi.mock('@/lib/marketing-api', async importOriginal => { const original = await importOriginal<typeof import('@/lib/marketing-api')>(); return { ...original, callMarketing: mocks.call }; });
 import MarketingAdmin from '@/pages/admin/MarketingAdmin';
 import { MarketingApiError } from '@/lib/marketing-api';
@@ -29,10 +29,20 @@ function overview(patch: Partial<MarketingOverview> = {}): MarketingOverview {
     ...patch,
   };
 }
-beforeEach(() => { vi.clearAllMocks(); mocks.user = { id: 'owner-a' }; mocks.call.mockImplementation(async () => ({ overview: overview() })); });
+beforeEach(() => { vi.clearAllMocks(); mocks.token = 'session-a'; mocks.user = { id: 'owner-a' }; mocks.call.mockImplementation(async () => ({ overview: overview() })); });
 afterEach(() => cleanup());
 
 describe('marketing admin page', () => {
+  it.each(['other-owner', 'new-session'])('hides prior data immediately during %s re-verification', async change => {
+    const view = render(tree());
+    await screen.findByText('Version A - Search Rewrite Repeat');
+    mocks.call.mockImplementation(() => new Promise(() => {}));
+    if (change === 'other-owner') mocks.user = { id: 'owner-b' };
+    else mocks.token = 'session-b';
+    view.rerender(tree());
+    expect(screen.queryByText('Version A - Search Rewrite Repeat')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Verifying access…' })).toBeInTheDocument();
+  });
   it('sends a signed-out visitor to sign-in and back to /marketing-admin', async () => {
     mocks.user = null; render(tree());
     expect(await screen.findByText('Sign-in route: ?next=%2Fmarketing-admin')).toBeInTheDocument();

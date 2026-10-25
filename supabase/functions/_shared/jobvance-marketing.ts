@@ -1,6 +1,6 @@
 import { ApiError } from './core.ts';
 import { ACCOUNT_UTC_OFFSET_MINUTES, accountDay, money, recommend, totalsFor } from './marketing-rules.ts';
-import { metaConfig, readAccount, readAd, readInsights, type MetaAccount, type MetaEnv, type MetaFetch } from './meta-ads.ts';
+import { metaConfig, readAccount, readAd, readInsights, type MetaAccount, type MetaAdState, type MetaEnv, type MetaFetch } from './meta-ads.ts';
 import type { IdeaStatus, LaunchStatus, MarketingAction, MarketingAudit, MarketingCreative, MarketingDay, MarketingIdea, MarketingLaunch, MarketingOverview, MarketingRequest, MarketingResponse, MarketingRole, MarketingSettings, MarketingSettingsInput, MetricsIssue, MetricsState } from '../../../src/lib/marketing-types.ts';
 
 // Read-only towards Meta. Pausing, resuming, launching and auto mode are deferred until each
@@ -20,7 +20,7 @@ export interface MarketingRows { ideas: IdeaRow[]; creatives: CreativeRow[]; lau
 export interface MarketingStore {
   rows(): Promise<MarketingRows>;
   updateLaunch(id: string, patch: Partial<LaunchRow>): Promise<void>;
-  upsertMetrics(rows: MetricRow[]): Promise<void>;
+  commitMetrics(id: string, observedAt: string, state: MetaAdState, days: MarketingDay[]): Promise<boolean>;
   insertIdea(row: { slug: string; title: string; angle: string }): Promise<string>;
   setIdeaStatus(id: string, status: IdeaStatus): Promise<void>;
   insertRequest(row: { idea_id: string; note: string; created_by: string }): Promise<string>;
@@ -111,8 +111,7 @@ export async function syncFromMeta(store: MarketingStore, env: MetaEnv, fetcher:
       const state = await readAd(config, fetcher, launch.meta_ad_id);
       if (state.accountId !== config.adAccountId || state.campaignId !== launch.meta_campaign_id || state.adsetId !== launch.meta_adset_id) throw mismatch('META_ACCOUNT_MISMATCH');
       const days = await readInsights(config, fetcher, launch.meta_ad_id, today);
-      if (days.length) await store.upsertMetrics(days.map(day => ({ launch_id: launch.id, day: day.day, impressions: day.impressions, reach: day.reach, clicks: day.clicks, link_clicks: day.linkClicks, landing_page_views: day.landingPageViews, spend_minor: day.spendMinor })));
-      await store.updateLaunch(launch.id, { status: state.status, effective_status: state.effectiveStatus, daily_budget_minor: state.dailyBudgetMinor, end_at: state.endAt, last_synced_at: now.toISOString(), metrics_state: 'fresh', metrics_issue: null });
+      await store.commitMetrics(launch.id, now.toISOString(), state, days);
       synced++;
     } catch (error) {
       if (!(error instanceof ApiError) || !error.code.startsWith('META_')) throw error;
@@ -163,35 +162,53 @@ export async function controlMarketing(store: MarketingStore, actor: { id: strin
 }
 
 // ---------- Supabase-backed store ----------
-type DbResult = { data: unknown; error: { message?: string } | null };
+type DbResult = { data: unknown; error: { message?: string; code?: string } | null };
 interface Chain extends PromiseLike<DbResult> {
   select(columns?: string): Chain; insert(values: unknown): Chain; update(values: unknown): Chain; upsert(values: unknown, options?: Record<string, unknown>): Chain;
-  eq(column: string, value: unknown): Chain; order(column: string, options?: Record<string, unknown>): Chain; limit(count: number): Chain; single(): Chain; maybeSingle(): Chain;
+  eq(column: string, value: unknown): Chain; order(column: string, options?: Record<string, unknown>): Chain; range(from: number, to: number): Chain; limit(count: number): Chain; single(): Chain; maybeSingle(): Chain;
 }
-export interface SupabaseLike { from(table: string): Chain }
+export interface SupabaseLike { from(table: string): Chain; rpc(name: string, args: Record<string, unknown>): PromiseLike<DbResult> }
 function checked<T>(result: DbResult): T {
   if (result.error) throw new ApiError(503, 'MARKETING_PERSISTENCE_FAILED', 'The marketing workspace could not be saved. Refresh and try again.');
   return result.data as T;
 }
-export function supabaseStore(db: SupabaseLike): MarketingStore {
+export function supabaseStore(db: SupabaseLike, actorId: string): MarketingStore {
+  // Read every page, with stable ordering. A bounded overflow fails the overview;
+  // silently truncated cached figures must never look like complete totals.
+  async function all(table: string, order: string[], cap: number): Promise<unknown[]> {
+    const result: unknown[] = [];
+    for (let offset = 0; offset <= cap; offset += 500) {
+      let query = db.from(table).select('*');
+      for (const column of order) query = query.order(column, { ascending: true });
+      const page = checked<unknown[]>(await query.range(offset, offset + 499));
+      if (!Array.isArray(page) || result.length + page.length > cap) throw new ApiError(503, 'MARKETING_READ_INCOMPLETE', 'The marketing workspace has more records than this view can read completely. No partial totals are shown.');
+      result.push(...page);
+      if (page.length < 500) return result;
+    }
+    throw new ApiError(503, 'MARKETING_READ_INCOMPLETE', 'The marketing workspace could not be read completely.');
+  }
   return {
     async rows() {
       const [ideas, creatives, launches, metrics, requests, settings, audit] = await Promise.all([
-        db.from('jobvance_marketing_ideas').select('*').order('created_at', { ascending: false }),
-        db.from('jobvance_marketing_creatives').select('*').order('created_at', { ascending: true }),
-        db.from('jobvance_marketing_launches').select('*').order('created_at', { ascending: true }),
-        db.from('jobvance_marketing_metrics').select('*').order('day', { ascending: true }).limit(5000),
+        all('jobvance_marketing_ideas', ['created_at', 'id'], 2000),
+        all('jobvance_marketing_creatives', ['created_at', 'id'], 5000),
+        all('jobvance_marketing_launches', ['created_at', 'id'], 500),
+        all('jobvance_marketing_metrics', ['day', 'launch_id'], 5000),
         db.from('jobvance_marketing_requests').select('*').order('created_at', { ascending: false }).limit(200),
         db.from('jobvance_marketing_settings').select('*').eq('singleton', true).single(),
         db.from('jobvance_marketing_audit').select('*').order('at', { ascending: false }).limit(100),
       ]);
-      return { ideas: checked(ideas), creatives: checked(creatives), launches: checked(launches), metrics: checked(metrics), requests: checked(requests), settings: checked(settings), audit: checked(audit) };
+      return { ideas: ideas as IdeaRow[], creatives: creatives as CreativeRow[], launches: launches as LaunchRow[], metrics: metrics as MetricRow[], requests: checked(requests), settings: checked(settings), audit: checked(audit) };
     },
     async updateLaunch(id, patch) { checked(await db.from('jobvance_marketing_launches').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', id)); },
-    async upsertMetrics(rows) { checked(await db.from('jobvance_marketing_metrics').upsert(rows.map(row => ({ ...row, fetched_at: new Date().toISOString() })), { onConflict: 'launch_id,day' })); },
+    async commitMetrics(id, observedAt, state, days) { return checked<boolean>(await db.rpc('jobvance_marketing_commit_metrics', { p_actor: actorId, p_launch_id: id, p_observed_at: observedAt, p_state: state, p_days: days })) === true; },
     async insertIdea(row) { return checked<{ id: string }>(await db.from('jobvance_marketing_ideas').insert(row).select('id').single()).id; },
     async setIdeaStatus(id, status) { checked(await db.from('jobvance_marketing_ideas').update({ status, updated_at: new Date().toISOString() }).eq('id', id)); },
-    async insertRequest(row) { return checked<{ id: string }>(await db.from('jobvance_marketing_requests').insert(row).select('id').single()).id; },
+    async insertRequest(row) {
+      const result = await db.from('jobvance_marketing_requests').insert(row).select('id').single();
+      if (result.error?.code === '23505') throw new ApiError(409, 'MARKETING_ALREADY_QUEUED', 'This idea is already in the production queue. Refresh to see its status.');
+      return checked<{ id: string }>(result).id;
+    },
     async updateSettings(expectedVersion, patch) {
       const saved = checked<unknown[]>(await db.from('jobvance_marketing_settings').update({ ...patch, version: expectedVersion + 1, updated_at: new Date().toISOString() }).eq('singleton', true).eq('version', expectedVersion).select('version'));
       return Array.isArray(saved) && saved.length === 1;

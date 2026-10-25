@@ -9,5 +9,5 @@ serve(async req => {
   const client = adminClient();
   const actor = await authenticateAdmin(req, client as unknown as AdminDatabase);
   const action = validateMarketingAction(await readJson(req));
-  return json(req, await controlMarketing(supabaseStore(client as unknown as SupabaseLike), actor, action, env, fetch, new Date()));
+  return json(req, await controlMarketing(supabaseStore(client as unknown as SupabaseLike, actor.id), actor, action, env, fetch, new Date()));
 });
