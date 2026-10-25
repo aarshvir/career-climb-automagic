@@ -86,7 +86,7 @@ describe('server administration authorization and input boundary',()=>{
     expect(response).toEqual({dashboard:{}});
     expect(m.rpc.mock.calls).toEqual([
       ['jobvance_admin_dashboard',{p_actor:owner,p_days:90}],
-      ['jobvance_admin_record_event',{p_actor:owner,p_action:'snapshot',p_details:{days:90,view:'dashboard'}}],
+      ['jobvance_admin_record_event',{p_actor:owner,p_action:'snapshot',p_details:{days:90}}],
     ]);
     expect(fetcher).not.toHaveBeenCalled();
   });

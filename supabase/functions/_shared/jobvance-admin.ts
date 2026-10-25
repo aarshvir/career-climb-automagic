@@ -80,7 +80,7 @@ export async function controlAdmin(db: AdminDatabase, actor: { id: string; role:
   if (action.action === 'dashboard') {
     // Membership is rechecked inside the RPC; the existing audit action records the read.
     const dashboard = await rpc<AdminDashboard>(db,'jobvance_admin_dashboard',{p_actor:actor.id,p_days:action.days});
-    await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_details:{days:action.days,view:'dashboard'}});
+    await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_details:{days:action.days}});
     return { dashboard };
   }
   if (action.action === 'update_config') {

@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { dashboardSchema } from '../../lib/admin-dashboard';
 import type { AdminDashboard } from '../../lib/admin-types';
+import { controlAdmin, type AdminDatabase } from '../../../supabase/functions/_shared/jobvance-admin';
 
 let db: PGlite;
 const owner = 'be619aa5-b1b8-4978-8780-b62461361980';
@@ -268,6 +269,46 @@ describe('admin dashboard SQL', () => {
       expect((await dashboard()).actor).toEqual({ id: owner, role: 'owner' });
       await expect(dashboard(payer)).rejects.toThrow(/ADMIN_FORBIDDEN/);
     } finally { await db.exec('RESET ROLE'); }
+  });
+
+  it('executes the dashboard control action through both real SQL RPCs and records only permitted audit details', async () => {
+    // beforeAll applies the complete original admin-platform migration: the
+    // production record_event body and immutable audit table are used here,
+    // rather than a mock that accepts arbitrary new audit-detail keys.
+    const sqlDatabase: AdminDatabase = {
+      auth: { async getUser() { throw new Error('This test begins after HTTP authentication.'); } },
+      from() { throw new Error('Unexpected table adapter call.'); },
+      async rpc(name, args) {
+        try {
+          if (name === 'jobvance_admin_dashboard') {
+            const result = await db.query<{ result: AdminDashboard }>('SELECT public.jobvance_admin_dashboard($1,$2) AS result', [args.p_actor, args.p_days]);
+            return { data: result.rows[0].result, error: null };
+          }
+          if (name === 'jobvance_admin_record_event') {
+            await db.query('SELECT public.jobvance_admin_record_event($1,$2,$3,$4::jsonb)', [args.p_actor, args.p_action, args.p_target ?? null, JSON.stringify(args.p_details)]);
+            return { data: null, error: null };
+          }
+          throw new Error(`Unexpected RPC ${name}`);
+        } catch (error) {
+          return { data: null, error: { message: error instanceof Error ? error.message : String(error) } };
+        }
+      },
+    };
+    await db.exec('BEGIN; SET LOCAL ROLE service_role; SAVEPOINT rejected_audit');
+    try {
+      // The original strict allowlist remains intact. This is the old failing
+      // handler payload, not a new key silently accepted to make tests pass.
+      await expect(db.query('SELECT public.jobvance_admin_record_event($1,$2,NULL,$3::jsonb)', [owner, 'snapshot', JSON.stringify({ days: 7, view: 'dashboard' })])).rejects.toThrow(/ADMIN_AUDIT_INVALID/);
+      await db.exec('ROLLBACK TO SAVEPOINT rejected_audit');
+      const before = (await db.query<{ count: number }>('SELECT count(*)::integer AS count FROM public.jobvance_admin_audit')).rows[0].count;
+      const response = await controlAdmin(sqlDatabase, { id: owner, role: 'owner' }, { action: 'dashboard', days: 7 }, () => undefined);
+      expect(response.dashboard?.actor).toEqual({ id: owner, role: 'owner' });
+      expect(response.dashboard?.window.days).toBe(7);
+      expect(() => dashboardSchema.parse(response.dashboard)).not.toThrow();
+      const audit = await db.query<{ actor_id: string; action: string; target_id: string | null; details: Record<string, unknown> }>('SELECT actor_id,action,target_id,details FROM public.jobvance_admin_audit ORDER BY at DESC,id DESC');
+      expect(audit.rows).toHaveLength(before + 1);
+      expect(audit.rows[0]).toEqual({ actor_id: owner, action: 'snapshot', target_id: null, details: { days: 7 } });
+    } finally { await db.exec('ROLLBACK'); }
   });
 
   it('reports places as the capacity rules see them, including test holders', async () => {
