@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,7 @@ import LoopCvBuilder from './LoopCvBuilder';
 import LoopPreferencePicker from '@/components/LoopPreferencePicker';
 import { accountRoleSuggestions, cvRoleSuggestions, roleChoices, locationChoices, cleanPreferences } from '@/lib/loop-role-suggestions';
 import { retainOnboardingDraft, recoverOnboardingDraft, clearOnboardingDraft } from '@/lib/loop-onboarding-memory';
+import { adAttributionQuery } from '@/lib/meta-pixel';
 import './JobLoop.css';
 import './LoopOnboarding.css';
 
@@ -38,9 +39,11 @@ export function onboardingStepError(step: number, profile: LoopProfileInput): st
  * automatic model request, implicit fact approval or schedule activation. */
 export default function LoopOnboarding() {
   const { user, loading, authError, retryConnection } = useAuth();
+  const { search } = useLocation();
   if (loading) return <main className="loop-onboarding"><p role="status">Opening your account…</p></main>;
   if (authError) return <main className="loop-onboarding"><p role="alert">Your sign-in could not be restored.</p><button onClick={retryConnection}>Retry sign-in recovery</button><Link to="/auth?next=%2Fonboarding">Sign in</Link></main>;
-  if (!user) return <Navigate to="/auth?mode=signup&next=%2Fonboarding" replace />;
+  // Ad campaign tags survive the sign-up redirect so the visit stays attributed.
+  if (!user) return <Navigate to={`/auth?mode=signup&next=%2Fonboarding${adAttributionQuery(search)}`} replace />;
   registerTrackingDraftOwner(user.id);
   return <OwnedQuiz key={`${user.id}:${trackingDraftAuthority(user.id)}`} owner={user.id} metadata={user.user_metadata} />;
 }

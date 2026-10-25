@@ -10,11 +10,11 @@ export const getCSPHeader = (): string => {
   
   const directives = [
     `default-src 'self'`,
-    `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com`,
+    `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `font-src 'self' https://fonts.gstatic.com`,
     `img-src 'self' data: https: blob:`,
-    `connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in https://www.google-analytics.com`,
+    `connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in https://www.google-analytics.com https://www.facebook.com https://connect.facebook.net`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,

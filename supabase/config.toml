@@ -27,6 +27,11 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
+# Verifies auth.getUser in the handler; inert until META_CAPI_ACCESS_TOKEN is set.
+[functions.meta-conversions]
+enabled = true
+verify_jwt = false
+
 [functions.create-checkout]
 enabled = true
 verify_jwt = false

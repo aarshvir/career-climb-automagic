@@ -5,6 +5,7 @@ import { configurationError, supabase } from '@/integrations/supabase/client';
 import { clearUserAuthCache, getGoogleOAuthOptions, isInIframe, getEnvironmentType } from '@/utils/authUtils';
 import { readAuthSession } from '@/utils/authSession';
 import { setTrackingDraftOwner } from '@/lib/tracking-draft-memory';
+import { noteAccountForMeta } from '@/lib/meta-pixel';
 
 interface AuthResult { error?: string }
 interface SignUpResult extends AuthResult { requiresEmailConfirmation?: boolean }
@@ -59,6 +60,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Revoke old draft writers before React unmounts the previous owner's UI.
       setTrackingDraftOwner(nextSession?.user.id ?? null, cvVariantSessionIdentity(nextSession));
       observeCvVariantRecoverySession(nextSession);
+      // Counts a newly created account once for ad measurement; makes no SDK call.
+      void noteAccountForMeta(nextSession?.user, undefined, cvVariantSessionIdentity(nextSession)).catch(() => undefined);
       setSession(nextSession);
       setAuthError(null);
       setLoading(false);
@@ -68,6 +71,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!active || authRevision !== initialRevision) return;
       setTrackingDraftOwner(nextSession?.user.id ?? null, cvVariantSessionIdentity(nextSession));
       observeCvVariantRecoverySession(nextSession);
+      void noteAccountForMeta(nextSession?.user, undefined, cvVariantSessionIdentity(nextSession)).catch(() => undefined);
       setSession(nextSession);
       setAuthError(null);
     }).catch(() => {
@@ -78,7 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (active) setLoading(false);
     });
 
-    return () => { active = false; subscription.unsubscribe(); };
+    return () => { active = false; void noteAccountForMeta(null); subscription.unsubscribe(); };
   }, [retryCount]);
 
   // Profile creation is owned by the database signup trigger. Signing in must
@@ -142,6 +146,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    void noteAccountForMeta(null);
     if (configurationError) { setTrackingDraftOwner(null); setSession(null); return; }
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) throw error;
