@@ -57,7 +57,7 @@
       "supabase": "ACTIVE meta-conversions v1: all three deployed files exact normalized-LF source match; POST not_configured200 and GET405 with expected CORS.",
       "notVerified": [
         "Actual new customer signup and browser/server event deduplication at Meta",
-        "CAPI delivery, because META_CAPI_ACCESS_TOKEN is absent",
+        "CAPI token acceptance and positive server delivery after the post-release configuration",
         "Private signed-in browser journey or new payment/renewal acceptance",
         "Current ad delivery, spend, conversions or NPS"
       ]
@@ -72,5 +72,45 @@
       "Job Loop worker/control/tailor/OAuth handlers",
       "Meta ad campaign, experiments, creatives, identity, budget and dates"
     ]
+  },
+  "configurationFollowup": {
+    "observedAt": "2026-10-25T06:42:20Z",
+    "ownerHandoff": "Complete: owner reports META_CAPI_ACCESS_TOKEN saved; no token value was accessed.",
+    "function": {
+      "slug": "meta-conversions",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "files": [
+        {
+          "name": "functions/meta-conversions/index.ts",
+          "exact": true,
+          "sha256": "258fb769a35dfb5370d0e5bb08e764b9b9ef78803f5aa2295dd0cb7499676fcd"
+        },
+        {
+          "name": "functions/_shared/meta-conversions.ts",
+          "exact": true,
+          "sha256": "9d90797284c0696172b3f9fcd3d433525e3f4093cea6b2bf874000eb389562e6"
+        },
+        {
+          "name": "functions/meta-conversions/deno.json",
+          "exact": true,
+          "sha256": "c9ea3da26de7bf2d163688c50d534215ced7a5f9ec33bc877b992ec395fa95f0"
+        }
+      ]
+    },
+    "unauthenticatedPost": {
+      "status": 401,
+      "code": "UNAUTHORIZED",
+      "cors": "https://jobvance.io"
+    },
+    "globalPrivacyControlPost": {
+      "status": 200,
+      "sent": false,
+      "reason": "privacy_signal"
+    },
+    "independentReview": "Claude read-only review of combined head2dc2050/merge8d67de4 found no blocking regression; recorded in the private dated coordination file.",
+    "remaining": "Provider acceptance of the configured token and a real server CompleteRegistration/deduplication receipt remain unverified. Claude owns the Events Manager acceptance check.",
+    "deployment": "No code or Site deployment required for this configuration/receipt update."
   }
 }
