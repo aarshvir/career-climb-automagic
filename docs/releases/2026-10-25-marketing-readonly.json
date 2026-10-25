@@ -1,0 +1,124 @@
+{
+  "date": "2026-10-25",
+  "site": "https://jobvance.io",
+  "dashboard": "https://jobvance.io/marketing-admin",
+  "publicVersion": 53,
+  "runtimeSource": "d3a40e278878bb3f8f88bd113959af679012aeb5",
+  "pr": "https://github.com/aarshvir/career-climb-automagic/pull/26",
+  "reviewedCombinedHead": "e19c89394199dee81b8a5545fd98c9c4b0e2a45c",
+  "mergeCommit": "49ff9a4ab644992d4c9b8adefed80e0d0215be14",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_03cdbac98a088191ad5a52701bec617c",
+  "deploymentId": "appgdep_6addc31fa8448191bb3a550be36c2d56",
+  "deploymentStatus": "succeeded",
+  "deployedAt": "2026-10-25T08:52:10.742816+00:00",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000e6ac8207930692a49f3830b3",
+    "content_hash": "sha256:157e81fad58d6b5c1f57fc49dc639cb3381f0a17aa43137c5600d5ae58db2380",
+    "size_bytes": 15267840,
+    "file_count": 139
+  },
+  "schema": {
+    "migration": "20261025083846",
+    "name": "jobvance_marketing_admin",
+    "source": "supabase/migrations/20261024090000_jobvance_marketing_admin.sql",
+    "sourceSha256": "a01ea939466483f4f92b8448e56d2942594a1cccc413236949c6134e61c07482",
+    "tables": 7,
+    "forcedRls": true,
+    "noAnonymousOrAuthenticatedTableAccess": true,
+    "exactRoutineBodies": 2,
+    "fixedSearchPaths": true,
+    "noBrowserRoutineExecution": true,
+    "marketingCronJobs": 0,
+    "seed": {
+      "ideas": 7,
+      "creatives": 16,
+      "launches": 4,
+      "metrics": 0,
+      "requests": 0
+    }
+  },
+  "edge": {
+    "name": "jobvance-marketing",
+    "version": 1,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "files": 2,
+    "exactBytes": true,
+    "artifactSha256": "d0a9eb298ccd104da7dfe625cafbf69ee030b0105688db34285eaeda4476a05e"
+  },
+  "validation": {
+    "tests": 3216,
+    "files": 176,
+    "focused": 63,
+    "typeScript": "passed",
+    "changedRuntimeLint": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "sourceDeno": 6,
+    "generatedDeno": 6,
+    "sourceAndGeneratedDenoCheck": "passed",
+    "publicPages": 38,
+    "hostingGroups": 12,
+    "compressedBytes": 2929167,
+    "liveHtmlExact": 5,
+    "liveJavaScriptExact": 63,
+    "htmlExclusion": "Only an actually observed appended Cloudflare challenge script; no ETag parity claimed",
+    "liveHttp": {
+      "unauthenticated": 401,
+      "forgedScheduler": 401,
+      "get": 405,
+      "preflight": 204
+    },
+    "browser": {
+      "liveOwnerOverview": true,
+      "ownerIdentityNotExported": true,
+      "finalDesktopWidth": 1920,
+      "finalDocumentWidth": 1905,
+      "mobileObservation": {
+        "version": 52,
+        "width": 390,
+        "height": 844,
+        "documentWidth": 375,
+        "unchangedLayoutInVersion53": true
+      },
+      "privateMetaSdkScripts": 0,
+      "noProductionWritesFromBrowserCheck": true
+    }
+  },
+  "reviewCorrections": [
+    "Ordinary PostgreSQL request insert failure from chr(0)",
+    "One open production request per idea",
+    "Atomic complete metric cache replacement including removed/empty days and older-read fence",
+    "Bounded cache pagination with overflow failure",
+    "Original immutable intent, initial and post-dispatch SDK session/epoch checks and render-time private data isolation",
+    "Correct daily-reach/frequency interpretation"
+  ],
+  "buildRecovery": {
+    "initialVersion52": "Build and packaging passed normally",
+    "version53": "Vite and38-page prerender passed; OneDrive dirent link guard failed. Actual137 files/five directories, zero dirent/lstat/readlink links; unchanged packager retry and12 hosting groups passed."
+  },
+  "remaining": {
+    "adsReportingConnection": "Not configured in the actual owner overview. Claude owns the single secure ads_read token/account-ID handoff and first-sync acceptance.",
+    "providerReadAndTokenAcceptanceVerified": false,
+    "autoControl": "Excluded: no scheduler, Meta writer, activation or spend authority",
+    "sqlConcurrency": "Actual PGlite atomic/ACL cases; no fresh native PostgreSQL concurrency race certification",
+    "originalProductAcceptance": "Broader discovery, unassisted/multiday acceptance and NPS remain open"
+  },
+  "preserved": [
+    "Live Dodo payments",
+    "100-paid-account capacity separate from10 free pilots",
+    "Shared50USD AI/search ceiling",
+    "Existing Meta ad experiment, identities, assets, links, budgets and end dates",
+    "Job Loop handlers and GC/history protections"
+  ],
+  "rollback": {
+    "beforeReleaseTag": "jobvance-before-marketing-readonly-2026-10-25",
+    "beforeReleaseSource": "f12676e947aaec128d3404110dec86a0428072aa",
+    "savedVersion51": true,
+    "savedVersion52": true,
+    "beforeClientFollowupTag": "jobvance-before-marketing-auth-preflight-2026-10-25",
+    "warning": "Source/site rollback is separate from database or file restoration. Keep additive marketing schema/history."
+  }
+}
