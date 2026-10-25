@@ -48,7 +48,7 @@ for (const path of ['/dashboard?tab=cv', '/onboarding', '/auth/callback?code=syn
   assert.ok(Buffer.from(await response.arrayBuffer()).equals(index), 'SPA output must match the built index bytes.');
 }
 assert.equal(decodedAssets, 1, 'SPA routes must reuse one lazily decoded index.');
-for (const path of ['/admin', '/admin2', '/admin2/ops?days=7', '/admin/users', '/ADMIN2']) {
+for (const path of ['/admin', '/admin2', '/admin2/ops?days=7', '/admin/users', '/ADMIN2', '/marketing-admin']) {
   const response = await request(path);
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('X-Robots-Tag'), 'noindex, nofollow, noarchive');
