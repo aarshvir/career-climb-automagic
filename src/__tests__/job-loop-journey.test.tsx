@@ -46,6 +46,27 @@ describe('cloud loop consent and accurate capabilities', () => {
     expect(await screen.findByRole('button', { name: 'Prepare today’s applications' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Enable recurring preparation' })).toBeDisabled();
   });
+  it('offers the Starter plan instead of a dead end when every free place is taken', async () => {
+    current.pilot = { enrolled: false, activeUsers: 10, maxUsers: 10 }; current.capabilities.scheduler = true; render(tree());
+    expect(await screen.findByRole('heading', { name: 'Start Job Loop with Starter: $29 a month' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Start Starter, \$29\/month/ })).toHaveAttribute('href', '/pricing?loopPlan=weekly');
+    expect(screen.getByRole('link', { name: /Start Job Loop with Starter/ })).toHaveAttribute('href', '/pricing?loopPlan=weekly');
+    expect(screen.getAllByRole('link', { name: 'Start Starter for $29 a month' }).length).toBeGreaterThanOrEqual(2);
+    expect(screen.queryByText(/until a place is available/)).not.toBeInTheDocument();
+  });
+  it('keeps paid or enrolled users free of the Starter prompt', async () => {
+    current.pilot = { enrolled: true, activeUsers: 10, maxUsers: 10 }; render(tree());
+    expect(await screen.findByRole('button', { name: 'Prepare today’s applications' })).toBeEnabled();
+    expect(screen.queryByText(/Start Starter/)).not.toBeInTheDocument();
+  });
+  it('turns the server’s full-places error into a Starter link', async () => {
+    current.pilot = { enrolled: false, activeUsers: 9, maxUsers: 10 };
+    mocks.call.mockImplementation(async (_id, action) => { if (action.action === 'start_run') throw new LoopServiceError('All ten free cloud pilot places are currently in use. Your record and free CV check remain available.', 'LOOP_PILOT_FULL'); return { snapshot: current }; });
+    render(tree()); const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Prepare today’s applications' }));
+    const alert = await screen.findByRole('alert');
+    expect(within(alert).getByRole('link', { name: 'Start Starter for $29 a month' })).toHaveAttribute('href', '/pricing?loopPlan=weekly');
+  });
   it('carries audience preferences into a new record while leaving years and target titles unset', async () => {
     current.profile = null; current.claims = []; render(tree('/loop?audience=professional')); await openTab('My CV & experience');
     expect(screen.getByLabelText('My situation')).toHaveValue('professional');
