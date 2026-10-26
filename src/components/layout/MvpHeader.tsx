@@ -8,12 +8,18 @@ import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 export function Brand() {
   return <Link to="/" className="jv-brand" aria-label="Jobvance home">
     <span className="jv-brand-mark" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M17 8.75v6.75a5.25 5.25 0 0 1-10.5 0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" /><circle cx="17" cy="4.75" r="1.9" className="jv-brand-signal" /></svg>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M17 9.5v6a5.25 5.25 0 0 1-10.5 0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" /><circle cx="17" cy="4.6" r="1.9" className="jv-brand-signal" /></svg>
     </span>
     <span className="jv-wordmark">jobvance</span>
   </Link>;
 }
 const links = [["/job-loop","Automated Job Loop"],["/check","Free CV Check"],["/pricing","Pricing"],["/guides","Guides"],["/help","Help"]];
+// A stored Supabase session makes "signed in" likely. Only then is the signed-out footprint held invisible while the
+// account check runs; everyone else (and the prerendered page) sees Sign in and Get started from the first paint.
+function storedSessionLikely() {
+  if (typeof window === "undefined") return false;
+  try { return Object.keys(window.localStorage).some(key => /^sb-.*-auth-token$/.test(key)); } catch { return false; }
+}
 export default function MvpHeader() {
   const { user, loading, authError, signOut } = useAuth();
   const previousOwner = useRef(user?.id ?? null);
@@ -22,22 +28,25 @@ export default function MvpHeader() {
   const location = useLocation();
   const [error,setError] = useState(""), [busy,setBusy] = useState(false);
   const [openPath,setOpenPath] = useState<string | null>(null);
+  const [sessionLikely] = useState(storedSessionLikely);
   const toggle = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLElement>(null);
   const open = openPath === location.pathname;
-  // Keep the panel mounted for 120ms after it closes so it can fade out (instant under reduced motion).
+  // Keep the panel mounted for 160ms after it closes so it can clip away (instant under reduced motion).
   const [closing,setClosing] = useState(false);
   const wasOpen = useRef(open);
   useEffect(() => {
     if (wasOpen.current && !open && window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) {
       setClosing(true);
-      const timer = window.setTimeout(() => setClosing(false), 120);
+      const timer = window.setTimeout(() => setClosing(false), 160);
       wasOpen.current = open;
       return () => window.clearTimeout(timer);
     }
     wasOpen.current = open;
     setClosing(false);
   }, [open]);
-  // While the mobile menu is open: lock page scroll (html and body, for iOS Safari), make the page behind it inert, and let Escape close it from anywhere.
+  // While the mobile menu is open: lock page scroll (html and body, for iOS Safari), make the page behind it inert,
+  // keep Tab cycling between the toggle and the panel, and let Escape close it from anywhere.
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
@@ -46,7 +55,15 @@ export default function MvpHeader() {
     document.documentElement.style.overflow = "hidden";
     const behind = [document.getElementById("main-content"), document.querySelector("footer")].filter((node): node is HTMLElement => !!node && !node.hasAttribute("inert"));
     behind.forEach(node => node.setAttribute("inert", ""));
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpenPath(null); toggle.current?.focus(); } };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setOpenPath(null); toggle.current?.focus(); return; }
+      if (event.key !== "Tab") return;
+      const items = Array.from(panel.current?.querySelectorAll<HTMLElement>("a[href], button:not([disabled])") ?? []).filter(item => item.tabIndex >= 0 && item.getClientRects().length > 0);
+      const last = items[items.length - 1];
+      if (!last || !toggle.current) return;
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); toggle.current.focus(); }
+      else if (event.shiftKey && document.activeElement === toggle.current) { event.preventDefault(); last.focus(); }
+    };
     document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previous;
@@ -55,12 +72,13 @@ export default function MvpHeader() {
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
-  const signedOut = !loading && !authError && !user;
-  const signedOutActions = (pending: boolean) => <>
-    <Link to="/auth?next=%2Floop" className="jv-btn jv-btn--ghost jv-btn--sm" tabIndex={pending ? -1 : undefined}>Sign in</Link>
-    <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm" tabIndex={pending ? -1 : undefined}>Get started</Link>
+  const pending = !!authError || (loading && sessionLikely);
+  const signedOut = !pending && !user;
+  const signedOutActions = (hold: boolean) => <>
+    <Link to="/auth?next=%2Floop" className="jv-btn jv-btn--ghost jv-btn--sm" tabIndex={hold ? -1 : undefined}>Sign in</Link>
+    <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm" tabIndex={hold ? -1 : undefined}>Get started</Link>
   </>;
-  const account = loading || authError ? <>
+  const account = pending ? <>
     {/* Holds the signed-out footprint (invisible) while the account check runs, so nothing shifts. */}
     <span className="jv-account-pending" aria-hidden="true">{signedOutActions(true)}</span>
     <span className="jv-sr-only" role="status">Checking account…</span>
@@ -82,7 +100,7 @@ export default function MvpHeader() {
       {signedOut && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm jv-header-start">Get started</Link>}
       <button ref={toggle} type="button" className="jv-menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="mobile-navigation" onClick={()=>setOpenPath(open ? null : location.pathname)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
-    <nav id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closing ? "closing" : undefined} className="jv-mobile-panel">
+    <nav ref={panel} id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closing ? "closing" : undefined} className="jv-mobile-panel">
       {links.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}
       <div className="jv-mobile-account" onClick={()=>setOpenPath(null)}>{account}</div>
     </nav>

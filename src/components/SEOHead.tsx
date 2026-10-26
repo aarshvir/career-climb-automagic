@@ -79,9 +79,6 @@ export function SeoHead({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
       <meta name="twitter:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png?v=2` ? 'Jobvance: Automate your job search. Automated Job Loop finds jobs on your schedule and prepares a tailored CV for each. You review, download and apply.' : description} />
-      <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       <link rel="dns-prefetch" href="https://www.google-analytics.com" />
       <link rel="preload" as="image" href="/images/hero-jobvance.webp" />
       {renderJsonLd(structuredData)}

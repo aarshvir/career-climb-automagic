@@ -17,7 +17,14 @@ export default function RouteNavigation() {
     try { fragment = decodeURIComponent(hash.slice(1)); } catch { /* malformed fragment has no target */ }
     const targetId = /^[a-zA-Z][a-zA-Z\d_:-]{0,99}$/.test(fragment) ? fragment : '';
     if (!changedPage && !targetId) return;
-    if (changedPage && !targetId) window.scrollTo(0, 0);
+    if (changedPage && !targetId) {
+      // A new page starts at the top instantly; html keeps scroll-behavior:smooth for in-page anchors only.
+      const rootStyle = document.documentElement.style;
+      const previousBehavior = rootStyle.scrollBehavior;
+      rootStyle.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      rootStyle.scrollBehavior = previousBehavior;
+    }
     let active = true;
     let observer: MutationObserver | undefined;
     const move = () => {

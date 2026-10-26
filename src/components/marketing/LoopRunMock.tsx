@@ -1,43 +1,36 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import { CalendarClock, Pause, Play } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
+import { CalendarClock } from "lucide-react";
 import "./LoopRunMock.css";
 
 // Layout effect in the browser (runs before paint); plain effect on the server.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // Placeholder employers and times only. No scores, percentages or result counts: this is an illustration.
+// One US 12-hour format throughout, and every row precedes the next run.
 const rows = [
-  { role: "Product Analyst", company: "Northwind Labs", time: "Mon 07:02" },
-  { role: "Data Analyst", company: "Contoso Health", time: "Mon 07:02" },
-  { role: "Junior Product Analyst", company: "Fabrikam", time: "Wed 07:01" },
+  { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:02 AM" },
+  { role: "Data Analyst", company: "Contoso Health", time: "Mon 7:02 AM" },
+  { role: "Junior Product Analyst", company: "Fabrikam", time: "Mon 7:04 AM" },
 ];
 
-type Props = {
-  onPausedChange?: (paused: boolean) => void;
-  /** Every animation in the hero has finished, so the Pause control is no longer needed. */
-  settled?: boolean;
-};
-
-/** Hero product mock: an example Automated Job Loop run, laid out as a run log in HTML and CSS. */
-export default function LoopRunMock({ onPausedChange, settled = false }: Props) {
-  const [paused, setPaused] = useState(false);
+/** Hero product mock: an example Automated Job Loop run, laid out as a run log in HTML and CSS.
+ * Its one short pass (each row: found, CV tailored, ready for review) ends within 5 seconds, so it needs no pause control. */
+export default function LoopRunMock() {
   const ref = useRef<HTMLElement>(null);
-  const toggle = () => { const next = !paused; setPaused(next); onPausedChange?.(next); };
   useBeforePaint(() => {
     const node = ref.current;
-    if (!node) return;
-    // The status cycle starts on the same "Ready for review" frame the server HTML paints, so mounting never jumps.
+    // A prerendered page keeps its server-painted "Ready for review" frame, so nothing steps backwards on mount.
+    if (!node || document.documentElement.classList.contains("jv-prerendered")) return;
     node.classList.add("is-live");
     if (typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(([entry]) => node.classList.toggle("is-offscreen", !entry.isIntersecting));
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  return <figure ref={ref} className={`jv-mock${paused ? " is-paused" : ""}${settled && !paused ? " is-settled" : ""}`} aria-label="Example of an Automated Job Loop run">
+  return <figure ref={ref} className="jv-mock" aria-label="Example of an Automated Job Loop run">
     <div className="jv-mock-card">
       <div className="jv-mock-top">
         <span className="jv-chip jv-chip--caption jv-mock-tag">Example run · illustrative data</span>
-        <button type="button" className="jv-mock-pause" aria-pressed={paused} aria-label="Pause motion" onClick={toggle} tabIndex={settled && !paused ? -1 : undefined}>{paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
       </div>
       <div className="jv-mock-head">
         <p className="jv-mock-title">Automated Job Loop</p>
@@ -57,7 +50,6 @@ export default function LoopRunMock({ onPausedChange, settled = false }: Props) 
             <span className="jv-status jv-status--tailored">CV tailored</span>
             <span className="jv-status jv-status--ready">Ready for review</span>
           </span>
-          <span className="jv-mock-review" aria-hidden="true">Review</span>
         </li>)}
       </ul>
       <p className="jv-sr-only">Each job moves from found, to CV tailored, to ready for your review.</p>

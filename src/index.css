@@ -15,7 +15,7 @@
     /* Legacy names, remapped to "Ink & Signal". Pastel lime is retired; the true lime is --jv-signal. */
     --jv-ink: #0A0B14; --jv-blue: #3B47F0; --jv-paper: #FFFFFF; --jv-lavender: #EEF0FF; --jv-lime: #EEF0FF;
     /* surfaces */
-    --jv-bg: #FFFFFF; --jv-bg-subtle: #F7F8FB; --jv-surface: #FFFFFF; --jv-sunken: #F1F3F8;
+    --jv-bg: #FFFFFF; --jv-bg-subtle: #F7F8FB; --jv-surface: #FFFFFF; --jv-sunken: #F1F3F8; --jv-bg-muted: #F2F3F7;
     /* lines */
     --jv-line: #E7E9F0; --jv-line-strong: #D5D9E4; --jv-line-input: #8A90A8;
     /* text (ink-3 only on #FFF or #F7F8FB) */
@@ -38,12 +38,14 @@
     --t-display: clamp(2.75rem, 2.1rem + 2.667vw, 4.5rem);
     --t-h1: clamp(2.25rem, 1.786rem + 1.905vw, 3.5rem);
     --t-h2: clamp(1.875rem, 1.457rem + 1.714vw, 3rem);
+    /* H2 inside a panel: matches --t-h2 on phones, a deliberate 1.2x step down (40px) on desktop. */
+    --t-h2-panel: clamp(1.875rem, 1.6rem + 1.1vw, 2.5rem);
     --t-h3: clamp(1.375rem, 1.236rem + .571vw, 1.75rem);
     --t-h4: clamp(1.125rem, 1.079rem + .19vw, 1.25rem);
     --t-price: clamp(2.5rem, 2.2rem + 1.2vw, 3.25rem);
     /* small end of the scale: no raw px font sizes on marketing pages */
     --t-xs: .75rem; --t-sm: .8125rem; --t-small: .875rem; --t-body-sm: .9375rem; --t-body: 1rem;
-    --lh-body: 1.625; --lh-body-sm: 1.6;
+    --lh-body: 1.625; --lh-body-sm: 1.6; --lh-sm: 1.25rem; /* every 13px style */
     /* radius (new names; the existing --radius* stay for the private app) */
     --r-xs: 6px; --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-pill: 999px;
     /* elevation */

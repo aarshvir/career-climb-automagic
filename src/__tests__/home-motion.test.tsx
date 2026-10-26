@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -24,16 +24,22 @@ afterEach(() => {
   (window as { IntersectionObserver?: unknown }).IntersectionObserver = original.IntersectionObserver;
 });
 
-describe('hero mock motion controls (WCAG 2.2.2)', () => {
-  it('pauses the example run and reports the pressed state', () => {
+describe('hero mock motion (WCAG 2.2.2)', () => {
+  // The example run is one pass that finishes within 5 seconds, so it needs no pause control.
+  it('plays its short pass once mounted and offers no pause control', () => {
     motion(true, true);
     render(<LoopRunMock />);
     const figure = screen.getByRole('figure', { name: 'Example of an Automated Job Loop run' });
-    const pause = screen.getByRole('button', { name: 'Pause motion' });
-    expect(pause).toHaveAttribute('aria-pressed', 'false');
-    fireEvent.click(pause);
-    expect(pause).toHaveAttribute('aria-pressed', 'true');
-    expect(figure).toHaveClass('is-paused');
+    expect(figure).toHaveClass('is-live');
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+  it('keeps the server-painted frame on a prerendered page', () => {
+    motion(true, true);
+    document.documentElement.classList.add('jv-prerendered');
+    try {
+      render(<LoopRunMock />);
+      expect(screen.getByRole('figure', { name: 'Example of an Automated Job Loop run' })).not.toHaveClass('is-live');
+    } finally { document.documentElement.classList.remove('jv-prerendered'); }
   });
   it('always labels the example as illustrative', () => {
     render(<LoopRunMock />);

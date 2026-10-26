@@ -17,17 +17,17 @@
   .jv-enter-fade { animation: jv-fade 420ms var(--ease-out) 220ms both; }
 
   /* Scroll reveals: useReveal adds html.jv-motion only when motion is allowed and
-     IntersectionObserver exists, so content is visible by default (no JS, crawlers, screenshots). */
-  .jv-motion [data-reveal] { opacity: 0; transform: translateY(var(--rise)); transition: opacity var(--dur-4) var(--ease-out), transform var(--dur-4) var(--ease-out); transition-delay: calc(var(--i, 0) * var(--stagger)); }
+     IntersectionObserver exists, so content is visible by default (no JS, crawlers, screenshots).
+     Hiding happens without a transition; html.jv-motion-ready (added two frames later) enables the
+     reveal transition, so arming never plays a visible-to-hidden fade. */
+  .jv-motion [data-reveal] { opacity: 0; transform: translateY(var(--rise)); }
+  .jv-motion-ready [data-reveal] { transition: opacity var(--dur-4) var(--ease-out), transform var(--dur-4) var(--ease-out); transition-delay: calc(var(--i, 0) * var(--stagger)); }
   .jv-motion [data-reveal].is-in { opacity: 1; transform: none; }
 }
 
 /* The server-rendered page is already painted when the client mounts over it: do not replay
    the entrance (main.tsx sets this class only when it finds prerendered markup). */
 .jv-prerendered .jv-enter, .jv-prerendered .jv-enter-h1, .jv-prerendered .jv-enter-card, .jv-prerendered .jv-enter-fade, .jv-prerendered .jv-enter-stage { animation: none !important; }
-
-/* Shared pause switch (the hero mock's Pause control sets .is-paused on its group). */
-.is-paused, .is-paused *, .is-paused *::before, .is-paused *::after { animation-play-state: paused !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .jv-enter, .jv-enter-h1, .jv-enter-card, .jv-enter-fade, .jv-enter-stage, [data-reveal] { opacity: 1 !important; transform: none !important; animation: none !important; }

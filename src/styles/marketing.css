@@ -8,9 +8,10 @@
 /* ---------- Type helpers ---------- */
 /* Mono is reserved for uppercase captions, section numbers and schedule/time values. */
 .jv-caption { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
-.jv-caption::before { content: ""; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--jv-brand); flex-shrink: 0; }
+/* Marker rule: a 6px SQUARE marks a label or list item (brand on light, #9AA2FF on ink); a CIRCLE marks only live state. */
+.jv-caption::before { content: ""; width: 6px; height: 6px; background: var(--jv-brand); flex-shrink: 0; }
 .jv-dark .jv-caption { color: var(--jv-on-dark-2); }
-.jv-dark .jv-caption::before { border-color: var(--jv-on-dark-link); }
+.jv-dark .jv-caption::before { background: var(--jv-on-dark-link); }
 
 /* ---------- Buttons ---------- */
 /* Solid fills with a 1px highlight. Primary lifts 1px on hover with a neutral shadow; no coloured glows. */
@@ -25,7 +26,7 @@
 @media (hover: hover) {
   .jv-btn--primary:hover { background: var(--jv-brand-hover); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 6px 16px -6px rgb(10 11 20 / .35); }
   .jv-btn--secondary:hover { border-color: #C3C8D6; background: var(--jv-bg-subtle); }
-  .jv-btn--ghost:hover { background: #F2F3F7; color: var(--jv-ink); }
+  .jv-btn--ghost:hover { background: var(--jv-bg-muted); color: var(--jv-ink); }
   .jv-btn:hover svg { transform: translateX(2px); }
 }
 .jv-btn--primary:active { background: var(--jv-brand-press); transform: scale(.98); transition-duration: var(--dur-1); }
@@ -36,6 +37,8 @@
 .jv-btn:focus-visible { outline: 2px solid transparent; outline-offset: 2px; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--jv-brand); }
 @media (forced-colors: active) { .jv-btn:focus-visible { outline: 2px solid CanvasText; } }
 .jv-btn--block { width: 100%; }
+/* Large and full-width buttons may wrap (WCAG 1.4.12 text spacing at 320px); min-height keeps the default look. */
+.jv-btn--lg, .jv-btn--block { white-space: normal; text-align: center; line-height: 1.2; padding-block: 12px; }
 
 /* Text link: brand, 560, underline grows from the left. */
 .jv-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--jv-brand); font-weight: var(--fw-semi); font-size: var(--t-body-sm); letter-spacing: -.01em; text-decoration: none; }
@@ -45,13 +48,13 @@
 .jv-link:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 3px; border-radius: 6px; }
 
 /* ---------- Chips and badges ---------- */
-.jv-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; padding: 3px 9px; border: 1px solid var(--jv-line); border-radius: var(--r-xs); background: var(--jv-sunken); color: var(--jv-ink-2); font-family: var(--font-sans); font-size: var(--t-sm); line-height: 1.25; font-weight: 500; letter-spacing: -.006em; white-space: nowrap; }
+.jv-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; padding: 3px 9px; border: 1px solid var(--jv-line); border-radius: var(--r-xs); background: var(--jv-sunken); color: var(--jv-ink-2); font-family: var(--font-sans); font-size: var(--t-sm); line-height: var(--lh-sm); font-weight: 500; letter-spacing: 0; white-space: nowrap; }
 .jv-chip::before { content: ""; width: 6px; height: 6px; background: var(--jv-brand); flex-shrink: 0; }
 .jv-chip--plain::before { display: none; }
 /* Caption chip: the one shared uppercase mono caption spec (12/16, 500, .06em). */
 .jv-chip--caption { font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
 .jv-chip--caption::before { background: var(--jv-ink-3); }
-.jv-badge { display: inline-flex; align-items: center; min-height: 24px; padding: 0 10px; border-radius: var(--r-pill); background: #F2F3F7; color: var(--jv-ink-2); font-size: var(--t-xs); font-weight: 500; line-height: 1; white-space: nowrap; }
+.jv-badge { display: inline-flex; align-items: center; min-height: 24px; padding: 0 10px; border-radius: var(--r-pill); background: var(--jv-bg-muted); color: var(--jv-ink-2); font-size: var(--t-xs); font-weight: 500; line-height: 1; white-space: nowrap; }
 .jv-badge--brand { background: var(--jv-brand-tint); color: var(--jv-brand-ink); }
 .jv-badge--success { background: var(--jv-success-tint); color: var(--jv-success); }
 
@@ -73,7 +76,8 @@
   background: radial-gradient(55% 60% at 50% 0%, rgb(154 162 255 / .13), transparent 70%), #0A0B14;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / .06);
 }
-.jv-dark :focus-visible { outline-color: var(--jv-on-dark-link); }
+/* Text links on ink get the lavender ring (this also beats .product-page's light-theme ring); buttons keep ink + lime. */
+.jv-dark :focus-visible, .product-page .jv-dark :is(a, button, summary):not(.jv-btn):focus-visible { outline-color: var(--jv-on-dark-link); }
 .jv-dark a:not(.jv-btn) { color: var(--jv-on-dark-link); }
 .jv-dark .jv-btn--primary { color: #0A0B14; background: var(--jv-signal); box-shadow: inset 0 1px 0 rgb(255 255 255 / .4); }
 .jv-dark .jv-btn--secondary { color: #fff; background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .16); box-shadow: none; }
@@ -82,14 +86,14 @@
   .jv-dark .jv-btn--secondary:hover { background: rgb(255 255 255 / .1); border-color: rgb(255 255 255 / .24); }
 }
 .jv-dark .jv-btn--primary:active { background: #C6E64A; }
-.jv-dark .jv-btn:focus-visible { box-shadow: 0 0 0 2px #0A0B14, 0 0 0 4px var(--jv-signal); }
+.jv-dark .jv-btn:focus-visible { outline-color: transparent; box-shadow: 0 0 0 2px #0A0B14, 0 0 0 4px var(--jv-signal); }
 
 /* ---------- Brand mark ("signal j") ---------- */
 .jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-weight: var(--fw-strong); font-size: 22px; letter-spacing: -.04em; line-height: 1; text-decoration: none; border-radius: 10px; }
 .jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #0A0B14; color: #fff; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
 .jv-brand-mark svg { width: 24px; height: 24px; }
 .jv-brand-signal { fill: #D4F25A; }
-.jv-wordmark { padding-bottom: 2px; }
+.jv-wordmark { padding-bottom: 2px; white-space: nowrap; }
 /* Windows High Contrast drops the tile fill; keep the tile's edge so the mark stays recognisable. */
 @media (forced-colors: active) { .jv-brand-mark { border: 1px solid CanvasText; } }
 .jv-dark .jv-brand-mark { background: #fff; color: #0A0B14; }
@@ -99,12 +103,15 @@
 /* ---------- Header ---------- */
 .jv-skip { position: absolute; left: 16px; top: -80px; z-index: 60; padding: 12px 18px; border-radius: 10px; background: var(--jv-ink); color: #fff; font-weight: 500; pointer-events: auto; }
 .jv-skip:focus { top: 12px; }
+/* While the mobile menu is open the page behind it is inert, so the skip link leaves the tab order. */
+.jv-header[data-menu-open="true"] .jv-skip { display: none; }
 .jv-header { position: sticky; top: 0; z-index: 40; background: #fff; border-bottom: 1px solid var(--jv-line); }
 .jv-header-inner { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; width: var(--shell); min-height: 56px; margin-inline: auto; }
 .jv-header .lucide, .jv-footer .lucide { stroke-width: 1.75; }
 .jv-header-nav { display: none; }
 .jv-header-actions { display: none; }
-.jv-header-start { margin-left: auto; }
+.jv-header-inner > .jv-brand { min-width: 0; }
+.jv-header-start { margin-left: auto; flex-shrink: 1; min-width: 0; }
 .jv-header-start::after { content: ""; position: absolute; inset: -2px 0; }
 .jv-header[data-menu-open="true"] .jv-header-start { visibility: hidden; }
 .jv-menu-toggle { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; margin: 0 -10px 0 auto; border: 0; border-radius: 12px; background: transparent; color: var(--jv-ink); }
@@ -115,7 +122,7 @@
 .jv-account-pending { display: contents; }
 .jv-account-pending > .jv-btn { visibility: hidden; }
 .jv-mobile-panel { display: none; }
-.jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(10 11 20 / .18); animation: jv-menu-in 180ms var(--ease-out) both; }
+.jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(10 11 20 / .18); animation: jv-menu-in 200ms var(--ease-out) both; }
 .jv-mobile-panel > a { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid var(--jv-line); color: var(--jv-ink); font-size: 20px; font-weight: 500; letter-spacing: -.02em; text-decoration: none; }
 .jv-mobile-panel > a[aria-current="page"] { color: var(--jv-brand); }
 .jv-mobile-panel > a:focus-visible { outline-offset: -2px; border-radius: 6px; }
@@ -126,12 +133,13 @@
 .jv-menu-scrim { position: fixed; inset: 56px 0 0; z-index: 1; background: rgb(10 11 20 / .32); animation: jv-scrim-in 180ms var(--ease-out) both; }
 .jv-account-status { color: var(--jv-ink-3); font-size: var(--t-sm); }
 .jv-header-error { width: var(--shell); margin: 0 auto 12px; color: var(--jv-danger); font-size: var(--t-sm); }
-@keyframes jv-menu-in { from { opacity: 0; transform: translateY(-8px); } }
+/* Open and close clip the panel from its top edge, so its text never overlaps the page text behind it. */
+@keyframes jv-menu-in { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes jv-scrim-in { from { opacity: 0; } }
-/* Closing: the panel stays mounted for 120ms and fades out (MvpHeader sets data-state="closing"). */
-.jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(10 11 20 / .18); pointer-events: none; animation: jv-menu-out 120ms var(--ease-press) both; }
-.jv-menu-scrim[data-state="closing"] { pointer-events: none; animation: jv-scrim-out 120ms var(--ease-press) both; }
-@keyframes jv-menu-out { to { opacity: 0; transform: translateY(-4px); } }
+/* Closing: the panel stays mounted for 160ms and is clipped away (MvpHeader sets data-state="closing"). */
+.jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(10 11 20 / .18); pointer-events: none; animation: jv-menu-out 160ms var(--ease-inout) both; }
+.jv-menu-scrim[data-state="closing"] { pointer-events: none; animation: jv-scrim-out 160ms var(--ease-inout) both; }
+@keyframes jv-menu-out { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }
 @keyframes jv-scrim-out { to { opacity: 0; } }
 /* Very narrow screens with large text spacing: the wordmark gives way before the menu controls do. */
 @media (max-width: 359px) { .jv-header-inner > .jv-brand { flex-shrink: 1; min-width: 0; overflow: hidden; } .jv-header-inner > .jv-brand .jv-wordmark { overflow: hidden; text-overflow: clip; } .jv-header-inner > .jv-brand .jv-brand-mark { flex: none; } }
@@ -140,54 +148,49 @@
   /* Full-bleed sticky bar: a 12px white strip masks scrolled content above the floating pill. */
   .jv-header { top: 0; padding-top: 12px; background: linear-gradient(#fff 12px, rgb(255 255 255 / 0) 12px); border-bottom: 0; pointer-events: none; }
   .jv-header > * { pointer-events: auto; }
-  .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 62px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(10 11 20 / .12); background: rgb(255 255 255 / .94); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .jv-header-inner { background: #fff; } }
+  .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 62px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(10 11 20 / .12); background: #FFFFFF; }
   .jv-header-inner > .jv-brand { justify-self: start; }
   .jv-header-nav { display: flex; align-items: center; gap: 2px; }
-  .jv-header-nav > a { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 14px; border-radius: var(--r-pill); color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; letter-spacing: -.006em; text-decoration: none; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
-  .jv-header-nav > a[aria-current="page"] { background: #F2F3F7; color: var(--jv-ink); }
+  .jv-header-nav > a { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 14px; border-radius: var(--r-pill); color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; letter-spacing: 0; text-decoration: none; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+  .jv-header-nav > a[aria-current="page"] { background: var(--jv-bg-muted); color: var(--jv-ink); }
   .jv-header-actions { display: flex; align-items: center; justify-self: end; gap: 4px; }
   .jv-header .jv-btn--sm { --jv-btn-h: 44px; }
   .jv-header-start, .jv-menu-toggle, .jv-mobile-panel, .jv-mobile-panel[data-open="true"], .jv-mobile-panel[data-state="closing"], .jv-menu-scrim { display: none; }
   .jv-header-error { margin-top: 8px; }
 }
-@media (min-width: 960px) and (hover: hover) { .jv-header-nav > a:hover { background: #F2F3F7; color: var(--jv-ink); } }
+@media (min-width: 960px) and (hover: hover) { .jv-header-nav > a:hover { background: var(--jv-bg-muted); color: var(--jv-ink); } }
 @media (min-width: 960px) and (max-width: 1079px) { .jv-header-nav > a { padding: 10px 10px; } }
 
 /* ---------- Footer ---------- */
 .jv-footer { position: relative; overflow: hidden; background: var(--jv-bg-subtle); border-top: 1px solid var(--jv-line); color: var(--jv-ink-2); }
-.jv-footer-inner { width: var(--shell); margin-inline: auto; padding: 56px 0 28px; }
+.jv-footer-inner { width: var(--shell); margin-inline: auto; padding: 56px 0 32px; }
 .jv-footer-top { display: grid; gap: 40px; }
 .jv-footer-brand { display: grid; justify-items: start; gap: 12px; align-content: start; }
 .jv-footer-brand .jv-brand { margin-top: -6px; }
 .jv-footer-description { max-width: 34ch; margin: 0; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.6; text-wrap: pretty; }
-.jv-footer-note { margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.5; }
+.jv-footer-note { margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-footer-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 24px; }
 .jv-footer-col-title { margin: 0 0 4px; color: var(--jv-ink-3); font-size: var(--t-sm); font-weight: 500; letter-spacing: 0; line-height: 1.4; }
 .jv-footer-col ul { display: grid; margin: 0; padding: 0; list-style: none; }
 .jv-footer-col a { display: inline-flex; align-items: center; min-height: 44px; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; text-decoration: none; transition: color var(--dur-2) var(--ease-press); }
 @media (hover: hover) { .jv-footer-col a:hover { color: var(--jv-ink); } }
-.jv-footer-bottom { display: flex; flex-direction: column; gap: 4px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--jv-line); color: var(--jv-ink-3); font-size: var(--t-sm); }
+.jv-footer-bottom { display: flex; flex-direction: column; gap: 4px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--jv-line); color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-footer-bottom p { margin: 0; }
 .jv-footer-bottom nav { display: flex; flex-wrap: wrap; column-gap: 20px; }
 .jv-footer-bottom nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--jv-ink-2); text-decoration: none; }
 @media (hover: hover) { .jv-footer-bottom nav a:hover { color: var(--jv-ink); text-decoration: underline; text-underline-offset: 3px; } }
-/* Closing wordmark: fills the shell edge to edge; only the j's descender bleeds off the bottom. */
-.jv-footer-mark::before { content: "jobvance"; }
-.jv-footer-mark { display: block; width: var(--shell); margin: 32px auto 0; color: #E7E9F0; font-size: min(304px, calc((100vw - 2 * var(--gutter)) * .248)); font-weight: var(--fw-strong); letter-spacing: -.045em; line-height: .8; text-indent: -.08em; white-space: nowrap; user-select: none; pointer-events: none; }
-.jv-footer-compact .jv-footer-top, .jv-footer-compact .jv-footer-mark { display: none; }
+.jv-footer-compact .jv-footer-top { display: none; }
 .jv-footer-compact .jv-footer-inner { padding-top: 20px; }
 .jv-footer-compact .jv-footer-bottom { margin-top: 0; border-top: 0; padding-top: 0; }
-/* Phones: Product fills the left column; Resources and Company stack on the right. */
-@media (max-width: 639px) { .jv-footer-links { grid-auto-flow: dense; } .jv-footer-col:first-child { grid-row: span 2; } }
+/* Phones: two columns in source order (Product and Resources, then Company under Product). The footer ends on the bottom bar. */
 @media (min-width: 640px) {
+  .jv-footer-inner { padding-bottom: 40px; }
   .jv-footer-links { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .jv-footer-bottom { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; }
 }
 @media (min-width: 1024px) {
   /* Same left edge as the page content (shell edge plus the band inset). */
-  .jv-footer-inner { padding: 72px var(--band-pad-x) 28px; }
-  .jv-footer-mark { width: calc(var(--shell) - 2 * var(--band-pad-x)); font-size: min(272px, calc((100vw - 2 * var(--gutter) - 2 * var(--band-pad-x)) * .248)); }
+  .jv-footer-inner { padding: 72px var(--band-pad-x) 40px; }
   .jv-footer-top { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; }
   .jv-footer-brand { grid-column: span 4; }
   .jv-footer-links { grid-column: 7 / span 6; gap: 24px; }
@@ -197,20 +200,23 @@
 }
 
 /* ---------- Final CTA band ---------- */
-/* Left-aligned copy over flat ink, with a static orbit cropped off the right edge (no glow). */
+/* Left-aligned copy over ink. From 640px a static orbit shows about 60% of its ring on the right, lit from its centre
+   by the same low-chroma source as the loop band (never behind a button), with the lime "You review" node inside the band. */
 .jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: #0A0B14; }
-.jv-cta .jv-cta-orbit { --ring: rgb(154 162 255 / .45); display: none; position: absolute; right: -400px; top: 50%; z-index: 0; width: 760px; translate: 0 -50%; opacity: .5; }
+.jv-cta .jv-cta-orbit { --ring: rgb(154 162 255 / .35); display: none; position: absolute; right: -220px; top: 50%; z-index: 0; width: 720px; translate: 0 -50%; opacity: 1; }
 .jv-cta-inner { position: relative; z-index: 1; max-width: 640px; }
 .jv-cta h2 { margin: 0; max-width: 12ch; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: -.04em; text-wrap: balance; }
 .jv-cta p { margin: 16px 0 0; max-width: 46ch; color: var(--jv-on-dark-body); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; text-wrap: pretty; }
 .jv-cta-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 32px; }
-.jv-cta .jv-cta-note { max-width: none; margin-top: 20px; color: var(--jv-on-dark-2); font-size: var(--t-sm); line-height: 1.5; letter-spacing: -.003em; font-variant-numeric: tabular-nums; }
+.jv-cta .jv-cta-note { max-width: none; margin-top: 20px; color: var(--jv-on-dark-2); font-size: var(--t-sm); line-height: var(--lh-sm); letter-spacing: 0; font-variant-numeric: tabular-nums; }
 @media (max-width: 639px) { .jv-cta-actions .jv-btn { width: 100%; } }
-@media (min-width: 640px) { .jv-cta { padding: 96px var(--band-pad-x); } .jv-cta .jv-cta-orbit { display: block; } }
+@media (min-width: 640px) {
+  .jv-cta { padding: 96px var(--band-pad-x); background: radial-gradient(42% 70% at 94% 50%, rgb(154 162 255 / .12), transparent 70%), #0A0B14; }
+  .jv-cta .jv-cta-orbit { display: block; }
+}
 @media (min-width: 1024px) {
   .jv-cta { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 112px var(--band-pad-x); }
   .jv-cta-inner { grid-column: 1 / span 7; max-width: none; }
-  .jv-cta .jv-cta-orbit { right: -380px; width: 900px; opacity: .55; }
 }
 
 /* ---------- FAQ accordion ---------- */

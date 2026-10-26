@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import "./LoopOrbit.css";
 
 // Layout effect in the browser (runs before paint); plain effect on the server.
@@ -8,8 +8,9 @@ type Props = {
   size: number;
   variant?: "light" | "dark";
   labels?: boolean;
-  /** Show the three stop nodes. Off gives a ring and comet only. */
+  /** Show the three stop nodes. */
   nodes?: boolean;
+  /** Off gives a static ring (and nodes) with no comet at all. */
   animate?: boolean;
   /** Play one sweep, Find to You review, when the orbit scrolls into view, then rest. */
   once?: boolean;
@@ -20,12 +21,15 @@ type Props = {
 /** The signature "orbit": the search goes round on its own; you are the last stop. Decorative only. */
 export default function LoopOrbit({ size, variant = "light", labels = false, nodes = true, animate = true, once = false, className = "", children }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  // The single pass starts on the client only. The server-painted frame shows the comet at rest on "You review",
+  // and a prerendered page keeps that frame, so the comet never jumps back when the app mounts.
+  const [live, setLive] = useState(false);
   useBeforePaint(() => {
     const node = ref.current;
     if (!animate || !node || typeof IntersectionObserver === "undefined") return;
+    // Without motion (or without JS) the comet simply rests on "You review".
+    if (!window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) return;
     if (once) {
-      // Without motion (or without JS) the comet simply rests on "You review".
-      if (!window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) return;
       // Already in view at mount (restored scroll, tall screens): leave it at rest rather than jump back to start.
       const box = node.getBoundingClientRect();
       const visible = Math.max(0, Math.min(box.bottom, window.innerHeight) - Math.max(box.top, 0));
@@ -39,15 +43,17 @@ export default function LoopOrbit({ size, variant = "light", labels = false, nod
       observer.observe(node);
       return () => observer.disconnect();
     }
-    // Pause the comet while the orbit is off screen.
+    if (document.documentElement.classList.contains("jv-prerendered")) return;
+    setLive(true);
+    // Pause the pass while the orbit is off screen.
     const observer = new IntersectionObserver(([entry]) => node.classList.toggle("is-offscreen", !entry.isIntersecting));
     observer.observe(node);
     return () => observer.disconnect();
   }, [animate, once]);
-  const mode = !animate ? "" : once ? " jv-orbit--once" : " jv-orbit--animate";
+  const mode = !animate ? "" : once ? " jv-orbit--once" : live ? " jv-orbit--animate" : "";
   return <div ref={ref} className={`jv-orbit jv-orbit--${variant}${mode} ${className}`.trim()} style={{ "--size": `${size}px` } as CSSProperties} aria-hidden="true">
     <span className="jv-orbit-ring" />
-    <span className="jv-orbit-comet" />
+    {animate && <span className="jv-orbit-comet" />}
     {nodes && <>
       <span className="jv-orbit-node jv-orbit-node--find" />
       <span className="jv-orbit-node jv-orbit-node--tailor" />

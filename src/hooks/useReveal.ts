@@ -19,6 +19,9 @@ export function useReveal() {
     const fold = window.innerHeight * 0.9;
     for (const element of pending) if (element.getBoundingClientRect().top < fold) element.classList.add("is-in");
     root.classList.add("jv-motion");
+    // Hide first with no transition, then enable the reveal transition two frames later, so arming never fades
+    // below-the-fold blocks from visible to hidden.
+    let frame = window.requestAnimationFrame(() => { frame = window.requestAnimationFrame(() => root.classList.add("jv-motion-ready")); });
     const observer = new IntersectionObserver((entries) => {
       // Stagger only elements that enter together (same callback batch); a lone element never waits.
       entries.filter(entry => entry.isIntersecting).forEach((entry, order) => {
@@ -28,6 +31,6 @@ export function useReveal() {
       });
     }, { rootMargin: "100000px 0px -10% 0px", threshold: 0.15 }); // the huge top margin also reveals anything a fast scroll jumped past
     for (const element of pending) if (!element.classList.contains("is-in")) observer.observe(element);
-    return () => { observer.disconnect(); root.classList.remove("jv-motion"); };
+    return () => { window.cancelAnimationFrame(frame); observer.disconnect(); root.classList.remove("jv-motion", "jv-motion-ready"); };
   }, []);
 }

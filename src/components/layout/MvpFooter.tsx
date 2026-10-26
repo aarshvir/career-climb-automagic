@@ -20,6 +20,5 @@ export default function MvpFooter() {
       </div>
       <div className="jv-footer-bottom"><p>© {new Date().getFullYear()} Jobvance</p><nav aria-label="Legal navigation">{legal.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav></div>
     </div>
-    <span className="jv-footer-mark" aria-hidden="true" />
   </footer>;
 }
