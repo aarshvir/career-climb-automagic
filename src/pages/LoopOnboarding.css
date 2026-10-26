@@ -2,3 +2,21 @@
 .oq-picker-input{display:flex;gap:8px;align-items:stretch}.oq-picker-input input{min-width:0;flex:1}.oq-picker-input button{flex-shrink:0}.oq-choice-list{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:14px 0}.oq-choice-list li{display:flex;align-items:center;gap:8px;max-width:100%;padding:4px 6px 4px 12px;background:#edf3ff;border:1px solid #d5e1fc;border-radius:20px;overflow-wrap:anywhere}.oq-choice-list button{border:0;background:transparent;color:#294f94;min-width:36px;min-height:36px;font-size:22px;cursor:pointer}.oq-picker details summary,.oq-early-cv summary{cursor:pointer;color:#294f94;padding:8px 0}.oq-picker details label{margin-top:12px}.oq-suggestion{padding:12px;background:#f1f6ff;border-radius:8px;font-size:.9rem}.oq-early-cv{border-top:1px solid #dfe6ee;padding-top:8px}
 .loop-onboarding{padding-bottom:calc(128px + env(safe-area-inset-bottom,0px))}.oq-actions{position:fixed;z-index:40;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,720px);box-sizing:border-box;margin:0;padding:16px 24px calc(16px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid #dfe6ee;box-shadow:0 -8px 24px #17243b0d}.oq-actions .jl-button{min-height:48px;min-width:112px}.oq-card input,.oq-card textarea,.oq-card select,.oq-card summary{scroll-margin-bottom:120px}@media(max-width:520px){.oq-actions{padding-left:16px;padding-right:16px}.loop-onboarding{padding-bottom:calc(128px + env(safe-area-inset-bottom,0px))}}
 .loop-onboarding{--jl-blue:#2850df;--jl-ink:#172338;--jl-muted:#566176;--jl-line:#dce1e9;--jl-lavender:#edeef9}.loop-onboarding :is(a,button,input,select,textarea,summary):focus-visible{outline:3px solid var(--jl-blue);outline-offset:4px}
+
+/* Setup uses the same semantic colors as account entry, without changing its flow. */
+.loop-onboarding { --jl-blue: var(--jv-brand); --jl-ink: var(--jv-ink); --jl-muted: var(--jv-ink-2); --jl-line: var(--jv-line); --jl-lavender: var(--jv-brand-tint); color: var(--jl-ink); }
+.loop-onboarding :is(.oq-back, .oq-step, .oq-note, .oq-card .jl-field p) { color: var(--jl-muted); }
+.loop-onboarding .oq-eyebrow { color: var(--jl-blue); }
+.loop-onboarding .oq-progress { background: var(--jv-sunken); }
+.loop-onboarding .oq-progress span { background: var(--jl-blue); }
+.loop-onboarding .oq-card { border-color: var(--jl-line); }
+.loop-onboarding .oq-card :is(input, textarea, select) { color: var(--jl-ink); border-color: var(--jv-line-input); }
+.loop-onboarding .oq-card .jl-field label { font-size: 14px; }
+.loop-onboarding .oq-card pre { color: var(--jl-ink); background: var(--jv-bg-subtle); }
+.loop-onboarding .oq-actions { border-color: var(--jl-line); }
+.loop-onboarding .jl-button { color: var(--jl-ink); border-color: var(--jv-line-input); font-size: 14px; }
+.loop-onboarding .jl-button--primary { color: #fff; background: var(--jl-blue); border-color: var(--jl-blue); }
+.loop-onboarding .jl-button--primary:hover { color: #fff; background: var(--jv-brand-hover); border-color: var(--jv-brand-hover); }
+.loop-onboarding :is(button, input, textarea, select):disabled { opacity: .55; cursor: not-allowed; }
+.loop-onboarding .oq-error { background: var(--jv-danger-tint); border-color: var(--jv-danger); }
+@media(max-width:520px) { .loop-onboarding .jl-button { font-size: 13px; } }

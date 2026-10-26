@@ -283,3 +283,29 @@
 .ap-phone-field { display: grid; grid-template-columns: minmax(96px, 128px) minmax(0, 1fr); gap: 8px; }
 .ap-phone-field select { min-height: 48px; border: 1px solid var(--ap-control-line, #c9d0dc); border-radius: 9px; padding: 0 8px; background: #fff; color: var(--ap-ink, #172338); font-size: 14px; }
 .ap-field-error { color: #b42318; font-size: 13px; margin: 0; }
+
+/* Account surfaces share the public design system; the research pilot stays separate. */
+.jv-account {
+  --ap-muted: var(--jv-ink-2);
+  --ap-lavender: var(--jv-bg-subtle);
+  --ap-lime: var(--jv-success-tint);
+  --ap-line: var(--jv-line);
+  --ap-control-line: var(--jv-line-input);
+}
+.jv-account .ap-document-back { background: var(--jv-sunken); border-color: var(--ap-line); }
+.jv-account .ap-document-sheet { border-color: var(--ap-line); }
+.jv-account .ap-document-lines span { background: var(--jv-sunken); }
+.jv-account .ap-document-note { background: var(--jv-brand-tint); }
+.jv-account .ap-review-stamp { background: var(--jv-success-tint); border-color: var(--jv-success); color: var(--jv-success); }
+.jv-account .ap-auth-heading > p:not(.ap-eyebrow) { margin: 0 0 18px; color: var(--ap-muted); font-size: 15px; line-height: 1.7; }
+.jv-account .ap-loop-entry { padding: 14px 16px; margin: 18px 0 24px; border: 1px solid var(--ap-line); border-radius: 12px; background: var(--jv-bg-subtle); }
+.jv-account .ap-loop-entry ol { margin: 0; padding-left: 20px; list-style: decimal outside; gap: 8px; font-size: 14px; }
+.jv-account .ap-loop-entry li::marker { color: var(--jv-brand-ink); font-weight: 700; }
+.jv-account .ap-loop-entry p { margin: 12px 0 0; color: var(--ap-muted); font-size: 13px; line-height: 1.65; }
+.jv-account .ap-field label { font-size: 14px; }
+.jv-account .ap-field input, .jv-account .ap-phone-field select { font-size: 16px; }
+.jv-account .ap-field-help { font-size: 13px; }
+.jv-account .ap-field input:focus { border-color: var(--ap-cobalt); box-shadow: 0 0 0 3px #3b47f01f; }
+.jv-account .ap-primary { font-size: 14px; box-shadow: 0 2px 8px #3b47f014; }
+.jv-account .ap-primary:hover { background: var(--jv-brand-hover); border-color: var(--jv-brand-hover); }
+.jv-account .ap-google-button:hover { background: var(--jv-bg-subtle); border-color: var(--ap-control-line); }
