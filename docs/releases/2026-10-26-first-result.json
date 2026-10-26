@@ -1,0 +1,132 @@
+{
+  "date": "2026-10-26",
+  "site": "https://jobvance.io",
+  "publicVersion": 57,
+  "runtimeSource": "07e63125275e5bf58c27aab81644aaa75df7e265",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/31",
+  "reviewedHead": "53a9b6d49982a02f4e9ec7ddb403ef382c85a72c",
+  "mergeCommit": "3cc5bc083d83df41960eaba8c35db7fec8cad88d",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ad3b3b87fb308191b66fc91f95384f3f",
+  "deploymentId": "appgdep_6adecc24859c8191a00d1abf2aaca409",
+  "status": "succeeded",
+  "deployedAt": "2026-10-26T03:42:54.047607+00:00",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_000000000fd0820896de8316dea78b2b",
+    "content_hash": "sha256:2858efa07f674eb792d0efb5da6e489de6c582d110f227e072dbf9acda7315e5",
+    "size_bytes": 15370240,
+    "file_count": 143
+  },
+  "changes": [
+    "Account-first Job Loop context and next actions, visible on narrow screens.",
+    "Known social-app browser email entry and safe browser-menu/copy guidance; Google hidden in detected webviews.",
+    "Deliberate original-tab email-confirmation continuation with ten-minute memory-only credentials and current SDK auth epoch; no automatic focus/visibility password login.",
+    "Honest callback recovery without treating a code as proof of confirmation.",
+    "Optional setup exact save tolerates equivalent JSONB pay-object key order and rejects altered answers.",
+    "Explicit source-bound fact retrieval and first search using the saved global CV, without requiring a variant or schedule.",
+    "Worker distinguishes actual source coverage, ready/held/missing outputs and successful no-match results.",
+    "Collapsible source details preserve separate exact-document approval."
+  ],
+  "backend": {
+    "function": "job-loop-worker",
+    "version": 37,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "ezbr_sha256": "9f46b07966fbac00c6518c79db22340ed8a55c1f45b50aea654ce82fbbf93733",
+    "exactUploadedFiles": true,
+    "fileNames": [
+      "index.js",
+      "deno.json"
+    ],
+    "authentication": "Existing service/lease authentication retained",
+    "migrations": 0,
+    "controlDeployed": false,
+    "otherGeneratedBundles": "Refreshed locally; not evidence of deployed parity"
+  },
+  "validation": {
+    "tests": 3308,
+    "files": 180,
+    "concurrency": 2,
+    "appTypeScript": "passed",
+    "sourceDenoCases": 28,
+    "generatedDenoCases": 28,
+    "independentFrontendCases": 165,
+    "independentCasesOverlap": true,
+    "workerReview": "Findings delivered and corrected; reviewer then reached model capacity, no later sign-off inferred.",
+    "changedRuntimeLint": {
+      "errors": 0,
+      "warnings": 9,
+      "note": "Eight pre-existing warnings and one lifetime-cleanup warning; inherited repository-wide lint is not called green."
+    },
+    "productionBuild": {
+      "publicPages": 37,
+      "guideArticles": 20,
+      "embeddedAssets": 139,
+      "compressedBytes": 2952154,
+      "compressedLimitBytes": 3145728,
+      "hostingGroups": 12
+    },
+    "packagerRecovery": "Initial OneDrive symlink-guard failure; actual dirent/lstat/readlink/realpath inspection of146entries (141files/five directories) found zero links or escapes; unchanged packager retry and twelve hosting groups passed.",
+    "actualLocalJourney": "Real controller/repository/PGlite/worker with intercepted employer fixture: global CV save, literal suggestions, pre-fact run rejection, explicit fact save, matching vacancy, actual rendering, pre-approval download rejection, approval, PDF/DOCX/TXT parsing and idempotent retry.",
+    "browser": {
+      "scope": "Actual components under isolated synthetic auth/persistence/employer adapters; original SQL/worker artifact bytes.",
+      "observed": [
+        "Signup UI to optional setup",
+        "Exact private save/readback",
+        "Explicit literal fact review and confirmation",
+        "First rules run without variant or schedule",
+        "Exact result/PDF preview",
+        "Separate document approval"
+      ],
+      "transport": "Local binary responses were empty in Chrome; QA adapter used length/SHA-checked JSON bytes preserving original artifacts.",
+      "signupViewport": {
+        "width": 390,
+        "height": 844,
+        "documentWidth": 390,
+        "horizontalOverflow": false
+      },
+      "wholeMobileJourneyVerified": false,
+      "nativeDownloadsVerified": false,
+      "downloadLimit": "Native download-event wait timed out; no matching new Downloads file found. Actual parsed exports verified separately through controller/SQL authorization."
+    },
+    "live": {
+      "at": "2026-10-26T03:44:04.999Z",
+      "privateRoutes": 13,
+      "publicRoutesOrFiles": 4,
+      "exactJavaScript": 66,
+      "exactCss": 15,
+      "workerUnauthorized401": 2,
+      "failures": [],
+      "accountEntry": "Actual published guest account form and Job Loop next steps observed in IAB; screenshot retained privately.",
+      "htmlNormalization": "Only the previously observed exact complete appended Cloudflare script template; no arbitrary HTML normalization; no live ETag claimed."
+    }
+  },
+  "scope": {
+    "migrations": 0,
+    "candidateWrites": false,
+    "paidProviderCalls": false,
+    "merchantChanges": false,
+    "paymentsChanged": false,
+    "capacityChanged": false,
+    "budgetChanged": false,
+    "adChanges": false,
+    "authConfigurationChanged": false,
+    "broaderPrivacyRiskAudit": "set aside; existing authorities preserved"
+  },
+  "limitations": [
+    "No real Instagram/Facebook phone-browser signup acceptance",
+    "No new hosted signup/email/Google OAuth acceptance",
+    "No fresh native browser-export success",
+    "No natural repeated-day or unassisted acceptance",
+    "No broader discovery or NPS uplift",
+    "PR32 contacts/analytics and premium redesign remain separate"
+  ],
+  "rollback": {
+    "tag": "jobvance-before-first-result-2026-10-25",
+    "source": "5278b273eedb6f20ed9765bd85322b10d02bef13",
+    "savedVersion56": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f21faf0dc2188191a77540f26a1c18a7",
+    "workerBefore": 36,
+    "exactBeforeNativeSourceRetainedPrivately": true,
+    "note": "Source/site rollback is separate from database/file/merchant restoration."
+  }
+}
