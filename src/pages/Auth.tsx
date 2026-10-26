@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowRight, Check, FileText, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
+import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
 import './AccountPilot.css';
 
@@ -28,6 +29,12 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const socialBrowser = detectInAppBrowser();
   const loopEntry = !embedded && accountDestination(searchParams.get('next')) === '/onboarding';
   const fieldId = useId();
+  // Only the newly submitted signup is retained, in this mounted tab for ten minutes.
+  // Continuation is deliberate; focus/visibility never starts a password login.
+  const pending = useRef<{ email:string; password:string; expiresAt:number; epoch:number } | null>(null);
+  const alive = useRef(true), continuing = useRef(false), attempt = useRef(0);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; pending.current = null; attempt.current++; }; }, []);
+  useEffect(() => { if (user || authLoading || authError) { pending.current = null; attempt.current++; } }, [user, authLoading, authError]);
 
   useEffect(() => {
     if (user && !authLoading && !embedded) navigate(accountDestination(searchParams.get('next')), { replace: true });
@@ -49,12 +56,15 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       if (!validation.valid) { setError(validation.errors.join('. ')); return; }
     }
     setBusy(true);
+    const turn = ++attempt.current, epoch = trackingAuthEpoch();
     try {
       if (!embedded && mode === 'sign-up') rememberLoopReturn(searchParams.get('next'));
       if (mode === 'sign-up') {
         const result = await signUpWithEmail(email, password);
+        if (!alive.current || attempt.current !== turn || trackingAuthEpoch() !== epoch) return;
         if (result.error) setError(result.error);
         else if (result.requiresEmailConfirmation) {
+          pending.current = { email:email.trim(), password, expiresAt:Date.now()+10*60*1000, epoch };
           setConfirmationSent(true);
           setPassword('');
           setConfirmPassword('');
@@ -81,12 +91,31 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   };
 
   const changeMode = () => {
+    pending.current = null; attempt.current++;
     setMode(current => current === 'sign-in' ? 'sign-up' : 'sign-in');
     setError('');
     setConfirmationSent(false);
     setPassword('');
     setConfirmPassword('');
   };
+
+  async function continueSignup() {
+    if (busy || continuing.current || configurationError || authLoading || authError || user) return;
+    const details = pending.current;
+    if (!details || details.epoch !== trackingAuthEpoch() || details.expiresAt <= Date.now()) {
+      pending.current = null; setConfirmationSent(false); setMode('sign-in');
+      setError('Sign in with your email and password to continue. Your setup destination is unchanged.'); return;
+    }
+    continuing.current = true; setBusy(true); setError('');
+    const turn = ++attempt.current;
+    try {
+      const result = await signInWithEmail(details.email, details.password);
+      if (!alive.current || pending.current !== details || attempt.current !== turn) return;
+      if (result.error) setError(/confirm/i.test(result.error) ? 'Your email is not confirmed yet. Open the confirmation email, then return and continue.' : result.error);
+      else pending.current = null;
+    } catch { if (alive.current && pending.current === details && attempt.current === turn) setError('We could not connect. Please try again.'); }
+    finally { continuing.current = false; if (alive.current) setBusy(false); }
+  }
 
   async function copyBrowserLink() {
     const target = new URL('/auth', window.location.origin);
@@ -150,8 +179,9 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           {confirmationSent ? (
             <div className="ap-confirmation">
               <p role="status">If this address can be registered, confirmation instructions will be sent to <strong>{email.trim()}</strong>. Check your spam folder. Open the link in this browser when possible.</p>
-              <p>If the email opens a different browser, confirm there, then return to this page and sign in with the password you chose. If you already have an account, sign in or reset your password.</p>
-              <Button className="ap-primary ap-auth-submit" onClick={changeMode}>Back to sign in <ArrowRight size={16} aria-hidden="true" /></Button>
+              <p>If the email opens a different browser, confirm there, then return here and press Continue. After ten minutes or a page reload, sign in with your password instead. If you already have an account, sign in or reset your password.</p>
+              <Button className="ap-primary ap-auth-submit" disabled={busy} onClick={() => void continueSignup()}>{busy ? 'Checking…' : "I’ve confirmed my email, continue"}</Button>
+              <Button variant="link" disabled={busy} onClick={changeMode}>Back to sign in <ArrowRight size={16} aria-hidden="true" /></Button>
             </div>
           ) : (
             <>

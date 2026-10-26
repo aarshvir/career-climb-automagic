@@ -142,7 +142,12 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       const response = await callJobLoop(owner, boundLoopAction({ action: 'save_profile', expectedVersion: original.recordVersion, profile: submitted, saveConsent: true }, original.lifecycleGeneration), () => current() && turn === epoch.current);
       if (!current() || turn !== epoch.current) return;
       if (!response.snapshot?.profile || response.snapshot.lifecycleGeneration !== original.lifecycleGeneration || response.snapshot.recordVersion <= original.recordVersion) throw new Error('The save could not be confirmed. Your answers are still here. Open your dashboard to check before trying again.');
-      for (const key of Object.keys(submitted) as (keyof LoopProfileInput)[]) if (JSON.stringify(response.snapshot.profile[key]) !== JSON.stringify(submitted[key])) throw new Error('The returned setup differs from your answers. Open your dashboard to review it before continuing.');
+      for (const key of Object.keys(submitted) as (keyof LoopProfileInput)[]) {
+        const same = key === 'compensation'
+          ? (['currency', 'period', 'minimum'] as const).every(field => response.snapshot!.profile!.compensation[field] === submitted.compensation[field])
+          : JSON.stringify(response.snapshot.profile[key]) === JSON.stringify(submitted[key]);
+        if (!same) throw new Error('The returned setup differs from your answers. Open your dashboard to review it before continuing.');
+      }
       snapshot.current = response.snapshot; clearOnboardingDraft(); setSaved(true);
     } catch (failure) { if (current() && turn === epoch.current) setError(failure instanceof Error ? failure.message : 'The save could not be confirmed. Check your dashboard before trying again.'); }
     finally { saving.current = false; if (current() && turn === epoch.current) setBusy(''); }

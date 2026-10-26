@@ -91,7 +91,7 @@ describe('first-result outcome guidance from actual worker phases', () => {
     expect(h.run.data.lanes?.some(l=>l.name.includes('LinkedIn'))).toBe(false);
   });
   it.each(['held','missing'] as const)('does not call %s output ready', async state => {
-    const h=harness();h.run.phase=7;h.run.data={packetIds:['p'],lanes:[],messages:[]};
+    const h=selectedHarness();h.run.phase=7;h.run.data={packetIds:['p'],lanes:[],messages:[]};
     if(state==='held')h.packets.push({id:'p',status:'held'} as LoopPacket);
     await processLoopPhase(h.repo,id,env);
     expect(h.run.data.nextAction).toMatch(state==='held'?/needs attention/:/availability could not be confirmed/);

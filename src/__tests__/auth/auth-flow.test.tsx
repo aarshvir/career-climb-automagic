@@ -252,3 +252,20 @@ describe('Job Loop account entry and confirmation recovery', () => {
     expect(await screen.findByText('Resume account sign-in')).toBeInTheDocument();
   });
 });
+
+
+it('continues the same signup on one deliberate click without focus-triggered login', async () => {
+  sdk.signUp.mockResolvedValue({data:{user:signedIn.user,session:null},error:null});
+  sdk.signInWithPassword.mockResolvedValue({data:{user:signedIn.user,session:signedIn},error:null});
+  render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Routes><Route path='/auth' element={<Auth />} /><Route path='/onboarding' element={<h1>Choose your roles</h1>} /></Routes></MemoryRouter></AuthProvider>);
+  const user=userEvent.setup();await user.type(await screen.findByLabelText('Email address'),'new-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.type(screen.getByLabelText('Confirm password'),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));
+  await screen.findByText('Check your email');await act(async()=>{window.dispatchEvent(new Event('focus'));document.dispatchEvent(new Event('visibilitychange'));});expect(sdk.signInWithPassword).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(await screen.findByText('Choose your roles')).toBeInTheDocument();expect(sdk.signInWithPassword).toHaveBeenCalledTimes(1);
+});
+it('does not reuse pending signup credentials after an SDK account change and sign-out', async () => {
+  sdk.signUp.mockResolvedValue({data:{user:signedIn.user,session:null},error:null});
+  render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth embedded /></MemoryRouter></AuthProvider>);
+  const user=userEvent.setup();await user.type(await screen.findByLabelText('Email address'),'another-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.type(screen.getByLabelText('Confirm password'),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));await screen.findByText('Check your email');
+  act(()=>{sdk.listener!('SIGNED_IN',signedIn);sdk.listener!('SIGNED_OUT',null);});
+  await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(sdk.signInWithPassword).not.toHaveBeenCalled();expect(screen.getByLabelText('Password',{exact:true})).toHaveValue('');
+});

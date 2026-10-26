@@ -86,7 +86,7 @@ describe('first saved global CV to useful result through real control, SQL and w
  it('saves setup and explicit facts, discovers a matching role, reviews and downloads the exact first CV', async () => {
   const {repo,bytes}=integratedRepository();
   await db.query('DELETE FROM jobvance_private.loop_cv_variants WHERE user_id=$1',[owner]);
-  const setupProfile={...profile,pageTarget:2 as const,compensation:{currency:'',period:'annual' as const,minimum:null}};
+  const setupProfile={...profile,languages:[],pageTarget:2 as const,compensation:{currency:'',period:'annual' as const,minimum:null}};
   const env=(key:string)=>({SUPABASE_URL:'https://project.example.test',SUPABASE_SERVICE_ROLE_KEY:'local-fixture-only',JOB_LOOP_EMPLOYER_FEEDS:JSON.stringify([{provider:'greenhouse',board:'example',company:'Example employer'}])}[key]);
   const transport=vi.fn(async(input:string|URL|Request)=>{
    const url=String(input);

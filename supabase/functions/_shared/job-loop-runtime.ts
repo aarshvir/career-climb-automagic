@@ -456,10 +456,10 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
     const ready=results.filter(item=>['review_required','approved'].includes(item.status)).length;
     const held=results.filter(item=>item.status==='held').length;
     state.nextAction=state.inbox?.some(item=>item.bucket==='action_needed')?'Read the action-needed recruitment messages first.'
-      :ready?`${ready} prepared CV${ready===1?' is':'s are'} available. Open Prepared CVs to review ${ready===1?'it':'them'}${incomplete?'; some source checks could not finish.':'.'}`
+      :ready?`${ready} prepared CV${ready===1?' is':'s are'} available. Open Prepared CVs to review ${ready===1?'it':'them'}${incomplete?'; some source checks could not finish.':'.'}${held?` ${held} other CV${held===1?' needs':'s need'} source or document checks before use.`:''}`
       :held?`${held} prepared CV${held===1?' needs':'s need'} attention. Open Prepared CVs for the exact source or document checks before use.`
-      :selected?'The chosen vacancies no longer need a new CV. Check their current application status or choose another vacancy.'
       :resultIds.size?'Open Prepared CVs to check this run’s documents; their current availability could not be confirmed.'
+      :selected?'The chosen vacancies no longer need a new CV. Check their current application status or choose another vacancy.'
       :incomplete?'Some source checks could not finish. See source details, retry after resolving the issue, or add a vacancy yourself.'
       :'No new matching jobs were found in the sources checked. Try broader roles or locations, or add a vacancy yourself.';
     await repo.commit(run,7,incomplete?'partial':'completed',state);return false;
