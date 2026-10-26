@@ -32,6 +32,20 @@ afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 describe('new admin', () => {
   it('uses a fixture the browser contract accepts', () => { expect(() => dashboardSchema.parse(adminDashboard())).not.toThrow(); });
 
+  it('updates only the exact retired traffic note and preserves every other server coverage note', async () => {
+    const legacy='Visitors who do not sign up are not tracked yet, so there are no visit or traffic figures. Ad clicks and landing views are on the Marketing page.';
+    const unrelated='Test accounts and staff are excluded; payment reconciliation remains separately reported.';
+    const different=legacy+' Historical snapshot retained.';
+    const dashboard=adminDashboard();dashboard.coverage.notes=[legacy,unrelated,different];
+    mocks.call.mockResolvedValue({dashboard});render(tree());
+    expect(await screen.findByText(/Acquisition and Journeys show received visits/)).toHaveTextContent('Earlier, blocked or undelivered activity is not included.');
+    expect(screen.getByText(/Acquisition and Journeys show received visits/)).toHaveTextContent('Meta ad clicks and landing-page views are reported separately');
+    expect(screen.queryByText(legacy,{exact:true})).not.toBeInTheDocument();
+    expect(screen.getByText(unrelated,{exact:true})).toBeInTheDocument();
+    expect(screen.getByText(different,{exact:true})).toBeInTheDocument();
+    expect(dashboard.coverage.notes).toEqual([legacy,unrelated,different]);
+  });
+
   it('sends signed-out visitors to sign in and back to the same page', async () => {
     mocks.user = null; render(tree('/admin/revenue?days=7'));
     expect(await screen.findByText('At: /auth?next=%2Fadmin%2Frevenue%3Fdays%3D7')).toBeInTheDocument();

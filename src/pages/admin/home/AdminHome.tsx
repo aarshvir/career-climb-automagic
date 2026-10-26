@@ -7,6 +7,7 @@ import type { AdminDashboard } from '@/lib/admin-dashboard';
 import { GrowthSection, OperationsSection, OverviewSection, RevenueSection, TodaySection } from './sections';
 import { MarketingSection, SupportSection } from './live-sections';
 import { AcquisitionSection, JourneysSection, PersonDetail, UsersWithContacts, VisitDetail } from './analytics-sections';
+import { adminCoverageNote } from './format';
 import './admin-home.css';
 
 type Section = 'overview' | 'today' | 'revenue' | 'growth' | 'marketing' | 'acquisition' | 'journeys' | 'users' | 'operations' | 'support';
@@ -120,7 +121,7 @@ export default function AdminHome() {
           {section === 'users' && userId && (detail ? <PersonDetail key={`${authority}${detail}`} userId={userId} id={detail} refresh={refresh} onAccessFailure={accessFailure} /> : <UsersWithContacts key={authority} userId={userId} data={dashboard} refresh={refresh} onAccessFailure={accessFailure} />)}
           {section === 'operations' && <OperationsSection data={dashboard} />}
           {section === 'support' && userId && <SupportSection key={authority} userId={userId} data={dashboard} refresh={refresh} onAccessFailure={accessFailure} onSaved={() => setRefresh(value => value + 1)} />}
-          <ul className="vh-note">{dashboard.coverage.notes.map((note, index) => <li key={index}>{note}</li>)}</ul>
+          <ul className="vh-note">{dashboard.coverage.notes.map((note, index) => <li key={index}>{adminCoverageNote(note)}</li>)}</ul>
         </>}
       </>}
     </main>

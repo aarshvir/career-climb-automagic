@@ -1,4 +1,11 @@
 /** Formatting shared by the admin pages. */
+/** Display compatibility for one note emitted by the already-applied dashboard RPC. */
+export function adminCoverageNote(note: string): string {
+  if (note === 'Visitors who do not sign up are not tracked yet, so there are no visit or traffic figures. Ad clicks and landing views are on the Marketing page.') {
+    return 'Acquisition and Journeys show received visits, including visitors without accounts, from the start of collection. Earlier, blocked or undelivered activity is not included. Meta ad clicks and landing-page views are reported separately on the Meta ads page.';
+  }
+  return note;
+}
 export const usd = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: value >= 1000 ? 0 : 2 }).format(value);
 /** Amounts in a currency's minor units; yen has none. */
 export const minor = (amount: number, currency: string) => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(currency === 'JPY' ? amount : amount / 100);
