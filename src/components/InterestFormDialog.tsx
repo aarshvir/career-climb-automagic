@@ -42,7 +42,8 @@ const InterestFormDialog = ({ open, onOpenChange }: InterestFormDialogProps) => 
   
   usePageExitTracking(hasCompleted);
 
-  const form = useForm<FormData>({
+  // zod 4 separates the form's input (optional fields) from its parsed output (defaults applied).
+  const form = useForm<z.input<typeof formSchema>, unknown, FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",

@@ -17,7 +17,7 @@ const overview = z.object({
   requests: z.array(z.object({ id, ideaId: id, kind: z.literal('create_ad'), status: z.enum(['queued', 'in_progress', 'done', 'cancelled']), note: short, createdAt: when })).max(500),
   recommendations: z.array(z.object({ id: short, launchId: id.nullable(), kind: z.enum(['wait', 'pause', 'budget_review', 'refresh_creative', 'spend_cap', 'check_delivery', 'ended', 'figures_unknown']), severity: z.enum(['info', 'warning', 'action']), title: short, reason: short })).max(1000),
   totals: z.object({ spendMinor: count, todaySpendMinor: count, impressions: count, landingPageViews: count, activeLaunches: count, incompleteLaunches: count, currency: z.string().length(3) }),
-  audit: z.array(z.object({ id, actorId: id.nullable(), action: short, targetId: id.nullable(), at: when, details: z.record(z.union([short, z.number(), z.boolean(), z.null()])) })).max(200),
+  audit: z.array(z.object({ id, actorId: id.nullable(), action: short, targetId: id.nullable(), at: when, details: z.record(z.string(), z.union([short, z.number(), z.boolean(), z.null()])) })).max(200),
 });
 const responseSchema = z.object({ overview, result: z.object({ changed: count, message: short }).optional() });
 

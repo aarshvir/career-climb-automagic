@@ -27,7 +27,7 @@ const snapshot = z.object({
     revenue: z.object({ checkoutEnabled: z.literal(false), recognizedUsd: z.number().nonnegative().nullable(), message: short }),
     budget: z.object({ month: z.string().regex(/^\d{4}-\d{2}$/), capUsd: z.number().positive().max(50), committedUsd: z.number().nonnegative(), remainingUsd: z.number().nonnegative(), actualUsd: z.number().nonnegative(), reservedUsd: z.number().nonnegative(), uncertainUsd: z.number().nonnegative(), candidateActualUsd: z.number().nonnegative(), adminActualUsd: z.number().nonnegative(), reviewBatchCapUsd: z.literal(5), source: z.literal('job_loop_budget_months + job_loop_usage + jobvance_admin_model_usage') }),
   }),
-  audit: z.array(z.object({ id, actorId: id, action: short, targetId: id.nullable(), at: short, details: z.record(z.union([short, z.number(), z.boolean(), z.null()])) })).max(1000), providerStatus: provider.nullable(),
+  audit: z.array(z.object({ id, actorId: id, action: short, targetId: id.nullable(), at: short, details: z.record(z.string(), z.union([short, z.number(), z.boolean(), z.null()])) })).max(1000), providerStatus: provider.nullable(),
 });
 const guestMeta=z.object({id,category:z.enum(['help','privacy','bug']),status,version:count,createdAt:short,updatedAt:short,expiresAt:short});
 const guestDetail=guestMeta.extend({message:z.string().max(2000),reply:z.string().max(2000)});

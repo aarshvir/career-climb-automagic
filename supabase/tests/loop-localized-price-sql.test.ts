@@ -101,7 +101,7 @@ describe('localized initial payment, renewal, cancellation and permanent refund 
   it('recovers a historical v1 checkout through real control/webhook SQL orchestration, renewal, cancellation and explicit-currency refund',async()=>{
     const environment=dodoEnvironment({JOBVANCE_LOOP_BILLING_ENABLED:'true',DODO_PRODUCT_LOOP_WEEKLY:'pdt_0NpzVnWkzvNbKUPtHzZGo',DODO_PRODUCT_LOOP_ACTIVE:'pdt_0NpzW2tG9N28jjBuUzYLB',DODO_PRODUCT_LOOP_DAILY:'pdt_0NpzWGsuzZZJfaeMXNPQV'});
     const config={...loopBillingConfiguration(key=>environment[key])!,mode:'live' as const};
-    const product=config.loopProducts.weekly;let q:any,cancelled=false,renewed=false,posts=0,patches=0;
+    const product=config.loopProducts.weekly;let q:any,cancelled=false,renewed=false,posts=0,patches=0; // eslint-disable-line prefer-const -- q is assigned once, after the closures that read it
     const initialStart=new Date(start).toISOString(),initialEnd=new Date(end).toISOString(),renewalStart=initialEnd,renewalEnd=new Date(Date.parse(initialEnd)+30*86400000).toISOString();
     const payment=(id='pay_initial')=>({payload_type:'Payment',payment_id:id,status:'succeeded',currency:'INR',subscription_id:'sub_fixture',subscription_ids:['sub_fixture'],customer:{customer_id:'cus_fixture'},total_amount:279900,tax:29900,checkout_session_id:id==='pay_initial'?'cks_fixture':null,service_periods:[{subscription_id:'sub_fixture',starts_at:id==='pay_initial'?initialStart:renewalStart,ends_at:id==='pay_initial'?initialEnd:renewalEnd}]});
     const metadata=()=>({product:LOOP_BILLING_PRODUCT,user_id:owner,request_id:checkoutRequest,generation:'0',plan:'weekly',quote_id:q.quoteId});
