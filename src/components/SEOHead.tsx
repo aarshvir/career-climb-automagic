@@ -45,7 +45,7 @@ export function SeoHead({
   title,
   description,
   canonicalPath,
-  ogImage = `${SITE_URL}/og-job-loop-account.png?v=2`,
+  ogImage = `${SITE_URL}/og-job-loop-account.png`,
   noindex = false,
   structuredData,
   openGraphType = "website",
@@ -72,13 +72,13 @@ export function SeoHead({
       <meta property="og:url" content={canonical} />
       <meta property="og:locale" content={locale} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png?v=2` ? 'Jobvance: Automate your job search. Automated Job Loop finds jobs on your schedule and prepares a tailored CV for each. You review, download and apply.' : description} />
+      <meta property="og:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Automated Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.' : description} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content={twitterHandle} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png?v=2` ? 'Jobvance: Automate your job search. Automated Job Loop finds jobs on your schedule and prepares a tailored CV for each. You review, download and apply.' : description} />
+      <meta name="twitter:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Automated Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.' : description} />
       <link rel="dns-prefetch" href="https://www.google-analytics.com" />
       <link rel="preload" as="image" href="/images/hero-jobvance.webp" />
       {renderJsonLd(structuredData)}

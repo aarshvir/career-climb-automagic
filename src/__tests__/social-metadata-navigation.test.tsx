@@ -14,7 +14,7 @@ import { clearTrackingDraftMemory } from '../lib/tracking-draft-memory';
 vi.unmock('react-router-dom');
 vi.unmock('react-helmet-async');
 vi.mock('@/lib/job-loop-api', () => ({ callJobLoop: vi.fn(async () => ({ existingState: 'absent' })), boundLoopAction: (value: unknown) => value }));
-const image='https://jobvance.io/og-job-loop-account.png?v=2';
+const image='https://jobvance.io/og-job-loop-account.png';
 const fallbackTitle='Jobvance — automate your job search';
 const originalHead=document.head.innerHTML;
 function content(key:string) {
@@ -42,7 +42,7 @@ describe('real Helmet ownership during client mount and navigation',()=>{
     expect(content('twitter:title')).toBe(staticPageMeta('/')!.title);
     expect(content('twitter:description')).toBe(staticPageMeta('/')!.description);
     for(const key of ['og:image','twitter:image'])expect(content(key)).toBe(image);
-    for(const key of ['og:image:alt','twitter:image:alt'])expect(content(key)).toContain('Automate your job search');
+    for(const key of ['og:image:alt','twitter:image:alt'])expect(content(key)).toContain('create your account');
     fireEvent.click(screen.getByRole('link',{name:'Test help'}));
     await waitFor(()=>expect(content('og:title')).toBe(staticPageMeta('/help')!.title));
     expect(content('twitter:title')).toBe(staticPageMeta('/help')!.title);
@@ -55,7 +55,7 @@ describe('real Helmet ownership during client mount and navigation',()=>{
     expect(content('twitter:title')).toBe(fallbackTitle);
     for(const key of ['description','og:description','twitter:description'])expect(content(key)).toMatch(/^Create your account,/);
     for(const key of ['og:image','twitter:image'])expect(content(key)).toBe(image);
-    for(const key of ['og:image:alt','twitter:image:alt'])expect(content(key)).toContain('Automate your job search');
+    for(const key of ['og:image:alt','twitter:image:alt'])expect(content(key)).toContain('create your account');
     expect(document.head.querySelectorAll('meta[property="og:image:width"]')).toHaveLength(1);
     expect(document.head.querySelector('meta[property="og:image:width"]')).toHaveAttribute('content','1200');
     expect(document.head.querySelector('meta[property="og:image:height"]')).toHaveAttribute('content','630');
@@ -70,7 +70,7 @@ describe('real Helmet ownership during client mount and navigation',()=>{
     fireEvent.click(screen.getByRole('link',{name:'Test home'}));
     await waitFor(()=>expect(content('og:title')).toBe(staticPageMeta('/')!.title));
     for(const key of ['og:image','twitter:image'])expect(content(key)).toBe(image);
-    for(const key of ['og:image:alt','twitter:image:alt'])expect(content(key)).toContain('Automate your job search');
+    for(const key of ['og:image:alt','twitter:image:alt'])expect(content(key)).toContain('create your account');
     expect(document.head.querySelectorAll('title')).toHaveLength(1);
     expect(document.head.querySelectorAll('link[rel="canonical"]')).toHaveLength(1);
   });

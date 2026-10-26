@@ -95,7 +95,7 @@ describe('Automated Job Loop access and monthly plans', () => {
 describe('Automated Job Loop first homepage', () => {
   it('explains the ordered search journey and offers a separate neutral CV Check entry', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Automate your job search.');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Jobvance automates your job search end to end.');
     const stages = within(screen.getByRole('list', { name: 'Your Automated Job Loop journey' })).getAllByRole('listitem');
     expect(stages).toHaveLength(3);
     expect(stages[0]).toHaveTextContent('Add your experience');

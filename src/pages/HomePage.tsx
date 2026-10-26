@@ -13,7 +13,7 @@ const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 const fromPrice = subscriptionPlans[0].priceUsd;
 
 // Facts the site already states (FAQ, pricing, Automated Job Loop page). No counts, ratings or outcomes.
-const proof = ["You review before you apply", "Free CV Check", "Weekly, 3×/week or daily", "PDF, DOCX or TXT downloads", "Pause your schedule anytime"];
+const proof = ["Jobs and prepared CVs, together", "Up to 3 CV variants", "Weekly, 3×/week or daily", "PDF, DOCX or TXT downloads", "Free CV Check"];
 
 // Every line restates something the site already says; only the short lead-in labels are new.
 const goodToKnow: [string, React.ReactNode][] = [
@@ -43,8 +43,8 @@ export default function HomePage() {
     <section className="jv-hero" aria-labelledby="home-title">
       <div className="jv-shell jv-hero-grid">
         <div className="jv-hero-copy">
-          <h1 id="home-title" className="jv-hero-title jv-enter-h1">Automate your job search.</h1>
-          <p className="jv-hero-lead jv-enter" style={delay(60)}>Automated Job Loop finds jobs on your schedule and prepares a tailored CV for each. You review, download and apply.</p>
+          <h1 id="home-title" className="jv-hero-title jv-enter-h1">Jobvance automates your job search end to end.</h1>
+          <p className="jv-hero-lead jv-enter" style={delay(60)}>Add or build your CV, choose roles and locations, and set your schedule. Jobvance searches connected sources and prepares role-specific CVs in your dashboard. You review, download and apply.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
             <StartLink size="lg" className="jv-hero-cta" />
             <TextLink to="/check">Try the free CV Check</TextLink>
@@ -89,38 +89,39 @@ export default function HomePage() {
       </div>
     </section>
 
-    {/* 4. You stay in control: each row stages one distinct product fragment on a panel. */}
+    {/* 4. Useful outcomes: each row stages one illustrative product fragment. */}
     <section className="jv-control" aria-labelledby="home-control-title">
       <div className="jv-shell">
         <div className="jv-section-head" data-reveal>
-          <h2 id="home-control-title">You stay in control.</h2>
-          <p>Jobvance prepares. You decide what is used, and you send every application yourself.</p>
+          <h2 id="home-control-title">Stop starting your job search from scratch.</h2>
+          <p>Save your experience once. Return to opportunities, prepared CVs and a clear next step.</p>
         </div>
         <div className="jv-control-rows">
           <article className="jv-control-row" data-reveal>
-            <div className="jv-control-copy"><h3>Jobvance never applies for you</h3><p>Each prepared CV waits for your approval. You download it and apply on the employer’s site.</p></div>
+            <div className="jv-control-copy"><h3>Review jobs and prepared CVs together.</h3><p>Your dashboard keeps each opportunity with its prepared documents. Review the CV, download it and open the employer’s vacancy from one place.</p></div>
             <div className="jv-frag" aria-hidden="true">
               <div className="jv-frag-card">
+                <span className="jv-frag-label">Example application</span>
                 <div className="jv-frag-head"><span className="jv-frag-strong">Product Analyst</span><span className="jv-frag-muted">Northwind Labs</span></div>
                 <div className="jv-frag-foot">
                   <span className="jv-frag-filename"><FileText aria-hidden="true" />CV_Product_Analyst.pdf</span>
-                  <span className="jv-frag-state"><span className="jv-switch is-on"><span /></span>Approved</span>
+                  <span className="jv-frag-state">Ready for review</span>
                 </div>
               </div>
             </div>
           </article>
           <article className="jv-control-row" data-reveal>
-            <div className="jv-control-copy"><h3>Only what you have listed</h3><p>It never adds employers, numbers, tools or qualifications you haven’t listed. It rewords and reorders your own lines.</p></div>
+            <div className="jv-control-copy"><h3>One CV setup. More than one direction.</h3><p>Keep up to three CV variants for different kinds of roles. Choose the one to use for your next run, without re-entering the same experience.</p></div>
             <div className="jv-frag" aria-hidden="true">
               <div className="jv-frag-card jv-frag-cv">
-                <span className="jv-frag-label">Example CV line</span>
-                <p>Ran the quarterly customer survey and shared the results with the team.</p>
-                <span className="jv-frag-skip"><s>Tableau</s><span>Not on your CV · not added</span></span>
+                <span className="jv-frag-label">Example CV variants</span>
+                <p>Product analyst</p>
+                <span className="jv-frag-skip"><FileText aria-hidden="true" /><span>Data analyst · Business analyst</span></span>
               </div>
             </div>
           </article>
           <article className="jv-control-row" data-reveal>
-            <div className="jv-control-copy"><h3>Pause or cancel your schedule anytime</h3><p>Pause or cancel your schedule whenever you need to. Your account shows the next scheduled run.</p></div>
+            <div className="jv-control-copy"><h3>A search schedule that fits your week.</h3><p>Choose weekly, three chosen weekdays or daily. See your next run and pause your search when your plans change.</p></div>
             <div className="jv-frag" aria-hidden="true">
               <div className="jv-frag-card">
                 <div className="jv-frag-head"><span className="jv-frag-strong">Schedule</span><span className="jv-frag-muted">3×/week</span></div>
