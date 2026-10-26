@@ -1,0 +1,199 @@
+{
+  "date": "2026-10-26",
+  "site": "https://jobvance.io",
+  "publicVersion": 62,
+  "runtimeSource": "2b18abca4bd4c4b13e13fcee02cfc795da660e2e",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_0c9d614f017481918fda1b9eea6e149f",
+  "deploymentId": "appgdep_6adf14dd504c81918f73f949c62ec533",
+  "deployedAt": "2026-10-26T08:53:04.709654+00:00",
+  "status": "succeeded",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_0000000094c48210a33d1cb275df3e40",
+    "content_hash": "sha256:f928a76f2963181c4746b8ccaabb8ecfd082b446d9128c01c44901aea2dd2a9f",
+    "size_bytes": 15646720,
+    "file_count": 152
+  },
+  "compressedArchiveSha256": "66ca56c9fa1f461ab913174a0287936ae1980d9b91868981b9dc0c3c959dad34",
+  "frontend": {
+    "base": "1fdf9aa62623847ed318c9cb5ab5f22a15ea271f",
+    "originalClaudeCommit": "3e519c322e9a2cdfb156fc42995a8c2eb4de701f",
+    "files": 62,
+    "admittedTokens": 342,
+    "sourceAggregateSha256": "80180bbfd4b20a5d8e2d29a065106364e83563e4cd7d6ca1e6769c235ef8f278",
+    "logicRoutesIdentifiersUnchanged": true,
+    "approvedGreenIdentityPreserved": true,
+    "premiumDesignIncluded": false,
+    "recordedNarrationAll21Unchanged": true
+  },
+  "backend": {
+    "functions": [
+      {
+        "name": "job-loop-control",
+        "version": 41,
+        "status": "ACTIVE",
+        "verifyJwt": false,
+        "entrypointMatches": true,
+        "importMapMatches": true,
+        "files": 2,
+        "allExact": true
+      },
+      {
+        "name": "job-loop-worker",
+        "version": 38,
+        "status": "ACTIVE",
+        "verifyJwt": false,
+        "entrypointMatches": true,
+        "importMapMatches": true,
+        "files": 2,
+        "allExact": true
+      },
+      {
+        "name": "job-loop-oauth",
+        "version": 26,
+        "status": "ACTIVE",
+        "verifyJwt": false,
+        "entrypointMatches": true,
+        "importMapMatches": true,
+        "files": 2,
+        "allExact": true
+      },
+      {
+        "name": "job-loop-billing",
+        "version": 25,
+        "status": "ACTIVE",
+        "verifyJwt": false,
+        "entrypointMatches": true,
+        "importMapMatches": true,
+        "files": 11,
+        "allExact": true
+      },
+      {
+        "name": "job-loop-billing-test",
+        "version": 22,
+        "status": "ACTIVE",
+        "verifyJwt": false,
+        "entrypointMatches": true,
+        "importMapMatches": true,
+        "files": 12,
+        "allExact": true
+      },
+      {
+        "name": "dodo-webhook",
+        "version": 27,
+        "status": "ACTIVE",
+        "verifyJwt": false,
+        "entrypointMatches": true,
+        "importMapMatches": true,
+        "files": 11,
+        "allExact": true
+      },
+      {
+        "name": "dodo-webhook-test",
+        "version": 22,
+        "status": "ACTIVE",
+        "verifyJwt": false,
+        "entrypointMatches": true,
+        "importMapMatches": true,
+        "files": 12,
+        "allExact": true
+      }
+    ],
+    "exactUploadedFiles": 52,
+    "migration": false,
+    "oauthScope": "Carries later shared repository class definitions; critical callback AST equivalent and8hermetic actual-native/candidate scenarios equal, not new hostedOAuth proof",
+    "cvHeadingPreservationSource": "1fdf9aa62623847ed318c9cb5ab5f22a15ea271f",
+    "historicalOutputsRewritten": false
+  },
+  "validation": {
+    "fullSuite": {
+      "tests": 3482,
+      "files": 190,
+      "failed": 0
+    },
+    "focusedOverlap": {
+      "tests": 589,
+      "files": 32
+    },
+    "typescript": "passed",
+    "lint": {
+      "errors": 0,
+      "existingWarnings": 54
+    },
+    "sourceDeno": 28,
+    "generatedDeno": 28,
+    "billingEntrypoints": 4,
+    "independentNativeOAuthDifferential": 8,
+    "ci": {
+      "runId": 40294222159,
+      "head": "2b18abca4bd4c4b13e13fcee02cfc795da660e2e",
+      "conclusion": "success",
+      "allStepsGreenBeforeSitePublish": true,
+      "url": "https://github.com/aarshvir/career-climb-automagic/actions/runs/40294222159"
+    },
+    "build": {
+      "publicPages": 37,
+      "guideArticles": 20,
+      "externalPrerenderRequests": 0,
+      "compressedWorkerBytes": 2998653,
+      "limitBytes": 3145728,
+      "hostingGroups": 12
+    },
+    "live": {
+      "publicHtmlPages": 37,
+      "otherPublicResponses": 2,
+      "privateRoutes": 17,
+      "exactJavaScript": 75,
+      "exactCss": 15,
+      "worker401Probes": 2,
+      "failures": 0,
+      "normalization": "Only observed exact appended Cloudflare script template; no liveETag claimed"
+    },
+    "nativeProbes": {
+      "control401": true,
+      "worker401": true,
+      "liveBilling401": true,
+      "testBilling401": true,
+      "liveWebhook400BadSignature": true,
+      "testWebhook503Disabled": true,
+      "oauth303FixedUnavailable": true,
+      "providerCalls": 0
+    },
+    "actualBrowser": {
+      "local": "Home, phone menu, pricing to account return and required-name/mobile entry;390and900px no horizontal overflow",
+      "live": "Desktop/390px account entry; existing-owner pricing available and renamed header observed",
+      "ownerLoop": "Existing required-mobile contact gate observed; no contact save or fresh dashboard/result acceptance",
+      "formsSubmitted": false,
+      "localDevUnconfiguredState": "Initial direct dev server lacked production public environment; configured production preview then rendered normally"
+    }
+  },
+  "preserved": {
+    "merchant": true,
+    "prices": true,
+    "capacity": true,
+    "budget": true,
+    "adsPixelCreativePermissions": true,
+    "analyticsContactsSignup": true
+  },
+  "exceptions": [
+    "immutable recorded media/narration",
+    "historical provider/financial/admin/analytics labels",
+    "existing social artwork/generator; separate measured layout required"
+  ],
+  "rollback": {
+    "tag": "jobvance-before-automated-loop-name-2026-10-26",
+    "source": "1fdf9aa62623847ed318c9cb5ab5f22a15ea271f",
+    "savedSiteVersion": 61,
+    "sevenExactNativeBeforeSourcesRetained": true,
+    "scope": "Source/site rollback is not database/file/merchant restoration"
+  },
+  "limits": {
+    "newHostedSignup": false,
+    "realPurchase": false,
+    "hostedGoogleOAuth": false,
+    "unassistedFirstSecond": false,
+    "naturalRepeatedDay": false,
+    "NPS": false,
+    "worldClassScore": false
+  }
+}
