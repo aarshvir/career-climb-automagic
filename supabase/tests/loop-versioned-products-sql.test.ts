@@ -62,7 +62,7 @@ describe('new provider product version without repricing existing history',()=>{
     await expect(apply(q,requestId,{p_product:old})).rejects.toThrow('LOOP_BILLING_REQUEST_CONFLICT');await apply(q,requestId);expect((await status()).subscription.pricing).toMatchObject({catalogVersion:v3,productId:q.productId,currency:'INR',amountMinor:299900});
   });
   it('executes fresh current v3 quote, checkout, retry and payment through actual SQL and orchestration on the new product',async()=>{
-    await activate();expect(LOOP_LOCAL_PRICE_CATALOG_VERSION).toBe(v3);const config=await configV3(),product=config.loopProducts.weekly,requestId=randomUUID();let q:any,posts=0;
+    await activate();expect(LOOP_LOCAL_PRICE_CATALOG_VERSION).toBe(v3);const config=await configV3(),product=config.loopProducts.weekly,requestId=randomUUID();let q:any,posts=0; // eslint-disable-line prefer-const -- q is assigned once, after the closures that read it
     const from=new Date(start).toISOString(),until=new Date(end).toISOString();
     const payment=()=>({payload_type:'Payment',payment_id:'pay_versioned',status:'succeeded',currency:'INR',subscription_id:'sub_versioned',subscription_ids:['sub_versioned'],customer:{customer_id:'cus_versioned'},total_amount:299900,tax:0,checkout_session_id:'cks_versioned',settlement_currency:'USD',settlement_amount:3025,settlement_tax:0,service_periods:[{subscription_id:'sub_versioned',starts_at:from,ends_at:until}]});
     const ports:LoopBillingPorts={rpc:async<T>(name:string,args:Record<string,unknown>)=>await rpc(name,args) as T,provider:async(endpoint,body)=>{
