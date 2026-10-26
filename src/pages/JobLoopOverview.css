@@ -5,3 +5,21 @@
 .lo-copy .lo-lead { font-size:18px !important; line-height:1.75 !important; }
 
 .lo-loop-hero { padding-block:24px 48px; }
+
+/* Keep the primary product page in the same system as the public entry. */
+.loop-overview { --lo-ink: var(--jv-ink); --lo-blue: var(--jv-brand); --lo-muted: var(--jv-ink-2); }
+.loop-overview :is(.lo-start, .lo-work, .lo-audiences, .lo-faq details) { border-color: var(--jv-line); }
+.loop-overview .lo-responsibilities article { background: var(--jv-bg-subtle); }
+.loop-overview .lo-responsibilities article:first-child, .loop-overview .lo-final { background: var(--jv-brand-tint); }
+.loop-overview .lo-button:hover { background: var(--jv-brand-hover); }
+.loop-overview :is(a, summary):focus-visible { outline-color: var(--lo-blue); }
+.loop-overview .lo-private { --lo-on-dark-heading: #f4f5fa; --lo-on-dark-body: #c9ccda; --lo-on-dark-secondary: #a9aec4; --lo-on-dark-link: #9aa2ff; color: var(--lo-on-dark-body); background: var(--jv-ink); }
+.loop-overview .lo-private :is(h2, h3) { color: var(--lo-on-dark-heading); }
+.loop-overview .lo-private :is(p, li) { color: var(--lo-on-dark-body); }
+.loop-overview .lo-private .lo-kicker { color: var(--lo-on-dark-secondary); }
+.loop-overview .lo-private .lo-link, .loop-overview .lo-private aside > svg { color: var(--lo-on-dark-link); }
+.loop-overview .lo-private .lo-button { color: var(--jv-ink); background: var(--jv-signal); }
+.loop-overview .lo-private .lo-button:hover { color: var(--jv-ink); background: #def77a; }
+.loop-overview .lo-private a:focus-visible { outline-color: var(--lo-on-dark-link); }
+.loop-overview .lo-private .lo-button:focus-visible { outline-color: var(--jv-signal); }
+.loop-overview .lo-private .lo-button + .lo-link { display: flex; width: fit-content; margin: 16px 0 0; }
