@@ -20,7 +20,7 @@ vi.mock('https://esm.sh/@supabase/supabase-js@2.57.4',()=>({createClient:()=>({a
   if(name==='job_loop_billing_apply_event_v2')return{data:{duplicate:false},error:null};
   return{data:result[name],error:null};
 }})}));
-let env:Record<string,string|undefined>,handlers:Handler[]=[];
+let env:Record<string,string|undefined>;const handlers:Handler[]=[];
 const fetches:{url:string,method:string,body:Record<string,unknown>|null,key:string|null}[]=[];
 let metadata:Record<string,unknown>,providerOwner=owner,liveCheckout=false,providerCurrency='USD';
 const subFixture=()=>({payload_type:'Subscription',subscription_id:sub,product_id:'pdt_IsolatedWeekly',quantity:1,currency:'USD',recurring_pre_tax_amount:2700,payment_frequency_count:1,payment_frequency_interval:'Month',subscription_period_count:20,subscription_period_interval:'Year',trial_period_days:0,on_demand:false,tax_inclusive:true,cancel_at_next_billing_date:state.cancelled,status:'active',previous_billing_date:'2026-10-18T08:00:00Z',next_billing_date:'2026-11-18T08:00:00Z',customer:{customer_id:'cus_IsolatedTest'},metadata:{...metadata,user_id:providerOwner}});

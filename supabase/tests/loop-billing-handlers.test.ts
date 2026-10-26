@@ -19,7 +19,7 @@ vi.mock('https://esm.sh/@supabase/supabase-js@2.57.4',()=>({createClient:()=>({a
   const responses:Record<string,unknown>={job_loop_billing_event:{duplicate:false},job_loop_billing_status:{generation:0,subscription:null,checkout:null,entitlement:null},job_loop_billing_checkout_claim:{state:'creating',creationClaimAcquired:true},job_loop_billing_checkout_finalize:{},job_loop_billing_cancel_claim:{creationClaimAcquired:true},job_loop_billing_cancel_finalize:{status:'confirmed'},job_loop_billing_order:{user_id:'11111111-1111-4111-8111-111111111111',request_id:'22222222-2222-4222-8222-222222222222',generation:0,session_id:'cks_FixtureLoop',plan:'weekly',product_id:'pdt_FixtureWeekly'},job_loop_billing_apply_event:{duplicate:false}};
   return{data:state.replies[name]??responses[name],error:null};
 }})}));
-let env:Record<string,string|undefined>,handlers:Handler[]=[];
+let env:Record<string,string|undefined>;const handlers:Handler[]=[];
 const fetches:{url:string,method:string,body:Record<string,unknown>|null}[]=[];
 const metadata={product:LOOP_BILLING_PRODUCT,user_id:owner,request_id:request,generation:'0',plan:'weekly'};
 const subFixture=()=>({payload_type:'Subscription',subscription_id:sub,product_id:'pdt_FixtureWeekly',quantity:1,currency:'USD',recurring_pre_tax_amount:2900,payment_frequency_count:1,payment_frequency_interval:'Month',subscription_period_count:20,subscription_period_interval:'Year',trial_period_days:0,on_demand:false,tax_inclusive:true,cancel_at_next_billing_date:state.cancelled,status:'active',previous_billing_date:'2026-10-18T08:00:00Z',next_billing_date:'2026-11-18T08:00:00Z',customer:{customer_id:customer},metadata});
