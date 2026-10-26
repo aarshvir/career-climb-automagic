@@ -1,6 +1,10 @@
 import '@testing-library/jest-dom/vitest'
+import { configure } from '@testing-library/react'
 import { vi } from 'vitest'
 import React from 'react'
+
+// findBy*/waitFor default to 1 s, which slow CI runners exceed on lazy-loaded pages.
+configure({ asyncUtilTimeout: 5000 })
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
