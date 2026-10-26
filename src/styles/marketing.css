@@ -199,7 +199,7 @@
 /* ---------- Final CTA band ---------- */
 /* Left-aligned copy over flat ink, with a static orbit cropped off the right edge (no glow). */
 .jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: #0A0B14; }
-.jv-cta .jv-cta-orbit { display: none; position: absolute; right: -320px; top: 50%; z-index: 0; width: 760px; translate: 0 -50%; opacity: .35; }
+.jv-cta .jv-cta-orbit { --ring: rgb(154 162 255 / .45); display: none; position: absolute; right: -400px; top: 50%; z-index: 0; width: 760px; translate: 0 -50%; opacity: .5; }
 .jv-cta-inner { position: relative; z-index: 1; max-width: 640px; }
 .jv-cta h2 { margin: 0; max-width: 12ch; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: -.04em; text-wrap: balance; }
 .jv-cta p { margin: 16px 0 0; max-width: 46ch; color: var(--jv-on-dark-body); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; text-wrap: pretty; }
@@ -210,7 +210,7 @@
 @media (min-width: 1024px) {
   .jv-cta { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 112px var(--band-pad-x); }
   .jv-cta-inner { grid-column: 1 / span 7; max-width: none; }
-  .jv-cta .jv-cta-orbit { right: -280px; width: 900px; opacity: .45; }
+  .jv-cta .jv-cta-orbit { right: -380px; width: 900px; opacity: .55; }
 }
 
 /* ---------- FAQ accordion ---------- */
