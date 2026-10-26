@@ -34,7 +34,7 @@ export const helpTopics: HelpTopic[] = [
       'The AI only rewords your own CV lines. Suggestions that add an employer, number, tool, qualification or a stronger claim of ownership are left out. Every reworded line shows your original beside it, and an added summary names the CV lines it was written from. The confirmation is yours: tick it only after reading every page.',
       'Open What the job asks for, beside your CV to compare each requirement with the words in your CV. The comparison uses English wording. A matching phrase does not verify a qualification, establish eligibility, calculate your experience years or predict an interview.',
       'You can leave quick questions unanswered. State your actual qualification status, label academic work and show your part in team results. Check required credentials separately from skills and examples. If the PDF is longer than your maximum, go back to Review changes to shorten it, or use Word or TXT.',
-      'Requirement report downloads the requirement-by-requirement comparison separately from your CV. Changing the CV clears your confirmation, so tick it again before downloading. Sign-in is an optional later step for private saving.',
+      'Requirement report downloads the requirement-by-requirement comparison separately from your CV. Changing the CV clears your confirmation, so tick it again before downloading. An account is required to use the free check. Saving a reviewed check to your account is a separate choice.',
     ],
     action: { label: 'Start the free CV check', to: '/check' },
     related: [{ label: 'File problems', id: 'uploads' }, { label: 'Remove private source lines', id: 'source-line-removal' }, { label: 'No CV yet', id: 'no-cv' }],
