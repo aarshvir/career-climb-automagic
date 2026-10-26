@@ -214,8 +214,8 @@ describe('actual discovery worker with intercepted employer HTTP fixtures', () =
     expect(h.packets[0].cvText).toContain(h.record.data.claims[0].phrasing); expect(h.packets[0].cvText).not.toContain('VacancyOnlySentinel');
     const artifact = h.packets[0].artifacts.pdf;
     expect(await extractCvText(new File([h.artifacts.get(artifact.path)!], 'discovered.pdf'))).toContain(h.record.data.profile!.name);
-    expect(run.status).toBe('partial'); // LinkedIn/search are explicitly unavailable in this fixture.
-    expect(run.data.lanes).toContainEqual(expect.objectContaining({ name: 'Broad web search', status: 'not_connected' }));
+    expect(run.status).toBe('completed'); // Only the configured, successfully read sources define completion.
+    expect(run.data.lanes).toContainEqual(expect.objectContaining({ name: 'Broad web search', status: 'not_run' }));
     const second = h.newRun(0); delete second.selected_opportunity_ids; delete second.selected_generation; h.mock.upload.mockClear();
     for (let i = 0; i < 12; i++) if (!await processLoopPhase(h.repo, second.id, env, fetcher)) break;
     expect(h.packets).toHaveLength(1); expect(second.data.reusedPacketIds).toEqual([h.packets[0].id]); expect(h.mock.upload).not.toHaveBeenCalled();

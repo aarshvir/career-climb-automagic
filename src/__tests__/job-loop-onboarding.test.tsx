@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { blankLoopProfile } from '@/lib/job-loop-audiences';
+import { clearTrackingDraftMemory } from '@/lib/tracking-draft-memory';
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 import type { LoopClaimInput, LoopProfile, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
 vi.unmock('react-router-dom');
@@ -38,7 +39,7 @@ async function replaceSource(user: ReturnType<typeof userEvent.setup>, nextSourc
   expect(textarea).toHaveValue(nextSource);
 }
 beforeEach(() => {
-  clearLoopWorkingDraft(); vi.clearAllMocks(); current = empty(); mocks.user = { id: 'synthetic-onboarding-owner' }; mocks.extract.mockResolvedValue(source);
+  clearLoopWorkingDraft(); clearTrackingDraftMemory(); vi.clearAllMocks(); current = empty(); mocks.user = { id: 'synthetic-onboarding-owner' }; mocks.extract.mockResolvedValue(source);
   mocks.call.mockImplementation(async (_id, action) => {
     if (action.action === 'save_profile') { current = { ...current, recordVersion: current.recordVersion + 1, profile: { ...action.profile, revision: 1, updatedAt: '2026-10-13T00:00:00Z' } }; return { snapshot: current }; }
     if (action.action === 'suggest_claims') return { snapshot: current, suggestions: [suggestion(quote), suggestion(forecast)] };

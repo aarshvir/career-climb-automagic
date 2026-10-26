@@ -199,6 +199,10 @@
 .ap-faq-grid details p { color: var(--ap-muted); font-size: 14px; line-height: 1.9; margin: 12px 0 0; }
 .ap-faq-grid a { color: var(--ap-cobalt); text-decoration: underline; text-underline-offset: 3px; }
 
+.ap-loop-entry { margin-top: 18px; font-size: 13px; line-height: 1.65; }
+.ap-loop-entry ol { padding-left: 20px; display: grid; gap: 5px; }
+.ap-loop-entry a { text-decoration: underline; text-underline-offset: 3px; }
+
 @media (max-width: 1000px) {
   .ap-account-story { padding: 40px 30px 30px; }
   .ap-auth-panel { padding: 40px 28px; }
@@ -275,11 +279,6 @@
 @media (prefers-reduced-motion: reduce) {
   .jv-account *, .jv-pilot *, .ap-auth-loading svg { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
-/* In Instagram/Facebook's own browser Google sign-in is blocked; email comes first. */
-.ap-inapp { margin-bottom:18px; padding:14px 16px; border:1px solid #cad4f4; background:#edeef9; border-radius:10px; font-size:14px; line-height:1.6; color:#172338; }
-.ap-inapp p { margin:0; }
-.ap-inapp-actions { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:8px !important; }
-.ap-inapp-actions a, .ap-inapp-actions button { font:inherit; font-size:13px; font-weight:700; color:#2850df; background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; }
 /* Mobile number: dialling code plus the local number. */
 .ap-phone-field { display: grid; grid-template-columns: minmax(96px, 128px) minmax(0, 1fr); gap: 8px; }
 .ap-phone-field select { min-height: 48px; border: 1px solid var(--ap-control-line, #c9d0dc); border-radius: 9px; padding: 0 8px; background: #fff; color: var(--ap-ink, #172338); font-size: 14px; }

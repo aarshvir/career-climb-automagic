@@ -10,12 +10,3 @@ export function detectInAppBrowser(userAgent = typeof navigator === 'undefined' 
   return null;
 }
 
-export const isAndroid = (userAgent = typeof navigator === 'undefined' ? '' : navigator.userAgent) => /Android/i.test(userAgent);
-
-/** A link that asks the phone to reopen this page in its normal browser.
- * Android hands an intent to Chrome (falling back to the page itself); iOS uses Safari's scheme. */
-export function openInBrowserHref(url: string, userAgent = typeof navigator === 'undefined' ? '' : navigator.userAgent): string {
-  const target = new URL(url);
-  if (isAndroid(userAgent)) return `intent://${target.host}${target.pathname}${target.search}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(target.toString())};end`;
-  return `x-safari-${target.toString()}`;
-}

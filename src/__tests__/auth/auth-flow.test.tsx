@@ -8,6 +8,8 @@ import Auth from '@/pages/Auth';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import AuthCallback from '@/pages/AuthCallback';
+import { rememberLoopReturn, peekLoopReturn } from '@/lib/account-return';
+import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { clearUserAuthCache } from '@/utils/authUtils';
 
 vi.unmock('@/contexts/AuthContext');
@@ -55,7 +57,7 @@ beforeEach(() => {
     sdk.listener = callback;
     return { data: { subscription: { unsubscribe: sdk.unsubscribe } } };
   });
-  window.localStorage.clear();
+  window.localStorage.clear(); sessionStorage.clear();
   window.history.replaceState(null, '', '/');
 });
 afterEach(cleanup);
@@ -151,7 +153,7 @@ describe('signup and password recovery screens', () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
     const user = userEvent.setup();
     await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
-    await user.type(screen.getByLabelText('Mobile number'), '50 123 4567');
+    await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
     await user.type(screen.getByLabelText('Email address'), 'person@example.test');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
     await user.type(screen.getByLabelText('Confirm password'), 'Password123');
@@ -218,65 +220,54 @@ it('cache cleanup also removes only the current account’s interest-form marker
   expect(localStorage.getItem('form_shown_timestamp')).toBe('keep');
 });
 
-describe('sign-up from Instagram and Facebook ads', () => {
-  const instagramIphone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0.0.0';
-  const facebookAndroid = 'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/480.0.0.0;]';
-  const signUpForm = async () => {
-    const user = userEvent.setup();
-    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
-    await user.type(screen.getByLabelText('Mobile number'), '50 123 4567');
-    await user.type(screen.getByLabelText('Email address'), 'person@example.test');
-    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
-    await user.type(screen.getByLabelText('Confirm password'), 'Password123');
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
-    return user;
-  };
-  const tree = () => <AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Routes><Route path="/auth" element={<Auth />} /><Route path="/loop" element={<h1>Job Loop dashboard</h1>} /></Routes></MemoryRouter></AuthProvider>;
-  afterEach(() => vi.restoreAllMocks());
 
-  it('hides Google inside Instagram and offers the phone browser instead', async () => {
-    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(instagramIphone);
-    render(tree());
-    expect(await screen.findByText('You\'re in the Instagram browser.')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Continue with Google/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Open in Safari to use Google' }).getAttribute('href')).toMatch(/^x-safari-https?:\/\//);
+describe('Job Loop account entry and confirmation recovery', () => {
+  it('keeps the Job Loop outcome and first steps beside signup on mobile markup', async () => {
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
+    expect(await screen.findByText('YOUR JOB LOOP STARTS HERE')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name:'After creating your account' })).toHaveTextContent('run your first search');
+    expect(screen.getByText(/Job Loop plans from US\$29\/month/)).toBeInTheDocument();
+    expect(sdk.signUp).not.toHaveBeenCalled();
   });
+  it.each(['Instagram 321.0','Mozilla [FBAN/FBIOS;FBAV/500]'])('offers email and browser guidance for %s without attempting blocked OAuth', async agent => {
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(agent);
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
+    expect(await screen.findByText('You’re in an app’s browser.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name:'Continue with Google' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Email address')).toBeEnabled();
+    expect(screen.getByRole('button', { name:'Copy sign-in link' })).toBeEnabled();
+    expect(sdk.signInWithOAuth).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+  it('does not confuse an ordinary mobile browser with a social-app webview', () => {
+    expect(detectInAppBrowser('Mozilla/5.0 (iPhone) AppleWebKit Safari/604.1')).toBeNull();
+    expect(detectInAppBrowser('Mozilla/5.0 Android Chrome/130.0 Mobile')).toBeNull();
+  });
+  it('keeps the original setup destination when a callback cannot establish a session', async () => {
+    rememberLoopReturn('/onboarding');
+    render(<MemoryRouter initialEntries={['/auth/callback?code=already-used']}><Routes>
+      <Route path='/auth/callback' element={<AuthCallback />} /><Route path='/auth' element={<p>Resume account sign-in</p>} />
+    </Routes></MemoryRouter>);
+    expect(await screen.findByRole('alert')).toHaveTextContent('password you chose');
+    expect(peekLoopReturn()).toBe('/onboarding');
+    await userEvent.setup().click(screen.getByRole('button', { name:'Sign in with email and password' }));
+    expect(await screen.findByText('Resume account sign-in')).toBeInTheDocument();
+  });
+});
 
-  it('sends Facebook on Android to Chrome', async () => {
-    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(facebookAndroid);
-    render(tree());
-    expect((await screen.findByRole('link', { name: 'Open in Chrome to use Google' })).getAttribute('href')).toMatch(/^intent:\/\/.*package=com\.android\.chrome/);
-  });
 
-  it('keeps Google in normal browsers', async () => {
-    render(tree());
-    expect(await screen.findByRole('button', { name: /Continue with Google/ })).toBeInTheDocument();
-  });
-
-  it('continues by itself when the person comes back after confirming in another browser', async () => {
-    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
-    sdk.signInWithPassword.mockResolvedValue({ data: { session: signedIn, user: signedIn.user }, error: null });
-    render(tree());
-    await signUpForm();
-    expect(await screen.findByText('Check your email')).toBeInTheDocument();
-    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
-    await waitFor(() => expect(sdk.signInWithPassword).toHaveBeenCalledWith({ email: 'person@example.test', password: 'Password123' }));
-    expect(await screen.findByText('Job Loop dashboard')).toBeInTheDocument();
-  });
-
-  it('explains plainly when the email is not confirmed yet', async () => {
-    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
-    sdk.signInWithPassword.mockResolvedValue({ data: { session: null, user: null }, error: { message: 'Email not confirmed' } });
-    render(tree());
-    const user = await signUpForm();
-    await user.click(await screen.findByRole('button', { name: /I've confirmed my email, continue/ }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Your email isn’t confirmed yet.');
-  });
-
-  it('says the email is confirmed when the link opens in a different browser', async () => {
-    window.history.replaceState(null, '', '/auth/callback?code=from-another-browser');
-    render(<MemoryRouter initialEntries={['/auth/callback?code=from-another-browser']}><Routes><Route path="/auth/callback" element={<AuthCallback />} /></Routes></MemoryRouter>);
-    expect(await screen.findByRole('heading', { name: 'Your email is confirmed' })).toBeInTheDocument();
-    expect(screen.queryByText(/invalid or expired/)).not.toBeInTheDocument();
-  });
+it('continues the same signup on one deliberate click without focus-triggered login', async () => {
+  sdk.signUp.mockResolvedValue({data:{user:signedIn.user,session:null},error:null});
+  sdk.signInWithPassword.mockResolvedValue({data:{user:signedIn.user,session:signedIn},error:null});
+  render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Routes><Route path='/auth' element={<Auth />} /><Route path='/onboarding' element={<h1>Choose your roles</h1>} /></Routes></MemoryRouter></AuthProvider>);
+  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'New Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'new-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.type(screen.getByLabelText('Confirm password'),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));
+  await screen.findByText('Check your email');await act(async()=>{window.dispatchEvent(new Event('focus'));document.dispatchEvent(new Event('visibilitychange'));});expect(sdk.signInWithPassword).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(await screen.findByText('Choose your roles')).toBeInTheDocument();expect(sdk.signInWithPassword).toHaveBeenCalledTimes(1);
+});
+it('does not reuse pending signup credentials after an SDK account change and sign-out', async () => {
+  sdk.signUp.mockResolvedValue({data:{user:signedIn.user,session:null},error:null});
+  render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth embedded /></MemoryRouter></AuthProvider>);
+  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'Another Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'another-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.type(screen.getByLabelText('Confirm password'),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));await screen.findByText('Check your email');
+  act(()=>{sdk.listener!('SIGNED_IN',signedIn);sdk.listener!('SIGNED_OUT',null);});
+  await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(sdk.signInWithPassword).not.toHaveBeenCalled();expect(screen.getByLabelText('Password',{exact:true})).toHaveValue('');
 });

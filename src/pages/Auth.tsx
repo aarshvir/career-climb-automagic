@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowRight, Check, FileText, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
-import { detectInAppBrowser, isAndroid, openInBrowserHref } from '@/lib/in-app-browser';
+import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
+import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { ContactFields } from '@/components/ContactDetails';
 import { blankContact, checkContact } from '@/lib/contact-details';
 import './AccountPilot.css';
@@ -27,14 +28,16 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [error, setError] = useState('');
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const fieldId = useId();
-  // Instagram/Facebook open ads in their own browser, where Google sign-in is blocked.
-  const [inApp] = useState(() => detectInAppBrowser());
   const [copied, setCopied] = useState(false);
-  // After sign-up, the email link often opens in another browser. Keeping the new
-  // credentials in this page lets it continue here once the address is confirmed.
-  const pending = useRef<{ email: string; password: string } | null>(null);
-  const continuing = useRef(false), lastTry = useRef(0);
+  const socialBrowser = detectInAppBrowser();
+  const loopEntry = !embedded && accountDestination(searchParams.get('next')) === '/onboarding';
+  const fieldId = useId();
+  // Only the newly submitted signup is retained, in this mounted tab for ten minutes.
+  // Continuation is deliberate; focus/visibility never starts a password login.
+  const pending = useRef<{ email:string; password:string; expiresAt:number; epoch:number } | null>(null);
+  const alive = useRef(true), continuing = useRef(false), attempt = useRef(0);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; pending.current = null; attempt.current++; }; }, []);
+  useEffect(() => { if (user || authLoading || authError) { pending.current = null; attempt.current++; } }, [user, authLoading, authError]);
 
   useEffect(() => {
     if (user && !authLoading && !embedded) navigate(accountDestination(searchParams.get('next')), { replace: true });
@@ -58,13 +61,15 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       if (!validation.valid) { setError(validation.errors.join('. ')); return; }
     }
     setBusy(true);
+    const turn = ++attempt.current, epoch = trackingAuthEpoch();
     try {
       if (!embedded && mode === 'sign-up') rememberLoopReturn(searchParams.get('next'));
       if (mode === 'sign-up') {
         const result = await signUpWithEmail(email, password, details ?? undefined);
+        if (!alive.current || attempt.current !== turn || trackingAuthEpoch() !== epoch) return;
         if (result.error) setError(result.error);
         else if (result.requiresEmailConfirmation) {
-          pending.current = { email: email.trim(), password };
+          pending.current = { email:email.trim(), password, expiresAt:Date.now()+10*60*1000, epoch };
           setConfirmationSent(true);
           setPassword('');
           setConfirmPassword('');
@@ -78,37 +83,9 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     } finally { setBusy(false); }
   };
 
-  const continueAfterConfirmation = useCallback(async (silent: boolean) => {
-    const details = pending.current;
-    if (!details || continuing.current) return;
-    const now = Date.now();
-    if (silent && now - lastTry.current < 8000) return;
-    lastTry.current = now; continuing.current = true;
-    if (!silent) { setBusy(true); setError(''); }
-    try {
-      const result = await signInWithEmail(details.email, details.password);
-      if (!result.error) { pending.current = null; return; }
-      if (!silent) setError(/confirm/i.test(result.error) ? 'Your email isn’t confirmed yet. Open the link in the email we sent, then come back here.' : result.error);
-    } catch { if (!silent) setError('We could not connect. Please try again.'); }
-    finally { continuing.current = false; if (!silent) setBusy(false); }
-  }, [signInWithEmail]);
-
-  // Coming back from the email app makes this page visible again: continue without a tap.
-  useEffect(() => {
-    if (!confirmationSent) return;
-    const attempt = () => { if (document.visibilityState === 'visible') void continueAfterConfirmation(true); };
-    document.addEventListener('visibilitychange', attempt);
-    window.addEventListener('focus', attempt);
-    return () => { document.removeEventListener('visibilitychange', attempt); window.removeEventListener('focus', attempt); };
-  }, [confirmationSent, continueAfterConfirmation]);
-
-  const copyLink = async () => {
-    try { await navigator.clipboard.writeText(window.location.href); setCopied(true); }
-    catch { setError('Copy is unavailable here. Open the ••• menu and choose to open in your browser.'); }
-  };
-
   const handleGoogle = async () => {
     if (busy || configurationError) return;
+    if (socialBrowser) { setError('Open this page in Safari or Chrome to continue with Google. You can also use email and password here.'); return; }
     if (onBeforeGoogle && !onBeforeGoogle()) return;
     rememberLoopReturn(embedded ? null : searchParams.get('next'));
     setError('');
@@ -119,13 +96,39 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   };
 
   const changeMode = () => {
+    pending.current = null; attempt.current++;
     setMode(current => current === 'sign-in' ? 'sign-up' : 'sign-in');
     setError('');
     setConfirmationSent(false);
-    pending.current = null;
     setPassword('');
     setConfirmPassword('');
   };
+
+  async function continueSignup() {
+    if (busy || continuing.current || configurationError || authLoading || authError || user) return;
+    const details = pending.current;
+    if (!details || details.epoch !== trackingAuthEpoch() || details.expiresAt <= Date.now()) {
+      pending.current = null; setConfirmationSent(false); setMode('sign-in');
+      setError('Sign in with your email and password to continue. Your setup destination is unchanged.'); return;
+    }
+    continuing.current = true; setBusy(true); setError('');
+    const turn = ++attempt.current;
+    try {
+      const result = await signInWithEmail(details.email, details.password);
+      if (!alive.current || pending.current !== details || attempt.current !== turn) return;
+      if (result.error) setError(/confirm/i.test(result.error) ? 'Your email is not confirmed yet. Open the confirmation email, then return and continue.' : result.error);
+      else pending.current = null;
+    } catch { if (alive.current && pending.current === details && attempt.current === turn) setError('We could not connect. Please try again.'); }
+    finally { continuing.current = false; if (alive.current) setBusy(false); }
+  }
+
+  async function copyBrowserLink() {
+    const target = new URL('/auth', window.location.origin);
+    target.searchParams.set('next', accountDestination(searchParams.get('next')));
+    if (mode === 'sign-up') target.searchParams.set('mode', 'signup');
+    try { await navigator.clipboard.writeText(target.href); setCopied(true); }
+    catch { setError('Use this app’s menu to open this page in Safari or Chrome.'); }
+  }
 
   const handleForgot = async () => {
     if (!embedded) { navigate('/auth/forgot-password'); return; }
@@ -169,31 +172,29 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       </aside>}
       <div className="ap-auth-panel">
         <div className="ap-auth-heading">
-          {!embedded && <p className="ap-eyebrow">YOUR JOBVANCE WORKSPACE</p>}
+          {!embedded && <p className="ap-eyebrow">{loopEntry ? 'YOUR JOB LOOP STARTS HERE' : 'YOUR JOBVANCE WORKSPACE'}</p>}
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
-          <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>
+          <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : loopEntry ? 'Add your CV and the roles you want. Find matching opportunities and review prepared CVs in your Job Loop.' : 'Keep your reviewed CVs and applications in one place.'}</p>
+          {loopEntry && !confirmationSent && <div className="ap-loop-entry"><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol><p>Job Loop plans from US$29/month. <Link to="/pricing">See plans</Link> · <Link to="/job-loop">How it works</Link></p></div>}
         </div>
         <div className="ap-auth-content">
           {visibleError && <Alert variant="destructive" role="alert" className="ap-auth-alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
           {resetSent && <p role="status" className="ap-auth-notice">If this email has an account, reset instructions were requested. Open the link in a separate tab, then sign in here to keep this CV check open.</p>}
+          {socialBrowser && <div className="ap-auth-notice" role="note"><strong>You’re in an app’s browser.</strong><p>For Google sign-in, use the app’s menu to open this page in Safari or Chrome. Email and password are available here. If your confirmation email opens another browser, return here and sign in with your password after confirming.</p>{!embedded && <Button type="button" variant="outline" onClick={() => void copyBrowserLink()}>{copied ? 'Link copied' : 'Copy sign-in link'}</Button>}</div>}
           {confirmationSent ? (
             <div className="ap-confirmation">
-              <p role="status">We sent a confirmation link to <strong>{email.trim()}</strong>. Open it from your email app (check spam too). It's fine if it opens in a different browser.</p>
-              <p>Then come back to this page and you'll continue automatically.</p>
-              <Button className="ap-primary ap-auth-submit" onClick={() => void continueAfterConfirmation(false)} disabled={busy}>{busy ? <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />Checking...</> : <>I've confirmed my email, continue <ArrowRight size={16} aria-hidden="true" /></>}</Button>
-              <Button type="button" variant="link" className="ap-mode-link" onClick={changeMode} disabled={busy}>Already confirmed before? Sign in</Button>
+              <p role="status">If this address can be registered, confirmation instructions will be sent to <strong>{email.trim()}</strong>. Check your spam folder. Open the link in this browser when possible.</p>
+              <p>If the email opens a different browser, confirm there, then return here and press Continue. After ten minutes or a page reload, sign in with your password instead. If you already have an account, sign in or reset your password.</p>
+              <Button className="ap-primary ap-auth-submit" disabled={busy} onClick={() => void continueSignup()}>{busy ? 'Checking…' : "I’ve confirmed my email, continue"}</Button>
+              <Button variant="link" disabled={busy} onClick={changeMode}>Back to sign in <ArrowRight size={16} aria-hidden="true" /></Button>
             </div>
           ) : (
             <>
-              {inApp ? <div className="ap-inapp" role="note">
-                <p><strong>You're in the {inApp} browser.</strong> Google sign-in doesn't work inside {inApp}, so use your email below. It takes about a minute.</p>
-                <p className="ap-inapp-actions"><a href={openInBrowserHref(window.location.href)}>Open in {isAndroid() ? 'Chrome' : 'Safari'} to use Google</a><button type="button" onClick={() => void copyLink()}>{copied ? 'Link copied' : 'Copy link'}</button></p>
-              </div> : <>
-              <Button type="button" variant="outline" className="ap-google-button" onClick={handleGoogle} disabled={busy || !!configurationError}>
+              {!socialBrowser && <Button type="button" variant="outline" className="ap-google-button" onClick={handleGoogle} disabled={busy || !!configurationError}>
                 <span className="ap-google-mark" aria-hidden="true">G</span>
                 Continue with Google
-              </Button>
-              <div className="ap-auth-divider"><span>or use your email and password</span></div></>}
+              </Button>}
+              {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
               <form className="ap-auth-form" onSubmit={handleSubmit}>
                 {mode === 'sign-up' && <ContactFields value={contact} onChange={setContact} disabled={busy} />}
                 <div className="ap-field">
