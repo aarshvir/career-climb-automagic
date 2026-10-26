@@ -8,6 +8,8 @@ import Auth from '@/pages/Auth';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import AuthCallback from '@/pages/AuthCallback';
+import { rememberLoopReturn, peekLoopReturn } from '@/lib/account-return';
+import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { clearUserAuthCache } from '@/utils/authUtils';
 
 vi.unmock('@/contexts/AuthContext');
@@ -55,7 +57,7 @@ beforeEach(() => {
     sdk.listener = callback;
     return { data: { subscription: { unsubscribe: sdk.unsubscribe } } };
   });
-  window.localStorage.clear();
+  window.localStorage.clear(); sessionStorage.clear();
   window.history.replaceState(null, '', '/');
 });
 afterEach(cleanup);
@@ -214,4 +216,39 @@ it('cache cleanup also removes only the current account’s interest-form marker
   clearUserAuthCache('account-a');
   expect(localStorage.getItem('last_user_id')).toBe('account-b');
   expect(localStorage.getItem('form_shown_timestamp')).toBe('keep');
+});
+
+
+describe('Job Loop account entry and confirmation recovery', () => {
+  it('keeps the Job Loop outcome and first steps beside signup on mobile markup', async () => {
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
+    expect(await screen.findByText('YOUR JOB LOOP STARTS HERE')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name:'After creating your account' })).toHaveTextContent('run your first search');
+    expect(screen.getByText(/Job Loop plans from US\$29\/month/)).toBeInTheDocument();
+    expect(sdk.signUp).not.toHaveBeenCalled();
+  });
+  it.each(['Instagram 321.0','Mozilla [FBAN/FBIOS;FBAV/500]'])('offers email and browser guidance for %s without attempting blocked OAuth', async agent => {
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(agent);
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
+    expect(await screen.findByText('You’re in an app’s browser.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name:'Continue with Google' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Email address')).toBeEnabled();
+    expect(screen.getByRole('button', { name:'Copy sign-in link' })).toBeEnabled();
+    expect(sdk.signInWithOAuth).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+  it('does not confuse an ordinary mobile browser with a social-app webview', () => {
+    expect(detectInAppBrowser('Mozilla/5.0 (iPhone) AppleWebKit Safari/604.1')).toBeNull();
+    expect(detectInAppBrowser('Mozilla/5.0 Android Chrome/130.0 Mobile')).toBeNull();
+  });
+  it('keeps the original setup destination when a callback cannot establish a session', async () => {
+    rememberLoopReturn('/onboarding');
+    render(<MemoryRouter initialEntries={['/auth/callback?code=already-used']}><Routes>
+      <Route path='/auth/callback' element={<AuthCallback />} /><Route path='/auth' element={<p>Resume account sign-in</p>} />
+    </Routes></MemoryRouter>);
+    expect(await screen.findByRole('alert')).toHaveTextContent('password you chose');
+    expect(peekLoopReturn()).toBe('/onboarding');
+    await userEvent.setup().click(screen.getByRole('button', { name:'Sign in with email and password' }));
+    expect(await screen.findByText('Resume account sign-in')).toBeInTheDocument();
+  });
 });

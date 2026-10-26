@@ -43,12 +43,17 @@ export function rememberLoopReturn(value: string | null, now = Date.now()): void
   } catch { /* Signing in still works when tab storage is unavailable. */ }
 }
 
-export function takeLoopReturn(now = Date.now()): PrivateReturn | null {
+export function peekLoopReturn(now = Date.now()): PrivateReturn | null {
   try {
     const raw = sessionStorage.getItem(KEY);
-    sessionStorage.removeItem(KEY);
     if (!raw || raw.length > 200) return null;
     const value = JSON.parse(raw);
     return isPrivateReturn(value.path) && typeof value.expiresAt === 'number' && value.expiresAt > now && value.expiresAt <= now + TTL ? accountDestination(value.path) : null;
   } catch { return null; }
+}
+
+export function takeLoopReturn(now = Date.now()): PrivateReturn | null {
+  const path = peekLoopReturn(now);
+  try { sessionStorage.removeItem(KEY); } catch { /* Storage can be disabled. */ }
+  return path;
 }

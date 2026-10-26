@@ -80,3 +80,35 @@ describe('integrated recurring CV authority',()=>{
   await withdraw();await expect(controlLoop(repo,owner,{action:'download',expectedGeneration:generation,packetId:packets[2].id,format:'txt'},env,transport)).rejects.toMatchObject({code:'LOOP_VARIANT_FACT_UNAVAILABLE'});
  },30000);
 });
+
+
+describe('first saved global CV to useful result through real control, SQL and worker', () => {
+ it('saves setup and explicit facts, discovers a matching role, reviews and downloads the exact first CV', async () => {
+  const {repo,bytes}=integratedRepository();
+  await db.query('DELETE FROM jobvance_private.loop_cv_variants WHERE user_id=$1',[owner]);
+  const setupProfile={...profile,pageTarget:2 as const,compensation:{currency:'',period:'annual' as const,minimum:null}};
+  const env=(key:string)=>({SUPABASE_URL:'https://project.example.test',SUPABASE_SERVICE_ROLE_KEY:'local-fixture-only',JOB_LOOP_EMPLOYER_FEEDS:JSON.stringify([{provider:'greenhouse',board:'example',company:'Example employer'}])}[key]);
+  const transport=vi.fn(async(input:string|URL|Request)=>{
+   const url=String(input);
+   if(url.includes('/functions/v1/job-loop-worker'))return Response.json({accepted:true});
+   if(url==='https://boards-api.greenhouse.io/v1/boards/example/jobs?content=true')return Response.json({jobs:[{id:1,title:'Operations Analyst',location:{name:'Remote'},absolute_url:'https://careers.example.com/analyst',content:'Prepare an operations tracker covering workstreams and document reporting assumptions. VacancyOnlySentinel is not candidate experience.'}]});
+   throw Error('Unapproved external call '+url);
+  });
+  await controlLoop(repo,owner,{action:'save_profile',expectedGeneration:generation,expectedVersion:await version(),profile:setupProfile,saveConsent:true},env,transport);
+  const suggested=await controlLoop(repo,owner,{action:'suggest_claims',expectedGeneration:generation},env,transport);expect(suggested.suggestions?.some(c=>c.sourceQuote===passage)).toBe(true);
+  await expect(controlLoop(repo,owner,{action:'start_run',expectedGeneration:generation,requestId:randomUUID(),provider:'rules',model:'grounded-rules-v1',modelConsent:false,inboxConsent:false},env,transport)).rejects.toMatchObject({code:'LOOP_CLAIMS_REQUIRED'});
+  await controlLoop(repo,owner,{action:'save_claim',expectedGeneration:generation,expectedVersion:await version(),claim},env,transport);
+  const request={action:'start_run' as const,expectedGeneration:generation,requestId:randomUUID(),provider:'rules' as const,model:'grounded-rules-v1',modelConsent:false,inboxConsent:false};
+  const started=await controlLoop(repo,owner,request,env,transport);
+  for(let n=0;n<12;n++)if(!await processLoopPhase(repo,started.runId!,env,transport))break;
+  const result=(await controlLoop(repo,owner,{action:'get_existing'},env,transport)).snapshot!;
+  const run=result.runs.find(r=>r.id===started.runId)!;expect(run.status).toBe('completed');expect(run.nextAction).toContain('1 prepared CV is available');
+  if(process.env.FIRST_RESULT_BROWSER_EXPORT==='1'){const fs=await import('node:fs/promises');await fs.mkdir('.tmp/first-result-browser/artifacts',{recursive:true});await fs.writeFile('.tmp/first-result-browser/worker-fixture.json',JSON.stringify({owner,snapshot:result,suggestions:suggested.suggestions},null,2));for(const packet of result.packets)for(const [format,artifact]of Object.entries(packet.artifacts))await fs.writeFile('.tmp/first-result-browser/artifacts/'+packet.id+'.'+format,bytes.get(artifact.path)!);}
+  const p=result.packets.find(p=>p.id===run.packetIds[0])!;expect(p.status).toBe('review_required');expect(p.cvSelection).toBeUndefined();expect(p.cvText).toContain(passage);expect(p.cvText).not.toContain('VacancyOnlySentinel');
+  await expect(controlLoop(repo,owner,{action:'download',packetId:p.id,format:'pdf'},env,transport)).rejects.toMatchObject({code:'LOOP_APPROVAL_REQUIRED'});
+  await controlLoop(repo,owner,{action:'approve_packet',packetId:p.id,inputHash:p.inputHash,reviewedText:p.cvText,confirmFacts:true,confirmDisclosure:true},env,transport);
+  for(const format of ['pdf','docx','txt'] as const){const out=await controlLoop(repo,owner,{action:'download',packetId:p.id,format},env,transport);expect(out.url).toBe('https://storage.example.test/'+p.artifacts[format].path);const parsed=await extractCvText(new File([bytes.get(p.artifacts[format].path)!],'first.'+format));expect(parsed.replace(/\s+/g,' ')).toContain(passage);}
+  const retried=await controlLoop(repo,owner,request,env,transport);expect(retried.runId).toBe(started.runId);expect((await repo.collections(owner)).runs).toHaveLength(1);
+  expect((await repo.record(owner)).data.profile?.sourceText).toBe(profile.sourceText);expect((await repo.collections(owner)).usage).toEqual([]);
+ },30000);
+});

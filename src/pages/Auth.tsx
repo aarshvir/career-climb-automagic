@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowRight, Check, FileText, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
+import { detectInAppBrowser } from '@/lib/in-app-browser';
 import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
@@ -23,6 +24,9 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [error, setError] = useState('');
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const socialBrowser = detectInAppBrowser();
+  const loopEntry = !embedded && accountDestination(searchParams.get('next')) === '/onboarding';
   const fieldId = useId();
 
   useEffect(() => {
@@ -66,6 +70,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
 
   const handleGoogle = async () => {
     if (busy || configurationError) return;
+    if (socialBrowser) { setError('Open this page in Safari or Chrome to continue with Google. You can also use email and password here.'); return; }
     if (onBeforeGoogle && !onBeforeGoogle()) return;
     rememberLoopReturn(embedded ? null : searchParams.get('next'));
     setError('');
@@ -82,6 +87,14 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     setPassword('');
     setConfirmPassword('');
   };
+
+  async function copyBrowserLink() {
+    const target = new URL('/auth', window.location.origin);
+    target.searchParams.set('next', accountDestination(searchParams.get('next')));
+    if (mode === 'sign-up') target.searchParams.set('mode', 'signup');
+    try { await navigator.clipboard.writeText(target.href); setCopied(true); }
+    catch { setError('Use this app’s menu to open this page in Safari or Chrome.'); }
+  }
 
   const handleForgot = async () => {
     if (!embedded) { navigate('/auth/forgot-password'); return; }
@@ -125,26 +138,28 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       </aside>}
       <div className="ap-auth-panel">
         <div className="ap-auth-heading">
-          {!embedded && <p className="ap-eyebrow">YOUR JOBVANCE WORKSPACE</p>}
+          {!embedded && <p className="ap-eyebrow">{loopEntry ? 'YOUR JOB LOOP STARTS HERE' : 'YOUR JOBVANCE WORKSPACE'}</p>}
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
-          <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>
+          <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : loopEntry ? 'Add your CV and the roles you want. Find matching opportunities and review prepared CVs in your Job Loop.' : 'Keep your reviewed CVs and applications in one place.'}</p>
+          {loopEntry && !confirmationSent && <div className="ap-loop-entry"><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol><p>Job Loop plans from US$29/month. <Link to="/pricing">See plans</Link> · <Link to="/job-loop">How it works</Link></p></div>}
         </div>
         <div className="ap-auth-content">
           {visibleError && <Alert variant="destructive" role="alert" className="ap-auth-alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
           {resetSent && <p role="status" className="ap-auth-notice">If this email has an account, reset instructions were requested. Open the link in a separate tab, then sign in here to keep this CV check open.</p>}
+          {socialBrowser && <div className="ap-auth-notice" role="note"><strong>You’re in an app’s browser.</strong><p>For Google sign-in, use the app’s menu to open this page in Safari or Chrome. Email and password are available here. If your confirmation email opens another browser, return here and sign in with your password after confirming.</p>{!embedded && <Button type="button" variant="outline" onClick={() => void copyBrowserLink()}>{copied ? 'Link copied' : 'Copy sign-in link'}</Button>}</div>}
           {confirmationSent ? (
             <div className="ap-confirmation">
-              <p role="status">If this address can be registered, confirmation instructions will be sent to <strong>{email.trim()}</strong>. Check your spam folder and open the link in this browser.</p>
-              <p>After confirming, you can sign in below. If you already have an account, sign in or reset your password.</p>
+              <p role="status">If this address can be registered, confirmation instructions will be sent to <strong>{email.trim()}</strong>. Check your spam folder. Open the link in this browser when possible.</p>
+              <p>If the email opens a different browser, confirm there, then return to this page and sign in with the password you chose. If you already have an account, sign in or reset your password.</p>
               <Button className="ap-primary ap-auth-submit" onClick={changeMode}>Back to sign in <ArrowRight size={16} aria-hidden="true" /></Button>
             </div>
           ) : (
             <>
-              <Button type="button" variant="outline" className="ap-google-button" onClick={handleGoogle} disabled={busy || !!configurationError}>
+              {!socialBrowser && <Button type="button" variant="outline" className="ap-google-button" onClick={handleGoogle} disabled={busy || !!configurationError}>
                 <span className="ap-google-mark" aria-hidden="true">G</span>
                 Continue with Google
-              </Button>
-              <div className="ap-auth-divider"><span>or use your email and password</span></div>
+              </Button>}
+              {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
               <form className="ap-auth-form" onSubmit={handleSubmit}>
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-email`}>Email address</Label>

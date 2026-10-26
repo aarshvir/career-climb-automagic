@@ -388,9 +388,8 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
       await repo.commit(run,2,'running',state);return true;
     }
     if(run.phase===0){
-      if(run.consents.inbox&&gmailConfigured(env)){try{const inbox=await readRecruitmentInbox(repo,run.user_id,env,fetcher,run.lifecycle_generation);state.inbox=inbox.signals;state.lanes!.push(lane('Recruitment inbox','partial',inbox.signals.length,`Bounded seven-day metadata/snippet triage${inbox.truncated?'; additional or unread messages remain':''}. Role receipts are unconfirmed; no applied status was inferred. Contextual reply drafts and existing-thread replies remain manual in Gmail.`));}catch{state.lanes!.push(lane('Recruitment inbox','not_connected',0,'Mailbox read was unavailable. No inbox check is claimed.'));}}
+      if(run.consents.inbox&&gmailConfigured(env)){try{const inbox=await readRecruitmentInbox(repo,run.user_id,env,fetcher,run.lifecycle_generation);state.inbox=inbox.signals;state.lanes!.push(lane('Recruitment inbox',inbox.truncated?'partial':'completed',inbox.signals.length,`Bounded seven-day metadata/snippet triage${inbox.truncated?'; additional or unread messages remain':''}. Role receipts are unconfirmed; no applied status was inferred. Contextual reply drafts and existing-thread replies remain manual in Gmail.`));}catch{state.lanes!.push(lane('Recruitment inbox','not_connected',0,'Mailbox read was unavailable. No inbox check is claimed.'));}}
       else state.lanes!.push(lane('Recruitment inbox',run.consents.inbox?'not_connected':'not_run',0,run.consents.inbox?'Mailbox access is not configured or connected.':'Mailbox processing was not requested.'));
-      state.lanes!.push(lane('LinkedIn inbox and browser sources','blocked',0,'No authorized hosted LinkedIn integration is connected. Use your own account and add source text manually.'));
       await repo.commit(run,1,'running',state);return true;
     }
     if(run.phase===1){
@@ -403,7 +402,7 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
         const queries=profile.targetTitles.slice(0,LIMITS.queries).map(title=>`${title} jobs ${profile.locations.join(' ')}`.slice(0,250));let count=0;let errors=0;
         for(let index=0;index<queries.length;index++){try{const result=await metered(repo,run,`search:${index}`,'tavily',TAVILY_CREDIT_MICROS,()=>searchTavily(queries[index],env,fetcher),env);if(result.error){errors++;continue;}for(const item of result.results){if(item.content.trim().length<80)continue;const sourceKey=`url:${await digest(item.url)}`;found.push({id:await stableUuid(sourceKey),title:item.title,company:'Employer not yet verified',location:'',url:item.url,description:item.content,contact:null,source:'web_search',sourceKey,checkedAt:new Date().toISOString(),verification:'unverified',status:'saved',followUpAt:null,notes:'Search text is discovery evidence only. Confirm the employer and full vacancy before using this opportunity.'});count++;}}catch(error){errors++;state.messages!.push(error instanceof ApiError?error.message:'A search query could not be confirmed.');}}
         state.lanes!.push(lane('Broad web search',errors||profile.targetTitles.length>LIMITS.queries?'partial':queries.length?'completed':'not_run',count,`${queries.length} bounded title/location queries attempted of ${profile.targetTitles.length} target titles. Search results and snippets are not proof that a vacancy is open.`));
-      }else state.lanes!.push(lane('Broad web search','not_connected',0,'Search is disabled or its server key is missing. No market-wide search is claimed.'));
+      }else state.lanes!.push(lane('Broad web search','not_run',0,'Optional web search is not configured and was not attempted. This run checks only its listed sources, not the whole job market.'));
       const known=await repo.record(run.user_id);const discovery=reconcileDiscovery(profile,known.data.opportunities,found);const newFound=discovery.updates;
       const all=discovery.preparation;
       state.lanes!.push(lane('Targeted shortlist',discovery.deferred?'partial':'completed',all.filter(item=>item.source!=='manual').length,'Only declared role/location matches without a stated seniority, experience or comparable pay conflict are added. Exact source URLs are deduplicated. Automatically found jobs need a fresh source observation for this run; unknown conditions remain unknown. Limited sources do not establish the size of the wider job market.'));
@@ -451,8 +450,19 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
       state.packetIds!.push(packet.id);state.messages!.push(packet.status==='held'?'A packet is held for its listed source/document checks.':'A source-backed packet is ready for your review.');
       await repo.commit(run,run.phase+1,'running',state,[packet]);return true;
     }
-    state.nextAction=state.inbox?.some(item=>item.bucket==='action_needed')?'Read the action-needed recruitment messages first.':state.packetIds?.length?'Review one source-backed packet and its factual/disclosure checks.':state.reusedPacketIds?.length?'Your unchanged packets were retained. Review the existing packet or add a new vacancy.':'Add a full vacancy and confirm relevant shareable career evidence.';
-    const incomplete=state.lanes!.some(item=>['partial','blocked','not_connected'].includes(item.status));await repo.commit(run,7,incomplete?'partial':'completed',state);return false;
+    const incomplete=state.lanes!.some(item=>['partial','blocked','not_connected'].includes(item.status));
+    const resultIds=new Set([...(state.packetIds??[]),...(state.reusedPacketIds??[])]);
+    const results=resultIds.size?(await repo.collections(run.user_id)).packets.filter(item=>resultIds.has(item.id)):[];
+    const ready=results.filter(item=>['review_required','approved'].includes(item.status)).length;
+    const held=results.filter(item=>item.status==='held').length;
+    state.nextAction=state.inbox?.some(item=>item.bucket==='action_needed')?'Read the action-needed recruitment messages first.'
+      :ready?`${ready} prepared CV${ready===1?' is':'s are'} available. Open Prepared CVs to review ${ready===1?'it':'them'}${incomplete?'; some source checks could not finish.':'.'}`
+      :held?`${held} prepared CV${held===1?' needs':'s need'} attention. Open Prepared CVs for the exact source or document checks before use.`
+      :selected?'The chosen vacancies no longer need a new CV. Check their current application status or choose another vacancy.'
+      :resultIds.size?'Open Prepared CVs to check this run’s documents; their current availability could not be confirmed.'
+      :incomplete?'Some source checks could not finish. See source details, retry after resolving the issue, or add a vacancy yourself.'
+      :'No new matching jobs were found in the sources checked. Try broader roles or locations, or add a vacancy yourself.';
+    await repo.commit(run,7,incomplete?'partial':'completed',state);return false;
   }catch(error){
     if(error instanceof ApiError&&['LOOP_LEASE_LOST','LOOP_STALE_INPUT'].includes(error.code))return false;
     state.messages!.push(error instanceof ApiError?error.message:'This stage failed without producing a confirmed result. Resume the saved run after resolving the problem.');state.nextAction='Review the failed stage before resuming; uncertain provider calls will not be repeated.';
