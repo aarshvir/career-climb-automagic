@@ -1,6 +1,6 @@
 # CI and browser-dependency repair
 
-26October2026. Reviewed integration of Claude PR33 head e51977ca1c1d1fe818f4ba5ee1c465be13985318 onto main681fda2. Candidate validation complete; GitHub checks and production publication are separate pending steps.
+26October2026. Reviewed integration of Claude PR33 head e51977ca1c1d1fe818f4ba5ee1c465be13985318 onto main681fda2. Exact-head GitHub CI40270048782passed before merge63adb66. Publicv58 at runtime3d94737 succeeded26October04:44:26UTC; the merge and runtime trees were compared equal. See the [release receipt](../../releases/2026-10-26-ci-repair.json).
 
 ## Change
 
@@ -24,6 +24,6 @@ The first full build failed at a60-second Vite SSR transport fetch after depende
 
 ## Scope and release
 
-Frontend/CI only. No migration, native function upload, auth configuration, merchant/payment/capacity change, paid call, candidate write, ad/pixel mutation or premium visual redesign is included. PR32 analytics has independent functional blockers and is not included. Current live baseline remainsv57 until a separate exact release receipt confirms publication.
+Frontend/CI only. No migration, native function upload, auth configuration, merchant/payment/capacity change, paid call, candidate write, ad/pixel mutation or premium visual redesign is included. PR32 analytics has independent functional blockers and is not included. Publicv58 is live. Thirteen private/four public route/file checks,66JavaScript/15CSS exact assets and two unauthorized worker401 probes pass. This is deployment verification, not a new hosted customer journey.
 
 Rollback: pushed tag jobvance-before-ci-repair-2026-10-26 at681fda2, with savedv57 retained. Source/site rollback is separate from database/file/merchant restoration. Preserve the pending backend name release boundary and the active Claude premium writer.
