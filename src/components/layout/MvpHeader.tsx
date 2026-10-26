@@ -41,8 +41,26 @@ export default function MvpHeader() {
   // Keep the panel mounted for 160ms after it closes so it can clip away (instant under reduced motion).
   const [closing,setClosing] = useState(false);
   const wasOpen = useRef(open);
+  // Desktop hides the mobile controls. Release their modal state as well,
+  // including when the viewport crosses the breakpoint while the menu is open.
   useEffect(() => {
-    if (wasOpen.current && !open && window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) {
+    const desktop = window.matchMedia?.("(min-width: 960px)");
+    if (!desktop) return;
+    const closeOnDesktop = () => {
+      if (!desktop.matches) return;
+      setOpenPath(null);
+      setClosing(false);
+    };
+    closeOnDesktop();
+    if (desktop.addEventListener) {
+      desktop.addEventListener("change", closeOnDesktop);
+      return () => desktop.removeEventListener("change", closeOnDesktop);
+    }
+    desktop.addListener?.(closeOnDesktop);
+    return () => desktop.removeListener?.(closeOnDesktop);
+  }, []);
+  useEffect(() => {
+    if (wasOpen.current && !open && !window.matchMedia?.("(min-width: 960px)").matches && window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) {
       setClosing(true);
       const timer = window.setTimeout(() => setClosing(false), 160);
       wasOpen.current = open;
