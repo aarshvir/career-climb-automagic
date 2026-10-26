@@ -75,6 +75,7 @@ describe('immutable browser measurements', () => {
     observe('SIGNED_IN', session()); await settle(); button('A return').click();
     window.dispatchEvent(new Event('pagehide')); await settle();
     const find = (label: string) => bodies().find(body => body.events.some((e: { label?: string }) => e.label === label));
+    await vi.waitFor(() => expect(find('A return')).toBeDefined());
     expect(find('A action').token).toBe(session().access_token);
     expect(find('B action').token).toBe(session(B, SB).access_token);
     expect(find('A return').token).toBe(session().access_token);
@@ -134,6 +135,7 @@ describe('immutable browser measurements', () => {
     observe('SIGNED_OUT', null); await settle(); button('After logout').click();
     window.dispatchEvent(new Event('pagehide')); await settle();
     const find = (label: string) => bodies().find(body => body.events.some((e: { label?: string }) => e.label === label));
+    await vi.waitFor(() => expect(find('After logout')).toBeDefined());
     expect(find('Anonymous action').visitorId).toBe(find('Signed action').visitorId);
     expect(find('After logout').visitorId).not.toBe(find('Signed action').visitorId);
     expect(find('Anonymous action').token).toBeNull();
