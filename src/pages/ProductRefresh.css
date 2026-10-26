@@ -1,7 +1,7 @@
 /* The landing page demonstrates the work; decoration never impersonates a result. */
 .product-page { background:var(--jv-paper); }
 .product-page .product-shell { width:min(1240px,calc(100% - 80px)); }
-.product-page h1,.product-page h2 { font-weight:700; letter-spacing:-.055em; }
+.product-page h1,.product-page h2 { font-weight:var(--fw-strong); letter-spacing:-.035em; }
 .product-page .product-eyebrow { font-size:10px; line-height:1.65; letter-spacing:.08em; color:#46604f; }
 .product-page .product-button { min-height:54px; padding:15px 22px; border-radius:8px; gap:24px; font-size:14px; }
 .product-page .product-button:hover { background:#174832; border-color:#174832; box-shadow:0 5px 15px #17302416; }

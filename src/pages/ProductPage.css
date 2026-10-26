@@ -17,7 +17,7 @@
   --product-lime: #e2eeaf;
   color: var(--product-ink);
   background: var(--product-paper);
-  font-family: "Manrope", "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   overflow-wrap: anywhere;
 }
 .product-how-loop { padding-bottom:30px; }
@@ -27,11 +27,11 @@
 .product-page *, .product-page *::before, .product-page *::after { box-sizing: border-box; }
 .product-page .product-shell { width: min(1184px, calc(100% - 80px)); margin-inline: auto; }
 .product-page h1, .product-page h2, .product-page h3, .product-page p, .product-page figure { margin: 0; }
-.product-page h1, .product-page h2 { font-weight: 600; letter-spacing: -.055em; }
+.product-page h1, .product-page h2 { font-weight: var(--fw-strong); letter-spacing: -.035em; }
 .product-page h2 { font-size: clamp(32px, 3.7vw, 48px); line-height: 1.08; }
-.product-page em { font-family: inherit; font-style: normal; font-weight: 700; letter-spacing: -.055em; }
+.product-page em { font-family: inherit; font-style: normal; font-weight: var(--fw-strong); letter-spacing: -.035em; }
 .product-page a, .product-page button, .product-page summary { -webkit-tap-highlight-color: transparent; }
-.product-page a:focus-visible, .product-page button:focus-visible, .product-page summary:focus-visible { outline: 3px solid var(--product-blue); outline-offset: 5px; border-radius: 4px; }
+.product-page :is(a, button, summary):not(.jv-btn):focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 3px; border-radius: 4px; }
 .product-page a { text-underline-offset: 4px; }
 .product-page .product-eyebrow { display: flex; align-items: center; gap: 9px; font-size: 11px; font-weight: 700; letter-spacing: .095em; line-height: 1.6; text-transform: uppercase; }
 .product-page .product-eyebrow > span:first-child:empty { width: 7px; height: 7px; border-radius: 50%; background: var(--product-blue); }
@@ -135,7 +135,7 @@
 .product-page .product-final-section h2 { position: relative; z-index: 1; max-width: 790px; margin-top: 26px; font-size: clamp(42px, 5.5vw, 74px); }
 .product-page .product-final-actions { position: relative; z-index: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 29px; margin-top: 35px; }
 .product-page .product-final-actions > span { color: #e0e7ff; font-size: 12px; line-height: 1.75; }
-.product-page .product-final-arrow { position: absolute; right: 0; top: 30px; color: #5a77e8; font-size: 290px; font-family: "Manrope", "Segoe UI", sans-serif; font-weight: 400; line-height: .9; pointer-events: none; }
+.product-page .product-final-arrow { position: absolute; right: 0; top: 30px; color: #5a77e8; font-size: 290px; font-family: var(--font-sans); font-weight: 400; line-height: .9; pointer-events: none; }
 .product-page .product-final-section a:focus-visible { outline-color: var(--product-lime); }
 
 /* Audience choices are real local controls; they do not create a saved profile. */
@@ -380,7 +380,4 @@
   .product-page .product-loop-steps > li { display: grid; grid-template-columns: 29px 1fr; gap: 4px 11px; padding-right: 0; }
   .product-page .product-loop-number { grid-row: 1 / 3; margin: 4px 0 0; }
   .product-page .product-loop-steps p { grid-column: 2; margin-top: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .product-page *, .product-page *::before, .product-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

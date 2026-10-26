@@ -1,6 +1,5 @@
-Manrope by Mikhail Sharanda and contributors, distributed under the SIL Open Font License in Manrope-OFL.txt.
-Regular and Bold fonts obtained from the official Google Fonts Manrope CSS endpoint on 2026-10-14.
-Source: https://fonts.google.com/specimen/Manrope
-License source: https://github.com/google/fonts/tree/main/ofl/manrope
-Locally subset to Latin/Latin Extended, common punctuation and selected symbols, then encoded as WOFF2 with FontTools.
-The website serves these files itself; it does not request fonts from Google at runtime.
+Geist and Geist Mono by The Geist Project Authors (Vercel), distributed under the SIL Open Font License (Geist-OFL.txt, GeistMono-OFL.txt).
+Files: Geist-latin-wght.woff2 and GeistMono-latin-wght.woff2 are the variable-weight (100-900) latin subsets,
+copied unchanged from @fontsource-variable/geist@5.3.0 and @fontsource-variable/geist-mono@5.3.0 (files/*-latin-wght-normal.woff2).
+Source: https://github.com/vercel/geist-font
+The website serves these files itself; it does not request fonts from any CDN at runtime.
