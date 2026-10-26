@@ -7,8 +7,11 @@ export default function RouteNavigation() {
   const { pathname, hash } = useLocation();
   const previous = useRef<string | null>(null);
   useEffect(() => {
+    const initial = previous.current === null;
     const changedPage = previous.current !== pathname;
     previous.current = pathname;
+    // A fresh page load keeps focus at the top so the first Tab reaches the skip link.
+    if (initial && !hash) return;
     if (!changedPage && !hash) return;
     let fragment = '';
     try { fragment = decodeURIComponent(hash.slice(1)); } catch { /* malformed fragment has no target */ }

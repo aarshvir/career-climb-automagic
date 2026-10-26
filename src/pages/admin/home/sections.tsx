@@ -34,7 +34,7 @@ export function OverviewSection({ data }: Data) {
       <section className="vh-card"><h2>Recorded USD per day</h2><p className="vh-sub">Known net amounts. Loop payments use the service-period start; refunds restate that period.</p>{data.revenue.unknownUsdPayments ? <p className="vh-empty">Chart unavailable while payment amounts are incomplete.</p> : <LineChart label="Recorded USD per day" points={data.daily.map(row => ({ label: day(row.day), value: row.revenueUsd }))} format={usd} />}</section>
       <section className="vh-card"><h2>New accounts per day</h2><p className="vh-sub">Real sign-ups only.</p><LineChart label="New accounts per day" tone="success" points={data.daily.map(row => ({ label: day(row.day), value: row.signups }))} /></section>
       <section className="vh-card"><h2>CV tailorings per day</h2><p className="vh-sub">AI-tailored CVs, including visitors without an account.</p><LineChart label="CV tailorings per day" points={data.daily.map(row => ({ label: day(row.day), value: row.cvChecks }))} /></section>
-      <section className="vh-card"><h2>Automated Job Loop runs per day</h2><p className="vh-sub">Runs that finished, including partial ones.</p><LineChart label="Automated Job Loop runs per day" tone="success" points={data.daily.map(row => ({ label: day(row.day), value: row.runs }))} /></section>
+      <section className="vh-card"><h2>Job Loop runs per day</h2><p className="vh-sub">Runs that finished, including partial ones.</p><LineChart label="Job Loop runs per day" tone="success" points={data.daily.map(row => ({ label: day(row.day), value: row.runs }))} /></section>
     </div>
     <p className="vh-help">{data.coverage.realUsers.toLocaleString()} customer accounts after classification · {usd(data.revenue.allTimeUsd)} known USD all time · <Link className="vh-link" to="/admin/revenue">revenue detail →</Link> · <Link className="vh-link" to="/admin/growth">sign-up funnel →</Link></p>
   </>;
@@ -55,8 +55,8 @@ export function RevenueSection({ data }: Data) {
       <Kpi label="Recorded USD (all time)" value={usd(revenue.allTimeUsd)} help={`${revenue.allTimeOrders} paid order${revenue.allTimeOrders === 1 ? '' : 's'} · known net amounts only`} />
       <Kpi label="Paying customers" value={revenue.payingCustomers.toLocaleString()} help="People with at least one paid order" />
       <Kpi label="Active subscriptions" value={revenue.subscriptions.active.toLocaleString()} help={`${revenue.subscriptions.cancelling} cancelling · ${revenue.subscriptions.pastDue} payment overdue · ${revenue.subscriptions.ended} ended`} />
-      <Kpi label="Paid Automated Job Loop places" value={`${revenue.places.paidUsed}`} foot={<>of {revenue.places.paidCapacity} paid places taken</>} />
-      <Kpi label="Free Automated Job Loop places" value={`${revenue.places.pilotUsed}`} tone={revenue.places.pilotUsed >= revenue.places.pilotCapacity ? 'bad' : undefined} foot={<>of {revenue.places.pilotCapacity} free places taken</>} />
+      <Kpi label="Paid Job Loop places" value={`${revenue.places.paidUsed}`} foot={<>of {revenue.places.paidCapacity} paid places taken</>} />
+      <Kpi label="Free Job Loop places" value={`${revenue.places.pilotUsed}`} tone={revenue.places.pilotUsed >= revenue.places.pilotCapacity ? 'bad' : undefined} foot={<>of {revenue.places.pilotCapacity} free places taken</>} />
       <Kpi label="Avg order" value={revenue.unknownUsdPayments ? 'Unknown' : revenue.allTimeOrders ? usd(revenue.allTimeUsd / revenue.allTimeOrders) : '—'} />
     </div>
     <div className="vh-grid vh-grid--2">
@@ -83,7 +83,7 @@ export function RevenueSection({ data }: Data) {
 export function GrowthSection({ data }: Data) {
   return <>
     <section className="vh-card vh-section"><h2>Sign-up funnel</h2><p className="vh-sub">People who created an account in the last {data.window.days} days, and how far they got. Each step counts only people who also did the step before.</p><Funnel stages={data.funnel} /></section>
-    <section className="vh-card vh-section"><h2>Who comes back</h2><p className="vh-sub">Share of each week's new accounts that used Jobvance again in each later week (a CV check, an Automated Job Loop action or a run). Blank cells are weeks that haven't happened yet.</p><CohortGrid cohorts={data.cohorts} /></section>
+    <section className="vh-card vh-section"><h2>Who comes back</h2><p className="vh-sub">Share of each week's new accounts that used Jobvance again in each later week (a CV check, a Job Loop action or a run). Blank cells are weeks that haven't happened yet.</p><CohortGrid cohorts={data.cohorts} /></section>
   </>;
 }
 
@@ -134,7 +134,7 @@ export function OperationsSection({ data }: Data) {
       tone={check.count === 0 ? 'good' : check.danger ? 'bad' : undefined} danger={check.danger && check.count > 0} />)}
       <Kpi label={`AI budget ${ops.budget.month}`} value={`${Math.round(budgetUsed)}%`} tone={budgetUsed >= 80 ? 'bad' : undefined} danger={budgetUsed >= 90}
         help={`${usd(ops.budget.committedUsd)} of ${usd(ops.budget.capUsd)} committed · ${usd(ops.budget.actualUsd)} actually spent. When it's used up, AI work stops until next month.`} />
-      <Kpi label="Automated Job Loop scheduler" value={ops.schedulerEnabled ? 'On' : 'Off'} tone={ops.schedulerEnabled ? 'good' : 'bad'} help={`Last automatic run started ${ago(ops.lastDispatchAt)}`} />
+      <Kpi label="Job Loop scheduler" value={ops.schedulerEnabled ? 'On' : 'Off'} tone={ops.schedulerEnabled ? 'good' : 'bad'} help={`Last automatic run started ${ago(ops.lastDispatchAt)}`} />
     </div>
     <div className="vh-table-wrap"><table className="vh-table">
       <thead><tr><th>Problem</th><th>When</th><th>User</th><th>Detail</th></tr></thead>

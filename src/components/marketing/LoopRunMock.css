@@ -2,60 +2,74 @@
 .jv-mock .lucide { stroke-width: 1.75; }
 .jv-mock-card { padding: 16px 16px 4px; }
 .jv-mock-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.jv-mock-top .jv-chip { text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
-.jv-mock-pause { display: inline-grid; place-items: center; width: 32px; height: 32px; margin: -4px -4px -4px 0; border: 1px solid var(--jv-line); border-radius: var(--r-pill); background: #fff; color: var(--jv-ink-2); transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+.jv-mock-tag-short { display: none; }
+.jv-mock-pause { position: relative; display: inline-grid; place-items: center; width: 32px; height: 32px; margin: -4px -4px -4px 0; border: 1px solid var(--jv-line); border-radius: var(--r-pill); background: #fff; color: var(--jv-ink-2); transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
 .jv-mock-pause::after { content: ""; position: absolute; inset: -6px; }
-.jv-mock-pause { position: relative; }
 .jv-mock-pause svg { width: 16px; height: 16px; }
 .jv-mock-pause:hover { background: #F2F3F7; color: var(--jv-ink); }
 .jv-mock-pause:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; }
 .jv-mock-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 16px; }
-.jv-mock-title { flex: 1 0 100%; margin: 0; color: var(--jv-ink); font-size: 15px; font-weight: var(--fw-semi); letter-spacing: -.011em; line-height: 1.3; }
-.jv-mock-schedule { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 9px 2px 7px; border-radius: var(--r-pill); background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-family: var(--font-mono); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.jv-mock-title { flex: 1 0 100%; margin: 0; color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); letter-spacing: -.011em; line-height: 1.3; }
+/* 14px icons are allowed only inside 24px mono schedule/status pills (DESIGN-DIRECTION §9). */
+.jv-mock-schedule { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 9px 2px 7px; border-radius: var(--r-pill); background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; white-space: nowrap; }
 .jv-mock-schedule svg { width: 14px; height: 14px; }
-.jv-mock-next { display: inline-flex; align-items: center; gap: 7px; margin: 0; color: var(--jv-ink-3); font-size: 13px; white-space: nowrap; }
+.jv-mock-next { display: inline-flex; align-items: center; gap: 7px; margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); white-space: nowrap; }
+.jv-mock-time { font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; color: var(--jv-ink-2); margin-left: -3px; }
 .jv-mock-pulse { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--jv-brand); }
-.jv-mock-pulse::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--jv-brand); animation: jv-pulse 2.4s var(--ease-out) infinite; }
+.jv-mock-pulse::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--jv-brand); animation: jv-pulse 2.4s var(--ease-out) 6; }
+.jv-mock.is-offscreen .jv-mock-pulse::after { animation-play-state: paused; }
 @keyframes jv-pulse { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(3.2); opacity: 0; } }
 .jv-mock-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--jv-line); }
 .jv-mock-rows { margin: 0; padding: 0; list-style: none; }
 .jv-mock-rows li { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 0; border-bottom: 1px solid var(--jv-line); }
 .jv-mock-rows li:last-child { border-bottom: 0; }
-.jv-mock-logo { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px; background: var(--jv-sunken); border: 1px solid var(--jv-line); color: var(--jv-ink-2); font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+.jv-mock-logo { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px; background: var(--jv-sunken); border: 1px solid var(--jv-line); color: var(--jv-ink-2); font-size: var(--t-sm); font-weight: 600; }
 .jv-mock-job { display: grid; min-width: 0; flex: 1; }
-.jv-mock-role { overflow: hidden; color: var(--jv-ink); font-size: 14px; font-weight: 500; line-height: 1.35; letter-spacing: -.006em; text-overflow: ellipsis; white-space: nowrap; }
-.jv-mock-company { overflow: hidden; color: var(--jv-ink-3); font-size: 13px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
-/* Status chips: three stacked states crossfade 3 times, then rest on "Ready for review". */
+.jv-mock-role { overflow: hidden; color: var(--jv-ink); font-size: var(--t-small); font-weight: 500; line-height: 1.35; letter-spacing: -.006em; text-overflow: ellipsis; white-space: nowrap; }
+.jv-mock-company { overflow: hidden; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+/* Status chips: three stacked states. Fill and dot carry the change; full indigo is saved for "ready". */
 .jv-mock-status { display: grid; flex-shrink: 0; }
-.jv-status { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: flex-start; gap: 6px; min-height: 24px; padding: 0 8px; border-radius: var(--r-xs); font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; white-space: nowrap; }
-.jv-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-.jv-status--found { color: var(--jv-ink-2); background: var(--jv-sunken); }
-.jv-status--tailored { color: var(--jv-brand-ink); background: var(--jv-brand-tint); }
-.jv-status--ready { color: var(--jv-brand-ink); background: var(--jv-brand-tint); box-shadow: inset 0 0 0 1px var(--jv-brand); }
+.jv-status { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: flex-start; gap: 6px; min-height: 24px; padding: 0 8px; border-radius: var(--r-xs); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; white-space: nowrap; }
+.jv-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--dot); flex-shrink: 0; }
+.jv-status--found { --dot: #8A90A8; color: #3C4157; background: #F1F3F8; }
+.jv-status--tailored { --dot: #3B47F0; color: #3C4157; background: #F1F3F8; }
+.jv-status--ready { --dot: #3B47F0; color: #2A33C4; background: #EEF0FF; }
 .jv-status--found, .jv-status--tailored { opacity: 0; }
-.jv-mock-review { display: none; align-items: center; min-height: 28px; padding: 0 12px; border: 1px solid var(--jv-line-strong); border-radius: var(--r-pill); color: var(--jv-ink); font-size: 12.5px; font-weight: 500; }
-.jv-mock-foot { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 16px; background: #0A0B14; color: #fff; font-size: 13px; line-height: 1.4; }
+/* Not a button: the mock is an illustration, so "Review" reads as a status label. */
+.jv-mock-review { display: none; align-items: center; color: var(--jv-ink-3); font-size: var(--t-sm); font-weight: 500; white-space: nowrap; cursor: default; }
+.jv-mock-foot { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 16px; background: #0A0B14; color: #fff; font-size: var(--t-sm); line-height: 1.4; }
 .jv-mock-foot > span { width: 6px; height: 6px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(212 242 90 / .18); flex-shrink: 0; }
 @media (max-width: 767px) { .jv-mock-rows li:nth-child(3) { display: none; } }
+/* Narrow two-column hero (1024-1279): keep role and company readable rather than the status label. */
+@media (min-width: 1024px) and (max-width: 1279px) { .jv-mock-review { display: none !important; } .jv-mock .jv-status { min-width: 0; } }
+@media (max-width: 399px) { .jv-mock-tag-long { display: none; } .jv-mock-tag-short { display: inline; } }
+@media (max-width: 374px) {
+  .jv-mock-rows li { flex-wrap: wrap; row-gap: 8px; }
+  .jv-mock-status { flex-basis: calc(100% - 44px); margin-left: 44px; justify-items: start; }
+}
 @media (min-width: 480px) {
   .jv-mock-card { padding: 20px 20px 4px; }
   .jv-mock-foot { padding: 12px 20px; }
   .jv-mock-title { flex: 0 1 auto; margin-right: auto; }
   .jv-mock-head { gap: 8px 12px; }
   .jv-mock-review { display: inline-flex; }
-  .jv-status { min-width: 15ch; }
+  .jv-status { min-width: 18ch; }
 }
 
+/* One 10.8s pass: found, tailored, ready, three times, then rest on ready. Each change is
+   sequential (the outgoing label is gone before the incoming one appears), so nothing ghosts. */
 @media (prefers-reduced-motion: no-preference) {
-  .jv-status { animation-duration: 3.6s; animation-timing-function: var(--ease-inout); animation-iteration-count: 3; animation-fill-mode: both; animation-delay: calc(var(--i, 0) * .8s + 1.1s); }
-  .jv-status--found { animation-name: jv-status-found; }
-  .jv-status--tailored { animation-name: jv-status-tailored; }
-  .jv-status--ready { animation-name: jv-status-ready; }
-  .jv-mock-review { animation: jv-status-ready 3.6s var(--ease-inout) calc(var(--i, 0) * .8s + 1.1s) 3 both; }
+  .jv-mock.is-live .jv-status, .jv-mock.is-live .jv-mock-review { animation-duration: 10.8s; animation-timing-function: var(--ease-inout); animation-iteration-count: 1; animation-fill-mode: both; animation-delay: calc(var(--i, 0) * .5s + .6s); }
+  .jv-mock.is-live .jv-status--found { animation-name: jv-status-found; }
+  .jv-mock.is-live .jv-status--tailored { animation-name: jv-status-tailored; }
+  .jv-mock.is-live .jv-status--ready { animation-name: jv-status-ready; }
+  .jv-mock.is-live .jv-mock-review { animation-name: jv-status-review; }
+  .jv-mock.is-offscreen .jv-status, .jv-mock.is-offscreen .jv-mock-review { animation-play-state: paused; }
 }
-@keyframes jv-status-found { 0%, 28% { opacity: 1; } 33%, 100% { opacity: 0; } }
-@keyframes jv-status-tailored { 0%, 28% { opacity: 0; } 33%, 61% { opacity: 1; } 66%, 100% { opacity: 0; } }
-@keyframes jv-status-ready { 0%, 61% { opacity: 0; } 66%, 100% { opacity: 1; } }
+@keyframes jv-status-found { 0%, 9.33% { opacity: 1; } 10.33%, 32% { opacity: 0; } 33.33%, 42.67% { opacity: 1; } 43.67%, 65.33% { opacity: 0; } 66.67%, 76% { opacity: 1; } 77%, 100% { opacity: 0; } }
+@keyframes jv-status-tailored { 0%, 10.33% { opacity: 0; } 11.67%, 20.33% { opacity: 1; } 21.33%, 43.67% { opacity: 0; } 45%, 53.67% { opacity: 1; } 54.67%, 77% { opacity: 0; } 78.33%, 87% { opacity: 1; } 88%, 100% { opacity: 0; } }
+@keyframes jv-status-ready { 0%, 21.33% { opacity: 0; } 22.67%, 30.67% { opacity: 1; } 32%, 54.67% { opacity: 0; } 56%, 64% { opacity: 1; } 65.33%, 88% { opacity: 0; } 89.33%, 100% { opacity: 1; } }
+@keyframes jv-status-review { 0%, 22.67% { opacity: 0; } 23.67%, 30.67% { opacity: 1; } 32%, 56% { opacity: 0; } 57%, 64% { opacity: 1; } 65.33%, 89.33% { opacity: 0; } 90.33%, 100% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .jv-mock-pause { display: none; }
   .jv-mock-pulse::after { animation: none !important; display: none; }

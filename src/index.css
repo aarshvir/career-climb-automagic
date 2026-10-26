@@ -3,7 +3,10 @@
 
 @font-face{font-family:"Geist";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:"Geist Mono";src:url('/fonts/GeistMono-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+2000-206F;}
-@font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica Neue");size-adjust:105.6%;ascent-override:95.2%;descent-override:27.9%;line-gap-override:0%;}
+/* Metric-matched fallbacks (measured in Chrome against the self-hosted files): Arial is 2.3% narrower
+   than Geist; Courier New has Geist Mono's exact 600/1000 advance. Swapping in the webfont does not reflow. */
+@font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica Neue");size-adjust:102.3%;ascent-override:98.2%;descent-override:28.8%;line-gap-override:0%;}
+@font-face{font-family:"Geist Mono Fallback";src:local("Courier New"),local("CourierNewPSMT");size-adjust:100%;ascent-override:100.5%;descent-override:29.5%;line-gap-override:0%;}
 /* Alias for admin-home.css, which still names Manrope; it now resolves to Geist. */
 @font-face{font-family:"Manrope";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-display:swap;}
 
@@ -28,7 +31,7 @@
     --jv-danger: #C42B2F; --jv-danger-tint: #FDECEC;
     /* type */
     --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-    --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Consolas, monospace;
     --fw-regular: 400; --fw-medium: 500; --fw-semi: 560; --fw-strong: 600;
     --t-display: clamp(2.75rem, 2.1rem + 2.667vw, 4.5rem);
     --t-h1: clamp(2.25rem, 1.786rem + 1.905vw, 3.5rem);
@@ -36,6 +39,9 @@
     --t-h3: clamp(1.375rem, 1.236rem + .571vw, 1.75rem);
     --t-h4: clamp(1.125rem, 1.079rem + .19vw, 1.25rem);
     --t-price: clamp(2.5rem, 2.2rem + 1.2vw, 3.25rem);
+    /* small end of the scale: no raw px font sizes on marketing pages */
+    --t-xs: .75rem; --t-sm: .8125rem; --t-small: .875rem; --t-body-sm: .9375rem; --t-body: 1rem;
+    --lh-body: 1.625; --lh-body-sm: 1.6;
     /* radius (new names; the existing --radius* stay for the private app) */
     --r-xs: 6px; --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-pill: 999px;
     /* elevation */
@@ -45,6 +51,7 @@
     /* layout */
     --gutter: 16px;
     --shell: min(1200px, 100% - 2 * var(--gutter));
+    --section-y: 80px; --band-pad-x: 20px;
     /* motion */
     --ease-out: cubic-bezier(.16, 1, .3, 1); --ease-inout: cubic-bezier(.65, 0, .35, 1); --ease-press: cubic-bezier(.3, 0, .5, 1);
     --dur-1: 120ms; --dur-2: 200ms; --dur-3: 420ms; --dur-4: 640ms; --stagger: 70ms; --rise: 12px;
@@ -78,8 +85,8 @@
     --content-max-width: 1240px; --header-height: 80px; --sidebar-width: 240px;
     --transition-fast: 140ms ease; --transition-base: 200ms ease;
   }
-  @media (min-width: 640px) { :root { --gutter: 24px; } }
-  @media (min-width: 1024px) { :root { --gutter: 40px; } }
+  @media (min-width: 640px) { :root { --gutter: 24px; --band-pad-x: 40px; } }
+  @media (min-width: 1024px) { :root { --gutter: 40px; --section-y: 128px; --band-pad-x: 64px; } }
   * { @apply border-border; }
   html { scroll-behavior: smooth; scroll-padding-top: 100px; }
   body { @apply bg-background text-foreground antialiased; margin: 0; font-family: var(--font-sans); line-height: 1.625; font-kerning: normal; font-synthesis-weight: none; text-rendering: optimizeLegibility; }
