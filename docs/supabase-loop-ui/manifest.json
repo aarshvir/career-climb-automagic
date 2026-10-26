@@ -72,7 +72,7 @@
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine.ts",
-                            "sha256": "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c"
+                            "sha256": "d8db4aa7019d63d64a01ace798cfad237b6937297d4739512e98cac9386196b1"
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine-font.ts",
@@ -278,9 +278,9 @@
                     },
                     {
                         "function":  "job-loop-worker",
-                        "sha256":  "66c55a0bdaf8fe9d613e961e488e2db2e7b8ec8373158b2dc7b3f592308eec7f",
+                        "sha256":  "d54ba58d40d9038cc082a388df032bfa068abbce34aac0b446c4f742cc2bfed5",
                         "artifact":  "docs/supabase-loop-ui/job-loop-worker.js",
-                        "bytes":  2081991,
+                        "bytes":  2082210,
                         "sources":  [
                           {
                             "path": "src/lib/admin-types.ts",
@@ -348,7 +348,7 @@
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine.ts",
-                            "sha256": "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c"
+                            "sha256": "d8db4aa7019d63d64a01ace798cfad237b6937297d4739512e98cac9386196b1"
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine-font.ts",
@@ -624,7 +624,7 @@
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine.ts",
-                            "sha256": "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c"
+                            "sha256": "d8db4aa7019d63d64a01ace798cfad237b6937297d4739512e98cac9386196b1"
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine-font.ts",
@@ -900,7 +900,7 @@
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine.ts",
-                            "sha256": "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c"
+                            "sha256": "d8db4aa7019d63d64a01ace798cfad237b6937297d4739512e98cac9386196b1"
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine-font.ts",
@@ -1176,7 +1176,7 @@
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine.ts",
-                            "sha256": "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c"
+                            "sha256": "d8db4aa7019d63d64a01ace798cfad237b6937297d4739512e98cac9386196b1"
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine-font.ts",
@@ -1452,7 +1452,7 @@
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine.ts",
-                            "sha256": "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c"
+                            "sha256": "d8db4aa7019d63d64a01ace798cfad237b6937297d4739512e98cac9386196b1"
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine-font.ts",
@@ -1728,7 +1728,7 @@
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine.ts",
-                            "sha256": "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c"
+                            "sha256": "d8db4aa7019d63d64a01ace798cfad237b6937297d4739512e98cac9386196b1"
                           },
                           {
                             "path": "supabase/functions/_shared/job-loop-engine-font.ts",

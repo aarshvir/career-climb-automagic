@@ -379,18 +379,31 @@ export async function composePacket(input: ComposeLoopPacketInput): Promise<Loop
   if (requiredContexts.some(c => !allowed.some(a => a.kind === c.kind && (a.id === c.id || a.context === c.context)))) holds.push('WORK_CONTEXT_REQUIRES_SAFE_SHAREABLE_FACT');
   if (!unique.length) holds.push('NO_APPROVED_SHAREABLE_FACTS');
   if (includesExcluded(profile.name + '\n' + profile.contactLine, profile)) holds.push('PROFILE_IDENTITY_REQUIRES_DISCLOSURE_REVIEW');
-  const headings: Record<LoopClaimInput['kind'], string> = { employment: 'EMPLOYMENT', internship: 'INTERNSHIPS', academic_project: 'ACADEMIC PROJECTS', personal_project: 'PERSONAL PROJECTS', volunteering: 'VOLUNTEERING', education: 'EDUCATION', skill: 'CONFIRMED SKILLS' };
+  const headings: Record<LoopClaimInput['kind'], string> = { employment: 'EMPLOYMENT', internship: 'INTERNSHIPS', academic_project: 'ACADEMIC PROJECTS', personal_project: 'PERSONAL PROJECTS', volunteering: 'VOLUNTEERING', education: 'EDUCATION', skill: 'SKILLS' };
   const cv = [redact(profile.name, profile), redact(profile.contactLine, profile)].filter(Boolean);
+  const originalCv = [...cv];
   const sourcePositions = literalCvContextPositions(profile.sourceText, unique);
   for (const kind of CLAIM_KINDS) {
     const section = unique.filter(c => c.kind === kind); if (!section.length) continue;
     cv.push('', headings[kind]);
+    originalCv.push('', kind === 'skill' ? 'CONFIRMED SKILLS' : headings[kind]);
     const contexts = [...new Set(section.map(c => c.context))];
     const anchored = contexts.filter(context => sourcePositions.has(context)).sort((a, b) => sourcePositions.get(a)! - sourcePositions.get(b)!);
     let next = 0;
     const presentationContexts = contexts.map(context => sourcePositions.has(context) ? anchored[next++] : context);
-    for (const context of presentationContexts) { cv.push(context); for (const c of section.filter(c => c.context === context)) cv.push(`• ${wording.get(c.id) ?? c.phrasing}`); }
+    for (const context of presentationContexts) {
+      originalCv.push(context);
+      if (context.trim().toLowerCase() !== headings[kind].toLowerCase()) cv.push(context);
+      for (const c of section.filter(c => c.context === context)) {
+        const line = `• ${wording.get(c.id) ?? c.phrasing}`;
+        cv.push(line); originalCv.push(line);
+      }
+    }
   }
+  // Cosmetic shortening must preserve prior length holds and short exports.
+  // Reuse the exact original presentation; never pad facts or lower a fence.
+  const originalLength = originalCv.join('\n').length;
+  if (originalLength > 60000 || (cv.join('\n').length < 80 && originalLength >= 80)) cv.splice(0, cv.length, ...originalCv);
   if (cv.join('\n').length < 80) holds.push('CV_TEXT_TOO_SHORT');
   if (cv.join('\n').length > 60000) holds.push('CV_TEXT_TOO_LONG');
   const contact = opportunity.contact;

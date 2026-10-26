@@ -1,0 +1,106 @@
+{
+  "at": "2026-10-26T06:48:20.156Z",
+  "status": "reviewed-source-prepared-not-deployed",
+  "baseline": {
+    "main": "dcfc56ca41e6f78ce6bb896a160b087da068583d",
+    "publicVersion": 61,
+    "publicRuntime": "5501930c8212359f10e0152ba2c5d8e7239a0c44",
+    "nativeWorkerVersion": 37
+  },
+  "engineSha256": "d8db4aa7019d63d64a01ace798cfad237b6937297d4739512e98cac9386196b1",
+  "checks": {
+    "focusedActualComposerRenderer": 8,
+    "independentFinalActualExports": 13,
+    "parsedOutputFixtures": 10,
+    "finalFullSuite": {
+      "files": 190,
+      "passed": 3482,
+      "failed": 0
+    },
+    "applicationTypeScript": true,
+    "targetedLintErrors": 0,
+    "sourceDeno": {
+      "passed": 28,
+      "failed": 0
+    },
+    "generatedDeno": {
+      "passed": 28,
+      "failed": 0
+    },
+    "manifestScalarUpdates": 9,
+    "standardBundleGeneration": true
+  },
+  "initialRun": {
+    "passed": 3471,
+    "failed": 11,
+    "files": 190,
+    "cause": "Pinned source manifest had not yet been regenerated; unchanged source-proof guard stopped mocked hosted harness before runStart",
+    "correction": "Standard builder refreshed source manifest; final complete suite passed"
+  },
+  "boundaries": {
+    "minimum": 80,
+    "maximum": 60000,
+    "exactOriginalFallback": true,
+    "original60001StillHeld": true,
+    "rendererChanged": false,
+    "nativeDeployment": false,
+    "siteDeployment": false,
+    "migration": false,
+    "paidProvider": false,
+    "productionCandidateMutation": false,
+    "adMutation": false,
+    "hostedAcceptance": false,
+    "browserAcceptance": false,
+    "wordPaginationCertification": false
+  },
+  "bundles": [
+    {
+      "function": "job-loop-control",
+      "artifact": "docs/supabase-loop-ui/job-loop-control.js",
+      "sha256": "7bed8a776b048391d10314697dcb78f6bc9a67694ee2e7faab094dca61ace14c",
+      "bytes": 99490
+    },
+    {
+      "function": "job-loop-worker",
+      "artifact": "docs/supabase-loop-ui/job-loop-worker.js",
+      "sha256": "d54ba58d40d9038cc082a388df032bfa068abbce34aac0b446c4f742cc2bfed5",
+      "bytes": 2082210
+    },
+    {
+      "function": "job-loop-oauth",
+      "artifact": "docs/supabase-loop-ui/job-loop-oauth.js",
+      "sha256": "1a4932b08d7530ae3668324e1b503c2034244d118820558f49170038dfa9f3cf",
+      "bytes": 42551
+    },
+    {
+      "function": "jobvance-admin",
+      "artifact": "docs/supabase-loop-ui/jobvance-admin.js",
+      "sha256": "f76e914e234109e9ed12275580f68932f111bde06569fff9ac1d42ea07efa2c6",
+      "bytes": 12662
+    },
+    {
+      "function": "jobvance-review-worker",
+      "artifact": "docs/supabase-loop-ui/jobvance-review-worker.js",
+      "sha256": "09809366c3491c1058ce64dfb922903a2581d4fe6b82eb0936e4d52091c1daef",
+      "bytes": 21563
+    },
+    {
+      "function": "jobvance-guest-support",
+      "artifact": "docs/supabase-loop-ui/jobvance-guest-support.js",
+      "sha256": "78b9d30e549818ed15e61b6b1892094472adc06cff1c6396d6f9ff66237f07f3",
+      "bytes": 5641
+    },
+    {
+      "function": "jobvance-marketing",
+      "artifact": "docs/supabase-loop-ui/jobvance-marketing.js",
+      "sha256": "e93fb5c4b58dd44167a5a60057730320e14e57dc68b5a5a8476c2eec95bcfbe9",
+      "bytes": 25426
+    }
+  ],
+  "rollback": {
+    "tag": "jobvance-before-cv-heading-preservation-2026-10-26",
+    "commit": "dcfc56ca41e6f78ce6bb896a160b087da068583d",
+    "savedSiteVersion": 61
+  },
+  "releaseDependency": "Separate prepared product-name batch remains undeployed; expose all seven affected handlers together with reviewed frontend, never claim worker-only name completion"
+}
