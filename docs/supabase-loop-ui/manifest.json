@@ -2,9 +2,9 @@
     "bundles":  [
                     {
                         "function":  "job-loop-control",
-                        "sha256":  "45062b2ed75a863fc6b8720c024fd9f1557f3040d9f0887d2a499cbed5f3efd9",
+                        "sha256":  "7bed8a776b048391d10314697dcb78f6bc9a67694ee2e7faab094dca61ace14c",
                         "artifact":  "docs/supabase-loop-ui/job-loop-control.js",
-                        "bytes":  99290,
+                        "bytes":  99490,
                         "sources":  [
                                         {
                                             "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
@@ -19,7 +19,7 @@
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
-                                            "sha256":  "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7",
+                                            "sha256":  "6dce490d26f4f42a94d63028603b9d66bff75207ff4a1b38a57a2e5cacccacf8",
                                             "path":  "package-lock.json"
                                         },
                                         {
@@ -71,7 +71,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-document-layout.ts"
                                         },
                                         {
-                                            "sha256":  "b11dd5aba02948743612af3261dc99d7419dff7b0a3e7e3645d5de31f90b3a8e",
+                                            "sha256":  "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c",
                                             "path":  "supabase/functions/_shared/job-loop-engine.ts"
                                         },
                                         {
@@ -103,7 +103,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-render.ts"
                                         },
                                         {
-                                            "sha256":  "dff4f610e6c587baa739e6b5679f9a4c60f6daad7cb0cf7ee639549dda713713",
+                                            "sha256":  "f589ecdaddebfbd6d14f88829de29da663fd7619b81b41a1370879b5ad9a4682",
                                             "path":  "supabase/functions/_shared/job-loop-repository.ts"
                                         },
                                         {
@@ -111,7 +111,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "8903eaee8eb614c769d7536412cfe47e77ae9e5f6cad614861e539167e3c437e",
+                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -159,7 +159,7 @@
                                             "path":  "supabase/functions/_shared/jobvance-review-runtime.ts"
                                         },
                                         {
-                                            "sha256":  "35f98e9469e3820aafe7d5940749243f175aaafbbf9b97faf372ab0ed9f69914",
+                                            "sha256":  "1beb6157bfbd988f0780b42c0ee9d5f7262bcf3c196ead8fc43780a6d3c91407",
                                             "path":  "supabase/functions/_shared/loop-billing.ts"
                                         },
                                         {
@@ -167,7 +167,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-accounting.ts"
                                         },
                                         {
-                                            "sha256":  "bae8565ad5bcb0b7c67ee8a18d4de3dd1fbe5450aa4bb6a4fa5febcd493b30a7",
+                                            "sha256":  "b3527034bd986ce6237ca250cdb7abc65fc451d880e2457ea7480ffc3b81832c",
                                             "path":  "supabase/functions/_shared/loop-billing-edge.ts"
                                         },
                                         {
@@ -175,7 +175,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-pricing.ts"
                                         },
                                         {
-                                            "sha256":  "eb3e732606193e0dcbc93d8ac117b2ca833fd8a6d9e179e8ea8301fca9e346b7",
+                                            "sha256":  "02f3058155785b73d4c5f9e68cf1ad8d528ba4300257680f8ce5b54fcdf47301",
                                             "path":  "supabase/functions/_shared/loop-billing-runtime.ts"
                                         },
                                         {
@@ -231,7 +231,7 @@
                                             "path":  "supabase/functions/job-loop-oauth/deno.json"
                                         },
                                         {
-                                            "sha256":  "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
+                                            "sha256":  "28da376fe3f9a09c23cc4a97d6c3d779bf023f1ee4fde104ee724f4fd4bd9f84",
                                             "path":  "supabase/functions/job-loop-oauth/gmail.ts"
                                         },
                                         {
@@ -274,9 +274,9 @@
                     },
                     {
                         "function":  "job-loop-worker",
-                        "sha256":  "9fc2c26012633173bdce9caf532bc6d3b5605a9656ca030df3692d7d60ce6880",
+                        "sha256":  "66c55a0bdaf8fe9d613e961e488e2db2e7b8ec8373158b2dc7b3f592308eec7f",
                         "artifact":  "docs/supabase-loop-ui/job-loop-worker.js",
-                        "bytes":  2081195,
+                        "bytes":  2081991,
                         "sources":  [
                                         {
                                             "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
@@ -291,7 +291,7 @@
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
-                                            "sha256":  "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7",
+                                            "sha256":  "6dce490d26f4f42a94d63028603b9d66bff75207ff4a1b38a57a2e5cacccacf8",
                                             "path":  "package-lock.json"
                                         },
                                         {
@@ -343,7 +343,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-document-layout.ts"
                                         },
                                         {
-                                            "sha256":  "b11dd5aba02948743612af3261dc99d7419dff7b0a3e7e3645d5de31f90b3a8e",
+                                            "sha256":  "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c",
                                             "path":  "supabase/functions/_shared/job-loop-engine.ts"
                                         },
                                         {
@@ -375,7 +375,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-render.ts"
                                         },
                                         {
-                                            "sha256":  "dff4f610e6c587baa739e6b5679f9a4c60f6daad7cb0cf7ee639549dda713713",
+                                            "sha256":  "f589ecdaddebfbd6d14f88829de29da663fd7619b81b41a1370879b5ad9a4682",
                                             "path":  "supabase/functions/_shared/job-loop-repository.ts"
                                         },
                                         {
@@ -383,7 +383,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "8903eaee8eb614c769d7536412cfe47e77ae9e5f6cad614861e539167e3c437e",
+                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -431,7 +431,7 @@
                                             "path":  "supabase/functions/_shared/jobvance-review-runtime.ts"
                                         },
                                         {
-                                            "sha256":  "35f98e9469e3820aafe7d5940749243f175aaafbbf9b97faf372ab0ed9f69914",
+                                            "sha256":  "1beb6157bfbd988f0780b42c0ee9d5f7262bcf3c196ead8fc43780a6d3c91407",
                                             "path":  "supabase/functions/_shared/loop-billing.ts"
                                         },
                                         {
@@ -439,7 +439,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-accounting.ts"
                                         },
                                         {
-                                            "sha256":  "bae8565ad5bcb0b7c67ee8a18d4de3dd1fbe5450aa4bb6a4fa5febcd493b30a7",
+                                            "sha256":  "b3527034bd986ce6237ca250cdb7abc65fc451d880e2457ea7480ffc3b81832c",
                                             "path":  "supabase/functions/_shared/loop-billing-edge.ts"
                                         },
                                         {
@@ -447,7 +447,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-pricing.ts"
                                         },
                                         {
-                                            "sha256":  "eb3e732606193e0dcbc93d8ac117b2ca833fd8a6d9e179e8ea8301fca9e346b7",
+                                            "sha256":  "02f3058155785b73d4c5f9e68cf1ad8d528ba4300257680f8ce5b54fcdf47301",
                                             "path":  "supabase/functions/_shared/loop-billing-runtime.ts"
                                         },
                                         {
@@ -503,7 +503,7 @@
                                             "path":  "supabase/functions/job-loop-oauth/deno.json"
                                         },
                                         {
-                                            "sha256":  "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
+                                            "sha256":  "28da376fe3f9a09c23cc4a97d6c3d779bf023f1ee4fde104ee724f4fd4bd9f84",
                                             "path":  "supabase/functions/job-loop-oauth/gmail.ts"
                                         },
                                         {
@@ -546,9 +546,9 @@
                     },
                     {
                         "function":  "job-loop-oauth",
-                        "sha256":  "09154b36bc25f18c21a2b594238b4644d9c21628f0c195af6aaf9afc94438841",
+                        "sha256":  "1a4932b08d7530ae3668324e1b503c2034244d118820558f49170038dfa9f3cf",
                         "artifact":  "docs/supabase-loop-ui/job-loop-oauth.js",
-                        "bytes":  42461,
+                        "bytes":  42551,
                         "sources":  [
                                         {
                                             "sha256":  "daf33a4fae38200e59450e8fd81df2e5672705bddc473d3fb970381b888af4ae",
@@ -563,7 +563,7 @@
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
-                                            "sha256":  "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7",
+                                            "sha256":  "6dce490d26f4f42a94d63028603b9d66bff75207ff4a1b38a57a2e5cacccacf8",
                                             "path":  "package-lock.json"
                                         },
                                         {
@@ -615,7 +615,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-document-layout.ts"
                                         },
                                         {
-                                            "sha256":  "b11dd5aba02948743612af3261dc99d7419dff7b0a3e7e3645d5de31f90b3a8e",
+                                            "sha256":  "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c",
                                             "path":  "supabase/functions/_shared/job-loop-engine.ts"
                                         },
                                         {
@@ -647,7 +647,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-render.ts"
                                         },
                                         {
-                                            "sha256":  "dff4f610e6c587baa739e6b5679f9a4c60f6daad7cb0cf7ee639549dda713713",
+                                            "sha256":  "f589ecdaddebfbd6d14f88829de29da663fd7619b81b41a1370879b5ad9a4682",
                                             "path":  "supabase/functions/_shared/job-loop-repository.ts"
                                         },
                                         {
@@ -655,7 +655,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "8903eaee8eb614c769d7536412cfe47e77ae9e5f6cad614861e539167e3c437e",
+                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -703,7 +703,7 @@
                                             "path":  "supabase/functions/_shared/jobvance-review-runtime.ts"
                                         },
                                         {
-                                            "sha256":  "35f98e9469e3820aafe7d5940749243f175aaafbbf9b97faf372ab0ed9f69914",
+                                            "sha256":  "1beb6157bfbd988f0780b42c0ee9d5f7262bcf3c196ead8fc43780a6d3c91407",
                                             "path":  "supabase/functions/_shared/loop-billing.ts"
                                         },
                                         {
@@ -711,7 +711,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-accounting.ts"
                                         },
                                         {
-                                            "sha256":  "bae8565ad5bcb0b7c67ee8a18d4de3dd1fbe5450aa4bb6a4fa5febcd493b30a7",
+                                            "sha256":  "b3527034bd986ce6237ca250cdb7abc65fc451d880e2457ea7480ffc3b81832c",
                                             "path":  "supabase/functions/_shared/loop-billing-edge.ts"
                                         },
                                         {
@@ -719,7 +719,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-pricing.ts"
                                         },
                                         {
-                                            "sha256":  "eb3e732606193e0dcbc93d8ac117b2ca833fd8a6d9e179e8ea8301fca9e346b7",
+                                            "sha256":  "02f3058155785b73d4c5f9e68cf1ad8d528ba4300257680f8ce5b54fcdf47301",
                                             "path":  "supabase/functions/_shared/loop-billing-runtime.ts"
                                         },
                                         {
@@ -775,7 +775,7 @@
                                             "path":  "supabase/functions/job-loop-oauth/deno.json"
                                         },
                                         {
-                                            "sha256":  "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
+                                            "sha256":  "28da376fe3f9a09c23cc4a97d6c3d779bf023f1ee4fde104ee724f4fd4bd9f84",
                                             "path":  "supabase/functions/job-loop-oauth/gmail.ts"
                                         },
                                         {
@@ -835,7 +835,7 @@
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
-                                            "sha256":  "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7",
+                                            "sha256":  "6dce490d26f4f42a94d63028603b9d66bff75207ff4a1b38a57a2e5cacccacf8",
                                             "path":  "package-lock.json"
                                         },
                                         {
@@ -887,7 +887,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-document-layout.ts"
                                         },
                                         {
-                                            "sha256":  "b11dd5aba02948743612af3261dc99d7419dff7b0a3e7e3645d5de31f90b3a8e",
+                                            "sha256":  "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c",
                                             "path":  "supabase/functions/_shared/job-loop-engine.ts"
                                         },
                                         {
@@ -919,7 +919,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-render.ts"
                                         },
                                         {
-                                            "sha256":  "dff4f610e6c587baa739e6b5679f9a4c60f6daad7cb0cf7ee639549dda713713",
+                                            "sha256":  "f589ecdaddebfbd6d14f88829de29da663fd7619b81b41a1370879b5ad9a4682",
                                             "path":  "supabase/functions/_shared/job-loop-repository.ts"
                                         },
                                         {
@@ -927,7 +927,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "8903eaee8eb614c769d7536412cfe47e77ae9e5f6cad614861e539167e3c437e",
+                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -975,7 +975,7 @@
                                             "path":  "supabase/functions/_shared/jobvance-review-runtime.ts"
                                         },
                                         {
-                                            "sha256":  "35f98e9469e3820aafe7d5940749243f175aaafbbf9b97faf372ab0ed9f69914",
+                                            "sha256":  "1beb6157bfbd988f0780b42c0ee9d5f7262bcf3c196ead8fc43780a6d3c91407",
                                             "path":  "supabase/functions/_shared/loop-billing.ts"
                                         },
                                         {
@@ -983,7 +983,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-accounting.ts"
                                         },
                                         {
-                                            "sha256":  "bae8565ad5bcb0b7c67ee8a18d4de3dd1fbe5450aa4bb6a4fa5febcd493b30a7",
+                                            "sha256":  "b3527034bd986ce6237ca250cdb7abc65fc451d880e2457ea7480ffc3b81832c",
                                             "path":  "supabase/functions/_shared/loop-billing-edge.ts"
                                         },
                                         {
@@ -991,7 +991,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-pricing.ts"
                                         },
                                         {
-                                            "sha256":  "eb3e732606193e0dcbc93d8ac117b2ca833fd8a6d9e179e8ea8301fca9e346b7",
+                                            "sha256":  "02f3058155785b73d4c5f9e68cf1ad8d528ba4300257680f8ce5b54fcdf47301",
                                             "path":  "supabase/functions/_shared/loop-billing-runtime.ts"
                                         },
                                         {
@@ -1047,7 +1047,7 @@
                                             "path":  "supabase/functions/job-loop-oauth/deno.json"
                                         },
                                         {
-                                            "sha256":  "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
+                                            "sha256":  "28da376fe3f9a09c23cc4a97d6c3d779bf023f1ee4fde104ee724f4fd4bd9f84",
                                             "path":  "supabase/functions/job-loop-oauth/gmail.ts"
                                         },
                                         {
@@ -1107,7 +1107,7 @@
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
-                                            "sha256":  "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7",
+                                            "sha256":  "6dce490d26f4f42a94d63028603b9d66bff75207ff4a1b38a57a2e5cacccacf8",
                                             "path":  "package-lock.json"
                                         },
                                         {
@@ -1159,7 +1159,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-document-layout.ts"
                                         },
                                         {
-                                            "sha256":  "b11dd5aba02948743612af3261dc99d7419dff7b0a3e7e3645d5de31f90b3a8e",
+                                            "sha256":  "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c",
                                             "path":  "supabase/functions/_shared/job-loop-engine.ts"
                                         },
                                         {
@@ -1191,7 +1191,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-render.ts"
                                         },
                                         {
-                                            "sha256":  "dff4f610e6c587baa739e6b5679f9a4c60f6daad7cb0cf7ee639549dda713713",
+                                            "sha256":  "f589ecdaddebfbd6d14f88829de29da663fd7619b81b41a1370879b5ad9a4682",
                                             "path":  "supabase/functions/_shared/job-loop-repository.ts"
                                         },
                                         {
@@ -1199,7 +1199,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "8903eaee8eb614c769d7536412cfe47e77ae9e5f6cad614861e539167e3c437e",
+                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -1247,7 +1247,7 @@
                                             "path":  "supabase/functions/_shared/jobvance-review-runtime.ts"
                                         },
                                         {
-                                            "sha256":  "35f98e9469e3820aafe7d5940749243f175aaafbbf9b97faf372ab0ed9f69914",
+                                            "sha256":  "1beb6157bfbd988f0780b42c0ee9d5f7262bcf3c196ead8fc43780a6d3c91407",
                                             "path":  "supabase/functions/_shared/loop-billing.ts"
                                         },
                                         {
@@ -1255,7 +1255,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-accounting.ts"
                                         },
                                         {
-                                            "sha256":  "bae8565ad5bcb0b7c67ee8a18d4de3dd1fbe5450aa4bb6a4fa5febcd493b30a7",
+                                            "sha256":  "b3527034bd986ce6237ca250cdb7abc65fc451d880e2457ea7480ffc3b81832c",
                                             "path":  "supabase/functions/_shared/loop-billing-edge.ts"
                                         },
                                         {
@@ -1263,7 +1263,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-pricing.ts"
                                         },
                                         {
-                                            "sha256":  "eb3e732606193e0dcbc93d8ac117b2ca833fd8a6d9e179e8ea8301fca9e346b7",
+                                            "sha256":  "02f3058155785b73d4c5f9e68cf1ad8d528ba4300257680f8ce5b54fcdf47301",
                                             "path":  "supabase/functions/_shared/loop-billing-runtime.ts"
                                         },
                                         {
@@ -1319,7 +1319,7 @@
                                             "path":  "supabase/functions/job-loop-oauth/deno.json"
                                         },
                                         {
-                                            "sha256":  "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
+                                            "sha256":  "28da376fe3f9a09c23cc4a97d6c3d779bf023f1ee4fde104ee724f4fd4bd9f84",
                                             "path":  "supabase/functions/job-loop-oauth/gmail.ts"
                                         },
                                         {
@@ -1379,7 +1379,7 @@
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
-                                            "sha256":  "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7",
+                                            "sha256":  "6dce490d26f4f42a94d63028603b9d66bff75207ff4a1b38a57a2e5cacccacf8",
                                             "path":  "package-lock.json"
                                         },
                                         {
@@ -1431,7 +1431,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-document-layout.ts"
                                         },
                                         {
-                                            "sha256":  "b11dd5aba02948743612af3261dc99d7419dff7b0a3e7e3645d5de31f90b3a8e",
+                                            "sha256":  "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c",
                                             "path":  "supabase/functions/_shared/job-loop-engine.ts"
                                         },
                                         {
@@ -1463,7 +1463,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-render.ts"
                                         },
                                         {
-                                            "sha256":  "dff4f610e6c587baa739e6b5679f9a4c60f6daad7cb0cf7ee639549dda713713",
+                                            "sha256":  "f589ecdaddebfbd6d14f88829de29da663fd7619b81b41a1370879b5ad9a4682",
                                             "path":  "supabase/functions/_shared/job-loop-repository.ts"
                                         },
                                         {
@@ -1471,7 +1471,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "8903eaee8eb614c769d7536412cfe47e77ae9e5f6cad614861e539167e3c437e",
+                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -1519,7 +1519,7 @@
                                             "path":  "supabase/functions/_shared/jobvance-review-runtime.ts"
                                         },
                                         {
-                                            "sha256":  "35f98e9469e3820aafe7d5940749243f175aaafbbf9b97faf372ab0ed9f69914",
+                                            "sha256":  "1beb6157bfbd988f0780b42c0ee9d5f7262bcf3c196ead8fc43780a6d3c91407",
                                             "path":  "supabase/functions/_shared/loop-billing.ts"
                                         },
                                         {
@@ -1527,7 +1527,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-accounting.ts"
                                         },
                                         {
-                                            "sha256":  "bae8565ad5bcb0b7c67ee8a18d4de3dd1fbe5450aa4bb6a4fa5febcd493b30a7",
+                                            "sha256":  "b3527034bd986ce6237ca250cdb7abc65fc451d880e2457ea7480ffc3b81832c",
                                             "path":  "supabase/functions/_shared/loop-billing-edge.ts"
                                         },
                                         {
@@ -1535,7 +1535,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-pricing.ts"
                                         },
                                         {
-                                            "sha256":  "eb3e732606193e0dcbc93d8ac117b2ca833fd8a6d9e179e8ea8301fca9e346b7",
+                                            "sha256":  "02f3058155785b73d4c5f9e68cf1ad8d528ba4300257680f8ce5b54fcdf47301",
                                             "path":  "supabase/functions/_shared/loop-billing-runtime.ts"
                                         },
                                         {
@@ -1591,7 +1591,7 @@
                                             "path":  "supabase/functions/job-loop-oauth/deno.json"
                                         },
                                         {
-                                            "sha256":  "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
+                                            "sha256":  "28da376fe3f9a09c23cc4a97d6c3d779bf023f1ee4fde104ee724f4fd4bd9f84",
                                             "path":  "supabase/functions/job-loop-oauth/gmail.ts"
                                         },
                                         {
@@ -1651,7 +1651,7 @@
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
-                                            "sha256":  "bd85c4e07f7231ebaaf42fadf158f999deb3e1912de4f125e7eb83f79b1931e7",
+                                            "sha256":  "6dce490d26f4f42a94d63028603b9d66bff75207ff4a1b38a57a2e5cacccacf8",
                                             "path":  "package-lock.json"
                                         },
                                         {
@@ -1703,7 +1703,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-document-layout.ts"
                                         },
                                         {
-                                            "sha256":  "b11dd5aba02948743612af3261dc99d7419dff7b0a3e7e3645d5de31f90b3a8e",
+                                            "sha256":  "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c",
                                             "path":  "supabase/functions/_shared/job-loop-engine.ts"
                                         },
                                         {
@@ -1735,7 +1735,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-render.ts"
                                         },
                                         {
-                                            "sha256":  "dff4f610e6c587baa739e6b5679f9a4c60f6daad7cb0cf7ee639549dda713713",
+                                            "sha256":  "f589ecdaddebfbd6d14f88829de29da663fd7619b81b41a1370879b5ad9a4682",
                                             "path":  "supabase/functions/_shared/job-loop-repository.ts"
                                         },
                                         {
@@ -1743,7 +1743,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "8903eaee8eb614c769d7536412cfe47e77ae9e5f6cad614861e539167e3c437e",
+                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -1791,7 +1791,7 @@
                                             "path":  "supabase/functions/_shared/jobvance-review-runtime.ts"
                                         },
                                         {
-                                            "sha256":  "35f98e9469e3820aafe7d5940749243f175aaafbbf9b97faf372ab0ed9f69914",
+                                            "sha256":  "1beb6157bfbd988f0780b42c0ee9d5f7262bcf3c196ead8fc43780a6d3c91407",
                                             "path":  "supabase/functions/_shared/loop-billing.ts"
                                         },
                                         {
@@ -1799,7 +1799,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-accounting.ts"
                                         },
                                         {
-                                            "sha256":  "bae8565ad5bcb0b7c67ee8a18d4de3dd1fbe5450aa4bb6a4fa5febcd493b30a7",
+                                            "sha256":  "b3527034bd986ce6237ca250cdb7abc65fc451d880e2457ea7480ffc3b81832c",
                                             "path":  "supabase/functions/_shared/loop-billing-edge.ts"
                                         },
                                         {
@@ -1807,7 +1807,7 @@
                                             "path":  "supabase/functions/_shared/loop-billing-pricing.ts"
                                         },
                                         {
-                                            "sha256":  "eb3e732606193e0dcbc93d8ac117b2ca833fd8a6d9e179e8ea8301fca9e346b7",
+                                            "sha256":  "02f3058155785b73d4c5f9e68cf1ad8d528ba4300257680f8ce5b54fcdf47301",
                                             "path":  "supabase/functions/_shared/loop-billing-runtime.ts"
                                         },
                                         {
@@ -1863,7 +1863,7 @@
                                             "path":  "supabase/functions/job-loop-oauth/deno.json"
                                         },
                                         {
-                                            "sha256":  "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
+                                            "sha256":  "28da376fe3f9a09c23cc4a97d6c3d779bf023f1ee4fde104ee724f4fd4bd9f84",
                                             "path":  "supabase/functions/job-loop-oauth/gmail.ts"
                                         },
                                         {

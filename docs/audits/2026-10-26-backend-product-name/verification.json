@@ -1,0 +1,110 @@
+{
+  "at": "2026-10-26T04:13:02.426Z",
+  "strings": 34,
+  "files": [
+    {
+      "path": "supabase/functions/job-loop-billing/index.ts",
+      "strings": 1,
+      "beforeSha256": "ac7378298263f3f8001ac1f0d5831b1299673c9be796c80e3b0d233796a7817e",
+      "afterSha256": "1883ca2adb4349847f4b4bcd061f72f0e16dffc199d3cda7facb9a9abb03e2d8",
+      "exactCopyOnly": true,
+      "normalizedAstEqual": true
+    },
+    {
+      "path": "supabase/functions/job-loop-oauth/gmail.ts",
+      "strings": 2,
+      "beforeSha256": "b7b5d25f59d1c7f49828f399279c290999bcd29e75a20755ccac514a98bc7d82",
+      "afterSha256": "28da376fe3f9a09c23cc4a97d6c3d779bf023f1ee4fde104ee724f4fd4bd9f84",
+      "exactCopyOnly": true,
+      "normalizedAstEqual": true
+    },
+    {
+      "path": "supabase/functions/_shared/job-loop-engine.ts",
+      "strings": 1,
+      "beforeSha256": "d68ef341ea1a4f47d93ba8db141746aec7ca73d8bb2774a70feaae2cbf1c59f0",
+      "afterSha256": "75244f9434914c99689efda2544204cdd9c357660a602b9dda008cd2dc4ea04c",
+      "exactCopyOnly": true,
+      "normalizedAstEqual": true
+    },
+    {
+      "path": "supabase/functions/_shared/job-loop-repository.ts",
+      "strings": 8,
+      "beforeSha256": "93abec92a391d0df71ee3abdb585affe8da4b7d88475756bb5acd4b38aaa6ddd",
+      "afterSha256": "f589ecdaddebfbd6d14f88829de29da663fd7619b81b41a1370879b5ad9a4682",
+      "exactCopyOnly": true,
+      "normalizedAstEqual": true
+    },
+    {
+      "path": "supabase/functions/_shared/job-loop-runtime.ts",
+      "strings": 10,
+      "beforeSha256": "7a894b842d40a1d6532ecf531a12a74750e1298727bcd97bd1e69f8bfca651d3",
+      "afterSha256": "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
+      "exactCopyOnly": true,
+      "normalizedAstEqual": true
+    },
+    {
+      "path": "supabase/functions/_shared/loop-billing-edge.ts",
+      "strings": 4,
+      "beforeSha256": "bae8565ad5bcb0b7c67ee8a18d4de3dd1fbe5450aa4bb6a4fa5febcd493b30a7",
+      "afterSha256": "b3527034bd986ce6237ca250cdb7abc65fc451d880e2457ea7480ffc3b81832c",
+      "exactCopyOnly": true,
+      "normalizedAstEqual": true
+    },
+    {
+      "path": "supabase/functions/_shared/loop-billing-runtime.ts",
+      "strings": 3,
+      "beforeSha256": "eb3e732606193e0dcbc93d8ac117b2ca833fd8a6d9e179e8ea8301fca9e346b7",
+      "afterSha256": "02f3058155785b73d4c5f9e68cf1ad8d528ba4300257680f8ce5b54fcdf47301",
+      "exactCopyOnly": true,
+      "normalizedAstEqual": true
+    },
+    {
+      "path": "supabase/functions/_shared/loop-billing.ts",
+      "strings": 5,
+      "beforeSha256": "35f98e9469e3820aafe7d5940749243f175aaafbbf9b97faf372ab0ed9f69914",
+      "afterSha256": "1beb6157bfbd988f0780b42c0ee9d5f7262bcf3c196ead8fc43780a6d3c91407",
+      "exactCopyOnly": true,
+      "normalizedAstEqual": true
+    }
+  ],
+  "logicChanged": false,
+  "codesRoutesActionsIdentifiersChanged": false,
+  "validation": {
+    "fullSuite": 3308,
+    "files": 180,
+    "concurrency": 2,
+    "appTypeScript": "passed",
+    "sourceDeno": 28,
+    "generatedDeno": 28,
+    "billingWebhookEntrypointTypeChecks": 4,
+    "newTests": 0,
+    "hostedAcceptance": false,
+    "providerCalls": 0
+  },
+  "deployed": false,
+  "runtimeEntrypoints": [
+    "job-loop-control",
+    "job-loop-worker",
+    "job-loop-oauth",
+    "job-loop-billing",
+    "job-loop-billing-test",
+    "dodo-webhook",
+    "dodo-webhook-test"
+  ],
+  "rollbackTag": "jobvance-before-backend-product-name-2026-10-26",
+  "rollbackSource": "7678c025336762817840a9966790a51b568fb42a",
+  "independentFinalReview": {
+    "sourceFiles": 8,
+    "literals": 34,
+    "articleCorrections": 2,
+    "manifestScalarChanges": 55,
+    "manifestSourceHashes": 49,
+    "manifestArtifactHashes": 3,
+    "manifestByteSizes": 3,
+    "workerOauthInverseCopyExact": true,
+    "controlAstNodes": 22812,
+    "controlConsistentIdentifierPairs": 9,
+    "remainingAstMismatch": 0,
+    "sourceScopeBlocker": false
+  }
+}

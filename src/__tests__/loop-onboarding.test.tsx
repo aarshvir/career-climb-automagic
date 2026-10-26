@@ -300,5 +300,12 @@ describe('account-first owned onboarding', () => {
     expect(screen.getByLabelText('Your CV text')).toHaveValue(`Alex Example\n\nEducation\n${education}`);
     expect(state.call).toHaveBeenCalledOnce();
   });
+  it.each([false,true])('compares pay values rather than JSONB field order; changed value %s', async changed => {
+    state.call.mockImplementation(async (_owner, action) => action.action === 'get_existing' ? {existingState:'absent'} : action.action === 'get' ? {snapshot:snapshot()} : {snapshot:snapshot({...action.profile,revision:1,compensation:{period:action.profile.compensation.period,minimum:changed?100:action.profile.compensation.minimum,currency:action.profile.compensation.currency}},3,1)});
+    open();await complete();fireEvent.click(screen.getByRole('checkbox',{name:/Save this CV text/}));fireEvent.click(screen.getByRole('button',{name:'Save my setup'}));
+    if(changed)expect(await screen.findByRole('alert')).toHaveTextContent('returned setup differs');
+    else expect(await screen.findByRole('heading',{name:'Your setup is saved.'})).toBeInTheDocument();
+  });
+
 });
 async function completeWithRender() { open(); await complete(); }

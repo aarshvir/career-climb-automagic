@@ -44,6 +44,8 @@ export function setTrackingDraftOwner(next: string | null, confirmedSessionIdent
 /** Resolved parents may initialize a standalone tree, never replace a newer SDK
  * identity. In particular, an old render/cleanup cannot re-adopt its old owner. */
 export function registerTrackingDraftOwner(next: string | null) { if (owner === undefined) setTrackingDraftOwner(next); }
+/** Observe the confirmed auth lifetime even before a signup has an owner. */
+export function trackingAuthEpoch() { return authority; }
 export function trackingDraftAuthority(ownerId: string) { return ownerId === owner ? authority : -1; }
 /** Observe only; an async operation must never advance recovery authority. */
 export function trackingLoopGeneration(ownerId: string) { return ownerId === owner ? loopGeneration : undefined; }

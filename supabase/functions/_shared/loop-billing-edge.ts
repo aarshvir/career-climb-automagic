@@ -5,11 +5,11 @@ export function loopBillingRpc(admin: ReturnType<typeof adminClient>) {
     const { data, error } = await admin.rpc(name, args);
     if (error) {
       const codes: [string,number,string][] = [
-        ['LOOP_PILOT_FULL',429,'Job Loop has no available service places right now. No checkout was opened and no charge was requested.'],
+        ['LOOP_PILOT_FULL',429,'Automated Job Loop has no available service places right now. No checkout was opened and no charge was requested.'],
         ['LOOP_BILLING_AUTH',401,'Sign in again before managing billing.'],
         ['LOOP_BILLING_SESSION',401,'Sign in again before managing billing.'],
-        ['LOOP_BILLING_GENERATION',409,'Your Job Loop changed. Refresh before continuing.'],
-        ['LOOP_REQUEST_STALE',409,'Your Job Loop changed. Refresh before continuing.'],
+        ['LOOP_BILLING_GENERATION',409,'Your Automated Job Loop changed. Refresh before continuing.'],
+        ['LOOP_REQUEST_STALE',409,'Your Automated Job Loop changed. Refresh before continuing.'],
         ['LOOP_BILLING_CONFLICT',409,'This billing request belongs to a different action.'],
         ['LOOP_BILLING_REQUEST_CONFLICT',409,'This billing request belongs to a different action or sign-in session.'],
         ['LOOP_BILLING_REVISION_CONFLICT',409,'This subscription changed. Refresh it before confirming cancellation.'],
@@ -21,7 +21,7 @@ export function loopBillingRpc(admin: ReturnType<typeof adminClient>) {
         ['LOOP_BILLING_PAID_PERIOD_REQUIRED',409,'This subscription has no verified paid month yet. Payment confirmation will be retried.'],
         ['LOOP_BILLING_ACTIVE',409,'An existing subscription or checkout must be managed first.'],
         ['LOOP_BILLING_LIMIT',429,'Too many new checkout attempts. Reuse your existing checkout or contact support.'],
-        ['LOOP_BILLING_UNBOUND',409,'This payment is not linked to a Job Loop checkout.'],
+        ['LOOP_BILLING_UNBOUND',409,'This payment is not linked to an Automated Job Loop checkout.'],
         ['LOOP_BILLING_QUOTE_EXPIRED',409,'This price quote expired. Request a fresh price before checkout.'],
         ['LOOP_BILLING_QUOTE_CONFLICT',409,'This price quote belongs to a different billing action. Refresh the selected price.'],
         ['LOOP_BILLING_PRICE_CHANGED',409,'This monthly price changed. Refresh the quote before checkout.'],

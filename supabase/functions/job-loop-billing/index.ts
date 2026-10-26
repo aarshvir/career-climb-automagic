@@ -8,7 +8,7 @@ serve(async req => {
   const authSession = verifiedAuthSession(req);
   const config = loopBillingConfiguration(name => Deno.env.get(name));
   const ports: LoopBillingPorts = { rpc: loopBillingRpc(admin), provider: (endpoint, body, method) => {
-    if (!config) throw new ApiError(503, 'LOOP_BILLING_UNAVAILABLE', 'Job Loop subscriptions are unavailable.');
+    if (!config) throw new ApiError(503, 'LOOP_BILLING_UNAVAILABLE', 'Automated Job Loop subscriptions are unavailable.');
     return loopBillingProvider(config, endpoint, body, method);
   } };
   return json(req, await controlLoopBilling(ports, config, user.id, authSession, await readJson(req), configuredBillingMode()));

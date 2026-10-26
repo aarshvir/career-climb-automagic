@@ -140,7 +140,7 @@ describe('cloud loop consent and accurate capabilities', () => {
     render(tree()); const user = userEvent.setup(); await user.selectOptions(await screen.findByLabelText('Preparation provider'), 'openai');
     expect(screen.getByRole('button', { name: 'Prepare today’s applications' })).toBeDisabled(); expect(screen.queryByRole('option', { name: 'Claude' })).not.toBeInTheDocument();
     await user.click(screen.getByLabelText(/Allow this run’s active, confirmed and shareable/)); await user.click(screen.getByRole('button', { name: 'Prepare today’s applications' }));
-    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', expect.objectContaining({ action: 'start_run', provider: 'openai', model: 'configured-gpt-fixture', modelConsent: true, inboxConsent: false })));
+    await waitFor(() => expect(mocks.call).toHaveBeenCalledWith('owner-a', expect.objectContaining({ action: 'start_run', provider: 'openai', model: 'configured-gpt-fixture', modelConsent: true, inboxConsent: false }), expect.any(Function)));
     expect(screen.getByLabelText(/Allow this run’s active, confirmed and shareable/)).not.toBeChecked();
   });
   it('does not infer a rules mode or invent ready capabilities from an unavailable service', async () => {
@@ -270,7 +270,7 @@ describe('exact approvals and account lifecycle', () => {
     vi.useFakeTimers(); current.runs = [{ id: 'run-a', requestId: 'request-a', status: 'running', phase: 'preparing', startedAt: profile.updatedAt, finishedAt: null, inputHash: 'hash-a', provider: 'rules', model: 'grounded-rules-v1', lanes: [{ name: 'Manual opportunities', status: 'completed', count: 1, checkedAt: profile.updatedAt, message: 'One user-provided opportunity inspected.' }], opportunityIds: [], packetIds: [], messages: [], nextAction: 'Review source coverage.', reservedUsd: 0, usageUsd: 0 }];
     const view = render(tree()); await act(async () => {}); expect(screen.getByText('running · preparing')).toBeInTheDocument();
     current = { ...current, recordVersion: 2, runs: [{ ...current.runs[0], status: 'completed', phase: 'completed', finishedAt: profile.updatedAt }] };
-    await act(async () => { await vi.advanceTimersByTimeAsync(5000); }); expect(screen.getByText('completed · completed')).toBeInTheDocument();
+    await act(async () => { await vi.advanceTimersByTimeAsync(5000); }); expect(screen.getByText('Search finished · completed')).toBeInTheDocument();
     view.unmount(); expect(mocks.call.mock.calls.some(([, action]) => action.action === 'cancel_run')).toBe(false);
   });
 });

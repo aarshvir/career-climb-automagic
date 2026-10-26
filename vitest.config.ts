@@ -8,6 +8,8 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.{ts,tsx}', 'supabase/tests/**/*.test.ts'],
     environment: 'jsdom',
     setupFiles: ['./src/test-utils/setup.ts'],
+    // GitHub's runners are slower than local machines; full-page renders need more than 5 s there.
+    testTimeout: 20000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

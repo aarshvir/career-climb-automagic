@@ -1,0 +1,119 @@
+{
+  "date": "2026-10-26",
+  "site": "https://jobvance.io",
+  "publicVersion": 58,
+  "runtimeSource": "3d9473752e52e514372382915eb3ea08dfa0aa85",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/33",
+  "reviewedClaudeHead": "e51977ca1c1d1fe818f4ba5ee1c465be13985318",
+  "reviewedIntegrationHead": "3d9473752e52e514372382915eb3ea08dfa0aa85",
+  "mergeCommit": "63adb66d3196cf604168e16a1e95d0f86a777696",
+  "mergeTreeEqualsRuntimeTree": true,
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f3ddc74cd8048191a9eeb808e8e05b27",
+  "deploymentId": "appgdep_6adeda96045881918c7745017bf6da73",
+  "status": "succeeded",
+  "deployedAt": "2026-10-26T04:44:26.005386+00:00",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000c1dc81f483b0989aa556b498",
+    "content_hash": "sha256:6e77d52c5a836ebf90d4d147c1e6ae212d9804c659b2ed34fe8b783598aecfe8",
+    "size_bytes": 15462400,
+    "file_count": 143
+  },
+  "changes": {
+    "lint": "Scoped configuration/fixture cleanup; existing runtime validation retained",
+    "zod": "3.25.76 -> 4.6.7",
+    "dompurify": "3.4.16 -> 3.4.17",
+    "zRecordConversions": 4,
+    "interestForm": "Schema input/defaulted-output generics separated",
+    "boundedAsyncWaitMs": 5000,
+    "testTimeoutMs": 20000,
+    "assertionsRemoved": 0,
+    "v57OriginalSdkGuardsAndFirstResultRegression": "independently compared and retained"
+  },
+  "validation": {
+    "local": {
+      "tests": 3308,
+      "files": 180,
+      "concurrency": 2,
+      "appTypeScript": "passed",
+      "repositoryLint": {
+        "errors": 0,
+        "warnings": 54
+      },
+      "sourceDeno": 28,
+      "generatedDeno": 28,
+      "sourceProofCases": 15,
+      "knownNpmAuditVulnerabilities": 0,
+      "auditScope": "Current npm lockfile dependency graph; not a general or native-Deno-runtime security certification"
+    },
+    "github": {
+      "runId": 40270048782,
+      "url": "https://github.com/aarshvir/career-climb-automagic/actions/runs/40270048782",
+      "head": "3d9473752e52e514372382915eb3ea08dfa0aa85",
+      "conclusion": "success",
+      "allStepsPassedBeforeMerge": true,
+      "steps": [
+        "install",
+        "lint",
+        "types",
+        "tests",
+        "Deno authentication boundaries",
+        "production build",
+        "hosting responses",
+        "dependency audit"
+      ]
+    },
+    "productionBuild": {
+      "publicPages": 37,
+      "guides": 20,
+      "embeddedAssets": 139,
+      "staticBytes": 6548705,
+      "workerBytes": 8761362,
+      "compressedBytes": 2970975,
+      "compressedLimitBytes": 3145728,
+      "hostingGroups": 12
+    },
+    "buildRecovery": "First Vite SSR module transport timed out after dependency refresh; cause not conclusively established. Unchanged standalone prerender retry generated37pages with zero external requests, then packaging/hosting passed. No guard, timeout or network prohibition relaxed.",
+    "saveRecovery": "First save attempt returned no confirmed version; native site/history readback still showed57 with no matching new saved version. Identical retry saved58 successfully; no duplicate deployment.",
+    "live": {
+      "at": "2026-10-26T04:45:21.864Z",
+      "privateRoutes": 13,
+      "publicRoutesOrFiles": 4,
+      "exactJavaScript": 66,
+      "exactCss": 15,
+      "unauthorizedWorker401": 2,
+      "failures": [],
+      "htmlNormalization": "Only the previously observed exact complete appended Cloudflare script template; no arbitrary HTML normalization; no live ETag claimed."
+    }
+  },
+  "generatedBackend": {
+    "artifactByteChangesFrom681fda2": 0,
+    "manifestChanges": "Exactly7current package-lock hashes; source ordering preserved",
+    "nativeUploads": 0,
+    "productNamePreparation": "Still undeployed; local source proofs are not native parity"
+  },
+  "scope": {
+    "frontendAndCi": true,
+    "migrations": 0,
+    "backendDeployments": 0,
+    "paymentMerchantCapacityChanges": false,
+    "authConfigurationChanges": false,
+    "candidateWrites": false,
+    "paidProviderCalls": false,
+    "adPixelChanges": false,
+    "premiumRedesignIncluded": false,
+    "analyticsPr32Included": false
+  },
+  "limits": [
+    "No fresh hosted signup or social-app-phone acceptance",
+    "No new native browser-download acceptance",
+    "No unassisted/multi-day/NPS result",
+    "PR32 functional blockers and premium design remain separate"
+  ],
+  "rollback": {
+    "tag": "jobvance-before-ci-repair-2026-10-26",
+    "source": "681fda2da9857c1a7521c1b13bbd00f92cb72134",
+    "savedVersion57": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ad3b3b87fb308191b66fc91f95384f3f",
+    "note": "No backend/database/merchant state changed; source/site rollback remains separate from data/file restoration."
+  }
+}

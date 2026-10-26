@@ -403,7 +403,7 @@ describe('selected preparation in the actual Loop page', () => {
     fireEvent.click(screen.getByLabelText(/Prepare documents for only my chosen vacancies/));
     fireEvent.click(screen.getByRole('button', { name: 'Prepare chosen vacancies' }));
     await screen.findByText(/Your chosen application preparation is recorded/);
-    expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'start_selected_run', expectedGeneration: 0, expectedVersion: 1, opportunityIds: [opportunityIds[2]], prepareConsent: true, modelConsent: false }));
+    expect(mocks.call).toHaveBeenLastCalledWith('owner-a', expect.objectContaining({ action: 'start_selected_run', expectedGeneration: 0, expectedVersion: 1, opportunityIds: [opportunityIds[2]], prepareConsent: true, modelConsent: false }), expect.any(Function));
   });
   it('does not carry a direct vacancy choice into a refreshed record lifetime', async () => {
     preparedRecord(); render(tree('/loop')); await screen.findByRole('heading', { name: 'Prepare for a saved vacancy' });

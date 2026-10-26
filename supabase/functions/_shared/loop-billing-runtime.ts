@@ -9,7 +9,7 @@ export interface LoopBillingPorts {
   provider(endpoint: string, body?: Record<string, unknown>, method?: 'GET'|'POST'|'PATCH'): Promise<Record<string, unknown>>;
   now?: () => number;
 }
-const unavailable = () => new ApiError(503, 'LOOP_BILLING_UNAVAILABLE', 'Job Loop subscriptions are temporarily unavailable. Your existing records remain available.');
+const unavailable = () => new ApiError(503, 'LOOP_BILLING_UNAVAILABLE', 'Automated Job Loop subscriptions are temporarily unavailable. Your existing records remain available.');
 const sqlPlan = (plan: string) => plan === 'active' ? 'three_weekly' : plan;
 const publicPlan = (plan: unknown) => plan === 'three_weekly' ? 'active' : plan;
 function publicSubscription(value: unknown, version = 1) {
@@ -143,7 +143,7 @@ export const LOOP_SUBSCRIPTION_EVENTS = new Set(['subscription.active','subscrip
 async function boundOrder(ports: LoopBillingPorts, config: LoopBillingConfig, sub: Pick<LoopSubscription,'userId'|'requestId'|'generation'|'plan'|'productId'|'subscriptionId'|'customerId'>, originalOrder?:Record<string,unknown>) {
   const order = originalOrder??record(await ports.rpc('job_loop_billing_order', { p_user: sub.userId, p_request: sub.requestId, p_mode: config.mode }));
   if (order.user_id !== sub.userId || order.request_id !== sub.requestId || Number(order.generation) !== sub.generation || order.plan !== sqlPlan(sub.plan) || order.product_id !== sub.productId ||
-    typeof order.session_id !== 'string' || !DODO_SESSION_ID.test(order.session_id)) throw new ApiError(409, 'LOOP_UNBOUND_SUBSCRIPTION', 'This subscription is not bound to a verified Job Loop checkout.');
+    typeof order.session_id !== 'string' || !DODO_SESSION_ID.test(order.session_id)) throw new ApiError(409, 'LOOP_UNBOUND_SUBSCRIPTION', 'This subscription is not bound to a verified Automated Job Loop checkout.');
   const checkout = await ports.provider(`checkouts/${order.session_id}`);
   if (checkout.id !== order.session_id || typeof checkout.payment_id !== 'string' || !DODO_PAYMENT_ID.test(checkout.payment_id)) throw new ApiError(409, 'LOOP_UNBOUND_SUBSCRIPTION', 'This subscription checkout has not been verified.');
   const original = await ports.provider(`payments/${checkout.payment_id}`);
@@ -251,6 +251,6 @@ export async function applyLoopBillingWebhook(ports: LoopBillingPorts, config: L
     p_cancel_at_period_end: sub.cancelAtPeriodEnd, p_event: `dodo_${webhookId}`, p_created: event.created,
     p_revoked: forceRevoke || paid?.revoked === true, p_payment: paid?.paymentId ?? null, p_paid_amount: paid?.amount ?? null, p_grace_until: graceUntil };
   const result = await ports.rpc(sub.quoteId?'job_loop_billing_apply_event_v2':'job_loop_billing_apply_event', { ...authority, p_payload_hash: hash,...(sub.quoteId?{p_quote:sub.quoteId,p_currency:sub.currency}:{}) });
-  if (result.pendingFulfillment === true) throw new ApiError(503, 'LOOP_BILLING_FULFILLMENT_PENDING', 'Payment received; Job Loop access requires support reconciliation.');
+  if (result.pendingFulfillment === true) throw new ApiError(503, 'LOOP_BILLING_FULFILLMENT_PENDING', 'Payment received; Automated Job Loop access requires support reconciliation.');
   return { received: true, ...result };
 }

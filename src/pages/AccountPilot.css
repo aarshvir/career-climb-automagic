@@ -199,6 +199,10 @@
 .ap-faq-grid details p { color: var(--ap-muted); font-size: 14px; line-height: 1.9; margin: 12px 0 0; }
 .ap-faq-grid a { color: var(--ap-cobalt); text-decoration: underline; text-underline-offset: 3px; }
 
+.ap-loop-entry { margin-top: 18px; font-size: 13px; line-height: 1.65; }
+.ap-loop-entry ol { padding-left: 20px; display: grid; gap: 5px; }
+.ap-loop-entry a { text-decoration: underline; text-underline-offset: 3px; }
+
 @media (max-width: 1000px) {
   .ap-account-story { padding: 40px 30px 30px; }
   .ap-auth-panel { padding: 40px 28px; }

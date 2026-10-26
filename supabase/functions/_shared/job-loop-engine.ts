@@ -200,7 +200,7 @@ export function validateAction(value: unknown): LoopAction {
   if (action === 'start_run'||action === 'start_selected_run') { enumeration(a.provider, ['rules', 'anthropic', 'openai', 'moonshot']); text(a.model, 1, 150); if (a.provider !== 'rules' && !a.modelConsent) fail('Provider processing consent is required.'); if(a.processingRoute!==undefined){enumeration(a.processingRoute,['direct','openrouter']);if(a.provider==='rules')fail('Rules preparation does not authorize an external processing route.');} }
   if (action === 'update_opportunity') { enumeration(a.status, STATUSES); text(a.notes, 0, 5000); a.followUpAt=normalizeFollowUp(a.followUpAt as string|null); }
   if (action === 'save_schedule') { a.schedule=validateScheduleInput(a.schedule); if(!a.recurringConsent)fail('Explicit recurring preparation permission is required.'); }
-  if ((action === 'erase_loop'||action==='erase_self') && !a.confirmErase) fail('Confirm erasing your private Job Loop record and generated documents.');
+  if ((action === 'erase_loop'||action==='erase_self') && !a.confirmErase) fail('Confirm erasing your private Automated Job Loop record and generated documents.');
   if (action==='request_support') { enumeration(a.category,['help','privacy','bug']); a.message=text(a.message,5,2000); }
   if (action === 'preview_packet' && (typeof a.inputHash!=='string'||!/^[0-9a-f]{64}$/.test(a.inputHash)))fail('Choose the exact current packet to preview.');
   if (action === 'approve_packet') { text(a.reviewedText, 80, 60000); if (typeof a.inputHash !== 'string' || !/^[0-9a-f]{64}$/.test(a.inputHash) || !a.confirmFacts || !a.confirmDisclosure) fail('Input-bound factual and disclosure approval is required.'); }

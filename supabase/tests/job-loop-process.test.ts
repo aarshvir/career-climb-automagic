@@ -26,7 +26,7 @@ describe('checkpointed actual rule-engine cloud phases',()=>{
     const h=harness();const network=vi.fn(()=>{throw new Error('No external provider configured.');});const env=(name:string)=>name==='JOB_LOOP_EMPLOYER_FEEDS'?'[]':undefined;
     let again=true;let requests=0;while(again&&requests<10){again=await processLoopPhase(h.repo,id,env,network);requests++;}
     expect(requests).toBeGreaterThan(3);expect(h.run.status).toBe('partial');expect(h.packets).toHaveLength(1);expect(h.packets[0].status).toBe('review_required');expect(h.packets[0].pageCount).toBe(1);expect(h.packets[0].cvText).toContain('ACADEMIC PROJECTS');expect(h.packets[0].cvText).toContain('Prepared a coursework report');expect(h.packets[0].connectionNote).toBe('');expect(Object.keys(h.packets[0].artifacts)).toEqual(expect.arrayContaining(['pdf','docx','txt','report','letter']));
-    expect(h.run.data.lanes).toEqual(expect.arrayContaining([expect.objectContaining({name:'Broad web search',status:'not_connected'}),expect.objectContaining({name:'LinkedIn inbox and browser sources',status:'blocked'})]));expect(h.run.data.nextAction).toMatch(/Review one/);expect(network).not.toHaveBeenCalled();expect(h.mock.reserve).not.toHaveBeenCalled();
+    expect(h.run.data.lanes).toEqual(expect.arrayContaining([expect.objectContaining({name:'Broad web search',status:'not_run'})]));expect(h.run.data.nextAction).toMatch(/prepared CV.*available/);expect(network).not.toHaveBeenCalled();expect(h.mock.reserve).not.toHaveBeenCalled();
     for(const artifact of Object.values(h.packets[0].artifacts)){expect(artifact.path).toContain(`/${artifact.sha256}/`);expect(await digest(h.artifacts.get(artifact.path)!)).toBe(artifact.sha256);}
   });
   it('cannot publish rendered results after cancellation or source-generation change',async()=>{
@@ -73,5 +73,41 @@ describe('explicit selected-vacancy worker foundation',()=>{
   it('rejects inbox expansion and a discovery-wide replay of the selected intent',async()=>{
     const h=selectedHarness();expect(await canReplayPreparation(h.run,h.record.data,{provider:'rules',model:h.run.model,modelConsent:false,inboxConsent:false})).toBe(false);
     h.run.consents.inbox=true;await drain(h);expect(h.run.status).toBe('blocked');expect(h.mock.upload).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('first-result outcome guidance from actual worker phases', () => {
+  const feed = JSON.stringify([{provider:'greenhouse',board:'example',company:'Example employer'}]);
+  const env = (name:string) => name==='JOB_LOOP_EMPLOYER_FEEDS' ? feed : undefined;
+  it.each(['empty','failed'] as const)('distinguishes a %s employer read without asking to reconfirm valid facts', async mode => {
+    const h=harness(); h.record.data.opportunities=[]; h.run.snapshot=structuredClone(h.record.data);
+    const fetcher=vi.fn(async()=>mode==='failed'?new Response('',{status:503}):Response.json({jobs:[]}));
+    for(let n=0;n<12;n++) if(!await processLoopPhase(h.repo,id,env,fetcher)) break;
+    expect(h.run.status).toBe(mode==='failed'?'partial':'completed');
+    expect(h.run.data.nextAction).toMatch(mode==='failed'?/source checks could not finish/:/No new matching jobs.*sources checked/);
+    expect(h.run.data.nextAction).not.toMatch(/confirm.*evidence/);
+    expect(h.mock.reserve).not.toHaveBeenCalled(); expect(h.mock.upload).not.toHaveBeenCalled();
+    expect(h.run.data.lanes?.some(l=>l.name.includes('LinkedIn'))).toBe(false);
+  });
+  it.each(['held','missing'] as const)('does not call %s output ready', async state => {
+    const h=selectedHarness();h.run.phase=7;h.run.data={packetIds:['p'],lanes:[],messages:[]};
+    if(state==='held')h.packets.push({id:'p',status:'held'} as LoopPacket);
+    await processLoopPhase(h.repo,id,env);
+    expect(h.run.data.nextAction).toMatch(state==='held'?/needs attention/:/availability could not be confirmed/);
+    expect(h.run.data.nextAction).not.toMatch(/available\./);expect(h.mock.upload).not.toHaveBeenCalled();
+  });
+  it('keeps selected-only no-work guidance about the selected application, not a search it never did', async () => {
+    const h=selectedHarness();h.record.data.opportunities[2].status='applied';
+    await drain(h);
+    expect(h.run.data.nextAction).toContain('chosen vacancies no longer need a new CV');
+    expect(h.run.data.nextAction).not.toMatch(/matching jobs|broader roles/);
+  });
+  it('can resume an unavailable final result read without another upload or provider call', async () => {
+    const h=harness();h.run.phase=7;h.run.data={packetIds:['p'],lanes:[],messages:[]};
+    h.mock.collections.mockRejectedValueOnce(new Error('Temporary read unavailable'));
+    await processLoopPhase(h.repo,id,env);expect(h.run.status).toBe('blocked');
+    await processLoopPhase(h.repo,id,env);expect(h.run.status).toBe('completed');
+    expect(h.mock.upload).not.toHaveBeenCalled();expect(h.mock.reserve).not.toHaveBeenCalled();
   });
 });
