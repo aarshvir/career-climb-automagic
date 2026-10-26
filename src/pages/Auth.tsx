@@ -9,6 +9,8 @@ import { ArrowRight, Check, FileText, Loader2, Eye, EyeOff, LockKeyhole } from '
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
 import { detectInAppBrowser, isAndroid, openInBrowserHref } from '@/lib/in-app-browser';
+import { ContactFields } from '@/components/ContactDetails';
+import { blankContact, checkContact } from '@/lib/contact-details';
 import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
@@ -19,6 +21,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [contact, setContact] = useState(() => blankContact());
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -47,6 +50,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     setError('');
     if (!isValidEmail(email.trim())) { setError('Please enter a valid email address.'); return; }
     if (!authRateLimiter.check(email.trim().toLowerCase())) { setError('Too many attempts. Please try again in a minute.'); return; }
+    const details = mode === 'sign-up' ? checkContact(contact) : null;
+    if (typeof details === 'string') { setError(details); return; }
     if (mode === 'sign-up') {
       if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
       const validation = validatePassword(password);
@@ -56,7 +61,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     try {
       if (!embedded && mode === 'sign-up') rememberLoopReturn(searchParams.get('next'));
       if (mode === 'sign-up') {
-        const result = await signUpWithEmail(email, password);
+        const result = await signUpWithEmail(email, password, details ?? undefined);
         if (result.error) setError(result.error);
         else if (result.requiresEmailConfirmation) {
           pending.current = { email: email.trim(), password };
@@ -190,6 +195,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
               </Button>
               <div className="ap-auth-divider"><span>or use your email and password</span></div></>}
               <form className="ap-auth-form" onSubmit={handleSubmit}>
+                {mode === 'sign-up' && <ContactFields value={contact} onChange={setContact} disabled={busy} />}
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-email`}>Email address</Label>
                   <Input id={`${fieldId}-email`} type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)} required disabled={busy} />

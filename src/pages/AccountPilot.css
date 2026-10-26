@@ -280,3 +280,7 @@
 .ap-inapp p { margin:0; }
 .ap-inapp-actions { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:8px !important; }
 .ap-inapp-actions a, .ap-inapp-actions button { font:inherit; font-size:13px; font-weight:700; color:#2850df; background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; }
+/* Mobile number: dialling code plus the local number. */
+.ap-phone-field { display: grid; grid-template-columns: minmax(96px, 128px) minmax(0, 1fr); gap: 8px; }
+.ap-phone-field select { min-height: 48px; border: 1px solid var(--ap-control-line, #c9d0dc); border-radius: 9px; padding: 0 8px; background: #fff; color: var(--ap-ink, #172338); font-size: 14px; }
+.ap-field-error { color: #b42318; font-size: 13px; margin: 0; }

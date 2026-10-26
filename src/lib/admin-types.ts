@@ -99,8 +99,13 @@ export type AdminAction =
   | { action: 'guest_support_update'; id:string; expectedVersion:number; status:AdminSupportStatus; reply:string }
   | { action: 'snapshot'; days: AdminWindow }
   | { action: 'dashboard'; days: AdminWindow }
+  | { action: 'analytics'; days: AdminWindow }
+  | { action: 'contacts' }
+  | { action: 'visit'; id: string }
+  | { action: 'person'; id: string }
   | { action: 'update_config'; expectedVersion: number; config: AdminConfigInput }
   | { action: 'update_support'; id: string; expectedVersion: number; status: AdminSupportStatus }
   | { action: 'support_detail'; id: string }
   | { action: 'provider_status' };
-export interface AdminResponse { snapshot?: AdminSnapshot; dashboard?: AdminDashboard; providerStatus?: AdminProviderStatus; config?: AdminConfig; support?: { id: string; status: AdminSupportStatus; version: number }; supportDetail?: { id: string; message: string }; guestSupport?:AdminGuestSupport[]; guestSupportDetail?:AdminGuestSupportDetail }
+/** Analytics reads are typed and validated in the browser by admin-analytics.ts. */
+export interface AdminResponse { snapshot?: AdminSnapshot; dashboard?: AdminDashboard; analytics?: unknown; contacts?: unknown; visit?: unknown; person?: unknown; providerStatus?: AdminProviderStatus; config?: AdminConfig; support?: { id: string; status: AdminSupportStatus; version: number }; supportDetail?: { id: string; message: string }; guestSupport?:AdminGuestSupport[]; guestSupportDetail?:AdminGuestSupportDetail }

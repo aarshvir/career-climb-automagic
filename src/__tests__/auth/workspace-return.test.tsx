@@ -36,7 +36,7 @@ function WorkspaceDestination() {
   const location = useLocation();
   return <main><h1>Workspace for {state.user?.id}</h1><p data-testid="workspace-path">{location.pathname}{location.search}</p></main>;
 }
-const owner = { id: 'return-fixture-owner', email: 'return-fixture@example.test' };
+const owner = { id: 'return-fixture-owner', email: 'return-fixture@example.test', user_metadata: { full_name: 'Fixture Person', phone: '+15555550100' } };
 function open(path: string) {
   window.history.replaceState(null, '', path);
   return render(<MvpApp />);
@@ -109,11 +109,14 @@ describe('protected legacy workspace return through real app routes', () => {
     open('/auth?mode=signup&next=%2Fonboarding');
     await screen.findByRole('heading', { name: 'Create your Jobvance account' });
     const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Full name'), 'Fixture Person');
+    await user.type(screen.getByLabelText('Mobile number'), '555 555 0100');
     await user.type(screen.getByLabelText('Email address'), owner.email);
     await user.type(screen.getByLabelText('Password'), 'FixturePassword123');
     await user.type(screen.getByLabelText('Confirm password'), 'FixturePassword123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     await screen.findByRole('heading', { name: 'Check your email' });
+    expect(state.signUpWithEmail).toHaveBeenCalledWith(owner.email, 'FixturePassword123', { fullName: 'Fixture Person', phone: '+15555550100' });
     expect(JSON.parse(sessionStorage.getItem('jobvance_account_return_v1')!).path).toBe('/onboarding');
     expect(localStorage.length).toBe(0);
   });

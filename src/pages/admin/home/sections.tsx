@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import type { AdminDashboard } from '@/lib/admin-dashboard';
+import type { AdminContacts } from '@/lib/admin-analytics';
 import { Bars, CohortGrid, Delta, Funnel, LineChart, Sparkline } from './charts';
 import { ago, day, minor, statusPill, usd } from './format';
 
@@ -11,10 +12,10 @@ function RevenueCoverage({ data }: Data) {
   return data.revenue.unknownUsdPayments > 0 ? <p className="vh-callout" role="status">USD totals are incomplete: {data.revenue.unknownUsdPayments} payment record(s) have missing conversion evidence or an unknown refund amount. Only known amounts are included. Comparisons and average order value are unavailable.</p> : null;
 }
 
-export function Kpi({ label, value, help, foot, spark, tone, danger }: { label: string; value: string; help?: string; foot?: ReactNode; spark?: number[]; tone?: 'good' | 'bad'; danger?: boolean }) {
+export function Kpi({ label, value, help, foot, spark, tone, danger, text }: { label: string; value: ReactNode; help?: string; foot?: ReactNode; spark?: number[]; tone?: 'good' | 'bad'; danger?: boolean; text?: boolean }) {
   return <article className={`vh-card${danger ? ' vh-card--danger' : ''}`}>
     <div className="vh-label">{label}</div>
-    <div className={`vh-value${tone ? ` vh-value--${tone}` : ''}`}>{value}</div>
+    <div className={`vh-value${tone ? ` vh-value--${tone}` : ''}${text ? ' vh-value--text' : ''}`}>{value}</div>
     {spark && <div className="vh-kpi-spark"><Sparkline points={spark} /></div>}
     {foot && <div className="vh-foot">{foot}</div>}
     {help && <p className="vh-help">{help}</p>}
@@ -87,8 +88,15 @@ export function GrowthSection({ data }: Data) {
   </>;
 }
 
+/** A tappable number for the owner; masked numbers (operators) are shown as text. */
+function Phone({ value, loading }: { value?: string | null; loading: boolean }) {
+  if (!value) return <span className="vh-muted">{loading ? '…' : 'not given'}</span>;
+  return value.includes('•') ? <>{value}</> : <a className="vh-link" href={`tel:${value}`}>{value}</a>;
+}
+
 type SortKey = 'joinedAt' | 'lastActiveAt' | 'paidUsd' | 'cvChecks' | 'runs';
-export function UsersSection({ data }: Data) {
+export function UsersSection({ data, contacts }: Data & { contacts?: AdminContacts | null }) {
+  const people = useMemo(() => new Map((contacts ?? []).map(contact => [contact.userId, contact])), [contacts]);
   const [params] = useSearchParams();
   const focus = params.get('focus');
   const [query, setQuery] = useState('');
@@ -97,21 +105,23 @@ export function UsersSection({ data }: Data) {
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase();
     const value = (row: AdminDashboard['users'][number]) => { const raw = row[sort.key]; return typeof raw === 'number' ? raw : raw ? new Date(raw).getTime() : 0; };
-    return data.users.filter(row => (!paidOnly || row.hasPaid) && (!needle || row.emailDisplay.toLowerCase().includes(needle) || row.id.startsWith(needle)))
+    return data.users.filter(row => (!paidOnly || row.hasPaid) && (!needle || [row.emailDisplay, people.get(row.id)?.name, people.get(row.id)?.phone].some(value => value?.toLowerCase().includes(needle)) || row.id.startsWith(needle)))
       .sort((a, b) => (value(a) - value(b)) * (sort.down ? -1 : 1));
-  }, [data.users, query, paidOnly, sort]);
+  }, [data.users, query, paidOnly, sort, people]);
   const head = (key: SortKey, label: string, right = true) => <th className={right ? 'vh-r' : undefined} aria-sort={sort.key === key ? (sort.down ? 'descending' : 'ascending') : undefined}>
     <button type="button" onClick={() => setSort(current => ({ key, down: current.key === key ? !current.down : true }))}>{label}{sort.key === key ? (sort.down ? ' ▼' : ' ▲') : ''}</button></th>;
   return <>
     <div className="vh-toolbar">
-      <input className="vh-search" type="search" placeholder="Search by email" aria-label="Search users by email" value={query} onChange={event => setQuery(event.target.value)} />
+      <input className="vh-search" type="search" placeholder="Search by name, email or phone" aria-label="Search users" value={query} onChange={event => setQuery(event.target.value)} />
       <label><input type="checkbox" checked={paidOnly} onChange={event => setPaidOnly(event.target.checked)} /> Paying customers only</label>
       <span>{rows.length} of {data.users.length} shown{data.users.length < data.coverage.realUsers ? ` (newest ${data.users.length} of ${data.coverage.realUsers})` : ''}</span>
     </div>
     <div className="vh-table-wrap"><table className="vh-table">
-      <thead><tr><th>Email</th>{head('joinedAt', 'Joined', false)}{head('lastActiveAt', 'Last active', false)}<th>Plan</th>{head('paidUsd', 'Known USD')}{head('cvChecks', 'CV checks')}{head('runs', 'Runs')}<th>Set-up</th></tr></thead>
+      <thead><tr><th>Person</th><th>Phone</th><th>Came from</th>{head('joinedAt', 'Joined', false)}{head('lastActiveAt', 'Last active', false)}<th>Plan</th>{head('paidUsd', 'Known USD')}{head('cvChecks', 'CV checks')}{head('runs', 'Runs')}<th>Set-up</th></tr></thead>
       <tbody>{rows.length ? rows.map(row => <tr key={row.id} style={row.id === focus ? { background: 'rgba(212,168,83,.1)' } : undefined}>
-        <td><span className="vh-strong">{row.emailDisplay}</span><small title={row.id}>{row.id.slice(0, 8)}</small></td>
+        <td><Link className="vh-link" to={`/admin/users/${row.id}`}>{people.get(row.id)?.name || row.emailDisplay}</Link><small title={row.id}>{people.get(row.id)?.name ? row.emailDisplay : row.id.slice(0, 8)}</small></td>
+        <td className="vh-nowrap"><Phone value={people.get(row.id)?.phone} loading={!contacts} /></td>
+        <td className="vh-source">{people.get(row.id)?.channel ?? <span className="vh-muted">—</span>}{people.get(row.id)?.visits ? <small>{people.get(row.id)?.visits} visits</small> : null}</td>
         <td className="vh-nowrap">{new Date(row.joinedAt).toISOString().slice(0, 10)}</td>
         <td className="vh-nowrap">{ago(row.lastActiveAt ?? row.lastSignInAt)}</td>
         <td>{row.plan ? statusPill('good', row.plan) : row.pilot ? statusPill('warn', 'free place') : <span className="vh-muted">free</span>}</td>
@@ -119,7 +129,7 @@ export function UsersSection({ data }: Data) {
         <td className="vh-r">{row.cvChecks}</td>
         <td className="vh-r">{row.runs}{row.failedRuns > 0 && <small style={{ color: 'var(--vh-caution)' }}>{row.failedRuns} failed</small>}</td>
         <td>{row.hasProfile ? statusPill('good', 'profile saved') : <span className="vh-muted">not started</span>}</td>
-      </tr>) : <tr><td colSpan={8} className="vh-table-empty">No users match.</td></tr>}</tbody>
+      </tr>) : <tr><td colSpan={10} className="vh-table-empty">No users match.</td></tr>}</tbody>
     </table></div>
   </>;
 }

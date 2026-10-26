@@ -150,7 +150,9 @@ describe('signup and password recovery screens', () => {
     sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
     const user = userEvent.setup();
-    await user.type(await screen.findByLabelText('Email address'), 'person@example.test');
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Mobile number'), '50 123 4567');
+    await user.type(screen.getByLabelText('Email address'), 'person@example.test');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
     await user.type(screen.getByLabelText('Confirm password'), 'Password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
@@ -221,7 +223,9 @@ describe('sign-up from Instagram and Facebook ads', () => {
   const facebookAndroid = 'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/480.0.0.0;]';
   const signUpForm = async () => {
     const user = userEvent.setup();
-    await user.type(await screen.findByLabelText('Email address'), 'person@example.test');
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Mobile number'), '50 123 4567');
+    await user.type(screen.getByLabelText('Email address'), 'person@example.test');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
     await user.type(screen.getByLabelText('Confirm password'), 'Password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
