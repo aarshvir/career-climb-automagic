@@ -17,7 +17,9 @@ export function validateAdminAction(value: unknown): AdminAction {
   if(item.action==='guest_support_list'){exact(item,['action']);return {action:'guest_support_list'};}
   if(item.action==='guest_support_detail'){exact(item,['action','id']);if(typeof item.id!=='string'||!uuidPattern.test(item.id))invalid();return {action:'guest_support_detail',id:item.id};}
   if(item.action==='guest_support_update'){exact(item,['action','id','expectedVersion','status','reply']);if(typeof item.id!=='string'||!uuidPattern.test(item.id)||!Number.isSafeInteger(item.expectedVersion)||Number(item.expectedVersion)<0||typeof item.status!=='string'||!['received','in_review','resolved'].includes(item.status)||typeof item.reply!=='string'||item.reply.length>2000||item.reply.includes('\0'))invalid();return item as unknown as AdminAction;}
-  if (item.action === 'snapshot' || item.action === 'dashboard') { exact(item, ['action', 'days']); if (![7,30,90].includes(Number(item.days)) || typeof item.days !== 'number') invalid(); return item as unknown as AdminAction; }
+  if (item.action === 'contacts') { exact(item, ['action']); return { action: 'contacts' }; }
+  if (item.action === 'visit' || item.action === 'person') { exact(item, ['action', 'id']); if (typeof item.id !== 'string' || !uuidPattern.test(item.id)) invalid(); return { action: item.action, id: item.id.toLowerCase() }; }
+  if (item.action === 'snapshot' || item.action === 'dashboard' || item.action === 'analytics') { exact(item, ['action', 'days']); if (![7,30,90].includes(Number(item.days)) || typeof item.days !== 'number') invalid(); return item as unknown as AdminAction; }
   if (item.action === 'provider_status') { exact(item, ['action']); return { action: 'provider_status' }; }
   if (item.action === 'support_detail') { exact(item,['action','id']); if (typeof item.id !== 'string' || !uuidPattern.test(item.id)) invalid(); return { action:'support_detail',id:item.id }; }
   if (item.action === 'update_support') {
@@ -82,6 +84,26 @@ export async function controlAdmin(db: AdminDatabase, actor: { id: string; role:
     const dashboard = await rpc<AdminDashboard>(db,'jobvance_admin_dashboard',{p_actor:actor.id,p_days:action.days});
     await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_details:{days:action.days}});
     return { dashboard };
+  }
+  if (action.action === 'analytics') {
+    const analytics = await rpc<unknown>(db,'jobvance_admin_analytics',{p_actor:actor.id,p_days:action.days});
+    await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_details:{days:action.days}});
+    return { analytics };
+  }
+  if (action.action === 'contacts') {
+    const contacts = await rpc<unknown[]>(db,'jobvance_admin_contacts',{p_actor:actor.id});
+    await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_details:{count:Array.isArray(contacts)?contacts.length:0}});
+    return { contacts };
+  }
+  if (action.action === 'visit') {
+    const visit = await rpc<unknown>(db,'jobvance_admin_session',{p_actor:actor.id,p_session:action.id});
+    await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_target:action.id,p_details:{}});
+    return { visit };
+  }
+  if (action.action === 'person') {
+    const person = await rpc<unknown>(db,'jobvance_admin_person',{p_actor:actor.id,p_user:action.id});
+    await rpc(db,'jobvance_admin_record_event',{p_actor:actor.id,p_action:'snapshot',p_target:action.id,p_details:{}});
+    return { person };
   }
   if (action.action === 'update_config') {
     if (actor.role !== 'owner') throw new ApiError(403,'ADMIN_FORBIDDEN','Only an owner can change global settings.');

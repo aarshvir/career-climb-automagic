@@ -10,6 +10,8 @@ import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security'
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
 import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
+import { ContactFields } from '@/components/ContactDetails';
+import { blankContact, checkContact } from '@/lib/contact-details';
 import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
@@ -20,6 +22,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [contact, setContact] = useState(() => blankContact());
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -50,6 +53,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     setError('');
     if (!isValidEmail(email.trim())) { setError('Please enter a valid email address.'); return; }
     if (!authRateLimiter.check(email.trim().toLowerCase())) { setError('Too many attempts. Please try again in a minute.'); return; }
+    const details = mode === 'sign-up' ? checkContact(contact) : null;
+    if (typeof details === 'string') { setError(details); return; }
     if (mode === 'sign-up') {
       if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
       const validation = validatePassword(password);
@@ -60,7 +65,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     try {
       if (!embedded && mode === 'sign-up') rememberLoopReturn(searchParams.get('next'));
       if (mode === 'sign-up') {
-        const result = await signUpWithEmail(email, password);
+        const result = await signUpWithEmail(email, password, details ?? undefined);
         if (!alive.current || attempt.current !== turn || trackingAuthEpoch() !== epoch) return;
         if (result.error) setError(result.error);
         else if (result.requiresEmailConfirmation) {
@@ -167,10 +172,10 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       </aside>}
       <div className="ap-auth-panel">
         <div className="ap-auth-heading">
-          {!embedded && <p className="ap-eyebrow">{loopEntry ? 'YOUR JOB LOOP STARTS HERE' : 'YOUR JOBVANCE WORKSPACE'}</p>}
+          {!embedded && <p className="ap-eyebrow">{loopEntry ? 'YOUR AUTOMATED JOB LOOP STARTS HERE' : 'YOUR JOBVANCE WORKSPACE'}</p>}
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
-          <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : loopEntry ? 'Add your CV and the roles you want. Find matching opportunities and review prepared CVs in your Job Loop.' : 'Keep your reviewed CVs and applications in one place.'}</p>
-          {loopEntry && !confirmationSent && <div className="ap-loop-entry"><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol><p>Job Loop plans from US$29/month. <Link to="/pricing">See plans</Link> · <Link to="/job-loop">How it works</Link></p></div>}
+          <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : loopEntry ? 'Add your CV and the roles you want. Find matching opportunities and review prepared CVs in your Automated Job Loop.' : 'Keep your reviewed CVs and applications in one place.'}</p>
+          {loopEntry && !confirmationSent && <div className="ap-loop-entry"><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol><p>Automated Job Loop plans from US$29/month. <Link to="/pricing">See plans</Link> · <Link to="/job-loop">How it works</Link></p></div>}
         </div>
         <div className="ap-auth-content">
           {visibleError && <Alert variant="destructive" role="alert" className="ap-auth-alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
@@ -191,6 +196,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
               </Button>}
               {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
               <form className="ap-auth-form" onSubmit={handleSubmit}>
+                {mode === 'sign-up' && <ContactFields value={contact} onChange={setContact} disabled={busy} />}
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-email`}>Email address</Label>
                   <Input id={`${fieldId}-email`} type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)} required disabled={busy} />

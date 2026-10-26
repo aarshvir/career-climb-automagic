@@ -125,7 +125,11 @@ describe('independent admin authority review', () => {
     act(() => { authEvent('TOKEN_REFRESHED', 'owner-a', mocks.token); });
     view.rerender(tree());
     expect(screen.getByText('payer@work.org')).toBeInTheDocument();
-    expect(mocks.call).toHaveBeenCalledTimes(1);
+    // The Users page also loads names and phone numbers once; neither read repeats on refresh.
+    const reads = (name: string) => mocks.call.mock.calls.filter(([, action]) => action.action === name).length;
+    expect(reads('dashboard')).toBe(1);
+    expect(reads('contacts')).toBe(1);
+    expect(mocks.call).toHaveBeenCalledTimes(2);
   });
 
   it('ignores the original in-flight private result after SDK A→B→A', async () => {

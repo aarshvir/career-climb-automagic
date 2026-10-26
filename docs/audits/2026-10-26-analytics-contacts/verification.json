@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-26",
+  "pullRequest": 32,
+  "originalHead": "6734b9f04e04805d66b53467260804b6b737acc6",
+  "integrationBase": "d9dd9dd5d7bd94ba2c0487d3069bd58f1f9a64f0",
+  "tests": {"passed": 3460, "files": 188, "maxWorkers": 2},
+  "initialFullRun": {"passed": 3439, "failed": 21, "cause": "Legacy workspace-return fixture omitted confirmed SDK authority; original29journey assertions preserved and final full rerun passed"},
+  "typeScript": "passed",
+  "lint": {"errors": 0, "existingWarnings": 54},
+  "deno": {"source": 28, "generated": 28, "actualSdkTracking": 6},
+  "sourceProof": {"bundles": 7, "sourcesPerBundle": 67, "migrations": 30},
+  "build": {"publicPages": 37, "guides": 20, "assets": 148, "compressedWorkerBytes": 2993958, "limitBytes": 3145728, "hostingGroups": 12},
+  "browser": {"isolatedDesktop": "passed", "isolatedMobileViewport": [390,844], "saveFailureRetry": "passed", "typedContactValuesAbsentFromEvents": true, "syntheticAdapters": true, "hostedSignupClaimed": false},
+  "nativeRelease": "See the exact release receipt; pre-release validation is not deployment proof",
+  "paymentsAdsPixelPremiumChanges": false,
+  "paidProviderCalls": 0,
+  "unassistedMultiDayOrNpsEvidence": false
+}

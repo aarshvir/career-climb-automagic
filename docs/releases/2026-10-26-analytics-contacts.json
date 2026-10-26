@@ -1,0 +1,126 @@
+{
+  "date": "2026-10-26",
+  "site": "https://jobvance.io",
+  "publicVersion": 60,
+  "runtimeSource": "4128e1d5140805a0d4fa5a9c9048f2425ba463d0",
+  "originalPrHead": "6734b9f04e04805d66b53467260804b6b737acc6",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/32",
+  "mergeCommit": "2058ea27c6d7ed1590b7c930fa9a4577b3e37084",
+  "mergeTreeEqualsRuntimeTree": true,
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_0befdd6b85888191af5da856a1eec0c5",
+  "deploymentId": "appgdep_6adeec22cd188191ac15f4db2194490e",
+  "deployedAt": "2026-10-26T05:59:16.393053+00:00",
+  "status": "succeeded",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000cb388243a2ecfbbd437ea4f0",
+    "content_hash": "sha256:db16d8a6bc325db1e0e26900792034043a13971293496f8a7188944a96af36d4",
+    "size_bytes": 15636480,
+    "file_count": 152
+  },
+  "validation": {
+    "fullTests": 3460,
+    "files": 188,
+    "appTypeScript": "passed",
+    "lint": {
+      "errors": 0,
+      "existingWarnings": 54
+    },
+    "sourceDeno": 28,
+    "generatedDeno": 28,
+    "actualSdkTrackingDeno": 6,
+    "sourceProof": {
+      "bundles": 7,
+      "perBundleSources": 67,
+      "migrations": 30
+    },
+    "build": {
+      "pages": 37,
+      "guides": 20,
+      "assets": 148,
+      "compressedBytes": 2993958,
+      "limitBytes": 3145728,
+      "hostingGroups": 12
+    },
+    "ci": {
+      "runId": 40276656662,
+      "head": "4128e1d5140805a0d4fa5a9c9048f2425ba463d0",
+      "conclusion": "success",
+      "allStepsGreenBeforeMerge": true,
+      "url": "https://github.com/aarshvir/career-climb-automagic/actions/runs/40276656662"
+    },
+    "live": {
+      "privateRoutes": 17,
+      "publicRoutes": 4,
+      "exactJavaScript": 75,
+      "exactCss": 15,
+      "unauthorizedWorker401": 2,
+      "failures": 0
+    },
+    "hosted": {
+      "checks": 10,
+      "passed": 10,
+      "originalRetryReceipt": true,
+      "storedEvents": 3,
+      "storedBatches": 1,
+      "nativePageExposureMs": 1200,
+      "strictBrowserModel": "passed",
+      "isolatedFixtureCleaned": true,
+      "remainingFixtureRows": 0
+    }
+  },
+  "backend": {
+    "track": 1,
+    "admin": 26,
+    "verifyJwt": false,
+    "runtimeAndConfigurationFilesExact": 6,
+    "localLockfile": "Uploaded but omitted from native artifact readback; no lockfile parity claimed",
+    "otherHandlersUploaded": 0,
+    "sqlSource": "supabase/migrations/20261026010000_jobvance_analytics.sql",
+    "sqlAppliedVersion": "20261026054823",
+    "sqlSha256": "a2e24f7b646795edf4302169c5e5f6e99ae0fb4fbf1f44b6c253cff93ca51076",
+    "exactRoutineBodies": 10,
+    "fixedSearchPaths": true,
+    "serviceOnly": true,
+    "privateForcedRlsTables": 5,
+    "existingSecurityWarningsUnchanged": true,
+    "newInformationalRlsWithoutClientPolicies": 5
+  },
+  "browser": {
+    "isolatedDesktopContactFailureRetry": "passed",
+    "isolatedMobileContactFailureRetry": "passed",
+    "mobileViewport": [
+      390,
+      844
+    ],
+    "typedContactValuesAbsentFromEvents": true,
+    "ownerReadOnly": [
+      "Acquisition",
+      "Journeys",
+      "Users contacts",
+      "business-owned person page",
+      "admin-original"
+    ],
+    "realCandidateEdits": false,
+    "hostedSignupOrPhoneVerification": false
+  },
+  "recovery": {
+    "initialFullRun": "Legacy workspace fixture lacked confirmed SDK session/epoch; original29journey assertions retained and full3460rerun passed",
+    "initialCi": "Two new async queue assertions observed before serialized delivery; added observable bounded waits,23focused passed, finalexactheadCIgreen",
+    "archiveUpload": "First upload failed before saved-version confirmation; nativehistory reconciled58, exactretry saved59.59was neverdeployed. Await-only testsource correction packaged final60; archive content identical.",
+    "routineReadbackHarness": "Read-only parser corrected to extract actual data boundary and allow expected fixed UTC alongside empty search_path; no deployed SQL changed"
+  },
+  "scope": {
+    "paymentsMerchantCapacity": false,
+    "adsPixel": false,
+    "providerCalls": 0,
+    "premiumRedesign": false,
+    "sourceRollbackTag": "jobvance-before-analytics-contacts-2026-10-26",
+    "sourceRollbackIsDbRestore": false
+  },
+  "pending": [
+    "Native dashboard footer still emits an old no-visitor-tracking sentence; a narrowly tested frontend compatibility correction is being integrated",
+    "Natural repeated-day/unassisted customer acceptance and NPS remain unverified",
+    "Broader discovery and all other tracked product/marketing requirements preserved"
+  ]
+}

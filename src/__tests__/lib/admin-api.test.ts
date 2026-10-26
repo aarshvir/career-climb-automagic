@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AdminAction } from '@/lib/admin-types';
 import { adminSnapshot } from '../fixtures/admin-snapshot';
 import { adminDashboard } from '../fixtures/admin-dashboard';
+import { adminAnalytics, adminVisit, adminPerson, adVisitId, caseyId } from '../fixtures/admin-analytics';
 const sdk = vi.hoisted(() => ({ session: vi.fn(), getUser: vi.fn(), invoke: vi.fn(), onAuthStateChange: vi.fn(), unsubscribe: vi.fn(), listeners: new Set<(event: string, session: unknown) => void>() }));
 vi.mock('@/utils/authSession', () => ({ readAuthSession: sdk.session }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { auth: { getUser: sdk.getUser, onAuthStateChange: sdk.onAuthStateChange }, functions: { invoke: sdk.invoke } } }));
@@ -16,6 +17,19 @@ beforeEach(() => {
 });
 
 describe('private administration API boundary', () => {
+  it.each([
+    [{ action: 'analytics', days: 30 }, 'analytics', () => adminAnalytics()],
+    [{ action: 'contacts' }, 'contacts', () => []],
+    [{ action: 'visit', id: adVisitId }, 'visit', adminVisit],
+    [{ action: 'person', id: caseyId }, 'person', adminPerson],
+  ] as const)('requires one exact new analytics envelope for %j', async (action, key, value) => {
+    sdk.invoke.mockResolvedValue({ data: { [key]: value() }, error: null });
+    await expect(callAdmin('owner-a', action)).resolves.toHaveProperty(key);
+    for (const extra of [{ unexpected: 'mixed' }, { providerStatus: null }]) {
+      sdk.invoke.mockResolvedValue({ data: { [key]: value(), ...extra }, error: null });
+      await expect(callAdmin('owner-a', action)).rejects.toMatchObject({ kind: 'unavailable' });
+    }
+  });
   it('uses the fixed first-party API with no caller-defined role, endpoint or key', async () => {
     const action = { action: 'snapshot', days: 30 } as const;
     await callAdmin('owner-a', { ...action, role: 'owner', userId: 'owner-b', key: 'SYNTHETIC_NOT_A_KEY', endpoint: 'https://invalid.example' } as unknown as AdminAction);

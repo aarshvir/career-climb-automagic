@@ -11,7 +11,7 @@ import { authRateLimiter } from '@/lib/security';
 
 vi.unmock('react-router-dom');
 const state = vi.hoisted(() => ({
-  user: null as { id: string; email: string } | null,
+  user: null as { id: string; email: string; user_metadata?: Record<string, string> } | null,
   signInWithEmail: vi.fn(), signUpWithEmail: vi.fn(), signInWithGoogle: vi.fn(), resetPassword: vi.fn(), readAuthSession: vi.fn(),
 }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: state.user, loading: false, authError: null, configurationError: null,
@@ -54,7 +54,7 @@ describe('embedded email authentication keeps the current check mounted', () => 
     await user.type(screen.getByLabelText('Password'), 'FixturePassword123');
     await user.click(screen.getByRole('button', { name: /^Sign in$/ }));
     await waitFor(() => expect(state.signInWithEmail).toHaveBeenCalledOnce());
-    await act(async () => { state.user = { id: 'fixture-owner', email: 'qa-handoff@example.com' }; view.rerender(inlineTree()); });
+    await act(async () => { state.user = { id: 'fixture-owner', email: 'qa-handoff@example.com', user_metadata: { full_name: 'Fixture Person', phone: '+15555550100' } }; view.rerender(inlineTree()); });
     expect(screen.getByTestId('current-path')).toHaveTextContent('/check'); expect(screen.getByLabelText('Unsaved CV fixture')).toHaveValue(fixture);
     expect(sessionStorage.length).toBe(0);
   });

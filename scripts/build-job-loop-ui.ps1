@@ -55,7 +55,7 @@ try {
     $loopHashes = @($loopSources | ForEach-Object { @{ path = $_; sha256 = Get-LoopNormalizedTextHash (Join-Path $loopRepo $_) } })
     $loopManifest += @{ function = $loopName; artifact = $loopArtifact; bytes = $loopBytes; sha256 = (Get-FileHash -LiteralPath $loopArtifact -Algorithm SHA256).Hash.ToLowerInvariant(); sources = $loopHashes }
   }
-  $loopMigrations = @(Get-ChildItem -LiteralPath 'supabase/migrations' -File | Where-Object { $_.Name -match '_job_loop_|_jobvance_admin_|_jobvance_marketing_' } | Sort-Object Name | ForEach-Object { @{ path = 'supabase/migrations/' + $_.Name; sha256 = Get-LoopNormalizedTextHash $_.FullName } })
+  $loopMigrations = @(Get-ChildItem -LiteralPath 'supabase/migrations' -File | Where-Object { $_.Name -match '_job_loop_|_jobvance_admin_|_jobvance_marketing_|_jobvance_analytics' } | Sort-Object Name | ForEach-Object { @{ path = 'supabase/migrations/' + $_.Name; sha256 = Get-LoopNormalizedTextHash $_.FullName } })
   $loopJson = @{ generator = $loopGenerator; hashAlgorithms = @{ artifact = 'sha256-bytes'; source = 'sha256-utf8-lf-no-bom'; migration = 'sha256-utf8-lf-no-bom' }; externalImport = $loopExternal; externalPackages = @('npm:jspdf@4.2.1', 'npm:docx@9.9.0'); bundles = $loopManifest; migrations = $loopMigrations } | ConvertTo-Json -Depth 8
   [System.IO.File]::WriteAllText((Join-Path $loopOutput 'manifest.json'), $loopJson + [Environment]::NewLine, [System.Text.UTF8Encoding]::new($false))
 } finally { Pop-Location }
