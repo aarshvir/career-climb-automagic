@@ -24,17 +24,33 @@ export default function MvpHeader() {
   const [openPath,setOpenPath] = useState<string | null>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const open = openPath === location.pathname;
-  // While the mobile menu is open: lock page scroll, make the page behind it inert, and let Escape close it from anywhere.
+  // Keep the panel mounted for 120ms after it closes so it can fade out (instant under reduced motion).
+  const [closing,setClosing] = useState(false);
+  const wasOpen = useRef(open);
+  useEffect(() => {
+    if (wasOpen.current && !open && window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) {
+      setClosing(true);
+      const timer = window.setTimeout(() => setClosing(false), 120);
+      wasOpen.current = open;
+      return () => window.clearTimeout(timer);
+    }
+    wasOpen.current = open;
+    setClosing(false);
+  }, [open]);
+  // While the mobile menu is open: lock page scroll (html and body, for iOS Safari), make the page behind it inert, and let Escape close it from anywhere.
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
+    const previousRoot = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     const behind = [document.getElementById("main-content"), document.querySelector("footer")].filter((node): node is HTMLElement => !!node && !node.hasAttribute("inert"));
     behind.forEach(node => node.setAttribute("inert", ""));
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpenPath(null); toggle.current?.focus(); } };
     document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previous;
+      document.documentElement.style.overflow = previousRoot;
       behind.forEach(node => node.removeAttribute("inert"));
       document.removeEventListener("keydown", onKey);
     };
@@ -66,11 +82,11 @@ export default function MvpHeader() {
       {signedOut && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm jv-header-start">Get started</Link>}
       <button ref={toggle} type="button" className="jv-menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="mobile-navigation" onClick={()=>setOpenPath(open ? null : location.pathname)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
-    <nav id="mobile-navigation" aria-label="Mobile navigation" data-open={open} className="jv-mobile-panel">
+    <nav id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closing ? "closing" : undefined} className="jv-mobile-panel">
       {links.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}
       <div className="jv-mobile-account" onClick={()=>setOpenPath(null)}>{account}</div>
     </nav>
-    {open && <div className="jv-menu-scrim" aria-hidden="true" onClick={()=>setOpenPath(null)} />}
+    {(open || closing) && <div className="jv-menu-scrim" aria-hidden="true" data-state={closing ? "closing" : undefined} onClick={()=>setOpenPath(null)} />}
     {error && <p className="jv-header-error" role="alert">{error}</p>}
   </header>;
 }

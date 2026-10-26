@@ -33,6 +33,8 @@
     --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Consolas, monospace;
     --fw-regular: 400; --fw-medium: 500; --fw-semi: 560; --fw-strong: 600;
+    /* heading weights: dark surfaces get 20 less for optical balance */
+    --fw-display: 560; --fw-heading: 540; --fw-heading-on-dark: 520;
     --t-display: clamp(2.75rem, 2.1rem + 2.667vw, 4.5rem);
     --t-h1: clamp(2.25rem, 1.786rem + 1.905vw, 3.5rem);
     --t-h2: clamp(1.875rem, 1.457rem + 1.714vw, 3rem);

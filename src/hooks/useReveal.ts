@@ -20,11 +20,12 @@ export function useReveal() {
     for (const element of pending) if (element.getBoundingClientRect().top < fold) element.classList.add("is-in");
     root.classList.add("jv-motion");
     const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
+      // Stagger only elements that enter together (same callback batch); a lone element never waits.
+      entries.filter(entry => entry.isIntersecting).forEach((entry, order) => {
+        (entry.target as HTMLElement).style.setProperty("--i", String(order));
         entry.target.classList.add("is-in");
         observer.unobserve(entry.target);
-      }
+      });
     }, { rootMargin: "100000px 0px -10% 0px", threshold: 0.15 }); // the huge top margin also reveals anything a fast scroll jumped past
     for (const element of pending) if (!element.classList.contains("is-in")) observer.observe(element);
     return () => { observer.disconnect(); root.classList.remove("jv-motion"); };

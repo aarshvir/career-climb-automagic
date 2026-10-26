@@ -1,33 +1,47 @@
-.jv-orbit { --ring: rgb(59 71 240 / .35); --node-ring: #0A0B14; --label: var(--jv-ink-3); position: relative; width: min(var(--size), 100%); aspect-ratio: 1; flex-shrink: 0; pointer-events: none; user-select: none; }
-.jv-orbit--dark { --ring: rgb(154 162 255 / .3); --node-ring: #fff; --label: #A9AEC4; }
+/* Light ring is the same neutral hairline as the frame rails; indigo is kept for the comet and nodes. */
+.jv-orbit { --ring: var(--jv-line-strong); --node-ring: #0A0B14; --label: var(--jv-ink-3); position: relative; width: min(var(--size), 100%); aspect-ratio: 1; flex-shrink: 0; pointer-events: none; user-select: none; }
+.jv-orbit--dark { --ring: rgb(154 162 255 / .3); --node-ring: #fff; --label: var(--jv-on-dark-2, #A9AEC4); }
 .jv-orbit-ring { position: absolute; inset: 0; border: 1.5px solid var(--ring); border-radius: 50%; }
-/* The comet's head sits 40deg past its rotation, so rotate(200deg) parks it on "You approve" (8 o'clock). */
+/* The comet's head sits 40deg past its rotation, so rotate(200deg) parks it on "You review" (8 o'clock). */
 .jv-orbit-comet { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, rgb(154 162 255 / 0) 2deg, #9AA2FF 30deg, #3B47F0 40deg, transparent 40.5deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px)); transform: rotate(200deg); }
+/* On ink the head must be the brightest point, not brand indigo (2.4:1 there). */
+.jv-orbit--dark .jv-orbit-comet { background: conic-gradient(from 0deg, transparent 0deg, rgb(154 162 255 / 0) 4deg, rgb(154 162 255 / .55) 30deg, #E4E7FF 40deg, transparent 40.5deg); }
 .jv-orbit--animate .jv-orbit-comet { animation: jv-orbit 14s linear infinite; }
 .jv-orbit.is-offscreen .jv-orbit-comet { animation-play-state: paused; }
 @keyframes jv-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-/* One sweep: Find (12 o'clock), Tailor, then You approve, and rest. Under 5s, so no pause control is needed. */
+/* One sweep: Find (12 o'clock), Tailor, then You review, and rest. Under 5s, so no pause control is needed. */
 .jv-orbit--once.is-armed .jv-orbit-comet { transform: rotate(-40deg); }
 .jv-orbit--once.is-armed.is-in .jv-orbit-comet { animation: jv-orbit-once 2800ms var(--ease-inout) 200ms forwards; }
 @keyframes jv-orbit-once { from { transform: rotate(-40deg); } to { transform: rotate(200deg); } }
-/* Nodes: 12 o'clock (Find), 4 o'clock (Tailor), 8 o'clock (You approve). */
+/* Nodes: 12 o'clock (Find), 4 o'clock (Tailor), 8 o'clock (You review). */
 .jv-orbit-node { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--jv-brand); box-shadow: 0 0 0 4px rgb(59 71 240 / .12); }
 .jv-orbit--dark .jv-orbit-node { background: #9AA2FF; box-shadow: 0 0 0 4px rgb(154 162 255 / .14); }
 .jv-orbit-node--find { left: 50%; top: 0; }
 .jv-orbit-node--tailor { left: 93.3%; top: 75%; }
-/* "You approve" is the stop that matters. On dark it is the lime signal; on light it is ink. */
+/* "You review" is the stop that matters. On dark it is the lime signal; on light it is ink. */
 .jv-orbit-node--approve { left: 6.7%; top: 75%; width: 14px; height: 14px; margin: -7px 0 0 -7px; background: #0A0B14 !important; box-shadow: 0 0 0 2px #fff, 0 0 0 7px rgb(59 71 240 / .16) !important; }
 .jv-orbit--dark .jv-orbit-node--approve { background: var(--jv-signal) !important; box-shadow: 0 0 0 2px var(--node-ring), 0 0 0 9px rgb(212 242 90 / .12) !important; }
 .jv-orbit-label { position: absolute; font-family: var(--font-mono); font-size: .75rem; line-height: 1rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--label); white-space: nowrap; }
 .jv-orbit-label--find { left: 50%; top: 0; transform: translate(-50%, calc(-100% - 14px)); }
 .jv-orbit-label--tailor { left: 93.3%; top: 75%; transform: translate(calc(-100% - 2px), calc(-100% - 16px)); }
 .jv-orbit-label--approve { left: 6.7%; top: 75%; transform: translate(-8px, calc(-100% - 18px)); color: var(--jv-ink, #fff); }
-.jv-orbit--dark .jv-orbit-label--approve { color: #F4F5FA; }
-/* Small rings: hang the lower labels under their nodes so they never meet the centre. */
+.jv-orbit--dark .jv-orbit-label--approve { color: var(--jv-on-dark-1, #F4F5FA); }
+/* Small rings: the lower labels hang below and outside their nodes, clear of the ring and the comet. */
 @media (max-width: 639px) {
-  .jv-orbit-label--tailor { transform: translate(calc(-100% + 4px), 18px); }
-  .jv-orbit-label--approve { transform: translate(-4px, 24px); }
+  .jv-orbit-label--tailor { transform: translate(-8px, 14px); }
+  .jv-orbit-label--approve { transform: translate(calc(-100% + 8px), 14px); text-align: right; }
 }
+/* The sweep lights each node as the comet's head arrives (head positions under ease-inout). */
+@media (prefers-reduced-motion: no-preference) {
+  .jv-orbit--once.is-armed.is-in .jv-orbit-node { animation: jv-node-hit 420ms var(--ease-out) both; }
+  .jv-orbit--once.is-armed.is-in .jv-orbit-node--find { animation-delay: 200ms; }
+  .jv-orbit--once.is-armed.is-in .jv-orbit-node--tailor { animation-delay: 1600ms; }
+  .jv-orbit--once.is-armed.is-in .jv-orbit-node--approve { animation-delay: 3000ms; }
+  .jv-orbit--once.is-armed .jv-orbit-label { transition: opacity var(--dur-3) var(--ease-out); }
+  .jv-orbit--once.is-armed .jv-orbit-label--approve { opacity: .6; }
+  .jv-orbit--once.is-armed.is-in .jv-orbit-label--approve { opacity: 1; transition-delay: 3000ms; }
+}
+@keyframes jv-node-hit { 0% { transform: scale(1); } 35% { transform: scale(1.45); box-shadow: 0 0 0 8px rgb(154 162 255 / .22); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) {
   .jv-orbit--animate .jv-orbit-comet, .jv-orbit--once .jv-orbit-comet { animation: none !important; transform: rotate(200deg) !important; }
 }

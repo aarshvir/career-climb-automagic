@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState, type AnimationEvent, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import LoopJourney from "@/components/LoopJourney";
@@ -10,17 +10,16 @@ import { subscriptionPlans } from "@/lib/subscription-plans";
 import "./Home.css";
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
-const step = (i: number) => ({ "--i": i }) as CSSProperties;
 const fromPrice = subscriptionPlans[0].priceUsd;
 
 const proof = ["You review before you apply", "Free CV Check", "Weekly, 3×/week or daily", "Up to 3 CV variants", "Pause anytime"];
 
-// Every line restates something the site already says; no new facts.
-const goodToKnow = [
-  <>Runs weekly, three times a week or daily. Confirm your AI provider once before recurring runs.</>,
-  <>Searches your connected sources or a vacancy you add, so a run may find nothing new.</>,
-  <>Your dashboard shows the jobs found, the documents prepared and any step that couldn’t finish.</>,
-  <>Review what you reuse before saving. You approve each document and apply on the employer’s site.</>,
+// Every line restates something the site already says; only the short lead-in labels are new.
+const goodToKnow: [string, React.ReactNode][] = [
+  ["Schedule", <>Runs weekly, three times a week or daily. You confirm AI preparation once before recurring runs start.</>],
+  ["Sources", <>Searches your connected sources or a vacancy you add, so a run may find nothing new.</>],
+  ["Dashboard", <>Your dashboard shows the jobs found, the documents prepared and any step that couldn’t finish.</>],
+  ["Approval", <>Review what you reuse before saving. You approve each document and apply on the employer’s site.</>],
 ];
 
 function StartLink({ children = "Start my Automated Job Loop", to = "/onboarding", size = "md", variant = "primary", className = "" }: { children?: React.ReactNode; to?: string; size?: "md" | "lg"; variant?: "primary" | "secondary"; className?: string }) {
@@ -33,25 +32,29 @@ function TextLink({ to, children }: { to: string; children: React.ReactNode }) {
 
 export default function HomePage() {
   const [paused, setPaused] = useState(false);
+  // The hero comet makes one long pass and rests. Once it has, nothing moves, so the Pause control can go.
+  const [settled, setSettled] = useState(false);
+  const onHeroAnimationEnd = (event: AnimationEvent<HTMLDivElement>) => { if (event.animationName === "jv-orbit-hero") setSettled(true); };
   useReveal();
   return <div className="jv-home">
     {/* 1. Hero */}
     <section className="jv-hero" aria-labelledby="home-title">
       <div className="jv-shell jv-hero-grid">
         <div className="jv-hero-copy">
+          <p className="jv-hero-eyebrow jv-enter">For students, graduates and career switchers</p>
           <h1 id="home-title" className="jv-hero-title jv-enter-h1">Automate your job search.</h1>
           <p className="jv-hero-lead jv-enter" style={delay(60)}>Automated Job Loop finds jobs on your schedule and prepares a tailored CV for each. You review, download and apply.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
             <div className="jv-hero-primary">
               <StartLink size="lg" className="jv-hero-cta" />
-              <p className="jv-hero-note">Free account · plans from ${fromPrice}/month</p>
+              <p className="jv-hero-note">Free account · an account doesn’t start a paid subscription · plans from ${fromPrice}/month</p>
             </div>
             <TextLink to="/check">Try a free CV check</TextLink>
           </div>
         </div>
-        <div className={`jv-hero-visual${paused ? " is-paused" : ""}`}>
-          <LoopOrbit size={560} nodes={false} className="jv-hero-orbit jv-enter-stage" />
-          <div className="jv-hero-mock jv-enter-card"><LoopRunMock onPausedChange={setPaused} /></div>
+        <div className={`jv-hero-visual${paused ? " is-paused" : ""}`} onAnimationEnd={onHeroAnimationEnd}>
+          <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={640} className="jv-hero-orbit" /></div>
+          <div className="jv-hero-mock jv-enter-card"><LoopRunMock onPausedChange={setPaused} settled={settled} /></div>
         </div>
       </div>
     </section>
@@ -75,8 +78,16 @@ export default function HomePage() {
               <span className="jv-orbit-core-meta">3×/week</span>
             </span>
           </LoopOrbit>
+          <p className="jv-loop-label" aria-hidden="true">Every run</p>
         </div>
-        <div className="jv-loop-steps"><LoopJourney variant="ring" /></div>
+        <div className="jv-loop-steps">
+          <p className="jv-loop-label" aria-hidden="true">Set up once</p>
+          <LoopJourney variant="ring" />
+          <div className="jv-loop-actions">
+            <StartLink className="jv-loop-cta" />
+            <TextLink to="/job-loop">Explore Automated Job Loop</TextLink>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -88,8 +99,8 @@ export default function HomePage() {
           <p>Jobvance prepares. You decide what is used, and you send every application yourself.</p>
         </div>
         <div className="jv-control-rows">
-          <article className="jv-control-row" data-reveal style={step(0)}>
-            <div><h3>Jobvance never applies for you</h3><p>Each prepared CV waits for your approval. You download it and apply on the employer’s site.</p></div>
+          <article className="jv-control-row" data-reveal>
+            <div className="jv-control-copy"><h3>Jobvance never applies for you</h3><p>Each prepared CV waits for your approval. You download it and apply on the employer’s site.</p></div>
             <div className="jv-frag" aria-hidden="true">
               <div className="jv-frag-card">
                 <div><span className="jv-frag-strong">Product Analyst</span><span className="jv-frag-muted">Northwind Labs · CV ready</span></div>
@@ -98,8 +109,8 @@ export default function HomePage() {
               <span className="jv-frag-caption">Approved by you</span>
             </div>
           </article>
-          <article className="jv-control-row" data-reveal style={step(1)}>
-            <div><h3>Only what you have listed</h3><p>It never adds employers, numbers, tools or qualifications you haven’t listed. It rewords and reorders your own lines.</p></div>
+          <article className="jv-control-row" data-reveal>
+            <div className="jv-control-copy"><h3>Only what you have listed</h3><p>It never adds employers, numbers, tools or qualifications you haven’t listed. It rewords and reorders your own lines.</p></div>
             <div className="jv-frag" aria-hidden="true">
               <div className="jv-frag-cv">
                 <span className="jv-frag-label">Example CV line</span>
@@ -109,8 +120,8 @@ export default function HomePage() {
               <span className="jv-frag-caption">Only tools and facts from your own CV</span>
             </div>
           </article>
-          <article className="jv-control-row" data-reveal style={step(2)}>
-            <div><h3>Pause or cancel anytime</h3><p>Pause or cancel your schedule whenever you need to. Your account shows the next scheduled run.</p></div>
+          <article className="jv-control-row" data-reveal>
+            <div className="jv-control-copy"><h3>Pause or cancel anytime</h3><p>Pause or cancel your schedule whenever you need to. Your account shows the next scheduled run.</p></div>
             <div className="jv-frag" aria-hidden="true">
               <div className="jv-frag-card">
                 <div><span className="jv-frag-strong">Schedule</span><span className="jv-frag-muted">3×/week · Mon Wed Fri</span></div>
@@ -121,14 +132,9 @@ export default function HomePage() {
           </article>
         </div>
         <div className="jv-know" data-reveal>
-          <div className="jv-know-head">
-            <h3>Good to know</h3>
-            <div className="jv-know-links">
-              <TextLink to="/job-loop">Explore Automated Job Loop</TextLink>
-              <TextLink to="/privacy">How your CV is handled</TextLink>
-            </div>
-          </div>
-          <ul>{goodToKnow.map((item, index) => <li key={index}>{item}</li>)}</ul>
+          <h3>Good to know</h3>
+          <dl className="jv-know-grid">{goodToKnow.map(([term, detail]) => <div key={term}><dt>{term}</dt><dd>{detail}</dd></div>)}</dl>
+          <div className="jv-know-links"><TextLink to="/privacy">How your CV is handled</TextLink></div>
         </div>
       </div>
     </section>
@@ -137,11 +143,11 @@ export default function HomePage() {
     <section className="jv-check" aria-labelledby="home-check-title">
       <div className="jv-check-copy" data-reveal>
         <h2 id="home-check-title"><span className="jv-h-line">Have one vacancy in mind?</span> <span className="jv-h-line">Try the free CV Check.</span></h2>
-        <p>Bring a CV and a job description, review suggested changes and download your approved version.</p>
-        <StartLink to="/check">Check my CV against a job</StartLink>
+        <p>Bring a CV and a job description, review suggested changes and download your approved version. Save your check to continue into your Automated Job Loop.</p>
+        <StartLink to="/check" variant="secondary">Check my CV against a job</StartLink>
       </div>
-      <div className="jv-check-example" aria-hidden="true" data-reveal style={step(1)}>
-        <span className="jv-chip jv-chip--caption">Example</span>
+      <div className="jv-check-example" aria-hidden="true" data-reveal>
+        <span className="jv-badge">Example</span>
         <div className="jv-check-line jv-check-line--before"><span className="jv-frag-label">Your line</span><p>Wrote weekly SQL reports for the sales team.</p></div>
         <div className="jv-check-line jv-check-line--after"><span className="jv-frag-label">Suggested for this job</span><p>Wrote <mark>weekly sales reports in SQL</mark> for the team.</p></div>
       </div>
@@ -168,6 +174,7 @@ export default function HomePage() {
 
     {/* 7. Final CTA */}
     <section className="jv-cta jv-dark" aria-labelledby="home-final-title">
+      <LoopOrbit size={900} variant="dark" nodes={false} animate={false} className="jv-cta-orbit" />
       <div className="jv-cta-inner">
         <h2 id="home-final-title">Give your job search a routine.</h2>
         <p>Set your roles and schedule once. Come back to jobs and tailored CVs ready for your review.</p>

@@ -4,8 +4,8 @@ import { publicPage, SITE_ORIGIN } from '@/lib/public-route-manifest';
 
 const fallbackTitle = 'Jobvance — automate your job search';
 const fallbackDescription = 'Create your account, upload or build your CV and choose your job preferences. Set a recurring search from connected sources, then review jobs and prepared CVs in your dashboard.';
-const image = `${SITE_ORIGIN}/og-job-loop-account.png`;
-const imageAlt = 'Automated Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.';
+const image = `${SITE_ORIGIN}/og-job-loop-account.png?v=2`;
+const imageAlt = 'Jobvance: Automate your job search. Automated Job Loop finds jobs on your schedule and prepares a tailored CV for each. You review, download and apply.';
 
 /** Always mounted so title-only private routes retain the common share image.
  * Page Helmets may override specific fields without leaving static duplicates. */

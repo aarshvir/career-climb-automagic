@@ -6,7 +6,8 @@ import { resolve } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const imagePath = '/og-job-loop-account.png';
-const imageUrl = `https://jobvance.io${imagePath}`;
+// The share URL is versioned so social caches fetch the redrawn card; the file path itself is unchanged.
+const imageUrl = `https://jobvance.io${imagePath}?v=2`;
 const image = await readFile(resolve(root, 'public', imagePath.slice(1)));
 assert.equal(image.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
 assert.equal(image.readUInt32BE(16), 1200);
@@ -24,7 +25,7 @@ function meta(html, key) {
 function verify(html, title) {
   for (const key of ['og:title', 'twitter:title']) assert.equal(meta(html, key), escape(title));
   for (const key of ['og:image', 'twitter:image']) assert.equal(meta(html, key), imageUrl);
-  for (const key of ['og:image:alt', 'twitter:image:alt']) assert.match(meta(html, key), /create your account/);
+  for (const key of ['og:image:alt', 'twitter:image:alt']) assert.match(meta(html, key), /Automate your job search/);
   for (const key of ['og:description', 'twitter:description']) {
     assert.ok(meta(html, key).length > 20);
     assert.doesNotMatch(meta(html, key), /no account needed|guest access|free beta/i);

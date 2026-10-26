@@ -107,7 +107,7 @@ describe('Automated Job Loop first homepage', () => {
     for (const link of screen.getAllByRole('link', { name: 'Start my Automated Job Loop' })) expect(link).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: /Try a free CV check/ })).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
-    expect(screen.getByText(/Runs weekly, three times a week or daily/)).toHaveTextContent('Confirm your AI provider once before recurring runs');
+    expect(screen.getByText(/Runs weekly, three times a week or daily/)).toHaveTextContent('You confirm AI preparation once before recurring runs start');
     expect(screen.getByText(/Searches your connected sources or a vacancy you add/)).toHaveTextContent('a run may find nothing new');
   });
 });
