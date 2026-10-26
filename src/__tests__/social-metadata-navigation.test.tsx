@@ -51,7 +51,7 @@ describe('real Helmet ownership during client mount and navigation',()=>{
     fireEvent.click(screen.getByRole('link',{name:'Test setup'}));
     await screen.findByRole('heading',{name:'Which roles would you like to find?'});
     await waitFor(()=>expect(content('og:title')).toBe(fallbackTitle));
-    expect(document.title).toBe('Set up your Job Loop | Jobvance');
+    expect(document.title).toBe('Set up your Automated Job Loop | Jobvance');
     expect(content('twitter:title')).toBe(fallbackTitle);
     for(const key of ['description','og:description','twitter:description'])expect(content(key)).toMatch(/^Create your account,/);
     for(const key of ['og:image','twitter:image'])expect(content(key)).toBe(image);

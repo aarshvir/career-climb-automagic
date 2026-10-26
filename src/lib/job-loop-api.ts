@@ -111,15 +111,15 @@ function assertConsent(action: LoopAction) {
   if ((action.action === 'add_opportunity' || action.action === 'link_saved_check') && (!isLoopHttpsUrl(action.opportunity.url) || (action.opportunity.contact && !isLoopHttpsUrl(action.opportunity.contact.sourceUrl)))) throw new Error('Use a real HTTPS vacancy and contact source link, without embedded credentials.');
   if(action.action==='save_schedule'&&(!action.recurringConsent||action.schedule.provider!=='rules'&&!action.schedule.modelConsent))throw new Error('Explicitly allow recurring preparation and any selected provider processing.');
   if(action.action==='save_schedule'&&action.schedule.provider==='rules'&&action.schedule.model!=='grounded-rules-v1')throw new Error('Choose the available rules preparation method.');
-  if((action.action==='erase_loop'||action.action==='erase_self')&&!action.confirmErase)throw new Error('Confirm erasing your private Job Loop record and documents.');
+  if((action.action==='erase_loop'||action.action==='erase_self')&&!action.confirmErase)throw new Error('Confirm erasing your private Automated Job Loop record and documents.');
 }
 export async function requireLoopOwner(userId: string): Promise<void> {
   let session: Awaited<ReturnType<typeof readAuthSession>>;
   let result: Awaited<ReturnType<typeof supabase.auth.getUser>>;
   try { session = await readAuthSession(); result = await supabase.auth.getUser(); }
-  catch { throw new Error('Please sign in again to access your Job Loop.'); }
+  catch { throw new Error('Please sign in again to access your Automated Job Loop.'); }
   const { data, error } = result;
-  if (error || !session?.user || !data.user) throw new Error('Please sign in again to access your Job Loop.');
+  if (error || !session?.user || !data.user) throw new Error('Please sign in again to access your Automated Job Loop.');
   if (session.user.id !== userId || data.user.id !== userId) throw new Error('Your account changed. Previous account data has not been opened.');
 }
 function publicFailure(payload: unknown, fallback: string): string {
@@ -168,7 +168,7 @@ export async function callJobLoop(userId: string, action: LoopAction, stillAutho
   assertConsent(action);
   await requireCurrentOwner();
   stillCurrent();
-  const fallback = action.action === 'get' ? 'We could not load your Job Loop. Retry to reconnect and load your saved work.' : 'This action could not be confirmed. Refresh your Job Loop before retrying.';
+  const fallback = action.action === 'get' ? 'We could not load your Automated Job Loop. Retry to reconnect and load your saved work.' : 'This action could not be confirmed. Refresh your Automated Job Loop before retrying.';
   let result: { data: unknown; error: unknown };
   try { result = await supabase.functions.invoke<unknown>('job-loop-control', { body: action }); }
   catch { await requireCurrentOwner(); throw new Error(fallback); }
@@ -225,7 +225,7 @@ export async function callJobLoop(userId: string, action: LoopAction, stillAutho
     const valid = value.existingState === 'active' ? !!value.snapshot && validLoopGeneration(value.snapshot.lifecycleGeneration) && value.erasureGeneration === undefined
       : value.existingState === 'absent' ? !value.snapshot && value.erasureGeneration === undefined
       : value.existingState === 'erasing' && !value.snapshot && value.erasureGeneration !== undefined;
-    if (!valid) throw new Error('Saved Job Loop applications could not be confirmed. Retry without changing your records.');
+    if (!valid) throw new Error('Saved Automated Job Loop applications could not be confirmed. Retry without changing your records.');
   }
   return parsed.data as LoopResponse;
 }

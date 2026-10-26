@@ -20,11 +20,11 @@ const trustLines = [
   'Secure checkout by Dodo Payments, our merchant of record.',
 ];
 const faqs: [string, React.ReactNode][] = [
-  ['Can I pay for Job Loop in my currency?', 'Choose your billing country and payment currency above the Job Loop plans. Supported local prices are fixed monthly amounts, confirmed before purchase. Other countries can pay in US dollars and enter their actual billing country at secure checkout. One-time CV passes remain in US dollars.'],
+  ['Can I pay for Automated Job Loop in my currency?', 'Choose your billing country and payment currency above the Automated Job Loop plans. Supported local prices are fixed monthly amounts, confirmed before purchase. Other countries can pay in US dollars and enter their actual billing country at secure checkout. One-time CV passes remain in US dollars.'],
   ['Does changing the currency change my existing subscription?', 'No. Your current subscription and any existing checkout keep their original price and currency. Your billing section shows that original price. Choosing another currency here changes the prices for a new purchase only.'],
   ['What counts as a tailored CV?', 'Each time you choose “Tailor my CV for this job” and the AI prepares a version, that uses one. If the request fails before any AI work is done, it does not count. Comparing without AI, editing and downloading never use one.'],
-  ['What stays free?', `Compare without AI, editing, PDF, Word and text downloads, and the applications tracker stay free with no limit. Signed in, you also get ${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs every calendar month (UTC). Job Loop access is shown in your account.`],
-  ['Do passes include Job Loop runs?', 'No. Passes add AI-tailored CVs for the CV check. Job Loop monthly plans are separate and cover the recurring search pace you choose. Your account confirms checkout availability and paid access.'],
+  ['What stays free?', `Compare without AI, editing, PDF, Word and text downloads, and the applications tracker stay free with no limit. Signed in, you also get ${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs every calendar month (UTC). Automated Job Loop access is shown in your account.`],
+  ['Do passes include Automated Job Loop runs?', 'No. Passes add AI-tailored CVs for the CV check. Automated Job Loop monthly plans are separate and cover the recurring search pace you choose. Your account confirms checkout availability and paid access.'],
   ['Can I buy another pass while one is active?', `Yes. Its tailored CVs are added to what you have, and its days start when your current pass ends, so nothing is wasted. The pass that ends soonest is used first. For fair use, any account can tailor up to ${FAIR_USE_TAILORED_CVS_PER_DAY} CVs a day.`],
   ['What if a pass isn’t right for me?', <>If you have used fewer than 5 tailored CVs, ask within 7 days of buying and we will refund you in full. A refunded pass stops working, including any CVs left on it. <Link to="/refund">Read the refund policy</Link>.</>],
   ['Who will my invoice come from?', 'Dodo Payments sells passes for us as merchant of record. They take the payment, handle sales tax and email your invoice, and their name may appear on your card statement.'],
@@ -54,17 +54,17 @@ export default function SubscriptionPricing() {
     <LoopSubscriptionBilling />
     <div className="product-current-offer product-current-offer--single">
       <section className="product-plan" aria-labelledby="loop-offer">
-        <span className="product-eyebrow">JOB LOOP · ACCOUNT NEEDED</span>
-        <h2 id="loop-offer">Start your Job Loop</h2>
+        <span className="product-eyebrow">AUTOMATED JOB LOOP · ACCOUNT NEEDED</span>
+        <h2 id="loop-offer">Start your Automated Job Loop</h2>
         <p className="product-price">Your search<span>On your schedule</span></p>
         <p>{currentOffer.loop}</p>
         <p>Upload a CV or build one from guided questions. Choose the jobs and locations you want, then review matched jobs and prepared documents in your dashboard. Your dashboard lists connected sources and reports the result of each run.</p>
-        <Link className="product-button" to="/onboarding">Start my Job Loop <ArrowRight size={17} aria-hidden="true" /></Link>
+        <Link className="product-button" to="/onboarding">Start my Automated Job Loop <ArrowRight size={17} aria-hidden="true" /></Link>
         <p className="product-plan-note">The CV check remains available when cloud preparation is full or paused. Your account shows current access; there is no guaranteed daily AI allowance.</p>
       </section>
     </div>
     <section className="product-current-offer pricing-offer" aria-labelledby="passes-title">
-      <div className="pricing-section-head"><p className="product-eyebrow">AI CV TAILORING · AVAILABLE NOW</p><h2 id="passes-title">AI CV tailoring: free to start, passes when you need more</h2><p>{currentOffer.check}</p><p>These optional one-time CV Check passes are priced in US dollars. The currency selector above applies to Job Loop subscriptions.</p></div>
+      <div className="pricing-section-head"><p className="product-eyebrow">AI CV TAILORING · AVAILABLE NOW</p><h2 id="passes-title">AI CV tailoring: free to start, passes when you need more</h2><p>{currentOffer.check}</p><p>These optional one-time CV Check passes are priced in US dollars. The currency selector above applies to your Automated Job Loop subscriptions.</p></div>
       {picked && <p className="pricing-picked" role="status">You picked the {passPlan(picked).name} pass (${passPlan(picked).price}, {passPlan(picked).days} days). {user ? `Choose “Buy ${passPlan(picked).name}” when you are ready to pay.` : 'Sign in, then choose it again to pay.'}</p>}
       {params.get('checkout') === 'cancelled' && <p className="pricing-picked" role="status">Checkout was cancelled. You have not been charged.</p>}
       <div className="pricing-tiers">

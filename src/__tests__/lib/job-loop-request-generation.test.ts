@@ -114,9 +114,9 @@ describe('browser request generation contract', () => {
     const action = { action: 'gmail_disconnect', expectedGeneration: 7 } as unknown as LoopAction;
     sdk.invoke.mockResolvedValueOnce({
       data: null,
-      error: { context: new Response(JSON.stringify({ error: 'This request belongs to a previous Job Loop lifetime.', code: 'LOOP_GENERATION_STALE' }), { status: 409 }) },
+      error: { context: new Response(JSON.stringify({ error: 'This request belongs to a previous Automated Job Loop lifetime.', code: 'LOOP_GENERATION_STALE' }), { status: 409 }) },
     });
-    await expect(callJobLoop(session.user.id, action)).rejects.toThrow('previous Job Loop lifetime');
+    await expect(callJobLoop(session.user.id, action)).rejects.toThrow('previous Automated Job Loop lifetime');
     expect(sdk.invoke).toHaveBeenCalledOnce();
     expect(sdk.invoke.mock.calls[0][1].body).toEqual(action);
   });

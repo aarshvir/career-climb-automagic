@@ -49,11 +49,11 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); vi.restoreAllMocks(); });
 
-describe('Job Loop source-first onboarding', () => {
+describe('Automated Job Loop source-first onboarding', () => {
   it('offers first value to guests before private saving needs sign-in', () => {
     mocks.user = null; render(tree());
     expect(screen.getByRole('link', { name: 'Try a CV check first' })).toHaveAttribute('href', '/check?audience=professional');
-    expect(screen.getByRole('link', { name: 'Set up my Job Loop' })).toHaveAttribute('href', '/auth?next=%2Floop');
+    expect(screen.getByRole('link', { name: 'Set up my Automated Job Loop' })).toHaveAttribute('href', '/auth?next=%2Floop');
     expect(mocks.call).not.toHaveBeenCalled();
   });
   it('shows one first action and saves no invented preparation or search result', async () => {
@@ -61,9 +61,9 @@ describe('Job Loop source-first onboarding', () => {
     expect(await screen.findByRole('button', { name: 'Set up directly without questions' })).toBeEnabled();
     expect(screen.queryByRole('button', { name: 'Prepare today’s applications' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Enable recurring preparation' })).not.toBeInTheDocument();
-    expect(screen.getAllByRole('region', { name: 'Job Loop setup' })).toHaveLength(1);
+    expect(screen.getAllByRole('region', { name: 'Automated Job Loop setup' })).toHaveLength(1);
     expect(screen.getByRole('link', { name: 'Start your setup' })).toHaveAttribute('href', '/onboarding');
-    expect(screen.queryByRole('list', { name: 'Job Loop journey' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Automated Job Loop journey' })).not.toBeInTheDocument();
     expect(screen.queryByText(/No employer API sources are reported as configured/)).not.toBeInTheDocument();
     expect(within(screen.getByRole('navigation', { name: 'Choose a product' })).getByRole('link', { name: /CV Check/ })).toHaveAttribute('href', '/check');
     expect(mocks.call.mock.calls.every(([, action]) => action.action === 'get')).toBe(true);

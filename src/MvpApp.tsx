@@ -73,7 +73,7 @@ function ProtectedJobLoop() {
   // Capture the presence only; the sealed ticket belongs to the page's memory.
   // An expired auth session can sign in in another tab without discarding it.
   const [mailboxReturn] = useState(() => new URLSearchParams(window.location.hash.slice(1)).has('gmail_ticket'));
-  if (loading) return <p className="p-8" role="status">Opening your Job Loop…</p>;
+  if (loading) return <p className="p-8" role="status">Opening your Automated Job Loop…</p>;
   return user || mailboxReturn ? <JobLoop /> : <Navigate to={`/auth?next=${encodeURIComponent(`/loop${location.search}`)}`} replace />;
 }
 function SiteChrome({ position }: { position: 'header' | 'footer' }) {

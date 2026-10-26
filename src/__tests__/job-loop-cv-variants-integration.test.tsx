@@ -28,7 +28,7 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); });
 
-describe('CV variants in the actual Job Loop page', () => {
+describe('CV variants in the actual Automated Job Loop page', () => {
   it.each([undefined, false])('keeps the variant editor unavailable when the deployed backend capability is %s', async capability => {
     current.capabilities.cvVariants = capability;
     render(<HelmetProvider><MemoryRouter initialEntries={['/loop']}><JobLoop /></MemoryRouter></HelmetProvider>);

@@ -203,12 +203,12 @@ describe('signup and password recovery screens', () => {
     sdk.getSession.mockResolvedValue({ data: { session: signedIn }, error: null });
     render(<MemoryRouter initialEntries={['/auth/callback?code=example-once']}><Routes>
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/loop" element={<h1>Job Loop dashboard</h1>} />
+      <Route path="/loop" element={<h1>Automated Job Loop dashboard</h1>} />
     </Routes></MemoryRouter>);
     expect(screen.getByRole('status')).toHaveTextContent('Completing sign-in');
     expect(sdk.getSession).not.toHaveBeenCalled();
     await act(async () => { initialized({ error: null }); });
-    expect(await screen.findByText('Job Loop dashboard')).toBeInTheDocument();
+    expect(await screen.findByText('Automated Job Loop dashboard')).toBeInTheDocument();
   });
 });
 
@@ -221,12 +221,12 @@ it('cache cleanup also removes only the current account’s interest-form marker
 });
 
 
-describe('Job Loop account entry and confirmation recovery', () => {
-  it('keeps the Job Loop outcome and first steps beside signup on mobile markup', async () => {
+describe('Automated Job Loop account entry and confirmation recovery', () => {
+  it('keeps the Automated Job Loop outcome and first steps beside signup on mobile markup', async () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
-    expect(await screen.findByText('YOUR JOB LOOP STARTS HERE')).toBeInTheDocument();
+    expect(await screen.findByText('YOUR AUTOMATED JOB LOOP STARTS HERE')).toBeInTheDocument();
     expect(screen.getByRole('list', { name:'After creating your account' })).toHaveTextContent('run your first search');
-    expect(screen.getByText(/Job Loop plans from US\$29\/month/)).toBeInTheDocument();
+    expect(screen.getByText(/Automated Job Loop plans from US\$29\/month/)).toBeInTheDocument();
     expect(sdk.signUp).not.toHaveBeenCalled();
   });
   it.each(['Instagram 321.0','Mozilla [FBAN/FBIOS;FBAV/500]'])('offers email and browser guidance for %s without attempting blocked OAuth', async agent => {

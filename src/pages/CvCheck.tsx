@@ -31,7 +31,7 @@ import "./CvCheck.css";
 
 function ContinueSavedCheck({ record, ownerId }: { record: FreeCvCheck; ownerId: string }) {
   const path = record.user_id === ownerId && record.status === 'approved' ? savedCheckContinuationPath(record.id) : null;
-  return path ? <Link className="text-sm underline underline-offset-4" to={path}>Continue this saved check in Job Loop</Link> : null;
+  return path ? <Link className="text-sm underline underline-offset-4" to={path}>Continue this saved check in your Automated Job Loop</Link> : null;
 }
 
 const emptyDraft: CheckDraft = { jobTitle: "", company: "", sourceText: "", reviewedText: "", jobDescription: "" };

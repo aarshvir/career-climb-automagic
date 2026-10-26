@@ -63,10 +63,10 @@ const tabs: { id: Tab; label: string; icon: typeof FileText }[] = [
   { id: "billing", label: "Plan & allowance", icon: Layers },
 ];
 const sectionDetails: Record<Tab, { title: string; description: string; breadcrumb: string }> = {
-  cv: { title: "Your saved CVs.", description: "Manage the source documents you saved here for individual applications. Your Job Loop CVs and setup are in Job Loop.", breadcrumb: "Saved CVs" },
+  cv: { title: "Your saved CVs.", description: "Manage the source documents you saved here for individual applications. Your Automated Job Loop CVs and setup are in your Automated Job Loop.", breadcrumb: "Saved CVs" },
   tailor: { title: "Review and download a CV.", description: "Prepare a CV for a job you already found, or open a saved version. Review it before approving and downloading.", breadcrumb: "Review & download" },
   tracker: { title: "Your application tracker.", description: "Update the applications you recorded here, with notes and follow-up dates. See All applications for records across Jobvance.", breadcrumb: "Application tracker" },
-  billing: { title: "Your plan and document allowance.", description: "Check your preparation allowance and open the current plans. Your Job Loop schedule is managed in Job Loop.", breadcrumb: "Plan & allowance" },
+  billing: { title: "Your plan and document allowance.", description: "Check your preparation allowance and open the current plans. Your Automated Job Loop schedule is managed in your Automated Job Loop.", breadcrumb: "Plan & allowance" },
 };
 const dateLabel = (value: string) => new Date(value).toLocaleDateString();
 
@@ -353,7 +353,7 @@ export default function Workspace() {
           <div className="ws-sidebar-heading"><span className="ws-workspace-mark" aria-hidden="true">J</span><div><strong>CV documents</strong><span>For individual applications</span></div></div>
           <Link to="/loop" className="ws-free-check ws-loop-return">
             <RefreshCw size={20} aria-hidden="true" />
-            <span><strong>Back to Job Loop</strong><small>Your setup, scheduled search and matched jobs.</small></span>
+            <span><strong>Back to your Automated Job Loop</strong><small>Your setup, scheduled search and matched jobs.</small></span>
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
           <nav aria-label="CV document sections" className="ws-navigation">
@@ -493,7 +493,7 @@ export default function Workspace() {
               {data?.cvs.length === 0 && (
                 <p className="ws-empty-state">
                   <FolderOpen size={28} aria-hidden="true" />
-                  No source CVs saved in this workspace. Manage CVs for your scheduled search in Job Loop.
+                  No source CVs saved in this workspace. Manage CVs for your scheduled search in your Automated Job Loop.
                 </p>
               )}
               <div className="grid gap-3">

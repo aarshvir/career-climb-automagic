@@ -80,7 +80,7 @@ describe('tracking row task and route recovery with fictional local mocks', () =
     fireEvent.change(screen.getByLabelText('Follow-up date'), { target: { value: '2026-10-23' } });
     fireEvent.change(screen.getByLabelText('My application notes'), { target: { value: 'Unsaved Loop note' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /I report this status myself/ }));
-    view.rerender(<p>Another Job Loop task</p>); view.rerender(loopRow(item, save));
+    view.rerender(<p>Another Automated Job Loop task</p>); view.rerender(loopRow(item, save));
     expect(screen.getByRole('checkbox', { name: /I report this status myself/ })).not.toBeChecked();
     expect(screen.getByRole('button', { name: 'Save tracking update' })).toBeDisabled();
     view.unmount(); render(loopRow(item, save));

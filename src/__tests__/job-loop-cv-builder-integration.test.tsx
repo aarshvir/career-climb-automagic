@@ -37,7 +37,7 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); });
 
-describe('no-CV entry inside the real Job Loop', () => {
+describe('no-CV entry inside the real Automated Job Loop', () => {
   it('builds a first source draft, then copies the name for explicit profile review without saving or running', async () => {
     render(tree()); await openBuilder(); enterAnswers();
     fireEvent.click(screen.getByRole('button', { name: 'Preview my CV draft' }));

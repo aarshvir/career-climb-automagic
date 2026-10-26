@@ -15,7 +15,7 @@ describe('account destinations', () => {
     rememberLoopReturn('/loop', 1000);
     expect(takeLoopReturn(1801000)).toBeNull();
   });
-  it('normalizes an old generic dashboard return to Job Loop without losing explicit tabs', () => {
+  it('normalizes an old generic dashboard return to your Automated Job Loop without losing explicit tabs', () => {
     expect(accountDestination('/dashboard')).toBe('/loop');
     rememberLoopReturn('/dashboard', 1000);
     expect(takeLoopReturn(1001)).toBe('/loop');

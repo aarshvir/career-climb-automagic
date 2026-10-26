@@ -119,7 +119,7 @@ describe('account-first owned onboarding', () => {
     state.call.mockImplementation(() => new Promise(done => { resolve = done; })); open();
     expect(screen.queryByLabelText('Search or add a role')).not.toBeInTheDocument();
     await act(async () => { resolve({ existingState: 'active', snapshot: snapshot(savedProfile, 0, 2) }); });
-    expect(await screen.findByRole('heading', { name: 'Your Job Loop is ready to continue.' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Your Automated Job Loop is ready to continue.' })).toBeInTheDocument();
     expect(screen.queryByDisplayValue('Unsaved title')).not.toBeInTheDocument();
   });
   it('preselects only explicit account career fields and keeps them editable', async () => {
@@ -227,7 +227,7 @@ describe('account-first owned onboarding', () => {
   });
   it('preserves a configured profile and sends its owner straight back to the dashboard', async () => {
     state.call.mockResolvedValue({ existingState: 'active', snapshot: snapshot({ ...savedProfile, revision: 4 }) }); open();
-    await screen.findByRole('heading', { name: 'Your Job Loop is ready to continue.' });
+    await screen.findByRole('heading', { name: 'Your Automated Job Loop is ready to continue.' });
     expect(screen.queryByLabelText('Target roles')).not.toBeInTheDocument(); expect(state.call).toHaveBeenCalledOnce();
   });
   it('does not overwrite a setup created elsewhere between passive read and final consent', async () => {

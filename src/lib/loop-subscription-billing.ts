@@ -47,7 +47,7 @@ export function validLoopCheckoutUrl(value: string, billingMode: 'test'|'live'):
   try { const url=new URL(value); return url.protocol==='https:' && url.hostname === (billingMode==='live'?'checkout.dodopayments.com':'test.checkout.dodopayments.com') && !url.username && !url.password && !url.port && url.pathname.startsWith('/'); } catch { return false; }
 }
 function currentScope(scope: LoopBillingScope, stillCurrent?: () => boolean) {
-  if (scope.authority < 0 || trackingDraftAuthority(scope.ownerId)!==scope.authority || stillCurrent && !stillCurrent()) throw new LoopBillingError('Your sign-in changed. Reopen your current Job Loop billing before continuing.','AUTH_CHANGED');
+  if (scope.authority < 0 || trackingDraftAuthority(scope.ownerId)!==scope.authority || stillCurrent && !stillCurrent()) throw new LoopBillingError('Your sign-in changed. Reopen your current Automated Job Loop billing before continuing.','AUTH_CHANGED');
 }
 async function call(scope: LoopBillingScope, body: object, stillCurrent?: () => boolean): Promise<unknown> {
   const original=Object.freeze({...body});
@@ -62,7 +62,7 @@ async function call(scope: LoopBillingScope, body: object, stillCurrent?: () => 
     const payload=response instanceof Response ? await response.clone().json().catch(()=>null) : null;
     await assertOwner();
     const code=payload && !Array.isArray(payload) && typeof payload.code==='string' && /^[A-Z_]{1,80}$/.test(payload.code) ? payload.code : null;
-    throw new LoopBillingError(['BILLING_UNAVAILABLE','LOOP_BILLING_UNAVAILABLE'].includes(code??'')?'Job Loop checkout is not available right now. Your existing access and saved work are unchanged.':code==='LOOP_CHECKOUT_FINISHED'?'This checkout already has a subscription. Refresh billing to manage its current state.':code==='LOOP_SUBSCRIPTION_EXISTS'?'An existing subscription may still renew or have an unresolved payment. Refresh billing and confirm its cancellation, or contact support before another checkout.':code==='LOOP_PILOT_FULL'?'Job Loop is at its current account capacity. A new checkout was not opened. Existing access and saved work are unchanged.':code==='LOOP_CHECKOUT_PENDING'?'A previous checkout needs confirmation. Refresh billing and resume that checkout.':'We could not confirm this billing action. Refresh billing before retrying the original request.',code);
+    throw new LoopBillingError(['BILLING_UNAVAILABLE','LOOP_BILLING_UNAVAILABLE'].includes(code??'')?'Automated Job Loop checkout is not available right now. Your existing access and saved work are unchanged.':code==='LOOP_CHECKOUT_FINISHED'?'This checkout already has a subscription. Refresh billing to manage its current state.':code==='LOOP_SUBSCRIPTION_EXISTS'?'An existing subscription may still renew or have an unresolved payment. Refresh billing and confirm its cancellation, or contact support before another checkout.':code==='LOOP_PILOT_FULL'?'Automated Job Loop is at its current account capacity. A new checkout was not opened. Existing access and saved work are unchanged.':code==='LOOP_CHECKOUT_PENDING'?'A previous checkout needs confirmation. Refresh billing and resume that checkout.':'We could not confirm this billing action. Refresh billing before retrying the original request.',code);
   }
   return result.data;
 }

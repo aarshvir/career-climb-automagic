@@ -25,7 +25,7 @@ beforeEach(() => {
   mocks.call.mockImplementation(async (_owner, action) => { if (action.action === 'suggest_claims') return { snapshot: structuredClone(current), suggestions: [{ sourceKind: 'cv_passage', sourceQuote: source, phrasing: source, context: 'Example College', kind: 'academic_project', resultStatus: 'not_measured', confirmed: true, shareable: true }] }; if (action.action === 'save_claim') { current.claims = [{ ...action.claim, id: 'fact-a', revision: 1, status: 'active', createdAt: '2026-10-25T00:00:00Z' }]; current.recordVersion++; return { snapshot: structuredClone(current) }; } if (action.action === 'start_run') return { snapshot: structuredClone(current), runId: 'first-run' }; if (action.action !== 'get') throw new Error('Unexpected setup write'); return { snapshot: structuredClone(current) }; });
 });
 afterEach(() => { cleanup(); clearLoopWorkingDraft(); clearTrackingDraftMemory(); });
-describe('saved quiz continuation in the actual Job Loop', () => {
+describe('saved quiz continuation in the actual Automated Job Loop', () => {
   it('waits for the owned snapshot, opens the record, consumes the hint and preserves saved source without running', async () => {
     let resolve!: (value: unknown) => void;
     mocks.call.mockImplementationOnce(() => new Promise(done => { resolve = done; }));

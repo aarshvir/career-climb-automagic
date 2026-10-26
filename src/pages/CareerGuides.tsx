@@ -22,7 +22,7 @@ function GuideCard({ guide }: { guide: CareerGuide }) {
 function GuideActions() {
   return <aside className="cg-actions" aria-labelledby="cg-actions-title">
     <div><p className="cg-eyebrow">PUT IT INTO PRACTICE</p><h2 id="cg-actions-title">Start with one real vacancy.</h2><p>Bring your CV and one job description. Review the evidence, approve your wording and download your CV. The free check does not require an account.</p></div>
-    <div className="cg-action-links"><Link className="cg-primary" to="/check">Check my CV for free <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/loop">Explore saving and reuse</Link><Link className="cg-help-link" to="/contact">Get help with the workflow</Link><p>Private saving and the cloud Job Loop require sign-in. You send messages and submit applications yourself.</p></div>
+    <div className="cg-action-links"><Link className="cg-primary" to="/check">Check my CV for free <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/loop">Explore saving and reuse</Link><Link className="cg-help-link" to="/contact">Get help with the workflow</Link><p>Private saving and the Automated Job Loop require sign-in. You send messages and submit applications yourself.</p></div>
   </aside>;
 }
 
