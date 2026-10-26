@@ -15,7 +15,7 @@ import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
 type Kind = "home" | "pricing" | "how" | "faq" | "about" | "contact" | "privacy" | "terms" | "refund" | "help" | "notfound";
 const titles: Record<Kind, string> = {
-  home: "Automate your job search", pricing: "Automated Job Loop access, plans and CV passes", how: "How the Automated Job Loop works", faq: "Questions about using Jobvance", about: "Why we built Jobvance", contact: "Get help with Jobvance", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "We couldn’t find that page",
+  home: "Automate your job search", pricing: "Choose your Automated Job Loop plan.", how: "How the Automated Job Loop works", faq: "Questions about using Jobvance", about: "Why we built Jobvance", contact: "Get help with Jobvance", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "We couldn’t find that page",
 };
 const labels: Record<Kind, string> = { home: "Jobvance", pricing: "Access & pricing", how: "How it works", faq: "Questions & answers", about: "About Jobvance", contact: "Contact", privacy: "Your information", terms: "The details", refund: "Refunds", help: "Help with your application", notfound: "Page not found" };
 const intros: Partial<Record<Kind, string>> = {

@@ -74,3 +74,22 @@
 @media(max-width:1000px) { .pricing-offer .pricing-tiers { grid-template-columns:repeat(2,minmax(0,1fr)); }}
 @media(max-width:640px) { .pricing-offer .pricing-tiers { grid-template-columns:1fr; }}
 
+/* Public pricing leads with the plan decision; account billing stays unchanged. */
+.product-page--pricing .product-inner { padding-top:32px; }
+.product-page--pricing .product-page-heading { max-width:none; margin-bottom:24px; }
+.product-page--pricing .product-page-heading h1 { max-width:30ch; margin-top:12px; font-size:clamp(30px,3.4vw,48px); line-height:1.12; }
+.product-page--pricing .product-page-intro { max-width:980px; margin-top:12px !important; line-height:1.6; }
+.product-page--pricing .loop-subscription-billing.product-proposed-plans { margin:0 0 40px; }
+.product-page--pricing .loop-subscription-billing > .product-eyebrow { margin:0 0 8px; }
+.product-page--pricing .loop-subscription-billing > h2 { font-size:28px; line-height:1.25; }
+.product-page--pricing .loop-subscription-billing > h2 + p { margin:10px 0 16px; max-width:1000px; line-height:1.6; }
+.product-page--pricing .loop-price-market { margin:16px 0 20px; gap:10px 16px; }
+.product-page--pricing .loop-price-market label { gap:6px; }
+.product-page--pricing .loop-price-market p { margin:0; line-height:1.5; }
+.product-page--pricing .product-proposed-grid { gap:18px; margin:20px 0 24px; }
+.product-page--pricing .product-proposed-grid .product-plan { padding:24px; }
+.product-page--pricing .product-proposed-grid h3 { font-size:24px; line-height:1.25; }
+.product-page--pricing .product-proposed-grid .product-price { margin:16px 0; font-size:48px; }
+.product-page--pricing .product-proposed-grid .product-price span { margin-top:8px; font-size:14px; }
+.product-page--pricing .product-proposed-grid .product-plan ul { gap:10px; margin:16px 0 22px; font-size:14px; line-height:1.6; }
+
