@@ -532,7 +532,7 @@ export default function JobLoop() {
     : !snapshot?.profile ? 'Save your CV and search preferences first.'
     : uncommitted ? 'Save or discard your CV and fact edits before searching.'
     : !snapshot.profile.targetTitles.length || !snapshot.profile.locations.length ? 'Add a target role and a location in My CV & experience.'
-    : !!busy ? 'Wait for the current action to finish.'
+    : busy ? 'Wait for the current action to finish.'
     : activeRun(snapshot) ? 'Your search is already running. Results update here automatically.'
     : !snapshot.capabilities.cloudWorker ? 'Search processing is currently unavailable. Retry Refresh records.'
     : snapshot.capabilities.dailyRunLimit < 1 ? 'No runs are available in your current allowance.'
