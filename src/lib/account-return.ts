@@ -8,7 +8,7 @@ const KEY = 'jobvance_account_return_v1';
 const TTL = 30 * 60 * 1000;
 type LoopReturn = '/loop' | '/loop?audience=student' | '/loop?audience=mba' | '/loop?audience=professional';
 const loopPaths: readonly string[] = ['/loop', '/loop?audience=student', '/loop?audience=mba', '/loop?audience=professional'];
-const adminSections = ['today', 'growth', 'users', 'revenue', 'marketing', 'operations', 'support'] as const;
+const adminSections = ['today', 'growth', 'users', 'revenue', 'marketing', 'acquisition', 'journeys', 'operations', 'support'] as const;
 type AdminRoot = '/admin' | `/admin/${typeof adminSections[number]}` | '/admin-original' | '/admin2';
 type AdminReturn = AdminRoot | `${AdminRoot}?days=${7 | 30 | 90}`;
 const adminRoots = ['/admin', ...adminSections.map(section => `/admin/${section}`), '/admin-original', '/admin2'];

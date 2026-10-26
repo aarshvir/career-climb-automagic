@@ -39,6 +39,9 @@ jobs:
     - name: Verify cloud authentication boundaries
       run: deno test --allow-env --config supabase/functions/job-loop-worker/deno.json supabase/tests/job-loop-edge.deno.ts
 
+    - name: Verify first-party tracking intake
+      run: deno test --allow-env=SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,ALLOWED_ORIGINS,APP_URL --config supabase/functions/jobvance-track/deno.json supabase/tests/jobvance-track-edge.deno.ts
+
     - name: Run build
       run: npm run build
 

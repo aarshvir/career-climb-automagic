@@ -12,6 +12,8 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ProductPage from "@/pages/ProductPage";
 import RouteNavigation from '@/components/RouteNavigation';
 import MetaPixelPages from '@/components/MetaPixelPages';
+import AnalyticsPages from '@/components/AnalyticsPages';
+import { ContactGate } from '@/components/ContactDetails';
 import SiteShareMetadata from '@/components/SiteShareMetadata';
 import { accountDestination, workspaceReturnPath } from '@/lib/account-return';
 const Auth = lazy(() => import("@/pages/Auth")),
@@ -92,6 +94,7 @@ export default function MvpApp() {
                 <SiteShareMetadata />
                 <RouteNavigation />
                 <MetaPixelPages />
+                <AnalyticsPages />
                 <SiteChrome position="header" />
                 <div id="main-content" tabIndex={-1} className="outline-none">
                 <Suspense
@@ -99,6 +102,7 @@ export default function MvpApp() {
                     <div className="jv-loading" role="status"><div className="jv-loading-line" aria-hidden="true" /><p>Opening your next step…</p><div className="jv-loading-line" aria-hidden="true" /><div className="jv-loading-line" aria-hidden="true" /></div>
                   }
                 >
+                  <ContactGate>
                   <Routes>
                     <Route path="/" element={<ProductPage kind="home" />} />
                     <Route path="/pilot" element={<Navigate to="/job-loop" replace />} />
@@ -152,6 +156,7 @@ export default function MvpApp() {
                     <Route path="/dashboard" element={<ProtectedWorkspace />} />
                     <Route path="/admin" element={<AdminHome />} />
                     <Route path="/admin/:section" element={<AdminHome />} />
+                    <Route path="/admin/:section/:id" element={<AdminHome />} />
                     <Route path="/admin-original" element={<AdminPortal view="operations" />} />
                     <Route path="/admin2" element={<AdminPortal view="founder" />} />
                     <Route path="/marketing-admin" element={<MarketingAdmin />} />
@@ -197,6 +202,7 @@ export default function MvpApp() {
                     />
                     <Route path="*" element={<ProductPage kind="notfound" />} />
                   </Routes>
+                  </ContactGate>
                 </Suspense>
                 </div>
                 <SiteChrome position="footer" />
