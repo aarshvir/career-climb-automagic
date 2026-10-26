@@ -13,3 +13,10 @@ export function ago(iso: string | null): string {
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: minutes > 300 * 24 * 60 ? 'numeric' : undefined });
 }
 export function statusPill(tone: 'good' | 'warn' | 'bad' | 'neutral', label: string) { return <span className={`vh-pill${tone === 'neutral' ? '' : ` vh-pill--${tone}`}`}>{label}</span>; }
+/** 45 s, 3 min 20 s, 1 h 5 min. */
+export function seconds(value: number): string {
+  const total = Math.max(0, Math.round(value));
+  if (total < 60) return `${total} s`;
+  if (total < 3600) return `${Math.floor(total / 60)} min${total % 60 ? ` ${total % 60} s` : ''}`;
+  return `${Math.floor(total / 3600)} h ${Math.floor(total % 3600 / 60)} min`;
+}

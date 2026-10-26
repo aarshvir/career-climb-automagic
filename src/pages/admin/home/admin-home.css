@@ -49,6 +49,7 @@
 .vh-value { font-family: var(--vh-display); font-size: 2rem; line-height: 1.15; color: var(--vh-amber); margin-top: 4px; font-variant-numeric: lining-nums tabular-nums; }
 .vh-value--good { color: var(--vh-success); }
 .vh-value--bad { color: var(--vh-caution); }
+.vh-value--text { font-size: 1.35rem; line-height: 1.25; overflow-wrap: anywhere; }
 .vh-value small { font-size: .9rem; color: var(--vh-dust); margin-left: 4px; }
 .vh-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 6px; font-size: .75rem; color: rgba(155, 143, 166, .8); }
 .vh-help { margin: 6px 0 0; font-size: .75rem; color: rgba(155, 143, 166, .7); }
@@ -100,6 +101,7 @@
 .vh-table tbody tr:hover { background: rgba(37, 26, 56, .35); }
 .vh-table tbody tr:last-child td { border-bottom: 0; }
 .vh-nowrap { white-space: nowrap; }
+.vh-table td.vh-source { min-width: 170px; }
 .vh-r { text-align: right !important; } .vh-c { text-align: center !important; }
 .vh-table td.vh-r { font-variant-numeric: tabular-nums; }
 .vh-table .vh-strong { color: var(--vh-star); font-weight: 600; }
@@ -131,6 +133,14 @@
 .vh-state h1 { font-family: var(--vh-display); font-weight: 500; font-size: 1.9rem; margin: 0 0 8px; }
 .vh-state p { color: var(--vh-dust); }
 
+.vh-timeline { list-style: none; margin: 0; padding: 0; }
+.vh-step { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 9px 0 9px 14px; border-left: 2px solid rgba(42, 30, 61, .9); position: relative; font-size: .875rem; }
+.vh-step::before { content: ''; position: absolute; left: -6px; top: 15px; width: 10px; height: 10px; border-radius: 50%; background: var(--vh-dust); }
+.vh-step--page_view::before { background: var(--vh-amber); } .vh-step--click::before { background: var(--vh-indigo); }
+.vh-step--form_submit::before, .vh-step--identify::before { background: var(--vh-success); }
+.vh-step time { font-family: var(--vh-mono); font-size: .72rem; color: var(--vh-dust); padding-top: 2px; }
+.vh-step strong { font-weight: 600; color: var(--vh-star); overflow-wrap: anywhere; }
+.vh-step small { display: block; color: var(--vh-dust); font-size: .75rem; margin-top: 2px; }
 @media (max-width: 720px) {
   .vh-top { padding: 12px 16px; }
   .vh-nav { order: 3; width: 100%; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }

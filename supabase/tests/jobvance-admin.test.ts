@@ -97,4 +97,23 @@ describe('server administration authorization and input boundary',()=>{
     expect(m.rpc).toHaveBeenCalledExactlyOnceWith('jobvance_admin_dashboard',{p_actor:owner,p_days:30});
     expect(fetcher).not.toHaveBeenCalled();
   });
+  it('routes analytics, contact, visit and person reads through actor-checked RPCs with safe audit metadata',async()=>{
+    const m=database(); const visit='00000000-0000-4000-8000-0000000000b1';
+    m.rpc.mockImplementation(async(name:string)=>({data:name==='jobvance_admin_contacts'?[{userId:owner},{userId:visit}]:{},error:null}));
+    expect(validateAdminAction({action:'analytics',days:7})).toEqual({action:'analytics',days:7});
+    expect(validateAdminAction({action:'contacts'})).toEqual({action:'contacts'});
+    expect(validateAdminAction({action:'visit',id:visit.toUpperCase()})).toEqual({action:'visit',id:visit});
+    expect(validateAdminAction({action:'person',id:owner})).toEqual({action:'person',id:owner});
+    for(const input of [{action:'analytics',days:14},{action:'contacts',all:true},{action:'visit',id:'not-a-uuid'},{action:'person'},{action:'person',id:owner,phone:'+1'}]) expect(()=>validateAdminAction(input)).toThrow(ApiError);
+    await controlAdmin(m.db,{id:owner,role:'owner'},{action:'analytics',days:30},()=>undefined);
+    expect(await controlAdmin(m.db,{id:owner,role:'operator'},{action:'contacts'},()=>undefined)).toEqual({contacts:[{userId:owner},{userId:visit}]});
+    await controlAdmin(m.db,{id:owner,role:'owner'},{action:'visit',id:visit},()=>undefined);
+    await controlAdmin(m.db,{id:owner,role:'owner'},{action:'person',id:owner},()=>undefined);
+    expect(m.rpc.mock.calls).toEqual([
+      ['jobvance_admin_analytics',{p_actor:owner,p_days:30}],['jobvance_admin_record_event',{p_actor:owner,p_action:'snapshot',p_details:{days:30}}],
+      ['jobvance_admin_contacts',{p_actor:owner}],['jobvance_admin_record_event',{p_actor:owner,p_action:'snapshot',p_details:{count:2}}],
+      ['jobvance_admin_session',{p_actor:owner,p_session:visit}],['jobvance_admin_record_event',{p_actor:owner,p_action:'snapshot',p_target:visit,p_details:{}}],
+      ['jobvance_admin_person',{p_actor:owner,p_user:owner}],['jobvance_admin_record_event',{p_actor:owner,p_action:'snapshot',p_target:owner,p_details:{}}],
+    ]);
+  });
 });

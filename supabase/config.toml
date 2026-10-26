@@ -98,3 +98,8 @@ verify_jwt = false
 [functions.jobvance-review-worker]
 enabled = true
 verify_jwt = false
+
+# Analytics intake: anonymous visits are allowed; a valid token in the body links the account.
+[functions.jobvance-track]
+enabled = true
+verify_jwt = false

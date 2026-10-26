@@ -18,7 +18,7 @@ interface AuthContextType {
   configurationError: string | null;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<AuthResult>;
-  signUpWithEmail: (email: string, password: string) => Promise<SignUpResult>;
+  signUpWithEmail: (email: string, password: string, details?: { fullName: string; phone: string }) => Promise<SignUpResult>;
   resetPassword: (email: string) => Promise<AuthResult>;
   updatePassword: (password: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
@@ -109,12 +109,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const signUpWithEmail = useCallback(async (email: string, password: string): Promise<SignUpResult> => {
+  const signUpWithEmail = useCallback(async (email: string, password: string, details?: { fullName: string; phone: string }): Promise<SignUpResult> => {
     if (configurationError) return { error: configurationError };
     try {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(), password,
-        options: { emailRedirectTo: getGoogleOAuthOptions().redirectTo },
+        options: { emailRedirectTo: getGoogleOAuthOptions().redirectTo, ...(details && { data: { full_name: details.fullName, phone: details.phone } }) },
       });
       if (error) return { error: error.message };
       if (data.session) { setTrackingDraftOwner(data.session.user.id, cvVariantSessionIdentity(data.session)); observeCvVariantRecoverySession(data.session); setSession(data.session); setAuthError(null); }
