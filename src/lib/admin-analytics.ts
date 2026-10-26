@@ -23,7 +23,7 @@ export const analyticsSchema = z.object({
 
 const person = z.object({ userId: id, name: maybe(text), email: text, phone: maybe(text), joinedAt: time });
 export const sessionSchema = z.object({
-  id, visitorId: id, userId: maybe(id), startedAt: time, lastSeenAt: time, channel: text, context: z.record(z.union([z.string().max(300), z.boolean()])),
+  id, visitorId: id, userId: maybe(id), startedAt: time, lastSeenAt: time, channel: text, context: z.record(z.string(), z.union([z.string().max(300), z.boolean()])),
   device: maybe(text), browser: maybe(text), os: maybe(text), inApp: maybe(text), country: maybe(text), person: person.nullable(), otherVisits: count,
   events: z.array(z.object({ at: time, kind: z.enum(['page_view', 'click', 'form_submit', 'identify']), path: text, title: maybe(text), label: maybe(text), href: maybe(text), seconds: maybe(count), scroll: maybe(z.number().min(0).max(100)) })).max(2000),
 });
