@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-26",
+  "site": "https://jobvance.io",
+  "publicVersion": 61,
+  "runtimeSource": "5501930c8212359f10e0152ba2c5d8e7239a0c44",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_8d3cd9a0fee48191b716979145b4ff5b",
+  "deploymentId": "appgdep_6adeef1d40988191bb0eb2570e2839bc",
+  "deployedAt": "2026-10-26T06:12:00.389287+00:00",
+  "status": "succeeded",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_00000000c49c8246a782b36481fc1538",
+    "content_hash": "sha256:7397ececd865e7a07ba1a6a8b6322473525de3f7d7fcc958a1dfdb0c759412f6",
+    "size_bytes": 15636480,
+    "file_count": 152
+  },
+  "underlyingRelease": "2026-10-26-analytics-contacts.json",
+  "change": "Translate only the exact retired dashboard no-visitor-tracking footer note into current first-party collection/limitations and separate Meta reporting; retain all other notes and server data.",
+  "validation": {
+    "focusedTests": 51,
+    "files": 3,
+    "appTypeScript": "passed",
+    "targetedLint": "passed",
+    "ci": {
+      "runId": 40277904057,
+      "head": "5501930c8212359f10e0152ba2c5d8e7239a0c44",
+      "conclusion": "success",
+      "fullTests": 3461,
+      "files": 188,
+      "allStepsGreenBeforePublish": true,
+      "url": "https://github.com/aarshvir/career-climb-automagic/actions/runs/40277904057"
+    },
+    "build": {
+      "pages": 37,
+      "guides": 20,
+      "assets": 148,
+      "compressedBytes": 2994299,
+      "limitBytes": 3145728,
+      "hostingGroups": 12
+    },
+    "live": {
+      "privateRoutes": 17,
+      "publicRoutes": 4,
+      "exactJavaScript": 75,
+      "exactCss": 15,
+      "unauthorizedWorker401": 2,
+      "failures": 0,
+      "ownerAcquisitionCorrectedCopy": "observed",
+      "ownerOriginalAdmin": "observed under underlyingv60; unchanged here"
+    }
+  },
+  "actualBrowserPipeline": {
+    "publicGuestToAdminTimeline": "passed",
+    "publicRoutes": [
+      "/job-loop",
+      "/pricing",
+      "Back to /job-loop"
+    ],
+    "pageViews": 3,
+    "clicks": 1,
+    "storedEvents": 7,
+    "rawExposureMs": [
+      3500,
+      4756,
+      57
+    ],
+    "pageExposuresDistinct": true,
+    "anonymousVisitLinkedToNoAccount": true,
+    "ownerVisitTimelineObserved": true,
+    "createdFixtureCleaned": true,
+    "remainingFixtureRows": 0,
+    "limits": "This is an assisted synthetic visitor, not a customer or signup. Visible time is not attention. Displayed whole page seconds are floored; raw millisecond evidence retained privately."
+  },
+  "backend": {
+    "changes": 0,
+    "track": 1,
+    "admin": 26,
+    "migrationReapplied": false
+  },
+  "scope": {
+    "paymentsAdsPixelProviderChanges": false,
+    "realCandidateEdits": false,
+    "paidProviderCalls": 0,
+    "premiumDesignIncluded": false,
+    "sourceRollbackTag": "jobvance-before-analytics-coverage-note-2026-10-26",
+    "savedRollbackVersion": 60
+  },
+  "openRequirements": "Hosted signup/social-browser/phone acceptance, unassisted first/second/repeated-day work, broader discovery, NPS, premium design and original remaining requests stay tracked."
+}
