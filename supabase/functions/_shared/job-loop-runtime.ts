@@ -84,8 +84,8 @@ export async function getLoopSnapshot(repo:LoopRepository,userId:string,env:Loop
   let cap=50;try{cap=configuredUsageCap(env);}catch{/* Paid choices fail closed in modelOptions; the private record remains readable. */}
   if(expectedGeneration===undefined&&!initialize){
     const lifecycle=await repo.erasureStatus(userId);
-    if(lifecycle.state==='erasing')throw new ApiError(409,'LOOP_ERASURE_IN_PROGRESS','Your Job Loop is being erased. Continue erasure before making another change.');
-    if(lifecycle.state!=='active')throw new ApiError(409,'LOOP_REQUEST_STALE','Your Job Loop was erased. Refresh before continuing.');
+    if(lifecycle.state==='erasing')throw new ApiError(409,'LOOP_ERASURE_IN_PROGRESS','Your Automated Job Loop is being erased. Continue erasure before making another change.');
+    if(lifecycle.state!=='active')throw new ApiError(409,'LOOP_REQUEST_STALE','Your Automated Job Loop was erased. Refresh before continuing.');
     expectedGeneration=lifecycle.generation;
   }
   const record=await repo.record(userId,expectedGeneration,initialize);
@@ -107,7 +107,7 @@ export async function getExistingLoopSnapshot(repo:LoopRepository,userId:string,
   if(lifecycle?.state==='erased')return {existingState:'absent'};
   const record=await repo.existingRecord(userId);
   if(!lifecycle){
-    if(record)throw new ApiError(409,'LOOP_REQUEST_STALE','Open your saved Job Loop to confirm its current lifetime, then refresh Applications.');
+    if(record)throw new ApiError(409,'LOOP_REQUEST_STALE','Open your saved Automated Job Loop to confirm its current lifetime, then refresh Applications.');
     return {existingState:'absent'};
   }
   if(!record)return {existingState:'absent'};
@@ -117,9 +117,9 @@ export async function getExistingLoopSnapshot(repo:LoopRepository,userId:string,
   const latestLifecycle=await repo.existingLifecycle(userId);
   if(latestLifecycle?.state==='erasing')return {existingState:'erasing',erasureGeneration:latestLifecycle.generation};
   if(!latestLifecycle||latestLifecycle.state==='erased')return {existingState:'absent'};
-  if(latestLifecycle.generation!==lifecycle.generation)throw new ApiError(409,'LOOP_REQUEST_STALE','Your Job Loop changed lifetime while Applications loaded. Refresh before continuing.');
+  if(latestLifecycle.generation!==lifecycle.generation)throw new ApiError(409,'LOOP_REQUEST_STALE','Your Automated Job Loop changed lifetime while Applications loaded. Refresh before continuing.');
   if(!latestRecord)return {existingState:'absent'};
-  if(latestRecord.version!==record.version||latestRecord.input_version!==record.input_version)throw new ApiError(409,'LOOP_VERSION_CONFLICT','Your Job Loop changed while Applications loaded. Refresh before continuing.');
+  if(latestRecord.version!==record.version||latestRecord.input_version!==record.input_version)throw new ApiError(409,'LOOP_VERSION_CONFLICT','Your Automated Job Loop changed while Applications loaded. Refresh before continuing.');
   return {existingState:'active',snapshot};
 }
 export async function controlLoop(repo:LoopRepository,userId:string,action:LoopAction,env:LoopEnv,fetcher:LoopFetch=fetch):Promise<LoopResponse> {
@@ -130,8 +130,8 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     const generation=captured.expectedGeneration;
     const active=async()=>{
       const lifetime=await repo.existingLifecycle(userId);
-      if(lifetime?.state==='erasing')throw new ApiError(409,'LOOP_ERASURE_IN_PROGRESS','Your Job Loop is being erased.');
-      if(!lifetime||lifetime.state!=='active'||lifetime.generation!==generation)throw new ApiError(409,'LOOP_REQUEST_STALE','Your Job Loop was erased or restarted. Refresh before continuing.');
+      if(lifetime?.state==='erasing')throw new ApiError(409,'LOOP_ERASURE_IN_PROGRESS','Your Automated Job Loop is being erased.');
+      if(!lifetime||lifetime.state!=='active'||lifetime.generation!==generation)throw new ApiError(409,'LOOP_REQUEST_STALE','Your Automated Job Loop was erased or restarted. Refresh before continuing.');
     };
     await active();
     const {action:kind,...intent}=captured;
@@ -161,8 +161,8 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
     const generation=captured.expectedGeneration;
     const active=async()=>{
       const lifetime=await repo.existingLifecycle(userId);
-      if(lifetime?.state==='erasing')throw new ApiError(409,'LOOP_ERASURE_IN_PROGRESS','Your Job Loop is being erased.');
-      if(!lifetime||lifetime.state!=='active'||lifetime.generation!==generation)throw new ApiError(409,'LOOP_REQUEST_STALE','Your Job Loop was erased or restarted. Refresh before continuing.');
+      if(lifetime?.state==='erasing')throw new ApiError(409,'LOOP_ERASURE_IN_PROGRESS','Your Automated Job Loop is being erased.');
+      if(!lifetime||lifetime.state!=='active'||lifetime.generation!==generation)throw new ApiError(409,'LOOP_REQUEST_STALE','Your Automated Job Loop was erased or restarted. Refresh before continuing.');
     };
     await active();
     if(captured.action==='read_cv_variants'){
@@ -193,7 +193,7 @@ export async function controlLoop(repo:LoopRepository,userId:string,action:LoopA
   if(action.action==='erase_loop'||action.action==='erase_self'){
     if(!action.confirmErase)throw new ApiError(400,'LOOP_ERASE_CONFIRMATION','Confirm erasing the private record and generated documents.');
     await repo.eraseArtifacts(userId,action.expectedGeneration!);
-    return {snapshot:await getLoopSnapshot(repo,userId,env,undefined,true),message:'Your Job Loop record, schedules, documents and mailbox connection were erased. Your sign-in account and separately saved workspace CVs remain; drafts already created in Gmail remain there.'};
+    return {snapshot:await getLoopSnapshot(repo,userId,env,undefined,true),message:'Your Automated Job Loop record, schedules, documents and mailbox connection were erased. Your sign-in account and separately saved workspace CVs remain; drafts already created in Gmail remain there.'};
   }
   if(generationBoundAction(action.action))await repo.assertGeneration(userId,action.expectedGeneration);
   const row=await repo.record(userId,action.expectedGeneration);const data=structuredClone(row.data);

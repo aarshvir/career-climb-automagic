@@ -15,7 +15,7 @@ export const LOOP_SUBSCRIPTION_STATUSES = ['pending', 'active', 'on_hold', 'paus
 const invalid = (message = 'The subscription could not be verified.') => new ApiError(409, 'LOOP_BILLING_INVALID', message);
 const absent = (value: unknown) => value === null || value === undefined;
 export function loopBillingPlan(value: unknown): LoopBillingPlan {
-  if (typeof value !== 'string' || !Object.prototype.hasOwnProperty.call(LOOP_BILLING_PLANS, value)) throw invalid('Choose a listed Job Loop plan.');
+  if (typeof value !== 'string' || !Object.prototype.hasOwnProperty.call(LOOP_BILLING_PLANS, value)) throw invalid('Choose a listed Automated Job Loop plan.');
   return value as LoopBillingPlan;
 }
 function obj(value: unknown): Record<string, unknown> {
@@ -42,7 +42,7 @@ export function validateLoopBillingProduct(value: unknown, config: LoopBillingCo
     price.currency !== 'USD' || price.price !== LOOP_BILLING_PLANS[plan].amount || price.payment_frequency_count !== 1 || price.payment_frequency_interval !== 'Month' ||
     price.subscription_period_count !== 20 || price.subscription_period_interval !== 'Year' || !(absent(price.trial_period_days) || price.trial_period_days === 0) ||
     !(absent(price.discount) || price.discount === 0) || !(absent(price.discount_bps) || price.discount_bps === 0) || price.purchasing_power_parity === true || price.pay_what_you_want === true ||
-    !absent(price.trial_amount) || price.trial_payment_method_optional === true || price.tax_inclusive !== true) throw new ApiError(503, 'LOOP_BILLING_PRODUCT_UNAVAILABLE', 'This monthly Job Loop plan is not ready for checkout.');
+    !absent(price.trial_amount) || price.trial_payment_method_optional === true || price.tax_inclusive !== true) throw new ApiError(503, 'LOOP_BILLING_PRODUCT_UNAVAILABLE', 'This monthly Automated Job Loop plan is not ready for checkout.');
 }
 export function loopCheckoutBody(config: LoopBillingConfig, userId: string, requestId: string, generation: number, plan: LoopBillingPlan) {
   return { product_cart: [{ product_id: config.loopProducts[plan], quantity: 1 }], billing_currency: 'USD',
@@ -101,7 +101,7 @@ export function validateLoopPaidPeriod(value: unknown, sub: LoopSubscription): L
   if (typeof payment.payment_id !== 'string' || !DODO_PAYMENT_ID.test(payment.payment_id) || payment.status !== 'succeeded' || payment.currency !== sub.currency ||
     payment.subscription_id !== sub.subscriptionId || (!absent(ids) && (!Array.isArray(ids) || ids.length !== 1 || ids[0] !== sub.subscriptionId)) || payment.is_multi_subscription === true || payment.is_update_payment_method === true ||
     customer.customer_id !== sub.customerId || !noDiscount(payment) || !Number.isSafeInteger(total) || !Number.isSafeInteger(tax) || (tax as number) < 0 || (tax as number) > (total as number) ||
-    (sub.taxInclusive ? total !== sub.amountMinor : (total as number) - (tax as number) !== sub.amountMinor) || !Array.isArray(payment.service_periods) || payment.service_periods.length !== 1) throw invalid('This charge does not prove a paid Job Loop month.');
+    (sub.taxInclusive ? total !== sub.amountMinor : (total as number) - (tax as number) !== sub.amountMinor) || !Array.isArray(payment.service_periods) || payment.service_periods.length !== 1) throw invalid('This charge does not prove a paid Automated Job Loop month.');
   const period = obj(payment.service_periods[0]);
   if (period.subscription_id !== sub.subscriptionId) throw invalid();
   const periodStart = date(period.starts_at), validUntil = date(period.ends_at);
@@ -124,7 +124,7 @@ export function validateLoopRefund(value: unknown) {
 export function captureLoopBillingInput(value: unknown) {
   const input = objectInput(value);
   const allowed = input.action === 'status' ? ['action','contractVersion'] : input.action === 'quote' ? ['action','requestId','plan','expectedGeneration','country','currency'] : input.action === 'checkout' ? ['action','requestId','plan','expectedGeneration','consent','quoteId'] : ['action','requestId','expectedSubscriptionId','expectedVersion','expectedGeneration','consent','contractVersion'];
-  if (Object.keys(input).some(key => !allowed.includes(key)) || !['status','quote','checkout','cancel'].includes(String(input.action))) throw new ApiError(400, 'INVALID_INPUT', 'Choose a Job Loop billing action.');
+  if (Object.keys(input).some(key => !allowed.includes(key)) || !['status','quote','checkout','cancel'].includes(String(input.action))) throw new ApiError(400, 'INVALID_INPUT', 'Choose an Automated Job Loop billing action.');
   if (input.action === 'status') {
     if (!absent(input.contractVersion) && input.contractVersion !== 2) throw new ApiError(400,'INVALID_INPUT','Refresh the billing page.');
     return { action: 'status' as const, contractVersion: input.contractVersion === 2 ? 2 : 1 };
@@ -133,7 +133,7 @@ export function captureLoopBillingInput(value: unknown) {
     if (!Number.isSafeInteger(input.expectedGeneration) || (input.expectedGeneration as number) < 0 || typeof input.country !== 'string' || !/^[A-Z]{2}$/.test(input.country) || typeof input.currency !== 'string' || !/^[A-Z]{3}$/.test(input.currency)) throw new ApiError(400,'INVALID_INPUT','Choose your billing country and currency.');
     return { action:'quote' as const, requestId:uuid(input.requestId,'Price request'), generation:input.expectedGeneration as number, plan:loopBillingPlan(input.plan), country:input.country, currency:input.currency };
   }
-  if (input.consent !== true || !Number.isSafeInteger(input.expectedGeneration) || (input.expectedGeneration as number) < 0) throw new ApiError(400, 'LOOP_BILLING_CONSENT', 'Confirm this billing action for your current Job Loop.');
+  if (input.consent !== true || !Number.isSafeInteger(input.expectedGeneration) || (input.expectedGeneration as number) < 0) throw new ApiError(400, 'LOOP_BILLING_CONSENT', 'Confirm this billing action for your current Automated Job Loop.');
   const base = { requestId: uuid(input.requestId, 'Request'), generation: input.expectedGeneration as number };
   if (input.action === 'checkout') return { ...base, action: 'checkout' as const, plan: loopBillingPlan(input.plan), ...(!absent(input.quoteId) ? { quoteId:uuid(input.quoteId,'Price quote') } : {}) };
   if (typeof input.expectedSubscriptionId !== 'string' || !LOOP_SUBSCRIPTION_ID.test(input.expectedSubscriptionId) || !Number.isSafeInteger(input.expectedVersion) || (input.expectedVersion as number) < 1) throw invalid('Refresh your subscription before cancelling.');

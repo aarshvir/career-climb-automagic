@@ -44,7 +44,7 @@ async function googleJson(endpoint:string,init:RequestInit,fetcher:LoopFetch,dea
 export async function completeGmail(repo:LoopRepository,code:string,state:string,env:LoopEnv,fetcher:LoopFetch=fetch):Promise<string> {
   if(!gmailConfigured(env)||code.length>2000||state.length>200||!/^[a-zA-Z0-9_-]{40,100}$/.test(state))throw new ApiError(400,'LOOP_OAUTH_STATE','This mailbox callback is invalid.');
   const hash=await digest(state); const stored=await repo.rpc<{user_id:string;allow_drafts:boolean;verifier_ciphertext:string;expires_at:string;lifecycle_generation:number}>('job_loop_consume_oauth_state',{p_hash:hash});
-  if(!validLoopGeneration(stored.lifecycle_generation))throw new ApiError(409,'LOOP_REQUEST_GENERATION_REQUIRED','Start a new mailbox connection from your current Job Loop.');
+  if(!validLoopGeneration(stored.lifecycle_generation))throw new ApiError(409,'LOOP_REQUEST_GENERATION_REQUIRED','Start a new mailbox connection from your current Automated Job Loop.');
   const {verifier}=await decryptJson(stored.verifier_ciphertext,stored.user_id,env,`state:${hash}`);
   if(typeof verifier!=='string')throw new ApiError(400,'LOOP_OAUTH_STATE','This connection could not be verified.');
   const tokens=await googleJson('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code,client_id:env('JOB_LOOP_GMAIL_CLIENT_ID')!,client_secret:env('JOB_LOOP_GMAIL_CLIENT_SECRET')!,redirect_uri:callbackUrl(env),grant_type:'authorization_code',code_verifier:verifier}).toString()},fetcher);
@@ -63,7 +63,7 @@ async function activationTicket(repo:LoopRepository,userId:string,ticket:string,
   if(!gmailConfigured(env)||ticket.length>16000)throw new ApiError(400,'LOOP_OAUTH_STATE','This activation ticket is invalid.');
   let data:Record<string,unknown>;try{data=await decryptJson(ticket,userId,env,'activation-ticket');}catch{throw new ApiError(403,'LOOP_OAUTH_OWNER','This ticket cannot be opened by the signed-in account. Use the account that started the connection.');}
   if(data.owner!==userId||typeof data.stateHash!=='string'||!/^[a-f0-9]{64}$/.test(data.stateHash)||typeof data.expiresAt!=='number'||!Number.isFinite(data.expiresAt)||data.expiresAt<=Date.now()||typeof data.allowDrafts!=='boolean')throw new ApiError(400,'LOOP_OAUTH_STATE','This activation ticket expired or belongs to another account.');
-  if(!validLoopGeneration(expectedGeneration)||data.generation!==expectedGeneration)throw new ApiError(409,'LOOP_REQUEST_STALE','This mailbox connection belongs to an earlier Job Loop. Start a new connection.');
+  if(!validLoopGeneration(expectedGeneration)||data.generation!==expectedGeneration)throw new ApiError(409,'LOOP_REQUEST_STALE','This mailbox connection belongs to an earlier Automated Job Loop. Start a new connection.');
   const state=await repo.rpc<{allow_drafts:boolean;consumed_at:string|null;activated_at:string|null;expires_at:string}>('job_loop_read_oauth_state',{p_user:userId,p_generation:expectedGeneration,p_hash:data.stateHash});
   if(!state?.consumed_at||state.activated_at||Date.parse(state.expires_at)<=Date.now()||state.allow_drafts!==data.allowDrafts)throw new ApiError(400,'LOOP_OAUTH_STATE','This activation ticket expired or was already used.');return data;
 }

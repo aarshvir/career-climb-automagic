@@ -18,11 +18,11 @@ export interface UsageRow { id: string; reserved_micros: number; actual_micros: 
 export interface PacketRow { id: string; user_id: string; input_version: number; status: LoopPacket['status']; data: LoopPacket }
 export interface ScheduleRow { occurrence_request?:string|null; bound_generation?:number|null; user_id:string;version:number;status:LoopSchedule['status'];settings:LoopScheduleInput;next_run_at:string|null;lease_token:string|null;lease_until:string|null;last_run_id:string|null;last_attempt_at:string|null;message:string }
 const ERRORS: [string, number, string][] = [
-  ['LOOP_SCHEDULE_ENTITLEMENT',403,'This cadence is not included in your current Job Loop access. Choose an included schedule.'],
+  ['LOOP_SCHEDULE_ENTITLEMENT',403,'This cadence is not included in your current Automated Job Loop access. Choose an included schedule.'],
   ['LOOP_WEEKLY_SCHEDULE_LIMIT',429,'This week’s included scheduled runs have been used. Your next scheduled occurrence remains available.'],
   ['LOOP_SCHEDULE_SOURCE_CHANGED',409,'The CV or facts changed. Choose the current source and confirm recurring preparation again.'],
   ['LOOP_RECURRING_AI_CONSENT',400,'Confirm recurring AI processing for this exact CV, model and provider route.'],
-  ['LOOP_SUBSCRIPTION_REQUIRED',403,'Active Job Loop access is required for this preparation.'],
+  ['LOOP_SUBSCRIPTION_REQUIRED',403,'Active Automated Job Loop access is required for this preparation.'],
   ['LOOP_VARIANT_FACT_CONSENT_REQUIRED',400,'Confirm saving or withdrawing this exact fact.'],
   ['LOOP_VARIANT_FACT_REVISION_CONFLICT',409,'This fact changed. Refresh it before confirming another change.'],
   ['LOOP_VARIANT_FACT_SOURCE_CHANGED',409,'The saved CV source changed. Review this fact against its exact source.'],
@@ -33,7 +33,7 @@ const ERRORS: [string, number, string][] = [
   ['LOOP_VARIANT_REVISION_CONFLICT',409,'This CV variant changed. Refresh it before saving.'],
   ['LOOP_VARIANT_CLAIM_UNAVAILABLE',409,'A chosen fact changed or is no longer shareable. Review it again.'],
   ['LOOP_VARIANT_SOURCE_CHANGED',409,'CV passage confirmation belongs to a different source. Review the new source first.'],
-  ['LOOP_VARIANT_UNAVAILABLE',404,'That CV variant or Job Loop is no longer available in your account.'],
+  ['LOOP_VARIANT_UNAVAILABLE',404,'That CV variant or Automated Job Loop is no longer available in your account.'],
   ['LOOP_VARIANT_LIMIT',422,'You can save up to three CV variants. Update an existing variant.'],
   ['LOOP_VARIANT_INVALID',422,'Review the CV variant name, source and selected facts before saving.'],
   ['LOOP_CHECK_LINK_CONSENT',400,'Choose to save this vacancy linked to the saved check.'],
@@ -55,12 +55,12 @@ const ERRORS: [string, number, string][] = [
   ['LOOP_SCHEDULE_INVALID',422,'The recurring settings could not be saved. Choose a valid timezone and future time.'],
   ['LOOP_DAILY_SCHEDULE_LIMIT',429,'One scheduled preparation has already run today. Your next scheduled occurrence remains available.'],
   ['LOOP_MONTHLY_SCHEDULE_LIMIT',429,'This pilot includes up to thirty scheduled preparations per account per calendar month.'],
-  ['LOOP_ERASURE_IN_PROGRESS',409,'Your Job Loop is being erased. Continue erasure before making another change.'],
+  ['LOOP_ERASURE_IN_PROGRESS',409,'Your Automated Job Loop is being erased. Continue erasure before making another change.'],
   ['LOOP_ERASURE_RETRY',503,'Preparation is stopped and documents are revoked. Continue erasure to remove the remaining files.'],
   ['LOOP_ERASURE_STALE',409,'This erasure attempt is no longer current. Refresh before continuing.'],
   ['LOOP_ARTIFACT_UNAUTHORIZED',409,'This preparation no longer has permission to store a document. Start or resume the current run.'],
   ['LOOP_REQUEST_GENERATION_REQUIRED',409,'Refresh Jobvance before continuing. This action needs the current workspace lifetime.'],
-  ['LOOP_REQUEST_STALE',409,'Your Job Loop was erased or restarted. Refresh it and review this action again.'],
+  ['LOOP_REQUEST_STALE',409,'Your Automated Job Loop was erased or restarted. Refresh it and review this action again.'],
   ['LOOP_SUPPORT_LIMIT',429,'Five requests have already been recorded today. Your existing requests remain visible.'],
   ['LOOP_GMAIL_NOT_CONNECTED',403,'Connect Gmail with the required read or draft permission first.'],
 ];
@@ -75,20 +75,20 @@ export class LoopRepository {
   async existingLifecycle(userId: string): Promise<LifecycleRow | null> {
     const {data,error}=await this.admin.from('job_loop_lifecycle').select('user_id,state,generation').eq('user_id',userId).maybeSingle();loopDatabaseError(error);
     if(!data)return null;
-    if(data.user_id!==userId||!['active','erasing','erased'].includes(data.state)||!validLoopGeneration(Number(data.generation)))throw new ApiError(503,'LOOP_PERSISTENCE_FAILED','The existing Job Loop lifetime could not be confirmed.');
+    if(data.user_id!==userId||!['active','erasing','erased'].includes(data.state)||!validLoopGeneration(Number(data.generation)))throw new ApiError(503,'LOOP_PERSISTENCE_FAILED','The existing Automated Job Loop lifetime could not be confirmed.');
     return {...data,generation:Number(data.generation)} as LifecycleRow;
   }
   async existingRecord(userId: string): Promise<RecordRow | null> {
     const {data,error}=await this.admin.from('job_loop_records').select('*').eq('user_id',userId).maybeSingle();loopDatabaseError(error);
     if(!data)return null;
-    if(data.user_id!==userId||!Number.isSafeInteger(Number(data.version))||Number(data.version)<0||!Number.isSafeInteger(Number(data.input_version))||Number(data.input_version)<0)throw new ApiError(503,'LOOP_PERSISTENCE_FAILED','The existing Job Loop record could not be confirmed.');
+    if(data.user_id!==userId||!Number.isSafeInteger(Number(data.version))||Number(data.version)<0||!Number.isSafeInteger(Number(data.input_version))||Number(data.input_version)<0)throw new ApiError(503,'LOOP_PERSISTENCE_FAILED','The existing Automated Job Loop record could not be confirmed.');
     return {...data,version:Number(data.version),input_version:Number(data.input_version)} as RecordRow;
   }
   async record(userId: string, expectedGeneration?: number, initialize = false): Promise<RecordRow> {
     if(expectedGeneration!==undefined)return this.rpc<RecordRow>('job_loop_read_record',{p_user:userId,p_generation:expectedGeneration});
     if(initialize)return this.rpc<RecordRow>('job_loop_open_record',{p_user:userId});
     const {data,error}=await this.admin.from('job_loop_records').select('*').eq('user_id',userId).maybeSingle();loopDatabaseError(error);
-    if(!data)throw new ApiError(404,'LOOP_NOT_FOUND','That Job Loop record is no longer available. Refresh before continuing.');
+    if(!data)throw new ApiError(404,'LOOP_NOT_FOUND','That Automated Job Loop record is no longer available. Refresh before continuing.');
     return data as RecordRow;
   }
   async assertGeneration(userId:string,generation:unknown):Promise<void> {
