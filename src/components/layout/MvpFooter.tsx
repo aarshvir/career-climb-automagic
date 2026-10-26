@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Brand } from "./MvpHeader";
+import { Brand, Wordmark } from "./MvpHeader";
 
 // The same 8 site links as before, grouped into columns.
 const columns: [string, [string, string][]][] = [
@@ -20,5 +20,6 @@ export default function MvpFooter() {
       </div>
       <div className="jv-footer-bottom"><p>© {new Date().getFullYear()} Jobvance</p><nav aria-label="Legal navigation">{legal.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav></div>
     </div>
+    {!compact && <div className="jv-footer-mark" aria-hidden="true"><Wordmark className="jv-footer-mark-svg" /></div>}
   </footer>;
 }

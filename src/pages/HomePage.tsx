@@ -13,7 +13,7 @@ const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 const fromPrice = subscriptionPlans[0].priceUsd;
 
 // Facts the site already states (FAQ, pricing, Automated Job Loop page). No counts, ratings or outcomes.
-const proof = ["You review before you apply", "Free CV Check", "Weekly, 3×/week or daily", "PDF, DOCX or TXT downloads", "Pause anytime"];
+const proof = ["You review before you apply", "Free CV Check", "Weekly, 3×/week or daily", "PDF, DOCX or TXT downloads", "Pause your schedule anytime"];
 
 // Every line restates something the site already says; only the short lead-in labels are new.
 const goodToKnow: [string, React.ReactNode][] = [
@@ -25,7 +25,7 @@ const goodToKnow: [string, React.ReactNode][] = [
 
 /** One reassurance line, identical under both main buttons. Lines only break between segments. */
 function PriceNote() {
-  return <><span className="jv-nb">Free account</span> · <span className="jv-nb">plans from ${fromPrice}/month</span> · <span className="jv-nb">pay only if you choose a plan</span></>;
+  return <><span className="jv-nb">Free account</span>{" "}<span className="jv-nb">·&nbsp;plans from ${fromPrice}/month</span>{" "}<span className="jv-nb">·&nbsp;pay only if you choose a plan or pass</span></>;
 }
 
 function StartLink({ children = "Start my Automated Job Loop", to = "/onboarding", size = "md", variant = "primary", className = "" }: { children?: React.ReactNode; to?: string; size?: "md" | "lg"; variant?: "primary" | "secondary"; className?: string }) {
@@ -47,7 +47,7 @@ export default function HomePage() {
           <p className="jv-hero-lead jv-enter" style={delay(60)}>Automated Job Loop finds jobs on your schedule and prepares a tailored CV for each. You review, download and apply.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
             <StartLink size="lg" className="jv-hero-cta" />
-            <TextLink to="/check">Try a free CV check</TextLink>
+            <TextLink to="/check">Try the free CV Check</TextLink>
           </div>
           <p className="jv-hero-note jv-enter" style={delay(180)}><PriceNote /></p>
         </div>
@@ -71,19 +71,19 @@ export default function HomePage() {
       <div className="jv-loop-grid">
         <h2 id="home-loop-journey" className="jv-loop-head" data-reveal>Set it up once. Come back to your next applications.</h2>
         <div className="jv-loop-visual">
+          <p className="jv-loop-caption">Every run · automatic</p>
           <LoopOrbit size={480} variant="dark" labels once>
             <span className="jv-orbit-core">
-              <span className="jv-orbit-core-label">Every run</span>
               <span className="jv-orbit-core-time">7:00 AM</span>
               <span className="jv-orbit-core-meta">Mon · Wed · Fri</span>
             </span>
           </LoopOrbit>
         </div>
         <div className="jv-loop-steps">
+          <p className="jv-loop-caption">Set up once · by you</p>
           <LoopJourney variant="ring" />
           <div className="jv-loop-actions">
-            <StartLink variant="secondary" className="jv-loop-cta" />
-            <TextLink to="/job-loop">Explore Automated Job Loop</TextLink>
+            <StartLink className="jv-loop-cta" />
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function HomePage() {
             </div>
           </article>
           <article className="jv-control-row" data-reveal>
-            <div className="jv-control-copy"><h3>Pause or cancel anytime</h3><p>Pause or cancel your schedule whenever you need to. Your account shows the next scheduled run.</p></div>
+            <div className="jv-control-copy"><h3>Pause or cancel your schedule anytime</h3><p>Pause or cancel your schedule whenever you need to. Your account shows the next scheduled run.</p></div>
             <div className="jv-frag" aria-hidden="true">
               <div className="jv-frag-card">
                 <div className="jv-frag-head"><span className="jv-frag-strong">Schedule</span><span className="jv-frag-muted">3×/week</span></div>
@@ -133,14 +133,14 @@ export default function HomePage() {
           </article>
         </div>
         <div className="jv-know" data-reveal>
-          <p className="jv-know-caption">Also worth knowing</p>
+          <p className="jv-caption jv-know-caption">Also worth knowing</p>
           <dl className="jv-know-grid">{goodToKnow.map(([term, detail]) => <div key={term}><dt>{term}</dt><dd>{detail}</dd></div>)}</dl>
-          <div className="jv-know-links"><TextLink to="/privacy">How your CV is handled</TextLink></div>
+          <div className="jv-know-links"><TextLink to="/job-loop">Explore Automated Job Loop</TextLink><TextLink to="/privacy">How your CV is handled</TextLink></div>
         </div>
       </div>
     </section>
 
-    {/* 5. Free CV Check: the one brand-tint panel on the page. */}
+    {/* 5. Free CV Check: a neutral panel; brand colour appears only in the highlights. */}
     <section className="jv-check" aria-labelledby="home-check-title">
       <div className="jv-check-copy" data-reveal>
         <h2 id="home-check-title"><span className="jv-h-line">Have one vacancy in mind?</span> <span className="jv-h-line">Try the free CV Check.</span></h2>
@@ -151,7 +151,7 @@ export default function HomePage() {
         <span className="jv-badge">Example</span>
         <div className="jv-check-job"><span className="jv-frag-label">Job asks for</span><span className="jv-check-chips"><span>SQL reporting</span><span>Sales stakeholders</span></span></div>
         <div className="jv-check-line jv-check-line--before"><span className="jv-frag-label">Your line</span><p>Wrote weekly reports for the sales team using SQL.</p></div>
-        <div className="jv-check-line jv-check-line--after"><span className="jv-frag-label">Suggested for this job</span><p>Wrote weekly <mark>SQL reports</mark> for the <mark>sales team</mark>.</p></div>
+        <div className="jv-check-line jv-check-line--after"><span className="jv-frag-label">Suggested for this job</span><p>Wrote weekly <mark>SQL reports</mark> for the <span className="jv-nb"><mark>sales team</mark>.</span></p></div>
       </div>
     </section>
 
@@ -177,13 +177,13 @@ export default function HomePage() {
 
     {/* 7. Final CTA */}
     <section className="jv-cta jv-dark" aria-labelledby="home-final-title">
-      <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
       <div className="jv-cta-inner">
         <h2 id="home-final-title">Give your job search a routine.</h2>
         <p>Set your roles and schedule once. Come back to jobs and tailored CVs ready for your review.</p>
         <div className="jv-cta-actions">
           <StartLink size="lg" />
           <Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link>
+          <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
         </div>
         <p className="jv-cta-note"><PriceNote /></p>
       </div>

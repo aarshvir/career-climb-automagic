@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
-import { CalendarClock } from "lucide-react";
+import { Repeat2 } from "lucide-react";
 import "./LoopRunMock.css";
 
 // Layout effect in the browser (runs before paint); plain effect on the server.
@@ -14,7 +14,8 @@ const rows = [
 ];
 
 /** Hero product mock: an example Automated Job Loop run, laid out as a run log in HTML and CSS.
- * Its one short pass (each row: found, CV tailored, ready for review) ends within 5 seconds, so it needs no pause control. */
+ * Its one short pass (each row: found, CV tailored, ready for review) ends within 5 seconds, so it needs no pause control.
+ * The third row (desktop only) rests on "CV tailored", so the resting state shows the progression, not three identical tags. */
 export default function LoopRunMock() {
   const ref = useRef<HTMLElement>(null);
   useBeforePaint(() => {
@@ -34,7 +35,7 @@ export default function LoopRunMock() {
       </div>
       <div className="jv-mock-head">
         <p className="jv-mock-title">Automated Job Loop</p>
-        <span className="jv-mock-schedule"><CalendarClock aria-hidden="true" />3×/week · Mon Wed Fri</span>
+        <span className="jv-mock-schedule"><Repeat2 aria-hidden="true" />3×/week · Mon Wed Fri</span>
         <p className="jv-mock-next"><span className="jv-mock-pulse" aria-hidden="true" />Next run · <span className="jv-mock-time">Wed 7:00 AM</span></p>
       </div>
       <div className="jv-mock-filters">

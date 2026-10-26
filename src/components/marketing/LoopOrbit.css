@@ -1,5 +1,5 @@
-/* Light ring is the same neutral hairline as the frame rails; indigo is kept for the comet and nodes. */
-.jv-orbit { --ring: var(--jv-line-strong); --node-ring: #0A0B14; --label: var(--jv-ink-3); position: relative; width: min(var(--size), 100%); aspect-ratio: 1; flex-shrink: 0; pointer-events: none; user-select: none; }
+/* Light ring: a quiet indigo tint (the signature motif, not a pencil circle); the comet and nodes carry full indigo. */
+.jv-orbit { --ring: rgb(59 71 240 / .2); --node-ring: #0A0B14; --label: var(--jv-ink-3); position: relative; width: min(var(--size), 100%); aspect-ratio: 1; flex-shrink: 0; pointer-events: none; user-select: none; }
 .jv-orbit--dark { --ring: rgb(154 162 255 / .3); --node-ring: #fff; --label: var(--jv-on-dark-2, #A9AEC4); }
 .jv-orbit-ring { position: absolute; inset: 0; border: 1.5px solid var(--ring); border-radius: 50%; }
 /* The comet's head sits 40deg past its rotation, so rotate(200deg) parks it on "You review" (8 o'clock).

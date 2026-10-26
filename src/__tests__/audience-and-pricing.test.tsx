@@ -105,7 +105,7 @@ describe('Automated Job Loop first homepage', () => {
     expect(stages[2]).toHaveTextContent('Review your dashboard');
     expect(stages[2]).toHaveTextContent('approve your documents');
     for (const link of screen.getAllByRole('link', { name: 'Start my Automated Job Loop' })) expect(link).toHaveAttribute('href', '/onboarding');
-    expect(screen.getByRole('link', { name: /Try a free CV check/ })).toHaveAttribute('href', '/check');
+    expect(screen.getByRole('link', { name: /Try the free CV Check/ })).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
     expect(screen.getByText(/Runs weekly, three times a week or daily/)).toHaveTextContent('You confirm AI preparation once before recurring runs start');
     expect(screen.getByText(/Searches your connected sources or a vacancy you add/)).toHaveTextContent('a run may find nothing new');

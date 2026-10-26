@@ -18,12 +18,8 @@ export default function RouteNavigation() {
     const targetId = /^[a-zA-Z][a-zA-Z\d_:-]{0,99}$/.test(fragment) ? fragment : '';
     if (!changedPage && !targetId) return;
     if (changedPage && !targetId) {
-      // A new page starts at the top instantly; html keeps scroll-behavior:smooth for in-page anchors only.
-      const rootStyle = document.documentElement.style;
-      const previousBehavior = rootStyle.scrollBehavior;
-      rootStyle.scrollBehavior = 'auto';
-      window.scrollTo(0, 0);
-      rootStyle.scrollBehavior = previousBehavior;
+      // A new page starts at the top instantly. 'instant' overrides html's scroll-behavior:smooth (kept for in-page anchors).
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
     }
     let active = true;
     let observer: MutationObserver | undefined;

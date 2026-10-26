@@ -5,12 +5,18 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 
+// Drawn monoline logotype: the same round-capped stroke as the "j" in the mark (2.5px at 22px tall), hand-spaced.
+// The tittle stays ink; lime belongs only to the mark's signal dot.
+const WORDMARK_PATH = "M4.45 7.35V19.4a3 3 0 0 1-3 3M4.45 1.7h0M8.65 12a4.8 4.8 0 1 0 9.6 0a4.8 4.8 0 1 0-9.6 0M22.15 1.35v15.3M22.15 12a4.8 4.8 0 1 0 9.6 0a4.8 4.8 0 1 0-9.6 0M35.08 7.35l4.5 9.3 4.5-9.3M47.41 12a4.8 4.8 0 1 0 9.6 0a4.8 4.8 0 1 0-9.6 0M57.01 7.35v9.3M60.91 16.65v-9.3M60.91 11.8a4.3 4.3 0 0 1 8.6 0v4.85M81.72 8.43a4.8 4.8 0 1 0 0 7.14M85.92 12h9.6a4.8 4.8 0 1 0-1.23 3.21";
+export function Wordmark({ className = "jv-wordmark" }: { className?: string }) {
+  return <svg className={className} viewBox="0 0 97 24" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={WORDMARK_PATH} /></svg>;
+}
 export function Brand() {
   return <Link to="/" className="jv-brand" aria-label="Jobvance home">
     <span className="jv-brand-mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none"><path d="M17 9.5v6a5.25 5.25 0 0 1-10.5 0" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" /><circle cx="17" cy="4.6" r="1.9" className="jv-brand-signal" /></svg>
     </span>
-    <span className="jv-wordmark">jobvance</span>
+    <Wordmark />
   </Link>;
 }
 const links = [["/job-loop","Automated Job Loop"],["/check","Free CV Check"],["/pricing","Pricing"],["/guides","Guides"],["/help","Help"]];
