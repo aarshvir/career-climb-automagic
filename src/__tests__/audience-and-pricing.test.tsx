@@ -104,11 +104,16 @@ describe('Automated Job Loop first homepage', () => {
     expect(stages[1]).toHaveTextContent('roles and locations');
     expect(stages[2]).toHaveTextContent('Review your dashboard');
     expect(stages[2]).toHaveTextContent('approve your documents');
-    for (const link of screen.getAllByRole('link', { name: 'Start my Automated Job Loop' })) expect(link).toHaveAttribute('href', '/onboarding');
+    // Short actions sit under headings that name the product; the final call to action keeps the full name.
+    expect(screen.getByText('Automated Job Loop', { selector: '.jv-hero-eyebrow' })).toBeInTheDocument();
+    expect(screen.getByText('How Automated Job Loop works')).toBeInTheDocument();
+    const starts = [...screen.getAllByRole('link', { name: 'Start my search' }), ...screen.getAllByRole('link', { name: 'Start my Automated Job Loop' })];
+    expect(starts).toHaveLength(3);
+    for (const link of starts) expect(link).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: /Try the free CV Check/ })).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
-    expect(screen.getByText(/Runs weekly, three times a week or daily/)).toHaveTextContent('You confirm AI preparation once before recurring runs start');
-    expect(screen.getByText(/Searches your connected sources or a vacancy you add/)).toHaveTextContent('a run may find nothing new');
+    expect(screen.getByText(/You review, download and apply\./, { selector: '.jv-hero-lead' })).toHaveTextContent('Choose your roles and locations once');
+    expect(screen.getByText(/Each run looks through connected sources/)).toHaveTextContent('Some runs may find nothing new');
   });
 });
 
@@ -116,7 +121,7 @@ describe('published draft privacy guidance', () => {
   it('links the concise guest privacy explanation to the full storage choices', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByRole('link', { name: 'How your CV is handled' })).toHaveAttribute('href', '/privacy');
-    expect(screen.getByText(/Review what you reuse before saving/)).toHaveTextContent('You approve each document');
+    expect(screen.getByText(/^Jobvance prepares;/)).toHaveTextContent('you approve each document, download it and apply on the employer’s site');
   });
   it('publishes the consented tab-storage exposure and requires renewed approval after restoration', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);

@@ -1,6 +1,5 @@
-/* Home page ("Ink & Signal"). Scoped under .jv-home so legacy .product-page rules never win.
-   Textures: hairline frame rails (on .jv-home, header to footer), the orbit, a faint dot field behind the hero mock,
-   and a 24px hatched band at each light-to-ink transition.
+/* Home page. Scoped under .jv-home so legacy .product-page rules never win.
+   Two devices only, both meaningful: hairline frame rails (the grid, header to footer) and the orbit (the scheduled loop).
    Grid: from 1024px every two-column block uses the hero's 12-column grid (24px gaps), so right columns share one edge. */
 .jv-home { position: relative; isolation: isolate; overflow-x: clip; color: var(--jv-ink); background: #fff; overflow-wrap: normal; }
 .jv-home h1, .jv-home h2, .jv-home h3 { text-wrap: balance; }
@@ -24,10 +23,9 @@
 
 /* 1. Hero */
 .jv-home .jv-hero { position: relative; isolation: isolate; padding: 28px 0 48px; overflow: clip; }
-/* A faint neutral dot field. Phones: only under the mock, never behind the buttons or the note. */
-.jv-home .jv-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 1px 1px, rgb(10 11 20 / .11) 1px, transparent 1.5px) 0 0 / 24px 24px; -webkit-mask-image: radial-gradient(70% 30% at 50% 92%, #000 10%, transparent 70%); mask-image: radial-gradient(70% 30% at 50% 92%, #000 10%, transparent 70%); }
 .jv-home .jv-hero-grid { display: grid; gap: 32px; }
 .jv-home .jv-hero-copy { position: relative; z-index: 1; min-width: 0; }
+.jv-home .jv-hero-eyebrow { margin: 0 0 16px; color: var(--jv-brand-ink); }
 .jv-home .jv-hero-title { margin: 0; max-width: 9.45em; color: var(--jv-ink); font-size: var(--t-display); font-weight: var(--fw-display); line-height: 1.02; letter-spacing: -.045em; }
 .jv-home .jv-hero-lead { margin: 20px 0 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; }
 .jv-home .jv-hero-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 28px; }
@@ -54,14 +52,9 @@
 @media (min-width: 640px) and (max-width: 1023px) {
   .jv-home .jv-hero-mock .jv-mock { max-width: 600px; }
 }
-@media (min-width: 768px) {
-  .jv-home .jv-hero::before { -webkit-mask-image: radial-gradient(50% 45% at 50% 80%, #000 10%, transparent 72%); mask-image: radial-gradient(50% 45% at 50% 80%, #000 10%, transparent 72%); }
-}
 @media (min-width: 1024px) {
   .jv-home .jv-hero { padding: 88px 0 64px; }
-  .jv-home .jv-hero::before { background: radial-gradient(circle at 1px 1px, rgb(10 11 20 / .15) 1px, transparent 1.5px) 0 0 / 32px 32px; -webkit-mask-image: radial-gradient(34% 62% at 76% 48%, #000 15%, transparent 75%); mask-image: radial-gradient(34% 62% at 76% 48%, #000 15%, transparent 75%); }
-  /* A soft 8% indigo light behind the mock: the hero's one source of colour besides the button. */
-  .jv-home .jv-hero::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(36% 46% at 75% 52%, rgb(59 71 240 / .08), transparent 70%); }
+  .jv-home .jv-hero-eyebrow { margin-bottom: 20px; }
   .jv-home .jv-hero-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: center; }
   .jv-home .jv-hero-copy { grid-column: 1 / span 6; }
   .jv-home .jv-hero-visual { grid-column: 7 / span 6; place-items: center; min-height: 520px; }
@@ -71,7 +64,7 @@
   .jv-home .jv-hero-orbit-wrap { display: block; position: absolute; left: 50%; top: 50%; z-index: 0; width: min(600px, calc(100% + 76px)); translate: -50% -50%; rotate: -30deg; pointer-events: none; }
   .jv-home .jv-hero-orbit { width: 100%; }
 }
-/* 1024-1279: the column is barely wider than the card, so a ring would hide two of its stops; the dot field carries it. */
+/* 1024-1279: the column is barely wider than the card, so a ring would hide two of its stops. */
 @media (min-width: 1024px) and (max-width: 1279px) { .jv-home .jv-hero-orbit-wrap { display: none; } }
 
 /* 2. Proof strip: a spec table. Phones: one ruled list. Tablets: two columns of hairline cells (the fifth spans both).
@@ -105,14 +98,11 @@
   .jv-home .jv-proof li > span:last-child { white-space: nowrap; }
 }
 
-/* Hatched transition band: the light page meets ink through a 24px seam inside the frame. */
-.jv-home .jv-hatch { width: var(--shell); height: 24px; margin: 0 auto; background: repeating-linear-gradient(135deg, var(--jv-line-strong) 0 1px, transparent 1px 9px); }
-.jv-home .jv-hatch + .jv-dark { border-top-left-radius: 0; border-top-right-radius: 0; }
-
-/* 3. How the loop runs (dark band) */
-.jv-home .jv-loop-band { width: var(--shell); margin: 0 auto; padding: 56px var(--band-pad-x) 48px; border-radius: var(--r-lg); }
+/* 3. How the loop runs (forest band) */
+.jv-home .jv-loop-band { width: var(--shell); margin: 24px auto 0; padding: 56px var(--band-pad-x) 48px; border-radius: var(--r-lg); }
 .jv-home .jv-loop-grid { position: relative; z-index: 1; display: grid; }
-.jv-home .jv-loop-head { max-width: 10.8em; }
+.jv-home .jv-loop-head { display: grid; gap: 16px; justify-items: start; }
+.jv-home .jv-loop-head h2 { max-width: 10.8em; }
 /* Two labelled models: the per-run cycle (orbit) and the one-time set-up (steps). */
 .jv-home .jv-loop-caption { justify-self: stretch; margin: 0; color: var(--jv-on-dark-2); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
 .jv-home .jv-loop-steps > .jv-loop-caption { margin-bottom: 20px; }
@@ -138,17 +128,18 @@
   .jv-home .jv-loop-visual .jv-orbit { width: min(360px, 80%); }
 }
 @media (min-width: 1024px) {
-  .jv-home .jv-loop-band { padding: 112px var(--band-pad-x) 104px; background: radial-gradient(36% 44% at 22% 64%, rgb(154 162 255 / .16), transparent 72%), radial-gradient(60% 45% at 50% 0%, rgb(154 162 255 / .14), transparent 70%), #0A0B14; }
+  .jv-home .jv-loop-band { padding: 112px var(--band-pad-x) 104px; }
   /* The headline leads from the page's left axis; the orbit (every run) and the steps (set up once) share row 2. */
   .jv-home .jv-loop-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 64px; align-items: start; }
-  .jv-home .jv-loop-head { grid-column: 1 / span 7; grid-row: 1; max-width: 12.15em; }
+  .jv-home .jv-loop-head { grid-column: 1 / span 7; grid-row: 1; gap: 20px; }
+  .jv-home .jv-loop-head h2 { max-width: 12.15em; }
   .jv-home .jv-loop-visual { grid-column: 1 / span 5; grid-row: 2; padding: 0; }
   .jv-home .jv-loop-visual > .jv-loop-caption { margin-bottom: 64px; }
   .jv-home .jv-loop-steps { grid-column: 7 / span 6; grid-row: 2; }
   .jv-home .jv-loop-visual .jv-orbit { width: min(420px, 100%); }
 }
 
-/* 4. You stay in control */
+/* 4. The work it takes off your hands */
 .jv-home .jv-control { padding: var(--section-y) 0; }
 .jv-home .jv-section-head { display: grid; gap: 16px; max-width: 720px; }
 .jv-home .jv-section-head p { margin: 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; }
@@ -167,37 +158,26 @@
 .jv-home .jv-frag-filename { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-sm); line-height: var(--lh-sm); overflow-wrap: anywhere; }
 .jv-home .jv-frag-filename svg { width: 16px; height: 16px; flex: none; color: var(--jv-ink-3); }
 .jv-home .jv-frag-state { display: inline-flex; align-items: center; gap: 8px; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; line-height: 1.25rem; letter-spacing: 0; }
-/* Paused schedule: the three day pills are dimmed (dashed, muted text) while the switch is off. */
+/* Schedule days: the chosen weekdays as quiet brand-tinted pills. */
 .jv-home .jv-frag-days { display: flex; gap: 6px; }
-.jv-home .jv-frag-days > span { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border: 1px dashed var(--jv-line-strong); border-radius: var(--r-pill); background: #fff; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; }
+.jv-home .jv-frag-days > span { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border: 1px solid color-mix(in srgb, var(--jv-brand) 22%, transparent); border-radius: var(--r-pill); background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; }
+.jv-home .jv-frag-time { color: var(--jv-ink); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; font-variant-numeric: tabular-nums; }
+/* Example run: two openings as ruled rows. */
+.jv-home .jv-frag-jobs { display: grid; margin: 0; padding: 0; list-style: none; }
+.jv-home .jv-frag-jobs li { display: grid; gap: 2px; padding: 12px 0; border-top: 1px solid var(--jv-line); }
+.jv-home .jv-frag-jobs li:last-child { padding-bottom: 0; }
+/* The one status tag in this section: the same "ready" tag as the hero run log. */
+.jv-home .jv-status-tag { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 8px; border-radius: var(--r-xs); background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; white-space: nowrap; }
+.jv-home .jv-status-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--jv-brand); }
 /* Labels inside fragments are sentence-case sans: mono is kept for machine data. */
 .jv-home .jv-frag-label { display: block; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); font-weight: 500; letter-spacing: 0; }
-.jv-home .jv-frag-cv { gap: 10px; }
-.jv-home .jv-frag-cv p { margin: 0; max-width: none; color: var(--jv-ink); font-size: var(--t-body-sm); line-height: var(--lh-body-sm); }
-.jv-home .jv-frag-skip { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; justify-self: start; color: var(--jv-ink-3); font-size: var(--t-small); line-height: 1.25rem; }
-.jv-home .jv-frag-skip s { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border: 1px dashed var(--jv-line-strong); border-radius: var(--r-xs); color: var(--jv-ink-3); font-size: var(--t-small); text-decoration-color: var(--jv-ink-3); }
-.jv-home .jv-switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; border-radius: var(--r-pill); background: var(--jv-line-strong); }
-.jv-home .jv-switch > span { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgb(10 11 20 / .2); }
-.jv-home .jv-switch.is-on { background: var(--jv-brand); }
-.jv-home .jv-switch.is-on > span { left: 18px; }
-/* Also worth knowing: four facts as a ruled spec grid (one column on phones, 2x2 from 640px), no bullets. */
-.jv-home .jv-know { display: grid; gap: 24px; padding-top: 32px; border-top: 1px solid var(--jv-line-strong); }
-.jv-home .jv-know-caption { margin: 0; justify-self: start; }
-.jv-home .jv-know-grid { display: grid; gap: 1px; margin: 0; background: var(--jv-line); }
-.jv-home .jv-know-grid > div { padding: 16px 0; background: #fff; }
-.jv-home .jv-know-grid > div:first-child { padding-top: 0; }
-.jv-home .jv-know-grid dt { color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-strong); line-height: 1.5rem; letter-spacing: -.011em; }
-.jv-home .jv-know-grid dd { margin: 4px 0 0; max-width: 48ch; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.5rem; }
-.jv-home .jv-know-links { display: flex; flex-wrap: wrap; gap: 0 28px; }
+/* Where Jobvance stops: one sentence and the two places to read more. */
+.jv-home .jv-boundary { display: grid; gap: 8px; padding-top: 28px; border-top: 1px solid var(--jv-line-strong); }
+.jv-home .jv-boundary p { margin: 0; max-width: 52ch; color: var(--jv-ink); font-size: var(--t-body); font-weight: 500; line-height: var(--lh-body); letter-spacing: -.011em; }
+.jv-home .jv-boundary-links { display: flex; flex-wrap: wrap; gap: 0 28px; }
 /* Phones: the card stands alone (no staging panel), so the section stays short. */
 @media (max-width: 767px) {
   .jv-home .jv-frag { padding: 0; border: 0; background: none; }
-}
-@media (min-width: 640px) {
-  .jv-home .jv-know-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .jv-home .jv-know-grid > div, .jv-home .jv-know-grid > div:first-child { padding: 24px 24px 24px 0; }
-  .jv-home .jv-know-grid > div:nth-child(even) { padding-left: 24px; }
-  .jv-home .jv-know-grid > div:nth-child(-n+2) { padding-top: 4px; }
 }
 @media (min-width: 768px) {
   .jv-home .jv-control-row { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
@@ -211,7 +191,9 @@
   .jv-home .jv-control-row { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 32px 0; }
   .jv-home .jv-control-copy { grid-column: 1 / span 5; }
   .jv-home .jv-frag { grid-column: 7 / span 6; }
-  .jv-home .jv-know { padding-top: 40px; gap: 28px; }
+  .jv-home .jv-boundary { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; padding-top: 32px; }
+  .jv-home .jv-boundary p { grid-column: 1 / span 6; }
+  .jv-home .jv-boundary-links { grid-column: 7 / span 6; }
 }
 
 /* 5. Free CV Check panel: a neutral surface tone (the control rows' field colour). Brand colour appears only in the

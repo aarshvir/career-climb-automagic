@@ -1,4 +1,4 @@
-/* Jobvance "Ink & Signal" marketing system. Every class is prefixed jv-.
+/* Jobvance marketing system (green brand, forest dark surface, lime signal). Every class is prefixed jv-.
    Tokens live in src/index.css; motion lives in src/styles/motion.css. */
 
 /* ---------- Layout ---------- */
@@ -8,10 +8,10 @@
 /* ---------- Type helpers ---------- */
 /* Mono is reserved for uppercase captions, section numbers and schedule/time values. */
 .jv-caption { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
-/* Marker rule: a 6px SQUARE marks a label or list item (brand on light, #9AA2FF on ink); a CIRCLE marks only live state. */
+/* Marker rule: a 6px SQUARE marks a label or list item (brand on light, lime signal on forest); a CIRCLE marks only live state. */
 .jv-caption::before { content: ""; width: 6px; height: 6px; background: var(--jv-brand); flex-shrink: 0; }
 .jv-dark .jv-caption { color: var(--jv-on-dark-2); }
-.jv-dark .jv-caption::before { background: var(--jv-on-dark-link); }
+.jv-dark .jv-caption::before { background: var(--jv-signal); }
 
 /* ---------- Buttons ---------- */
 /* Icon stroke: 2.25 for 16px+ icons beside 560-weight labels; 1.75 for 14px meta icons. */
@@ -23,19 +23,19 @@
 .jv-btn--sm { --jv-btn-h: 40px; padding: 0 16px; font-size: var(--t-small); }
 .jv-btn--lg { --jv-btn-h: 56px; padding: 0 28px; font-size: var(--t-body); }
 .jv-btn--lg svg { width: 18px; height: 18px; }
-.jv-btn--primary { color: #fff; background: #3B47F0; box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 1px 2px rgb(10 11 20 / .2); }
+.jv-btn--primary { color: #fff; background: var(--jv-brand); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(15 29 23 / .2); }
 .jv-btn--secondary { color: var(--jv-ink); background: #fff; border-color: var(--jv-line-strong); box-shadow: var(--sh-1); }
 .jv-btn--ghost { color: var(--jv-ink-2); background: transparent; }
 @media (hover: hover) {
-  .jv-btn--primary:hover { background: var(--jv-brand-hover); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 6px 16px -6px rgb(10 11 20 / .35); }
-  .jv-btn--secondary:hover { border-color: #C3C8D6; background: var(--jv-bg-subtle); }
+  .jv-btn--primary:hover { background: var(--jv-brand-hover); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 6px 16px -6px rgb(15 29 23 / .35); }
+  .jv-btn--secondary:hover { border-color: #BCC6C0; background: var(--jv-bg-subtle); }
   .jv-btn--ghost:hover { background: var(--jv-bg-muted); color: var(--jv-ink); }
   .jv-btn:hover svg { transform: translateX(2px); }
 }
 .jv-btn--primary:active { background: var(--jv-brand-press); transform: scale(.98); transition-duration: var(--dur-1); }
 .jv-btn--secondary:active { transform: scale(.98); transition-duration: var(--dur-1); }
 .jv-btn:disabled, .jv-btn[aria-busy="true"] { cursor: not-allowed; }
-.jv-btn--primary:disabled, .jv-btn--primary[aria-busy="true"] { background: #B9BDF8; box-shadow: none; transform: none; }
+.jv-btn--primary:disabled, .jv-btn--primary[aria-busy="true"] { background: #9DB3A8; box-shadow: none; transform: none; }
 /* The focus ring is an outline (never transitioned), so it appears and disappears instantly. */
 .jv-btn:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; }
 @media (forced-colors: active) { .jv-btn:focus-visible { outline: 2px solid CanvasText; } }
@@ -66,39 +66,38 @@
 @media (max-width: 639px) { .jv-card { padding: 20px; } }
 @media (hover: hover) { .jv-card--link:hover { border-color: color-mix(in srgb, var(--jv-brand) 30%, var(--jv-line)); box-shadow: var(--sh-3); transform: translateY(-2px); } }
 
-/* ---------- Dark band ---------- */
+/* ---------- Dark band (forest) ---------- */
 .jv-dark {
-  --jv-bg: #0A0B14; --jv-surface: #12141F; --jv-elevated: #1A1D2B; --jv-line: rgb(255 255 255 / .08);
-  --jv-ink: #F4F5FA; --jv-ink-2: #A9AEC4; --jv-ink-3: #7D829B; --jv-brand-text: #9AA2FF;
-  --jv-success: #4ADE95; --jv-warn: #FBBF4A; --jv-danger: #FF7A7A;
-  /* text on ink, with contrast on #0A0B14 */
-  --jv-on-dark-1: #F4F5FA; /* 18.0:1 */ --jv-on-dark-body: #C9CCDA; /* 12.4:1 */ --jv-on-dark-2: #A9AEC4; /* 8.9:1 */
-  --jv-on-dark-3: #7D829B; /* 5.2:1 */ --jv-on-dark-link: #9AA2FF; /* 8.4:1 */
+  --jv-bg: var(--jv-forest); --jv-surface: var(--jv-forest-2); --jv-elevated: #183427; --jv-line: rgb(255 255 255 / .09);
+  --jv-ink: #F2F6F3; --jv-ink-2: #A5B6AD; --jv-ink-3: #82948A; --jv-brand-text: #A9DDBC;
+  --jv-success: #6FDCA0; --jv-warn: #FBBF4A; --jv-danger: #FF8A80;
+  /* text on forest, with contrast on #0C1F17 */
+  --jv-on-dark-1: #F2F6F3; /* 16.3:1 */ --jv-on-dark-body: #C6D3CC; /* 11.1:1 */ --jv-on-dark-2: #A5B6AD; /* 8.1:1 */
+  --jv-on-dark-3: #82948A; /* 5.4:1 */ --jv-on-dark-link: #A9DDBC; /* 11.2:1 */
   position: relative; isolation: isolate; overflow: hidden; color: var(--jv-on-dark-body);
-  /* A cool, low-chroma light source, not a brand-indigo haze. */
-  background: radial-gradient(60% 55% at 50% 0%, rgb(154 162 255 / .16), transparent 70%), #0A0B14;
+  /* One soft light from the top edge; no grain or second glow. */
+  background: radial-gradient(60% 55% at 50% 0%, rgb(169 221 188 / .09), transparent 70%), var(--jv-forest);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / .06);
 }
-/* A 4% film grain over ink, so the light falls on a surface rather than a flat fill (decorative, under the content). */
-.jv-dark::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .05; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-/* Text links on ink get the lavender ring (this also beats .product-page's light-theme ring); buttons keep ink + lime. */
+/* Text links on forest get the mint ring (this also beats .product-page's light-theme ring). */
 .jv-dark :focus-visible, .product-page .jv-dark :is(a, button, summary):not(.jv-btn):focus-visible { outline-color: var(--jv-on-dark-link); }
 .jv-dark a:not(.jv-btn) { color: var(--jv-on-dark-link); }
-.jv-dark .jv-btn--primary { color: #0A0B14; background: var(--jv-signal); box-shadow: inset 0 1px 0 rgb(255 255 255 / .4); }
-.jv-dark .jv-btn--secondary { color: #fff; background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .16); box-shadow: none; }
+/* On forest the primary is a white button (17:1); lime stays a small signal, never a fill. */
+.jv-dark .jv-btn--primary { color: var(--jv-forest); background: #fff; box-shadow: inset 0 -1px 0 rgb(15 29 23 / .08), 0 1px 2px rgb(0 0 0 / .2); }
+.jv-dark .jv-btn--secondary { color: #fff; background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .18); box-shadow: none; }
 @media (hover: hover) {
-  .jv-dark .jv-btn--primary:hover { background: #DEF77A; }
-  .jv-dark .jv-btn--secondary:hover { background: rgb(255 255 255 / .1); border-color: rgb(255 255 255 / .24); }
+  .jv-dark .jv-btn--primary:hover { background: #E6F0EA; }
+  .jv-dark .jv-btn--secondary:hover { background: rgb(255 255 255 / .1); border-color: rgb(255 255 255 / .26); }
 }
-.jv-dark .jv-btn--primary:active { background: #C6E64A; }
+.jv-dark .jv-btn--primary:active { background: #D5E5DB; }
 .jv-dark .jv-btn:focus-visible { outline-color: var(--jv-signal); }
 
-/* The approved document-J and Manrope wordmark stay independent of the page palette. */
+/* The approved document-J mark (the same green tile as the favicon and the ads) and the Manrope wordmark. */
 @font-face { font-family: "Jobvance Brand"; src: url("/fonts/Manrope-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
-.jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: #172b24; font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.04em; line-height: 1; text-decoration: none; border-radius: 10px; }
+.jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.04em; line-height: 1; text-decoration: none; border-radius: 10px; }
 .jv-brand-name { white-space: nowrap; }
-.jv-brand-period { color: #215c43; }
-.jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #215c43; color: #fff; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
+.jv-brand-period { color: var(--jv-brand); }
+.jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #215C43; color: #E2EEAF; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
 .jv-brand-mark svg { width: 24px; height: 24px; }
 /* Windows High Contrast drops the tile fill; keep the tile's edge so the mark stays recognisable. */
 @media (forced-colors: active) { .jv-brand-mark { border: 1px solid CanvasText; } }
@@ -112,10 +111,6 @@
 .jv-header { position: sticky; top: 0; z-index: 40; background: #fff; border-bottom: 1px solid var(--jv-line); }
 .jv-header-inner { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; width: var(--shell); min-height: 56px; margin-inline: auto; }
 .jv-header .lucide, .jv-footer .lucide { stroke-width: 1.75; }
-/* The bar's primary is ink, so the hero CTA is the single indigo peak. */
-.jv-header-inner .jv-btn--primary { background: #0A0B14; box-shadow: inset 0 1px 0 rgb(255 255 255 / .10), 0 1px 2px rgb(10 11 20 / .2); }
-@media (hover: hover) { .jv-header-inner .jv-btn--primary:hover { background: #1A1D2B; } }
-.jv-header-inner .jv-btn--primary:active { background: #000; }
 .jv-header-nav { display: none; }
 .jv-header-actions { display: none; }
 .jv-header-inner > .jv-brand { min-width: 0; }
@@ -130,7 +125,7 @@
 .jv-account-pending { display: contents; }
 .jv-account-pending > .jv-btn { visibility: hidden; }
 .jv-mobile-panel { display: none; }
-.jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(10 11 20 / .18); animation: jv-menu-in 200ms var(--ease-out) both; }
+.jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(15 29 23 / .18); animation: jv-menu-in 200ms var(--ease-out) both; }
 .jv-mobile-panel > a { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid var(--jv-line); color: var(--jv-ink); font-size: 20px; font-weight: 500; letter-spacing: -.02em; text-decoration: none; }
 .jv-mobile-panel > a[aria-current="page"] { color: var(--jv-brand); }
 .jv-mobile-panel > a:focus-visible { outline-offset: -2px; border-radius: 6px; }
@@ -138,14 +133,14 @@
 .jv-mobile-account > * { width: 100%; }
 .jv-mobile-account .jv-btn { --jv-btn-h: 48px; font-size: var(--t-body-sm); }
 .jv-mobile-account .jv-btn--ghost { color: var(--jv-ink); background: #fff; border-color: var(--jv-line-strong); }
-.jv-menu-scrim { position: fixed; inset: 56px 0 0; z-index: 1; background: rgb(10 11 20 / .32); animation: jv-scrim-in 180ms var(--ease-out) both; }
+.jv-menu-scrim { position: fixed; inset: 56px 0 0; z-index: 1; background: rgb(15 29 23 / .32); animation: jv-scrim-in 180ms var(--ease-out) both; }
 .jv-account-status { color: var(--jv-ink-3); font-size: var(--t-sm); }
 .jv-header-error { width: var(--shell); margin: 0 auto 12px; color: var(--jv-danger); font-size: var(--t-sm); }
 /* Open and close clip the panel from its top edge, so its text never overlaps the page text behind it. */
 @keyframes jv-menu-in { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes jv-scrim-in { from { opacity: 0; } }
 /* Closing: the panel stays mounted for 160ms and is clipped away (MvpHeader sets data-state="closing"). */
-.jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(10 11 20 / .18); pointer-events: none; animation: jv-menu-out 160ms var(--ease-inout) both; }
+.jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(15 29 23 / .18); pointer-events: none; animation: jv-menu-out 160ms var(--ease-inout) both; }
 .jv-menu-scrim[data-state="closing"] { pointer-events: none; animation: jv-scrim-out 160ms var(--ease-inout) both; }
 @keyframes jv-menu-out { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }
 @keyframes jv-scrim-out { to { opacity: 0; } }
@@ -156,7 +151,7 @@
   /* Floating glass bar: the page passes visibly above and under it while scrolling. */
   .jv-header { top: 0; padding-top: 12px; background: transparent; border-bottom: 0; pointer-events: none; }
   .jv-header > * { pointer-events: auto; }
-  .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 64px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(10 11 20 / .12); background: rgb(255 255 255 / .82); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
+  .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 64px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(15 29 23 / .12); background: rgb(255 255 255 / .82); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
   .jv-header-inner > .jv-brand { justify-self: start; }
   .jv-header-nav { display: flex; align-items: center; gap: 2px; }
   .jv-header-nav > a { display: inline-flex; align-items: center; min-height: 36px; padding: 8px 12px; border-radius: var(--r-pill); color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; letter-spacing: 0; text-decoration: none; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
@@ -216,10 +211,10 @@
 }
 
 /* ---------- Final CTA band ---------- */
-/* Left-aligned copy over ink, lit from the top-right corner at every width (phones included), never behind a button.
-   From 1024px a static orbit is anchored to the button row: its lime "You review" node sits on the row's vertical
-   centre to the right of the buttons, inside its own light pool; the rest of the ring arcs out of the band. */
-.jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: radial-gradient(90% 45% at 100% 0%, rgb(154 162 255 / .14), transparent 70%), #0A0B14; }
+/* Left-aligned copy on forest, lit once from the top-right corner. From 1024px a static orbit ring is anchored to the
+   button row: its lime "You review" node sits on the row's vertical centre to the right of the buttons; the rest of
+   the ring arcs out of the band. */
+.jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: radial-gradient(90% 45% at 100% 0%, rgb(169 221 188 / .1), transparent 70%), var(--jv-forest); }
 .jv-cta .jv-cta-orbit { display: none; }
 .jv-cta-inner { position: relative; z-index: 1; max-width: 640px; }
 .jv-cta h2 { margin: 0; max-width: 8.1em; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: -.04em; text-wrap: balance; }
@@ -227,15 +222,12 @@
 .jv-cta-actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 32px; }
 .jv-cta .jv-cta-note { max-width: none; margin-top: 20px; color: var(--jv-on-dark-2); font-size: var(--t-sm); line-height: var(--lh-sm); letter-spacing: 0; font-variant-numeric: tabular-nums; }
 @media (max-width: 639px) { .jv-cta-actions .jv-btn { width: 100%; } }
-@media (min-width: 640px) {
-  .jv-cta { padding: 96px var(--band-pad-x); background: radial-gradient(70% 60% at 100% 0%, rgb(154 162 255 / .14), transparent 70%), #0A0B14; }
-}
+@media (min-width: 640px) { .jv-cta { padding: 96px var(--band-pad-x); } }
 @media (min-width: 1024px) {
   .jv-cta { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 112px var(--band-pad-x); }
   .jv-cta-inner { grid-column: 1 / span 7; max-width: none; }
   /* 720px ring; the "You review" node is at (6.7%, 75%) of it, i.e. 48px in and 540px down. */
-  .jv-cta .jv-cta-orbit { --ring: rgb(154 162 255 / .4); display: block; position: absolute; z-index: -1; left: calc(108% - 48px); top: calc(50% - 540px); width: 720px; max-width: none; }
-  .jv-cta .jv-cta-orbit::before { content: ""; position: absolute; left: 6.7%; top: 75%; width: 420px; height: 420px; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgb(154 162 255 / .2), rgb(154 162 255 / .06) 55%, transparent); }
+  .jv-cta .jv-cta-orbit { --ring: rgb(169 221 188 / .32); display: block; position: absolute; z-index: -1; left: calc(108% - 48px); top: calc(50% - 540px); width: 720px; max-width: none; }
 }
 
 /* ---------- FAQ accordion ---------- */
