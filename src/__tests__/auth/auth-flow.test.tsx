@@ -229,6 +229,26 @@ describe('Automated Job Loop account entry and confirmation recovery', () => {
     expect(screen.getByText(/Automated Job Loop plans from US\$29\/month/)).toBeInTheDocument();
     expect(sdk.signUp).not.toHaveBeenCalled();
   });
+  it('tells an ad visitor what they get, what it costs and that they stay in control, before the form', async () => {
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding&utm_source=meta']}><Auth /></MemoryRouter></AuthProvider>);
+    const benefits = await screen.findByRole('list', { name:'What the Automated Job Loop does' });
+    expect(benefits).toHaveTextContent('Roles matched to your CV.');
+    expect(benefits).toHaveTextContent('A tailored CV for each role.');
+    expect(benefits).toHaveTextContent('Review every CV, then apply yourself. Nothing is sent for you.');
+    expect(screen.getByText('Your account also includes 3 AI-tailored CVs a month, free.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name:'See plans' })).toHaveAttribute('href', '/pricing');
+    // The explanation sits above the form fields, and the form is unchanged.
+    const form = screen.getByLabelText('Email address');
+    expect(benefits.compareDocumentPosition(form) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByLabelText('Full name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Mobile number')).toBeInTheDocument();
+  });
+  it('does not show the product explainer on an ordinary sign-in or after the confirmation email is sent', async () => {
+    const { unmount } = render(<AuthProvider><MemoryRouter initialEntries={['/auth']}><Auth /></MemoryRouter></AuthProvider>);
+    await screen.findByText('Sign in to Jobvance');
+    expect(screen.queryByRole('list', { name:'What the Automated Job Loop does' })).not.toBeInTheDocument();
+    unmount();
+  });
   it.each(['Instagram 321.0','Mozilla [FBAN/FBIOS;FBAV/500]'])('offers email and browser guidance for %s without attempting blocked OAuth', async agent => {
     vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(agent);
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);

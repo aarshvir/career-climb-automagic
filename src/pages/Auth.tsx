@@ -174,8 +174,17 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
         <div className="ap-auth-heading">
           {!embedded && <p className="ap-eyebrow">{loopEntry ? 'YOUR AUTOMATED JOB LOOP STARTS HERE' : 'YOUR JOBVANCE WORKSPACE'}</p>}
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
-          <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : loopEntry ? 'Add your CV and the roles you want. Find matching opportunities and review prepared CVs in your Automated Job Loop.' : 'Keep your reviewed CVs and applications in one place.'}</p>
-          {loopEntry && !confirmationSent && <div className="ap-loop-entry"><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol><p>Automated Job Loop plans from US$29/month. <Link to="/pricing">See plans</Link> · <Link to="/job-loop">How it works</Link></p></div>}
+          {!(loopEntry && !confirmationSent) && <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>}
+          {loopEntry && !confirmationSent && <div className="ap-loop-entry">
+            <ul className="ap-benefits" aria-label="What the Automated Job Loop does">
+              <li><Check size={18} aria-hidden="true" /><span><strong>Roles matched to your CV.</strong> Each run searches the employer job boards we cover for the roles you choose.</span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>A tailored CV for each role.</strong> Built only from facts you confirm. Nothing is invented.</span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>You stay in control.</strong> Review every CV, then apply yourself. Nothing is sent for you.</span></li>
+            </ul>
+            <p className="ap-benefits-price">Automated Job Loop plans from US$29/month. <Link to="/pricing">See plans</Link> · <Link to="/job-loop">How it works</Link></p>
+            <p className="ap-benefits-free">Your account also includes 3 AI-tailored CVs a month, free.</p>
+            <details className="ap-steps"><summary>What happens after you sign up</summary><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol></details>
+          </div>}
         </div>
         <div className="ap-auth-content">
           {visibleError && <Alert variant="destructive" role="alert" className="ap-auth-alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
