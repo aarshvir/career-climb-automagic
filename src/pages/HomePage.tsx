@@ -38,7 +38,7 @@ export default function HomePage() {
           {/* The product is named right above the pitch, so the main action can stay short. */}
           <p className="jv-caption jv-hero-eyebrow">Automated Job Loop</p>
           <h1 id="home-title" className="jv-hero-title jv-enter-h1">Jobvance automates your job search end to end.</h1>
-          <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. It searches on your schedule and prepares a tailored CV for each role. You review, download and apply.</p>
+          <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. It searches on your schedule and prepares role-specific CVs for your review. You review, download and apply.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
             <StartLink size="lg" className="jv-hero-cta">Start my search</StartLink>
             <TextLink to="/check">Try the free CV Check</TextLink>
@@ -91,7 +91,7 @@ export default function HomePage() {
       <div className="jv-shell">
         <div className="jv-section-head" data-reveal>
           <h2 id="home-control-title">Stop starting your job search from scratch.</h2>
-          <p>Set your search once. Each run brings back openings and a CV prepared for each one, ready for your review.</p>
+          <p>Set your search once. Come back to matched openings and CVs prepared for your review.</p>
         </div>
         <div className="jv-control-rows">
           <article className="jv-control-row" data-reveal>

@@ -156,6 +156,7 @@
 .cv-check-page details > summary { min-height: 44px; padding-top: 8px; padding-bottom: 8px; align-content: center; cursor: pointer; }
 .cv-check-page label:has(input[type="checkbox"]) { min-height: 44px; padding-top: 8px; padding-bottom: 8px; cursor: pointer; }
 .cv-check-page a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; max-width: 100%; }
+.cv-check-page .product-navigation a { display: grid; }
 .cv-check-page a:focus-visible, .cv-check-page select:focus-visible, .cv-check-page input:focus-visible { outline: 2px solid var(--jv-blue); outline-offset: 3px; }
 .check-source-lines { margin-top: 16px; border-top: 1px solid hsl(var(--border)); padding-top: 8px; }
 .check-source-lines summary { font-size: 13px; font-weight: 550; }
