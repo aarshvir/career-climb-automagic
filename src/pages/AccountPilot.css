@@ -309,3 +309,16 @@
 .jv-account .ap-primary { font-size: 14px; box-shadow: 0 2px 8px #3b47f014; }
 .jv-account .ap-primary:hover { background: var(--jv-brand-hover); border-color: var(--jv-brand-hover); }
 .jv-account .ap-google-button:hover { background: var(--jv-bg-subtle); border-color: var(--ap-control-line); }
+
+/* Ad and onboarding visitors: what the product does, before the form. */
+.ap-loop-entry { margin-bottom: 22px; }
+.ap-benefits { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.ap-benefits li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 14px; line-height: 1.55; color: var(--ap-ink); }
+.ap-benefits svg { color: var(--ap-cobalt); margin-top: 2px; }
+.ap-benefits strong { font-weight: 700; }
+.ap-benefits-price, .ap-benefits-free { margin: 12px 0 0; font-size: 13px; line-height: 1.6; color: var(--ap-muted); }
+.ap-benefits-free { margin-top: 2px; }
+.ap-benefits-price a { color: var(--ap-cobalt); text-decoration: underline; text-underline-offset: 3px; }
+.ap-steps { margin-top: 12px; border-top: 1px solid var(--ap-line); padding-top: 10px; font-size: 13px; }
+.ap-steps summary { cursor: pointer; font-weight: 650; color: var(--ap-cobalt); }
+.ap-steps ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 4px; list-style: decimal; color: var(--ap-muted); }

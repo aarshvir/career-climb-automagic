@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-27",
+  "site": "https://jobvance.io",
+  "publicVersion": 63,
+  "runtimeSource": "add47189c48ccb989e7d7a7aa883fe7c601584d4",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_a655ba53ec9481918a03f4c6c70c77e7",
+  "deploymentId": "appgdep_6ae0e2cc209c8191b8a2f05cb69897ff",
+  "deployedAt": "2026-10-27T17:44:00.120558+00:00",
+  "status": "succeeded",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_000000002da082118ecfa0968bc51447",
+    "content_hash": "sha256:f5f8561f1dbf22ed3c2ea12c8eb9c52b4d6554068306af37514cd23b5bbf419f",
+    "size_bytes": 15656960,
+    "file_count": 152
+  },
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/34",
+  "reviewedHead": "dc9afba2cbe6cd7571117804471e4525b3f3f953",
+  "codeTreeIdenticalAtMerge": true,
+  "change": {
+    "files": 3,
+    "scope": "Auth entry benefit copy and collapsed next-step disclosure for next=/onboarding, corresponding CSS and two tests",
+    "authHandlersChanged": false,
+    "requiredFieldsChanged": false,
+    "adsChanged": false,
+    "backendSchemaPaymentsChanged": false,
+    "premiumLookIncluded": false
+  },
+  "validation": {
+    "tests": {
+      "passed": 3484,
+      "files": 190
+    },
+    "applicationTypeScript": "passed",
+    "ci": {
+      "head": "dc9afba2cbe6cd7571117804471e4525b3f3f953",
+      "run": 40551173708,
+      "check": 122355010391,
+      "result": "success",
+      "mergeHeadCIClaimed": false
+    },
+    "build": {
+      "publicPages": 37,
+      "guides": 20,
+      "hostingGroups": 12,
+      "compressedWorkerBytes": 2999610,
+      "limit": 3145728,
+      "socialPreview": "passed",
+      "initialAttempt": "SSR module transport timed out at 60000ms fetching unchanged pinned source; serial rebuild completed without source or guard changes."
+    },
+    "live": {
+      "checked": 134,
+      "publicPages": 37,
+      "js": 75,
+      "css": 15,
+      "rawByteMatches": 92,
+      "htmlApplicationMatchesWithOnlyCloudflareJsdTail": 42,
+      "checks": "Five SPA entry paths and sitemap/robots included. All return200. HTML differs only by Cloudflare-injected JS detection tail; raw hashes retained privately.",
+      "browser": "Actual desktop1440x900 and phone375x812 signup, collapsed/open/closed disclosure by keyboard, ordinary signin without benefits; no account/contact/Google/provider/checkout submission.",
+      "actualRaster": {
+        "desktop": [
+          1425,
+          891
+        ],
+        "phone": [
+          360,
+          780
+        ]
+      }
+    }
+  },
+  "rollback": {
+    "sourceTag": "jobvance-before-ad-landing-value-2026-10-27",
+    "source": "da9d69e0103adb3d61ae958ee2e0ffd0617a87c1",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_0c9d614f017481918fda1b9eea6e149f",
+    "limits": "Source/site rollback; not database, files or merchant restoration."
+  },
+  "acquisition": {
+    "cutoff": "2026-10-27T17:44:00.120558+00:00",
+    "preCollectionStart": "2026-10-26T05:48:23.986807+00:00",
+    "readAt": "2026-10-27T17:44:49.01924+00:00",
+    "preRelease": {
+      "trackedAdEntryVisits": 35,
+      "firstTouchLinkedAccounts": 0
+    },
+    "postRelease": {
+      "trackedAdEntryVisits": 0,
+      "firstTouchLinkedAccounts": 0
+    },
+    "cohort": "Meta ads channel, exact campaign us_job_loop_20261017, landing /onboarding or /auth; eligibility matches Admin Acquisition staff/test exclusions.",
+    "limitations": "Browser identifiers are not verified unique people. Anonymous QA cannot always be classified; direct QA used no campaign tags. Only tracked, first-touch-linked accounts count. No post-release rate or lift yet; unequal windows, email-confirmation lag and small samples prevent causal attribution."
+  },
+  "evidence": "jobvance-repair-evidence/ad-landing-value-2026-10-27/"
+}
