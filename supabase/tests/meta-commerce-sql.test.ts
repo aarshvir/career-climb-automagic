@@ -10,7 +10,7 @@ const q = (sql: string, args: unknown[] = []) => db.query<Record<string, any>>(s
 const asService = async <T>(run: () => Promise<T>) => { await db.exec('SET ROLE service_role'); try { return await run(); } finally { await db.exec('RESET ROLE'); } };
 const claimPurchases = (user: string, includeTest = false) => asService(async () => (await q('SELECT * FROM public.jobvance_meta_claim_purchases($1,$2)', [user, includeTest])).rows);
 const claimCheckout = (user: string, request: string, includeTest = false) => asService(async () => (await q('SELECT * FROM public.jobvance_meta_claim_checkout($1,$2,$3)', [user, request, includeTest])).rows);
-const markSent = (user: string, kind: string, keys: string[]) => asService(async () => (await q('SELECT public.jobvance_meta_mark_sent($1,$2,$3) AS n', [user, kind, keys])).rows[0].n);
+const markSent = (user: string, kind: string, keys: string[], mode = 'live') => asService(async () => (await q('SELECT public.jobvance_meta_mark_sent($1,$2,$3,$4) AS n', [user, kind, keys, mode])).rows[0].n);
 
 let owner: string;
 async function person(email = 'buyer@gmail.com', meta: Record<string, unknown> = {}) {
@@ -49,6 +49,23 @@ beforeEach(async () => {
 });
 
 describe('purchases offered to Meta', () => {
+  it('review: a test claim cannot suppress a live payment with the same provider key', async () => {
+    const payment = 'pay_review_shared_key';
+    await period(await subscription(owner, { mode: 'test' }), { mode: 'test', payment });
+    expect(await claimPurchases(owner, true)).toHaveLength(1);
+    await markSent(owner, 'purchase', [payment], 'test');
+    await period(await subscription(owner), { payment });
+    expect(await claimPurchases(owner)).toHaveLength(1);
+  });
+
+  it('review: two payments with the same first-cycle start are one first-cycle purchase', async () => {
+    const sub = await subscription(owner);
+    const first = await period(sub);
+    const second = await period(sub);
+    await q('UPDATE jobvance_private.loop_subscription_periods SET starts_at=(SELECT starts_at FROM jobvance_private.loop_subscription_periods WHERE payment_id=$1) WHERE payment_id=$2', [first, second]);
+    expect(await claimPurchases(owner)).toHaveLength(1);
+  });
+
   it('claims the first paid cycle once, with plan, amount and currency, and never twice', async () => {
     const payment = await period(await subscription(owner, { plan: 'daily' }), { amount: 9900 });
     const first = await claimPurchases(owner);
@@ -140,7 +157,7 @@ describe('access', () => {
       try {
         await expect(q('SELECT * FROM public.jobvance_meta_claim_purchases($1,false)', [owner])).rejects.toThrow(/permission denied/);
         await expect(q('SELECT * FROM public.jobvance_meta_claim_checkout($1,$2,false)', [owner, randomUUID()])).rejects.toThrow(/permission denied/);
-        await expect(q("SELECT public.jobvance_meta_mark_sent($1,'purchase',ARRAY['x'])", [owner])).rejects.toThrow(/permission denied/);
+        await expect(q("SELECT public.jobvance_meta_mark_sent($1,'purchase',ARRAY['x'],'live')", [owner])).rejects.toThrow(/permission denied/);
         await expect(q('SELECT * FROM jobvance_private.meta_commerce_events')).rejects.toThrow(/permission denied/);
       } finally { await db.exec('RESET ROLE'); }
     }

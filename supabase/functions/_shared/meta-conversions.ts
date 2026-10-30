@@ -61,13 +61,13 @@ export async function buildRegistrationEvent(facts: RegistrationFacts): Promise<
 export type CommerceKind = 'checkout' | 'purchase';
 
 /** Stable per order or payment, so a retried send is counted by Meta once. */
-export async function commerceEventId(kind: CommerceKind, key: string): Promise<string> {
-  return `${kind === 'purchase' ? 'pur' : 'chk'}_${(await sha256Hex(key)).slice(0, 32)}`;
+export async function commerceEventId(kind: CommerceKind, key: string, mode: 'live' | 'test' = 'live'): Promise<string> {
+  return `${kind === 'purchase' ? 'pur' : 'chk'}_${(await sha256Hex(`${mode}:${key}`)).slice(0, 32)}`;
 }
 
 /** What jobvance_meta_claim_purchases returns for one first paid cycle. */
 export interface PurchaseRow {
-  event_key: string; occurred_at: string; plan_label: string; amount_minor: number | string; currency: string; usd: number | string | null;
+  event_key: string; occurred_at: string; plan_label: string; amount_minor: number | string; currency: string; usd: number | string | null; mode: 'live' | 'test';
 }
 
 const ZERO_DECIMAL_CURRENCIES = new Set(['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF']);
@@ -90,17 +90,17 @@ export async function buildPurchaseEvent(facts: PersonFacts, row: PurchaseRow): 
   const amount = purchaseValue(row);
   if (!Number.isFinite(paid) || !amount) return null;
   return {
-    event_name: 'Purchase', event_time: Math.floor(Math.min(paid, facts.now) / 1000), event_id: await commerceEventId('purchase', row.event_key),
-    action_source: 'website', event_source_url: cleanSourceUrl(facts.pageUrl), user_data: await buildUserData(facts),
+    event_name: 'Purchase', event_time: Math.floor(Math.min(paid, facts.now) / 1000), event_id: await commerceEventId('purchase', row.event_key, row.mode),
+    action_source: 'website', event_source_url: `${SITE_ORIGIN}/pricing`, user_data: await buildUserData(facts),
     custom_data: { value: amount.value, currency: amount.currency, content_name: planName(row.plan_label), content_type: 'product', num_items: 1 },
   };
 }
 
 /** InitiateCheckout for an order that reached the payment provider's checkout page. */
-export async function buildCheckoutEvent(facts: PersonFacts, row: { event_key: string; plan_label: string }): Promise<Record<string, unknown>> {
+export async function buildCheckoutEvent(facts: PersonFacts, row: { event_key: string; plan_label: string; mode: 'live' | 'test' }): Promise<Record<string, unknown>> {
   return {
-    event_name: 'InitiateCheckout', event_time: Math.floor(facts.now / 1000), event_id: await commerceEventId('checkout', row.event_key),
-    action_source: 'website', event_source_url: cleanSourceUrl(facts.pageUrl), user_data: await buildUserData(facts),
+    event_name: 'InitiateCheckout', event_time: Math.floor(facts.now / 1000), event_id: await commerceEventId('checkout', row.event_key, row.mode),
+    action_source: 'website', event_source_url: `${SITE_ORIGIN}/pricing`, user_data: await buildUserData(facts),
     custom_data: { content_name: planName(row.plan_label), content_type: 'product', num_items: 1 },
   };
 }

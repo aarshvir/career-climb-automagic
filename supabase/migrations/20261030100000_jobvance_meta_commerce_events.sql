@@ -10,7 +10,7 @@ CREATE TABLE jobvance_private.meta_commerce_events (
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   claimed_at timestamptz NOT NULL DEFAULT now(),
   sent_at timestamptz,
-  PRIMARY KEY(kind,event_key)
+  PRIMARY KEY(mode,kind,event_key)
 );
 ALTER TABLE jobvance_private.meta_commerce_events ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON jobvance_private.meta_commerce_events FROM PUBLIC,anon,authenticated,service_role;
@@ -41,20 +41,23 @@ BEGIN
     LEFT JOIN jobvance_private.loop_provider_accounting a ON a.mode=p.mode AND a.payment_id=p.payment_id
     WHERE s.user_id=p_user AND NOT p.revoked AND (p.mode='live' OR p_include_test)
       AND p.starts_at>now()-interval '6 days' AND p.starts_at<=now()+interval '5 minutes'
-      AND p.starts_at=(SELECT min(q.starts_at) FROM jobvance_private.loop_subscription_periods q WHERE q.subscription_id=p.subscription_id AND q.mode=p.mode)
+      AND NOT EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_periods q
+        WHERE q.subscription_id=p.subscription_id AND q.mode=p.mode
+          AND (q.starts_at,q.payment_id)<(p.starts_at,p.payment_id))
+    ORDER BY p.starts_at,p.payment_id LIMIT 50
   ), eligible AS (
     SELECT d.* FROM due d WHERE d.mode='test' OR public.jobvance_meta_reportable_user(d.user_id)
   ), claimed AS (
     INSERT INTO jobvance_private.meta_commerce_events AS e(kind,event_key,mode,user_id)
     SELECT 'purchase',el.payment_id,el.mode,el.user_id FROM eligible el
-    ON CONFLICT(kind,event_key) DO UPDATE SET claimed_at=now()
-      WHERE e.sent_at IS NULL AND e.claimed_at<now()-interval '5 minutes'
-    RETURNING e.event_key AS claimed_key
+    ON CONFLICT(mode,kind,event_key) DO UPDATE SET claimed_at=now()
+      WHERE e.user_id=EXCLUDED.user_id AND e.sent_at IS NULL AND e.claimed_at<now()-interval '5 minutes'
+    RETURNING e.event_key AS claimed_key,e.mode AS claimed_mode
   )
   SELECT el.payment_id,el.starts_at,
     CASE el.plan WHEN 'weekly' THEN 'Job Loop Starter' WHEN 'three_weekly' THEN 'Job Loop Advanced' ELSE 'Job Loop Pro' END,
     el.amount,el.currency,CASE WHEN el.usd_minor IS NULL THEN NULL ELSE round(el.usd_minor/100.0,2) END,el.mode
-  FROM eligible el JOIN claimed c ON c.claimed_key=el.payment_id;
+  FROM eligible el JOIN claimed c ON c.claimed_key=el.payment_id AND c.claimed_mode=el.mode;
 END $$;
 
 -- A checkout counts when the owner's own order reached a provider checkout session.
@@ -75,30 +78,30 @@ BEGIN
   ), claimed AS (
     INSERT INTO jobvance_private.meta_commerce_events AS e(kind,event_key,mode,user_id)
     SELECT 'checkout',el.request_id::text,el.mode,el.user_id FROM eligible el
-    ON CONFLICT(kind,event_key) DO UPDATE SET claimed_at=now()
-      WHERE e.sent_at IS NULL AND e.claimed_at<now()-interval '5 minutes'
-    RETURNING e.event_key AS claimed_key
+    ON CONFLICT(mode,kind,event_key) DO UPDATE SET claimed_at=now()
+      WHERE e.user_id=EXCLUDED.user_id AND e.sent_at IS NULL AND e.claimed_at<now()-interval '5 minutes'
+    RETURNING e.event_key AS claimed_key,e.mode AS claimed_mode
   )
   SELECT el.request_id::text,
     CASE el.plan WHEN 'weekly' THEN 'Job Loop Starter' WHEN 'three_weekly' THEN 'Job Loop Advanced' ELSE 'Job Loop Pro' END,el.mode
-  FROM eligible el JOIN claimed c ON c.claimed_key=el.request_id::text;
+  FROM eligible el JOIN claimed c ON c.claimed_key=el.request_id::text AND c.claimed_mode=el.mode;
 END $$;
 
-CREATE FUNCTION public.jobvance_meta_mark_sent(p_user uuid,p_kind text,p_keys text[]) RETURNS integer
+CREATE FUNCTION public.jobvance_meta_mark_sent(p_user uuid,p_kind text,p_keys text[],p_mode text) RETURNS integer
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE n integer;
 BEGIN
-  IF p_user IS NULL OR p_kind IS NULL OR p_kind NOT IN('checkout','purchase') OR p_keys IS NULL OR cardinality(p_keys)>50 THEN RAISE EXCEPTION 'META_COMMERCE_INVALID'; END IF;
+  IF p_user IS NULL OR p_mode IS NULL OR p_mode NOT IN('live','test') OR p_kind IS NULL OR p_kind NOT IN('checkout','purchase') OR p_keys IS NULL OR cardinality(p_keys)>50 THEN RAISE EXCEPTION 'META_COMMERCE_INVALID'; END IF;
   UPDATE jobvance_private.meta_commerce_events SET sent_at=now()
-    WHERE kind=p_kind AND user_id=p_user AND event_key=ANY(p_keys) AND sent_at IS NULL;
+    WHERE mode=p_mode AND kind=p_kind AND user_id=p_user AND event_key=ANY(p_keys) AND sent_at IS NULL;
   GET DIAGNOSTICS n=ROW_COUNT;
   RETURN n;
 END $$;
 
 REVOKE ALL ON FUNCTION public.jobvance_meta_reportable_user(uuid),public.jobvance_meta_claim_purchases(uuid,boolean),
-  public.jobvance_meta_claim_checkout(uuid,uuid,boolean),public.jobvance_meta_mark_sent(uuid,text,text[]) FROM PUBLIC,anon,authenticated;
+  public.jobvance_meta_claim_checkout(uuid,uuid,boolean),public.jobvance_meta_mark_sent(uuid,text,text[],text) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.jobvance_meta_reportable_user(uuid),public.jobvance_meta_claim_purchases(uuid,boolean),
-  public.jobvance_meta_claim_checkout(uuid,uuid,boolean),public.jobvance_meta_mark_sent(uuid,text,text[]) TO service_role;
+  public.jobvance_meta_claim_checkout(uuid,uuid,boolean),public.jobvance_meta_mark_sent(uuid,text,text[],text) TO service_role;
 
 NOTIFY pgrst,'reload schema';
 COMMIT;

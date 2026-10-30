@@ -41,12 +41,12 @@ describe('Meta Conversions API sign-up event', () => {
 
 describe('Meta Conversions API checkout and purchase events', () => {
   const person = { userId: facts.userId, email: 'Person@Example.COM', pageUrl: 'https://jobvance.io/pricing?loop_checkout=success&payment_id=pay_secret', fbp: 'fb.1.1729849200000.1234567890', ip: '203.0.113.7', userAgent: 'Mozilla/5.0', now };
-  const paid = { event_key: 'pay_0NabcDEF123', occurred_at: '2026-10-25T09:55:00Z', plan_label: 'Job Loop Starter', amount_minor: 2900, currency: 'USD', usd: 29 };
+  const paid = { event_key: 'pay_0NabcDEF123', occurred_at: '2026-10-25T09:55:00Z', plan_label: 'Job Loop Starter', amount_minor: 2900, currency: 'USD', usd: 29, mode: 'live' as const };
 
   it('builds a dollar Purchase from the ledger with a stable ID, the payment time and only hashed identifiers', async () => {
     const event = await buildPurchaseEvent(person, paid);
     expect(event).toEqual({
-      event_name: 'Purchase', event_time: Date.parse(paid.occurred_at) / 1000, event_id: `pur_${sha(paid.event_key).slice(0, 32)}`,
+      event_name: 'Purchase', event_time: Date.parse(paid.occurred_at) / 1000, event_id: `pur_${sha(`live:${paid.event_key}`).slice(0, 32)}`,
       action_source: 'website', event_source_url: 'https://jobvance.io/pricing',
       user_data: { external_id: [sha(person.userId)], em: [sha('person@example.com')], client_ip_address: '203.0.113.7', client_user_agent: 'Mozilla/5.0', fbp: person.fbp },
       custom_data: { value: 29, currency: 'USD', content_name: 'Job Loop Starter', content_type: 'product', num_items: 1 },
@@ -71,14 +71,20 @@ describe('Meta Conversions API checkout and purchase events', () => {
 
   it('builds InitiateCheckout with a separate stable ID and no money fields', async () => {
     const request = '5b3c1e0e-9a41-4c3f-8a52-0e1f5b0c7d11';
-    const event = await buildCheckoutEvent(person, { event_key: request, plan_label: 'Job Loop Pro' });
-    expect(event).toMatchObject({ event_name: 'InitiateCheckout', event_time: now / 1000, event_id: `chk_${sha(request).slice(0, 32)}`, custom_data: { content_name: 'Job Loop Pro', content_type: 'product', num_items: 1 } });
+    const event = await buildCheckoutEvent(person, { event_key: request, plan_label: 'Job Loop Pro', mode: 'live' });
+    expect(event).toMatchObject({ event_name: 'InitiateCheckout', event_time: now / 1000, event_id: `chk_${sha(`live:${request}`).slice(0, 32)}`, custom_data: { content_name: 'Job Loop Pro', content_type: 'product', num_items: 1 } });
     expect(event.custom_data).not.toHaveProperty('value');
     expect(event.event_id).not.toBe(await commerceEventId('purchase', request));
   });
 
   it('falls back to a neutral plan name instead of forwarding odd text', async () => {
-    const event = await buildCheckoutEvent(person, { event_key: 'x'.repeat(10), plan_label: '<script>alert(1)</script>' });
+    const event = await buildCheckoutEvent(person, { event_key: 'x'.repeat(10), plan_label: '<script>alert(1)</script>', mode: 'live' });
     expect(event.custom_data).toMatchObject({ content_name: 'Job Loop' });
+  });
+
+  it('separates mode identities and never forwards a private page path', async () => {
+    expect(await commerceEventId('purchase', paid.event_key, 'test')).not.toBe(await commerceEventId('purchase', paid.event_key, 'live'));
+    const event = await buildPurchaseEvent({ ...person, pageUrl: 'https://jobvance.io/loop/private-receipt' }, paid);
+    expect(event?.event_source_url).toBe('https://jobvance.io/pricing');
   });
 });

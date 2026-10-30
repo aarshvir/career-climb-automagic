@@ -3,7 +3,8 @@ import {act,cleanup,fireEvent,render,screen,waitFor,within} from '@testing-libra
 import {MemoryRouter} from 'react-router-dom';
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 vi.unmock('react-router-dom');
-const m=vi.hoisted(()=>({auth:{user:{id:'owner'},session:{user:{id:'owner'}},loading:false,authError:null} as Record<string,any>,read:vi.fn(),quote:vi.fn(),checkout:vi.fn(),cancel:vi.fn(),open:vi.fn()}));
+const m=vi.hoisted(()=>({auth:{user:{id:'owner'},session:{user:{id:'owner'}},loading:false,authError:null} as Record<string,any>,read:vi.fn(),quote:vi.fn(),checkout:vi.fn(),cancel:vi.fn(),open:vi.fn(),report:vi.fn()}));
+vi.mock('@/lib/meta-commerce',()=>({reportMetaCheckout:m.report}));
 vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>m.auth}));
 vi.mock('@/lib/loop-subscription-billing',async original=>({...await original<typeof import('@/lib/loop-subscription-billing')>(),readLoopBilling:m.read,requestLoopPriceQuote:m.quote,createLoopSubscriptionCheckout:m.checkout,cancelLoopSubscription:m.cancel}));
 vi.mock('@/lib/payment-checkout',()=>({openPaymentCheckout:m.open}));
@@ -17,9 +18,16 @@ const quoted=(intent:any)=>({...price(intent.plan,intent.currency,'00000000-0000
 const sub={subscriptionId:'sub_fixture',plan:'weekly',status:'active',validUntil:'2026-11-18T10:00:00Z',periodStart:'2026-10-18T10:00:00Z',cancelAtPeriodEnd:false,revoked:false,graceUntil:null,version:1,pricing:price()};
 const status=()=>({billingConfigured:true,fulfillmentPending:false,billingMode:'live',generation:0,plans:[{id:'weekly',amount:2900,currency:'USD',interval:'month',runsPerWeek:1},{id:'active',amount:5900,currency:'USD',interval:'month',runsPerWeek:3},{id:'daily',amount:9900,currency:'USD',interval:'month',runsPerWeek:7}],entitlement:null,subscription:null,checkout:null,cancelRequest:null});
 const renderPage=(path='/pricing',compact=false)=>render(<MemoryRouter initialEntries={[path]}><LoopSubscriptionBilling compact={compact}/></MemoryRouter>);
-beforeEach(()=>{clearTrackingDraftMemory();setTrackingDraftOwner('owner','session');m.auth={user:{id:'owner'},session:{user:{id:'owner'}},loading:false,authError:null};m.read.mockReset();m.quote.mockReset();m.quote.mockImplementation(async (_scope,intent)=>quoted(intent));m.checkout.mockReset();m.cancel.mockReset();m.open.mockReset();m.read.mockResolvedValue(status());});
+beforeEach(()=>{clearTrackingDraftMemory();setTrackingDraftOwner('owner','session');m.auth={user:{id:'owner'},session:{user:{id:'owner'}},loading:false,authError:null};m.read.mockReset();m.quote.mockReset();m.quote.mockImplementation(async (_scope,intent)=>quoted(intent));m.checkout.mockReset();m.cancel.mockReset();m.open.mockReset();m.report.mockReset();m.report.mockResolvedValue(undefined);m.read.mockResolvedValue(status());});
 afterEach(()=>{cleanup();clearTrackingDraftMemory();});
 describe('Automated Job Loop subscriptions journey',()=>{
+ it('does not open a previous session checkout after the measurement wait',async()=>{
+  let finishReport!:()=>void;m.report.mockReturnValue(new Promise<void>(resolve=>{finishReport=resolve;}));
+  m.checkout.mockResolvedValue({provider:'dodo',billingMode:'live',url:'https://checkout.dodopayments.com/1',sessionId:'cks_fixture',requestId:'00000000-0000-4000-8000-000000000001'});
+  renderPage('/pricing?loopPlan=weekly');fireEvent.click(await screen.findByRole('checkbox',{name:/I choose Starter/}));fireEvent.click(screen.getByRole('button',{name:/Continue to secure checkout/}));
+  await waitFor(()=>expect(m.report).toHaveBeenCalledTimes(1));setTrackingDraftOwner(null,null);
+  await act(async()=>{finishReport();});expect(m.open).not.toHaveBeenCalled();
+ });
  it.each(['pending','active','on_hold','paused','past_due'])('keeps %s revoked subscription cancellable and blocks another checkout even after recorded access expires',async providerStatus=>{
   m.read.mockResolvedValue({...status(),subscription:{...sub,status:providerStatus,revoked:true,validUntil:'2020-01-01T00:00:00Z'},entitlement:{active:false,plan:null,cadence:null,variantLimit:3,maxWeeklyRuns:0,validUntil:null}});
   renderPage('/pricing?loopPlan=weekly');

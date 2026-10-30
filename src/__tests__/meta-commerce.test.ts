@@ -17,6 +17,8 @@ beforeEach(async () => {
   sdk.invoke.mockReset(); sdk.invoke.mockResolvedValue({ data: { sent: true }, error: null });
   sdk.getSession.mockReset(); sdk.getSession.mockResolvedValue({ data: { session: { user: { id: owner }, access_token: 'fixture-token' } }, error: null });
   commerce = await import('@/lib/meta-commerce');
+  const { setTrackingDraftOwner } = await import('@/lib/tracking-draft-memory');
+  setTrackingDraftOwner(owner, 'original-session');
 });
 afterEach(() => {
   vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks();
@@ -76,6 +78,20 @@ describe('checkout notice', () => {
 });
 
 describe('purchase check', () => {
+  it.each(['signout', 'switch', 'same-owner-new-session'])('revokes an in-flight report after %s', async change => {
+    const { setTrackingDraftOwner } = await import('@/lib/tracking-draft-memory');
+    setTrackingDraftOwner(owner, 'original-session');
+    let releaseSession!: (value: unknown) => void;
+    sdk.getSession.mockReturnValue(new Promise(resolve => { releaseSession = resolve; }));
+    const report = commerce.reportMetaCheckout(request, owner);
+    setTrackingDraftOwner(null, null);
+    if (change === 'switch') setTrackingDraftOwner('22222222-2222-4222-8222-222222222222', 'other-session');
+    if (change === 'same-owner-new-session') setTrackingDraftOwner(owner, 'new-session');
+    releaseSession({ data: { session: { user: { id: owner }, access_token: 'old-session-token' } }, error: null });
+    await report;
+    expect(sdk.invoke).not.toHaveBeenCalled();
+  });
+
   it('asks once, then waits half an hour unless the owner just returned from checkout', async () => {
     expect(await commerce.flushMetaCommerce(owner)).toBe(true);
     expect(sent().map(call => call.body.kind)).toEqual(['purchase']);
