@@ -1,26 +1,32 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
-@font-face{font-family:"Geist";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:"Geist";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2197,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:"Geist Mono";src:url('/fonts/GeistMono-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+2000-206F;}
 /* Metric-matched fallbacks (measured in Chrome against the self-hosted files): Arial is 2.3% narrower
-   than Geist; Courier New has Geist Mono's exact 600/1000 advance. Swapping in the webfont does not reflow.
+   than Geist; Menlo and DejaVu Sans Mono share Geist Mono's 600/1000 advance and Consolas (550) is scaled to it; the fallback is always a sans mono, never serif Courier. Swapping in the webfont does not reflow.
    Headings (520-600) get their own face: Arial Bold is 1.8% wider than Geist at 540, so heading line counts hold too. */
 @font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica Neue");font-weight:100 519;size-adjust:102.3%;ascent-override:98.2%;descent-override:28.8%;line-gap-override:0%;}
-@font-face{font-family:"Geist Fallback";src:local("Arial Bold"),local("Arial-BoldMT"),local("Helvetica Neue Bold");font-weight:520 900;size-adjust:98.2%;ascent-override:102.3%;descent-override:30%;line-gap-override:0%;}
-@font-face{font-family:"Geist Mono Fallback";src:local("Courier New"),local("CourierNewPSMT");size-adjust:100%;ascent-override:100.5%;descent-override:29.5%;line-gap-override:0%;}
+@font-face{font-family:"Geist Fallback";src:local("Arial Bold"),local("Arial-BoldMT"),local("Helvetica Neue Medium"),local("Arial");font-weight:520 900;size-adjust:99.4%;ascent-override:102.3%;descent-override:30%;line-gap-override:0%;}
+@font-face{font-family:"Geist Mono Fallback";src:local("Menlo"),local("SF Mono"),local("Roboto Mono"),local("DejaVu Sans Mono");size-adjust:100%;ascent-override:100.5%;descent-override:29.5%;line-gap-override:0%;}
+@font-face{font-family:"Geist Mono Fallback Win";src:local("Consolas");size-adjust:109%;ascent-override:92%;descent-override:27%;line-gap-override:0%;}
 /* Alias for admin-home.css, which still names Manrope; it now resolves to Geist. */
 @font-face{font-family:"Manrope";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-display:swap;}
 
 @layer base {
   :root {
-    /* "Jobvance Green": the approved mark's #215c43 is the primary action colour. Lime (--jv-signal) is only a small
-       signal on the forest surface, never a fill on white. Legacy names map onto the same tokens. */
-    --jv-ink: #0F1D17; --jv-blue: #215C43; --jv-paper: #FFFFFF; --jv-lavender: #E6F0EA; --jv-lime: #E6F0EA;
+    /* "Jobvance Green": the approved mark's #215c43 is the primary action colour. Lime (--jv-signal) is the brand's one
+       accent: a small signal on the forest surface, plus two deliberate uses on white (the home H1 underline and the
+       featured-plan badge). It is never a large fill, a button or body-text colour. */
+    --jv-ink: #0F1D17; --jv-paper: #FFFFFF;
     /* surfaces */
-    --jv-bg: #FFFFFF; --jv-bg-subtle: #F5F8F6; --jv-surface: #FFFFFF; --jv-sunken: #EEF2EF; --jv-bg-muted: #EFF3F0;
+    --jv-bg: #FFFFFF; --jv-bg-subtle: #F3F8F5; --jv-surface: #FFFFFF; --jv-sunken: #ECF3EE; --jv-bg-muted: var(--jv-sunken);
     /* forest: the one dark surface (bands, final CTA, mock footer) */
-    --jv-forest: #0C1F17; --jv-forest-2: #12291F;
+    --jv-forest: #0C1F17; --jv-forest-2: #12291F; --jv-elevated: #183427;
+    /* text on forest (contrast on --jv-forest): 16.3, 11.1, 8.1, 6.8 and 11.2 to 1; the third step is 5.3 to 1 on --jv-elevated */
+    --jv-on-dark-1: #F2F6F3; --jv-on-dark-body: #C6D3CC; --jv-on-dark-2: #A5B6AD; --jv-on-dark-3: #94A79C; --jv-on-dark-link: #A9DDBC; --jv-success-on-dark: var(--jv-on-dark-link);
+    /* the wordmark's period */
+    --jv-brand-period: var(--jv-brand); --jv-brand-period-on-dark: var(--jv-signal);
     /* lines */
     --jv-line: #E3E8E4; --jv-line-strong: #CFD7D2; --jv-line-input: #85918B;
     /* text: ink 17.4:1, ink-2 9.4:1, ink-3 5.4:1 on #FFF (4.8:1 on --jv-sunken) */
@@ -28,35 +34,55 @@
     /* brand: white on --jv-brand 7.9:1; --jv-brand on white 7.9:1 */
     --jv-brand: #215C43; --jv-brand-hover: #1A4D37; --jv-brand-press: #143D2C;
     --jv-brand-tint: #E6F0EA; --jv-brand-ink: #1A4D37; --jv-brand-text: #215C43;
-    /* signal */
+    /* signal: lime is decoration, a fill, or an on-dark signal. It is never text and never a thin line on white; on light pages it appears only as a fill (the 72px lime-to-green section lead-in, the hero underline mark, the featured badge). */
     --jv-signal: #D4F25A;
+    /* one glow for every forest band: a soft mint light from the top and a deeper green lift from the opposite corner */
+    --jv-glow: radial-gradient(60% 55% at 50% 0%, rgb(var(--jv-link-on-dark-rgb) / .09), transparent 70%), radial-gradient(55% 65% at 100% 100%, rgb(var(--jv-brand-2-rgb) / .26), transparent 72%);
+    /* the mid green (strokes and small text on forest) and the hairline on forest */
+    /* one green ramp: brand, brand-hover, brand-2 (gradient end, decorative), brand-mid (strokes on forest, decorative), brand-tint */
+    --jv-brand-2: #2B7556; --jv-brand-mid: var(--jv-on-dark-link); --jv-line-on-dark: rgb(255 255 255 / .14);
+    /* the HSL block further down (shadcn names) is derived from these hex tokens: sunken 137 23% 94%, line 132 10% 90%, line-input 150 5% 55%, tint 144 25% 92%, subtle 144 26% 96%. */
+    /* channels for alpha uses, so a palette change cannot leave stragglers */
+    --jv-ink-rgb: 15 29 23; --jv-brand-rgb: 33 92 67; --jv-brand-2-rgb: 43 117 86; --jv-link-on-dark-rgb: 169 221 188; --jv-signal-rgb: 212 242 90; --jv-brand-mid-rgb: var(--jv-link-on-dark-rgb);
+    /* light-surface values that stay fixed inside dark bands (the product cards are always white) */
+    --jv-card-ink: var(--jv-ink); --jv-card-ink-2: var(--jv-ink-2); --jv-card-ink-3: var(--jv-ink-3); --jv-card-line: var(--jv-line); --jv-card-line-strong: var(--jv-line-strong); --jv-card-sunken: var(--jv-sunken); --jv-card-subtle: var(--jv-bg-subtle); --jv-card-tint: var(--jv-brand-tint); --jv-card-brand-ink: var(--jv-brand-ink);
+    /* the mark's pale lime glyph, and status colours on forest */
+    --jv-brand-glyph: #E2EEAF; --jv-warn-on-dark: #FBBF4A; --jv-danger-on-dark: #FF8A80;
+    /* one tinted light-surface moment: the hero wash, painted full-bleed behind every marketing hero */
+    --jv-wash-peak: #CDE3D5; --jv-wash-soft: var(--jv-brand-tint);
+    --jv-wash: linear-gradient(180deg, var(--jv-wash-soft) 0%, #fff 100%);
     /* status (meaning only, never decoration) */
     --jv-success: #0B7A47; --jv-success-tint: #E8F6EE;
-    --jv-warn: #8A5300; --jv-warn-tint: #FFF3DC;
-    --jv-danger: #C42B2F; --jv-danger-tint: #FDECEC;
+    --jv-warn: #8A5300; --jv-warn-tint: #FFF3DC; --jv-warn-line: #E6C987;
+    --jv-danger: #C42B2F; --jv-danger-tint: #FDECEC; --jv-danger-line: #F0C4C4;
     /* type */
     --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-    --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --font-mono: "Geist Mono", "Geist Mono Fallback", "Geist Mono Fallback Win", ui-monospace, SFMono-Regular, Consolas, monospace;
     --fw-regular: 400; --fw-medium: 500; --fw-semi: 560; --fw-strong: 600;
     /* heading weights: dark surfaces get 20 less for optical balance */
-    --fw-display: 560; --fw-heading: 540; --fw-heading-on-dark: 520;
-    --t-display: clamp(2.75rem, 2.1rem + 2.667vw, 4.5rem);
-    --t-h1: clamp(2.25rem, 1.786rem + 1.905vw, 3.5rem);
-    --t-h2: clamp(1.875rem, 1.457rem + 1.714vw, 3rem);
-    /* H2 inside a panel: matches --t-h2 on phones, a deliberate 1.2x step down (40px) on desktop. */
-    --t-h2-panel: clamp(1.875rem, 1.6rem + 1.1vw, 2.5rem);
-    --t-h3: clamp(1.375rem, 1.236rem + .571vw, 1.75rem);
-    --t-h4: clamp(1.125rem, 1.079rem + .19vw, 1.25rem);
+    --fw-display: 540; --fw-heading: 540; --fw-heading-on-dark: 520;
+    /* One page-title (H1) size for every marketing page, set in marketing.css as --t-page (36 / 48 / 56 / 60). */
+    --t-display: var(--t-page); --t-display-xl: var(--t-page);
+    --t-h1: 2.25rem;
+    /* Whole-pixel steps only (no fluid clamps, so no fractional computed sizes): phones, then 640px, then 1024px.
+       h2 28 / 36 / 48, panel h2 28 / 32 / 40, h3 24 / 28, card h3 20 / 24, h4 18 / 20, lead 18 / 20. */
+    --t-h2: 1.75rem; --t-h2-panel: 1.75rem; --t-h3: 1.5rem; --t-h3-card: 1.25rem; --t-h4: 1.125rem;
+    --t-card-title: 1.25rem;
+    /* One tracking value per type step: display (h1 and big numerals), h2 (section and panel titles), h3 (card and row titles), card (card titles), lead (intro paragraphs). */
+    --ls-display: -.035em; --ls-h2: -.03em; --ls-h3: -.025em; --ls-card: -.015em; --ls-lead: -.011em;
     --t-price: clamp(2.5rem, 2.2rem + 1.2vw, 3.25rem);
-    /* small end of the scale: no raw px font sizes on marketing pages */
-    --t-xs: .75rem; --t-sm: .8125rem; --t-small: .875rem; --t-body-sm: .9375rem; --t-body: 1rem;
+    /* one page-title size for every inner page (home keeps --t-display); lead is the shared intro size */
+    --t-page: 2.25rem; --t-lead: 1.125rem;
+    /* small end of the scale, one rhythm: 12 (mockup chrome and mono data), 14 (UI and meta), 16 (body and instructions), 18-20 (lead).
+       The older 13 and 15 steps now resolve to 14 and 16; the one 13px exception is the real mono eyebrow (--t-eyebrow). */
+    --t-xs: .75rem; --t-sm: .875rem; --t-small: .875rem; --t-body-sm: 1rem; --t-body: 1rem;
     --lh-body: 1.625; --lh-body-sm: 1.6; --lh-sm: 1.25rem; /* every 13px style */
     /* radius (new names; the existing --radius* stay for the private app) */
     --r-xs: 6px; --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-pill: 999px;
     /* elevation */
-    --sh-1: 0 1px 2px rgb(15 29 23 / .06);
-    --sh-2: 0 1px 2px rgb(15 29 23 / .04), 0 6px 16px -4px rgb(15 29 23 / .08);
-    --sh-3: 0 1px 2px rgb(15 29 23 / .06), 0 12px 32px -8px rgb(15 29 23 / .12), 0 40px 80px -24px rgb(33 92 67 / .16);
+    --sh-1: 0 1px 2px rgb(var(--jv-ink-rgb) / .06);
+    --sh-2: 0 1px 2px rgb(var(--jv-ink-rgb) / .04), 0 6px 16px -4px rgb(var(--jv-ink-rgb) / .08);
+    --sh-3: 0 1px 2px rgb(var(--jv-ink-rgb) / .06), 0 12px 32px -8px rgb(var(--jv-ink-rgb) / .12), 0 40px 80px -24px rgb(var(--jv-brand-rgb) / .16), 0 24px 80px -12px rgb(var(--jv-brand-rgb) / .18);
     /* layout */
     --gutter: 16px;
     --shell: min(1200px, 100% - 2 * var(--gutter));
@@ -65,63 +91,84 @@
     --ease-out: cubic-bezier(.16, 1, .3, 1); --ease-inout: cubic-bezier(.65, 0, .35, 1); --ease-press: cubic-bezier(.3, 0, .5, 1);
     --dur-1: 120ms; --dur-2: 200ms; --dur-3: 420ms; --dur-4: 640ms; --stagger: 70ms; --rise: 12px;
     --background: 0 0% 100%; --foreground: 154 32% 9%;
-    --muted: 135 13% 94%; --muted-foreground: 152 11% 26%;
+    --muted: 137 23% 94%; --muted-foreground: 152 11% 26%;
     --popover: 0 0% 100%; --popover-foreground: 154 32% 9%;
     --primary: 155 47% 25%; --primary-foreground: 0 0% 100%; --primary-hover: 154 50% 20%;
-    --primary-light: 144 25% 92%; --primary-subtle: 140 18% 97%;
-    --secondary: 135 13% 94%; --secondary-foreground: 154 32% 9%; --secondary-hover: 135 12% 90%;
+    --primary-light: 144 25% 92%; --primary-subtle: 144 26% 96%;
+    --secondary: 137 23% 94%; --secondary-foreground: 154 32% 9%; --secondary-hover: 132 10% 90%;
     --destructive: 358 64% 47%; --destructive-foreground: 0 0% 100%;
     --success: 152 83% 26%; --success-foreground: 0 0% 100%;
     --warning: 36 100% 27%; --warning-foreground: 0 0% 100%;
-    --info: 211 76% 40%; --info-foreground: 0 0% 100%;
+    --info: 155 47% 25%; --info-foreground: 0 0% 100%;
     --border: 132 10% 90%; --input: 150 5% 55%; --ring: 155 47% 25%;
     --accent: 144 25% 92%; --accent-foreground: 154 50% 20%;
-    --card: 0 0% 100%; --card-foreground: 154 32% 9%; --card-border: 132 10% 90%; --card-hover: 140 18% 97%;
+    --card: 0 0% 100%; --card-foreground: 154 32% 9%; --card-border: 132 10% 90%; --card-hover: 144 26% 96%;
     --sidebar-background: 0 0% 100%; --sidebar-foreground: 154 32% 9%;
     --sidebar-primary: 155 47% 25%; --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 144 25% 92%; --sidebar-accent-foreground: 154 50% 20%;
     --sidebar-border: 132 10% 90%; --sidebar-ring: 155 47% 25%;
     --radius-xs: 4px; --radius-sm: 8px; --radius: 12px; --radius-md: 14px;
     --radius-lg: 18px; --radius-xl: 24px; --radius-2xl: 28px; --radius-3xl: 36px;
-    --shadow-xs: 0 1px 2px rgb(23 35 56 / 3%); --shadow-sm: 0 2px 8px rgb(23 35 56 / 4%);
-    --shadow-md: 0 8px 24px rgb(23 35 56 / 6%); --shadow-lg: 0 16px 36px rgb(23 35 56 / 8%);
-    --shadow-xl: 0 24px 64px rgb(23 35 56 / 10%); --shadow-2xl: 0 32px 80px rgb(23 35 56 / 14%);
-    --shadow-premium: var(--shadow-xl); --shadow-glow: 0 4px 20px rgb(33 92 67 / 14%); --shadow-inner: inset 0 1px 3px rgb(23 35 56 / 5%);
-    --gradient-primary: linear-gradient(120deg, var(--jv-brand), #2B7556); --gradient-success: linear-gradient(120deg, #1b765a, #2c9070);
-    --gradient-warning: linear-gradient(120deg, #f1c77a, #f9dda5); --gradient-glass: linear-gradient(135deg, #fff, #F5F8F6);
+    --shadow-xs: 0 1px 2px rgb(var(--jv-ink-rgb) / 3%); --shadow-sm: 0 2px 8px rgb(var(--jv-ink-rgb) / 4%);
+    --shadow-md: 0 8px 24px rgb(var(--jv-ink-rgb) / 6%); --shadow-lg: 0 16px 36px rgb(var(--jv-ink-rgb) / 8%);
+    --shadow-xl: 0 24px 64px rgb(var(--jv-ink-rgb) / 10%); --shadow-2xl: 0 32px 80px rgb(var(--jv-ink-rgb) / 14%);
+    --shadow-premium: var(--shadow-xl); --shadow-glow: 0 4px 20px rgb(var(--jv-brand-rgb) / 14%); --shadow-inner: inset 0 1px 3px rgb(var(--jv-ink-rgb) / 5%);
+    --gradient-primary: linear-gradient(120deg, var(--jv-brand), var(--jv-brand-2)); --gradient-success: linear-gradient(120deg, var(--jv-brand), var(--jv-brand-2));
+    --gradient-warning: linear-gradient(120deg, var(--jv-warn-line), var(--jv-warn-tint)); --gradient-glass: linear-gradient(135deg, #fff, var(--jv-bg-subtle));
     --gradient-hero: linear-gradient(135deg, var(--jv-forest), var(--jv-brand));
-    --glass: rgb(255 255 255 / 94%); --glass-border: rgb(23 35 56 / 8%); --backdrop-blur: blur(16px);
+    --glass: rgb(255 255 255 / 94%); --glass-border: rgb(var(--jv-ink-rgb) / 8%); --backdrop-blur: blur(16px);
     --content-max-width: 1240px; --header-height: 80px; --sidebar-width: 240px;
     --transition-fast: 140ms ease; --transition-base: 200ms ease;
   }
-  @media (min-width: 640px) { :root { --gutter: 24px; --band-pad-x: 40px; } }
-  @media (min-width: 1024px) { :root { --gutter: 40px; --section-y: 128px; --band-pad-x: 64px; } }
+  @media (min-width: 640px) { :root { --gutter: 24px; --band-pad-x: 40px; --t-h1: 2.75rem; --t-h2: 2.25rem; --t-h2-panel: 2rem; } }
+  @media (min-width: 1024px) { :root { --gutter: 40px; --section-y: 128px; --band-pad-x: 64px; --t-h1: 3.5rem; --t-h2: 3rem; --t-h2-panel: 2.5rem; --t-h3: 1.75rem; --t-h3-card: 1.5rem; --t-h4: 1.25rem; --t-lead: 1.25rem; } }
   * { @apply border-border; }
-  html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+  html { scroll-padding-top: 96px; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
   body { @apply bg-background text-foreground antialiased; margin: 0; font-family: var(--font-sans); line-height: 1.625; font-kerning: normal; font-synthesis-weight: none; }
   h1, h2, h3, h4, h5, h6 { letter-spacing: -.025em; line-height: 1.2; font-weight: var(--fw-strong); }
   button, input, textarea, select { font: inherit; }
   button, a, summary, input, textarea, select { -webkit-tap-highlight-color: transparent; }
   button:not(:disabled), summary { cursor: pointer; }
   :focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 3px; }
-  ::selection { color: var(--jv-ink); background: #CDE3D5; }
+  ::selection { color: var(--jv-ink); background: var(--jv-wash-peak); }
   input[type="checkbox"] { accent-color: var(--jv-brand); }
   textarea { resize: vertical; }
 }
-.jv-loading { max-width: 1240px; margin: 40px auto; min-height: 50vh; min-height: 100svh; padding: 32px 24px; }
+.jv-loading { width: var(--shell); margin: 0 auto; min-height: 100vh; min-height: 100svh; padding: 56px 0 32px; }
 .jv-loading-line { height: 10px; max-width: 380px; background: var(--jv-sunken); border-radius: 8px; margin: 24px 0; }
 .jv-loading-line:first-child { width: 150px; height: 28px; } .jv-loading-line:last-child { width: 65%; }
-.custom-scrollbar { scrollbar-width: thin; scrollbar-color: #c5ccda transparent; }
+/* While the route gate resolves nothing is rendered; keep the footer below the fold instead of flashing under the header. */
+/* A containing block for margins, so the empty placeholder and the mounted page share one top edge (no layout shift). */
+#main-content { display: flow-root; }
+/* The pre-hydration shell holds the viewport so the first paint never shifts (CLS 0 with or without motion). */
+html, body, #root { min-height: 100vh; min-height: 100dvh; }
+/* One full-bleed wash behind every marketing hero (never clipped at the shell edge). */
+/* The wash starts at the very top of the document (behind the floating header), so no edge shows under the header. */
+body:has(#main-content main.jv-rails, #main-content main.jv-home, #main-content main.product-page, #main-content main.audience-page) { background-image: var(--jv-wash); background-position: top center; background-size: 100% 756px; background-repeat: no-repeat; }
+@media (max-width: 959px) { body:has(#main-content main.jv-rails, #main-content main.jv-home, #main-content main.product-page, #main-content main.audience-page) { background-position: top center; background-size: 100% 760px; } }
+#main-content:empty, #main-content:has(> div:is([hidden], :empty):only-child) { min-height: 100svh; }
+.jv-loading > p { margin: 0; color: var(--jv-ink-3); font-size: var(--t-small); }
+.custom-scrollbar { scrollbar-width: thin; scrollbar-color: var(--jv-line-strong) transparent; }
 .section-container, .content-wrapper { max-width: 1240px; margin: auto; padding: 24px; }
 .gradient-text { color: var(--jv-brand); }
+/* Reduced motion has one pattern everywhere: no animation, no transition (state changes are instant). Observers read the setting live (useReveal, LoopOrbit, MvpHeader). */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
 .jv-account-utility { background: radial-gradient(ellipse at 20% 0%, var(--jv-brand-tint), transparent 60%); padding-top: 48px; padding-bottom: 48px; }
-.jv-account-utility-card { background: white; border: 1px solid #dce2ee; border-radius: 24px; box-shadow: 0 20px 64px #17233808; }
+.jv-account-utility-card { background: white; border: 1px solid var(--jv-line); border-radius: 24px; box-shadow: 0 20px 64px rgb(var(--jv-ink-rgb) / .03); }
 
 /* Route announcements focus headings; keyboard controls keep their visible rings. */
 main h1[tabindex="-1"]:focus { outline: none; }
 
+
+/* ---------- Round 9: type and icon defaults ---------- */
+/* Headings balance their lines and prose avoids one-word last lines; both are zero-specificity defaults that any component rule can override. */
+:where(h1, h2, h3) { text-wrap: balance; }
+:where(p, li, dd, blockquote, figcaption) { text-wrap: pretty; }
+/* One icon stroke on every public surface (lucide's default is 2, which reads heavier than the type). Sizes stay 16, 20 or 24. */
+:root { --icon-stroke: 1.75; }
+:where(.jv-header, .jv-footer, .jv-home, .jv-page, .product-page, .jv-rails, .audience-page, .help-center, .career-guides, .walkthroughs-page, .jv-cta, .jv-account, .loop-overview) svg.lucide { stroke-width: var(--icon-stroke); }

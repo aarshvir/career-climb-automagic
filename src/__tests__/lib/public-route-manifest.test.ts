@@ -12,10 +12,13 @@ describe('public search routes remain distinct and exclude private state',()=>{
   });
   it('publishes canonical page locations without private/admin/auth/query URLs',()=>{
     const sitemap=publicSitemap();
-    expect(sitemap.match(/<url>/g)).toHaveLength(publicPages.length);
+    // /check is prerendered (noindex, no canonical) because guests are sent to the account page, so it is the one public route the sitemap leaves out.
+    const listed=publicPages.filter(page=>page.kind!=='check');
+    expect(sitemap.match(/<url>/g)).toHaveLength(listed.length);
+    expect(sitemap).not.toContain('<loc>https://jobvance.io/check</loc>');
     for(const path of clientOnlyPaths)expect(sitemap).not.toContain(`<loc>https://jobvance.io${path}</loc>`);
     const locations=[...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match=>match[1]);
-    expect(locations).toHaveLength(publicPages.length);
+    expect(locations).toHaveLength(listed.length);
     for(const location of locations){expect(location).not.toContain('?');expect(location).not.toContain('#');}
   });
   it('moves old blog and jobs entries to an explanatory public page',()=>{

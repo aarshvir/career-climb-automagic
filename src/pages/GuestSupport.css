@@ -1,1 +1,58 @@
-.guest-support{max-width:760px}.guest-support form{display:grid;gap:12px;margin:22px 0}.guest-support label{font-weight:600}.guest-support textarea,.guest-support select{width:100%;min-height:44px;border:1px solid #bdc9da;border-radius:9px;padding:12px;color:#24334a;background:#fff}.guest-support textarea{min-height:112px}.guest-support button,.guest-support-help a,.guest-support summary,.guest-support>p>a{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:9px}.guest-support button{width:fit-content;background:#2850df;color:#fff}.guest-support button:disabled{opacity:.6}.guest-support-help{display:flex;flex-wrap:wrap;gap:12px}.guest-support-consent{display:flex;gap:10px;align-items:center;min-height:44px}.guest-support-consent input{width:20px;height:20px;flex-shrink:0}.guest-support-receipt{padding:20px;border:1px solid #d5deeb;border-radius:12px;background:#f5f8fd}.guest-support-receipt textarea{font-family:monospace;font-size:13px;overflow-wrap:anywhere;word-break:break-all}.guest-support-reply{white-space:pre-wrap;overflow-wrap:anywhere}.guest-support summary{cursor:pointer;padding-left:0}.guest-support [role=alert]{color:#a02929}.guest-support a{color:#2850df}.guest-support p{overflow-wrap:anywhere}
+/* Contact form: the same field, button and checkbox styling as the account forms, on the shared page tokens. */
+.guest-support { max-width: 680px; }
+.guest-support > h2 { margin: 0 0 12px; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: var(--ls-h3); }
+.guest-support > p { max-width: 62ch; margin: 0 0 16px; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.6; overflow-wrap: anywhere; }
+.guest-support-help { margin: 0 0 8px; }
+.guest-support form { display: grid; gap: 20px; margin: 24px 0 8px; }
+@media (max-width: 639px) { .guest-support form button[type="submit"], .guest-support form > button { width: 100%; } }
+.guest-support label { color: var(--jv-ink); font-size: var(--t-small); font-weight: var(--fw-semi); }
+.guest-support textarea, .guest-support select { width: 100%; min-height: 48px; padding: 12px 14px; color: var(--jv-ink); background: #fff; border: 1px solid var(--jv-line-input); border-radius: 12px; font-size: var(--t-body-sm); transition: border-color var(--dur-2) var(--ease-press), box-shadow var(--dur-2) var(--ease-press); }
+.guest-support textarea { min-height: 128px; line-height: 1.5; }
+.guest-support :is(input, textarea, select):focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; border-color: var(--jv-brand); }
+.guest-support > h2 { text-wrap: balance; }
+.guest-support form > p { margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.5; }
+.guest-support button { display: inline-flex; align-items: center; justify-content: center; width: fit-content; min-height: 48px; padding: 0 22px; border: 1px solid transparent; border-radius: var(--r-pill); background: var(--jv-brand); color: #fff; font-size: var(--t-body-sm); font-weight: var(--fw-semi); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(var(--jv-ink-rgb) / .2); transition: background var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
+.guest-support button:hover:not(:disabled) { background: var(--jv-brand-hover); }
+.guest-support button:active:not(:disabled) { transform: scale(.98); transition-duration: var(--dur-1); }
+.guest-support button:disabled { opacity: .6; cursor: not-allowed; }
+.guest-support button:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; }
+/* Checkbox: one custom control, 44px hit area on the whole row. */
+.guest-support-consent { display: flex; gap: 12px; align-items: center; min-height: 44px; padding: 4px 0; font-size: var(--t-small); font-weight: 400; line-height: 1.4; cursor: pointer; }
+.guest-support-consent input { appearance: none; -webkit-appearance: none; display: grid; place-content: center; flex-shrink: 0; width: 24px; height: 24px; margin: 0; background: #fff; border: 1.5px solid var(--jv-line-input); border-radius: 7px; cursor: pointer; transition: background var(--dur-2) var(--ease-press), border-color var(--dur-2) var(--ease-press); }
+.guest-support-consent input::after { content: ""; width: 12px; height: 7px; margin-top: -2px; border-left: 2.25px solid #fff; border-bottom: 2.25px solid #fff; transform: rotate(-45deg) scale(0); transition: transform var(--dur-1) var(--ease-press); }
+.guest-support-consent input:checked { background: var(--jv-brand); border-color: var(--jv-brand); }
+.guest-support-consent input:checked::after { transform: rotate(-45deg) scale(1); }
+.guest-support-consent input:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; }
+.guest-support-receipt { padding: 20px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: var(--jv-bg-subtle); }
+.guest-support-receipt h3 { margin: 0 0 8px; font-size: var(--t-h4); font-weight: var(--fw-heading); }
+.guest-support-receipt textarea { font-family: var(--font-mono); font-size: var(--t-sm); overflow-wrap: anywhere; word-break: break-all; }
+.guest-support-reply { white-space: pre-wrap; overflow-wrap: anywhere; }
+.guest-support [role=alert] { color: var(--jv-danger); }
+.guest-support p a { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
+.guest-support-help a { text-decoration: none; }
+.guest-support-lookup { margin-top: 16px; }
+.guest-support-lookup > summary { min-height: 56px; padding: 14px 0; }
+.guest-support-lookup > form { padding-bottom: 20px; }
+.guest-support-fine { margin: 16px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.6; }
+
+/* Round 6: inline field errors with a visible border state (never colour alone: the message names the fix). */
+.guest-support-error { margin: 6px 0 0; color: var(--jv-danger); font-size: var(--t-sm); font-weight: var(--fw-medium); line-height: 1.4; }
+.guest-support textarea[aria-invalid="true"] { border-color: var(--jv-danger); box-shadow: 0 0 0 1px var(--jv-danger); }
+.guest-support-consent input[type="checkbox"] { width: 28px; height: 28px; flex-shrink: 0; }
+.guest-support-consent input[aria-invalid="true"] { outline: 2px solid var(--jv-danger); outline-offset: 2px; }
+.guest-support-consent { min-height: 44px; align-items: center; }
+
+/* ---------- Round 7 ---------- */
+.guest-support :is(p, li) { max-width: 60ch; }
+.guest-support > h2 { font-size: var(--t-h3); }
+.guest-support-consent { min-height: 48px; }
+.guest-support-consent input[type="checkbox"] { width: 28px; height: 28px; }
+.guest-support-fine { margin-top: 0; }
+
+/* Round 8: the checkbox itself is a 44px target; the visible 28px box is drawn inside it. */
+.guest-support-consent input[type="checkbox"] { position: relative; width: 44px; height: 44px; margin: 0 -8px 0 -8px; background: transparent; border: 0; border-radius: 0; }
+.guest-support-consent input[type="checkbox"]::before { content: ""; position: absolute; inset: 8px; border: 1.5px solid var(--jv-line-input); border-radius: 7px; background: #fff; transition: background-color var(--dur-1) var(--ease-press), border-color var(--dur-1) var(--ease-press); }
+.guest-support-consent input[type="checkbox"]:checked { background: transparent; }
+.guest-support-consent input[type="checkbox"]:checked::before { background: var(--jv-brand); border-color: var(--jv-brand); }
+.guest-support-consent input[type="checkbox"]::after { position: relative; z-index: 1; }
+.guest-support-consent input[type="checkbox"][aria-invalid="true"]::before { border-color: var(--jv-danger); }

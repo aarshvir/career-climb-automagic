@@ -72,15 +72,14 @@ export function SeoHead({
       <meta property="og:url" content={canonical} />
       <meta property="og:locale" content={locale} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Automated Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.' : description} />
+      <meta property="og:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Jobvance Automated Job Loop: create your account, choose your roles and schedule, then come back to matched jobs and tailored CVs.' : description} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content={twitterHandle} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Automated Job Loop: create your account, add your CV, set your search schedule and review jobs and prepared CVs.' : description} />
+      <meta name="twitter:image:alt" content={ogImage === `${SITE_URL}/og-job-loop-account.png` ? 'Jobvance Automated Job Loop: create your account, choose your roles and schedule, then come back to matched jobs and tailored CVs.' : description} />
       <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-      <link rel="preload" as="image" href="/images/hero-jobvance.webp" />
       {renderJsonLd(structuredData)}
     </Helmet>
   );
@@ -91,21 +90,7 @@ export const defaultOrganizationJsonLd: JsonLd = {
   "@type": "Organization",
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/images/logo.svg`,
-  sameAs: [
-    "https://www.linkedin.com/company/jobvance",
-    "https://twitter.com/jobvance",
-    "https://www.youtube.com/@jobvance"
-  ],
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      telephone: "+1-415-555-0199",
-      contactType: "customer service",
-      areaServed: "US",
-      availableLanguage: ["English"]
-    }
-  ]
+  logo: `${SITE_URL}/icon-512.png`
 };
 
 export const searchActionJsonLd: JsonLd = {
@@ -166,11 +151,6 @@ export const jobvanceProductJsonLd: JsonLd = {
     priceCurrency: "USD",
     availability: "https://schema.org/InStock",
     url: `${SITE_URL}/pricing`
-  },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.8",
-    reviewCount: "112"
   }
 };
 

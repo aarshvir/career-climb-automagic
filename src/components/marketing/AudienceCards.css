@@ -1,0 +1,63 @@
+/* Round 7: audience hero artifacts and the closing-band CV line. */
+.pc-source-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.pc-source-list li { display: grid; grid-template-columns: 84px minmax(0, 1fr); align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--jv-line); border-radius: 10px; background: var(--jv-bg-subtle); }
+.pc-source-list li.is-used { border-color: color-mix(in srgb, var(--jv-brand) 35%, transparent); background: var(--jv-brand-tint); box-shadow: inset 3px 0 0 var(--jv-brand); }
+.pc-source-kind { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
+.pc-source-text { display: grid; min-width: 0; }
+.pc-source-text strong { font-size: var(--t-small); line-height: 1.3; font-weight: 500; }
+.pc-source-text span { color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
+.pc-source-join { display: flex; align-items: center; gap: 10px; color: var(--jv-brand-ink); font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .04em; }
+.pc-source-join i { flex: 1; height: 1px; background: linear-gradient(90deg, var(--jv-line-strong), var(--jv-brand)); }
+.pc-source-join i:last-child { background: linear-gradient(90deg, var(--jv-brand), var(--jv-line-strong)); }
+.pc-line-box { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--jv-brand) 30%, transparent); border-left: 3px solid var(--jv-brand); border-radius: 10px; background: var(--jv-brand-tint); }
+.pc-line-box--before { border-color: var(--jv-line); border-left-color: var(--jv-line-strong); background: var(--jv-bg-subtle); }
+.pc-line-box p { margin: 0; color: var(--jv-ink); font-size: var(--t-small); line-height: 1.45; }
+.pc-line-box mark { padding: 1px 3px; border-radius: 4px; background: #fff; color: var(--jv-brand-ink); }
+.pc-cvline { gap: 10px; }
+.pc-pivot-row { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); align-items: center; gap: 8px; }
+.pc-pivot-end { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--jv-line); border-radius: 12px; background: var(--jv-bg-subtle); }
+.pc-pivot-end strong { font-size: var(--t-small); line-height: 1.3; }
+.pc-pivot-end--to { border-color: color-mix(in srgb, var(--jv-brand) 35%, transparent); background: var(--jv-brand-tint); box-shadow: inset 0 3px 0 var(--jv-signal); }
+.pc-pivot-arrow { position: relative; height: 2px; background: linear-gradient(90deg, var(--jv-line-strong), var(--jv-brand)); }
+.pc-pivot-arrow::after { content: ""; position: absolute; right: -1px; top: -3px; width: 8px; height: 8px; border-top: 2px solid var(--jv-brand); border-right: 2px solid var(--jv-brand); rotate: 45deg; }
+.pc-pivot-arrow i { position: absolute; left: 50%; top: -3px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(var(--jv-signal-rgb) / .3); }
+.pc-pivot-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.pc-pivot-list li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 11px 0; border-top: 1px solid var(--jv-line); }
+.pc-pivot-list strong { font-size: var(--t-small); font-weight: 500; }
+.pc-pivot-n { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); }
+.pc-weekrun-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; }
+.pc-weekrun-grid li { display: grid; justify-items: center; gap: 8px; padding: 12px 0 10px; border: 1px solid var(--jv-line); border-radius: 12px; color: var(--jv-ink-3); }
+.pc-weekrun-grid li.is-run { border-color: color-mix(in srgb, var(--jv-brand) 30%, transparent); background: var(--jv-brand-tint); color: var(--jv-brand-ink); }
+.pc-weekrun-day { font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.pc-weekrun-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--jv-line-strong); }
+.pc-weekrun-grid li.is-run .pc-weekrun-dot { width: 14px; height: 14px; background: var(--jv-brand); box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px var(--jv-signal); }
+.pc-weekrun-result { font-size: var(--t-xs); line-height: 1rem; text-align: center; }
+@media (max-width: 479px) {
+  .pc-source-list li { grid-template-columns: 1fr; gap: 2px; }
+  .pc-pivot-row { grid-template-columns: 1fr; }
+  .pc-pivot-arrow { width: 2px; height: 28px; justify-self: center; background: linear-gradient(180deg, var(--jv-line-strong), var(--jv-brand)); }
+  .pc-pivot-arrow::after { right: -3px; top: auto; bottom: -1px; rotate: 135deg; }
+  .pc-pivot-arrow i { left: -3px; top: 50%; margin: -4px 0 0; }
+  .pc-weekrun-grid { gap: 2px; }
+}
+.pc-done-list { position: relative; display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.pc-done-list li { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; padding: 8px 0; }
+.pc-done-list li:not(:last-child)::before { content: ""; position: absolute; left: 13px; top: 36px; bottom: -8px; width: 2px; background: linear-gradient(180deg, var(--jv-brand), var(--jv-signal)); }
+.pc-done-check { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--jv-brand); color: #fff; box-shadow: 0 0 0 4px var(--jv-brand-tint); }
+.pc-done-check svg { width: 14px; height: 14px; stroke-width: 2.5; }
+.pc-done-text { display: grid; padding-top: 1px; }
+.pc-done-text strong { font-size: var(--t-small); line-height: 1.3; font-weight: 500; }
+.pc-done-text span { color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
+
+/* Pricing hero: three rings, one per plan pace. */
+.pc-rings { display: grid; grid-template-columns: 160px minmax(0, 1fr); align-items: center; gap: 16px; }
+.pc-rings-svg { display: block; width: 160px; height: 160px; }
+.pc-ring { stroke: var(--jv-line-strong); stroke-width: 1.5; }
+.pc-ring-dot { fill: var(--jv-brand); }
+.pc-ring-dot--first { fill: var(--jv-signal); stroke: var(--jv-brand); stroke-width: 2; }
+.pc-rings-legend { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.pc-rings-legend li { display: grid; padding-left: 12px; border-left: 2px solid var(--jv-brand); }
+.pc-rings-legend li:nth-child(1) { border-left-color: var(--jv-line-strong); }
+.pc-rings-legend li:nth-child(2) { border-left-color: var(--jv-brand-mid); }
+.pc-rings-legend strong { font-size: var(--t-small); font-weight: 500; line-height: 1.3; }
+.pc-rings-legend span { color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }

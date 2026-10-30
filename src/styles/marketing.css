@@ -7,7 +7,7 @@
 
 /* ---------- Type helpers ---------- */
 /* Mono is reserved for uppercase captions, section numbers and schedule/time values. */
-.jv-caption { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
+.jv-caption { display: flex; width: fit-content; max-width: 100%; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
 /* Marker rule: a 6px SQUARE marks a label or list item (brand on light, lime signal on forest); a CIRCLE marks only live state. */
 .jv-caption::before { content: ""; width: 6px; height: 6px; background: var(--jv-brand); flex-shrink: 0; }
 .jv-dark .jv-caption { color: var(--jv-on-dark-2); }
@@ -23,19 +23,19 @@
 .jv-btn--sm { --jv-btn-h: 40px; padding: 0 16px; font-size: var(--t-small); }
 .jv-btn--lg { --jv-btn-h: 56px; padding: 0 28px; font-size: var(--t-body); }
 .jv-btn--lg svg { width: 18px; height: 18px; }
-.jv-btn--primary { color: #fff; background: var(--jv-brand); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(15 29 23 / .2); }
+.jv-btn--primary { color: #fff; background: var(--jv-brand); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(var(--jv-ink-rgb) / .2); }
 .jv-btn--secondary { color: var(--jv-ink); background: #fff; border-color: var(--jv-line-strong); box-shadow: var(--sh-1); }
 .jv-btn--ghost { color: var(--jv-ink-2); background: transparent; }
 @media (hover: hover) {
-  .jv-btn--primary:hover { background: var(--jv-brand-hover); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 6px 16px -6px rgb(15 29 23 / .35); }
-  .jv-btn--secondary:hover { border-color: #BCC6C0; background: var(--jv-bg-subtle); }
+  .jv-btn--primary:hover { background: var(--jv-brand-hover); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 6px 16px -6px rgb(var(--jv-ink-rgb) / .35); }
+  .jv-btn--secondary:hover { border-color: color-mix(in srgb, var(--jv-line-strong), var(--jv-ink) 14%); background: var(--jv-bg-subtle); }
   .jv-btn--ghost:hover { background: var(--jv-bg-muted); color: var(--jv-ink); }
   .jv-btn:hover svg { transform: translateX(2px); }
 }
 .jv-btn--primary:active { background: var(--jv-brand-press); transform: scale(.98); transition-duration: var(--dur-1); }
 .jv-btn--secondary:active { transform: scale(.98); transition-duration: var(--dur-1); }
 .jv-btn:disabled, .jv-btn[aria-busy="true"] { cursor: not-allowed; }
-.jv-btn--primary:disabled, .jv-btn--primary[aria-busy="true"] { background: #9DB3A8; box-shadow: none; transform: none; }
+.jv-btn--primary:disabled, .jv-btn--primary[aria-busy="true"] { background: color-mix(in srgb, var(--jv-brand) 45%, #fff); box-shadow: none; transform: none; }
 /* The focus ring is an outline (never transitioned), so it appears and disappears instantly. */
 .jv-btn:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; }
 @media (forced-colors: active) { .jv-btn:focus-visible { outline: 2px solid CanvasText; } }
@@ -68,37 +68,36 @@
 
 /* ---------- Dark band (forest) ---------- */
 .jv-dark {
-  --jv-bg: var(--jv-forest); --jv-surface: var(--jv-forest-2); --jv-elevated: #183427; --jv-line: rgb(255 255 255 / .09);
-  --jv-ink: #F2F6F3; --jv-ink-2: #A5B6AD; --jv-ink-3: #82948A; --jv-brand-text: #A9DDBC;
-  --jv-success: #6FDCA0; --jv-warn: #FBBF4A; --jv-danger: #FF8A80;
-  /* text on forest, with contrast on #0C1F17 */
-  --jv-on-dark-1: #F2F6F3; /* 16.3:1 */ --jv-on-dark-body: #C6D3CC; /* 11.1:1 */ --jv-on-dark-2: #A5B6AD; /* 8.1:1 */
-  --jv-on-dark-3: #82948A; /* 5.4:1 */ --jv-on-dark-link: #A9DDBC; /* 11.2:1 */
+  --jv-bg: var(--jv-forest); --jv-surface: var(--jv-forest-2); --jv-line: rgb(255 255 255 / .09);
+  --jv-ink: var(--jv-on-dark-1); --jv-ink-2: var(--jv-on-dark-2); --jv-ink-3: var(--jv-on-dark-3); --jv-brand-text: var(--jv-on-dark-link);
+  --jv-success: var(--jv-success-on-dark); --jv-warn: var(--jv-warn-on-dark); --jv-danger: var(--jv-danger-on-dark);
   position: relative; isolation: isolate; overflow: hidden; color: var(--jv-on-dark-body);
   /* One soft light from the top edge; no grain or second glow. */
-  background: radial-gradient(60% 55% at 50% 0%, rgb(169 221 188 / .09), transparent 70%), var(--jv-forest);
+  background: var(--jv-glow), var(--jv-forest);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / .06);
 }
 /* Text links on forest get the mint ring (this also beats .product-page's light-theme ring). */
 .jv-dark :focus-visible, .product-page .jv-dark :is(a, button, summary):not(.jv-btn):focus-visible { outline-color: var(--jv-on-dark-link); }
 .jv-dark a:not(.jv-btn) { color: var(--jv-on-dark-link); }
 /* On forest the primary is a white button (17:1); lime stays a small signal, never a fill. */
-.jv-dark .jv-btn--primary { color: var(--jv-forest); background: #fff; box-shadow: inset 0 -1px 0 rgb(15 29 23 / .08), 0 1px 2px rgb(0 0 0 / .2); }
-.jv-dark .jv-btn--secondary { color: #fff; background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .18); box-shadow: none; }
+.jv-dark .jv-btn--primary { color: var(--jv-forest); background: #fff; box-shadow: inset 0 -1px 0 rgb(var(--jv-ink-rgb) / .08), 0 1px 2px rgb(var(--jv-ink-rgb) / .2); }
+.jv-dark .jv-btn--secondary { color: #fff; background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .42); box-shadow: none; }
 @media (hover: hover) {
-  .jv-dark .jv-btn--primary:hover { background: #E6F0EA; }
-  .jv-dark .jv-btn--secondary:hover { background: rgb(255 255 255 / .1); border-color: rgb(255 255 255 / .26); }
+  .jv-dark .jv-btn--primary:hover { background: var(--jv-brand-tint); }
+  .jv-dark .jv-btn--secondary:hover { background: rgb(255 255 255 / .1); border-color: rgb(255 255 255 / .6); }
 }
-.jv-dark .jv-btn--primary:active { background: #D5E5DB; }
+.jv-dark .jv-btn--primary:active { background: color-mix(in srgb, var(--jv-brand-tint), var(--jv-forest) 8%); }
 .jv-dark .jv-btn:focus-visible { outline-color: var(--jv-signal); }
 
-/* The approved document-J mark (the same green tile as the favicon and the ads) and the Manrope wordmark. */
+/* The approved J mark: one glyph (the favicon's hooked J) on the green tile at every size, plus the Manrope wordmark. */
 @font-face { font-family: "Jobvance Brand"; src: url("/fonts/Manrope-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
-.jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.04em; line-height: 1; text-decoration: none; border-radius: 10px; }
+.jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: var(--ls-h2); line-height: 1; text-decoration: none; border-radius: 10px; }
 .jv-brand-name { white-space: nowrap; }
-.jv-brand-period { color: var(--jv-brand); }
-.jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #215C43; color: #E2EEAF; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
-.jv-brand-mark svg { width: 24px; height: 24px; }
+.jv-brand-period { color: var(--jv-brand-period); }
+.jv-dark .jv-brand-period { color: var(--jv-brand-period-on-dark); }
+/* The mark's lime (#E2EEAF) is a brand constant shared with favicon.svg and the PNG icons; UI uses --jv-signal. The tile radius is 25% at every size, like the favicon. */
+.jv-brand-mark { --mark-tile: var(--jv-brand); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 25%; background: var(--jv-brand); color: var(--jv-brand-glyph); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
+.jv-brand-mark svg { width: 100%; height: 100%; display: block; }
 /* Windows High Contrast drops the tile fill; keep the tile's edge so the mark stays recognisable. */
 @media (forced-colors: active) { .jv-brand-mark { border: 1px solid CanvasText; } }
 @media (max-width: 760px) { .jv-brand { font-size: 20px; } }
@@ -125,24 +124,24 @@
 .jv-account-pending { display: contents; }
 .jv-account-pending > .jv-btn { visibility: hidden; }
 .jv-mobile-panel { display: none; }
-.jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(15 29 23 / .18); animation: jv-menu-in 200ms var(--ease-out) both; }
-.jv-mobile-panel > a { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid var(--jv-line); color: var(--jv-ink); font-size: 20px; font-weight: 500; letter-spacing: -.02em; text-decoration: none; }
+.jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(var(--jv-ink-rgb) / .18); animation: jv-menu-in 200ms var(--ease-out) both; }
+.jv-mobile-panel > a { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid var(--jv-line); color: var(--jv-ink); font-size: 20px; font-weight: 500; letter-spacing: var(--ls-h3); text-decoration: none; }
 .jv-mobile-panel > a[aria-current="page"] { color: var(--jv-brand); }
 .jv-mobile-panel > a:focus-visible { outline-offset: -2px; border-radius: 6px; }
-.jv-mobile-account { display: flex; flex-direction: column; gap: 10px; padding-top: 20px; }
+.jv-mobile-account { display: flex; flex-direction: column; gap: 10px; padding: 12px 0 16px; border-bottom: 1px solid var(--jv-line); }
 .jv-mobile-account > * { width: 100%; }
 .jv-mobile-account .jv-btn { --jv-btn-h: 48px; font-size: var(--t-body-sm); }
 .jv-mobile-account .jv-btn--ghost { color: var(--jv-ink); background: #fff; border-color: var(--jv-line-strong); }
-.jv-menu-scrim { position: fixed; inset: 56px 0 0; z-index: 1; background: rgb(15 29 23 / .32); animation: jv-scrim-in 180ms var(--ease-out) both; }
+.jv-menu-scrim { position: fixed; inset: 56px 0 0; z-index: 1; background: rgb(var(--jv-ink-rgb) / .32); animation: jv-scrim-in 180ms var(--ease-out) both; }
 .jv-account-status { color: var(--jv-ink-3); font-size: var(--t-sm); }
 .jv-header-error { width: var(--shell); margin: 0 auto 12px; color: var(--jv-danger); font-size: var(--t-sm); }
-/* Open and close clip the panel from its top edge, so its text never overlaps the page text behind it. */
-@keyframes jv-menu-in { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+/* Open and close slide and fade the panel (transform and opacity only, so it stays on the compositor). */
+@keyframes jv-menu-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 @keyframes jv-scrim-in { from { opacity: 0; } }
-/* Closing: the panel stays mounted for 160ms and is clipped away (MvpHeader sets data-state="closing"). */
-.jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(15 29 23 / .18); pointer-events: none; animation: jv-menu-out 160ms var(--ease-inout) both; }
+/* Closing: the panel stays mounted for 160ms and fades away (MvpHeader sets data-state="closing"). */
+.jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(var(--jv-ink-rgb) / .18); pointer-events: none; animation: jv-menu-out 160ms var(--ease-inout) both; }
 .jv-menu-scrim[data-state="closing"] { pointer-events: none; animation: jv-scrim-out 160ms var(--ease-inout) both; }
-@keyframes jv-menu-out { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }
+@keyframes jv-menu-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-8px); } }
 @keyframes jv-scrim-out { to { opacity: 0; } }
 /* The full wordmark and navigation fit narrow phones; the main page keeps its primary start action. */
 @media (max-width: 359px) { .jv-header-inner > .jv-header-start { display: none; } .jv-header-inner > .jv-header-start ~ .jv-menu-toggle { margin-left: auto; } }
@@ -151,10 +150,10 @@
   /* Floating glass bar: the page passes visibly above and under it while scrolling. */
   .jv-header { top: 0; padding-top: 12px; background: transparent; border-bottom: 0; pointer-events: none; }
   .jv-header > * { pointer-events: auto; }
-  .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 64px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(15 29 23 / .12); background: rgb(255 255 255 / .82); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
+  .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 64px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(var(--jv-ink-rgb) / .12); background: rgb(255 255 255 / .82); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
   .jv-header-inner > .jv-brand { justify-self: start; }
   .jv-header-nav { display: flex; align-items: center; gap: 2px; }
-  .jv-header-nav > a { display: inline-flex; align-items: center; min-height: 36px; padding: 8px 12px; border-radius: var(--r-pill); color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; letter-spacing: 0; text-decoration: none; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+  .jv-header-nav > a { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 12px; border-radius: var(--r-pill); color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; letter-spacing: 0; text-decoration: none; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
   .jv-header-nav > a[aria-current="page"] { background: var(--jv-bg-muted); color: var(--jv-ink); }
   .jv-header-actions { display: flex; align-items: center; justify-self: end; gap: 4px; }
   .jv-header .jv-btn--sm { --jv-btn-h: 40px; }
@@ -176,7 +175,7 @@
 .jv-footer-top { display: grid; gap: 40px; }
 .jv-footer-brand { display: grid; justify-items: start; gap: 12px; align-content: start; }
 .jv-footer-brand .jv-brand { margin-top: -6px; }
-.jv-footer-description { max-width: 34ch; margin: 0; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.6; text-wrap: pretty; }
+.jv-footer-description { max-width: 40ch; margin: 0; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.6; text-wrap: pretty; }
 .jv-footer-note { margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-footer-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 24px; }
 .jv-footer-col-title { margin: 0 0 4px; color: var(--jv-ink-3); font-size: var(--t-sm); font-weight: 500; letter-spacing: 0; line-height: 1.4; }
@@ -184,11 +183,12 @@
 .jv-footer-col a { display: inline-flex; align-items: center; min-height: 44px; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; text-decoration: none; transition: color var(--dur-2) var(--ease-press); }
 @media (hover: hover) { .jv-footer-col a:hover { color: var(--jv-ink); } }
 /* Desktop with a pointer: 32px link rows (touch keeps 44px). */
-@media (min-width: 1024px) and (hover: hover) { .jv-footer-col a { min-height: 32px; } .jv-footer-col ul { gap: 2px; } }
+@media (min-width: 1024px) and (hover: hover) { .jv-footer-col a { min-height: 40px; } .jv-footer-col ul { gap: 0; } }
 .jv-footer-bottom { display: flex; flex-direction: column; gap: 4px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--jv-line); color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-footer-bottom p { margin: 0; }
-.jv-footer-bottom nav { display: flex; flex-wrap: wrap; column-gap: 20px; }
-.jv-footer-bottom nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--jv-ink-2); text-decoration: none; }
+.jv-footer-bottom nav { display: flex; flex-wrap: wrap; column-gap: 8px; }
+.jv-footer-bottom nav a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 8px; color: var(--jv-ink-2); text-decoration: none; }
+.jv-footer-bottom nav a:first-child { margin-left: -8px; }
 @media (hover: hover) { .jv-footer-bottom nav a:hover { color: var(--jv-ink); text-decoration: underline; text-underline-offset: 3px; } }
 .jv-footer-compact .jv-footer-top { display: none; }
 .jv-footer-compact .jv-footer-inner { padding-top: 20px; }
@@ -207,40 +207,1261 @@
   .jv-footer-links { grid-column: 7 / span 6; gap: 24px; }
   .jv-footer-bottom { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; }
   .jv-footer-bottom > p:first-child { grid-column: 1 / span 4; }
-  .jv-footer-bottom > nav { grid-column: 7 / span 6; column-gap: 20px; }
+  .jv-footer-bottom > nav { grid-column: 7 / span 6; column-gap: 8px; }
 }
 
 /* ---------- Final CTA band ---------- */
 /* Left-aligned copy on forest, lit once from the top-right corner. From 1024px a static orbit ring is anchored to the
    button row: its lime "You review" node sits on the row's vertical centre to the right of the buttons; the rest of
    the ring arcs out of the band. */
-.jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: radial-gradient(90% 45% at 100% 0%, rgb(169 221 188 / .1), transparent 70%), var(--jv-forest); }
+.jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: radial-gradient(90% 45% at 100% 0%, rgb(var(--jv-link-on-dark-rgb) / .1), transparent 70%), var(--jv-forest); }
 .jv-cta .jv-cta-orbit { display: none; }
 .jv-cta-inner { position: relative; z-index: 1; max-width: 640px; }
-.jv-cta h2 { margin: 0; max-width: 8.1em; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: -.04em; text-wrap: balance; }
-.jv-cta p { margin: 16px 0 0; max-width: 46ch; color: var(--jv-on-dark-body); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; text-wrap: pretty; }
+.jv-cta h2 { margin: 0; max-width: 8.1em; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: var(--ls-display); text-wrap: balance; }
+.jv-cta p:not(.jv-caption) { margin: 16px 0 0; max-width: 46ch; color: var(--jv-on-dark-body); font-size: var(--t-h4); line-height: 1.55; letter-spacing: var(--ls-lead); text-wrap: pretty; }
 .jv-cta-actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 32px; }
-.jv-cta .jv-cta-note { max-width: none; margin-top: 20px; color: var(--jv-on-dark-2); font-size: var(--t-sm); line-height: var(--lh-sm); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.jv-cta p.jv-cta-note { max-width: none; margin-top: 20px; color: var(--jv-on-dark-2); font-size: var(--t-sm); line-height: var(--lh-sm); letter-spacing: 0; font-variant-numeric: tabular-nums; }
 @media (max-width: 639px) { .jv-cta-actions .jv-btn { width: 100%; } }
 @media (min-width: 640px) { .jv-cta { padding: 96px var(--band-pad-x); } }
 @media (min-width: 1024px) {
   .jv-cta { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 112px var(--band-pad-x); }
   .jv-cta-inner { grid-column: 1 / span 7; max-width: none; }
   /* 720px ring; the "You review" node is at (6.7%, 75%) of it, i.e. 48px in and 540px down. */
-  .jv-cta .jv-cta-orbit { --ring: rgb(169 221 188 / .32); display: block; position: absolute; z-index: -1; left: calc(108% - 48px); top: calc(50% - 540px); width: 720px; max-width: none; }
+  .jv-cta .jv-cta-orbit { --ring: rgb(var(--jv-link-on-dark-rgb) / .32); display: block; position: absolute; z-index: -1; left: calc(108% - 48px); top: calc(50% - 540px); width: 720px; max-width: none; }
 }
 
 /* ---------- FAQ accordion ---------- */
 .jv-faq { max-width: 720px; border-top: 1px solid var(--jv-line); }
 .jv-faq details { border-bottom: 1px solid var(--jv-line); }
-.jv-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; padding: 20px 0; list-style: none; color: var(--jv-ink); font-size: 17px; line-height: 26px; font-weight: 500; cursor: pointer; transition: color var(--dur-2) var(--ease-press); border-radius: 10px; }
+.jv-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; padding: 20px 0; list-style: none; color: var(--jv-ink); font-size: 1.0625rem; line-height: 1.5rem; font-weight: 500; cursor: pointer; transition: color var(--dur-2) var(--ease-press); border-radius: 10px; }
 .jv-faq summary::-webkit-details-marker { display: none; }
 .jv-faq summary:hover { color: var(--jv-brand); }
 .jv-faq summary:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: -2px; }
 .jv-faq-toggle { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
 .jv-faq-toggle svg { width: 16px; height: 16px; }
-.jv-faq details[open] .jv-faq-toggle { background: var(--jv-ink); border-color: var(--jv-ink); color: #fff; transform: rotate(45deg); }
-.jv-faq details > p, .jv-faq details > div { max-width: 64ch; margin: 0; padding: 0 0 24px; color: var(--jv-ink-2); font-size: 16px; line-height: 26px; }
+.jv-faq details[open] .jv-faq-toggle { background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; transform: rotate(45deg); }
+.jv-faq details > p, .jv-faq details > div { max-width: 34em; margin: 0; padding: 0 0 24px; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
 
 /* Icons on marketing pages use a lighter stroke; the private app keeps 2. */
 .product-page .lucide, .loop-overview .lucide, .jv-marketing .lucide { stroke-width: 1.75; }
+
+/* ---------- Inner-page system: every marketing page except the home page shares these primitives ---------- */
+/* One container: content starts on the header pill's inner edge (x=184 at 1440) with the same frame rails as home. */
+.jv-rails { position: relative; isolation: isolate; overflow-x: clip; }
+@media (min-width: 1024px) {
+  .jv-rails::before, .jv-rails::after { content: ""; position: absolute; top: 0; bottom: 0; z-index: -1; width: 1px; background: var(--jv-line); pointer-events: none; }
+  .jv-rails::before { left: calc(50% - var(--shell) / 2); }
+  .jv-rails::after { right: calc(50% - var(--shell) / 2); }
+}
+.jv-page { width: var(--shell); margin-inline: auto; }
+@media (min-width: 1024px) { .jv-page { padding-inline: var(--band-pad-x); } }
+.jv-page-head { padding: 40px 0 40px; }
+.jv-page-head > .jv-caption { margin: 0 0 16px; }
+.jv-page-title { margin: 0; max-width: 16em; color: var(--jv-ink); font-size: var(--t-page); font-weight: var(--fw-display); line-height: 1.05; letter-spacing: var(--ls-display); text-wrap: balance; }
+.jv-lead { margin: var(--gap-lead) 0 0; max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); text-wrap: pretty; }
+.jv-page-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 28px; }
+.jv-page-note { margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
+.jv-nb { white-space: nowrap; }
+/* Meta lines: segments never start a line with a separator (each row clips its own leading dot). */
+.jv-meta { display: block; margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); font-variant-numeric: tabular-nums; }
+.jv-meta-in { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.jv-meta-in > span { position: relative; padding-left: 18px; white-space: nowrap; }
+/* A drawn tick per fact (no separators to orphan when the row wraps). */
+.jv-meta-in > span::before { content: ""; position: absolute; left: 1px; top: .42em; width: 9px; height: 5px; border-left: 1.75px solid var(--jv-brand); border-bottom: 1.75px solid var(--jv-brand); rotate: -45deg; }
+.jv-dark .jv-meta-in > span::before { border-color: var(--jv-signal); }
+.jv-dark .jv-meta { color: var(--jv-on-dark-2); }
+@media (min-width: 640px) { .jv-page-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 28px; } .jv-page-head { padding-top: 64px; } }
+@media (min-width: 1024px) { .jv-page-head { padding: 88px 0 72px; } }
+@media (max-width: 639px) { .jv-page-actions .jv-btn { width: 100%; } }
+.jv-section { padding: 56px 0; border-top: 1px solid var(--jv-line); }
+@media (min-width: 1024px) { .jv-section { padding: 96px 0; } }
+.jv-section-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: var(--ls-display); text-wrap: balance; }
+.jv-head { display: grid; gap: 16px; max-width: 720px; margin-bottom: 32px; }
+.jv-head > .jv-caption { margin: 0; }
+.jv-head > p:not(.jv-caption) { margin: 0; max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); }
+@media (min-width: 1024px) { .jv-head { margin-bottom: 48px; } }
+/* Numbered hairline list (replaces icon-in-circle step cards). */
+.jv-steps { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line-strong); }
+.jv-steps > li { display: grid; gap: 10px; padding: 28px 0; border-bottom: 1px solid var(--jv-line); min-width: 0; }
+.jv-steps :is(h2, h3) { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: var(--ls-h3); text-wrap: balance; }
+.jv-steps p:not(.jv-caption) { margin: 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); text-wrap: pretty; }
+.jv-steps .jv-caption { margin: 0; }
+.jv-steps .jv-steps-example { display: inline-flex; width: fit-content; max-width: 100%; margin-top: 6px; padding: 4px 10px; border: 1px solid var(--jv-line); border-radius: var(--r-xs); background: var(--jv-sunken); color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; }
+@media (min-width: 768px) {
+  .jv-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 0; column-gap: 32px; }
+  .jv-steps > li { align-content: start; padding: 24px 0 0; border-top: 1px solid var(--jv-line-strong); border-bottom: 0; }
+}
+/* Two-column rows on the 12-column grid. */
+.jv-split { display: grid; gap: 32px; }
+@media (min-width: 1024px) { .jv-split { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; } .jv-split > :first-child { grid-column: 1 / span 5; } .jv-split > :last-child { grid-column: 7 / span 6; } }
+/* Ticked lists: a square marker, hairline rows. */
+.jv-ticks { display: grid; margin: 0; padding: 0; list-style: none; }
+.jv-ticks li { position: relative; padding: 14px 0 14px 22px; border-top: 1px solid var(--jv-line); color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: var(--lh-body-sm); }
+.jv-ticks li::before { content: ""; position: absolute; left: 0; top: 23px; width: 6px; height: 6px; background: var(--jv-brand); }
+.jv-dark .jv-ticks li { border-color: var(--jv-line); color: var(--jv-on-dark-body); }
+.jv-dark .jv-ticks li::before { background: var(--jv-signal); }
+/* Reading width for prose; legal text shares one token set. */
+.jv-prose { max-width: 36em; }
+.jv-prose > h2 { margin: 44px 0 0; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: var(--ls-h3); }
+.jv-prose > h2:first-child { margin-top: 0; }
+.jv-prose > p { margin: 14px 0 0; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.65; }
+.jv-prose a { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
+/* Related pages row at the end of reading pages. */
+.jv-related { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--jv-line-strong); }
+.jv-related > span { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; }
+/* Inline text links in reading areas keep a 44px hit area without changing their look. */
+.jv-related a, .jv-link-row a { display: inline-flex; align-items: center; min-height: 44px; color: var(--jv-brand); font-size: var(--t-body-sm); font-weight: var(--fw-semi); text-decoration: none; }
+.jv-related a:hover, .jv-link-row a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.jv-link-row { display: flex; flex-wrap: wrap; gap: 0 24px; }
+/* Interactive feedback shared by inner-page buttons and links. */
+.jv-page a:focus-visible, .jv-related a:focus-visible { border-radius: 6px; }
+/* Accordion rows on inner pages use the same +/- accordion everywhere. */
+.jv-faq--wide { max-width: none; }
+/* Mono eyebrow as a link (breadcrumb-free pages). */
+/* Final CTA band: optional right-half visual. */
+.jv-cta .jv-cta-visual { display: none; }
+@media (min-width: 1024px) {
+  .jv-cta--visual .jv-cta-visual { display: block; position: absolute; z-index: 0; right: var(--band-pad-x); top: 50%; width: min(340px, 32%); translate: 0 -50%; pointer-events: none; }
+  .jv-cta--visual .jv-cta-visual .pc-card { box-shadow: 0 30px 80px -20px rgb(var(--jv-ink-rgb) / .5); }
+  .jv-cta--visual .jv-cta-orbit { display: none; }
+}
+/* Footer note and description measure. */
+.jv-footer-description { max-width: 40ch; hyphens: manual; }
+@media (hover: hover) { .jv-page a.jv-btn, .jv-cta a.jv-btn { text-decoration: none; } }
+.jv-page :is(a, button, summary, input, select, textarea):focus-visible { outline-color: var(--jv-brand); }
+.jv-dark :is(a, button, summary):focus-visible, .jv-page .jv-dark :is(a, button, summary):focus-visible { outline-color: var(--jv-signal); }
+
+/* One disclosure style: every plain <details> summary outside the FAQ markup gets the same +/- toggle as .jv-faq. */
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; list-style: none; cursor: pointer; }
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary::-webkit-details-marker { display: none; }
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary::after { content: "+"; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); font-size: 18px; line-height: 1; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details)[open] > summary::after { content: "\2212"; background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; }
+.jv-brand--static { min-height: 0; pointer-events: none; }
+
+/* Touch targets: 44px minimum on phones. */
+@media (max-width: 959px) {
+  .jv-header .jv-btn--sm { --jv-btn-h: 44px; }
+  .jv-footer-col a { min-width: 44px; }
+}
+/* Brand wordmark fallback: Manrope Bold's width is close to this stack, so a late swap does not move the header. */
+.jv-brand { font-synthesis: none; }
+/* Pages whose <main> is already the 1200px shell: the rails sit on its own edges. */
+@media (min-width: 1024px) {
+  :is(.career-guides, .help-center, .walkthroughs-page).jv-rails::before { left: 0; }
+  :is(.career-guides, .help-center, .walkthroughs-page).jv-rails::after { right: 0; }
+}
+
+/* ---------- Spacing rhythm (one set of gaps for every page) ---------- */
+:root { --gap-eyebrow: 16px; --gap-lead: 20px; --gap-band: 32px; --gap-block: 40px; }
+@media (min-width: 1024px) { :root { --gap-lead: 24px; --gap-band: 64px; --gap-block: 48px; } }
+/* An eyebrow always sits one token above its heading; containers that already space their children by gap opt out. */
+.jv-caption + :is(h1, h2) { margin-top: var(--gap-eyebrow); }
+:is(.jv-head, .jv-page-head, .jv-loop-head, .jv-hero-copy, .audience-copy) > .jv-caption + :is(h1, h2) { margin-top: 0; }
+/* A heading is always followed by the same space before its lead, whichever page owns the lead. */
+:is(h1, h2) + :is(.jv-lead, p.jv-lead) { margin-top: var(--gap-lead); }
+/* Dark closing band never abuts the section above it. */
+.jv-page + .jv-cta, .jv-section + .jv-cta { margin-top: var(--gap-band); }
+/* The hero wash (--jv-wash) is painted full-bleed on #main-content (src/index.css), so it never clips at a shell or rail edge. */
+
+/* Explainer pages with one product fragment beside the intro (how it works, about). */
+.jv-page-head--split { display: grid; column-gap: 24px; }
+.jv-page-head--split > .jv-page-visual { margin-top: 40px; }
+.jv-page-visual .pc-card { max-width: 420px; }
+@media (min-width: 1024px) {
+  .jv-page-head--split { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+  .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / span 7; }
+  .jv-page-head--split > .jv-page-visual { grid-column: 9 / span 4; grid-row: 1 / span 4; align-self: center; margin-top: 0; }
+}
+
+/* Long legal pages: a sticky index beside a 36em reading column. */
+.jv-legal { display: grid; gap: 32px; padding-bottom: 72px; }
+.jv-toc { min-width: 0; }
+.jv-toc ol { display: grid; margin: 12px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line); }
+.jv-toc li { border-bottom: 1px solid var(--jv-line); }
+.jv-toc a { display: flex; align-items: center; min-height: 44px; padding: 6px 0; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; line-height: 1.35; text-decoration: none; }
+@media (hover: hover) { .jv-toc a:hover { color: var(--jv-brand); } }
+.jv-prose > h2 { scroll-margin-top: 112px; }
+.jv-legal .jv-prose > h2 { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--jv-line); }
+.jv-legal .jv-prose > h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+@media (min-width: 1024px) {
+  .jv-legal { grid-template-columns: minmax(0, 1fr) 280px; column-gap: 96px; align-items: start; }
+  .jv-legal .jv-prose { order: 1; }
+  .jv-toc { order: 2; position: sticky; top: 112px; max-height: calc(100vh - 144px); overflow-y: auto; }
+  .jv-toc a { min-height: 36px; padding: 4px 0; font-size: var(--t-sm); }
+}
+
+/* Accordions: the opened answer fades in with the same easing the toggle uses, so the two move together (opacity and transform only). */
+@keyframes jv-open { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: no-preference) {
+  .jv-faq details[open] > :is(p, div), .hc-note-details[open] > :not(summary) { animation: jv-open var(--dur-3) var(--ease-out) both; }
+}
+/* Phones: explainer heroes stay short; the product fragment appears from tablet width. */
+@media (max-width: 767px) { .jv-page-head--split > .jv-page-visual { display: none; } }
+/* Legal index: one disclosure on phones; a plain sticky list from 1024px. */
+.jv-toc details > summary { display: flex; align-items: center; justify-content: space-between; min-height: 44px; list-style: none; cursor: pointer; }
+.jv-toc details > summary::-webkit-details-marker { display: none; }
+.jv-toc details > summary::after { content: "+"; display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); font-family: var(--font-sans); font-size: 18px; }
+.jv-toc details[open] > summary::after { content: "\2212"; }
+@media (min-width: 1024px) { .jv-toc details > summary { pointer-events: none; min-height: 0; } .jv-toc details > summary::after { display: none; } }
+/* Legal headings: a clear step above 16px body, short paragraphs. */
+.jv-legal .jv-prose > h2 { margin-top: 56px; font-size: 1.5rem; font-weight: var(--fw-semi); line-height: 1.25; letter-spacing: var(--ls-h3); }
+.jv-legal .jv-prose > p { margin: 12px 0 0; }
+
+/* ---------- Round 3: hero actions, headings, eyebrows ---------- */
+/* One mobile hero-actions pattern on every page: the primary action full width, the secondary link left-aligned beneath. */
+@media (max-width: 639px) {
+  :is(.jv-hero-actions, .jv-page-actions, .cg-hero-links, .wt-hero-actions) { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+  :is(.jv-hero-actions, .jv-page-actions, .cg-hero-links, .wt-hero-actions) > .jv-link { align-self: flex-start; }
+}
+/* The product name is never split across lines. */
+.jv-nb, .jv-prod { white-space: nowrap; }
+/* Prices and numbers set in lining tabular figures. */
+:is(.pricing-amount, .pricing-unit, .loop-subscription-billing [class*="price"], .loop-subscription-billing [class*="amount"]) { font-variant-numeric: lining-nums tabular-nums; }
+/* Running text holds a readable measure. */
+:is(.pricing-note, .pricing-trust, .product-plan-note) { max-width: 62ch; }
+/* Section eyebrows are for sections whose h2 needs context; FAQ, contact and legal heads lead with the heading alone. */
+:is(.product-page--faq, .product-page--contact, .product-page--privacy, .product-page--terms, .product-page--refund) .jv-page-head > .jv-caption { display: none; }
+/* Entrance on the page heads that had none; legal and form bodies stay static on purpose (they are read, not browsed). */
+
+/* Round 3: 44px targets for secondary links. */
+@media (min-width: 1024px) and (hover: hover) { .jv-footer-col a { min-height: 44px; } }
+:is(.hc-breadcrumb, .cg-breadcrumb, .wt-breadcrumb) a { min-width: 44px; justify-content: center; }
+.jv-footer-col a { padding-inline: 4px; margin-inline: -4px; }
+@media (min-width: 1024px) { .jv-toc a { min-height: 44px; } }
+
+/* ---------- Round 4 ---------- */
+/* Header: 44px targets on desktop too (the pill keeps its 64px height). */
+@media (min-width: 960px) {
+  .jv-header-nav > a { min-height: 44px; }
+  .jv-header .jv-btn--sm { --jv-btn-h: 44px; }
+}
+
+/* Closing bar: heading, one line and the actions in one tinted row. The dark band stays on the home page and the Automated Job Loop page. */
+.jv-cta-bar { display: grid; gap: 24px; width: var(--shell); margin: var(--gap-band) auto 64px; padding: 32px var(--band-pad-x); border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-brand-tint)); }
+.jv-cta-bar-copy h2 { margin: 0; max-width: 20ch; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.15; letter-spacing: var(--ls-h2); text-wrap: balance; }
+.jv-cta-bar-copy p { margin: 8px 0 0; max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.5; text-wrap: pretty; }
+.jv-cta-bar-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+@media (max-width: 639px) { .jv-cta-bar-actions .jv-btn { width: 100%; } }
+@media (min-width: 640px) { .jv-cta-bar-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 24px; } }
+@media (min-width: 1024px) {
+  .jv-cta-bar { grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 48px; padding: 40px var(--band-pad-x); }
+}
+
+/* Brand device: the run trail. Each section's top hairline starts with a short lime-to-green segment, the same trail
+   the week strip and the loop steps use. Static, so it never competes with the content. */
+.jv-section { position: relative; }
+.jv-section::before { content: ""; position: absolute; top: -1px; left: 0; width: 72px; height: 2px; background: linear-gradient(90deg, var(--jv-signal), var(--jv-brand)); border-radius: 2px; }
+
+/* Utility pages (contact): the form and its note share one top edge. */
+.jv-contact-grid { display: grid; gap: 32px; }
+.jv-contact-grid .guest-support { min-width: 0; }
+.jv-contact-grid .jv-notecard { align-self: start; }
+@media (min-width: 1024px) {
+  .jv-contact-grid { grid-template-columns: minmax(0, 1fr) 340px; column-gap: 96px; align-items: start; }
+  .jv-contact-grid .jv-notecard { position: sticky; top: 112px; }
+}
+.product-page--contact .jv-page-head { padding-bottom: 32px; }
+/* Privacy: from 1024px the at-a-glance card sits beside the heading (three facts stacked); below that it is a full-width row. */
+@media (max-width: 1023px) {
+  .product-page--privacy .jv-page-head--split { grid-template-columns: minmax(0, 1fr); }
+  .product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / -1; }
+  .product-page--privacy .jv-page-head--split > .jv-page-visual { grid-column: 1 / -1; grid-row: auto; margin-top: 32px; max-width: none; }
+  .product-page--privacy .jv-page-visual .jv-notecard { max-width: none; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .product-page--privacy .jv-notecard ol { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
+}
+.jv-notecard li { align-content: start; }
+.product-page--privacy .jv-page-head { padding-bottom: 40px; }
+/* Typography: breadcrumb is one style (mono, 12px); lead is one size and measure on every page. */
+.hc-breadcrumb { font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
+.hc-breadcrumb a { color: var(--jv-brand); }
+.walkthroughs-page .wt-hero > p:not(.wt-eyebrow), .jv-lead { max-width: 31em; font-size: var(--t-lead); line-height: 1.5; }
+/* Notes and fine print hold a readable measure and a 14px floor where they carry meaning. */
+:is(.pricing-note, .pricing-trust, .product-plan-note, .cg-note, .guest-support-fine, .wt-format-note) { max-width: 62ch; font-size: var(--t-small); line-height: 1.5; }
+.pricing-trust svg { margin-top: 3px; }
+.pricing-trust li { align-items: flex-start; }
+
+/* Brand device, part two: the dot field. A faint green dot grid fades out from behind the product card on every hero that has one
+   (CSS only, no asset weight). It sits with the orbit ring and the run trail as the site's one visual language. */
+@media (min-width: 1024px) {
+  .jv-home .jv-hero-visual, .jv-page-head--split > .jv-page-visual, .audience-hero { position: relative; isolation: isolate; }
+  .jv-home .jv-hero-visual::before, .jv-page-head--split > .jv-page-visual::before, .audience-hero::before { content: ""; position: absolute; inset: -56px -48px; z-index: -1; pointer-events: none; background: radial-gradient(circle, rgb(var(--jv-brand-rgb) / .26) 1px, transparent 1.6px) 0 0 / 22px 22px; -webkit-mask-image: radial-gradient(closest-side, #000 25%, transparent 100%); mask-image: radial-gradient(closest-side, #000 25%, transparent 100%); }
+  .audience-hero::before { inset: -16px -24px 8px auto; width: 48%; }
+}
+/* One section rhythm: 48px on phones, 72px on tablets, 96px on desktop; the band after a section adds no second padding. */
+.jv-section { padding-block: 48px; }
+@media (min-width: 640px) { .jv-section { padding-block: 72px; } }
+@media (min-width: 1024px) { .jv-section { padding-block: 96px; } }
+.jv-page + :is(.jv-cta, .jv-cta-bar), .jv-section + :is(.jv-cta, .jv-cta-bar) { margin-top: var(--gap-band); }
+/* Explainer heads: the product card spans a spare row, so the heading never stretches away from its lead. */
+@media (min-width: 1024px) {
+  .jv-page-head--split { grid-template-rows: repeat(4, auto) 1fr; }
+  .jv-page-head--split > .jv-page-visual { grid-row: 1 / span 5; }
+  .product-page--about .product-main-content { border-top: 1px solid var(--jv-line); }
+}
+/* On the full-width pages the trail starts on the content edge, not the viewport edge. */
+.jv-home .jv-section::before { left: var(--gutter); }
+@media (min-width: 1024px) { .jv-home .jv-section::before { left: calc(50% - var(--shell) / 2 + var(--band-pad-x)); } }
+.product-page--about .product-main-content { padding-top: 56px; }
+
+/* Type floor: 13px is the smallest sans size anywhere; anything a visitor must read or act on is 14px or more. */
+.guest-support form > p, .guest-support-fine { font-size: var(--t-small); line-height: 1.5; }
+.pricing-details > p, .pricing-note, .pricing-trust { max-width: 62ch; }
+.pricing-trust li, .pricing-note { font-size: var(--t-small); line-height: 1.5; }
+.career-guides .cg-public-note, .career-guides .cg-library-heading > p { font-size: var(--t-small); max-width: 62ch; }
+.walkthroughs-page :is(.wt-hero, .wt-player, .wt-recorded, .wt-instructions, .wt-context) p:not(.wt-eyebrow):not(.wt-demo *) { font-size: var(--t-body-sm); line-height: 1.55; max-width: 68ch; }
+/* One heading step per level: h3 never exceeds the h2 above it, card titles are 20-24px, and per-page tracking overrides are gone. */
+.career-guides h2, .walkthroughs-page h2 { letter-spacing: var(--ls-h2); }
+
+/* Eyebrows are for section openers and the home hero; utility headings (walkthroughs, guides, help) lead with the heading alone. */
+.walkthroughs-page .wt-hero > .wt-eyebrow, .career-guides .cg-hero > .cg-eyebrow, .career-guides .cg-library-heading .cg-eyebrow, .audience-path .jv-head > .jv-caption { display: none; }
+/* Tonal range: one tinted panel on the long pages (the passes on pricing, the workflow on the audience pages), from existing tokens only. */
+.jv-section.pricing-passes, .jv-section.audience-features { margin-top: 48px; padding-inline: var(--band-pad-x); border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--jv-bg-subtle), #fff 70%); }
+.jv-section.pricing-passes::before, .jv-section.audience-features::before { left: 24px; }
+@media (min-width: 1024px) { .jv-section.pricing-passes, .jv-section.audience-features { padding-block: 72px; } }
+
+
+/* ---------- Round 5 ---------- */
+/* Panels and dark bands carry no run-trail rule: it would straddle a rounded edge or peek out under a filled band. */
+.jv-section.pricing-passes::before, .jv-section.audience-features::before, .jv-dark + .jv-section::before, .jv-dark + .jv-section--flat::before { display: none; }
+.jv-section.pricing-passes { padding-top: 56px; }
+/* Header pill: opaque enough that it never turns grey over a forest band. */
+@media (min-width: 960px) {
+  .jv-header-inner { background: rgb(255 255 255 / .96); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+}
+/* Reflow: the product name may wrap on narrow phones (WCAG 1.4.10 at 320px). */
+@media (max-width: 359px) { .jv-nb, .jv-prod { white-space: normal; } .jv-page-title .jv-nb { white-space: normal; } }
+/* Text links in the header and footer, and small controls, keep 44px targets. */
+.jv-header-nav > a, .jv-footer-bottom nav a { min-width: 44px; justify-content: center; }
+.jv-toc details > summary { min-height: 44px; }
+@media (min-width: 1024px) { .jv-toc details > summary { min-height: 44px; } }
+.wt-caption-toggle, .wt-restart { min-height: 44px; min-width: 44px; }
+/* Secondary and ghost buttons: a 3:1 edge against white (WCAG 1.4.11). */
+.jv-btn--secondary { border-color: var(--jv-line-input); }
+.jv-faq-toggle { border-color: var(--jv-line-strong); }
+/* Text spacing (WCAG 1.4.12): nothing in the account entry or audience switch clips when spacing is raised. */
+.audience-switch-full { overflow: visible; }
+
+/* Walkthroughs and help share the one hero lead and hero link sizes; the hero asides need the full width. */
+.walkthroughs-page .wt-hero > p:not(.wt-eyebrow):not(.wt-demo *) { max-width: 31em; font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); color: var(--jv-ink-2); }
+.help-center .hc-hero.jv-aside-grid { max-width: none; }
+.help-center .hc-hero-actions .hc-text-link, .help-center .hc-hero-actions .hc-text-link span { font-size: var(--t-body-sm); font-weight: var(--fw-semi); }
+@media (max-width: 1023px) { .jv-aside-grid > .jv-aside-slot { display: none; } }
+
+/* ---------- Round 5: closing bands ---------- */
+/* One soft light behind the right-hand card; no stripe along the top edge. */
+.jv-cta { background: radial-gradient(60% 90% at 84% 55%, rgb(var(--jv-link-on-dark-rgb) / .12), transparent 70%), var(--jv-glow), var(--jv-forest); }
+.jv-cta--page h2 { max-width: 11em; font-size: var(--t-h2); }
+.jv-cta--page { padding-block: 64px; }
+@media (min-width: 640px) { .jv-cta--page { padding-block: 80px; } }
+@media (min-width: 1024px) { .jv-cta--page { padding-block: 96px; } .jv-cta--visual { align-items: center; } .jv-cta--visual .jv-cta-inner { grid-column: 1 / span 7; } }
+/* The quiet bar for utility pages: a heading that sits on one or two balanced lines, with room before its line of copy. */
+.jv-cta-bar-copy h2 { max-width: none; font-size: var(--t-h2-panel); line-height: 1.12; }
+.jv-cta-bar-copy p { margin-top: 12px; max-width: 48ch; }
+.jv-cta-bar-copy { max-width: 40em; }
+/* The dark section on the Automated Job Loop page centres its copy against the card. */
+@media (min-width: 1024px) { .loop-overview .lo-private-grid { align-items: center; } }
+
+.help-center .hc-hero-actions .jv-btn--primary { color: #fff; text-decoration: none; }
+.help-center .hc-hero-actions .jv-btn--primary:hover { color: #fff; }
+
+/* Accordions open with the opacity and transform fade above on every browser (no block-size animation, so nothing below the panel reflows). */
+/* Menu icon: the bars and the close mark cross-fade and turn. */
+.jv-header[data-menu-open="true"] .jv-menu-toggle svg { animation: jv-icon-in 200ms var(--ease-out) both; }
+@keyframes jv-icon-in { from { opacity: 0; transform: rotate(-45deg) scale(.8); } }
+@media (prefers-reduced-motion: reduce) { .jv-menu-toggle svg { animation: none; } }
+/* Hover that needs a pointer: touch screens never get a stuck hover. */
+@media (hover: none) { .hc-start > a:hover { transform: none; box-shadow: var(--sh-1); } }
+
+/* ---------- Round 6 ---------- */
+/* One breadcrumb on every utility page: quiet sans, muted separators. */
+@media screen {
+  .help-center .hc-breadcrumb, .career-guides .cg-breadcrumb { font-family: var(--font-sans); font-size: var(--t-sm); letter-spacing: 0; text-transform: none; color: var(--jv-ink-3); }
+  .help-center .hc-breadcrumb a, .career-guides .cg-breadcrumb a { font-weight: var(--fw-medium); }
+  .help-center .hc-breadcrumb > span[aria-hidden], .career-guides .cg-breadcrumb > span[aria-hidden] { color: var(--jv-line-strong); }
+}
+/* Two short sentences in a heading each get their own line. */
+.jv-line { display: block; }
+
+/* One divider system: every section rule and its lime-to-green lead-in stops at the content edge (never the viewport edge). */
+.jv-home .jv-section, .loop-overview .lo-section { border-top: 0; }
+.jv-home .jv-section::after, .loop-overview .lo-section::after { content: ""; position: absolute; top: 0; left: calc(50% - var(--shell) / 2); width: var(--shell); height: 1px; background: var(--jv-line); pointer-events: none; }
+@media (min-width: 1024px) { .jv-home .jv-section::after, .loop-overview .lo-section::after { left: calc(50% - var(--shell) / 2 + var(--band-pad-x)); width: calc(var(--shell) - 2 * var(--band-pad-x)); } }
+.jv-home .jv-section::before { z-index: 1; }
+.jv-dark + .jv-section::after, .jv-dark + .lo-section::after { display: none; }
+
+/* One closing-band heading size on every page. */
+.jv-cta h2, .jv-cta--page h2 { font-size: var(--t-h2); }
+.jv-cta:not(.jv-cta--visual) .jv-cta-inner { max-width: 720px; }
+@media (min-width: 1024px) { .jv-cta:not(.jv-cta--visual) .jv-cta-inner { grid-column: 1 / span 8; max-width: none; } }
+
+/* Explainer timeline beside its heading. */
+@media (min-width: 1024px) { .jv-split--timeline { align-items: start; } .jv-split--timeline > .jv-head { margin-bottom: 0; position: sticky; top: 112px; } }
+.jv-split--timeline > .jv-head > p:not(.jv-caption) { max-width: 28em; }
+
+/* About: three story blocks in the eyebrow and large-heading rhythm. */
+.product-about { display: block; padding-bottom: 0; }
+.product-page--about .product-main-content { padding-top: 0; border-top: 0; }
+.jv-story { display: grid; gap: 16px; padding: 48px 0; border-top: 1px solid var(--jv-line); }
+.jv-story:first-child { border-top: 0; }
+.jv-story > .jv-caption { margin: 0; }
+.jv-story-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: var(--ls-display); text-wrap: balance; }
+.jv-story-body p { margin: 0; max-width: 34em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); text-wrap: pretty; }
+.jv-story .product-about-principles { margin-top: 24px; }
+@media (min-width: 1024px) {
+  .jv-story { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; padding: 80px 0; }
+  .jv-story > .jv-caption { grid-column: 1 / span 6; grid-row: 1; }
+  .jv-story-title { grid-column: 1 / span 6; grid-row: 2; }
+  .jv-story-body { grid-column: 8 / span 5; grid-row: 1 / span 2; align-self: center; }
+  .jv-story .product-about-principles { grid-column: 1 / -1; grid-row: 3; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 32px; }
+  .jv-story .product-about-principles > li { grid-row: auto; grid-template-rows: none; }
+}
+
+/* Selects: one control, the same height, radius, border and chevron as the text inputs beside them. */
+main :is(.loop-price-market, .guest-support, .cg-field, .ap-phone-field, .ap-field)[class] select { appearance: none; -webkit-appearance: none; width: 100%; min-height: 48px; padding: 0 40px 0 14px; color: var(--jv-ink); background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233B4A43' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center / 16px 16px; border: 1px solid var(--jv-line-input); border-radius: var(--r-sm); font-size: var(--t-small); font-weight: var(--fw-regular); line-height: 1.2; text-overflow: ellipsis; }
+main :is(.loop-price-market, .guest-support, .cg-field, .ap-phone-field, .ap-field)[class] select:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; border-color: var(--jv-brand); }
+main .ap-phone-field[class] select { padding-right: 34px; background-position: right 10px center; }
+.product-page .loop-price-market[class] { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; }
+.product-page .loop-price-market[class] label { font-size: var(--t-small); color: var(--jv-ink); }
+
+/* Pricing */
+.pricing-billed-line { margin: 12px 0 0; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.5; font-variant-numeric: tabular-nums; }
+.pricing-flag { box-shadow: inset 0 0 0 1px var(--jv-forest); }
+.pricing-card--featured .pricing-flag { box-shadow: inset 0 0 0 1px var(--jv-forest), 0 0 0 4px #fff; }
+.pricing-tier--featured { border-color: var(--jv-brand); box-shadow: 0 0 0 1px var(--jv-brand), var(--sh-3); }
+.pricing-tier--featured > .jv-caption { color: var(--jv-brand-ink); font-weight: 600; }
+@media (max-width: 639px) {
+  .pricing-includes { display: grid; gap: 0; padding: 8px 0; }
+  .pricing-includes li { min-height: 36px; }
+}
+.pricing-passes .jv-section-title--panel, .pricing-passes-title { font-size: var(--t-h3); }
+.pricing-passes-disclosure > summary { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 56px; list-style: none; cursor: pointer; border-radius: var(--r-sm); }
+.pricing-passes-disclosure > summary::-webkit-details-marker { display: none; }
+.pricing-passes-disclosure > summary::after { content: "+"; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line-strong); border-radius: 50%; color: var(--jv-ink); font-size: 18px; line-height: 1; }
+.pricing-passes-disclosure[open] > summary::after { content: "\2212"; background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; }
+.pricing-passes-disclosure > summary:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 4px; }
+.pricing-passes-lead { display: grid; gap: 12px; }
+.pricing-passes-title { display: block; color: var(--jv-ink); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: var(--ls-h3); text-wrap: balance; }
+.pricing-passes-sub { max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.5; }
+.pricing-passes-body { padding-top: 32px; }
+.pricing-passes-body .pricing-note--lead { margin-top: 0; }
+
+/* Footer, phones: Company is a third full-width block in the same two-column grid and 44px rows as Product and Resources. */
+/* The loop's rings are the home band's own motif; inner closing bands carry a page-specific card instead. */
+.jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])) { padding-block: 20px; }
+.jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 40px; }
+/* Header and footer text links: 44px wide hit areas, not only 44px tall. */
+.jv-header .jv-header-nav > a, .jv-footer-bottom nav a { min-width: 44px; justify-content: center; }
+/* The open mobile menu's close button keeps its focus ring inside the viewport edge. */
+.jv-menu-toggle:focus-visible { outline-offset: -2px; }
+/* Legal pages: a 46rem reading column and a 260px index share the content width; no dead gap between them. */
+@media (min-width: 1024px) {
+  .jv-legal { grid-template-columns: minmax(0, 46rem) 260px; column-gap: 64px; justify-content: space-between; }
+  .jv-legal .jv-prose { max-width: none; }
+  .jv-legal .jv-prose > p { max-width: 46rem; font-size: 1.0625rem; color: var(--jv-ink); }
+  .jv-toc a[aria-current="true"], .jv-toc a:focus-visible { color: var(--jv-brand); }
+}
+
+/* ---------- Round 7 ---------- */
+/* Cards inside a closing band keep card typography (the band's lead style must not reach them). */
+.jv-cta .pc-card p, .jv-cta .pc-card .pc-line-box p { max-width: none; margin: 0; color: var(--jv-card-ink); font-size: var(--t-small); line-height: 1.45; letter-spacing: 0; }
+.jv-cta .pc-card .pc-source-text span, .jv-cta .pc-card .pc-done-text span { color: var(--jv-card-ink-3); }
+
+/* Heading weights: one token per level (card titles keep --fw-semi). */
+:root { --fw-h1: 540; --fw-h2: 540; --fw-h3: 540; --fw-heading-on-dark: 540; --t-legal-h2: 1.5rem; }
+.jv-legal .jv-prose > h2 { font-weight: var(--fw-h2); font-size: var(--t-legal-h2); }
+.pricing-details > summary { font-size: var(--t-body); font-weight: var(--fw-semi); }
+
+/* Legal and long-form pages: a 38rem measure (65 to 72 characters) for every paragraph and list item. */
+@media (min-width: 1024px) {
+  .jv-legal { grid-template-columns: minmax(0, 38rem) 260px; column-gap: 64px; justify-content: space-between; }
+  .jv-legal .jv-prose > p, .jv-legal .jv-prose li { max-width: 38rem; }
+  .product-page--privacy .jv-page-head--split { grid-template-columns: minmax(0, 1fr); }
+  .product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / -1; }
+  .product-page--privacy .jv-page-head--split > .jv-page-visual { grid-column: 1 / -1; grid-row: auto; margin-top: 32px; max-width: none; }
+  .product-page--privacy .jv-page-visual .jv-notecard { max-width: none; }
+  .product-page--privacy .jv-notecard ol { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
+}
+.jv-toc a { text-decoration: none; }
+.jv-toc a:hover { text-decoration: none; }
+.jv-toc a[aria-current="true"] { box-shadow: inset 2px 0 0 var(--jv-brand); padding-left: 12px; }
+
+/* About: all three principle columns share one top rule and baseline. */
+@media (min-width: 1024px) {
+  .product-about .product-about-principles { align-items: start; }
+  .product-about .product-about-principles > li, .jv-story .product-about-principles > li { border-top: 1px solid var(--jv-line-strong); padding-top: 24px; margin-top: 0; }
+  .product-about .product-about-principles > li > :first-child { margin-top: 0; }
+}
+
+/* Pricing: the one-time-passes card clears the rule below it. */
+.jv-section.pricing-passes { margin-bottom: 48px; }
+.jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])) { padding-block: 24px; }
+.jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 40px; }
+.pricing-billed-line { margin-top: 20px; }
+.pricing-outcome { margin: 10px 0 20px; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.5; }
+.pricing-card.jv-dark .pricing-outcome { color: var(--jv-on-dark-body); }
+
+/* Audience pages: the Compare / Reuse / Continue columns share baselines. */
+@media (min-width: 768px) {
+  .audience-features .jv-steps { grid-template-rows: auto auto 1fr; }
+  .audience-features .jv-steps > li { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; align-content: start; }
+}
+.jv-lead, .jv-hero-lead, .audience-copy .jv-lead, .jv-page-head .jv-lead { text-wrap: pretty; }
+.audience-check-copy h2, .jv-check-copy h2, .lo-dashboard h2 { text-wrap: balance; }
+
+/* Interaction states: every control eases at --dur-2 and presses at --dur-1. */
+:is(.hc-button, .hc-categories button, .hc-text-link, .hc-start > a, .wt-button, .wt-restart, .wt-task-toggle, .wt-caption-toggle, .wt-step-picker button, .wt-task-picker button, .ap-primary, .cg-primary, .cg-secondary) { transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out); }
+:is(.hc-button, .hc-categories button, .wt-button, .wt-restart, .wt-task-toggle, .wt-caption-toggle, .wt-step-picker button, .cg-primary, .cg-secondary):active:not(:disabled) { transform: scale(.98); }
+@media (prefers-reduced-motion: reduce) { :is(.hc-button, .hc-categories button, .wt-button, .wt-restart, .wt-task-toggle, .wt-caption-toggle, .wt-step-picker button, .cg-primary, .cg-secondary):active { transform: none; } }
+
+/* Focused controls clear the sticky header. */
+:is(a, button, input, select, textarea, summary, [tabindex]) { scroll-margin-top: 96px; }
+
+/* Small sentence copy is 13px or more; 12px stays for uppercase mono tags. */
+.pc-tag, .pc-chip, .jv-status { font-size: var(--t-sm); }
+.pricing-flag, .wt-demo-top > span:last-child { font-size: var(--t-sm); }
+
+/* Phones: block links get a 44px hit area. */
+@media (max-width: 767px) {
+  :is(.jv-related, .hc-related, .cg-hero-sub, .jv-boundary-links) a, .cg-help-link, .hc-top-link, .pricing-billed-line a, .wt-format-links a { display: inline-flex; align-items: center; min-height: 44px; }
+  .cg-card h3 a, .cg-card > a { min-height: 44px; }
+}
+
+/* Hero price note: the ad audience's main free and price signals read at body-small size in the secondary ink. */
+.jv-meta { color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.4; }
+.jv-dark .jv-meta { color: var(--jv-on-dark-body); }
+
+/* Reverse lockup: on forest the tile gets a mint hairline and the wordmark turns light. */
+.jv-dark .jv-brand-mark { box-shadow: inset 0 0 0 1px rgb(var(--jv-link-on-dark-rgb) / .5); }
+.jv-dark .jv-brand-name { color: var(--jv-on-dark-1); }
+
+/* The pricing closing band spans the content column (it lives inside the page shell, not beside it). */
+
+.product-page .jv-toc a, .product-page .jv-toc a:hover { text-decoration: none; }
+
+/* ---------- Round 8 ----------
+   Hypothesis: scores stalled because every page opened on the same pale card-on-wash hero, closed on a different band recipe,
+   and carried layered per-page overrides that left dead space (pricing, home, about). This block sets one rhythm for spacing,
+   one closing-band recipe, two forest hero treatments (/job-loop, /about) and one pass on target sizes. */
+
+/* Spacing rhythm: one value between stacked blocks on pricing. */
+.product-page--pricing .loop-subscription-billing { padding-bottom: 0; }
+.product-page--pricing .jv-section.pricing-passes { margin-top: 48px; margin-bottom: 40px; }
+.product-page--pricing .jv-page-head { padding-bottom: 32px; }
+@media (min-width: 1024px) { .product-page--pricing .jv-page-head { padding-bottom: 48px; } }
+.product-page--pricing .jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])) { padding-block: 28px; }
+.pricing-passes-disclosure > summary { align-items: flex-start; }
+.pricing-passes-disclosure > summary::after { margin-top: 2px; }
+.pricing-passes-prices { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 4px; color: var(--jv-ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums lining-nums; }
+.pricing-passes-prices strong { color: var(--jv-ink); font-weight: var(--fw-semi); }
+.product-proposed-grid .pricing-desc { margin: 12px 0 12px; }
+.product-proposed-grid .pricing-outcome { margin: 0 0 20px; text-wrap: balance; }
+@media (min-width: 1024px) { .product-proposed-grid .pricing-outcome { min-height: 3em; } }
+.pricing-free-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; margin-top: 20px; padding: 16px 20px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: var(--jv-bg-subtle); }
+.pricing-free-strip p { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 0; color: var(--jv-ink-2); font-size: var(--t-small); }
+.pricing-free-strip strong { color: var(--jv-ink); font-weight: var(--fw-semi); }
+.pricing-free-strip .jv-link { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* About: the three principle columns share rows (rule, label, heading, body), so nothing sits higher than its neighbour. */
+@media (min-width: 1024px) {
+  .jv-story .product-about-principles { grid-template-rows: auto auto 1fr; }
+  .jv-story .product-about-principles > li { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; align-content: start; border-top: 1px solid var(--jv-line-strong); padding-top: 24px; }
+  .jv-story .product-about-principles h3 { text-wrap: balance; }
+  .jv-story { align-items: start; }
+  .jv-story-body { align-self: start; padding-top: 8px; }
+}
+
+/* How it works: heading breaks in two lines, not three. */
+@media (min-width: 1024px) { .jv-split--timeline .jv-section-title { font-size: var(--t-h2-panel); text-wrap: balance; } }
+
+/* Forest hero: /job-loop and /about open on the dark band the rest of the site closes on (white card on forest, lime on one word). */
+.jv-h-signal { color: var(--jv-signal); }
+.loop-overview.jv-home .lo-loop-hero--forest { width: var(--shell); margin: 12px auto 0; padding: 40px var(--band-pad-x); border-radius: var(--r-lg); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-shell { width: auto; padding: 0; }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-eyebrow { color: var(--jv-on-dark-2); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { color: #fff; font-weight: var(--fw-heading-on-dark); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-lead { color: var(--jv-on-dark-body); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-orbit { --ring: rgb(var(--jv-link-on-dark-rgb) / .3); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-btn--primary { color: var(--jv-forest); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-link { color: var(--jv-on-dark-link); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual::before, .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual::after { display: none; }
+.loop-overview.jv-home .lo-loop-hero--forest .pc-card { box-shadow: 0 40px 90px -24px rgb(var(--jv-ink-rgb) / .55), 0 0 0 1px rgb(255 255 255 / .06); }
+@media (min-width: 640px) { .loop-overview.jv-home .lo-loop-hero--forest { padding: 56px var(--band-pad-x); } }
+@media (min-width: 1024px) {
+  .loop-overview.jv-home .lo-loop-hero--forest { padding: 72px var(--band-pad-x); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual { min-height: 0; }
+  /* The product surface docks to the band's right edge, like an app window opened from the side, with every label intact. */
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock { justify-items: start; margin-right: calc(-1 * var(--band-pad-x)); width: calc(100% + var(--band-pad-x)); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock .pc-card { max-width: none; width: 100%; border-radius: var(--r-md) 0 0 var(--r-md); }
+}
+@media (max-width: 639px) { .loop-overview.jv-home .lo-loop-hero .jv-hero-cta { width: 100%; } }
+.loop-overview.jv-home .lo-loop-hero { padding-bottom: 40px; }
+.loop-overview.jv-home .lo-loop-hero--forest + .lo-section { border-top: 0; }
+
+.product-page .jv-page-head--forest { margin-top: 12px; padding: 48px var(--band-pad-x); border-radius: var(--r-lg); }
+.jv-page-head--forest > .jv-caption { color: var(--jv-on-dark-2); }
+.jv-page-head--forest .jv-page-title { color: #fff; font-weight: var(--fw-heading-on-dark); }
+.jv-page-head--forest .jv-lead { color: var(--jv-on-dark-body); }
+.jv-page-head--forest .jv-page-visual::before { display: none; }
+.jv-page-head--forest .bc-mark { --ring: rgb(var(--jv-link-on-dark-rgb) / .3); }
+.jv-page-head--forest .bc-mark-core { color: #fff; }
+.jv-page-head--forest .bc-mark-core span { color: var(--jv-on-dark-2); }
+@media (min-width: 640px) { .product-page .jv-page-head--forest { padding: 64px var(--band-pad-x); } }
+@media (min-width: 1024px) { .product-page .jv-page-head--forest { margin-inline: calc(-1 * var(--band-pad-x)); padding: 72px var(--band-pad-x); } .product-page .jv-page-head--forest.jv-page-head--split { align-items: center; } }
+
+/* Closing bands: one recipe. Copy and buttons at the left; an example card or the faint ring at the right; 420-500px tall. */
+.jv-cta--page { padding-block: 64px; }
+@media (min-width: 640px) { .jv-cta--page { padding-block: 80px; } }
+@media (min-width: 1024px) { .jv-cta--page { padding-block: 88px; } }
+.product-page .jv-cta, .audience-page .jv-cta, .loop-overview .jv-cta, .jv-home .jv-cta { margin-bottom: 96px; }
+@media (max-width: 639px) { .product-page .jv-cta, .audience-page .jv-cta, .loop-overview .jv-cta, .jv-home .jv-cta { margin-bottom: 64px; } }
+:is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) { margin-bottom: 40px; }
+@media (min-width: 1024px) { :is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) { padding-block: 64px; } }
+/* Action stacks share one left edge: button and links start at the same x. */
+:is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) > div:last-child { justify-items: start; align-items: flex-start; }
+.help-center .hc-further.jv-dark .hc-button--primary { margin-bottom: 8px; }
+.jv-cta .jv-cta-visual .pc-card { max-width: 360px; }
+
+/* Contact: the form is one bordered card beside the receipt and support cards. */
+.jv-contact-grid .guest-support { padding: 28px; border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: #fff; box-shadow: var(--sh-2); }
+.jv-contact-grid .guest-support > h2 { font-size: var(--t-h4); letter-spacing: var(--ls-h3); }
+.jv-contact-grid .guest-support > p { font-size: var(--t-body-sm); }
+.jv-contact-grid .guest-support form { margin-top: 20px; }
+.jv-contact-rail { display: grid; gap: 16px; align-content: start; min-width: 0; }
+@media (min-width: 1024px) { .jv-contact-rail { position: sticky; top: 112px; } .jv-contact-grid .jv-contact-rail .jv-notecard { position: static; } .jv-contact-grid { column-gap: 48px; } }
+.jv-notecard--links ul { display: grid; margin: 12px 0 0; padding: 0; list-style: none; }
+.jv-notecard--links li { border-top: 1px solid var(--jv-line); }
+.jv-notecard--links .jv-link { display: flex; align-items: center; justify-content: space-between; min-height: 48px; width: 100%; }
+@media (max-width: 639px) { .jv-contact-grid .guest-support { padding: 20px; } }
+
+/* Home: the hero hands over to the proof strip and the forest band without empty bands. */
+@media (min-width: 1024px) {
+  .jv-home .jv-hero { padding: 24px 0 28px; }
+  .jv-home .jv-hero-visual { min-height: 500px; }
+  .jv-home .jv-hero-actions { margin-top: 28px; }
+}
+.jv-home .jv-hero-note .jv-meta { color: var(--jv-ink-2); font-size: var(--t-small); }
+@media (min-width: 640px) { .jv-home .jv-hero-note .jv-meta { font-size: var(--t-body-sm); } }
+.jv-home .jv-loop-band { margin-top: 32px; }
+.jv-home .jv-boundary-links { align-items: center; gap: 8px 28px; }
+.jv-home .jv-check .jv-btn--secondary { background: var(--jv-brand-tint); border-color: rgb(var(--jv-brand-rgb) / .28); color: var(--jv-brand-ink); }
+@media (hover: hover) { .jv-home .jv-check .jv-btn--secondary:hover { background: #fff; border-color: var(--jv-brand); } }
+
+/* Target sizes: 44px at least for footer links and standalone text links; running text keeps its line box. */
+.jv-footer-col a { min-width: 44px; min-height: 44px; }
+@media (min-width: 1024px) and (hover: hover) { .jv-footer-col a { min-height: 44px; } }
+.jv-footer-bottom nav a { min-width: 44px; justify-content: center; }
+.loop-overview .jv-faq details > div a, .loop-overview .lo-lede a { display: inline-block; padding-block: 12px; margin-block: -12px; }
+.career-guides .cg-card h3 a { display: inline-flex; min-height: 44px; align-items: center; }
+
+/* Type: one reading size per template class (long-form 17, UI 16, card 15) and one card-title style. */
+:root { --t-prose: 1.0625rem; --fw-card: 540; }
+.jv-steps h3, .bc-timeline h3, .cg-card h3, .jv-home .jv-control-copy h3 { font-weight: var(--fw-card); letter-spacing: var(--ls-card); }
+.hc-topic > details :is(.hc-topic-summary, .hc-steps li > *, .hc-note p, .hc-field-help dd) { max-width: 62ch; }
+.help-center .hc-topic .hc-steps li > *, .help-center .hc-topic .hc-note > p, .help-center .hc-topic-summary { max-width: 62ch; }
+.help-center .hc-topic > details:not([open]) h2 { font-size: var(--t-card-title); letter-spacing: var(--ls-card); }
+.help-center .hc-topic > details:not([open]) > summary { min-height: 64px; }
+.jv-account .ap-story-free { font-family: var(--font-sans); letter-spacing: 0; white-space: nowrap; }
+@media (max-width: 760px) {
+  .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { font-size: var(--t-body-sm); }
+  .jv-account--standalone .ap-story-free { font-family: var(--font-sans); font-size: var(--t-sm); letter-spacing: 0; }
+}
+@media (min-width: 761px) { .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { font-size: var(--t-body-sm); } }
+/* Real-content labels are 13px at least on phones; 12px stays for decorative mock chrome. */
+@media (max-width: 639px) { .jv-footer-bottom, .jv-footer-col-title, .jv-footer-note, .jv-caption { font-size: var(--t-sm); } }
+
+/* Walkthroughs: the tour and the next-click column share one white surface; the column stays in view beside the tall tour. */
+@media (min-width: 901px) {
+  .walkthroughs-page .wt-storyboard { background: #fff; }
+  .walkthroughs-page .wt-instructions { position: sticky; top: 112px; align-self: start; }
+}
+.walkthroughs-page .wt-step-caption { padding-inline: 0; background: none; border: 0; }
+/* Guides: a last row that does not fill the grid stretches its final card instead of leaving a hole. */
+@media (min-width: 1001px) {
+  .career-guides .cg-grid > :last-child:nth-child(3n + 1) { grid-column: 1 / -1; }
+  .career-guides .cg-grid > :last-child:nth-child(3n + 2) { grid-column: span 2; }
+}
+@media (min-width: 641px) and (max-width: 1000px) { .career-guides .cg-grid > :last-child:nth-child(2n + 1) { grid-column: 1 / -1; } }
+@media (max-width: 479px) { .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: 2rem; } }
+.jv-related a, .hc-related a { min-width: 44px; justify-content: center; }
+
+/* ---------- Round 9: footer ---------- */
+/* Four short columns (Product, Resources, Who it's for, Company) in a 2x2 grid on phones; tighter rows; column titles are 12px mono eyebrows, not headings. */
+.jv-footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 24px; }
+.jv-footer-col-title { margin: 0 0 6px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; letter-spacing: .06em; line-height: 1rem; text-transform: uppercase; }
+@media (max-width: 639px) { .jv-footer-col-title { font-size: var(--t-xs); } }
+@media (min-width: 640px) { .jv-footer-links { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 20px; } }
+@media (min-width: 1024px) {
+  .jv-footer-brand { grid-column: 1 / span 4; }
+  .jv-footer-links { grid-column: 6 / span 7; }
+}
+/* The close: an oversized, low-contrast wordmark cropped by the bottom edge. Decorative only. */
+.jv-footer-mark { container-type: inline-size; width: var(--shell); margin: 0 auto; aspect-ratio: 6.2 / 1; overflow: hidden; pointer-events: none; user-select: none; }
+.jv-footer-mark > span { display: block; font-family: "Jobvance Brand", var(--font-sans); font-weight: 700; font-size: 18cqw; letter-spacing: -.045em; line-height: .86; white-space: nowrap; color: rgb(var(--jv-brand-rgb) / .09); text-align: center; }
+/* Drawn with pseudo-elements: it is decoration, so it is not text for assistive tech or contrast checks. */
+.jv-footer-mark > span::before { content: "jobvance"; }
+.jv-footer-mark > span::after { content: "."; color: rgb(var(--jv-brand-rgb) / .22); }
+.jv-footer-compact .jv-footer-mark { display: none; }
+@supports not (font-size: 1cqw) { .jv-footer-mark > span { font-size: 17vw; } }
+
+/* ---------- Round 9: the ad landing and sign-in screens ---------- */
+/* On the pages that already are the start, the header is the mark and "Sign in" only (visible on phones too): no site navigation next to the form. */
+.jv-header[data-entry="true"] .jv-header-inner { display: flex; justify-content: space-between; }
+.jv-header[data-entry="true"] .jv-header-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.jv-header[data-entry="true"] :is(.jv-header-nav, .jv-menu-toggle, .jv-mobile-panel, .jv-menu-scrim, .jv-header-start) { display: none; }
+.jv-mobile-who { display: grid; padding: 20px 0 8px; }
+.jv-mobile-who > p { margin: 0 0 4px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; letter-spacing: .06em; line-height: 1rem; text-transform: uppercase; }
+.jv-mobile-who > a { display: flex; align-items: center; min-height: 48px; color: var(--jv-ink-2); font-size: 17px; font-weight: 500; letter-spacing: -.01em; text-decoration: none; }
+.jv-mobile-who > a[aria-current="page"] { color: var(--jv-brand); }
+/* An arrow drawn as an icon (the mono and sans subsets carry no arrow glyph, so a character would fall back to another face). */
+.jv-inline-arrow { display: inline-block; width: 1em; height: 1em; margin-inline: .3em; vertical-align: -.14em; flex: none; }
+
+/* ---------- Round 9: page compositions, rhythm and targets ---------- */
+/* Rails end at the closing band instead of running on into an empty framed strip above the footer. */
+.jv-rails, .jv-home { --rail-bottom: 0px; }
+:is(.product-page--how, .product-page--about, .product-page--pricing, .product-page--faq, .product-page--contact, .product-page--privacy, .audience-page, .loop-overview, .jv-home) { --rail-bottom: 96px; }
+:is(.help-center, .walkthroughs-page, .career-guides).jv-rails { --rail-bottom: 40px; }
+@media (min-width: 1024px) {
+  .jv-rails::before, .jv-rails::after, .jv-home::before, .jv-home::after { bottom: var(--rail-bottom); }
+}
+
+/* /about and /pricing open on a forest stage; the about rows keep one eyebrow-to-heading gap. */
+.product-page--pricing .jv-page-head--forest .pc-aside { box-shadow: 0 40px 90px -24px rgb(var(--jv-ink-rgb) / .55), 0 0 0 1px rgb(255 255 255 / .06); }
+.product-page--pricing .jv-page-head--forest .jv-lead { max-width: 34em; }
+@media (min-width: 1024px) {
+  .jv-story { grid-template-rows: auto 1fr; row-gap: 16px; }
+  .jv-story > .jv-caption { grid-row: 1; align-self: end; }
+  .jv-story-title { grid-row: 2; align-self: start; }
+  .jv-story-body { grid-row: 2; align-self: start; padding-top: .35em; }
+  .product-page--about .jv-page-head--forest.jv-page-head--split { padding-block: 64px; }
+}
+
+/* /faq and /help: a centred, search-first opening with no card repeating the list below. */
+.jv-page-head--center { max-width: 820px; margin-inline: auto; text-align: center; }
+.jv-page-head--center .jv-lead { margin-inline: auto; }
+.jv-page-head--center .jv-page-actions { justify-content: center; }
+.hc-hero { margin-inline: auto; text-align: center; }
+.help-center .hc-hero > p:not(.hc-eyebrow) { margin-inline: auto; }
+.hc-hero .hc-hero-actions { justify-content: center; }
+.help-center .hc-hero { padding-bottom: 40px; }
+@media (min-width: 1024px) { .help-center .hc-hero { padding-top: 8px; } }
+
+/* /walkthroughs: a dark split panel (copy at the left, the captioned-video card at the right). */
+.walkthroughs-page .wt-hero.jv-dark { width: auto; margin: 12px 0 32px; padding: 40px 24px; border-radius: var(--r-lg); }
+.walkthroughs-page .wt-hero.jv-dark h1 { color: #fff; font-weight: var(--fw-heading-on-dark); }
+.walkthroughs-page .wt-hero.jv-dark > p:not(.wt-eyebrow) { color: var(--jv-on-dark-body); }
+.walkthroughs-page .wt-hero.jv-dark .wt-eyebrow { color: var(--jv-on-dark-2); }
+.walkthroughs-page .wt-hero.jv-dark .jv-link { color: var(--jv-on-dark-link); }
+.walkthroughs-page .wt-hero.jv-dark a.jv-btn--primary { background: #fff; border-color: #fff; color: var(--jv-forest) !important; }
+.walkthroughs-page .wt-hero.jv-dark .jv-aside-slot { display: none; }
+@media (min-width: 640px) { .walkthroughs-page .wt-hero.jv-dark { padding: 56px var(--band-pad-x); } }
+@media (min-width: 1024px) {
+  .walkthroughs-page .wt-hero.jv-dark { margin-inline: calc(-1 * var(--band-pad-x)); padding: 64px var(--band-pad-x); }
+  .walkthroughs-page .wt-hero.jv-dark .jv-aside-slot { display: block; right: var(--band-pad-x); }
+}
+/* One shared top rule for the text-first heroes: the first line sits at the same offset, and the card centres on the text block. */
+.jv-aside-grid > .jv-aside-slot { top: 50%; }
+/* Walkthrough tour: a calmer stack. One white card for the mock UI (the outer frame drops its border and fill), a shorter measure, and two-up step controls on phones. */
+.walkthroughs-page .wt-storyboard { border: 0; background: none; padding: 24px 18px; box-shadow: none; }
+.walkthroughs-page :is(.wt-player > .wt-format-note, .wt-instructions p, .wt-transcript p, .wt-transcript li, .wt-controls > p, .wt-selected-task p) { max-width: 56ch; }
+@media (max-width: 639px) {
+  .walkthroughs-page .wt-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .walkthroughs-page .wt-navigation .wt-restart { grid-column: 1 / -1; justify-content: center; }
+}
+
+/* /job-loop: the dashboard card sits inside the band with its full radius (it used to run off the right edge). */
+@media (min-width: 1024px) {
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock { margin-right: 0; width: 100%; }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock .pc-card { border-radius: var(--r-md); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual { margin-right: 0; }
+  .loop-overview .lo-private-copy { grid-column: 1 / span 8; }
+}
+
+/* Audience pages: same top offset on all three (tab switching does not jump), card-to-card alignment, equal heading blocks in the 3-up band. */
+.audience-copy > .jv-caption { min-height: 2rem; display: flex; align-items: flex-start; }
+@media (min-width: 1024px) {
+  .audience-hero { align-items: start; }
+  .audience-hero-visual { align-self: start; }
+  .audience-features .jv-steps { grid-template-rows: auto auto 1fr; }
+  .audience-features .jv-steps > li { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; }
+}
+.audience-features { padding-block: 40px; margin-top: 24px; }
+@media (min-width: 1024px) { .jv-section.audience-features { padding-block: 56px; } }
+.audience-path .jv-head { align-content: start; }
+.audience-path .jv-head .jv-link { margin-top: 20px; }
+
+/* Guides: small print at a readable size and measure. */
+.cg-editorial p, .cg-editorial div p { max-width: 62ch; font-size: var(--t-small); line-height: 1.55; }
+.career-guides .cg-card h3 { min-height: 0; }
+
+/* Pricing: one paragraph per plan card; one rhythm for the billing note, the included list and the disclosure. */
+.product-proposed-grid .pricing-desc { margin: 10px 0 20px; max-width: none; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.55; text-wrap: pretty; }
+.pricing-card.jv-dark .pricing-desc { color: var(--jv-on-dark-body); }
+.pricing-billed-line { margin-block: 24px 0; }
+.pricing-includes { margin-top: 24px; }
+.pricing-details { margin-bottom: 0; }
+.pricing-details .loop-price-market { margin-bottom: 20px; }
+.pricing-passes-prices strong { font-weight: var(--fw-semi); }
+
+/* Standalone text links keep a 44px target without changing how they look. */
+:is(.cg-help-link, .pricing-billed-line a, .pricing-details a, .jv-contact-rail a, .product-contact-box a, .hc-top-link, .cg-more) { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Legal contents: a closed disclosure on phones (server and client agree), always listed from 1024px. */
+@media (min-width: 1024px) { .jv-toc details::details-content { content-visibility: visible; display: block; } .jv-toc details > summary { pointer-events: none; } }
+
+/* Dark-band link lists: ruled rows, a trailing arrow, 44px rows (as on /walkthroughs). */
+.hc-further.jv-dark > div:last-child { display: grid; gap: 0; min-width: min(100%, 320px); }
+.hc-further.jv-dark > div:last-child > a:not(.hc-button) { display: flex; align-items: center; justify-content: space-between; min-height: 48px; border-top: 1px solid var(--jv-line-on-dark); color: var(--jv-on-dark-link); font-size: var(--t-body-sm); font-weight: var(--fw-semi); text-decoration: none; }
+.hc-further.jv-dark > div:last-child > a:not(.hc-button)::after { content: ""; width: 8px; height: 8px; border-top: 1.75px solid currentColor; border-right: 1.75px solid currentColor; rotate: 45deg; margin-right: 4px; }
+
+.product-page--pricing .jv-page-head--forest { margin-bottom: 56px; }
+.walkthroughs-page .wt-step-status { min-height: 3rem; }
+@media (min-width: 640px) { .walkthroughs-page .wt-step-status { min-height: 0; } }
+
+/* /job-loop: the product name is unbreakable, so its copy column keeps 7 of 12 columns and the headline steps down to fit; the card overlaps the gutter, never the type. */
+@media (min-width: 1024px) {
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-copy { grid-column: 1 / span 7; }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual { grid-column: 8 / span 5; }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: var(--t-page); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock { width: calc(100% + 48px); margin-left: -48px; }
+}
+@media (min-width: 1024px) { .jv-home .jv-hero:not(.lo-loop-hero) { padding: 64px 0 72px; } }
+
+
+/* ---------- Round 10 ---------- */
+/* Footer: every link row is 44px on every viewport; each column is one stack; the legal row ends on the container edge; the wordmark is whole (no cropped letters). */
+.jv-footer-col a { min-height: 44px; white-space: nowrap; }
+.jv-footer-col ul { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1024px) {
+  .jv-footer-bottom > nav { grid-column: 7 / -1; justify-content: flex-end; margin-right: -8px; }
+}
+.jv-footer-mark { aspect-ratio: auto; overflow: visible; padding-bottom: 2.4cqw; }
+.jv-footer-mark > span { font-size: 15cqw; line-height: 1; color: rgb(var(--jv-brand-rgb) / .12); text-align: center; }
+.jv-footer-mark > span::after { color: rgb(var(--jv-brand-rgb) / .3); }
+/* Product-mock wordmark: the same ink and green period as the header lockup, on the card's own (always white) surface. */
+.jv-brand--static { color: var(--jv-card-ink); }
+.jv-brand--static .jv-brand-period { color: var(--jv-brand); }
+
+/* Mobile type ladder: H1 36px or more on inner pages and home, every H2 (CTA bands included) 28-30px. */
+@media (max-width: 639px) {
+  .jv-cta h2, .jv-cta--page h2 { font-size: var(--t-h2-panel); }
+}
+/* Two section sizes: section titles (--t-h2) and panel / closing-band titles (--t-h2-panel). */
+.jv-cta h2, .jv-cta--page h2, .loop-overview .lo-private h2 { font-size: var(--t-h2-panel); }
+/* 3-up card titles use the card-title size; full-width rows keep the row size. */
+@media (min-width: 768px) { .jv-steps :is(h2, h3), .audience-features .jv-steps h3 { font-size: var(--t-h3-card); line-height: 1.2; } }
+/* Descriptive copy in cards and lists is 15px minimum, with a readable measure. */
+.cg-card p, .jv-steps p:not(.jv-caption), .audience-features p { font-size: var(--t-body-sm); line-height: var(--lh-body-sm); }
+
+/* Help and FAQ openings are left-aligned like every other template. */
+.jv-page-head--center { max-width: none; margin-inline: 0; text-align: left; }
+.jv-page-head--center .jv-lead { margin-inline: 0; }
+.jv-page-head--center .jv-page-actions { justify-content: flex-start; }
+.hc-hero { margin-inline: 0; text-align: left; }
+.help-center .hc-hero > p:not(.hc-eyebrow) { margin-inline: 0; }
+.hc-hero .hc-hero-actions { justify-content: flex-start; }
+
+/* Pricing: the one-time-passes card is one toggle. The whole header row is the control; its +/- sits on the heading line. */
+.pricing-passes-disclosure > summary { align-items: center; }
+.pricing-passes-disclosure > summary::after { margin-top: 0; }
+.pricing-passes-disclosure > summary > .pricing-passes-lead { min-width: 0; }
+@media (max-width: 639px) { .pricing-passes-disclosure > summary { gap: 12px; } .pricing-passes-disclosure .pricing-passes-lead > .jv-caption { white-space: normal; } }
+
+/* Dark tiles use the same glow token as every forest band. */
+.jv-home .jv-tile.jv-dark { background: var(--jv-glow), var(--jv-forest); }
+
+/* Help: the open article, its steps, the callout and the other topic rows share one right edge; only paragraph text keeps its reading measure. */
+.help-center .hc-topic > details { max-width: none; }
+.help-center .hc-topic > details > :is(.hc-steps, .hc-note, .hc-field-help) { max-width: none; }
+.help-center .hc-topic .hc-note > p, .help-center .hc-topic .hc-steps li > * { max-width: 64ch; }
+
+/* Contact: the rail and the form card end together (the rail stretches; its last card spreads its rows). */
+@media (min-width: 1024px) {
+  .jv-contact-grid { align-items: stretch; }
+  .jv-contact-rail, .jv-contact-grid .jv-contact-rail { position: static; grid-template-rows: auto 1fr; }
+  .jv-contact-rail .jv-notecard--links { display: flex; flex-direction: column; }
+  .jv-contact-rail .jv-notecard--links ul { flex: 1; grid-auto-rows: 1fr; }
+}
+
+/* Pricing: the passes card follows the Billing details row with the standard gap. */
+.product-page--pricing .jv-section.pricing-passes { margin-top: 20px; }
+
+/* Home: the two paired tiles end their mock cards on one bottom edge. */
+@media (min-width: 1024px) {
+  .jv-home .jv-tile--schedule, .jv-home .jv-tile--openings { grid-template-rows: auto 1fr; }
+}
+
+/* 320px reflow (WCAG 1.4.10): mock content wraps instead of widening its box. */
+.audience-evidence, .audience-workspace-title, .audience-workspace .jv-caption, .jv-nb { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 359px) { .audience-workspace .jv-caption, .audience-evidence span { white-space: normal; } }
+
+/* ---------- Round 11 ----------
+   Reviewer themes: a less templated rhythm (eyebrows and dark foot bars are exceptions, not the grammar), one type system
+   (width-aware H1, tracking tokens, sentence-case secondary labels), balanced heroes on the text-led pages, a warmer light surface,
+   and a few defects (walkthrough controls, closing band padding, footer grid). Everything below uses tokens; no raw colours. *//* Type: one H1 token for every marketing page. The longest unbreakable run ("Automated Job Loop", about 9.2em) must always fit, so the size is capped by the
+   viewport (the gutter on both sides); the forest heroes also lose their band padding. */
+
+
+:root {
+  /* Whole pixels at every common width: 36 phones, 48 from 640, 56 from 1024, 60 from 1280. The dark-band heroes lose their band padding on phones (32). Below 380px the viewport cap keeps the longest run on one line. */
+  --t-page: 2.25rem;
+  --t-page-band: 2rem;
+  --lh-display: 1.04;
+  --t-eyebrow: .8125rem;
+}
+@media (min-width: 640px) { :root { --t-page: 3rem; --t-page-band: var(--t-page); } }
+@media (min-width: 1024px) { :root { --t-page: 3.5rem; } }
+@media (min-width: 1280px) { :root { --t-page: 3.75rem; } }
+@media (max-width: 379px) { :root { --t-page: min(2.25rem, calc((100vw - 2 * var(--gutter)) / 9.4)); --t-page-band: min(2rem, calc((100vw - 2 * var(--gutter) - 2 * var(--band-pad-x)) / 9.4)); } }
+:root .jv-page-title, :root .jv-home .jv-hero-title, :root .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title, :root .career-guides .cg-hero h1, :root .help-center .hc-hero h1, :root .walkthroughs-page .wt-hero h1 { line-height: var(--lh-display); overflow-wrap: break-word; }
+:root .jv-page-head--forest .jv-page-title { font-size: var(--t-page-band); }
+@media (min-width: 640px) { :root .jv-page-head--forest .jv-page-title { font-size: var(--t-page); } }
+@media (min-width: 1024px) {
+  :root .jv-home .jv-hero-title { font-size: var(--t-page); }
+  :root .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: var(--t-page); }
+}
+@media (max-width: 1023px) { :root .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: var(--t-page-band); } }/* Section and panel titles are two sizes everywhere (the how-it-works split heading and the home closing band no longer carry their own). */
+
+@media (min-width: 1024px) { :root .jv-split--timeline .jv-section-title { font-size: var(--t-h2-panel); } }
+:root .jv-home .jv-cta h2 { font-size: var(--t-h2-panel); }/* Running text: three tiers (16 body, 15 secondary, 14 caption); 13px stays for chips and mono data. */
+
+
+:root .career-guides .cg-card > p, :root .career-guides .cg-card-audience { font-size: var(--t-body-sm); line-height: 1.55; color: var(--jv-ink-2); }
+:root .walkthroughs-page :is(.wt-instructions > p:not(.wt-eyebrow), .wt-step-caption p, .wt-controls > p, .wt-selected-task p:not(.wt-eyebrow), .wt-transcript > p, .wt-transcript li > p, .wt-player > .wt-format-note, .wt-recorded > p, .wt-ready p, .wt-further p, .wt-task-picker small, .wt-step-status) { font-size: var(--t-body-sm); line-height: 1.55; }
+:root :is(.pricing-note, .pricing-trust li, .pricing-billed-line, .product-plan-note, .pricing-free-strip p, .pricing-passes-sub, .pricing-outcome, .jv-contact-grid .guest-support > p) { font-size: var(--t-body-sm); line-height: 1.55; }
+:root .guest-support form > p, :root .guest-support-fine, :root .ap-field-help, :root .ap-auth-footnote { font-size: var(--t-body-sm); line-height: 1.5; }/* Form labels share one style (14px, 500) on the account and contact forms. */
+
+:root .jv-account .ap-field label, :root .jv-account .ap-phone-field label, :root .guest-support label, :root .guest-support .guest-support-consent { font-size: var(--t-small); font-weight: var(--fw-medium); line-height: 1.4; color: var(--jv-ink); }
+:root .wt-task-toggle { min-height: 44px; padding: 0 18px; border-radius: var(--r-pill); font-size: var(--t-body-sm); font-weight: var(--fw-semi); line-height: 1; white-space: nowrap; }/* Labels: eyebrows stay mono caps (a little larger, a little tighter); secondary labels become sentence-case Geist at 13px; mono is left for times, files and days. */
+
+
+:root .jv-caption, :root .ap-eyebrow, :root .hc-eyebrow, :root .cg-eyebrow, :root .wt-eyebrow, :root .jv-home .jv-step-index { font-size: var(--t-eyebrow); letter-spacing: .04em; }
+:root .jv-chip--caption, :root .jv-related > span, :root .hc-related > span, :root .jv-footer-col-title, :root .jv-mobile-who > p, :root .jv-home .jv-loop-caption, :root .jv-home .jv-appwin-pane-label, :root .pc-source-kind, :root .bc-mini-cap, :root .bc-stack-cap, :root .pc-dash-h, :root .pc-week-strip-caption, :root .pc-caption, :root .pc-doc-h, :root .pricing-includes-label, :root .audience-workspace figcaption, :root .audience-evidence span, :root .as-sources li > span, :root .as-result > span, :root .as-col > span, :root .wt-task-picker button > span:first-child, :root .cg-example figcaption, :root .cg-card-meta span:first-child, :root .ap-board-caption { font-family: var(--font-sans); font-size: var(--t-sm); font-weight: var(--fw-medium); letter-spacing: 0; line-height: var(--lh-sm); text-transform: none; }
+:root .pricing-includes-label { font-size: var(--t-sm) !important; }
+:root .jv-chip--caption::before { display: none; }
+:root .jv-chip--caption { padding-inline: 10px; }/* Rhythm: eyebrows lead heroes and the first section only; later sections open on their heading. The dark foot bar is kept for three hero cards (home, Automated Job Loop, audience heroes). */
+
+
+:root .loop-overview .lo-section ~ .lo-section .jv-head > .jv-caption, :root .loop-overview .lo-section ~ .lo-section .jv-caption:first-child, :root .loop-overview .lo-private .jv-caption, :root .product-main-content > .jv-section ~ .jv-section .jv-head > .jv-caption, :root .product-main-content > .jv-section ~ .jv-section [data-reveal] > .jv-caption:first-child, :root .audience-setpiece .jv-head > .jv-caption, :root .jv-story ~ .jv-story > .jv-caption { display: none; }
+:root .pc-foot { margin: 14px -18px -18px; background: var(--jv-bg-subtle); border-top: 1px solid var(--jv-line); color: var(--jv-ink-2); font-weight: var(--fw-medium); }
+:root .pc-foot > span { background: var(--jv-brand); box-shadow: 0 0 0 3px rgb(var(--jv-brand-rgb) / .14); }
+:root :is(.audience-hero-visual, .lo-loop-hero--forest .jv-hero-mock) .pc-foot { background: var(--jv-forest); border-top: 0; color: #fff; }
+:root :is(.audience-hero-visual, .lo-loop-hero--forest .jv-hero-mock) .pc-foot > span { background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(var(--jv-signal-rgb) / .18); }/* Light surfaces: a warmer wash (a faint lime light at one corner), softer rails, and a footer that carries the same tint. */
+
+
+:root { --jv-wash: radial-gradient(38% 28% at 94% 0%, rgb(var(--jv-signal-rgb) / .16), transparent 70%), linear-gradient(180deg, var(--jv-wash-soft) 0%, var(--jv-paper) 100%); }
+@media (min-width: 1024px) {
+  :root .jv-rails::before, :root .jv-rails::after, :root .jv-home::before, :root .jv-home::after { background: color-mix(in srgb, var(--jv-line) 50%, transparent); }
+}
+:root .jv-footer { background: linear-gradient(180deg, var(--jv-paper), var(--jv-wash-soft)); }/* A quiet dot field and a soft glow behind the pale-page heroes, so the pages without a mock still have one detail. */
+
+@media (min-width: 1024px) {
+  :root .jv-page-head:not(.jv-page-head--forest):not(.jv-page-head--split), :root .career-guides .cg-hero { position: relative; isolation: isolate; }
+  :root .jv-page-head:not(.jv-page-head--forest):not(.jv-page-head--split)::before, :root .career-guides .cg-hero::before { content: ""; position: absolute; z-index: -1; inset: 0 -24px 0 auto; width: 46%; pointer-events: none; background: radial-gradient(circle, rgb(var(--jv-brand-rgb) / .2) 1px, transparent 1.6px) 0 0 / 22px 22px; -webkit-mask-image: radial-gradient(closest-side at 70% 40%, black 20%, transparent 100%); mask-image: radial-gradient(closest-side at 70% 40%, black 20%, transparent 100%); }
+  :root .jv-page-head--split:not(.jv-page-head--forest) > .jv-page-visual::after { content: ""; position: absolute; inset: -14% -18%; z-index: -2; pointer-events: none; background: radial-gradient(closest-side, rgb(var(--jv-brand-rgb) / .12), transparent 74%); }
+}/* Vertical rhythm: the gap after a section is one value. */
+
+:root { --gap-section: clamp(64px, 8vw, 112px); }
+:root .jv-related { margin-top: 40px; }
+:root .jv-legal { padding-bottom: 40px; }
+:root .loop-overview .lo-faq { padding-bottom: 48px; }/* Page heroes: the copy and its card are centred against each other (no empty lower-left), and the faq, privacy and help heroes carry a compact right-hand card. */
+
+
+@media (min-width: 1024px) {
+  :root .jv-page-head--split { grid-template-rows: 1fr auto auto auto auto 1fr; align-items: center; }
+  :root .jv-page-head--split > .jv-caption { grid-row: 2; }
+  :root .jv-page-head--split > .jv-page-title { grid-row: 3; }
+  :root .jv-page-head--split > .jv-lead { grid-row: 4; }
+  :root .jv-page-head--split > .jv-page-actions { grid-row: 5; }
+  :root .jv-page-head--split > .jv-page-visual { grid-row: 1 / -1; align-self: center; margin-top: 0; }
+  :root .product-page--privacy .jv-page-head--split, :root .product-page--faq .jv-page-head--split { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  :root .product-page--privacy .jv-page-head--split > :not(.jv-page-visual), :root .product-page--faq .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / span 7; }
+  :root .product-page--privacy .jv-page-head--split > .jv-page-visual, :root .product-page--faq .jv-page-head--split > .jv-page-visual { grid-column: 9 / span 4; grid-row: 1 / -1; margin-top: 0; max-width: none; }
+  :root .product-page--privacy .jv-notecard ol { grid-template-columns: minmax(0, 1fr); }
+  :root .product-page--privacy .jv-page-head, :root .product-page--faq .jv-page-head { padding-bottom: 56px; }
+}
+:root .jv-faq-index ol { display: grid; margin: 12px 0 0; padding: 0; list-style: none; }
+:root .jv-faq-index li { border-top: 1px solid var(--jv-line); }
+:root .jv-faq-index li::before { content: none; }
+:root .jv-faq-index a { display: flex; align-items: center; min-height: 48px; padding: 8px 0; color: var(--jv-ink); font-size: var(--t-small); font-weight: var(--fw-medium); line-height: 1.35; text-decoration: none; }
+@media (hover: hover) { :root .jv-faq-index a:hover { color: var(--jv-brand); } }
+:root .jv-faq-index.jv-notecard li { padding: 0; }
+@media (max-width: 767px) { :root .product-page--faq .jv-page-head--split > .jv-page-visual { display: none; } }/* Help: the three starting tasks are a compact "Popular tasks" card beside the heading from 1024px, and the original cards below it on phones. */
+
+:root .hc-start-title { display: none; }
+@media (min-width: 1024px) {
+  :root .help-center .hc-hero { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; max-width: none; padding-bottom: 40px; }
+  :root .help-center .hc-hero > :not(.hc-start) { grid-column: 1 / span 7; }
+  :root .help-center .hc-hero > .hc-start { grid-column: 9 / span 4; grid-row: 1 / span 4; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 20px 24px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: var(--jv-paper); box-shadow: var(--sh-3); }
+  :root .help-center .hc-start-title { display: block; margin: 0 0 8px; color: var(--jv-ink-3); font-size: var(--t-sm); font-weight: var(--fw-medium); }
+  :root .help-center .hc-start > a { grid-row: auto; grid-template-rows: none; grid-template-columns: 40px minmax(0, 1fr) 16px; align-items: center; gap: 2px 12px; padding: 14px 0; border: 0; border-top: 1px solid var(--jv-line); border-radius: 0; background: none; box-shadow: none; }
+  :root .help-center .hc-start > a > svg:first-child { grid-column: 1; grid-row: 1 / span 2; }
+  :root .help-center .hc-start > a > strong { grid-column: 2; font-size: var(--t-body-sm); line-height: 1.3; }
+  :root .help-center .hc-start > a > span { grid-column: 2; font-size: var(--t-sm); }
+  :root .help-center .hc-start > a > svg:last-child { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+  :root .help-center .hc-start > a:hover { transform: none; box-shadow: none; border-color: var(--jv-line); }
+}
+:root .help-center .hc-contents, :root .help-center .hc-contents ol a, :root .help-center .hc-contents nav > a, :root .help-center .hc-contents summary { font-size: var(--t-small); }/* Pricing: the price control is on the page (not behind a disclosure), plan cards carry their own points and cadence, and the free path is a real row. */
+
+
+:root .pricing-market-line { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; margin: 0 0 16px; color: var(--jv-ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+:root .pricing-market-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--jv-brand); font: inherit; font-weight: var(--fw-semi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+:root .pricing-market-link:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; border-radius: 4px; }
+:root .pricing-week { display: flex; gap: 4px; margin: 14px 0 0; }
+:root .pricing-week > i { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--jv-sunken); color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-style: normal; font-weight: 500; line-height: 1; }
+:root .pricing-week > i.is-on { background: var(--jv-brand); color: #fff; }
+:root .pricing-card.jv-dark .pricing-week > i { background: rgb(255 255 255 / .1); color: var(--jv-on-dark-2); }
+:root .pricing-card.jv-dark .pricing-week > i.is-on { background: var(--jv-signal); color: var(--jv-forest); }
+:root .pricing-cadence { color: var(--jv-brand-ink); font-size: var(--t-h4); font-weight: var(--fw-medium); letter-spacing: var(--ls-card); line-height: 1.3; }
+:root .pricing-cadence strong { font-weight: var(--fw-semi); }
+:root .pricing-card.jv-dark .pricing-cadence { color: var(--jv-on-dark-link); }
+:root .pricing-points { display: grid; margin: 18px 0 24px; padding: 0; list-style: none; }
+:root .pricing-card > .pricing-points ~ :is(a, button) { margin-top: auto; }
+:root .pricing-card .pricing-points li { padding: 8px 0; }
+:root .product-proposed-grid .pricing-desc { min-height: 0; margin-bottom: 0; }/* Pro gets its own identity (a tinted surface and a brand rule) so the three tiers read as three. */
+
+:root .product-proposed-grid .pricing-card:not(.jv-dark):nth-child(3) { background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-paper) 60%); box-shadow: inset 0 3px 0 var(--jv-brand), var(--sh-2); }
+:root .pricing-free-strip { margin-top: 24px; padding: 20px 24px; border-radius: var(--r-md); background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-brand-tint)); }
+:root .pricing-free-strip p { font-size: var(--t-body-sm); }
+:root .pricing-free-strip .jv-btn { flex: none; }/* One-time passes: a quiet "prefer a one-off?" row, below the free path. */
+
+:root .product-page--pricing .jv-section.pricing-passes { margin-top: 20px; padding-block: 4px; border-color: var(--jv-line); background: none; border-style: dashed; }
+:root .pricing-passes-title { font-size: var(--t-h4); }
+:root .pricing-passes-lead > .jv-caption { display: none; }
+:root .jv-cta-bar--plans .jv-cta-bar-copy p { max-width: 52ch; }
+:root .jv-plan-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+:root .jv-plan-pills li { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 14px; border: 1px solid var(--jv-line-strong); border-radius: var(--r-pill); background: var(--jv-paper); color: var(--jv-ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+:root .jv-plan-pills strong { color: var(--jv-ink); font-weight: var(--fw-semi); }/* Audience pages: the section heading starts at the top of its card, and each audience has its own example layout. */
+
+
+@media (min-width: 1024px) {
+  :root .audience-check { align-items: start; }
+  :root .audience-check-copy { align-content: start; position: sticky; top: 112px; }
+  :root .audience-hero { align-items: center; padding-bottom: 56px; }
+}
+:root .audience-bridge { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: stretch; }
+:root .audience-bridge .audience-evidence { min-width: 0; }
+:root .audience-bridge-arrow { align-self: center; width: 20px; height: 20px; color: var(--jv-brand); }
+@media (max-width: 639px) { :root .audience-bridge { grid-template-columns: minmax(0, 1fr); } :root .audience-bridge-arrow { rotate: 90deg; justify-self: center; } }
+:root .audience-reuse { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-left: 2px solid var(--jv-line-strong); }
+:root .audience-reuse li { position: relative; padding: 4px 0 14px 18px; }
+:root .audience-reuse li::before { content: ""; position: absolute; left: -6px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--jv-brand); box-shadow: 0 0 0 3px var(--jv-paper); }
+:root .audience-reuse li:last-child::before { background: var(--jv-signal); box-shadow: 0 0 0 3px var(--jv-paper), 0 0 0 4px var(--jv-brand); }
+:root .audience-reuse span { color: var(--jv-ink-3); font-size: var(--t-sm); font-weight: var(--fw-medium); }
+:root .audience-reuse p { margin: 2px 0 0; color: var(--jv-ink); font-size: var(--t-small); line-height: 1.5; }
+:root .audience-workspace--mba figcaption { background: var(--jv-wash-peak); }
+:root .audience-workspace--professional figcaption { background: var(--jv-sunken); }
+:root .audience-workspace--professional .audience-workspace-body { gap: 14px; }/* Closing bands: the visual sits in the grid (not absolutely), so the card sets the band height and every band keeps the same padding around it. */
+
+
+@media (min-width: 1024px) {
+  :root .jv-cta--visual .jv-cta-visual { position: relative; right: auto; top: auto; translate: none; grid-column: 9 / span 4; grid-row: 1; align-self: center; width: auto; }
+  :root .jv-cta--visual { align-items: center; }
+}/* Walkthroughs: controls hold their size on phones, the shortcut hint is for keyboards, and the tour and its next click share one surface. */
+
+
+@media (max-width: 639px) {
+  :root .walkthroughs-page .wt-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root .walkthroughs-page .wt-navigation :is(.wt-button, .wt-restart) { min-height: 48px; padding-inline: 12px; white-space: nowrap; justify-content: center; }
+  :root .walkthroughs-page .wt-navigation .wt-restart { grid-column: 1 / -1; min-height: 44px; }
+}
+@media (pointer: coarse), (max-width: 767px) {
+  :root #wt-keyboard-help { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+}
+:root .walkthroughs-page :is(.wt-format-links a, .wt-video-chapters button, .wt-step-picker button) { min-height: 44px; display: inline-flex; align-items: center; }
+:root .walkthroughs-page .wt-selected-task :is(a, button) { min-height: 44px; }/* Guides: one card surface, one top rule, titles clamped to three lines in a fixed block so the descriptions start together, one hairline between list rows. */
+
+
+:root .career-guides .cg-card, :root .career-guides .cg-card--feature { background: var(--jv-paper); }
+:root .career-guides .cg-card h3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; line-height: 1.3; }
+@media (min-width: 1001px) { :root .career-guides .cg-card h3 { min-height: calc(3 * 1.3em); } }/* Footer: four balanced columns, 44px rows with no extra margin on phones, and a wordmark whose descender is never clipped. */
+
+
+@media (max-width: 639px) {
+  :root .jv-footer-col a { min-height: 44px; margin-block: 0; }
+  :root .jv-footer-links { row-gap: 20px; }
+}
+:root .jv-footer-mark { padding-bottom: 5cqw; }
+@supports not (font-size: 1cqw) { :root .jv-footer-mark { padding-bottom: 5vw; } }/* Brand: the wordmark's stem is thickened to match the J's stroke (the Manrope file is a static Bold; a hairline stroke adds the missing weight), and the period is the lime signal dot. */
+
+
+:root .jv-brand { font-size: 24px; }
+@media (max-width: 760px) { :root .jv-brand { font-size: 22px; } }
+:root .jv-brand-name { -webkit-text-stroke: .45px currentColor; }
+:root .jv-brand-period { position: relative; display: inline-block; width: .26em; height: .26em; margin-left: .08em; overflow: hidden; border-radius: 50%; color: transparent; -webkit-text-stroke: 0; background: var(--jv-signal); box-shadow: 0 0 0 1.5px var(--jv-brand); vertical-align: baseline; }
+:root .jv-dark .jv-brand-period { color: transparent; box-shadow: none; }
+:root .jv-dark .jv-brand--static .jv-brand-period { box-shadow: 0 0 0 1.5px var(--jv-brand); }/* Targets: inline link rows keep a 44px hit area. */
+
+
+:root :is(.jv-related, .hc-related, .wt-format-links, .jv-link-row) a { min-height: 44px; }/* Account entry (the ad landing). Desktop: the promise panel is one grouped column (headline, one sentence, three claims, the free-account line, one example run, one link) centred against the long form and sticky beside it.
+   Phones: it shrinks to the headline and the free-account line, so Google, the name and the mobile number sit above the fold. */
+
+
+:root .ap-story-footnote, :root .ap-story-steps { display: none; }
+:root .ap-story-description { font-size: var(--t-body-sm); line-height: 1.55; max-width: 38ch; }
+:root .ap-story-free { font-size: var(--t-small); }
+@media (min-width: 761px) {
+  :root .jv-account--standalone .ap-account-story.jv-dark { justify-content: flex-start; padding-top: 56px; padding-bottom: 48px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-inner { position: sticky; top: 96px; flex: none; min-height: 0; padding-bottom: 0; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-run { display: grid; margin: 28px 0 0; padding: 16px 18px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-link { margin-top: 12px; }
+}
+@media (max-width: 760px) {
+  :root .jv-account--standalone .ap-account-story.jv-dark { padding: 18px 20px 16px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-eyebrow { display: none; }
+  :root .jv-account--standalone .ap-account-story.jv-dark h1 { margin: 0; }
+  :root .jv-account--standalone .ap-account-story.jv-dark :is(.ap-story-description, .ap-story-ticks, .ap-story-run, .ap-story-link) { display: none; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-free { display: block; margin: 8px 0 0; }
+}
+/* Home: a clear gutter between the lead and the product window, the sheet laid over the window's lower edge (never over its footer text), and the ring centred on the window. */
+
+
+:root .jv-home .jv-hero:not(.lo-loop-hero) .jv-hero-lead { max-width: 37rem; }
+:root .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-lead { max-width: 34rem; }
+@media (min-width: 1280px) {
+  :root .jv-home .jv-hero:not(.lo-loop-hero) { padding: 32px 0 0; }
+  :root .jv-home .jv-hero:not(.lo-loop-hero) .jv-hero-visual { padding-bottom: 212px; }
+  :root .jv-home .jv-hero:not(.lo-loop-hero) .jv-hero-cv { right: -16px; bottom: 0; width: 268px; }
+  :root .jv-home .jv-hero:not(.lo-loop-hero) .jv-hero-orbit-wrap { top: calc(50% - 106px); width: min(500px, calc(100% + 8px)); }
+  :root .jv-home .jv-hero:not(.lo-loop-hero) .jv-hero-visual::after { inset: -10% -8% 8% -8%; }
+}
+:root .jv-home .jv-tile-next { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; color: var(--jv-ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+:root .jv-home .jv-tile-next b { color: var(--jv-ink); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; }
+:root .jv-home .jv-tile-next i { margin-left: auto; padding: 2px 8px; border-radius: var(--r-pill); background: var(--jv-paper); color: var(--jv-ink-3); font-size: var(--t-sm); font-style: normal; }
+@media (min-width: 1024px) { :root .jv-home .jv-tile--schedule .jv-tile-card { align-self: center; } }/* Disclosures open on the shorter step (the reveal itself is in motion.css). */
+
+
+@media (prefers-reduced-motion: no-preference) {
+  :root .jv-faq details[open] > :is(p, div), :root .hc-note-details[open] > :not(summary) { animation-duration: var(--dur-2); }
+}
+
+/* ================= Round 12 ================= */
+/* Round 12 hypothesis: the scores stalled because the pages share one template (eyebrow, H1, two CTAs, a floating chip card, the same dark closing band), the hero art is flat UI chips,
+   and the small craft slips (square footer period, misaligned pricing rows, five different toggles, faint focus rings on dark panels, 13px and 15px steps) sit on every page.
+   This round changes composition and structure, not polish: a staged product object on the home hero, a different hero and closing band on at least four page types,
+   one toggle, one tag, one type rhythm, and the focus ring fixed at its specificity root. */
+
+/* Focus: the mint ring on every forest panel. The page-scoped rules (.career-guides a, .walkthroughs-page a, .help-center :is(...)) outrank the generic dark rule, so this one is stronger than all of them.
+   Buttons keep the lime ring. 3:1 or better on forest. */
+:root .jv-dark :is(a, button, summary, input, select, textarea):focus-visible { outline-color: var(--jv-on-dark-link); }
+:root .jv-dark .jv-btn:focus-visible, :root .jv-dark a.jv-btn:focus-visible, :root .jv-dark button.jv-btn:focus-visible { outline-color: var(--jv-signal); }
+
+/* Footer: one colour for every legal and column link (no visited-link tint), and a ghost wordmark that is brand green, ends in the round lime dot of the header lockup, fades toward the page edge and is never clipped. */
+:root :is(.jv-footer-bottom nav a, .jv-footer-col a):is(:link, :visited) { color: var(--jv-ink-2); }
+@media (hover: hover) { :root :is(.jv-footer-bottom nav a, .jv-footer-col a):is(:link, :visited):hover { color: var(--jv-ink); } }
+:root .jv-footer-mark > span { color: transparent; background: linear-gradient(180deg, rgb(var(--jv-brand-rgb) / .22) 0%, rgb(var(--jv-brand-rgb) / .08) 90%); -webkit-background-clip: text; background-clip: text; }
+:root .jv-footer-mark > span::after { content: ""; display: inline-block; width: .125em; height: .125em; margin-left: .035em; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 .014em rgb(var(--jv-brand-rgb) / .3); opacity: .8; vertical-align: baseline; }
+
+/* Header and footer lockup: the lime dot sits clear of the "e" (about .12em), a touch smaller (.22em) and a hair above the baseline, so its gap matches the letter spacing. */
+:root .jv-brand-period { width: .22em; height: .22em; margin-left: .12em; vertical-align: .03em; }
+
+/* One tag: "Example · illustrative data" is a quiet mono corner label, not a boxed chip. */
+:root .jv-mock-tag.jv-chip--caption { min-height: 0; padding: 0; border: 0; background: none; color: var(--jv-ink-3); letter-spacing: .04em; }
+
+/* One toggle: every disclosure (FAQ, guides sources, contact receipt, help topic, pricing one-offs, walkthrough transcript, steps) is the same 32px outlined circle with a drawn plus that turns to a cross, filled brand green when open. */
+:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .hc-contents details, .pricing-passes-disclosure) > summary::after { content: ""; display: block; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line-strong); border-radius: 50%; color: var(--jv-ink); font-size: 0; background: linear-gradient(currentColor, currentColor) center / 14px 1.75px no-repeat, linear-gradient(currentColor, currentColor) center / 1.75px 14px no-repeat; transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-press), border-color var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .hc-contents details, .pricing-passes-disclosure)[open] > summary::after { content: ""; background: linear-gradient(currentColor, currentColor) center / 14px 1.75px no-repeat, linear-gradient(currentColor, currentColor) center / 1.75px 14px no-repeat, var(--jv-brand); border-color: var(--jv-brand); color: #fff; transform: rotate(45deg); }
+:root .jv-faq-toggle { border-color: var(--jv-line-strong); }
+:root .jv-faq-toggle svg { width: 14px; height: 14px; stroke-width: 1.75; }
+
+/* Accordion height eases where the browser supports it (Chrome 131 and later): the answer grows instead of jumping, and everything below it moves with it. Elsewhere the fade above stays. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+    :root .jv-faq { interpolate-size: allow-keywords; }
+    :root .jv-faq details::details-content { block-size: 0; overflow: clip; transition: block-size var(--dur-3) var(--ease-out), content-visibility var(--dur-3) var(--ease-out) allow-discrete; }
+    :root .jv-faq details[open]::details-content { block-size: auto; }
+  }
+}
+
+/* Pricing: the three plan cards share one row grid (subgrid), so price, description, checklist and button line up whatever a description's length. */
+@media (min-width: 768px) {
+  :root .product-proposed-grid { row-gap: 0; column-gap: 16px; }
+  @supports (grid-template-rows: subgrid) {
+    :root .product-proposed-grid > .pricing-card { display: grid; grid-template-rows: subgrid; grid-row: span 7; row-gap: 0; align-content: start; }
+    :root .product-proposed-grid > .pricing-card > .pricing-points { align-self: stretch; }
+    :root .product-proposed-grid > .pricing-card > :is(a, button) { align-self: end; margin-top: 0; }
+  }
+  @supports not (grid-template-rows: subgrid) { :root .product-proposed-grid .pricing-desc { min-height: 3.1em; } }
+}
+/* Phones: the free-account entry is the first thing under the hero (the cold ad visitor is not ready to pay); the plans follow. */
+@media (max-width: 767px) {
+  :root .loop-subscription-billing.product-proposed-plans { display: flex; flex-direction: column; }
+  :root .loop-subscription-billing.product-proposed-plans > .pricing-free-strip { order: -2; margin: 0 0 24px; }
+  :root .loop-subscription-billing.product-proposed-plans > * { order: 0; }
+  :root .loop-subscription-billing.product-proposed-plans > .jv-caption { order: -3; }
+}
+
+/* One-off passes: a standard accordion row on the page grid (hairlines, same left edge, the shared toggle at the right edge), not a dashed card. */
+:root .product-page--pricing .jv-section.pricing-passes { margin: 0 0 40px; padding: 0; border: 0; border-bottom: 1px solid var(--jv-line); border-radius: 0; background: none; }
+:root .product-page--pricing .jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])), :root .product-page--pricing .jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 0; }
+:root .pricing-passes-disclosure > summary { min-height: 72px; padding: 20px 0; align-items: center; color: var(--jv-ink); }
+:root .pricing-passes-disclosure > summary::after { color: var(--jv-ink); }
+:root .pricing-passes-disclosure > summary::after { margin-top: 0; }
+:root .pricing-passes-body { padding-bottom: 32px; }
+:root .pricing-passes-title { font-size: var(--t-h4); }
+:root .pricing-passes-prices { font-size: var(--t-small); }
+:root .product-page--pricing .pricing-teams { margin-top: 0; }
+:root .pricing-billed-line { max-width: 72ch; }
+
+/* Audience pages. The example captions never break inside a word (the page-level overflow-wrap would split REVIEW); on phones the audience switcher drops below the hero actions so the headline and "Start my search" lead the fold. */
+:root .audience-page :is(.jv-caption, .audience-workspace figcaption, .audience-workspace-body > .jv-caption) { overflow-wrap: normal; word-break: normal; hyphens: none; }
+@media (max-width: 767px) {
+  :root .audience-page > .jv-page { display: flex; flex-direction: column; }
+  :root .audience-page > .jv-page > * { order: 2; }
+  :root .audience-page > .jv-page > .audience-hero { order: 0; }
+  :root .audience-page > .jv-page > .audience-switch { order: 1; margin: 8px 0 24px; }
+}
+/* Pale closing band: the dark band is the home, Automated Job Loop and pricing close; audience pages, guides, help and walkthroughs close on the tint. */
+:root .jv-cta.jv-cta--pale { border: 1px solid var(--jv-line); background: radial-gradient(70% 80% at 100% 0%, rgb(var(--jv-brand-rgb) / .12), transparent 70%), var(--jv-brand-tint); }
+:root .jv-cta--pale h2 { color: var(--jv-ink); font-weight: var(--fw-heading); font-size: var(--t-h2-panel); }
+:root .jv-cta--pale p:not(.jv-caption) { color: var(--jv-ink-2); }
+:root .jv-cta--pale .jv-caption { color: var(--jv-ink-3); }
+:root :is(.career-guides .cg-actions, .help-center .hc-further, .walkthroughs-page .wt-further) { border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: radial-gradient(70% 80% at 100% 0%, rgb(var(--jv-brand-rgb) / .12), transparent 70%), var(--jv-brand-tint); }
+:root :is(.career-guides .cg-actions h2, .help-center .hc-further h2, .walkthroughs-page .wt-further h2) { max-width: 18ch; margin: 0 0 12px; color: var(--jv-ink); font-size: var(--t-h2-panel); font-weight: var(--fw-heading); letter-spacing: var(--ls-h2); line-height: 1.12; }
+
+/* Phones keep the product art: the explainer heroes (about, how it works, pricing, contact, FAQ) show their card under the actions instead of dropping it, so ad traffic sees the same product UI the desktop does. */
+@media (max-width: 767px) {
+  :root .product-page .jv-page-head--split > .jv-page-visual { display: block; margin-top: 28px; max-width: none; }
+  :root .product-page .jv-page-head--split > .jv-page-visual > * { max-width: none; width: 100%; }
+}
+
+/* Guides open on a centred headline (no side card): the library below carries the featured guide, so the page does not repeat the eyebrow, headline, two buttons and floating card of every other page. */
+:root .career-guides .cg-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding-block: 56px 40px; }
+:root .career-guides .cg-hero::before { content: none; }
+:root .career-guides .cg-hero .jv-aside-slot { display: none; }
+:root .career-guides .cg-hero h1 { max-width: 14em; margin-inline: auto; }
+:root .career-guides .cg-hero > p:not(.cg-eyebrow):not(.cg-public-note) { max-width: 34em; margin-inline: auto; }
+:root .career-guides .cg-hero .cg-hero-links { justify-content: center; align-items: center; }
+:root .career-guides .cg-hero .cg-hero-sub { justify-content: center; }
+@media (max-width: 639px) { :root .career-guides .cg-hero .cg-hero-links { align-items: stretch; } :root .career-guides .cg-hero .cg-hero-links > .jv-link, :root .career-guides .cg-hero .cg-hero-sub { align-self: center; align-items: center; } }
+
+/* Typography: prose measure. Running text never runs wider than 62ch (about 70 characters of Geist at 16px); the explicit narrower caps elsewhere still win. Instructions and notes on the pricing and account flows are 16px, never 14. */
+:root :is(.help-center, .walkthroughs-page, .loop-overview, .product-page, .career-guides, .audience-page, .jv-home) :is(p, li, dd) { max-width: 62ch; }
+:root :is(.pricing-details > div > p, .loop-price-market p, .pricing-billed-line, .pricing-trust li, .pricing-note) { font-size: var(--t-body-sm); line-height: 1.55; }
+/* Guide cards: titles take the room they need (no reserved three-line block), with one gap from title to description. */
+@media (min-width: 1001px) { :root .career-guides .cg-card h3 { min-height: 0; } }
+:root .career-guides .cg-card h3 { margin-bottom: 8px; }
+/* Help task index: one row rhythm for one- and two-line items. */
+:root .help-center .hc-contents ol a { min-height: 52px; padding-block: 10px; line-height: 1.4; }
+/* Home feature tiles: the mock sits at one fixed distance under its copy (it is no longer pushed to the tile floor, which left a dead band between the paragraph and the mock). */
+:root .jv-home .jv-tile { align-content: start; }
+:root .jv-home .jv-tile-card { align-self: start; }
+@media (min-width: 1024px) {
+  /* The schedule tile's mock fills the tile under its copy, spreading its rows, instead of floating with a dead band above it. */
+  :root .jv-home .jv-tile--schedule { grid-template-rows: auto 1fr; }
+  :root .jv-home .jv-tile--schedule .jv-tile-card { align-self: stretch; display: flex; flex-direction: column; }
+  :root .jv-home .jv-tile--schedule .jv-tile-card > .pc-card { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+}
+
+/* Hero alignment: the Automated Job Loop hero card is centred against its copy; the privacy heading starts level with the "At a glance" card (no 100px void beside a centred H1); the privacy index uses quiet links. */
+@media (min-width: 1024px) {
+  :root .loop-overview .lo-loop-hero .jv-hero-grid { align-items: center; }
+  :root .loop-overview .lo-loop-hero .jv-hero-visual { align-self: center; min-height: 0; padding-bottom: 0; }
+  :root .product-page--privacy .jv-page-head--split { align-items: start; align-content: start; }
+  :root .product-page--privacy .jv-page-head--split { grid-template-rows: auto auto auto 1fr; }
+  :root .product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { align-self: start; grid-row: auto; }
+  :root .product-page--privacy .jv-page-head--split > .jv-page-visual { grid-row: 1 / span 4; align-self: start; }
+}
+:root .product-page .product-main-content .jv-toc a:is(:link, :visited), :root .product-page .product-main-content .jv-toc a:is(:link, :visited):not(:hover), :root .product-page .jv-toc a:is(:link, :visited) { color: var(--jv-ink-2); text-decoration: none; }
+@media (hover: hover) { :root .product-page .product-main-content .jv-toc a:is(:link, :visited):hover { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; } }

@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import CareerGuides, { CareerGuideArticle } from "@/pages/CareerGuides";
 import { careerGuides } from "@/lib/career-guides";
+import { guideDocumentTitle } from "@/lib/public-route-manifest";
 
 vi.unmock("react-router-dom");
 vi.unmock("react-helmet-async");
@@ -22,7 +23,7 @@ describe("public career guides", () => {
     expect(screen.getByLabelText("Your stage")).toHaveValue("all");
     expect(screen.getByLabelText("Your task")).toHaveValue("all");
     expect(screen.getByRole("status")).toHaveTextContent("20 guides to explore");
-    expect(screen.getByRole("link", { name: "Check my CV for free" })).toHaveAttribute("href", "/check");
+    expect(screen.getByRole("link", { name: "Try the free CV Check" })).toHaveAttribute("href", "/check");
     expect(screen.queryByRole("link", { name: /sign up/i })).not.toBeInTheDocument();
   });
 
@@ -65,7 +66,7 @@ describe("public career guides", () => {
     expect(screen.getByText("Jobvance Editorial", { selector: ".cg-byline span" })).toBeInTheDocument();
     expect(container.querySelectorAll(".cg-source-note")).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Sources and further reading" })).toBeInTheDocument();
-    await waitFor(() => expect(document.title).toBe(`${guide.title} | Jobvance`));
+    await waitFor(() => expect(document.title).toBe(guideDocumentTitle(guide.title)));
     expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute("href", `https://jobvance.io/guides/${guide.slug}`);
   });
 

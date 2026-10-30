@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BookOpen, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Compass, FileCheck2, ListChecks, MapPin, Search, ShieldCheck, type LucideIcon } from "lucide-react";
 import { careerGuides, editorialPolicy, getCareerGuide, type CareerGuide, type GuideAudience, type GuideCategory } from "@/lib/career-guides";
+import { guideDocumentTitle } from "@/lib/public-route-manifest";
+import { useReveal } from "@/hooks/useReveal";
+import { GuidesFeaturedAside } from "@/components/marketing/HeroAsides";
 import "./CareerGuides.css";
 
 const SITE = "https://jobvance.io";
@@ -10,19 +13,31 @@ const audiences: GuideAudience[] = ["Students", "MBA candidates", "Working profe
 const categories: GuideCategory[] = ["CV evidence", "Career direction", "Application workflow", "UAE job search", "Privacy & troubleshooting"];
 const dateLabel = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 
-function GuideCard({ guide }: { guide: CareerGuide }) {
-  return <article className="cg-card">
-    <div className="cg-card-meta"><span>{guide.category}</span><span>{guide.readingMinutes} min read</span></div>
+// Region-specific guides stay in the default library (all guides are listed); the task filter narrows them.
+const REGION_CATEGORY: GuideCategory = "UAE job search";
+/** The category tag a reader sees. Region-scoped guides say so in plain words; the underlying category and sources are unchanged. */
+function categoryLabel(guide: CareerGuide): string {
+  if (guide.category !== REGION_CATEGORY) return guide.category;
+  return guide.slug === "verify-job-listing-source" ? "Job listing safety" : "Regional guide";
+}
+const categoryIcon: Record<GuideCategory, LucideIcon> = { "CV evidence": FileCheck2, "Career direction": Compass, "Application workflow": ListChecks, "UAE job search": MapPin, "Privacy & troubleshooting": ShieldCheck };
+const featuredSlugs = ["first-application-pack", "cv-job-description-evidence", "role-filtering-before-applying"];
+
+function GuideCard({ guide, feature = false }: { guide: CareerGuide; feature?: boolean }) {
+  const Icon = categoryIcon[guide.category];
+  return <article className={`cg-card${feature ? " cg-card--feature" : ""}`} data-category={guide.category}>
+    <span className="cg-card-glyph" aria-hidden="true"><Icon size={18} /></span>
+    <div className="cg-card-meta"><span>{categoryLabel(guide)}</span><span>{guide.readingMinutes} min read</span></div>
     <h3><Link to={`/guides/${guide.slug}`}>{guide.title}<ArrowRight size={18} aria-hidden="true" /></Link></h3>
     <p>{guide.description}</p>
-    <span className="cg-card-audience">For {guide.audience.toLowerCase()}</span>
+    <span className="cg-card-audience">{guide.audience === "All applicants" ? "For all applicants" : `For ${guide.audience.replace(/^(\w)(?!BA)(.*)$/, (_m: string, first: string, rest: string) => first.toLowerCase() + rest)}`}</span>
   </article>;
 }
 
 function GuideActions() {
-  return <aside className="cg-actions" aria-labelledby="cg-actions-title">
-    <div><p className="cg-eyebrow">PUT IT INTO PRACTICE</p><h2 id="cg-actions-title">Start with one real vacancy.</h2><p>Bring your CV and one job description. Create a free account, review the evidence, approve your wording and download your CV.</p></div>
-    <div className="cg-action-links"><Link className="cg-primary" to="/check">Check my CV for free <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/loop">Explore saving and reuse</Link><Link className="cg-help-link" to="/contact">Get help with the workflow</Link><p>CV Check and Automated Job Loop require sign-in. You send messages and submit applications yourself.</p></div>
+  return <aside className="cg-actions" aria-labelledby="cg-actions-title" data-reveal>
+    <div><h2 id="cg-actions-title">Start with one real vacancy.</h2><p>Bring your CV and one job description. Create a free account, see which experience fits, and download a tailored CV.</p></div>
+    <div className="cg-action-links"><Link className="cg-primary" to="/onboarding">Start my search <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/check">Try the free CV Check</Link><p>CV Check and Automated Job Loop need a free account. <Link className="cg-help-link" to="/loop">Explore saving and reuse</Link> · <Link className="cg-help-link" to="/contact">Get help with the workflow</Link></p></div>
   </aside>;
 }
 
@@ -31,6 +46,7 @@ function EditorialNote() {
 }
 
 export default function CareerGuides() {
+  useReveal();
   const [query, setQuery] = useState("");
   const [audience, setAudience] = useState("all");
   const [category, setCategory] = useState("all");
@@ -42,15 +58,18 @@ export default function CareerGuides() {
     });
   }, [query, audience, category]);
   const hasFilters = query.trim() || audience !== "all" || category !== "all";
+  const [showAll, setShowAll] = useState(false);
+  const featured = hasFilters ? [] : featuredSlugs.map(slug => filtered.find(guide => guide.slug === slug)).filter((guide): guide is CareerGuide => Boolean(guide));
+  const rest = filtered.filter(guide => !featured.includes(guide));
   function reset() { setQuery(""); setAudience("all"); setCategory("all"); }
-  return <main className="career-guides">
-    <Helmet><title>Practical CV and application guides | Jobvance</title><meta name="description" content="Original guides for students, MBA candidates and busy professionals. Review CV evidence, prepare applications, verify UAE job sources and troubleshoot." /><link rel="canonical" href={`${SITE}/guides`} /><meta property="og:title" content="Practical CV and application guides | Jobvance" /><meta property="og:description" content="Useful next steps for your CV, career direction and application workflow. Practical guides with worked examples and source links." /><meta property="og:url" content={`${SITE}/guides`} /><meta property="og:type" content="website" /></Helmet>
-    <header className="cg-hero"><p className="cg-eyebrow"><BookOpen size={16} aria-hidden="true" /> JOBVANCE GUIDES</p><h1>Practical help for your <span>next application.</span></h1><p>Practical reading for students, MBA candidates and professionals fitting a move around work. Choose the task in front of you and leave with something you can use.</p><div className="cg-hero-links"><Link to="/guides/first-application-pack">Preparing your first application <ArrowRight size={16} aria-hidden="true" /></Link><Link to="/guides/cv-job-description-evidence">Checking your CV evidence <ArrowRight size={16} aria-hidden="true" /></Link></div><p className="cg-public-note">20 practical guides · Free to read · Worked examples and source links</p></header>
+  return <main className="career-guides jv-rails">
+    <Helmet><title>Practical CV and application guides | Jobvance</title><meta name="description" content="Original guides for students, MBA candidates and busy professionals. Review CV evidence, prepare applications, check job listings and troubleshoot." /><link rel="canonical" href={`${SITE}/guides`} /><meta property="og:title" content="Practical CV and application guides | Jobvance" /><meta property="og:description" content="Useful next steps for your CV, career direction and application workflow. Practical guides with worked examples and source links." /><meta property="og:url" content={`${SITE}/guides`} /><meta property="og:type" content="website" /></Helmet>
+    <header className="cg-hero jv-aside-grid"><div className="jv-aside-slot"><GuidesFeaturedAside category={categoryLabel(getCareerGuide(featuredSlugs[0])!)} minutes={getCareerGuide(featuredSlugs[0])!.readingMinutes} title={getCareerGuide(featuredSlugs[0])!.title} /></div><p className="cg-eyebrow"><BookOpen size={16} aria-hidden="true" /> JOBVANCE GUIDES</p><h1 className="jv-enter-h1">Practical help for your next application.</h1><p className="jv-enter">Practical reading for students, MBA candidates and professionals fitting a move around work. Choose the task in front of you and leave with something you can use.</p><div className="cg-hero-links"><Link className="jv-btn jv-btn--primary jv-btn--lg cg-hero-cta" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link><span className="cg-hero-sub"><Link className="jv-link" to="/guides/first-application-pack"><span>Preparing your first application</span><ArrowRight aria-hidden="true" /></Link><Link className="jv-link" to="/guides/cv-job-description-evidence"><span>Checking your CV evidence</span><ArrowRight aria-hidden="true" /></Link></span></div><p className="cg-public-note">{careerGuides.length} practical guides · Free to read · Worked examples and source links</p></header>
     <section className="cg-library" aria-labelledby="cg-library-title">
       <div className="cg-library-heading"><div><p className="cg-eyebrow">FIND YOUR TASK</p><h2 id="cg-library-title">The guide library</h2></div><p>Common guides appear alongside your audience's guides.</p></div>
-      <div className="cg-filters"><div className="cg-field cg-search"><label htmlFor="cg-search">Search the guides</label><div><Search size={17} aria-hidden="true" /><input id="cg-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Try projects, PDF or follow-up" /></div></div><div className="cg-field"><label htmlFor="cg-audience">Your stage</label><select id="cg-audience" value={audience} onChange={event => setAudience(event.target.value)}><option value="all">All stages</option>{audiences.map(item => <option key={item} value={item}>{item}</option>)}</select></div><div className="cg-field"><label htmlFor="cg-category">Your task</label><select id="cg-category" value={category} onChange={event => setCategory(event.target.value)}><option value="all">All tasks</option>{categories.map(item => <option key={item} value={item}>{item}</option>)}</select></div></div>
+      <div className="cg-filters"><div className="cg-field cg-search"><label htmlFor="cg-search">Search the guides</label><div><Search size={17} aria-hidden="true" /><input id="cg-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Try projects, PDF or follow-up" /></div></div><div className="cg-field"><label htmlFor="cg-audience">Your stage</label><select id="cg-audience" value={audience} onChange={event => setAudience(event.target.value)}><option value="all">All stages</option>{audiences.map(item => <option key={item} value={item}>{item}</option>)}</select></div><div className="cg-field"><label htmlFor="cg-category">Your task</label><select id="cg-category" value={category} onChange={event => setCategory(event.target.value)}><option value="all">All tasks</option>{categories.filter(item => item !== REGION_CATEGORY).map(item => <option key={item} value={item}>{item}</option>)}<optgroup label="Other regions"><option value={REGION_CATEGORY}>UAE job search</option></optgroup></select></div></div>
       <div className="cg-results-bar"><p role="status" aria-live="polite">{filtered.length} {filtered.length === 1 ? "guide" : "guides"}{hasFilters ? " match your choices" : " to explore"}</p>{hasFilters && <button type="button" onClick={reset}>Clear search and filters</button>}</div>
-      {filtered.length ? <div className="cg-grid">{filtered.map(guide => <GuideCard key={guide.slug} guide={guide} />)}</div> : <div className="cg-empty"><h3>No guide matches these choices yet.</h3><p>Try a shorter phrase such as “CV”, “projects” or “privacy”, or clear the filters to browse all 20 guides.</p><button className="cg-primary" type="button" onClick={reset}>Show all guides</button><p>You can start with <Link to="/guides/first-application-pack">preparing a first application pack</Link> or <Link to="/contact">ask for workflow help</Link>.</p></div>}
+      {filtered.length ? <>{featured.length > 0 && <div className="cg-featured" data-reveal>{featured.map(guide => <GuideCard key={guide.slug} guide={guide} feature />)}</div>}<div className={`cg-grid${showAll ? "" : " cg-grid--collapsed"}`}>{rest.map(guide => <GuideCard key={guide.slug} guide={guide} />)}</div>{rest.length > 6 && !showAll && <button type="button" className="cg-more" onClick={() => setShowAll(true)}>Show all {rest.length + featured.length} guides</button>}</> : <div className="cg-empty"><h3>No guide matches these choices yet.</h3><p>Try a shorter phrase such as “CV”, “projects” or “privacy”, or clear the filters to browse all {careerGuides.length} guides.</p><button className="cg-primary" type="button" onClick={reset}>Show all guides</button><p>You can start with <Link to="/guides/first-application-pack">preparing a first application pack</Link> or <Link to="/contact">ask for workflow help</Link>.</p></div>}
     </section>
     <EditorialNote /><GuideActions />
   </main>;
@@ -68,8 +87,8 @@ export function CareerGuideArticle() {
     author: { "@type": "Organization", name: editorialPolicy.publisher },
     publisher: { "@type": "Organization", name: "Jobvance", url: SITE },
   };
-  return <main className="career-guides cg-article-page">
-    <Helmet><title>{guide.title} | Jobvance</title><meta name="description" content={guide.description} /><link rel="canonical" href={canonical} /><meta property="og:title" content={guide.title} /><meta property="og:description" content={guide.description} /><meta property="og:url" content={canonical} /><meta property="og:type" content="article" /><meta property="article:published_time" content={guide.publishedAt} /><meta property="article:modified_time" content={guide.updatedAt} /><script type="application/ld+json">{JSON.stringify(articleSchema)}</script></Helmet>
+  return <main className="career-guides cg-article-page jv-rails">
+    <Helmet><title>{guideDocumentTitle(guide.title)}</title><meta name="description" content={guide.description} /><link rel="canonical" href={canonical} /><meta property="og:title" content={guide.title} /><meta property="og:description" content={guide.description} /><meta property="og:url" content={canonical} /><meta property="og:type" content="article" /><meta property="article:published_time" content={guide.publishedAt} /><meta property="article:modified_time" content={guide.updatedAt} /><script type="application/ld+json">{JSON.stringify(articleSchema)}</script></Helmet>
     <nav className="cg-breadcrumb" aria-label="Breadcrumb"><Link to="/guides"><ArrowLeft size={16} aria-hidden="true" /> All guides</Link><span aria-hidden="true">/</span><span>{guide.category}</span></nav>
     <article>
       <header className="cg-article-header"><p className="cg-eyebrow">{guide.category} · {guide.audience}</p><h1>{guide.title}</h1><p className="cg-summary">{guide.summary}</p><p className="cg-byline">By <span>{editorialPolicy.publisher}</span> · {guide.readingMinutes} min read<br /><span>Published <time dateTime={guide.publishedAt}>{dateLabel(guide.publishedAt)}</time> · Updated <time dateTime={guide.updatedAt}>{dateLabel(guide.updatedAt)}</time></span></p></header>

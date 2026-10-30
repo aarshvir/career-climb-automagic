@@ -224,7 +224,7 @@ it('cache cleanup also removes only the current account’s interest-form marker
 describe('Automated Job Loop account entry and confirmation recovery', () => {
   it('keeps the Automated Job Loop outcome and first steps beside signup on mobile markup', async () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
-    expect(await screen.findByText('YOUR AUTOMATED JOB LOOP STARTS HERE')).toBeInTheDocument();
+    expect(await screen.findByText('Your Automated Job Loop')).toBeInTheDocument();
     expect(screen.getByRole('list', { name:'After creating your account' })).toHaveTextContent('run your first search');
     expect(screen.getByText(/Automated Job Loop plans from US\$29\/month/)).toBeInTheDocument();
     expect(sdk.signUp).not.toHaveBeenCalled();
@@ -234,7 +234,8 @@ describe('Automated Job Loop account entry and confirmation recovery', () => {
     const benefits = await screen.findByRole('list', { name:'What the Automated Job Loop does' });
     expect(benefits).toHaveTextContent('Roles matched to your CV.');
     expect(benefits).toHaveTextContent('A tailored CV for each role.');
-    expect(benefits).toHaveTextContent('Role-specific CVs written to fit each job’s requirements.');
+    expect(benefits).toHaveTextContent('Written to fit each job’s requirements.');
+    expect(benefits).toHaveTextContent('Built only from facts you confirm.');
     expect(screen.getByText('Your account also includes 3 AI-tailored CVs a month, free.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name:'See plans' })).toHaveAttribute('href', '/pricing');
     // The explanation sits above the form fields, and the form is unchanged.
@@ -290,4 +291,95 @@ it('does not reuse pending signup credentials after an SDK account change and si
   const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'Another Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'another-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.type(screen.getByLabelText('Confirm password'),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));await screen.findByText('Check your email');
   act(()=>{sdk.listener!('SIGNED_IN',signedIn);sdk.listener!('SIGNED_OUT',null);});
   await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(sdk.signInWithPassword).not.toHaveBeenCalled();expect(screen.getByLabelText('Password',{exact:true})).toHaveValue('');
+});
+
+describe('signup validation blocks submission and names each failing field', () => {
+  const open = () => render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
+
+  it('makes no signUp call for a blank form and marks every required field invalid with its own message', async () => {
+    open();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Create account' }));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    const name = screen.getByLabelText('Full name'), phone = screen.getByLabelText('Mobile number'), email = screen.getByLabelText('Email address');
+    const password = screen.getByLabelText('Password', { exact: true });
+    for (const field of [name, phone, email, password]) expect(field).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByText('Please enter your full name.')).toBeInTheDocument();
+    expect(screen.getByText('Please enter a valid mobile number, including the country code.')).toBeInTheDocument();
+    expect(screen.getAllByText('Please enter a valid email address.').length).toBeGreaterThan(0);
+    expect(screen.getByText('Choose a password to continue.')).toBeInTheDocument();
+    expect(name).toHaveFocus();
+  });
+
+  it('makes no signUp call when the confirmation does not match', async () => {
+    open();
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.type(screen.getByLabelText('Email address'), 'person@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.type(screen.getByLabelText('Confirm password'), 'Password124');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Confirm password')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getAllByText('Passwords do not match.').length).toBeGreaterThan(0);
+  });
+
+  it('clears a field message when that field is edited', async () => {
+    open();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Create account' }));
+    await user.type(screen.getByLabelText('Full name'), 'Casey Person');
+    expect(screen.getByLabelText('Full name')).not.toHaveAttribute('aria-invalid');
+  });
+});
+
+describe('round 8: free CV Check entry copy and the signup contract', () => {
+  it('opens the free CV Check entry on its own headline, not the Automated Job Loop setup headline', async () => {
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fcheck']}><Auth /></MemoryRouter></AuthProvider>);
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Start your free CV Check.');
+    expect(screen.getByText('Download PDF, Word or text')).toBeInTheDocument();
+    expect(screen.queryByText(/Set up your Automated Job Loop/)).not.toBeInTheDocument();
+  });
+  it('keeps the Automated Job Loop headline for the onboarding entry', async () => {
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Set up your Automated Job Loop and let it run.');
+  });
+  it('blocks an invalid signup per field, then sends the same contact details on a valid one', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Mobile number'), '12');
+    await user.type(screen.getByLabelText('Email address'), 'not-an-email');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.type(screen.getByLabelText('Confirm password'), 'Password999');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    await user.clear(screen.getByLabelText('Mobile number')); await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.clear(screen.getByLabelText('Email address')); await user.type(screen.getByLabelText('Email address'), 'person@example.test');
+    await user.clear(screen.getByLabelText('Confirm password')); await user.type(screen.getByLabelText('Confirm password'), 'Password123');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(await screen.findByText('Check your email')).toBeInTheDocument();
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+    expect(sdk.signUp.mock.calls[0][0]).toMatchObject({ email: 'person@example.test', password: 'Password123' });
+    expect(JSON.stringify(sdk.signUp.mock.calls[0][0])).toContain('Casey Person');
+  });
+  it('does not spend rate-limit attempts on blank or invalid submits: three blank submits, then a valid one, still signs up', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
+    const user = userEvent.setup();
+    const email = 'limiter-order@example.test';
+    await user.type(await screen.findByLabelText('Email address'), email);
+    for (let attempt = 0; attempt < 6; attempt++) await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Too many attempts/)).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.type(screen.getByLabelText('Confirm password'), 'Password123');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(await screen.findByText('Check your email')).toBeInTheDocument();
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+  });
 });

@@ -6,22 +6,25 @@ import "./LoopRunMock.css";
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // Placeholder employers and times only. No scores, percentages or result counts: this is an illustration.
-// One US 12-hour format throughout, and every row precedes the next run.
+// One US 12-hour format throughout. Rows run newest first and every run precedes the next one (Wed), so Monday leads Friday.
 const rows = [
-  { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:02 AM" },
-  { role: "Data Analyst", company: "Contoso Health", time: "Mon 7:02 AM" },
-  { role: "Junior Product Analyst", company: "Fabrikam", time: "Mon 7:04 AM" },
+  { role: "Junior Product Analyst", company: "Fabrikam", time: "Mon 7:00 AM" },
+  { role: "Data Analyst", company: "Contoso Health", time: "Wed 7:00 AM" },
+  { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:00 AM" },
 ];
 
 /** Hero product mock: an example Automated Job Loop run, laid out as a run log in HTML and CSS.
  * Its one short pass (each row: found, CV tailored, ready for review) ends within 5 seconds, so it needs no pause control.
- * The third row (desktop only) rests on "CV tailored", so the resting state shows the progression, not three identical tags. */
+ * The newest row rests on "CV tailored", so the resting state shows the progression, not three identical tags. All three rows show at every width, so the footer count always matches. */
 export default function LoopRunMock() {
   const ref = useRef<HTMLElement>(null);
   useBeforePaint(() => {
     const node = ref.current;
     // A prerendered page keeps its server-painted "Ready for review" frame, so nothing steps backwards on mount.
-    if (!node || document.documentElement.classList.contains("jv-prerendered")) return;
+    if (!node) return;
+    // A prerendered page keeps its painted "Ready for review" frame and only settles forward: a 2px rise and a brief ring on each
+    // status, in row order. Nothing steps backwards. Other pages play the full found, tailored, ready pass.
+    if (document.documentElement.classList.contains("jv-prerendered")) { node.classList.add("is-settle"); return; }
     node.classList.add("is-live");
     if (typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(([entry]) => node.classList.toggle("is-offscreen", !entry.isIntersecting));
@@ -55,6 +58,6 @@ export default function LoopRunMock() {
       </ul>
       <p className="jv-sr-only">Each job moves from found, to CV tailored, to ready for your review.</p>
     </div>
-    <p className="jv-mock-foot"><span aria-hidden="true" />3 jobs found · 3 tailored CVs ready</p>
+    <p className="jv-mock-foot"><span aria-hidden="true" />3 jobs · 3 tailored CVs</p>
   </figure>;
 }

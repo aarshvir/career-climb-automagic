@@ -19,12 +19,12 @@ afterEach(cleanup);
 describe('audience entry points', () => {
   it.each(['student', 'mba', 'professional'] as const)('offers first value without sign-in for %s', audience => {
     render(page(audience));
-    const start = screen.getByRole('link', { name: 'Check my CV against a job' });
-    expect(start).toHaveAttribute('href', `/check?audience=${audience}`);
+    // Destinations match the live site: the hero leads with the check the page describes.
+    expect(screen.getByRole('link', { name: 'Try the free CV Check' })).toHaveAttribute('href', `/check?audience=${audience}`);
     expect(screen.getByRole('link', { name: /See how the Automated Job Loop works/ })).toHaveAttribute('href', '/job-loop');
     expect(screen.getByRole('link', { name: /Sign in to save my experience/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].title);
-    expect(screen.getByText('Example application')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].searchTitle);
+    expect(screen.getByText(/^Example application/)).toBeInTheDocument();
   });
   it('opens the selected private setup for a signed-in candidate', () => {
     account.user = { id: 'fictional-owner' }; render(page('professional'));
@@ -41,19 +41,27 @@ describe('audience entry points', () => {
   });
 });
 
+/** Legal sections are split into short paragraphs: read a section as all text up to the next heading. */
+function sectionText(heading: Element) {
+  let text = '';
+  for (let node = heading.nextElementSibling; node && node.tagName !== 'H2'; node = node.nextElementSibling) text += ` ${node.textContent}`;
+  return text;
+}
+
 describe('current offer', () => {
   it('starts free and offers only the three one-time passes, never the legacy pack or a subscription', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    const passes = screen.getByRole('region', { name: /AI CV tailoring/ });
+    const passes = screen.getByRole('region', { name: /one-time passes/ });
     expect(within(passes).getAllByRole('heading', { level: 3 }).map(heading => heading.textContent)).toEqual(['Free', 'Sprint', 'Job Search', 'Career Move']);
-    expect(within(passes).getByRole('link', { name: /Check my CV against a job/ })).toHaveAttribute('href', '/check');
+    expect(within(passes).getByRole('link', { name: 'Check my CV' })).toHaveAttribute('href', '/check');
     expect(within(passes).queryByText(/\$15|\$29|ten application packs|per month, billed|cancel anytime|free trial/i)).not.toBeInTheDocument();
     expect(screen.getByText('One-time payment. No subscription, nothing renews.')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
   it('states the new free allowance everywhere the old beta line was', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByText('Choose your Automated Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.')).toBeInTheDocument();
+    expect(document.body.textContent).toContain('Choose how often your Automated Job Loop runs. Plans from $29/month, with a free account to start.');
+    expect(screen.getByRole('heading', { name: 'Not ready to choose? Start free.' })).toBeInTheDocument();
     expect(screen.queryByText(/2 tailored CVs a day|8 when signed in/i)).not.toBeInTheDocument();
   });
   it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
@@ -63,10 +71,10 @@ describe('current offer', () => {
     cleanup();
     render(<HelmetProvider><MemoryRouter><ProductPage kind="refund" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByRole('heading', { name: '7-day money-back promise' }).nextElementSibling).toHaveTextContent(/within 7 days of buying it.*fewer than 5 tailored CVs/);
-    expect(screen.getByRole('heading', { name: 'What a refund does' }).nextElementSibling).toHaveTextContent(/stops working straight away.*partial refund/);
+    expect(sectionText(screen.getByRole('heading', { name: 'What a refund does' }))).toMatch(/stops working straight away.*partial refund/);
     cleanup();
     render(<HelmetProvider><MemoryRouter><ProductPage kind="terms" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByRole('heading', { name: 'Passes' }).nextElementSibling).toHaveTextContent(/Sprint \(\$9, 7 days, 25 AI-tailored CVs\).*Nothing renews/);
+    expect(sectionText(screen.getByRole('heading', { name: 'Passes' }))).toMatch(/Sprint \(\$9, 7 days, 25 AI-tailored CVs\).*Nothing renews/);
     expect(screen.queryByText(/No paid plan is currently offered for sale/)).not.toBeInTheDocument();
   });
 });
@@ -74,9 +82,8 @@ describe('current offer', () => {
 describe('Automated Job Loop access and monthly plans', () => {
   it('leads with monthly Automated Job Loop and requires an account before checking purchase availability', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: 'Start your Automated Job Loop' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Start my Automated Job Loop' })).toHaveAttribute('href', '/onboarding');
-    expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
+    expect(screen.getByRole('link', { name: 'Start my search' })).toHaveAttribute('href', '/onboarding');
+    expect(screen.getByRole('link', { name: 'Check my CV' })).toHaveAttribute('href', '/check');
     expect(screen.queryByText(/beta|ten accounts|no account needed/i)).not.toBeInTheDocument();
     const proposals = screen.getByRole('region', { name: 'Automated Job Loop monthly plans' });
     expect(proposals).toHaveTextContent('No trial or subscription starts automatically');
@@ -86,7 +93,7 @@ describe('Automated Job Loop access and monthly plans', () => {
     expect(proposals).toHaveTextContent('1 Automated Job Loop run a week');
     expect(proposals).toHaveTextContent('3 Automated Job Loop runs a week');
     expect(proposals).toHaveTextContent('1 Automated Job Loop run a day');
-    expect(within(proposals).getByRole('link',{name:'Sign in for Starter'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
+    expect(within(proposals).getByRole('link',{name:'Choose Starter'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
     expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
     expect(proposals).toHaveTextContent('does not cancel subscription billing');
   });
@@ -103,14 +110,14 @@ describe('Automated Job Loop first homepage', () => {
     expect(stages[1]).toHaveTextContent('Choose your search');
     expect(stages[1]).toHaveTextContent('roles and locations');
     expect(stages[2]).toHaveTextContent('Review your dashboard');
-    expect(stages[2]).toHaveTextContent('approve your documents');
+    expect(stages[2]).toHaveTextContent('tailored CV for each');
     // Short actions sit under headings that name the product; the final call to action keeps the full name.
     expect(screen.getByText('Automated Job Loop', { selector: '.jv-hero-eyebrow' })).toBeInTheDocument();
     expect(screen.getByText('How Automated Job Loop works')).toBeInTheDocument();
-    const starts = [...screen.getAllByRole('link', { name: 'Start my search' }), ...screen.getAllByRole('link', { name: 'Start my Automated Job Loop' })];
-    expect(starts).toHaveLength(3);
+    const starts = screen.getAllByRole('link', { name: 'Start my search' });
+    expect(starts).toHaveLength(4);
     for (const link of starts) expect(link).toHaveAttribute('href', '/onboarding');
-    expect(screen.getByRole('link', { name: /Try the free CV Check/ })).toHaveAttribute('href', '/check');
+    for (const link of screen.getAllByRole('link', { name: /Try the free CV Check/ })) expect(link).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
     expect(screen.getByText(/runs in the background and finds the best-matching jobs/, { selector: '.jv-hero-lead' })).toHaveTextContent('Choose your roles and locations once');
     expect(screen.getByText(/Each run looks through connected sources/)).toHaveTextContent('Some runs may find nothing new');
@@ -118,21 +125,31 @@ describe('Automated Job Loop first homepage', () => {
 });
 
 describe('published draft privacy guidance', () => {
-  it('links the concise guest privacy explanation to the full storage choices', () => {
+  it('keeps privacy reachable: the footer links the privacy page and the page keeps the Meta Pixel and opt-out disclosures', async () => {
+    const { default: MvpFooter } = await import('@/components/layout/MvpFooter');
+    render(<MemoryRouter><MvpFooter /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy');
+    expect(screen.getByRole('link', { name: 'Your privacy choices' })).toHaveAttribute('href', '/privacy#advertising-measurement');
+    cleanup();
+    const { container } = render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);
+    expect(container.textContent).toContain('Meta Pixel from Meta Platforms');
+    expect(container.textContent).toContain('Global Privacy Control');
+  });
+  it('shows the home hero link to how it works and keeps the ATS line', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByRole('link', { name: 'How your CV is handled' })).toHaveAttribute('href', '/privacy');
+    expect(screen.getByRole('link', { name: 'See how it works' })).toHaveAttribute('href', '/how-it-works');
     expect(screen.getByText(/^Tailored, role-specific CVs/)).toHaveTextContent('built for a high ATS match');
   });
   it('publishes the consented tab-storage exposure and requires renewed approval after restoration', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);
-    const paragraph = screen.getByRole('heading', { name: 'Optional refresh recovery' }).nextElementSibling;
-    expect(paragraph).toHaveTextContent(/Anyone using the same browser tab may access this copy/);
-    expect(paragraph).toHaveTextContent(/Restoring a draft clears its approval/);
-    expect(paragraph).toHaveTextContent(/does not save the check to your account/);
-    const models = screen.getByRole('heading', { name: 'Optional models and search' }).nextElementSibling;
-    expect(models).toHaveTextContent('comparison without AI runs on your device');
-    expect(models).toHaveTextContent('AI tailoring sends your CV and vacancy text');
-    const local = screen.getByRole('heading', { name: 'Your free check' }).nextElementSibling;
-    expect(local).toHaveTextContent(/Without optional tab-storage permission, refreshing or closing the tab clears the draft/);
+    const paragraph = sectionText(screen.getByRole('heading', { name: 'Optional refresh recovery' }));
+    expect(paragraph).toMatch(/Anyone using the same browser tab may access this copy/);
+    expect(paragraph).toMatch(/Restoring a draft clears its approval/);
+    expect(paragraph).toMatch(/does not save the check to your account/);
+    const models = sectionText(screen.getByRole('heading', { name: 'Optional models and search' }));
+    expect(models).toContain('comparison without AI runs on your device');
+    expect(models).toContain('AI tailoring sends your CV and vacancy text');
+    const local = sectionText(screen.getByRole('heading', { name: 'Your free check' }));
+    expect(local).toMatch(/Without optional tab-storage permission, refreshing or closing the tab clears the draft/);
   });
 });

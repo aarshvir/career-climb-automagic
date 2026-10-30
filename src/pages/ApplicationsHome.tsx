@@ -140,7 +140,7 @@ export default function ApplicationsHome() {
   useEffect(() => {
     if (!scope || !current(scope) || deliberateChoice?.scopeKey !== scope.key || deliberateChoice.id !== selected?.id) return;
     detailRegion.current?.focus({ preventScroll: true });
-    detailRegion.current?.scrollIntoView?.({ block: 'start' });
+    detailRegion.current?.scrollIntoView?.({ block: 'start', behavior: 'auto' });
     setDeliberateChoice(null);
   }, [deliberateChoice, selected?.id, scope?.key, current]);
   function choose(row: ApplicationHomeRow) {

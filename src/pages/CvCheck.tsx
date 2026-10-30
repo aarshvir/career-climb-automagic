@@ -46,7 +46,7 @@ const statusLabels: Record<EvidenceStatus, string> = {
 };
 const statusStyles: Record<EvidenceStatus, string> = {
   direct: "border-emerald-200 bg-emerald-50 text-emerald-950", partial: "border-amber-200 bg-amber-50 text-amber-950",
-  missing: "border-slate-200 bg-slate-50 text-slate-800", review: "border-blue-200 bg-blue-50 text-blue-950",
+  missing: "border-[var(--jv-line-strong)] bg-[var(--jv-sunken)] text-[var(--jv-ink-2)]", review: "border-[var(--jv-brand-ink)] bg-[var(--jv-brand-tint)] text-[var(--jv-brand-ink)]",
 };
 type ApprovedCheck = { draft: CheckDraft; report: EvidenceReport; key: string; requestId: string };
 type Tailoring = { changes: (TailorChange & { reverted?: boolean })[]; questions: string[]; rejectedCount: number; ownerId: string | null; facts: string[]; factSources: number[]; sourceText: string; jobDescription: string; jobTitle: string; company: string; withdrawnFacts?: number[] };

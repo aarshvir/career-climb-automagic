@@ -1,0 +1,66 @@
+/* Home hero: one staged product object. A forest stage (the same glow as every dark band, a lime rim along its top edge and a fine grain) carries the run window; the tailored résumé rises from the
+   stage's lower edge, tilted a degree or two. Mobile-first: the same composition at every width, only smaller. */
+.hs { position: relative; min-width: 0; isolation: isolate; }
+/* The light the stage casts on the pale page. */
+.hs::before { content: ""; position: absolute; inset: 8% -6% -10%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(var(--jv-brand-rgb) / .22), transparent 72%), radial-gradient(40% 30% at 70% 90%, rgb(var(--jv-signal-rgb) / .2), transparent 80%); }
+.hs-panel { position: relative; overflow: hidden; display: grid; gap: 14px; padding: 14px 14px 0; border-radius: var(--r-lg); background: var(--jv-glow), var(--jv-forest); box-shadow: inset 0 1px 0 rgb(var(--jv-signal-rgb) / .38), inset 0 0 0 1px rgb(255 255 255 / .05), 0 40px 80px -32px rgb(var(--jv-ink-rgb) / .55); }
+/* Fine grain (an inline SVG filter, no request): keeps the dark stage from banding. */
+.hs-panel::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .07; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.hs-win { position: relative; z-index: 1; overflow: hidden; border-radius: var(--r-md); background: #fff; box-shadow: 0 24px 48px -20px rgb(0 0 0 / .55), 0 0 0 1px rgb(255 255 255 / .08); }
+.hs-win-bar { display: none; }
+.hs-win-body .jv-mock { max-width: none; border: 0; border-radius: 0; box-shadow: none; }
+@media (min-width: 640px) {
+  .hs-win-bar { display: flex; align-items: center; gap: 20px; height: 40px; padding: 0 14px; border-bottom: 1px solid var(--jv-line); background: var(--jv-bg-subtle); }
+  .hs-dots { display: inline-flex; gap: 6px; }
+  .hs-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--jv-line-strong); }
+  .hs-tabs { display: flex; gap: 2px; color: var(--jv-ink-3); font-size: var(--t-sm); font-weight: 500; line-height: 1; }
+  .hs-tabs > * { padding: 7px 11px; border-radius: var(--r-pill); }
+  .hs-tabs > b { background: #fff; color: var(--jv-ink); font-weight: 500; box-shadow: var(--sh-1); }
+}
+
+/* The résumé: an A4 page (1 : 1.414) under a thin viewer bar. Only its top part is visible, the stage's edge crops it. */
+.rs { position: relative; z-index: 1; width: min(300px, 82%); margin: 0 0 0 auto; overflow: hidden; border-radius: 10px 10px 0 0; background: #fff; box-shadow: 0 -12px 40px -12px rgb(0 0 0 / .5), 0 0 0 1px rgb(255 255 255 / .08); transform: rotate(1.6deg); transform-origin: 50% 100%; margin-right: -4px; -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent 100%); mask-image: linear-gradient(180deg, #000 62%, transparent 100%); }
+.rs-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 30px; padding: 0 12px; border-bottom: 1px solid var(--jv-line); background: var(--jv-bg-subtle); color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1; }
+.rs-file { display: inline-flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-file svg { width: 13px; height: 13px; flex-shrink: 0; }
+.rs-tag { flex-shrink: 0; padding: 3px 8px; border-radius: var(--r-pill); background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-family: var(--font-sans); font-size: var(--t-xs); font-weight: 500; }
+.rs-page { padding: 18px 20px 0; height: 160px; overflow: hidden; color: var(--jv-ink); font-size: 11px; line-height: 1.45; }
+.rs-page :where(p) { margin: 0; }
+.rs-name { font-size: 19px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
+.rs-role { margin-top: 2px; color: var(--jv-ink-3); font-size: 11px; }
+.rs-rule { height: 2px; margin: 10px 0 8px; border: 0; background: var(--jv-brand); }
+.rs-h { margin-top: 8px; color: var(--jv-brand-ink); font-family: var(--font-mono); font-size: 9px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
+.rs-p { margin-top: 3px; color: var(--jv-ink-2); }
+.rs-job { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 11px; }
+.rs-job b { font-weight: 600; }
+.rs-job span { color: var(--jv-ink-3); }
+.rs-list { margin: 3px 0 0; padding: 0 0 0 14px; color: var(--jv-ink-2); }
+.rs-list li { margin: 0 0 2px; padding: 0; }
+.rs .rs-page mark { padding: 0 2px; border-radius: 2px; background: rgb(var(--jv-signal-rgb) / .62); color: inherit; }
+
+@media (min-width: 1024px) {
+  .hs-panel { gap: 18px; padding: 20px 20px 0; }
+  .rs { width: min(318px, 74%); }
+  .rs-page { height: 176px; }
+}
+/* Entrance: the window and the résumé settle in sequence (opacity and transform only; the global reduced-motion rule switches both off). */
+@media (prefers-reduced-motion: no-preference) {
+  .hs-sheet.jv-enter-card { animation-delay: 260ms; animation-duration: 640ms; }
+}
+
+/* Layout: the stage replaces the old visual column; these selectors outrank the layered rules in Home.css that still serve the Automated Job Loop page. */
+:root .jv-home .jv-hero-visual.jv-hero-visual--stage { display: block; min-height: 0; padding: 0; margin: 8px 0 0; align-self: center; }
+:root .jv-home .jv-hero-visual.jv-hero-visual--stage::before, :root .jv-home .jv-hero-visual.jv-hero-visual--stage::after { content: none; display: none; }
+/* 24px (or more) of clear space between the stage and the proof strip, at every width. */
+:root .jv-home .jv-hero:not(.lo-loop-hero) { padding-bottom: 40px; }
+@media (min-width: 1024px) {
+  :root .jv-home .jv-hero:not(.lo-loop-hero) { padding-bottom: 48px; }
+  :root .jv-home .jv-hero-visual.jv-hero-visual--stage { margin: 0; }
+}
+@media (min-width: 1280px) {
+  :root .jv-home .jv-hero:not(.lo-loop-hero) { padding-bottom: 56px; }
+  :root .jv-home .jv-hero-visual.jv-hero-visual--stage { margin-right: -40px; }
+}
+/* "Built for" lives in the hero's left column: it fills the space under the actions and keeps the three audience pages one tap away. Phones: it moves out (the menu and footer carry the links). */
+:root .jv-home .jv-hero-copy .jv-built-for { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--jv-line); }
+@media (max-width: 639px) { :root .jv-home .jv-hero-copy .jv-built-for { display: none; } }

@@ -1,3 +1,4 @@
+import { smoothBehavior } from '@/lib/motion';
 import { readApplicationSource } from '@/lib/application-source-selection';
 import { workspaceReturnPath } from '@/lib/account-return';
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -212,6 +213,7 @@ export default function Workspace() {
   const lock = useRef(false);
   const operationOwner = useRef(user?.id ?? null), operationRevision = useRef(0), operationMounted = useRef(true);
   operationOwner.current = user?.id ?? null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the cleanup must bump the live revision counter, so operations still in flight are discarded on unmount.
   useEffect(() => { operationMounted.current = true; return () => { operationMounted.current = false; operationRevision.current++; }; }, []);
   const packRequest = useRef(crypto.randomUUID());
   const query = useQuery({
@@ -227,10 +229,12 @@ export default function Workspace() {
     retry: 1,
   });
   const data = query.data;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed to the user id and the application list, not the user and query objects, which change identity on every refetch.
   useEffect(() => { if (user && !loading && !authError && data) pruneTrackingApplications('workspace', user.id, data.applications.filter(item => item.user_id === user.id).map(item => item.id)); }, [user?.id, loading, authError, data?.applications]);
   const selected = data?.packs.find((p) => p.id === selectedId && p.user_id === user?.id && (!hasExactSource || exactPack?.id === p.id));
   const requestedPack = exactPack ? data?.packs.find(p => p.id === exactPack.id && p.user_id === user?.id) : null;
   const requestedTracker = exactTracker ? data?.applications.find(p => p.id === exactTracker.id && p.user_id === user?.id) : null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- resets the selection only when the exact-source route or the draft authority changes.
   useEffect(() => { if (hasExactSource) { setSelectedId(''); setReviewText(''); setConfirmed(false); } }, [sourceRoute.search, trackingAuthority]);
   useEffect(() => {
     operationRevision.current++; lock.current = false; setBusy(false);
@@ -619,7 +623,7 @@ export default function Workspace() {
                               const text = await extractCvText(original);
                               setFile(original);
                               setCvText(text);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
+                              window.scrollTo({ top: 0, behavior: smoothBehavior() });
                             }, "Review the imported text, then save your CV.")
                           }
                         >

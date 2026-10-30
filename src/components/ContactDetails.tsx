@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
+import { CircleAlert } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -7,21 +8,23 @@ import { Label } from '@/components/ui/label';
 import { captureContactAuthority, contactAuthorityKey, countryCodes, currentContactAuthority, hasContactDetails, readContactDetails, type ContactReceipt, type ContactValue } from '@/lib/contact-details';
 const ContactForm = lazy(() => import('./ContactForm'));
 
-export function ContactFields({ value, onChange, disabled }: { value: ContactValue; onChange: (next: ContactValue) => void; disabled?: boolean }) {
+export function ContactFields({ value, onChange, disabled, errors }: { value: ContactValue; onChange: (next: ContactValue) => void; disabled?: boolean; errors?: { name?: string; phone?: string } }) {
   const id = useId();
   return <>
     <div className="ap-field">
       <Label htmlFor={`${id}-name`}>Full name</Label>
-      <Input id={`${id}-name`} autoComplete="name" value={value.name} onChange={event => onChange({ ...value, name: event.target.value })} required disabled={disabled} maxLength={120} />
+      <Input id={`${id}-name`} autoComplete="name" value={value.name} onChange={event => onChange({ ...value, name: event.target.value })} required disabled={disabled} maxLength={120} aria-invalid={errors?.name ? true : undefined} aria-describedby={errors?.name ? `${id}-name-error` : undefined} />
+      {errors?.name && <p id={`${id}-name-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{errors.name}</p>}
     </div>
     <div className="ap-field">
       <Label htmlFor={`${id}-phone`}>Mobile number</Label>
       <div className="ap-phone-field">
         <select aria-label="Country code" value={value.countryCode} onChange={event => onChange({ ...value, countryCode: event.target.value })} disabled={disabled}>
-          {countryCodes.map(([code, dial, name]) => <option key={code} value={dial} aria-label={`${name} ${dial}`}>{code} {dial}</option>)}
+          {countryCodes.map(([code, dial, name]) => <option key={code} value={dial} aria-label={`${code} ${dial}, ${name}`}>{code} {dial}</option>)}
         </select>
-        <Input id={`${id}-phone`} type="tel" inputMode="tel" autoComplete="tel-national" placeholder="Number" value={value.phone} onChange={event => onChange({ ...value, phone: event.target.value })} required disabled={disabled} maxLength={24} />
+        <Input id={`${id}-phone`} type="tel" inputMode="tel" autoComplete="tel-national" placeholder="Number" value={value.phone} onChange={event => onChange({ ...value, phone: event.target.value })} required disabled={disabled} maxLength={24} aria-invalid={errors?.phone ? true : undefined} aria-describedby={errors?.phone ? `${id}-phone-error` : undefined} />
       </div>
+      {errors?.phone && <p id={`${id}-phone-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{errors.phone}</p>}
     </div>
   </>;
 }
