@@ -114,7 +114,7 @@
 .jv-loading-line { height: 10px; max-width: 380px; background: var(--jv-sunken); border-radius: 8px; margin: 24px 0; }
 .jv-loading-line:first-child { width: 150px; height: 28px; } .jv-loading-line:last-child { width: 65%; }
 /* While the route gate resolves nothing is rendered; keep the footer below the fold instead of flashing under the header. */
-#main-content:empty, #main-content:has(> div[hidden]:only-child) { min-height: 100svh; }
+#main-content:empty, #main-content:has(> div:is([hidden], :empty):only-child) { min-height: 100svh; }
 .jv-loading > p { margin: 0; color: var(--jv-ink-3); font-size: var(--t-small); }
 .custom-scrollbar { scrollbar-width: thin; scrollbar-color: var(--jv-line-strong) transparent; }
 .section-container, .content-wrapper { max-width: 1240px; margin: auto; padding: 24px; }
