@@ -1,0 +1,186 @@
+{
+  "date": "2026-10-31",
+  "dateTimezone": "Asia/Dubai",
+  "site": "https://jobvance.io",
+  "publicVersion": 65,
+  "runtimeSource": "b999ca3b0f8f872f89c8ad704617c019c69e39dd",
+  "githubMergeSource": "9915c24154e80c8b749f26bd2016d0e082e2ca34",
+  "pullRequests": [
+    "https://github.com/aarshvir/career-climb-automagic/pull/35",
+    "https://github.com/aarshvir/career-climb-automagic/pull/37"
+  ],
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_3c5fcf65383c8191a4aea4337d66c4b3",
+  "deploymentId": "appgdep_6ae4fd2eff44819197f78281ca4e79c3",
+  "deployedAt": "2026-10-30T20:25:45.450435+00:00",
+  "status": "succeeded",
+  "authorization": {
+    "latestDirectOwnerInstruction": "Keep going with Claude. Fix the social-preview check, recheck PR #37, and publish the newer version once all checks pass. Don't stop.",
+    "priorSpecialistGatePassed": false,
+    "priorGateReport": "12 rounds; average76to90;bestlowest86",
+    "publicationBasis": "Latest direct instruction authorises the owner-selected newer version after technical checks. This does not claim the specialist score gate passed."
+  },
+  "source": {
+    "reviewedInitialHead": "9211f1f9cc691a0b783d5615df059b40905e5a10",
+    "reviewedFinalHead": "b999ca3b0f8f872f89c8ad704617c019c69e39dd",
+    "fix": "Claude b999ca3 changes only the maintained social-preview assertion to the owner-directed onboarding description.",
+    "mergeTree": "3fc87f5973b8fc4da4b432fe16021033c957a69f",
+    "mergeTreeEqualsReviewedHead": true,
+    "sourceHelper": {
+      "project_id": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+      "checkout_path": "C:\\Users\\user\\dev\\jobvance-pr37-review-20261030",
+      "commit_sha": "b999ca3b0f8f872f89c8ad704617c019c69e39dd",
+      "archive": "C:/Users/user/OneDrive/Documents/Projects/Job CV linkedin/jobvance-repair-evidence/premium-pr37-release-2026-10-31/site.tar"
+    },
+    "backendPixelCspCoreAuthContactPublicConfigObjectsMatchV64": true
+  },
+  "archive": {
+    "localSha256": "0cbfd8a4d1277c3322f78e70df92c7e0105dc3c44cb48c8d96fa2645433f963e",
+    "localBytes": 4326263,
+    "localEntries": 163,
+    "privateSourcePaths": [],
+    "storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000b78082088a25f5f6dd6835f5",
+      "content_hash": "sha256:5c84dd3c546037a8d1d1fdfc217e1083dbdb6ce16f12f9f83d57fc4ac1516d8d",
+      "size_bytes": 14448640,
+      "file_count": 155
+    }
+  },
+  "validation": {
+    "ci": {
+      "run": 41121622603,
+      "job": 124288921320,
+      "head": "b999ca3b0f8f872f89c8ad704617c019c69e39dd",
+      "status": "completed",
+      "conclusion": "success",
+      "allStepsPassed": true
+    },
+    "local": {
+      "fullTests": 3665,
+      "files": 207,
+      "fullRunAt": "9211f1f (runtime-identical parent; final diff is the check-only correction)",
+      "finalIndependentAuthTests": 2,
+      "typeScript": "passed",
+      "lintErrors": 0,
+      "lintWarnings": 50,
+      "confirmationAndRateLimit": "SDK-mocked sixth-valid-attempt limit/reset and expired pending-password non-reuse passed; existing deliberate continuation/session/lifecycle/checkout guards passed."
+    },
+    "build": {
+      "publicPages": 37,
+      "guides": 20,
+      "hostingGroups": 12,
+      "compressedBytes": 2180183,
+      "limit": 3145728,
+      "workerSha256": "10b803c7168d7b6df0cb267060fa5cbbed56c987a358d0e198c3468dd6248c7b",
+      "social": "passed;37pages,2PNGURLs,1200x630",
+      "socialPngSha256": "0fddf2c4a4cd04d756382a1a335ce7653045e3110c1640f1b331d6d02c31dcc8"
+    },
+    "http": {
+      "at": "2026-10-30T20:26:44.871Z",
+      "paths": 158,
+      "status200": 158,
+      "js": 68,
+      "css": 17,
+      "rawExact": 113,
+      "recognizedCloudflareTailHtml": 45,
+      "securityHeadersMatch": true,
+      "javascriptExecuted": false,
+      "adTaggedQa": false,
+      "limits": "45HTML responses match the exact application prefix plus only the recognized CloudflareJSDtail; not rawHTMLparity."
+    },
+    "browser": {
+      "site": "Actual live jobvance.io after reload",
+      "desktopViewport": [
+        1440,
+        900
+      ],
+      "desktopDocumentWidth": 1425,
+      "phoneViewport": [
+        390,
+        844
+      ],
+      "phoneDocumentWidth": 375,
+      "homeH1": "Jobvance automates your job search end to end.",
+      "pixelScriptPresentOnPublicHome": true,
+      "signup": {
+        "fiveRequiredInputs": true,
+        "fontSize": "16px",
+        "noSubmit": true
+      },
+      "passes": {
+        "selectedSprintAutoOpens": true,
+        "allPricesVisible": true,
+        "threeSignInReturnPathsRetained": true
+      },
+      "limits": "No real account, confirmation-email, checkout/payment/provider, Meta-positive acceptance, private-workspace/customer/ATS or real-device acceptance. Pixel DOM presence is not accepted conversion evidence."
+    }
+  },
+  "scope": {
+    "premiumPublished": true,
+    "accountRequired": true,
+    "oneTimePassesDisclosure": true,
+    "signupInlineValidation": true,
+    "checkNoindex": true,
+    "sitemapUrls": 36,
+    "backendFunctionsOrSchemaChanged": false,
+    "billingEntitlementsOrWebhooksChanged": false,
+    "adsFundingOrPermissionsChanged": false
+  },
+  "backendVersions": [
+    {
+      "name": "job-loop-control",
+      "version": 41,
+      "status": "ACTIVE"
+    },
+    {
+      "name": "job-loop-worker",
+      "version": 38,
+      "status": "ACTIVE"
+    },
+    {
+      "name": "job-loop-oauth",
+      "version": 26,
+      "status": "ACTIVE"
+    },
+    {
+      "name": "jobvance-admin",
+      "version": 26,
+      "status": "ACTIVE"
+    },
+    {
+      "name": "dodo-webhook",
+      "version": 27,
+      "status": "ACTIVE"
+    },
+    {
+      "name": "job-loop-billing",
+      "version": 25,
+      "status": "ACTIVE"
+    },
+    {
+      "name": "meta-conversions",
+      "version": 3,
+      "status": "ACTIVE"
+    },
+    {
+      "name": "jobvance-track",
+      "version": 1,
+      "status": "ACTIVE"
+    }
+  ],
+  "rollback": {
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_dd79ccb6a54c8191b906664521aa29e3",
+    "source": "4e84f9c69f77724c6d4d37ff5b16708a8714113f",
+    "sourceTag": "jobvance-before-premium-2026-10-31",
+    "limits": "Restore the saved frontend/source when needed; do not replay/delete migrations or pretend to restore financial/customer/external-event data."
+  },
+  "measurement": {
+    "v63Cutoff": "2026-10-27T17:44:00.120558Z",
+    "v64Cutoff": "2026-10-30T04:15:39.034668Z",
+    "v65Cutoff": "2026-10-30T20:25:45.450435+00:00",
+    "limits": "Separate intervention boundaries; no conversion lift/winner claim. Browser QA used no ad tags and submitted no accounts or purchases."
+  },
+  "evidence": "jobvance-repair-evidence/premium-pr37-release-2026-10-31/",
+  "priorFunctionalReviewEvidence": "jobvance-repair-evidence/premium-pr37-review-2026-10-30/"
+}
