@@ -1,0 +1,125 @@
+{
+  "date": "2026-10-30",
+  "site": "https://jobvance.io",
+  "publicVersion": 64,
+  "runtimeSource": "4e84f9c69f77724c6d4d37ff5b16708a8714113f",
+  "githubMergeSource": "a1e3f1967ec46f8e58bd6e8a92a57fb9a9ba8af2",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_dd79ccb6a54c8191b906664521aa29e3",
+  "deploymentId": "appgdep_6ae419d875608191a2287e9700221f17",
+  "deployedAt": "2026-10-30T04:15:39.034668+00:00",
+  "status": "succeeded",
+  "archive": {
+    "archive_format": "tar",
+    "sediment_file_id": "file_000000003a9081f497e6589743ade7bb",
+    "content_hash": "sha256:94fbd42247e9a65390efb56d9f5fe5cc56fc94497cd7f29e0f599e9469cf5e5a",
+    "size_bytes": 15667200,
+    "file_count": 152
+  },
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/36",
+  "submittedHead": "11835cadaec3759f6f3cc5c6cc0660bc617382cf",
+  "reviewedHead": "4e84f9c69f77724c6d4d37ff5b16708a8714113f",
+  "scope": {
+    "filesFromPublicDocumentationBaseline": 15,
+    "feature": "Verified live checkout and first recorded subscription-cycle Meta commerce notices",
+    "premiumPublished": false,
+    "publicDesignBaseline": "931b34994f3a0e69665b9e7fd6783bc8d095b096 (v63)",
+    "sourceRelationship": "PR36 was merged into main, which also contains held PR35. Production uses the corrected PR36 branch head based on the v63 design, not the full main tree.",
+    "billingRuntimeWebhooksEntitlementsChanged": false,
+    "existingFinancialRowsChanged": false,
+    "adSettingsChanged": false
+  },
+  "database": {
+    "projectId": "gvftdfriujrkpptdueyb",
+    "migration": {
+      "version": "20261030041314",
+      "name": "jobvance_meta_commerce_events"
+    },
+    "source": "supabase/migrations/20261030100000_jobvance_meta_commerce_events.sql",
+    "sha256": "e16767aedb8856cf07a91c01192c668ef0091e9d4bc6ff51ea9720aba578c015",
+    "newPrivateTable": "jobvance_private.meta_commerce_events",
+    "rls": true,
+    "directTableGrants": false,
+    "serviceOnlyFunctions": 4,
+    "exactNativeFunctionBodies": 4,
+    "claimsAfterVerification": 0,
+    "sentAfterVerification": 0
+  },
+  "function": {
+    "name": "meta-conversions",
+    "version": 3,
+    "status": "ACTIVE",
+    "verifyJwt": false,
+    "authentication": "Existing body-level bearer verification retained; gateway setting unchanged",
+    "exactNativeFiles": 3,
+    "unauthenticatedPost": 401,
+    "gpcPost": {
+      "status": 200,
+      "sent": false,
+      "reason": "privacy_signal"
+    }
+  },
+  "validation": {
+    "ci": {
+      "head": "4e84f9c69f77724c6d4d37ff5b16708a8714113f",
+      "run": 41000870165,
+      "job": 123884696903,
+      "result": "success",
+      "tests": 3541,
+      "files": 197,
+      "context": "PR integration checks include unpublished premium from main; no post-merge CI claim",
+      "boundedLogTruncated": true
+    },
+    "local": {
+      "applicationTypeScript": "passed",
+      "lintErrors": 0,
+      "inheritedLintWarnings": 54,
+      "deno": "2.9.6 check passed",
+      "focusedTests": 89,
+      "fullTestsBeforeFinalVariants": 3521,
+      "fullFiles": 194,
+      "finalAffectedTests": 19,
+      "context": "Two auth-lifetime variants and final sandbox exclusion followed the full local run; affected cases and final-head CI passed."
+    },
+    "productionBuild": {
+      "publicPages": 37,
+      "guides": 20,
+      "hostingGroups": 12,
+      "compressedBytes": 3000618,
+      "limit": 3145728,
+      "socialPreview": "passed"
+    },
+    "http": {
+      "at": "2026-10-30T04:16:01.473Z",
+      "paths": 135,
+      "publicPages": 37,
+      "js": 75,
+      "css": 15,
+      "rawExact": 92,
+      "applicationExactExceptRecognizedCloudflareTail": 43,
+      "utmEntry200": true,
+      "javascriptExecuted": false
+    },
+    "browser": "No fresh native browser or real-device journey; Windows desktop locked. HTTP checks execute no tracking JavaScript.",
+    "securityAdvisors": "Only added expected private RLS/no-policy INFO; inherited two anon and two authenticated SECURITY DEFINER warnings plus leaked-password-protection warning unchanged. New routines have no anon/authenticated execution."
+  },
+  "measurement": {
+    "liveOnly": true,
+    "sandboxIntake": false,
+    "testEventCodeIsNotAssumedIsolation": true,
+    "firstPaidCycleOnly": true,
+    "renewalsReported": false,
+    "privatePagePathsSent": false,
+    "eventSource": "https://jobvance.io/pricing",
+    "privacyGates": "GPC, saved device opt-out and European time zone; confirmed auth lifetime",
+    "limits": "Return-based within six days; no webhook hook/backfill, genuine positive Meta acceptance, attribution, deduplication outcome or conversion lift established. Stable event IDs and durable claims do not certify exactly-once external delivery."
+  },
+  "rollback": {
+    "sourceTag": "jobvance-before-meta-commerce-2026-10-30",
+    "source": "931b34994f3a0e69665b9e7fd6783bc8d095b096",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_a655ba53ec9481918a03f4c6c70c77e7",
+    "function": "Exact native v2 source/config saved privately. Restoration receives a new native version; leave additive claims/DDL intact rather than deleting receipts.",
+    "limits": "No restoration of financial/customer data or already-sent external events."
+  },
+  "evidence": "jobvance-repair-evidence/meta-commerce-pr36-2026-10-30/"
+}
