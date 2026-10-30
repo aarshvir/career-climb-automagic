@@ -1302,7 +1302,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 :root .ap-story-description { font-size: var(--t-body-sm); line-height: 1.55; max-width: 38ch; }
 :root .ap-story-free { font-size: var(--t-small); }
 @media (min-width: 761px) {
-  :root .jv-account--standalone .ap-account-story.jv-dark { justify-content: center; padding-top: 48px; padding-bottom: 48px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark { justify-content: flex-start; padding-top: 56px; padding-bottom: 48px; }
   :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-inner { position: sticky; top: 96px; flex: none; min-height: 0; padding-bottom: 0; }
   :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-run { display: grid; margin: 28px 0 0; padding: 16px 18px; }
   :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-link { margin-top: 12px; }
@@ -1360,8 +1360,8 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 :root .jv-mock-tag.jv-chip--caption { min-height: 0; padding: 0; border: 0; background: none; color: var(--jv-ink-3); letter-spacing: .04em; }
 
 /* One toggle: every disclosure (FAQ, guides sources, contact receipt, help topic, pricing one-offs, walkthrough transcript, steps) is the same 32px outlined circle with a drawn plus that turns to a cross, filled brand green when open. */
-:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .pricing-passes-disclosure) > summary::after { content: ""; display: block; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line-strong); border-radius: 50%; color: var(--jv-ink); font-size: 0; background: linear-gradient(currentColor, currentColor) center / 14px 1.75px no-repeat, linear-gradient(currentColor, currentColor) center / 1.75px 14px no-repeat; transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-press), border-color var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
-:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .pricing-passes-disclosure)[open] > summary::after { content: ""; background-color: var(--jv-brand); border-color: var(--jv-brand); color: #fff; transform: rotate(45deg); }
+:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .hc-contents details, .pricing-passes-disclosure) > summary::after { content: ""; display: block; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line-strong); border-radius: 50%; color: var(--jv-ink); font-size: 0; background: linear-gradient(currentColor, currentColor) center / 14px 1.75px no-repeat, linear-gradient(currentColor, currentColor) center / 1.75px 14px no-repeat; transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-press), border-color var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .hc-contents details, .pricing-passes-disclosure)[open] > summary::after { content: ""; background-color: var(--jv-brand); border-color: var(--jv-brand); color: #fff; transform: rotate(45deg); }
 :root .jv-faq-toggle { border-color: var(--jv-line-strong); }
 :root .jv-faq-toggle svg { width: 14px; height: 14px; stroke-width: 1.75; }
 
@@ -1393,9 +1393,10 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 }
 
 /* One-off passes: a standard accordion row on the page grid (hairlines, same left edge, the shared toggle at the right edge), not a dashed card. */
-:root .product-page--pricing .jv-section.pricing-passes { margin: 32px 0 0; padding: 0; border: 0; border-top: 1px solid var(--jv-line); border-bottom: 1px solid var(--jv-line); border-radius: 0; background: none; }
+:root .product-page--pricing .jv-section.pricing-passes { margin: 0 0 40px; padding: 0; border: 0; border-bottom: 1px solid var(--jv-line); border-radius: 0; background: none; }
 :root .product-page--pricing .jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])), :root .product-page--pricing .jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 0; }
-:root .pricing-passes-disclosure > summary { min-height: 72px; padding: 20px 0; align-items: center; }
+:root .pricing-passes-disclosure > summary { min-height: 72px; padding: 20px 0; align-items: center; color: var(--jv-ink); }
+:root .pricing-passes-disclosure > summary::after { color: var(--jv-ink); }
 :root .pricing-passes-disclosure > summary::after { margin-top: 0; }
 :root .pricing-passes-body { padding-bottom: 32px; }
 :root .pricing-passes-title { font-size: var(--t-h4); }
@@ -1418,3 +1419,49 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 :root .jv-cta--pale .jv-caption { color: var(--jv-ink-3); }
 :root :is(.career-guides .cg-actions, .help-center .hc-further, .walkthroughs-page .wt-further) { border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: radial-gradient(70% 80% at 100% 0%, rgb(var(--jv-brand-rgb) / .12), transparent 70%), var(--jv-brand-tint); }
 :root :is(.career-guides .cg-actions h2, .help-center .hc-further h2, .walkthroughs-page .wt-further h2) { max-width: 18ch; margin: 0 0 12px; color: var(--jv-ink); font-size: var(--t-h2-panel); font-weight: var(--fw-heading); letter-spacing: var(--ls-h2); line-height: 1.12; }
+
+/* Phones keep the product art: the explainer heroes (about, how it works, pricing, contact, FAQ) show their card under the actions instead of dropping it, so ad traffic sees the same product UI the desktop does. */
+@media (max-width: 767px) {
+  :root .product-page .jv-page-head--split > .jv-page-visual { display: block; margin-top: 28px; max-width: none; }
+  :root .product-page .jv-page-head--split > .jv-page-visual > * { max-width: none; width: 100%; }
+}
+
+/* Guides open on a centred headline (no side card): the library below carries the featured guide, so the page does not repeat the eyebrow, headline, two buttons and floating card of every other page. */
+:root .career-guides .cg-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding-block: 56px 40px; }
+:root .career-guides .cg-hero::before { content: none; }
+:root .career-guides .cg-hero .jv-aside-slot { display: none; }
+:root .career-guides .cg-hero h1 { max-width: 14em; margin-inline: auto; }
+:root .career-guides .cg-hero > p:not(.cg-eyebrow):not(.cg-public-note) { max-width: 34em; margin-inline: auto; }
+:root .career-guides .cg-hero .cg-hero-links { justify-content: center; align-items: center; }
+:root .career-guides .cg-hero .cg-hero-sub { justify-content: center; }
+@media (max-width: 639px) { :root .career-guides .cg-hero .cg-hero-links { align-items: stretch; } :root .career-guides .cg-hero .cg-hero-links > .jv-link, :root .career-guides .cg-hero .cg-hero-sub { align-self: center; align-items: center; } }
+
+/* Typography: prose measure. Running text never runs wider than 62ch (about 70 characters of Geist at 16px); the explicit narrower caps elsewhere still win. Instructions and notes on the pricing and account flows are 16px, never 14. */
+:root :is(.help-center, .walkthroughs-page, .loop-overview, .product-page, .career-guides, .audience-page, .jv-home) :is(p, li, dd) { max-width: 62ch; }
+:root :is(.pricing-details > div > p, .loop-price-market p, .pricing-billed-line, .pricing-trust li, .pricing-note) { font-size: var(--t-body-sm); line-height: 1.55; }
+/* Guide cards: titles take the room they need (no reserved three-line block), with one gap from title to description. */
+@media (min-width: 1001px) { :root .career-guides .cg-card h3 { min-height: 0; } }
+:root .career-guides .cg-card h3 { margin-bottom: 8px; }
+/* Help task index: one row rhythm for one- and two-line items. */
+:root .help-center .hc-contents ol a { min-height: 52px; padding-block: 10px; line-height: 1.4; }
+/* Home feature tiles: the mock sits at one fixed distance under its copy (it is no longer pushed to the tile floor, which left a dead band between the paragraph and the mock). */
+:root .jv-home .jv-tile { align-content: start; }
+:root .jv-home .jv-tile-card { align-self: start; }
+@media (min-width: 1024px) {
+  /* The schedule tile's mock fills the tile under its copy, spreading its rows, instead of floating with a dead band above it. */
+  :root .jv-home .jv-tile--schedule { grid-template-rows: auto 1fr; }
+  :root .jv-home .jv-tile--schedule .jv-tile-card { align-self: stretch; display: flex; flex-direction: column; }
+  :root .jv-home .jv-tile--schedule .jv-tile-card > .pc-card { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+}
+
+/* Hero alignment: the Automated Job Loop hero card is centred against its copy; the privacy heading starts level with the "At a glance" card (no 100px void beside a centred H1); the privacy index uses quiet links. */
+@media (min-width: 1024px) {
+  :root .loop-overview .lo-loop-hero .jv-hero-grid { align-items: center; }
+  :root .loop-overview .lo-loop-hero .jv-hero-visual { align-self: center; }
+  :root .product-page--privacy .jv-page-head--split { align-items: start; align-content: start; }
+  :root .product-page--privacy .jv-page-head--split { grid-template-rows: auto auto auto 1fr; }
+  :root .product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { align-self: start; grid-row: auto; }
+  :root .product-page--privacy .jv-page-head--split > .jv-page-visual { grid-row: 1 / span 4; align-self: start; }
+}
+:root .product-page .product-main-content .jv-toc a:is(:link, :visited), :root .product-page .product-main-content .jv-toc a:is(:link, :visited):not(:hover), :root .product-page .jv-toc a:is(:link, :visited) { color: var(--jv-ink-2); text-decoration: none; }
+@media (hover: hover) { :root .product-page .product-main-content .jv-toc a:is(:link, :visited):hover { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; } }

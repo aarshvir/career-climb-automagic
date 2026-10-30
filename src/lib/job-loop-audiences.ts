@@ -2,7 +2,7 @@ import type { LoopAudience, LoopProfileInput } from '../../supabase/functions/_s
 
 export const loopAudienceContent = {
   student: {
-    label: 'Students & graduates', path: '/for-students', eyebrow: 'FOR INTERNSHIPS AND GRADUATE JOBS',
+    label: 'Students and graduates', path: '/for-students', eyebrow: 'FOR INTERNSHIPS AND GRADUATE JOBS',
     title: 'Prepare your student CV for a real vacancy.',
     searchTitle: 'Automate your graduate job search.',
     searchIntro: 'Choose your roles and locations once. Automated Job Loop finds matching jobs and builds a tailored CV for each from your projects, placements and activities.',
@@ -15,7 +15,7 @@ export const loopAudienceContent = {
     pageTarget: 1 as const, discreetSearch: false,
   },
   mba: {
-    label: 'MBA students & alumni', path: '/for-mba', eyebrow: 'FOR YOUR SEARCH DURING AND AFTER AN MBA',
+    label: 'MBA career pivots', path: '/for-mba', eyebrow: 'FOR YOUR SEARCH DURING AND AFTER AN MBA',
     title: 'Show how your work and MBA fit the role you want.',
     searchTitle: 'Automate your search after your MBA.',
     searchIntro: 'Choose your roles and locations once. Automated Job Loop finds matching jobs and builds a tailored CV for each from your prior work and MBA projects.',

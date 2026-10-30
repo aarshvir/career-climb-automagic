@@ -1,6 +1,7 @@
 /* Motion for the marketing pages: CSS only, purposeful, and off under reduced motion.
-   Animate opacity, transform, box-shadow, background-color and color. The one exception is the accordion panel's block-size
-   (marketing.css): 200ms, user-initiated, layout-contained, and off under reduced motion. */
+   Every entrance, reveal and hover animates opacity, transform, box-shadow, background-color or color. The one layout-property exception is the accordion
+   panel's block-size (marketing.css, Round 12): 420ms, user-initiated, clipped inside the panel, only where interpolate-size is supported, and off under reduced motion.
+   Elsewhere the answer fades in with opacity and transform only. */
 
 @keyframes jv-rise { from { opacity: .001; transform: translateY(var(--rise)); } }
 @keyframes jv-rise-h1 { from { transform: translateY(8px); } }
