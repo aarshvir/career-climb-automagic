@@ -72,3 +72,12 @@
   .cg-grid--collapsed > .cg-card:nth-child(n+4) { display: none; }
   .cg-more { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 48px; margin-top: 16px; border: 1px solid var(--jv-line-strong); border-radius: var(--r-pill); background: #fff; color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); cursor: pointer; }
 }
+/* Category cue: a brand square before the mono category label, and a lift on hover with a green-tinted border. */
+.cg-card-meta span:first-child { display: inline-flex; align-items: center; gap: 8px; }
+.cg-card-meta span:first-child::before { content: ""; width: 6px; height: 6px; flex-shrink: 0; background: var(--jv-brand); }
+@media (hover: hover) {
+  .career-guides .cg-card { transition: border-color var(--dur-2) var(--ease-press), box-shadow var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
+  .career-guides .cg-card:hover { border-color: color-mix(in srgb, var(--jv-brand) 35%, var(--jv-line)); box-shadow: var(--sh-3); transform: translateY(-2px); }
+}
+.career-guides .cg-card h3 { font-weight: var(--fw-heading); }
+.career-guides .cg-card > p { font-size: var(--t-small); }

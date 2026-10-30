@@ -87,3 +87,7 @@
   .walkthroughs-page .wt-hero-actions { flex-direction: column; align-items: stretch; gap: 8px; }
   .walkthroughs-page .wt-hero-actions > .jv-link { align-self: flex-start; }
 }
+/* Under text-spacing overrides the demo grows instead of clipping its text. */
+.walkthroughs-page .wt-demo { overflow: visible; }
+.walkthroughs-page .wt-demo > :first-child { border-radius: 9px 9px 0 0; }
+.walkthroughs-page .wt-demo :is(p, h3, span, dd, li) { overflow-wrap: anywhere; }

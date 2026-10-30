@@ -140,3 +140,9 @@
 @media (max-width: 639px) { .hc-hero-actions .jv-btn { width: 100%; } }
 /* The open answer reads at a full line length, not a narrow column inside a wide panel. */
 .hc-topic > details > :is(.hc-topic-summary, .hc-steps, .hc-note, .hc-field-help) { max-width: 68ch; }
+/* The open topic reads at body size; the quick-action cards lift and show a brand top rule on hover. */
+.hc-topic > details :is(.hc-topic-summary, .hc-steps li, .hc-note p) { font-size: var(--t-body); line-height: 1.65; }
+@media (hover: hover) {
+  .hc-start > a { transition: border-color var(--dur-2) var(--ease-press), box-shadow var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
+  .hc-start > a:hover { border-color: color-mix(in srgb, var(--jv-brand) 40%, var(--jv-line)); box-shadow: var(--sh-3), inset 0 2px 0 var(--jv-brand); transform: translateY(-2px); }
+}

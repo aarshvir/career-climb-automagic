@@ -389,3 +389,5 @@
   .jv-account--standalone .ap-account-story { padding-bottom: 0; }
   .jv-account--standalone .ap-story-inner { position: sticky; top: 96px; flex: none; min-height: min(640px, calc(100svh - 160px)); padding-bottom: 36px; }
 }
+/* The loading placeholder holds the same top offset as the loaded card (no shift when the account check resolves). */
+.ap-auth-loading:not(.ap-auth-loading--embedded) { margin-top: 40px; min-height: calc(100svh - 40px); }

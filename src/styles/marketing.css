@@ -470,7 +470,6 @@
 @media (min-width: 768px) {
   .product-page--privacy .jv-notecard ol { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
 }
-@media (max-width: 767px) { .product-page--privacy .jv-page-head--split > .jv-page-visual { display: block; } }
 .product-page--privacy .jv-page-head { padding-bottom: 40px; }
 /* Typography: breadcrumb is one style (mono, 12px); lead is one size and measure on every page. */
 .hc-breadcrumb { font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
@@ -519,3 +518,9 @@
 .jv-section.pricing-passes, .jv-section.audience-features { margin-top: 48px; padding-inline: var(--band-pad-x); border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--jv-bg-subtle), #fff 70%); }
 .jv-section.pricing-passes::before, .jv-section.audience-features::before { left: 24px; }
 @media (min-width: 1024px) { .jv-section.pricing-passes, .jv-section.audience-features { padding-block: 72px; } }
+
+/* Phones: Company is a single full-width row of links under the two columns, so it is never orphaned in a half-empty row. */
+@media (max-width: 639px) {
+  .jv-footer-links .jv-footer-col:last-child { grid-column: 1 / -1; }
+  .jv-footer-links .jv-footer-col:last-child ul { display: flex; flex-wrap: wrap; gap: 0 24px; }
+}
