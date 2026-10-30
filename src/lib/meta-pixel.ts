@@ -133,7 +133,7 @@ function flushRegistration(fbq: Fbq): void {
   sendServerRegistration(scope);
 }
 
-const metaCookie = (name: '_fbp' | '_fbc') => document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1);
+export const metaCookie = (name: '_fbp' | '_fbc') => document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1);
 
 /** Asks the meta-conversions function for the server copy once Meta has set its cookies. */
 function sendServerRegistration(scope: RegistrationScope, delay = 2000): void {

@@ -1,8 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { buildRegistrationEvent, firstForwardedIp, META_PIXEL_ID } from '../_shared/meta-conversions.ts';
+import { buildCheckoutEvent, buildPurchaseEvent, buildRegistrationEvent, firstForwardedIp, META_PIXEL_ID, type PurchaseRow } from '../_shared/meta-conversions.ts';
 
-// Sends Meta the server copy of a new account's sign-up. Inert until the owner adds the
-// META_CAPI_ACCESS_TOKEN secret; the token travels only in the request body, never a URL or log.
+// Sends Meta the server copy of a new account's sign-up, and the checkouts and first payments the
+// database proves. Inert until the owner adds the META_CAPI_ACCESS_TOKEN secret; the token travels only
+// in the request body, never a URL or log.
 // Self-contained (no billing modules); CORS, responses and auth follow _shared/runtime.ts.
 const env = (name: string) => Deno.env.get(name);
 
@@ -29,24 +30,72 @@ async function handle(req: Request): Promise<Response> {
   if (Number(req.headers.get('Content-Length') ?? 0) > 4000) return reply(req, { error: 'Request is too large.', code: 'INPUT_TOO_LARGE' }, 413);
   let body: Record<string, unknown> = {};
   try { const parsed = JSON.parse((await req.text()).slice(0, 4000) || '{}'); if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) body = parsed; } catch { /* identifiers are optional */ }
-  const event = await buildRegistrationEvent({
-    userId: data.user.id, email: data.user.email, createdAt: data.user.created_at, pageUrl: body.pageUrl, fbp: body.fbp, fbc: body.fbc,
+  const kind = body.kind ?? 'registration';
+  if (kind !== 'registration' && kind !== 'checkout' && kind !== 'purchase') return reply(req, { error: 'Unknown event.', code: 'INVALID_KIND' }, 400);
+  const person = {
+    userId: data.user.id, email: data.user.email, pageUrl: body.pageUrl, fbp: body.fbp, fbc: body.fbc,
     ip: firstForwardedIp(req.headers.get('x-forwarded-for')), userAgent: req.headers.get('User-Agent'), now: Date.now(),
-  });
-  if (!event) return reply(req, { sent: false, reason: 'not_new' });
+  };
   const version = /^v\d{2}\.0$/.test(env('META_GRAPH_VERSION') ?? '') ? env('META_GRAPH_VERSION') : 'v23.0';
   const testCode = env('META_CAPI_TEST_EVENT_CODE');
-  const response = await fetch(`https://graph.facebook.com/${version}/${META_PIXEL_ID}/events`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ data: [event], access_token: token, ...(testCode ? { test_event_code: testCode } : {}) }),
-    signal: AbortSignal.timeout(10000),
-  });
-  const result: { error?: { code?: number; error_subcode?: number } } | null = await response.json().catch(() => null);
-  if (!response.ok) {
+  // True when Meta accepted the batch. The token travels in the body only.
+  const post = async (events: Record<string, unknown>[], testMode = Boolean(testCode)): Promise<boolean> => {
+    const response = await fetch(`https://graph.facebook.com/${version}/${META_PIXEL_ID}/events`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: events, access_token: token, ...(testMode && testCode ? { test_event_code: testCode } : {}) }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (response.ok) {
+      if (kind === 'registration') return true;
+      const accepted = await response.json().catch(() => null);
+      return accepted?.events_received === events.length;
+    }
+    const result: { error?: { code?: number; error_subcode?: number } } | null = await response.json().catch(() => null);
     console.error('meta_capi_rejected', { status: response.status, code: result?.error?.code ?? null, subcode: result?.error?.error_subcode ?? null });
-    return reply(req, { error: 'Meta did not accept the event.', code: 'META_REJECTED' }, 503);
+    return false;
+  };
+  const rejected = () => reply(req, { error: 'Meta did not accept the event.', code: 'META_REJECTED' }, 503);
+
+  if (kind === 'registration') {
+    const event = await buildRegistrationEvent({ ...person, createdAt: data.user.created_at });
+    if (!event) return reply(req, { sent: false, reason: 'not_new' });
+    return await post([event]) ? reply(req, { sent: true }) : rejected();
   }
-  return reply(req, { sent: true });
+
+  // Checkout and purchase events come from the payment ledgers, never from the browser's say-so. The
+  // database claims each one once (a short lease) and records it as sent only after Meta accepts it.
+  const admin = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  // A Test Events tag is not proof of isolation from advertising measurement.
+  // Production commerce intake excludes Dodo sandbox payments even when that tag is configured.
+  const includeTest = false;
+  const deliver = async (rows: { event_key: string; mode: 'live' | 'test'; event: Record<string, unknown> }[]): Promise<boolean> => {
+    for (const mode of ['live', 'test'] as const) {
+      const group = rows.filter(row => row.mode === mode);
+      if (!group.length) continue;
+      if (mode === 'test' || !await post(group.map(row => row.event), false)) return false;
+      const marked = await admin.rpc('jobvance_meta_mark_sent', { p_user: data.user.id, p_kind: kind, p_keys: group.map(row => row.event_key), p_mode: mode });
+      if (marked.error) throw new Error('Meta receipt could not be retained');
+    }
+    return true;
+  };
+  if (kind === 'checkout') {
+    const requestId = typeof body.requestId === 'string' && /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(body.requestId) ? body.requestId.toLowerCase() : null;
+    if (!requestId) return reply(req, { error: 'Checkout reference is missing.', code: 'INVALID_REQUEST' }, 400);
+    const claimed = await admin.rpc('jobvance_meta_claim_checkout', { p_user: data.user.id, p_request: requestId, p_include_test: includeTest });
+    if (claimed.error) { console.error('meta_commerce_claim_failed', { kind, code: claimed.error.code ?? null }); return reply(req, { error: 'The service could not complete this request. Try again.', code: 'SERVICE_ERROR' }, 503); }
+    const rows = (claimed.data ?? []) as { event_key: string; plan_label: string; mode: 'live' | 'test' }[];
+    if (!rows.length) return reply(req, { sent: false, reason: 'nothing_new' });
+    if (!await deliver(await Promise.all(rows.map(async row => ({ ...row, event: await buildCheckoutEvent(person, row) }))))) return rejected();
+    return reply(req, { sent: true, count: rows.length });
+  }
+
+  const claimed = await admin.rpc('jobvance_meta_claim_purchases', { p_user: data.user.id, p_include_test: includeTest });
+  if (claimed.error) { console.error('meta_commerce_claim_failed', { kind, code: claimed.error.code ?? null }); return reply(req, { error: 'The service could not complete this request. Try again.', code: 'SERVICE_ERROR' }, 503); }
+  const rows = (claimed.data ?? []) as PurchaseRow[];
+  if (!rows.length) return reply(req, { sent: false, reason: 'nothing_new' });
+  const events = (await Promise.all(rows.map(async row => ({ ...row, event: await buildPurchaseEvent(person, row) })))).filter((row): row is PurchaseRow & { event: Record<string, unknown> } => row.event !== null);
+  if (events.length && !await deliver(events)) return rejected();
+  return reply(req, { sent: events.length > 0, count: events.length });
 }
 
 Deno.serve(async req => {
