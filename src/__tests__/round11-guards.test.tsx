@@ -35,11 +35,13 @@ describe('round 11 guards', () => {
     }
   });
 
-  it('the FAQ opens on a popular-questions card whose links open their answers', () => {
+  it('the FAQ opens on a topic-jump card (themes, not a repeat of the question list) whose links open their answers', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="faq" /></MemoryRouter></HelmetProvider>);
-    const card = screen.getByRole('complementary', { name: 'Popular questions' });
+    const card = screen.getByRole('complementary', { name: 'Jump to a topic' });
     expect(within(card).getAllByRole('link')).toHaveLength(5);
     expect(within(card).getAllByRole('link')[0]).toHaveAttribute('href', '#faq-0');
+    // No question text is printed twice.
+    for (const link of within(card).getAllByRole('link')) expect(link.textContent).not.toMatch(/\?$/);
     expect(document.getElementById('faq-0')).toBeInstanceOf(HTMLDetailsElement);
   });
 
@@ -58,7 +60,8 @@ describe('round 11 guards', () => {
 
   it('H1 size is capped by the viewport so the product name always fits, and tracking comes from tokens', () => {
     const marketing = css('styles/marketing.css');
-    expect(marketing).toMatch(/--t-page: min\(clamp\([^)]*\), calc\(\(100vw - 2 \* var\(--gutter\)\) \/ 9\.4\)\)/);
+    expect(marketing).toMatch(/--t-page: 2\.25rem;/);
+    expect(marketing).toMatch(/@media \(max-width: 379px\) \{ :root \{ --t-page: min\(2\.25rem, calc\(\(100vw - 2 \* var\(--gutter\)\) \/ 9\.4\)\)/);
     expect(css('index.css')).toMatch(/--ls-h2: -\.03em/);
     for (const file of ['styles/marketing.css', 'pages/Home.css', 'pages/ProductPage.css']) expect(css(file)).not.toMatch(/letter-spacing:\s*-\.0(?:2|25|3|35|4)em/);
   });

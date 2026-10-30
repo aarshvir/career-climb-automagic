@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import LoopJourney from "@/components/LoopJourney";
 import LoopOrbit from "@/components/marketing/LoopOrbit";
-import LoopRunMock from "@/components/marketing/LoopRunMock";
+import HeroStage from "@/components/marketing/HeroStage";
 import { CvCard, RunTimeline, ScheduleCard } from "@/components/marketing/ProductCards";
 import { CvDiffCard, NextRunCard, OpeningsCard } from "@/components/marketing/PageCards";
 import { useReveal } from "@/hooks/useReveal";
@@ -40,20 +40,9 @@ export default function HomePage() {
             <TextLink to="/check">Try the free CV Check</TextLink>
           </div>
           <div className="jv-hero-note jv-enter" style={delay(180)}><PriceNote /></div>
+          <div className="jv-built-for jv-enter" style={delay(220)}><span>Built for</span><div><Link to="/for-students">Students and graduates</Link><Link to="/for-mba">MBA career pivots</Link><Link to="/for-career-switchers">Busy professionals</Link></div></div>
         </div>
-        <div className="jv-hero-visual">
-          <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} className="jv-hero-orbit" nodes={false} animate={false} /></div>
-          <div className="jv-appwin jv-enter-card">
-            <div className="jv-appwin-bar" aria-hidden="true">
-              <span className="jv-appwin-dots"><i /><i /><i /></span>
-              <span className="jv-appwin-tabs"><b>Dashboard</b><span>Jobs</span><span>CVs</span><span>Schedule</span></span>
-            </div>
-            <div className="jv-appwin-body">
-              <div className="jv-hero-mock"><LoopRunMock /></div>
-            </div>
-          </div>
-          <div className="jv-hero-cv jv-enter-card" aria-hidden="true"><CvCard compact /></div>
-        </div>
+        <div className="jv-hero-visual jv-hero-visual--stage"><HeroStage /></div>
       </div>
     </section>
 
@@ -62,10 +51,6 @@ export default function HomePage() {
       <div className="jv-shell">
         <ul aria-label="At a glance">{proof.map(([lead, rest], index) => <li key={lead}><span className="jv-proof-num" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><strong>{lead}</strong><span>{rest}</span></li>)}</ul>
       </div>
-    </div>
-
-    <div className="jv-shell jv-built-for-wrap">
-      <div className="jv-built-for"><span>Built for</span><div><Link to="/for-students">Students and graduates</Link><Link to="/for-mba">MBA career pivots</Link><Link to="/for-career-switchers">Busy professionals</Link></div></div>
     </div>
 
     {/* 3. How the loop runs: the headline leads, then the per-run cycle (orbit) beside the one-time set-up (steps). */}

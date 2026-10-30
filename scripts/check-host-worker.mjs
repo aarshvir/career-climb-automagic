@@ -13,6 +13,9 @@ assert.equal(manifest.project_id, originalManifest.project_id, 'The original Sit
 assert.ok(!('static' in manifest), 'Worker deployment must omit the static configuration.');
 const compressedBytes = gzipSync(source, { level: 9 }).length;
 assert.ok(compressedBytes < 3 * 1024 * 1024, 'Worker must fit the 3 MiB compressed script limit.');
+// Headroom guard. A clean build (empty outDir) is about 2.2 MB compressed, so 15% of the limit stays free. Building into a non-empty
+// outDir keeps stale chunks and inflates this number (that is how an older note came to quote 3.05 MB): clear dist before measuring.
+assert.ok(compressedBytes < 3 * 1024 * 1024 * 0.85, `Worker uses ${compressedBytes} bytes of the 3 MiB limit; at least 15% must stay free (clear dist first if stale chunks inflate this).`);
 // Force ESM parsing without relying on the deployment's package.json or filesystem.
 const nativeAtob = globalThis.atob;
 let decodedAssets = 0;
@@ -61,7 +64,9 @@ for (const path of ['/onboarding?utm_source=meta', '/auth?mode=signup']) {
   // The only body difference is the static first paint inside #root: inert markup (no script, link, form, image or input).
   const paint = raw.match(/<div id="root">(<div aria-hidden="true" style="padding-top:72px">[\s\S]*?<\/main><\/div>)<\/div>/);
   assert.ok(paint, 'Account entry carries the static first paint.');
-  assert.doesNotMatch(paint[1], /<(script|link|form|img|input|iframe|a)/i, 'The static first paint is inert markup.');
+  assert.doesNotMatch(paint[1], /<(script|link|form|img|input|iframe|a)\b/i, 'The static first paint is inert markup.');
+  // The description paragraph is the largest text on desktop: it must be in the first paint (same words as Auth.tsx) so it is never a late LCP element.
+  assert.match(paint[1], /<p class="ap-story-description">Choose your roles and locations once\. <span class="jv-nb">Automated Job Loop<\/span> finds the best-matching jobs and prepares a tailored, role-specific CV for each\.<\/p>/, 'The static first paint carries the story description.');
   const text = raw.replace(paint[0], '<div id="root"></div>');
   const [head, tail] = indexText.split('</head>');
   assert.ok(text.startsWith(head) && text.endsWith('</head>' + tail), 'Account entry must be the built index plus head links only.');

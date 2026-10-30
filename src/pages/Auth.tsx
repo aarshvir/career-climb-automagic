@@ -14,7 +14,7 @@ import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
 import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { ContactFields } from '@/components/ContactDetails';
-import { blankContact, checkContact, normalizePhone, validName } from '@/lib/contact-details';
+import { blankContact, normalizePhone, validName } from '@/lib/contact-details';
 import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
@@ -63,11 +63,12 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     const form = event.currentTarget as HTMLFormElement;
     const found: typeof fieldErrors = {}, summary: string[] = [];
     if (!isValidEmail(email.trim())) { found.email = 'Please enter a valid email address.'; summary.push(found.email); }
-    const details = mode === 'sign-up' ? checkContact(contact) : null;
+    // One validation source: validName and normalizePhone (the same checks checkContact applies) decide each field, and their results are the details sent.
+    const phone = mode === 'sign-up' ? normalizePhone(contact.phone, contact.countryCode) : null;
+    const details = mode === 'sign-up' && validName(contact.name) && phone ? { fullName: contact.name.trim(), phone } : null;
     if (mode === 'sign-up') {
-      if (!validName(contact.name)) found.name = 'Please enter your full name.';
-      if (!normalizePhone(contact.phone, contact.countryCode)) found.phone = 'Please enter a valid mobile number, including the country code.';
-      if (typeof details === 'string') summary.push(details);
+      if (!validName(contact.name)) { found.name = 'Please enter your full name.'; summary.push(found.name); }
+      if (!phone) { found.phone = 'Please enter a valid mobile number, including the country code.'; if (!found.name) summary.push(found.phone); }
     }
     if (!password) { found.password = mode === 'sign-up' ? 'Choose a password to continue.' : 'Enter your password to continue.'; summary.push(found.password); }
     else if (mode === 'sign-up') {
@@ -90,7 +91,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     try {
       if (!embedded && mode === 'sign-up') rememberLoopReturn(searchParams.get('next'));
       if (mode === 'sign-up') {
-        const result = await signUpWithEmail(email, password, typeof details === 'object' && details ? details : undefined);
+        const result = await signUpWithEmail(email, password, details ?? undefined);
         if (!alive.current || attempt.current !== turn || trackingAuthEpoch() !== epoch) return;
         if (result.error) setError(result.error);
         else if (result.requiresEmailConfirmation) {
@@ -188,9 +189,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           <p className="ap-story-description">{checkEntry ? 'Bring a CV and a job description, review the suggested changes and download your approved version.' : <>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares a tailored, role-specific CV for each.</>}</p>
           {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance">{checkEntry ? <><li>Compare your CV with a job</li><li>Review every change</li><li>Download PDF, Word or text</li></> : <><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></>}</ul>}
           {showBenefits && <p className="ap-story-free">Free account · 3 tailored CVs a month</p>}
-          {showBenefits && !checkEntry && <ol className="ap-story-steps" aria-label="What happens next"><li>Add your CV</li><li>Choose roles and locations</li><li>Review your matches</li></ol>}
           <MiniRun className="ap-story-run" />
-          <p className="ap-story-footnote"><Check size={16} aria-hidden="true" /> Matched jobs and a tailored CV for each role, in your dashboard.</p>
           <Link to="/job-loop" className="ap-story-link">See how the Automated Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
         </div>
       </aside>}
@@ -227,8 +226,6 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
               </Button>}
               {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
               <form className="ap-auth-form" onSubmit={handleSubmit} noValidate>
-                {showBenefits && <p className="ap-next-line">{checkEntry ? 'After this: add your CV and the job you have in mind.' : 'After this: add your CV, choose roles and locations, pick a schedule.'}</p>}
-                {mode === 'sign-up' && <p className="ap-form-expect">Next: your name, mobile number, email and a password.</p>}
                 {mode === 'sign-up' && <ContactFields value={contact} onChange={next => { setContact(next); if (next.name !== contact.name) clearField('name'); if (next.phone !== contact.phone) clearField('phone'); }} disabled={busy} errors={fieldErrors} />}
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-email`}>Email address</Label>

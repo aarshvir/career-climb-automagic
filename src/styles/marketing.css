@@ -557,7 +557,7 @@
 @media (min-width: 640px) { .jv-cta--page { padding-block: 80px; } }
 @media (min-width: 1024px) { .jv-cta--page { padding-block: 96px; } .jv-cta--visual { align-items: center; } .jv-cta--visual .jv-cta-inner { grid-column: 1 / span 7; } }
 /* The quiet bar for utility pages: a heading that sits on one or two balanced lines, with room before its line of copy. */
-.jv-cta-bar-copy h2 { max-width: none; font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem); line-height: 1.12; }
+.jv-cta-bar-copy h2 { max-width: none; font-size: var(--t-h2-panel); line-height: 1.12; }
 .jv-cta-bar-copy p { margin-top: 12px; max-width: 48ch; }
 .jv-cta-bar-copy { max-width: 40em; }
 /* The dark section on the Automated Job Loop page centres its copy against the card. */
@@ -773,7 +773,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 }
 
 /* How it works: heading breaks in two lines, not three. */
-@media (min-width: 1024px) { .jv-split--timeline .jv-section-title { font-size: clamp(2rem, 1.2rem + 1.7vw, 2.625rem); text-wrap: balance; } }
+@media (min-width: 1024px) { .jv-split--timeline .jv-section-title { font-size: var(--t-h2-panel); text-wrap: balance; } }
 
 /* Forest hero: /job-loop and /about open on the dark band the rest of the site closes on (white card on forest, lime on one word). */
 .jv-h-signal { color: var(--jv-signal); }
@@ -1023,7 +1023,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 @media (min-width: 1024px) {
   .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-copy { grid-column: 1 / span 7; }
   .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual { grid-column: 8 / span 5; }
-  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: clamp(2.5rem, 1rem + 3vw, 3.75rem); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: var(--t-page); }
   .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock { width: calc(100% + 48px); margin-left: -48px; }
 }
 @media (min-width: 1024px) { .jv-home .jv-hero:not(.lo-loop-hero) { padding: 64px 0 72px; } }
@@ -1104,11 +1104,16 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 
 
 :root {
-  --t-page: min(clamp(2.25rem, 1.9rem + 2.2vw, 3.75rem), calc((100vw - 2 * var(--gutter)) / 9.4));
-  --t-page-band: min(var(--t-page), calc((100vw - 2 * var(--gutter) - 2 * var(--band-pad-x)) / 9.4));
+  /* Whole pixels at every common width: 36 phones, 48 from 640, 56 from 1024, 60 from 1280. The dark-band heroes lose their band padding on phones (32). Below 380px the viewport cap keeps the longest run on one line. */
+  --t-page: 2.25rem;
+  --t-page-band: 2rem;
   --lh-display: 1.04;
   --t-eyebrow: .8125rem;
 }
+@media (min-width: 640px) { :root { --t-page: 3rem; --t-page-band: var(--t-page); } }
+@media (min-width: 1024px) { :root { --t-page: 3.5rem; } }
+@media (min-width: 1280px) { :root { --t-page: 3.75rem; } }
+@media (max-width: 379px) { :root { --t-page: min(2.25rem, calc((100vw - 2 * var(--gutter)) / 9.4)); --t-page-band: min(2rem, calc((100vw - 2 * var(--gutter) - 2 * var(--band-pad-x)) / 9.4)); } }
 :root .jv-page-title, :root .jv-home .jv-hero-title, :root .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title, :root .career-guides .cg-hero h1, :root .help-center .hc-hero h1, :root .walkthroughs-page .wt-hero h1 { line-height: var(--lh-display); overflow-wrap: break-word; }
 :root .jv-page-head--forest .jv-page-title { font-size: var(--t-page-band); }
 @media (min-width: 640px) { :root .jv-page-head--forest .jv-page-title { font-size: var(--t-page); } }
@@ -1125,7 +1130,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 :root .career-guides .cg-card > p, :root .career-guides .cg-card-audience { font-size: var(--t-body-sm); line-height: 1.55; color: var(--jv-ink-2); }
 :root .walkthroughs-page :is(.wt-instructions > p:not(.wt-eyebrow), .wt-step-caption p, .wt-controls > p, .wt-selected-task p:not(.wt-eyebrow), .wt-transcript > p, .wt-transcript li > p, .wt-player > .wt-format-note, .wt-recorded > p, .wt-ready p, .wt-further p, .wt-task-picker small, .wt-step-status) { font-size: var(--t-body-sm); line-height: 1.55; }
 :root :is(.pricing-note, .pricing-trust li, .pricing-billed-line, .product-plan-note, .pricing-free-strip p, .pricing-passes-sub, .pricing-outcome, .jv-contact-grid .guest-support > p) { font-size: var(--t-body-sm); line-height: 1.55; }
-:root .guest-support form > p, :root .guest-support-fine, :root .ap-field-help, :root .ap-form-expect, :root .ap-next-line, :root .ap-auth-footnote { font-size: var(--t-small); line-height: 1.5; }/* Form labels share one style (14px, 500) on the account and contact forms. */
+:root .guest-support form > p, :root .guest-support-fine, :root .ap-field-help, :root .ap-auth-footnote { font-size: var(--t-body-sm); line-height: 1.5; }/* Form labels share one style (14px, 500) on the account and contact forms. */
 
 :root .jv-account .ap-field label, :root .jv-account .ap-phone-field label, :root .guest-support label, :root .guest-support .guest-support-consent { font-size: var(--t-small); font-weight: var(--fw-medium); line-height: 1.4; color: var(--jv-ink); }
 :root .wt-task-toggle { min-height: 44px; padding: 0 18px; border-radius: var(--r-pill); font-size: var(--t-body-sm); font-weight: var(--fw-semi); line-height: 1; white-space: nowrap; }/* Labels: eyebrows stay mono caps (a little larger, a little tighter); secondary labels become sentence-case Geist at 13px; mono is left for times, files and days. */
@@ -1289,27 +1294,27 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 :root .jv-dark .jv-brand--static .jv-brand-period { box-shadow: 0 0 0 1.5px var(--jv-brand); }/* Targets: inline link rows keep a 44px hit area. */
 
 
-:root :is(.jv-related, .hc-related, .wt-format-links, .jv-link-row) a { min-height: 44px; }/* Account entry (the ad landing): the story panel is one grouped column from the top (sticky beside the long form), the phone strip carries the outcome and the three steps. */
+:root :is(.jv-related, .hc-related, .wt-format-links, .jv-link-row) a { min-height: 44px; }/* Account entry (the ad landing). Desktop: the promise panel is one grouped column (headline, one sentence, three claims, the free-account line, one example run, one link) centred against the long form and sticky beside it.
+   Phones: it shrinks to the headline and the free-account line, so Google, the name and the mobile number sit above the fold. */
 
 
-:root .ap-story-steps { display: none; margin: 0; padding: 0; list-style: none; counter-reset: ap-step; }
-:root .ap-story-steps li { counter-increment: ap-step; position: relative; color: var(--jv-on-dark-1); font-size: var(--t-body-sm); font-weight: var(--fw-medium); line-height: 1.4; }
-:root .ap-story-steps li::before { content: counter(ap-step); display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 10px; border-radius: 50%; background: rgb(var(--jv-link-on-dark-rgb) / .16); color: var(--jv-on-dark-link); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; }
-:root .ap-story-footnote svg { color: var(--jv-signal); }
+:root .ap-story-footnote, :root .ap-story-steps { display: none; }
+:root .ap-story-description { font-size: var(--t-body-sm); line-height: 1.55; max-width: 38ch; }
+:root .ap-story-free { font-size: var(--t-small); }
 @media (min-width: 761px) {
-  :root .jv-account--standalone .ap-account-story.jv-dark { justify-content: flex-start; padding-top: 56px; padding-bottom: 0; }
-  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-inner { position: sticky; top: 96px; flex: none; min-height: 0; padding-bottom: 40px; }
-  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-steps { display: grid; gap: 12px; margin: 28px 0 0; }
-  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-run { display: grid; margin: 32px 0 0; padding: 16px 18px; }
-  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-footnote { display: flex; margin: 24px 0 8px; color: var(--jv-on-dark-body); font-size: var(--t-small); }
-  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-link { margin-top: 4px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark { justify-content: center; padding-top: 48px; padding-bottom: 48px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-inner { position: sticky; top: 96px; flex: none; min-height: 0; padding-bottom: 0; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-run { display: grid; margin: 28px 0 0; padding: 16px 18px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-link { margin-top: 12px; }
 }
 @media (max-width: 760px) {
-  :root .jv-account--standalone .ap-account-story .ap-story-description { display: block; margin: 0 0 6px; color: var(--jv-on-dark-body); font-size: var(--t-small); line-height: 1.45; max-width: 36ch; }
-  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-steps { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; }
-  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-steps li { font-size: var(--t-sm); }
-  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-steps li::before { width: 18px; height: 18px; margin-right: 6px; font-size: .6875rem; }
-}/* Home: a clear gutter between the lead and the product window, the sheet laid over the window's lower edge (never over its footer text), and the ring centred on the window. */
+  :root .jv-account--standalone .ap-account-story.jv-dark { padding: 18px 20px 16px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-eyebrow { display: none; }
+  :root .jv-account--standalone .ap-account-story.jv-dark h1 { margin: 0; }
+  :root .jv-account--standalone .ap-account-story.jv-dark :is(.ap-story-description, .ap-story-ticks, .ap-story-run, .ap-story-link) { display: none; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-free { display: block; margin: 8px 0 0; }
+}
+/* Home: a clear gutter between the lead and the product window, the sheet laid over the window's lower edge (never over its footer text), and the ring centred on the window. */
 
 
 :root .jv-home .jv-hero:not(.lo-loop-hero) .jv-hero-lead { max-width: 37rem; }
@@ -1330,3 +1335,86 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 @media (prefers-reduced-motion: no-preference) {
   :root .jv-faq details[open] > :is(p, div), :root .hc-note-details[open] > :not(summary) { animation-duration: var(--dur-2); }
 }
+
+/* ================= Round 12 ================= */
+/* Round 12 hypothesis: the scores stalled because the pages share one template (eyebrow, H1, two CTAs, a floating chip card, the same dark closing band), the hero art is flat UI chips,
+   and the small craft slips (square footer period, misaligned pricing rows, five different toggles, faint focus rings on dark panels, 13px and 15px steps) sit on every page.
+   This round changes composition and structure, not polish: a staged product object on the home hero, a different hero and closing band on at least four page types,
+   one toggle, one tag, one type rhythm, and the focus ring fixed at its specificity root. */
+
+/* Focus: the mint ring on every forest panel. The page-scoped rules (.career-guides a, .walkthroughs-page a, .help-center :is(...)) outrank the generic dark rule, so this one is stronger than all of them.
+   Buttons keep the lime ring. 3:1 or better on forest. */
+:root .jv-dark :is(a, button, summary, input, select, textarea):focus-visible { outline-color: var(--jv-on-dark-link); }
+:root .jv-dark .jv-btn:focus-visible, :root .jv-dark a.jv-btn:focus-visible, :root .jv-dark button.jv-btn:focus-visible { outline-color: var(--jv-signal); }
+
+/* Footer: one colour for every legal and column link (no visited-link tint), and a ghost wordmark that is brand green, ends in the round lime dot of the header lockup, fades toward the page edge and is never clipped. */
+:root :is(.jv-footer-bottom nav a, .jv-footer-col a):is(:link, :visited) { color: var(--jv-ink-2); }
+@media (hover: hover) { :root :is(.jv-footer-bottom nav a, .jv-footer-col a):is(:link, :visited):hover { color: var(--jv-ink); } }
+:root .jv-footer-mark > span { color: transparent; background: linear-gradient(180deg, rgb(var(--jv-brand-rgb) / .22) 0%, rgb(var(--jv-brand-rgb) / .08) 90%); -webkit-background-clip: text; background-clip: text; }
+:root .jv-footer-mark > span::after { content: ""; display: inline-block; width: .125em; height: .125em; margin-left: .035em; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 .014em rgb(var(--jv-brand-rgb) / .3); opacity: .8; vertical-align: baseline; }
+
+/* Header and footer lockup: the lime dot sits clear of the "e" (about .12em), a touch smaller (.22em) and a hair above the baseline, so its gap matches the letter spacing. */
+:root .jv-brand-period { width: .22em; height: .22em; margin-left: .12em; vertical-align: .03em; }
+
+/* One tag: "Example · illustrative data" is a quiet mono corner label, not a boxed chip. */
+:root .jv-mock-tag.jv-chip--caption { min-height: 0; padding: 0; border: 0; background: none; color: var(--jv-ink-3); letter-spacing: .04em; }
+
+/* One toggle: every disclosure (FAQ, guides sources, contact receipt, help topic, pricing one-offs, walkthrough transcript, steps) is the same 32px outlined circle with a drawn plus that turns to a cross, filled brand green when open. */
+:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .pricing-passes-disclosure) > summary::after { content: ""; display: block; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line-strong); border-radius: 50%; color: var(--jv-ink); font-size: 0; background: linear-gradient(currentColor, currentColor) center / 14px 1.75px no-repeat, linear-gradient(currentColor, currentColor) center / 1.75px 14px no-repeat; transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-press), border-color var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .pricing-passes-disclosure)[open] > summary::after { content: ""; background-color: var(--jv-brand); border-color: var(--jv-brand); color: #fff; transform: rotate(45deg); }
+:root .jv-faq-toggle { border-color: var(--jv-line-strong); }
+:root .jv-faq-toggle svg { width: 14px; height: 14px; stroke-width: 1.75; }
+
+/* Accordion height eases where the browser supports it (Chrome 131 and later): the answer grows instead of jumping, and everything below it moves with it. Elsewhere the fade above stays. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+    :root .jv-faq { interpolate-size: allow-keywords; }
+    :root .jv-faq details::details-content { block-size: 0; overflow: clip; transition: block-size var(--dur-3) var(--ease-out), content-visibility var(--dur-3) var(--ease-out) allow-discrete; }
+    :root .jv-faq details[open]::details-content { block-size: auto; }
+  }
+}
+
+/* Pricing: the three plan cards share one row grid (subgrid), so price, description, checklist and button line up whatever a description's length. */
+@media (min-width: 768px) {
+  :root .product-proposed-grid { row-gap: 0; column-gap: 16px; }
+  @supports (grid-template-rows: subgrid) {
+    :root .product-proposed-grid > .pricing-card { display: grid; grid-template-rows: subgrid; grid-row: span 7; row-gap: 0; align-content: start; }
+    :root .product-proposed-grid > .pricing-card > .pricing-points { align-self: stretch; }
+    :root .product-proposed-grid > .pricing-card > :is(a, button) { align-self: end; margin-top: 0; }
+  }
+  @supports not (grid-template-rows: subgrid) { :root .product-proposed-grid .pricing-desc { min-height: 3.1em; } }
+}
+/* Phones: the free-account entry is the first thing under the hero (the cold ad visitor is not ready to pay); the plans follow. */
+@media (max-width: 767px) {
+  :root .loop-subscription-billing.product-proposed-plans { display: flex; flex-direction: column; }
+  :root .loop-subscription-billing.product-proposed-plans > .pricing-free-strip { order: -2; margin: 0 0 24px; }
+  :root .loop-subscription-billing.product-proposed-plans > * { order: 0; }
+  :root .loop-subscription-billing.product-proposed-plans > .jv-caption { order: -3; }
+}
+
+/* One-off passes: a standard accordion row on the page grid (hairlines, same left edge, the shared toggle at the right edge), not a dashed card. */
+:root .product-page--pricing .jv-section.pricing-passes { margin: 32px 0 0; padding: 0; border: 0; border-top: 1px solid var(--jv-line); border-bottom: 1px solid var(--jv-line); border-radius: 0; background: none; }
+:root .product-page--pricing .jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])), :root .product-page--pricing .jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 0; }
+:root .pricing-passes-disclosure > summary { min-height: 72px; padding: 20px 0; align-items: center; }
+:root .pricing-passes-disclosure > summary::after { margin-top: 0; }
+:root .pricing-passes-body { padding-bottom: 32px; }
+:root .pricing-passes-title { font-size: var(--t-h4); }
+:root .pricing-passes-prices { font-size: var(--t-small); }
+:root .product-page--pricing .pricing-teams { margin-top: 0; }
+:root .pricing-billed-line { max-width: 72ch; }
+
+/* Audience pages. The example captions never break inside a word (the page-level overflow-wrap would split REVIEW); on phones the audience switcher drops below the hero actions so the headline and "Start my search" lead the fold. */
+:root .audience-page :is(.jv-caption, .audience-workspace figcaption, .audience-workspace-body > .jv-caption) { overflow-wrap: normal; word-break: normal; hyphens: none; }
+@media (max-width: 767px) {
+  :root .audience-page > .jv-page { display: flex; flex-direction: column; }
+  :root .audience-page > .jv-page > * { order: 2; }
+  :root .audience-page > .jv-page > .audience-hero { order: 0; }
+  :root .audience-page > .jv-page > .audience-switch { order: 1; margin: 8px 0 24px; }
+}
+/* Pale closing band: the dark band is the home, Automated Job Loop and pricing close; audience pages, guides, help and walkthroughs close on the tint. */
+:root .jv-cta.jv-cta--pale { border: 1px solid var(--jv-line); background: radial-gradient(70% 80% at 100% 0%, rgb(var(--jv-brand-rgb) / .12), transparent 70%), var(--jv-brand-tint); }
+:root .jv-cta--pale h2 { color: var(--jv-ink); font-weight: var(--fw-heading); font-size: var(--t-h2-panel); }
+:root .jv-cta--pale p:not(.jv-caption) { color: var(--jv-ink-2); }
+:root .jv-cta--pale .jv-caption { color: var(--jv-ink-3); }
+:root :is(.career-guides .cg-actions, .help-center .hc-further, .walkthroughs-page .wt-further) { border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: radial-gradient(70% 80% at 100% 0%, rgb(var(--jv-brand-rgb) / .12), transparent 70%), var(--jv-brand-tint); }
+:root :is(.career-guides .cg-actions h2, .help-center .hc-further h2, .walkthroughs-page .wt-further h2) { max-width: 18ch; margin: 0 0 12px; color: var(--jv-ink); font-size: var(--t-h2-panel); font-weight: var(--fw-heading); letter-spacing: var(--ls-h2); line-height: 1.12; }

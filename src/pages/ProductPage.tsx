@@ -160,7 +160,9 @@ export default function ProductPage({ kind }: { kind: Kind }) {
   // One product fragment beside the intro on the explainer pages that would otherwise open on text alone.
   // Contact and privacy get a quiet summary card (real facts from the policy); the explainers get their own product moment.
   const openAnswer = (index: number) => () => { const box = document.getElementById(`faq-${index}`); if (box instanceof HTMLDetailsElement) box.open = true; };
-  const faqIndex = <aside className="jv-notecard jv-faq-index" aria-label="Popular questions"><p className="jv-caption">Popular questions</p><ol>{faqs.slice(0, 5).map(([question], index) => <li key={question}><a href={`#faq-${index}`} onClick={openAnswer(index)}>{question}</a></li>)}</ol></aside>;
+  // Topic jumps, not a second copy of the question list below: each label names a theme and opens the first answer in it.
+  const faqTopics: [string, number][] = [["What a run prepares", 0], ["Your CV and files", 3], ["Accounts and saving", 2], ["AI and privacy", 6], ["Cost and results", 8]];
+  const faqIndex = <aside className="jv-notecard jv-faq-index" aria-label="Jump to a topic"><p className="jv-caption">Jump to a topic</p><ol>{faqTopics.map(([label, index]) => <li key={label}><a href={`#faq-${index}`} onClick={openAnswer(index)}>{label}</a></li>)}</ol></aside>;
   const visual = kind === "faq" ? faqIndex : kind === "how" ? <SetupCard /> : kind === "about" ? <RepeatStack /> : kind === "pricing" ? <PacesAside /> : kind === "contact" ? <ReceiptAside /> : kind === "privacy" ? <aside className="jv-notecard" aria-label="Your information at a glance"><p className="jv-caption">At a glance</p><ol><li><strong>The free check runs on your device</strong><span>Comparing without AI never uploads your file.</span></li><li><strong>Saving is your choice</strong><span>Nothing is stored in your account until you confirm.</span></li><li><strong>Advertising measurement is optional</strong><span>You can turn it off further down this page.</span></li></ol></aside> : null;
   const contactNote = <aside className="jv-notecard" aria-label="How support works"><p className="jv-caption">How support works</p><ol><li><strong>No account needed</strong><span>Public support needs no name or email.</span></li><li><strong>Keep your receipt code</strong><span>It lets you read the status and any reply.</span></li><li><strong>Kept up to 90 days</strong><span>You confirm storage before sending. It is available for review, then removed.</span></li></ol></aside>;
   const visualDecor = kind === "how" || kind === "about" || kind === "pricing" || kind === "contact";
@@ -170,7 +172,7 @@ export default function ProductPage({ kind }: { kind: Kind }) {
     {kind === "home" ? <HomePage /> : <>
       <div className="jv-page product-inner">
         <header className={`jv-page-head product-page-heading${visual ? " jv-page-head--split" : ""}${kind === "about" || kind === "pricing" ? " jv-page-head--forest jv-dark" : ""}${kind === "faq" ? " jv-page-head--center" : ""}`}><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title jv-enter-h1">{nb(titles[kind])}</h1><p className="jv-lead product-page-intro jv-enter" style={{ "--d": "60ms" } as React.CSSProperties}>{nb(intros[kind] ?? "")}</p>
-          {band && <div className="jv-page-actions"><StartLink to={start} /><TextLink to="/check">Try the free CV Check</TextLink></div>}
+          {(band || kind === "pricing") && <div className="jv-page-actions"><StartLink to={start}>{kind === "pricing" ? "Start free" : undefined}</StartLink><TextLink to="/check">Try the free CV Check</TextLink></div>}
           {visual && <div className="jv-page-visual" {...(visualDecor ? { "aria-hidden": true } : {})}>{visual}</div>}
         </header>
         {kind === "pricing" ? <SubscriptionPricing /> : <div className="product-main-content">

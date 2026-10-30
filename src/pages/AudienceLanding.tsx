@@ -104,7 +104,7 @@ export default function AudienceLanding({ audience }: { audience: LoopAudience }
         </ul>
       </section>
     </div>
-    <section className="jv-cta jv-cta--page jv-cta--visual jv-dark" aria-labelledby="audience-final-title">
+    <section className="jv-cta jv-cta--page jv-cta--visual jv-cta--pale" aria-labelledby="audience-final-title">
       <div className="jv-cta-inner"><h2 id="audience-final-title">{closing[audience].heading}</h2><p>{content.recordHint}</p>
         <div className="jv-cta-actions">{user ? <Link className="jv-btn jv-btn--primary jv-btn--lg" to={saveRecord}>Open my career record<ArrowRight aria-hidden="true" /></Link> : <><Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search<ArrowRight aria-hidden="true" /></Link><Link className="jv-btn jv-btn--secondary jv-btn--lg" to={saveRecord}>Sign in to save my experience</Link></>}</div></div>
       <div className="jv-cta-visual" aria-hidden="true"><CvLineCard before={content.exampleFact} after={closing[audience].after} /></div>

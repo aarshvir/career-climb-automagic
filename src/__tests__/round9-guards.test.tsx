@@ -21,7 +21,7 @@ describe('round 9 conversion copy', () => {
   it('shows one reassurance row of three facts and never mentions "pass" before it is explained', () => {
     const { container } = render(<PriceNote />);
     const facts = Array.from(container.querySelectorAll('.jv-meta-in > span')).map(node => node.textContent);
-    expect(facts).toEqual(['Free account', 'Tailored CV for each role', 'Plans from $29/month']);
+    expect(facts).toEqual(['Free to start', '3 tailored CVs a month, free', 'Plans from $29/month']);
   });
   it('keeps the FAQ description and the visible questions in step', () => {
     const description = staticPageMeta('/faq')!.description;

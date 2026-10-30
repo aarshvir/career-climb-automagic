@@ -179,7 +179,7 @@
 .pricing-card > .jv-caption { display: block; min-height: 1rem; }
 .pricing-card > .jv-caption::before { display: inline-block; margin-right: 10px; vertical-align: .1em; }
 /* The optional passes are a second-tier block: a section-sized heading, with the lead beside it on desktop. */
-.pricing-passes .jv-section-title--panel { font-size: clamp(1.625rem, 1.4rem + .9vw, 2rem); letter-spacing: var(--ls-h2); }
+.pricing-passes .jv-section-title--panel { font-size: var(--t-h2-panel); letter-spacing: var(--ls-h2); }
 .pricing-start, .pricing-teams { padding-block: 40px; }
 @media (min-width: 1024px) {
   .pricing-start, .pricing-teams { padding-block: 56px; }

@@ -125,10 +125,7 @@
 /* ---------- Round 10: guide library ---------- */
 /* Each category has a glyph and a quiet tint, all from the green tokens (tile and ink pairs; the top rule is brand green on every card, so the library reads as one family). */
 .career-guides .cg-card { --cg-tint: var(--jv-brand-tint); --cg-tint-ink: var(--jv-brand-ink); position: relative; }
-.career-guides .cg-card[data-category="Career direction"] { --cg-tint: var(--jv-wash-peak); --cg-tint-ink: var(--jv-brand); }
-.career-guides .cg-card[data-category="Application workflow"] { --cg-tint: var(--jv-brand-glyph); --cg-tint-ink: var(--jv-forest); }
-.career-guides .cg-card[data-category="UAE job search"] { --cg-tint: var(--jv-sunken); --cg-tint-ink: var(--jv-ink-2); }
-.career-guides .cg-card[data-category="Privacy & troubleshooting"] { --cg-tint: var(--jv-bg-subtle); --cg-tint-ink: var(--jv-ink-2); }
+/* One chip treatment for every category: the brand tint with the brand ink glyph (lime is never a fill on a light page). */
 .cg-card-glyph { display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 14px; border-radius: 10px; background: var(--cg-tint); color: var(--cg-tint-ink); }
 .career-guides .cg-card, .career-guides .cg-card:hover { border-top: 3px solid var(--jv-brand); }
 /* Uniform rows: the grid is always whole rows, and the last card is one column wide. */
