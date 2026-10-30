@@ -17,6 +17,7 @@ export function Brand() {
 export function BrandLockup() {
   return <span className="jv-brand jv-brand--static" aria-hidden="true">{brandInner}</span>;
 }
+const audienceLinks = [["/for-students","Students and graduates"],["/for-mba","MBA career pivots"],["/for-career-switchers","Busy professionals"]];
 const links = [["/job-loop","Automated Job Loop"],["/check","Free CV Check"],["/pricing","Pricing"],["/guides","Guides"],["/help","Help"]];
 // A stored Supabase session makes "signed in" likely. Only then is the signed-out footprint held invisible while the
 // account check runs; everyone else (and the prerendered page) sees Sign in and Get started from the first paint.
@@ -118,7 +119,7 @@ export default function MvpHeader() {
       finally { setBusy(false); }
     }}>{busy ? "Signing out…" : "Sign out"}</button>
   </> : signedOutActions(false);
-  return <header className="jv-header" data-menu-open={open} {...(open ? { role: "dialog", "aria-modal": true, "aria-label": "Site menu" } : {})}>
+  return <header className="jv-header" data-menu-open={open} data-entry={onEntry || undefined} {...(open ? { role: "dialog", "aria-modal": true, "aria-label": "Site menu" } : {})}>
     <a className="jv-skip" href="#main-content">Skip to content</a>
     <div className="jv-header-inner">
       <Brand />
@@ -129,6 +130,7 @@ export default function MvpHeader() {
     </div>
     <nav ref={panel} id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closingNow ? "closing" : undefined} className="jv-mobile-panel">
       {links.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}
+      <div className="jv-mobile-who" role="group" aria-label="Who it's for"><p aria-hidden="true">Who it's for</p>{audienceLinks.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}</div>
       <div className="jv-mobile-account" onClick={()=>setOpenPath(null)}>{account}</div>
     </nav>
     {(open || closingNow) && <div className="jv-menu-scrim" aria-hidden="true" data-state={closingNow ? "closing" : undefined} onClick={()=>setOpenPath(null)} />}

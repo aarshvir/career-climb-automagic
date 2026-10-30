@@ -39,6 +39,9 @@ const tile = (variant, { rx = RX, scale = 1 } = {}) => `<svg xmlns="http://www.w
 const MONO_SCALE = 0.64;
 const mono = (variant = small, scale = MONO_SCALE) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><mask id="gap" maskUnits="userSpaceOnUse" x="0" y="0" width="40" height="40"><rect width="40" height="40" fill="#fff"/><circle cx="${cx}" cy="${cy}" r="${ring(variant)}" fill="#000" transform="${transform}"/></mask></defs><g${fit(scale)}><g mask="url(#gap)">${group(variant, '#000', strokes)}</g>${group(variant, '#000', `<circle cx="${cx}" cy="${cy}" r="${variant.r}" fill="#000" stroke="none"/>`)}</g></svg>`;
 
+/** The 16px frame is drawn on whole pixels, not resampled from the 40-unit geometry: a 3px stem (x 10-13), a 2px bar (y 2-4),
+ * a hook of radius 3.5 centred on (8, 8) and a lime dot capping its end at (4.5, 8). No knockout ring at this size. */
+const tile16 = () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" rx="4" fill="${TILE}"/><g fill="none" stroke="${GLYPH}"><path d="M8 3h5" stroke-width="2"/><path d="M11.5 3v5a3.5 3.5 0 0 1-7 0" stroke-width="3"/></g><circle cx="4.5" cy="8" r="1.75" fill="${SIGNAL}"/></svg>`;
 writeFileSync(pub('favicon.svg'), tile(small) + '\n');
 writeFileSync(pub('icon-mono.svg'), mono() + '\n');
 console.log('brand svgs written');
@@ -66,7 +69,8 @@ if (process.argv.includes('--png')) {
   const frames = [];
   for (const [size, variant] of [[16, small], [32, small], [48, large]]) {
     const out = resolve(root, `.tmp-fav${size}.png`);
-    await render(tile(variant), size, out);
+    await render(size === 16 ? tile16() : tile(variant), size, out);
+    if (size !== 48) writeFileSync(pub(`favicon-${size}.png`), readFileSync(out)); // linked directly, so browsers never pick a blurry ico frame
     frames.push({ w: size, data: readFileSync(out) });
     rmSync(out);
   }

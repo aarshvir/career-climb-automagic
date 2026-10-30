@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Play, Search } from "lucide-react";
+import { BookOpen, FileText, Play } from "lucide-react";
 import "./ProductCards.css";
 import "./PageCards.css";
 import "./AudienceCards.css";
@@ -8,30 +8,18 @@ import "./AudienceCards.css";
 // ever shows statements the page already makes.
 
 
-/** FAQ: one open answer and two closed questions, as the page itself shows them. */
-export function FaqAside({ className = "" }: { className?: string }) {
-  return <div className={`pc-card pc-aside pc-faq ${className}`.trim()} aria-hidden="true">
-    <div className="pc-top"><span className="pc-caption">Example · common questions</span><span className="pc-pill"><Search />Search</span></div>
-    <div className="pc-qa is-open"><span className="pc-qa-q">What does the Automated Job Loop prepare for me?<i /></span><p>Matching jobs for your roles and locations, and a tailored CV for each prepared role, kept in your dashboard.</p></div>
-    <div className="pc-qa"><span className="pc-qa-q">Which files can I upload?<i /></span></div>
-    <div className="pc-qa"><span className="pc-qa-q">Can I download my documents?<i /></span></div>
-  </div>;
-}
-
-const paces: [string, string, number, number][] = [["Starter", "1 run a week", 1, 40], ["Advanced", "3 runs a week", 3, 66], ["Pro Job Seeker", "1 run a day", 7, 92]];
-/** Pricing: the run pace behind each plan, drawn as three rings. The dots on each ring are the runs in one example week. */
+const cadenceDays = ["M", "T", "W", "T", "F", "S", "S"];
+const cadence: [string, string, number[]][] = [["Starter", "1 run a week", [0]], ["Advanced", "3 runs a week", [0, 2, 4]], ["Pro Job Seeker", "1 run a day", [0, 1, 2, 3, 4, 5, 6]]];
+/** Pricing: a plain cadence chart. One row per plan, one dot per run in an example week (Advanced shows Mon, Wed and Fri; you choose your days). */
 export function PacesAside({ className = "" }: { className?: string }) {
-  return <div className={`pc-card pc-aside pc-paces ${className}`.trim()} aria-hidden="true">
-    <div className="pc-top"><span className="pc-caption">Example week · runs per ring</span></div>
-    <div className="pc-rings">
-      <svg viewBox="0 0 200 200" className="pc-rings-svg" focusable="false">
-        {paces.map(([name, , , radius]) => <circle key={name} cx="100" cy="100" r={radius} fill="none" className="pc-ring" />)}
-        {paces.map(([name, , count, radius]) => Array.from({ length: count }, (_, index) => {
-          const angle = -Math.PI / 2 + (index / count) * Math.PI * 2;
-          return <circle key={`${name}-${index}`} cx={100 + radius * Math.cos(angle)} cy={100 + radius * Math.sin(angle)} r={index === 0 ? 5.5 : 4} className={index === 0 ? "pc-ring-dot pc-ring-dot--first" : "pc-ring-dot"} />;
-        }))}
-      </svg>
-      <ul className="pc-rings-legend">{paces.map(([name, pace, count]) => <li key={name}><strong>{name}</strong><span>{pace}</span></li>)}</ul>
+  return <div className={`pc-card pc-aside pc-cadence ${className}`.trim()} aria-hidden="true">
+    <div className="pc-top"><span className="pc-caption">Example week · runs per plan</span></div>
+    <div className="pc-cad-grid">
+      <span className="pc-cad-days">{cadenceDays.map((day, index) => <i key={index}>{day}</i>)}</span>
+      {cadence.map(([name, pace, on]) => <div key={name} className="pc-cad-row">
+        <span className="pc-cad-name"><strong>{name}</strong><span>{pace}</span></span>
+        <span className="pc-cad-dots">{cadenceDays.map((_, index) => <i key={index} className={on.includes(index) ? "is-on" : ""} />)}</span>
+      </div>)}
     </div>
   </div>;
 }
@@ -45,21 +33,11 @@ export function ReceiptAside({ className = "" }: { className?: string }) {
   </div>;
 }
 
-/** Guides: the library as an index, counted from the real list. */
-export function GuidesAside({ counts, className = "" }: { counts: [string, number][]; className?: string }) {
-  const total = counts.reduce((sum, [, count]) => sum + count, 0);
-  return <div className={`pc-card pc-aside pc-index ${className}`.trim()} aria-hidden="true">
-    <div className="pc-top"><span className="pc-caption"><BookOpen />Guide library</span><span className="pc-tag pc-tag--neutral">{total} guides</span></div>
-    <ul className="pc-index-list">{counts.map(([name, count]) => <li key={name}><span>{name}</span><strong>{count}</strong></li>)}</ul>
-  </div>;
-}
-
-const helpSteps = [["Add your experience", "Upload a CV or build one"], ["Choose roles and locations", "Pick a weekly, 3x weekly or daily schedule"], ["Review your dashboard", "Matched jobs and a tailored CV for each"]];
-/** Help: the three clicks every new search takes. */
-export function HelpAside({ className = "" }: { className?: string }) {
-  return <div className={`pc-card pc-aside pc-help ${className}`.trim()} aria-hidden="true">
-    <div className="pc-top"><span className="pc-caption">Example · your next click</span></div>
-    <ol className="pc-trail">{helpSteps.map(([title, note], index) => <li key={title} className={index === 1 ? "is-now" : ""}><span className="pc-trail-n">0{index + 1}</span><span className="pc-trail-t"><strong>{title}</strong><span>{note}</span></span></li>)}</ol>
+/** Guides: one real guide as a cover (category, title, reading time) with a drawn document motif. Decorative; the full list sits below. */
+export function GuidesFeaturedAside({ category, title, minutes, className = "" }: { category: string; title: string; minutes: number; className?: string }) {
+  return <div className={`pc-card pc-aside pc-cover ${className}`.trim()} aria-hidden="true">
+    <div className="pc-cover-art"><span /><span /><span /><i /></div>
+    <div className="pc-cover-body"><span className="pc-caption"><BookOpen />Featured guide · {category}</span><strong>{title}</strong><span className="pc-cover-meta">{minutes} min read</span></div>
   </div>;
 }
 

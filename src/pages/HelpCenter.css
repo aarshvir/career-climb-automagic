@@ -151,7 +151,8 @@
 /* ---------- Round 6 ---------- */
 /* One measure for the whole topic: heading row, summary, steps and notes share it, so the toggle sits beside its heading and no block ends early. */
 .hc-topic > details { max-width: 46rem; }
-.hc-topic > details > :is(.hc-topic-summary, .hc-steps, .hc-note, .hc-field-help) { max-width: none; }
+.hc-topic > details > :is(.hc-topic-summary, .hc-steps, .hc-note, .hc-field-help) { max-width: 64ch; }
+.hc-topic > details :is(.hc-topic-summary, .hc-steps li, .hc-note p, .hc-field-help dd) { text-wrap: pretty; }
 .hc-steps li { max-width: none; }
 .hc-note { max-width: none; }
 /* The closing card is the forest band every page ends on. */

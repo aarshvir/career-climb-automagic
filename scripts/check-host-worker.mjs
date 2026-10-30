@@ -21,7 +21,7 @@ const { default: worker } = await import(`data:text/javascript;base64,${Buffer.f
   throw new Error(`Generated Worker is not valid ESM (${error.name}).`);
 });
 assert.equal(typeof worker?.fetch, 'function');
-assert.equal(decodedAssets, 0, 'Loading the Worker must not decode all assets.');
+assert.equal(worker.decodedAssets, 0, 'Loading the Worker must not decode all assets.');
 const hosting = JSON.parse(await readFile(join(root, 'vercel.json'), 'utf8'));
 const expectedHeaders = hosting.headers.find(rule => rule.source === '/(.*)').headers;
 const publicRender = JSON.parse(await readFile(join(dist,'.prerender/manifest.json'),'utf8'));
@@ -38,7 +38,7 @@ const checkHeaders = response => {
 const index = await readFile(join(dist, 'index.html'));
 const undecodedHead = await request('/dashboard', { method: 'HEAD' });
 assert.equal(undecodedHead.status, 200);
-assert.equal(decodedAssets, 0, 'HEAD must not decode an asset body.');
+assert.equal(worker.decodedAssets, 0, 'HEAD must not decode an asset body.');
 for (const path of ['/dashboard?tab=cv', '/auth/callback?code=synthetic', '/auth/reset']) {
   const response = await request(path);
   assert.equal(response.status, 200, `SPA route ${path} must serve the frontend.`);
@@ -47,7 +47,7 @@ for (const path of ['/dashboard?tab=cv', '/auth/callback?code=synthetic', '/auth
   assert.equal(response.headers.get('Cache-Control'), 'no-cache');
   assert.ok(Buffer.from(await response.arrayBuffer()).equals(index), 'SPA output must match the built index bytes.');
 }
-assert.equal(decodedAssets, 1, 'SPA routes must reuse one lazily decoded index.');
+assert.equal(worker.decodedAssets, 1, 'SPA routes must reuse one lazily decoded index.');
 // The ad landing routes are the same shell plus parallel preloads of the account-entry chunks (nothing else differs).
 const indexText = index.toString('utf8');
 let entryShell = null;
@@ -67,6 +67,9 @@ for (const path of ['/onboarding?utm_source=meta', '/auth?mode=signup']) {
   assert.ok(text.startsWith(head) && text.endsWith('</head>' + tail), 'Account entry must be the built index plus head links only.');
   const added = text.slice(head.length, text.length - tail.length - '</head>'.length);
   assert.match(added, /^(<link rel="(stylesheet|modulepreload)" href="\/assets\/[^"]+"\/>)+$/, 'Account entry adds only asset preloads.');
+  // The static first paint uses .ap-account-story, which AccountPilot's stylesheet defines: it must be linked in the head, or the shell paints unstyled.
+  assert.match(added, /<link rel="stylesheet" href="\/assets\/AccountPilot-[^"]+\.css"\/>/, 'Account entry must link the stylesheet that styles its first paint (.ap-account-story).');
+  assert.match(added, /<link rel="modulepreload" href="\/assets\/Auth-[^"]+\.js"\/>/, 'Account entry must preload the Auth chunk.');
   assert.ok(entryShell === null || entryShell === text, '/onboarding and /auth share one shell.');
   entryShell = text;
 }
@@ -76,7 +79,7 @@ for (const path of ['/admin', '/admin2', '/admin2/ops?days=7', '/admin/users', '
   assert.equal(response.headers.get('X-Robots-Tag'), 'noindex, nofollow, noarchive');
 }
 assert.equal((await request('/')).headers.get('X-Robots-Tag'), null, 'Public marketing remains indexable.');
-const decodedBeforePages=decodedAssets;
+const decodedBeforePages=worker.decodedAssets;
 for(const page of publicRender.pages){
   const response=await request(page.path),html=await response.text();
   assert.equal(response.status,200);checkHeaders(response);
@@ -122,7 +125,7 @@ for(const page of publicRender.pages){
     assert.ok(response.headers.get('Content-Security-Policy').includes(`'sha256-${createHash('sha256').update(match[1]).digest('base64')}'`),'Actual structured text must be permitted by its exact CSP hash.');
   }
 }
-const pageDecodes=decodedAssets-decodedBeforePages;
+const pageDecodes=worker.decodedAssets-decodedBeforePages;
 for(const path of ['/guides/no-such-article','/no-such-product','/unknown/deep/route'])assert.equal((await request(path)).status,404,'Unknown routes must not masquerade as successful pages.');
 for(const [path,target] of [['/blog','/guides'],['/jobs','/job-loop'],['/product','/job-loop'],['/guides/','/guides']]){const response=await request(path);assert.equal(response.status,308);assert.equal(response.headers.get('Location'),target);}
 for (const path of ['/pilot','/pilot/','/pilot?utm_source=review','/pilot/?utm_source=review']) {
@@ -200,6 +203,6 @@ for (const method of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
   assert.equal(response.headers.get('Cache-Control'), 'no-store');
   checkHeaders(response);
 }
-assert.equal(decodedAssets, 1 + 1 + pageDecodes + 3 + cases.length, 'ETag and HEAD requests must not decode additional assets; sitemap and IndexNow key each decode once.');
+assert.equal(worker.decodedAssets, 1 + 1 + pageDecodes + 3 + cases.length, 'ETag and HEAD requests must not decode additional assets; sitemap and IndexNow key each decode once.');
 globalThis.atob = nativeAtob;
 console.log(JSON.stringify({ result: 'passed', publicPages:publicRender.pages.length, guideArticles:publicRender.pages.filter(page=>page.kind==='guide').length, checks: ['security-headers-and-jsonld-hashes','private-client-routes','rendered-public-content','canonical-redirects','real-notfound-status','asset-bytes-and-mime','etag-and-cache','head','missing-and-private-paths','unsafe-methods','project-identity','compressed-size'], compressedBytes }));

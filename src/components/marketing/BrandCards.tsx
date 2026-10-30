@@ -1,3 +1,4 @@
+import { ArrowDown } from "lucide-react";
 import LoopOrbit from "./LoopOrbit";
 import "./BrandCards.css";
 
@@ -24,6 +25,16 @@ export function JourneyTimeline() {
 export function AboutMark() {
   return <div className="bc-mark" aria-hidden="true">
     <LoopOrbit size={380} labels variant="dark" animate={false}><span className="bc-mark-core"><strong>Your experience</strong><span>every time</span></span></LoopOrbit>
+  </div>;
+}
+
+/** /about: the problem as a picture. Three applications each retype the same facts; one saved record replaces them. Decorative, labelled as an example. */
+export function RepeatStack() {
+  return <div className="bc-stack" aria-hidden="true">
+    <p className="bc-stack-cap">Example · the same facts, retyped</p>
+    <div className="bc-stack-docs">{["Application 3", "Application 2", "Application 1"].map(label => <div key={label} className="bc-stack-doc"><span>{label}</span><i /><i /><i className="is-short" /></div>)}</div>
+    <ArrowDown className="bc-stack-arrow" />
+    <div className="bc-stack-one"><strong>Your experience</strong><span>Added once, reused every run</span></div>
   </div>;
 }
 

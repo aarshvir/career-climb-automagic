@@ -11,7 +11,7 @@
 .guest-support :is(input, textarea, select):focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; border-color: var(--jv-brand); }
 .guest-support > h2 { text-wrap: balance; }
 .guest-support form > p { margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.5; }
-.guest-support button { display: inline-flex; align-items: center; justify-content: center; width: fit-content; min-height: 48px; padding: 0 22px; border: 1px solid transparent; border-radius: var(--r-pill); background: var(--jv-brand); color: #fff; font-size: var(--t-body-sm); font-weight: var(--fw-semi); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(15 29 23 / .2); transition: background var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
+.guest-support button { display: inline-flex; align-items: center; justify-content: center; width: fit-content; min-height: 48px; padding: 0 22px; border: 1px solid transparent; border-radius: var(--r-pill); background: var(--jv-brand); color: #fff; font-size: var(--t-body-sm); font-weight: var(--fw-semi); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(var(--jv-ink-rgb) / .2); transition: background var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
 .guest-support button:hover:not(:disabled) { background: var(--jv-brand-hover); }
 .guest-support button:active:not(:disabled) { transform: scale(.98); transition-duration: var(--dur-1); }
 .guest-support button:disabled { opacity: .6; cursor: not-allowed; }

@@ -47,3 +47,14 @@
 @media (prefers-reduced-motion: reduce) {
   .jv-orbit--animate .jv-orbit-comet, .jv-orbit--once .jv-orbit-comet { animation: none !important; transform: rotate(200deg) !important; opacity: 1 !important; }
 }
+
+/* "You review" is the last stop: before the comet arrives it is as quiet as the other nodes, then it lights up and stays lit (reduced motion and no-JS keep the lit final state). */
+@media (prefers-reduced-motion: no-preference) {
+  .jv-orbit.jv-orbit--dark.jv-orbit--once.is-armed .jv-orbit-node--approve { background: var(--jv-on-dark-link); box-shadow: 0 0 0 2px var(--ring), 0 0 0 4px rgb(var(--jv-link-on-dark-rgb) / .1); }
+  .jv-orbit.jv-orbit--dark.jv-orbit--once.is-armed.is-in .jv-orbit-node--approve { animation: jv-node-lit-approve 700ms var(--ease-out) 3000ms both; }
+}
+@keyframes jv-node-lit-approve {
+  0% { transform: scale(1); background: var(--jv-on-dark-link); box-shadow: 0 0 0 2px var(--ring), 0 0 0 4px rgb(var(--jv-link-on-dark-rgb) / .1); }
+  40% { transform: scale(1.25); background: var(--jv-signal); box-shadow: 0 0 0 2px var(--ring), 0 0 0 17px var(--halo-hit); }
+  100% { transform: scale(1); background: var(--jv-signal); box-shadow: 0 0 0 2px var(--ring), 0 0 0 9px var(--halo); }
+}

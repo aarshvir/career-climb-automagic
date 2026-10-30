@@ -23,11 +23,11 @@
 .jv-btn--sm { --jv-btn-h: 40px; padding: 0 16px; font-size: var(--t-small); }
 .jv-btn--lg { --jv-btn-h: 56px; padding: 0 28px; font-size: var(--t-body); }
 .jv-btn--lg svg { width: 18px; height: 18px; }
-.jv-btn--primary { color: #fff; background: var(--jv-brand); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(15 29 23 / .2); }
+.jv-btn--primary { color: #fff; background: var(--jv-brand); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(var(--jv-ink-rgb) / .2); }
 .jv-btn--secondary { color: var(--jv-ink); background: #fff; border-color: var(--jv-line-strong); box-shadow: var(--sh-1); }
 .jv-btn--ghost { color: var(--jv-ink-2); background: transparent; }
 @media (hover: hover) {
-  .jv-btn--primary:hover { background: var(--jv-brand-hover); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 6px 16px -6px rgb(15 29 23 / .35); }
+  .jv-btn--primary:hover { background: var(--jv-brand-hover); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 6px 16px -6px rgb(var(--jv-ink-rgb) / .35); }
   .jv-btn--secondary:hover { border-color: color-mix(in srgb, var(--jv-line-strong), var(--jv-ink) 14%); background: var(--jv-bg-subtle); }
   .jv-btn--ghost:hover { background: var(--jv-bg-muted); color: var(--jv-ink); }
   .jv-btn:hover svg { transform: translateX(2px); }
@@ -80,7 +80,7 @@
 .jv-dark :focus-visible, .product-page .jv-dark :is(a, button, summary):not(.jv-btn):focus-visible { outline-color: var(--jv-on-dark-link); }
 .jv-dark a:not(.jv-btn) { color: var(--jv-on-dark-link); }
 /* On forest the primary is a white button (17:1); lime stays a small signal, never a fill. */
-.jv-dark .jv-btn--primary { color: var(--jv-forest); background: #fff; box-shadow: inset 0 -1px 0 rgb(15 29 23 / .08), 0 1px 2px rgb(0 0 0 / .2); }
+.jv-dark .jv-btn--primary { color: var(--jv-forest); background: #fff; box-shadow: inset 0 -1px 0 rgb(var(--jv-ink-rgb) / .08), 0 1px 2px rgb(var(--jv-ink-rgb) / .2); }
 .jv-dark .jv-btn--secondary { color: #fff; background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .42); box-shadow: none; }
 @media (hover: hover) {
   .jv-dark .jv-btn--primary:hover { background: var(--jv-brand-tint); }
@@ -124,7 +124,7 @@
 .jv-account-pending { display: contents; }
 .jv-account-pending > .jv-btn { visibility: hidden; }
 .jv-mobile-panel { display: none; }
-.jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(15 29 23 / .18); animation: jv-menu-in 200ms var(--ease-out) both; }
+.jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(var(--jv-ink-rgb) / .18); animation: jv-menu-in 200ms var(--ease-out) both; }
 .jv-mobile-panel > a { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid var(--jv-line); color: var(--jv-ink); font-size: 20px; font-weight: 500; letter-spacing: -.02em; text-decoration: none; }
 .jv-mobile-panel > a[aria-current="page"] { color: var(--jv-brand); }
 .jv-mobile-panel > a:focus-visible { outline-offset: -2px; border-radius: 6px; }
@@ -132,14 +132,14 @@
 .jv-mobile-account > * { width: 100%; }
 .jv-mobile-account .jv-btn { --jv-btn-h: 48px; font-size: var(--t-body-sm); }
 .jv-mobile-account .jv-btn--ghost { color: var(--jv-ink); background: #fff; border-color: var(--jv-line-strong); }
-.jv-menu-scrim { position: fixed; inset: 56px 0 0; z-index: 1; background: rgb(15 29 23 / .32); animation: jv-scrim-in 180ms var(--ease-out) both; }
+.jv-menu-scrim { position: fixed; inset: 56px 0 0; z-index: 1; background: rgb(var(--jv-ink-rgb) / .32); animation: jv-scrim-in 180ms var(--ease-out) both; }
 .jv-account-status { color: var(--jv-ink-3); font-size: var(--t-sm); }
 .jv-header-error { width: var(--shell); margin: 0 auto 12px; color: var(--jv-danger); font-size: var(--t-sm); }
 /* Open and close slide and fade the panel (transform and opacity only, so it stays on the compositor). */
 @keyframes jv-menu-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 @keyframes jv-scrim-in { from { opacity: 0; } }
 /* Closing: the panel stays mounted for 160ms and fades away (MvpHeader sets data-state="closing"). */
-.jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(15 29 23 / .18); pointer-events: none; animation: jv-menu-out 160ms var(--ease-inout) both; }
+.jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(var(--jv-ink-rgb) / .18); pointer-events: none; animation: jv-menu-out 160ms var(--ease-inout) both; }
 .jv-menu-scrim[data-state="closing"] { pointer-events: none; animation: jv-scrim-out 160ms var(--ease-inout) both; }
 @keyframes jv-menu-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-8px); } }
 @keyframes jv-scrim-out { to { opacity: 0; } }
@@ -150,7 +150,7 @@
   /* Floating glass bar: the page passes visibly above and under it while scrolling. */
   .jv-header { top: 0; padding-top: 12px; background: transparent; border-bottom: 0; pointer-events: none; }
   .jv-header > * { pointer-events: auto; }
-  .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 64px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(15 29 23 / .12); background: rgb(255 255 255 / .82); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
+  .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 64px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(var(--jv-ink-rgb) / .12); background: rgb(255 255 255 / .82); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
   .jv-header-inner > .jv-brand { justify-self: start; }
   .jv-header-nav { display: flex; align-items: center; gap: 2px; }
   .jv-header-nav > a { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 12px; border-radius: var(--r-pill); color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; letter-spacing: 0; text-decoration: none; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
@@ -263,10 +263,12 @@
 .jv-page-note { margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-nb { white-space: nowrap; }
 /* Meta lines: segments never start a line with a separator (each row clips its own leading dot). */
-.jv-meta { display: block; overflow: hidden; margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); font-variant-numeric: tabular-nums; }
-.jv-meta-in { display: flex; flex-wrap: wrap; margin-left: -18px; }
+.jv-meta { display: block; margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); font-variant-numeric: tabular-nums; }
+.jv-meta-in { display: flex; flex-wrap: wrap; gap: 4px 18px; }
 .jv-meta-in > span { position: relative; padding-left: 18px; white-space: nowrap; }
-.jv-meta-in > span::before { content: "\00B7"; position: absolute; left: 6px; }
+/* A drawn tick per fact (no separators to orphan when the row wraps). */
+.jv-meta-in > span::before { content: ""; position: absolute; left: 1px; top: .42em; width: 9px; height: 5px; border-left: 1.75px solid var(--jv-brand); border-bottom: 1.75px solid var(--jv-brand); rotate: -45deg; }
+.jv-dark .jv-meta-in > span::before { border-color: var(--jv-signal); }
 .jv-dark .jv-meta { color: var(--jv-on-dark-2); }
 @media (min-width: 640px) { .jv-page-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 28px; } .jv-page-head { padding-top: 64px; } }
 @media (min-width: 1024px) { .jv-page-head { padding: 88px 0 72px; } }
@@ -320,7 +322,7 @@
 .jv-cta .jv-cta-visual { display: none; }
 @media (min-width: 1024px) {
   .jv-cta--visual .jv-cta-visual { display: block; position: absolute; z-index: 0; right: var(--band-pad-x); top: 50%; width: min(340px, 32%); translate: 0 -50%; pointer-events: none; }
-  .jv-cta--visual .jv-cta-visual .pc-card { box-shadow: 0 30px 80px -20px rgb(0 0 0 / .5); }
+  .jv-cta--visual .jv-cta-visual .pc-card { box-shadow: 0 30px 80px -20px rgb(var(--jv-ink-rgb) / .5); }
   .jv-cta--visual .jv-cta-orbit { display: none; }
 }
 /* Footer note and description measure. */
@@ -520,11 +522,6 @@
 .jv-section.pricing-passes::before, .jv-section.audience-features::before { left: 24px; }
 @media (min-width: 1024px) { .jv-section.pricing-passes, .jv-section.audience-features { padding-block: 72px; } }
 
-/* Phones: Company is a single full-width row of links under the two columns, so it is never orphaned in a half-empty row. */
-@media (max-width: 639px) {
-  .jv-footer-links .jv-footer-col:last-child { grid-column: 1 / -1; }
-  .jv-footer-links .jv-footer-col:last-child ul { display: flex; flex-wrap: wrap; gap: 0 24px; }
-}
 
 /* ---------- Round 5 ---------- */
 /* Panels and dark bands carry no run-trail rule: it would straddle a rounded edge or peek out under a filled band. */
@@ -535,7 +532,7 @@
   .jv-header-inner { background: rgb(255 255 255 / .96); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 }
 /* Reflow: the product name may wrap on narrow phones (WCAG 1.4.10 at 320px). */
-@media (max-width: 400px) { .jv-nb, .jv-prod { white-space: normal; } .jv-page-title .jv-nb { white-space: normal; } }
+@media (max-width: 359px) { .jv-nb, .jv-prod { white-space: normal; } .jv-page-title .jv-nb { white-space: normal; } }
 /* Text links in the header and footer, and small controls, keep 44px targets. */
 .jv-header-nav > a, .jv-footer-bottom nav a { min-width: 44px; justify-content: center; }
 .jv-toc details > summary { min-height: 44px; }
@@ -595,8 +592,6 @@
 }
 /* Two short sentences in a heading each get their own line. */
 .jv-line { display: block; }
-/* The /how-it-works title may break inside the product name, so the last line is never a lone word. */
-.product-page--how .jv-page-title .jv-nb { white-space: normal; }
 
 /* One divider system: every section rule and its lime-to-green lead-in stops at the content edge (never the viewport edge). */
 .jv-home .jv-section, .loop-overview .lo-section { border-top: 0; }
@@ -803,7 +798,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 .loop-overview.jv-home .lo-loop-hero--forest .jv-btn--primary { color: var(--jv-forest); }
 .loop-overview.jv-home .lo-loop-hero--forest .jv-link { color: var(--jv-on-dark-link); }
 .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual::before, .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual::after { display: none; }
-.loop-overview.jv-home .lo-loop-hero--forest .pc-card { box-shadow: 0 40px 90px -24px rgb(0 0 0 / .55), 0 0 0 1px rgb(255 255 255 / .06); }
+.loop-overview.jv-home .lo-loop-hero--forest .pc-card { box-shadow: 0 40px 90px -24px rgb(var(--jv-ink-rgb) / .55), 0 0 0 1px rgb(255 255 255 / .06); }
 @media (min-width: 640px) { .loop-overview.jv-home .lo-loop-hero--forest { padding: 56px var(--band-pad-x); } }
 @media (min-width: 1024px) {
   .loop-overview.jv-home .lo-loop-hero--forest { padding: 72px var(--band-pad-x); }
@@ -879,10 +874,10 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 .help-center .hc-topic .hc-steps li > *, .help-center .hc-topic .hc-note > p, .help-center .hc-topic-summary { max-width: 62ch; }
 .help-center .hc-topic > details:not([open]) h2 { font-size: var(--t-card-title); letter-spacing: var(--ls-card); }
 .help-center .hc-topic > details:not([open]) > summary { min-height: 64px; }
-.jv-account .ap-story-free { font-family: var(--font-mono); letter-spacing: .02em; }
+.jv-account .ap-story-free { font-family: var(--font-sans); letter-spacing: 0; white-space: nowrap; }
 @media (max-width: 760px) {
   .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { font-size: var(--t-body-sm); }
-  .jv-account--standalone .ap-story-free { font-family: var(--font-mono); font-size: var(--t-sm); }
+  .jv-account--standalone .ap-story-free { font-family: var(--font-sans); font-size: var(--t-sm); letter-spacing: 0; }
   .ap-next-line + .ap-form-expect { display: none; }
 }
 @media (min-width: 761px) { .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { font-size: var(--t-body-sm); } }
@@ -903,3 +898,147 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 @media (min-width: 641px) and (max-width: 1000px) { .career-guides .cg-grid > :last-child:nth-child(2n + 1) { grid-column: 1 / -1; } }
 @media (max-width: 479px) { .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: 2rem; } }
 .jv-related a, .hc-related a { min-width: 44px; justify-content: center; }
+
+/* ---------- Round 9: footer ---------- */
+/* Four short columns (Product, Resources, Who it's for, Company) in a 2x2 grid on phones; tighter rows; column titles are 12px mono eyebrows, not headings. */
+.jv-footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 24px; }
+.jv-footer-col-title { margin: 0 0 6px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; letter-spacing: .06em; line-height: 1rem; text-transform: uppercase; }
+@media (max-width: 639px) { .jv-footer-col-title { font-size: var(--t-xs); } }
+.jv-footer-col a { min-height: 40px; }
+@media (min-width: 640px) { .jv-footer-links { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 20px; } }
+@media (min-width: 1024px) {
+  .jv-footer-brand { grid-column: 1 / span 4; }
+  .jv-footer-links { grid-column: 6 / span 7; }
+  .jv-footer-col a, .jv-footer-col a:where(:hover) { min-height: 36px; }
+}
+/* The close: an oversized, low-contrast wordmark cropped by the bottom edge. Decorative only. */
+.jv-footer-mark { container-type: inline-size; width: var(--shell); margin: 0 auto; aspect-ratio: 6.2 / 1; overflow: hidden; pointer-events: none; user-select: none; }
+.jv-footer-mark > span { display: block; font-family: "Jobvance Brand", var(--font-sans); font-weight: 700; font-size: 18cqw; letter-spacing: -.045em; line-height: .86; white-space: nowrap; color: rgb(var(--jv-brand-rgb) / .09); text-align: center; }
+/* Drawn with pseudo-elements: it is decoration, so it is not text for assistive tech or contrast checks. */
+.jv-footer-mark > span::before { content: "jobvance"; }
+.jv-footer-mark > span::after { content: "."; color: rgb(var(--jv-brand-rgb) / .22); }
+.jv-footer-compact .jv-footer-mark { display: none; }
+@supports not (font-size: 1cqw) { .jv-footer-mark > span { font-size: 17vw; } }
+
+/* ---------- Round 9: the ad landing and sign-in screens ---------- */
+/* On the pages that already are the start, the header is the mark and "Sign in" only (visible on phones too): no site navigation next to the form. */
+.jv-header[data-entry="true"] .jv-header-inner { display: flex; justify-content: space-between; }
+.jv-header[data-entry="true"] .jv-header-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.jv-header[data-entry="true"] :is(.jv-header-nav, .jv-menu-toggle, .jv-mobile-panel, .jv-menu-scrim, .jv-header-start) { display: none; }
+.jv-mobile-who { display: grid; padding: 20px 0 8px; }
+.jv-mobile-who > p { margin: 0 0 4px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; letter-spacing: .06em; line-height: 1rem; text-transform: uppercase; }
+.jv-mobile-who > a { display: flex; align-items: center; min-height: 48px; color: var(--jv-ink-2); font-size: 17px; font-weight: 500; letter-spacing: -.01em; text-decoration: none; }
+.jv-mobile-who > a[aria-current="page"] { color: var(--jv-brand); }
+/* An arrow drawn as an icon (the mono and sans subsets carry no arrow glyph, so a character would fall back to another face). */
+.jv-inline-arrow { display: inline-block; width: 1em; height: 1em; margin-inline: .3em; vertical-align: -.14em; flex: none; }
+
+/* ---------- Round 9: page compositions, rhythm and targets ---------- */
+/* Rails end at the closing band instead of running on into an empty framed strip above the footer. */
+.jv-rails, .jv-home { --rail-bottom: 0px; }
+:is(.product-page--how, .product-page--about, .product-page--pricing, .product-page--faq, .product-page--contact, .product-page--privacy, .audience-page, .loop-overview, .jv-home) { --rail-bottom: 96px; }
+:is(.help-center, .walkthroughs-page, .career-guides).jv-rails { --rail-bottom: 40px; }
+@media (min-width: 1024px) {
+  .jv-rails::before, .jv-rails::after, .jv-home::before, .jv-home::after { bottom: var(--rail-bottom); }
+}
+
+/* /about and /pricing open on a forest stage; the about rows keep one eyebrow-to-heading gap. */
+.product-page--pricing .jv-page-head--forest .pc-aside { box-shadow: 0 40px 90px -24px rgb(var(--jv-ink-rgb) / .55), 0 0 0 1px rgb(255 255 255 / .06); }
+.product-page--pricing .jv-page-head--forest .jv-lead { max-width: 34em; }
+@media (min-width: 1024px) {
+  .jv-story { grid-template-rows: auto 1fr; row-gap: 16px; }
+  .jv-story > .jv-caption { grid-row: 1; align-self: end; }
+  .jv-story-title { grid-row: 2; align-self: start; }
+  .jv-story-body { grid-row: 2; align-self: start; padding-top: .35em; }
+  .product-page--about .jv-page-head--forest.jv-page-head--split { padding-block: 64px; }
+}
+
+/* /faq and /help: a centred, search-first opening with no card repeating the list below. */
+.jv-page-head--center { max-width: 820px; margin-inline: auto; text-align: center; }
+.jv-page-head--center .jv-lead { margin-inline: auto; }
+.jv-page-head--center .jv-page-actions { justify-content: center; }
+.hc-hero { margin-inline: auto; text-align: center; }
+.help-center .hc-hero > p:not(.hc-eyebrow) { margin-inline: auto; }
+.hc-hero .hc-hero-actions { justify-content: center; }
+.help-center .hc-hero { padding-bottom: 40px; }
+@media (min-width: 1024px) { .help-center .hc-hero { padding-top: 8px; } }
+
+/* /walkthroughs: a dark split panel (copy at the left, the captioned-video card at the right). */
+.walkthroughs-page .wt-hero.jv-dark { width: auto; margin: 12px 0 32px; padding: 40px 24px; border-radius: var(--r-lg); }
+.walkthroughs-page .wt-hero.jv-dark h1 { color: #fff; font-weight: var(--fw-heading-on-dark); }
+.walkthroughs-page .wt-hero.jv-dark > p:not(.wt-eyebrow) { color: var(--jv-on-dark-body); }
+.walkthroughs-page .wt-hero.jv-dark .wt-eyebrow { color: var(--jv-on-dark-2); }
+.walkthroughs-page .wt-hero.jv-dark .jv-link { color: var(--jv-on-dark-link); }
+.walkthroughs-page .wt-hero.jv-dark a.jv-btn--primary { background: #fff; border-color: #fff; color: var(--jv-forest) !important; }
+.walkthroughs-page .wt-hero.jv-dark .jv-aside-slot { display: none; }
+@media (min-width: 640px) { .walkthroughs-page .wt-hero.jv-dark { padding: 56px var(--band-pad-x); } }
+@media (min-width: 1024px) {
+  .walkthroughs-page .wt-hero.jv-dark { margin-inline: calc(-1 * var(--band-pad-x)); padding: 64px var(--band-pad-x); }
+  .walkthroughs-page .wt-hero.jv-dark .jv-aside-slot { display: block; right: var(--band-pad-x); }
+}
+/* One shared top rule for the text-first heroes: the first line sits at the same offset, and the card centres on the text block. */
+.jv-aside-grid > .jv-aside-slot { top: 50%; }
+/* Walkthrough tour: a calmer stack. One white card for the mock UI (the outer frame drops its border and fill), a shorter measure, and two-up step controls on phones. */
+.walkthroughs-page .wt-storyboard { border: 0; background: none; padding: 24px 18px; box-shadow: none; }
+.walkthroughs-page :is(.wt-player > .wt-format-note, .wt-instructions p, .wt-transcript p, .wt-transcript li, .wt-controls > p, .wt-selected-task p) { max-width: 56ch; }
+@media (max-width: 639px) {
+  .walkthroughs-page .wt-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .walkthroughs-page .wt-navigation .wt-restart { grid-column: 1 / -1; justify-content: center; }
+}
+
+/* /job-loop: the dashboard card sits inside the band with its full radius (it used to run off the right edge). */
+@media (min-width: 1024px) {
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock { margin-right: 0; width: 100%; }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock .pc-card { border-radius: var(--r-md); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual { margin-right: 0; }
+  .loop-overview .lo-private-copy { grid-column: 1 / span 8; }
+}
+
+/* Audience pages: same top offset on all three (tab switching does not jump), card-to-card alignment, equal heading blocks in the 3-up band. */
+.audience-copy > .jv-caption { min-height: 2rem; display: flex; align-items: flex-start; }
+@media (min-width: 1024px) {
+  .audience-hero { align-items: start; }
+  .audience-hero-visual { align-self: start; }
+  .audience-features .jv-steps { grid-template-rows: auto auto 1fr; }
+  .audience-features .jv-steps > li { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; }
+}
+.audience-features { padding-block: 40px; margin-top: 24px; }
+@media (min-width: 1024px) { .jv-section.audience-features { padding-block: 56px; } }
+.audience-path .jv-head { align-content: start; }
+.audience-path .jv-head .jv-link { margin-top: 20px; }
+
+/* Guides: small print at a readable size and measure. */
+.cg-editorial p, .cg-editorial div p { max-width: 62ch; font-size: var(--t-small); line-height: 1.55; }
+.career-guides .cg-card h3 { min-height: 0; }
+
+/* Pricing: one paragraph per plan card; one rhythm for the billing note, the included list and the disclosure. */
+.product-proposed-grid .pricing-desc { margin: 10px 0 20px; max-width: none; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.55; text-wrap: pretty; }
+.pricing-card.jv-dark .pricing-desc { color: var(--jv-on-dark-body); }
+.pricing-billed-line { margin-block: 24px 0; }
+.pricing-includes { margin-top: 24px; }
+.pricing-details { margin-bottom: 0; }
+.pricing-details .loop-price-market { margin-bottom: 20px; }
+.pricing-passes-prices strong { font-weight: var(--fw-semi); }
+
+/* Standalone text links keep a 44px target without changing how they look. */
+:is(.cg-help-link, .pricing-billed-line a, .pricing-details a, .jv-contact-rail a, .product-contact-box a, .hc-top-link, .cg-more) { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Legal contents: a closed disclosure on phones (server and client agree), always listed from 1024px. */
+@media (min-width: 1024px) { .jv-toc details::details-content { content-visibility: visible; display: block; } .jv-toc details > summary { pointer-events: none; } }
+
+/* Dark-band link lists: ruled rows, a trailing arrow, 44px rows (as on /walkthroughs). */
+.hc-further.jv-dark > div:last-child { display: grid; gap: 0; min-width: min(100%, 320px); }
+.hc-further.jv-dark > div:last-child > a:not(.hc-button) { display: flex; align-items: center; justify-content: space-between; min-height: 48px; border-top: 1px solid var(--jv-line-on-dark); color: var(--jv-on-dark-link); font-size: var(--t-body-sm); font-weight: var(--fw-semi); text-decoration: none; }
+.hc-further.jv-dark > div:last-child > a:not(.hc-button)::after { content: ""; width: 8px; height: 8px; border-top: 1.75px solid currentColor; border-right: 1.75px solid currentColor; rotate: 45deg; margin-right: 4px; }
+
+.product-page--pricing .jv-page-head--forest { margin-bottom: 56px; }
+.walkthroughs-page .wt-step-status { min-height: 3rem; }
+@media (min-width: 640px) { .walkthroughs-page .wt-step-status { min-height: 0; } }
+
+/* /job-loop: the product name is unbreakable, so its copy column keeps 7 of 12 columns and the headline steps down to fit; the card overlaps the gutter, never the type. */
+@media (min-width: 1024px) {
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-copy { grid-column: 1 / span 7; }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual { grid-column: 8 / span 5; }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: clamp(2.5rem, 1rem + 3vw, 3.75rem); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock { width: calc(100% + 48px); margin-left: -48px; }
+}
+@media (min-width: 1024px) { .jv-home .jv-hero:not(.lo-loop-hero) { padding: 64px 0 72px; } }

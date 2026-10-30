@@ -10,7 +10,6 @@ import LoopRunMock from '@/components/marketing/LoopRunMock';
 import { DashboardCard, WeekStrip } from '@/components/marketing/PageCards';
 import { CvCard } from '@/components/marketing/ProductCards';
 import { useReveal } from '@/hooks/useReveal';
-import { currentOffer } from '@/lib/current-offer';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
 const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
@@ -87,15 +86,9 @@ export default function JobLoopOverview() {
         <div className="lo-private-copy" data-reveal>
           <p className="jv-caption">Keep your work for next time</p>
           <h2 id="lo-private-title">Save your experience for the next application.</h2>
-          <p>Import your CV or choose a saved CV check, confirm the experience you want to reuse, and set up Automated Job Loop in your account. Each saved vacancy keeps its own documents, status and next action.</p>
-          <ul className="jv-ticks lo-private-ticks"><li>Save a career record you have reviewed.</li><li>Keep each vacancy and its prepared documents together.</li><li>Choose when to use recurring preparation.</li></ul>
-          <div className="lo-private-actions"><StartLink>Set up my search</StartLink><TextLink to="/help#job-loop-start">Read the setup guide</TextLink></div>
+          <p>Confirm the experience you want to reuse once. Each saved vacancy keeps its own documents, status and next action.</p>
+          <div className="lo-private-actions"><StartLink>Start my search</StartLink><TextLink to="/help#job-loop-start">Read the setup guide</TextLink></div>
         </div>
-        <aside className="lo-private-aside" data-reveal>
-          <h3>Your search, in one place</h3>
-          <p>{currentOffer.statement} Your account shows your available preparation allowance.</p>
-          <TextLink to="/pricing">See what’s included</TextLink>
-        </aside>
       </div>
     </section>
 

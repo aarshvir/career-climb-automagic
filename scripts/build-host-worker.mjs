@@ -31,6 +31,10 @@ const mime = {
   '.gif': 'image/gif', '.webp': 'image/webp', '.avif': 'image/avif', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.ttf': 'font/ttf', '.otf': 'font/otf', '.woff': 'font/woff', '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.pdf': 'application/pdf',
 };
+// Text assets are stored as plain strings (a flag of 1) and binary assets as base64 (0); a byte-identical twin is an alias (2).
+// gzip compresses plain text about twice as well as the same text re-encoded as base64, which is what keeps the Worker well inside its limit.
+const isText = type => /^(text\/|application\/(json|xml|manifest\+json)|image\/svg\+xml)/.test(type);
+const encodeBody = (type, bytes) => isText(type) && Buffer.from(bytes.toString('utf8'), 'utf8').equals(bytes) ? [bytes.toString('utf8'), 1] : [bytes.toString('base64'), 0];
 const privateRoots = new Set(['server', 'src', 'scripts', 'docs', 'supabase', 'node_modules', 'api', 'functions']);
 const assets = {};
 const assetRoots = new Set();
@@ -52,8 +56,9 @@ async function collect(directory, prefix = '') {
     const digest = createHash('sha256').update(bytes).digest('hex');
     const twin = bytes.length > 1024 ? firstByDigest.get(digest) : undefined;
     if (!twin) firstByDigest.set(digest, path);
-    assets[path] = [mime[extname(entry.name).toLowerCase()] ?? 'application/octet-stream',
-      `"${digest}"`, bytes.length, immutable, twin ? `=${twin}` : bytes.toString('base64')];
+    const type = mime[extname(entry.name).toLowerCase()] ?? 'application/octet-stream';
+    const [body, kind] = twin ? [twin, 2] : encodeBody(type, bytes);
+    assets[path] = [type, `"${digest}"`, bytes.length, immutable, body, kind];
     totalAssetBytes += bytes.length;
   }
 }
@@ -62,7 +67,7 @@ if (!assets['/index.html']) throw new Error('Run the frontend build before packa
 for (const page of publicRender.pages) {
   if (!/^\/[a-z\d/-]*$/.test(page.path) || !/^\.prerender\/[a-zA-Z\d]+\.html$/.test(page.file)) throw new Error('Public rendered paths must be bounded and canonical.');
   const bytes = await readFile(join(dist, page.file));
-  assets[page.path] = [mime['.html'], `"${createHash('sha256').update(bytes).digest('hex')}"`, bytes.length, false, bytes.toString('base64')];
+  assets[page.path] = [mime['.html'], `"${createHash('sha256').update(bytes).digest('hex')}"`, bytes.length, false, ...encodeBody(mime['.html'], bytes)];
   totalAssetBytes += bytes.length;
 }
 
@@ -72,7 +77,11 @@ for (const page of publicRender.pages) {
   const viteManifest = JSON.parse(await readFile(join(dist, '.vite/manifest.json'), 'utf8'));
   const shell = await readFile(join(dist, 'index.html'), 'utf8');
   const closure = keys => { const files = new Set(), css = new Set(), seen = new Set(); const visit = key => { const entry = viteManifest[key]; if (!entry || seen.has(key)) return; seen.add(key); files.add(entry.file); (entry.css ?? []).forEach(file => css.add(file)); (entry.imports ?? []).forEach(visit); }; keys.forEach(visit); return { files, css }; };
-  const { files, css } = closure(['src/pages/LoopOnboarding.tsx', 'src/pages/Auth.tsx']);
+  // Vite emits a chunk that several routes share (Auth) under a hashed key such as "_Auth-xxxx.js" with no `src`, so resolve each page by
+  // its source path or by its output file name. A page that cannot be found fails the build instead of silently shipping an unstyled shell.
+  const entryKey = name => Object.keys(viteManifest).find(key => viteManifest[key].src === `src/pages/${name}.tsx` || (viteManifest[key].file ?? '').startsWith(`assets/${name}-`));
+  const entryKeys = ['LoopOnboarding', 'Auth'].map(name => { const key = entryKey(name); if (!key) throw new Error(`The ${name} chunk is missing from the build manifest.`); return key; });
+  const { files, css } = closure(entryKeys);
   const links = [...css].filter(file => !shell.includes(file)).map(file => `<link rel="stylesheet" href="/${file}"/>`).join('') + [...files].filter(file => !shell.includes(file)).map(file => `<link rel="modulepreload" href="/${file}"/>`).join('');
   if (links) {
     // A static first paint for the ad landing routes: the forest story panel (real class names, real copy) is in the HTML, so the
@@ -80,8 +89,8 @@ for (const page of publicRender.pages) {
     const firstPaint = '<div aria-hidden="true" style="padding-top:72px"><main class="jv-account jv-account--standalone"><aside class="ap-account-story jv-dark"><div class="ap-story-inner"><p class="ap-eyebrow"><span class="ap-dot"></span>Automated Job Loop</p><h1>Set up your <span class="jv-nb">Automated Job Loop</span> <span>and let it run.</span></h1><ul class="ap-story-ticks"><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></ul><p class="ap-story-free">Free account · 3 AI-tailored CVs a month</p></div></aside></main></div>';
     const bytes = Buffer.from(shell.replace('</head>', links + '</head>').replace('<div id="root"></div>', `<div id="root">${firstPaint}</div>`));
     const etag = `"${createHash('sha256').update(bytes).digest('hex')}"`;
-    assets['/onboarding'] = [mime['.html'], etag, bytes.length, false, bytes.toString('base64')];
-    assets['/auth'] = [mime['.html'], etag, bytes.length, false, '=/onboarding'];
+    assets['/onboarding'] = [mime['.html'], etag, bytes.length, false, ...encodeBody(mime['.html'], bytes)];
+    assets['/auth'] = [mime['.html'], etag, bytes.length, false, '/onboarding', 2];
     totalAssetBytes += bytes.length;
   }
 }
@@ -121,12 +130,16 @@ function publicPath(request){
   return path;
 }
 function bytesFor(path,asset){
-  if(asset[4][0]==='='){const twin=asset[4].slice(1);return bytesFor(twin,ASSETS[twin]);}
+  if(asset[5]===2){const twin=asset[4];return bytesFor(twin,ASSETS[twin]);}
   let bytes=decoded.get(path);
-  if(!bytes){const binary=atob(asset[4]);bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);decoded.set(path,bytes);}
+  if(!bytes){
+    if(asset[5]===1)bytes=new TextEncoder().encode(asset[4]);
+    else{const binary=atob(asset[4]);bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);}
+    decoded.set(path,bytes);
+  }
   return bytes;
 }
-export default {fetch(request){
+export default {get decodedAssets(){return decoded.size;},fetch(request){
   const url=new URL(request.url);
   if(url.hostname==='www.jobvance.io'){
     url.protocol='https:';url.host='jobvance.io';
@@ -149,7 +162,7 @@ export default {fetch(request){
   const headers=responseHeaders(request,path);
   headers.set('Content-Type',asset[0]);
   headers.set('ETag',asset[1]);
-  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':served.startsWith('/fonts/')?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');
+  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':served.startsWith('/fonts/')?'public, max-age=86400, stale-while-revalidate=2592000':'public, max-age=3600, must-revalidate');
   const condition=request.headers.get('If-None-Match');
   if(condition&&condition.split(',').some(tag=>tag.trim()==='*'||tag.trim().replace(/^W\\//,'')===asset[1]))return new Response(null,{status:304,headers});
   headers.set('Content-Length',String(asset[2]));

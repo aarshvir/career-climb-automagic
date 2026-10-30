@@ -117,7 +117,7 @@ describe('Automated Job Loop first homepage', () => {
     const starts = screen.getAllByRole('link', { name: 'Start my search' });
     expect(starts).toHaveLength(4);
     for (const link of starts) expect(link).toHaveAttribute('href', '/onboarding');
-    expect(screen.getByRole('link', { name: /Try the free CV Check/ })).toHaveAttribute('href', '/check');
+    for (const link of screen.getAllByRole('link', { name: /Try the free CV Check/ })) expect(link).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
     expect(screen.getByText(/runs in the background and finds the best-matching jobs/, { selector: '.jv-hero-lead' })).toHaveTextContent('Choose your roles and locations once');
     expect(screen.getByText(/Each run looks through connected sources/)).toHaveTextContent('Some runs may find nothing new');

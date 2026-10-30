@@ -240,5 +240,5 @@
 /* Reduced motion: the loading spinner does not rotate; it holds still and breathes in opacity so the state still reads as "working". */
 @keyframes jl-breathe { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) {
-  .jl-loading svg { animation: none !important; }
+  .jl-loading svg { animation: jl-breathe 1.6s ease-in-out infinite !important; }
 }
