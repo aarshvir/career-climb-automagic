@@ -7,8 +7,9 @@ import './JobLoopOverview.css';
 import LoopJourney from '@/components/LoopJourney';
 import LoopOrbit from '@/components/marketing/LoopOrbit';
 import LoopRunMock from '@/components/marketing/LoopRunMock';
-import { DashboardCard, WeekStrip } from '@/components/marketing/PageCards';
+import { DashboardCard, SavedExperienceCard, WeekStrip } from '@/components/marketing/PageCards';
 import { CvCard } from '@/components/marketing/ProductCards';
+import PriceNote from '@/components/marketing/PriceNote';
 import { useReveal } from '@/hooks/useReveal';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
@@ -46,6 +47,7 @@ export default function JobLoopOverview() {
             <StartLink className="jv-hero-cta" />
             <TextLink to="/walkthroughs">Walk through an application</TextLink>
           </div>
+          <div className="jv-hero-note jv-enter" style={delay(180)}><PriceNote /></div>
         </div>
         <div className="jv-hero-visual">
           <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} variant="dark" className="jv-hero-orbit" nodes={false} animate={false} /></div>
@@ -56,7 +58,7 @@ export default function JobLoopOverview() {
 
     <section className="jv-section lo-section" aria-labelledby="lo-start-title">
       <div className="jv-shell">
-        <div className="jv-head" data-reveal><p className="jv-caption">Set up once</p><h2 id="lo-start-title" className="jv-section-title">One setup. A repeatable search.</h2></div>
+        <div className="jv-head" data-reveal><p className="jv-caption">Set up once</p><h2 id="lo-start-title" className="jv-section-title">One setup. A&nbsp;repeatable search.</h2></div>
         <LoopJourney />
         <div className="lo-week" data-reveal><WeekStrip /></div>
       </div>
@@ -89,6 +91,7 @@ export default function JobLoopOverview() {
           <p>Confirm the experience you want to reuse once. Each saved vacancy keeps its own documents, status and next action.</p>
           <div className="lo-private-actions"><StartLink>Start my search</StartLink><TextLink to="/help#job-loop-start">Read the setup guide</TextLink></div>
         </div>
+        <div className="lo-private-visual" data-reveal aria-hidden="true"><SavedExperienceCard /></div>
       </div>
     </section>
 

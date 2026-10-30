@@ -4,11 +4,12 @@
 @font-face{font-family:"Geist";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2197,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:"Geist Mono";src:url('/fonts/GeistMono-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+2000-206F;}
 /* Metric-matched fallbacks (measured in Chrome against the self-hosted files): Arial is 2.3% narrower
-   than Geist; Courier New has Geist Mono's exact 600/1000 advance. Swapping in the webfont does not reflow.
+   than Geist; Menlo and DejaVu Sans Mono share Geist Mono's 600/1000 advance and Consolas (550) is scaled to it; the fallback is always a sans mono, never serif Courier. Swapping in the webfont does not reflow.
    Headings (520-600) get their own face: Arial Bold is 1.8% wider than Geist at 540, so heading line counts hold too. */
 @font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica Neue");font-weight:100 519;size-adjust:102.3%;ascent-override:98.2%;descent-override:28.8%;line-gap-override:0%;}
 @font-face{font-family:"Geist Fallback";src:local("Arial Bold"),local("Arial-BoldMT"),local("Helvetica Neue Medium"),local("Arial");font-weight:520 900;size-adjust:99.4%;ascent-override:102.3%;descent-override:30%;line-gap-override:0%;}
-@font-face{font-family:"Geist Mono Fallback";src:local("Courier New"),local("CourierNewPSMT");size-adjust:100%;ascent-override:100.5%;descent-override:29.5%;line-gap-override:0%;}
+@font-face{font-family:"Geist Mono Fallback";src:local("Menlo"),local("SF Mono"),local("Roboto Mono"),local("DejaVu Sans Mono");size-adjust:100%;ascent-override:100.5%;descent-override:29.5%;line-gap-override:0%;}
+@font-face{font-family:"Geist Mono Fallback Win";src:local("Consolas");size-adjust:109%;ascent-override:92%;descent-override:27%;line-gap-override:0%;}
 /* Alias for admin-home.css, which still names Manrope; it now resolves to Geist. */
 @font-face{font-family:"Manrope";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-display:swap;}
 
@@ -22,8 +23,8 @@
     --jv-bg: #FFFFFF; --jv-bg-subtle: #F3F8F5; --jv-surface: #FFFFFF; --jv-sunken: #ECF3EE; --jv-bg-muted: var(--jv-sunken);
     /* forest: the one dark surface (bands, final CTA, mock footer) */
     --jv-forest: #0C1F17; --jv-forest-2: #12291F; --jv-elevated: #183427;
-    /* text on forest (contrast on --jv-forest): 16.3, 11.1, 8.1, 5.4 and 11.2 to 1 */
-    --jv-on-dark-1: #F2F6F3; --jv-on-dark-body: #C6D3CC; --jv-on-dark-2: #A5B6AD; --jv-on-dark-3: #82948A; --jv-on-dark-link: #A9DDBC; --jv-success-on-dark: var(--jv-on-dark-link);
+    /* text on forest (contrast on --jv-forest): 16.3, 11.1, 8.1, 6.8 and 11.2 to 1; the third step is 5.3 to 1 on --jv-elevated */
+    --jv-on-dark-1: #F2F6F3; --jv-on-dark-body: #C6D3CC; --jv-on-dark-2: #A5B6AD; --jv-on-dark-3: #94A79C; --jv-on-dark-link: #A9DDBC; --jv-success-on-dark: var(--jv-on-dark-link);
     /* the wordmark's period */
     --jv-brand-period: var(--jv-brand); --jv-brand-period-on-dark: var(--jv-signal);
     /* lines */
@@ -33,8 +34,10 @@
     /* brand: white on --jv-brand 7.9:1; --jv-brand on white 7.9:1 */
     --jv-brand: #215C43; --jv-brand-hover: #1A4D37; --jv-brand-press: #143D2C;
     --jv-brand-tint: #E6F0EA; --jv-brand-ink: #1A4D37; --jv-brand-text: #215C43;
-    /* signal */
+    /* signal: lime is decoration, a fill, or an on-dark signal. It is never text and never a thin line on white; on light pages it appears only as a fill (the 72px lime-to-green section lead-in, the hero underline mark, the featured badge). */
     --jv-signal: #D4F25A;
+    /* one glow for every forest band: a soft mint light from the top and a deeper green lift from the opposite corner */
+    --jv-glow: radial-gradient(60% 55% at 50% 0%, rgb(var(--jv-link-on-dark-rgb) / .09), transparent 70%), radial-gradient(55% 65% at 100% 100%, rgb(43 117 86 / .26), transparent 72%);
     /* the mid green (strokes and small text on forest) and the hairline on forest */
     /* one green ramp: brand, brand-hover, brand-2 (gradient end, decorative), brand-mid (strokes on forest, decorative), brand-tint */
     --jv-brand-2: #2B7556; --jv-brand-mid: var(--jv-on-dark-link); --jv-line-on-dark: rgb(255 255 255 / .14);
@@ -46,7 +49,7 @@
     /* the mark's pale lime glyph, and status colours on forest */
     --jv-brand-glyph: #E2EEAF; --jv-warn-on-dark: #FBBF4A; --jv-danger-on-dark: #FF8A80;
     /* one tinted light-surface moment: the hero wash, painted full-bleed behind every marketing hero */
-    --jv-wash-peak: #CDE3D5; --jv-wash-soft: #E1EEE6;
+    --jv-wash-peak: #CDE3D5; --jv-wash-soft: var(--jv-brand-tint);
     --jv-wash: linear-gradient(180deg, var(--jv-wash-soft) 0%, #fff 100%);
     /* status (meaning only, never decoration) */
     --jv-success: #0B7A47; --jv-success-tint: #E8F6EE;
@@ -54,17 +57,17 @@
     --jv-danger: #C42B2F; --jv-danger-tint: #FDECEC; --jv-danger-line: #F0C4C4;
     /* type */
     --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-    --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --font-mono: "Geist Mono", "Geist Mono Fallback", "Geist Mono Fallback Win", ui-monospace, SFMono-Regular, Consolas, monospace;
     --fw-regular: 400; --fw-medium: 500; --fw-semi: 560; --fw-strong: 600;
     /* heading weights: dark surfaces get 20 less for optical balance */
     --fw-display: 540; --fw-heading: 540; --fw-heading-on-dark: 520;
     --t-display: clamp(2.75rem, 2.1rem + 2.667vw, 3.75rem);
     --t-display-xl: clamp(2.75rem, .9rem + 3.6vw, 4.25rem);
     --t-h1: clamp(2.25rem, 1.786rem + 1.905vw, 3.5rem);
-    --t-h2: clamp(1.875rem, 1.457rem + 1.714vw, 3rem);
+    --t-h2: clamp(1.75rem, 1.29rem + 1.905vw, 3rem);
     /* One section heading size everywhere (48px desktop, 30px phones); panels use the same token. */
-    --t-h2-panel: var(--t-h2);
-    --t-h3: clamp(1.375rem, 1.236rem + .571vw, 1.75rem);
+    --t-h2-panel: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+    --t-h3: clamp(1.375rem, 1.236rem + .571vw, 1.75rem); --t-h3-card: clamp(1.25rem, 1.15rem + .4vw, 1.5rem);
     --t-h4: clamp(1.125rem, 1.079rem + .19vw, 1.25rem);
     --t-card-title: 1.25rem; --ls-display: -.035em; --ls-h3: -.025em; --ls-card: -.015em;
     --t-price: clamp(2.5rem, 2.2rem + 1.2vw, 3.25rem);
@@ -148,9 +151,10 @@ body:has(#main-content main.jv-rails, #main-content main.jv-home, #main-content 
 .custom-scrollbar { scrollbar-width: thin; scrollbar-color: var(--jv-line-strong) transparent; }
 .section-container, .content-wrapper { max-width: 1240px; margin: auto; padding: 24px; }
 .gradient-text { color: var(--jv-brand); }
+/* Reduced motion has one pattern everywhere: no animation, no transition (state changes are instant). Observers read the setting live (useReveal, LoopOrbit, MvpHeader). */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
 .jv-account-utility { background: radial-gradient(ellipse at 20% 0%, var(--jv-brand-tint), transparent 60%); padding-top: 48px; padding-bottom: 48px; }

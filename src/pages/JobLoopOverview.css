@@ -1,6 +1,6 @@
 /* /job-loop: the product in depth, built on the home frame (Home.css .jv-home) and the shared jv-* primitives. */
 .loop-overview .lo-loop-hero { padding-bottom: 56px; }
-.loop-overview .lo-section { border-top: 1px solid var(--jv-line); }
+/* The section rule is the content-width ::after hairline in marketing.css (a full-bleed border here ran past the frame rails). */
 .loop-overview .lo-section .jv-ticks { margin-top: 28px; }
 .loop-overview .lo-lede { margin: 20px 0 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; }
 .loop-overview .lo-audience-cta { margin-top: 28px; }
@@ -68,5 +68,12 @@
 .loop-overview .lo-private-actions { margin-top: 24px; }
 .loop-overview .lo-private-aside { align-self: center; }
 .loop-overview .lo-private-aside .jv-link { margin-top: 12px; }
+/* Round 10: the band's right half carries a saved-experience card, lit from the opposite corner. */
+.loop-overview .lo-private-visual { display: none; }
+@media (min-width: 1024px) {
+  .loop-overview .lo-private .lo-private-copy { grid-column: 1 / span 6; }
+  .loop-overview .lo-private .lo-private-visual { display: block; grid-column: 8 / span 5; align-self: center; }
+  .loop-overview .lo-private-visual .pc-card { max-width: none; box-shadow: 0 30px 80px -20px rgb(var(--jv-ink-rgb) / .5), 0 0 0 1px rgb(255 255 255 / .06); }
+}
 .loop-overview .lo-loop-hero .pc-dash-grid { grid-template-columns: 1fr; }
 .loop-overview .lo-loop-hero .pc-dash-grid > div:first-child { display: none; }

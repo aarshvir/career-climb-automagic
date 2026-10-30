@@ -150,3 +150,14 @@
 .pc-cover-body { display: grid; gap: 10px; padding: 18px 20px 20px; }
 .pc-cover-body strong { color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }
 .pc-cover-meta { color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
+
+/* Round 10: the featured guide cover is a real mini-document (an application checklist), not placeholder bars. */
+.pc-cover-art { height: auto; min-height: 148px; padding: 22px 24px; align-content: center; background: var(--jv-glow), var(--jv-forest); }
+.pc-cover-art > span.pc-cover-sheet { display: grid; gap: 0; height: auto; width: 100%; max-width: 300px; padding: 12px 14px; border-radius: 10px; background: #fff; box-shadow: 0 18px 40px -16px rgb(0 0 0 / .5); }
+.pc-cover-sheet-top { display: flex !important; align-items: center; justify-content: space-between; gap: 8px; height: auto !important; padding-bottom: 8px; background: none !important; }
+.pc-cover-sheet-top b { color: var(--jv-card-ink); font-size: var(--t-sm); font-weight: var(--fw-semi); }
+.pc-cover-sheet-top i { padding: 1px 8px; border-radius: var(--r-pill); background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-size: var(--t-xs); font-style: normal; font-weight: 500; }
+.pc-cover-row { display: flex !important; align-items: center; gap: 10px; height: auto !important; padding: 7px 0; border-top: 1px solid var(--jv-card-line); background: none !important; border-radius: 0 !important; color: var(--jv-card-ink-2); font-size: var(--t-sm); line-height: 1.3; }
+.pc-cover-row::before { content: ""; flex: none; width: 14px; height: 14px; border: 1.5px solid var(--jv-line-strong); border-radius: 4px; }
+.pc-cover-row.is-done::before { border-color: var(--jv-brand); background: var(--jv-brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 7.5 2.2 2.2 4.8-5'/%3E%3C/svg%3E") center / 12px no-repeat; }
+.pc-cover-art > i { top: 18px; right: 18px; }

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useMotionAllowed } from "@/lib/motion";
 import "./LoopOrbit.css";
 
 // Layout effect in the browser (runs before paint); plain effect on the server.
@@ -24,11 +25,12 @@ export default function LoopOrbit({ size, variant = "light", labels = false, nod
   // The single pass starts on the client only. The server-painted frame shows the comet at rest on "You review",
   // and a prerendered page keeps that frame, so the comet never jumps back when the app mounts.
   const [live, setLive] = useState(false);
+  const motionAllowed = useMotionAllowed();
   useBeforePaint(() => {
     const node = ref.current;
     if (!animate || !node || typeof IntersectionObserver === "undefined") return;
     // Without motion (or without JS) the comet simply rests on "You review".
-    if (!window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) return;
+    if (!motionAllowed) { setLive(false); return; }
     if (once) {
       // Already in view at mount (restored scroll, tall screens): leave it at rest rather than jump back to start.
       const box = node.getBoundingClientRect();
@@ -49,7 +51,7 @@ export default function LoopOrbit({ size, variant = "light", labels = false, nod
     const observer = new IntersectionObserver(([entry]) => node.classList.toggle("is-offscreen", !entry.isIntersecting));
     observer.observe(node);
     return () => observer.disconnect();
-  }, [animate, once]);
+  }, [animate, once, motionAllowed]);
   const mode = !animate ? "" : once ? " jv-orbit--once" : live ? " jv-orbit--animate" : "";
   return <div ref={ref} className={`jv-orbit jv-orbit--${variant}${mode} ${className}`.trim()} style={{ "--size": `${size}px` } as CSSProperties} aria-hidden="true">
     <span className="jv-orbit-ring" />

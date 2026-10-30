@@ -176,7 +176,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
 
   const Container = embedded ? 'section' : 'main';
   const Title = embedded ? 'h3' : 'h2';
-  const pageTitle = checkEntry ? 'Start your free CV Check | Jobvance' : loopEntry ? 'Set up your Automated Job Loop | Jobvance' : mode === 'sign-up' ? 'Create your account | Jobvance' : 'Sign in | Jobvance';
+  const pageTitle = checkEntry ? 'Start your free CV Check | Jobvance' : loopEntry || mode === 'sign-up' ? 'Set up your Automated Job Loop | Jobvance' : 'Sign in | Jobvance';
   return (
     <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
       {!embedded && <Helmet><title>{pageTitle}</title><meta name="robots" content="noindex,nofollow" /></Helmet>}

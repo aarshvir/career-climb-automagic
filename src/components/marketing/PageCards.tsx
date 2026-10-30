@@ -69,10 +69,23 @@ export function SetupCard({ className = "" }: { className?: string }) {
 /** A compact "what is next" card for the closing bands. */
 export function NextRunCard({ className = "" }: { className?: string }) {
   return <div className={`pc-card pc-next ${className}`.trim()} aria-hidden="true">
-    <div className="pc-top"><span className="pc-caption">Next run</span><span className="pc-pill"><Repeat2 />3×/week</span></div>
+    <div className="pc-top"><span className="pc-caption">Example · next run</span><span className="pc-pill"><Repeat2 />3×/week</span></div>
     <div className="pc-next-time"><span className="pc-next-pulse" />Wed 7:00 AM</div>
     <div className="pc-week">{week.map((day, index) => <span key={index} className={[0, 2, 4].includes(index) ? "is-on" : ""}>{day}</span>)}</div>
-    <div className="pc-foot"><span />Last run · 3 jobs · 3 tailored CVs</div>
+    <div className="pc-foot"><span />Example last run · 3 jobs · 3 tailored CVs</div>
+  </div>;
+}
+
+const savedFacts: [string, string][] = [["Stock reporting", "Monthly reports for the operations review"], ["Team coordination", "Warehouse team of four"], ["SQL", "Weekly sales reports"]];
+/** The confirmed experience a person reuses: each fact is confirmed once, then offered to every later application. */
+export function SavedExperienceCard({ className = "" }: { className?: string }) {
+  return <div className={`pc-card pc-saved ${className}`.trim()} aria-hidden="true">
+    <div className="pc-top"><strong>Saved experience</strong><span className="pc-caption">Example · illustrative</span></div>
+    <ul className="pc-jobs">{savedFacts.map(([fact, detail]) => <li key={fact}>
+      <span className="pc-job"><strong>{fact}</strong><span>{detail}</span></span>
+      <span className="pc-tag">Confirmed</span>
+    </li>)}</ul>
+    <div className="pc-foot"><span />Reused in 3 applications</div>
   </div>;
 }
 

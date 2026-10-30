@@ -349,16 +349,22 @@
   .jv-home .jv-hero-orbit-wrap { width: min(640px, calc(100% + 100px)); }
   .jv-home .jv-hero-visual::after { inset: -12% -16%; }
 }
+/* Round 10: the window sits inside the frame (right edge 32px short of the rail), and the tailored CV is a sheet laid over its lower right corner,
+   so the hero has depth without a cropped edge. The headline sets on three lines: the copy column takes 7 of 12 columns. */
+.jv-home .jv-hero-cv .pc-foot-row { display: none; }
+@media (min-width: 1024px) {
+  .jv-home .jv-hero-cv .pc-line { display: none; }
+  .jv-home .jv-hero-title { font-size: clamp(2.5rem, 4.1vw, 3.75rem); }
+  .jv-home .jv-hero-cv { margin: 16px 0 0 auto; width: 280px; }
+}
 @media (min-width: 1280px) {
-  /* The window runs past the right rail to the viewport edge: left corners round, right edge cropped on purpose. */
-  .jv-home .jv-hero-visual { margin-right: calc(-1 * (var(--band-pad-x) + max((100vw - 1200px) / 2, var(--gutter)))); }
-  .jv-home .jv-appwin { border-right: 0; border-radius: var(--r-md) 0 0 var(--r-md); }
-  .jv-home .jv-appwin-body { display: grid; grid-template-columns: minmax(0, 1fr) 264px; }
-  .jv-home .jv-appwin-pane { display: block; padding: 16px; border-left: 1px solid var(--jv-line); background: var(--jv-bg-subtle); }
-  .jv-home .jv-appwin-pane .pc-card { box-shadow: var(--sh-2); }
-  .jv-home .jv-appwin-pane .pc-foot-row { display: none; }
-  .jv-home .jv-appwin-pane .pc-top { min-width: 0; flex-wrap: wrap; gap: 8px; }
-  .jv-home .jv-appwin-pane .pc-file { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--t-xs); }
+  .jv-home .jv-hero { padding: 48px 0 24px; }
+  .jv-home .jv-hero-copy { grid-column: 1 / span 7; }
+  .jv-home .jv-hero-visual { grid-column: 8 / span 5; margin-right: 0; align-self: start; padding-bottom: 186px; }
+  .jv-home .jv-appwin { width: calc(100% + 32px); }
+  .jv-home .jv-hero-cv { position: absolute; z-index: 2; right: -20px; bottom: 0; margin: 0; width: 268px; }
+  .jv-home .jv-hero-cv .pc-card { box-shadow: 0 28px 64px -16px rgb(var(--jv-ink-rgb) / .34), 0 2px 6px rgb(var(--jv-ink-rgb) / .1); }
+  .jv-home .jv-hero-orbit-wrap { width: min(560px, calc(100% + 120px)); }
 }
 @media (min-width: 1024px) and (max-width: 1279px) { .jv-home .jv-hero-orbit-wrap { display: none; } }
 
@@ -403,6 +409,6 @@
 /* Final CTA keeps its closing space after the footer wordmark was added. */
 @media (min-width: 1024px) { .jv-home .jv-cta { margin-bottom: 96px; } }
 /* One tidy first line on phones and tablets ("Jobvance automates"); in the narrow desktop column the words wrap naturally. */
-@media (min-width: 375px) and (max-width: 1023px) { .jv-home .jv-h-bind { white-space: nowrap; } }
+@media (min-width: 375px) { .jv-home :is(.jv-h-bind, .jv-h-mark) { white-space: nowrap; } }
 
 .jv-home .jv-proof { position: relative; z-index: 2; background: #fff; }

@@ -47,7 +47,7 @@ describe("footer links", () => {
   it("keeps the site links (now including the three audience pages) and 4 legal links", () => {
     render(<MemoryRouter><MvpFooter /></MemoryRouter>);
     const hrefs = (name: string) => within(screen.getByRole("navigation", { name })).getAllByRole("link").map(link => link.getAttribute("href"));
-    expect(hrefs("Footer navigation")).toEqual(["/job-loop", "/check", "/pricing", "/guides", "/walkthroughs", "/help", "/for-students", "/for-mba", "/for-career-switchers", "/about", "/contact"]);
+    expect(hrefs("Footer navigation")).toEqual(["/job-loop", "/check", "/pricing", "/guides", "/walkthroughs", "/help", "/faq", "/for-students", "/for-mba", "/for-career-switchers", "/about", "/contact"]);
     expect(hrefs("Legal navigation")).toEqual(["/privacy", "/privacy#advertising-measurement", "/terms", "/refund"]);
     // Column titles are eyebrow labels on named groups, not headings (they would add an H2 to every page outline).
     expect(screen.queryAllByRole("heading", { level: 2 })).toHaveLength(0);

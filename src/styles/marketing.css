@@ -73,7 +73,7 @@
   --jv-success: var(--jv-success-on-dark); --jv-warn: var(--jv-warn-on-dark); --jv-danger: var(--jv-danger-on-dark);
   position: relative; isolation: isolate; overflow: hidden; color: var(--jv-on-dark-body);
   /* One soft light from the top edge; no grain or second glow. */
-  background: radial-gradient(60% 55% at 50% 0%, rgb(var(--jv-link-on-dark-rgb) / .09), transparent 70%), var(--jv-forest);
+  background: var(--jv-glow), var(--jv-forest);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / .06);
 }
 /* Text links on forest get the mint ring (this also beats .product-page's light-theme ring). */
@@ -128,7 +128,7 @@
 .jv-mobile-panel > a { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid var(--jv-line); color: var(--jv-ink); font-size: 20px; font-weight: 500; letter-spacing: -.02em; text-decoration: none; }
 .jv-mobile-panel > a[aria-current="page"] { color: var(--jv-brand); }
 .jv-mobile-panel > a:focus-visible { outline-offset: -2px; border-radius: 6px; }
-.jv-mobile-account { display: flex; flex-direction: column; gap: 10px; padding-top: 20px; }
+.jv-mobile-account { display: flex; flex-direction: column; gap: 10px; padding: 12px 0 16px; border-bottom: 1px solid var(--jv-line); }
 .jv-mobile-account > * { width: 100%; }
 .jv-mobile-account .jv-btn { --jv-btn-h: 48px; font-size: var(--t-body-sm); }
 .jv-mobile-account .jv-btn--ghost { color: var(--jv-ink); background: #fff; border-color: var(--jv-line-strong); }
@@ -390,8 +390,7 @@
   .jv-toc a { min-height: 36px; padding: 4px 0; font-size: var(--t-sm); }
 }
 
-/* Accordions: the opened answer fades in with the same easing the toggle uses, so the two move together.
-   The fade is the fallback. Where the browser supports ::details-content, the panel also eases its block-size for 200ms (user-initiated only, contained). */
+/* Accordions: the opened answer fades in with the same easing the toggle uses, so the two move together (opacity and transform only). */
 @keyframes jv-open { from { opacity: 0; transform: translateY(-4px); } }
 @media (prefers-reduced-motion: no-preference) {
   .jv-faq details[open] > :is(p, div), .hc-note-details[open] > :not(summary) { animation: jv-open var(--dur-3) var(--ease-out) both; }
@@ -552,7 +551,7 @@
 
 /* ---------- Round 5: closing bands ---------- */
 /* One soft light behind the right-hand card; no stripe along the top edge. */
-.jv-cta { background: radial-gradient(60% 90% at 84% 55%, rgb(var(--jv-link-on-dark-rgb) / .12), transparent 70%), var(--jv-forest); }
+.jv-cta { background: radial-gradient(60% 90% at 84% 55%, rgb(var(--jv-link-on-dark-rgb) / .12), transparent 70%), var(--jv-glow), var(--jv-forest); }
 .jv-cta--page h2 { max-width: 11em; font-size: var(--t-h2); }
 .jv-cta--page { padding-block: 64px; }
 @media (min-width: 640px) { .jv-cta--page { padding-block: 80px; } }
@@ -567,15 +566,7 @@
 .help-center .hc-hero-actions .jv-btn--primary { color: #fff; text-decoration: none; }
 .help-center .hc-hero-actions .jv-btn--primary:hover { color: #fff; }
 
-/* Accordions open and close with a height transition where the browser supports it (the fade above is the fallback). */
-@supports (interpolate-size: allow-keywords) and selector(::details-content) {
-  @media (prefers-reduced-motion: no-preference) {
-    :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial) { interpolate-size: allow-keywords; }
-    :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial)::details-content { block-size: 0; overflow: hidden; transition: block-size var(--dur-2) var(--ease-out), content-visibility var(--dur-2) allow-discrete; contain: layout; }
-    :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial)[open]::details-content { block-size: auto; }
-    :is(.jv-faq details[open] > :is(p, div), details.jv-faq[open] > div, .hc-note-details[open] > :not(summary)) { animation: none; }
-  }
-}
+/* Accordions open with the opacity and transform fade above on every browser (no block-size animation, so nothing below the panel reflows). */
 /* Menu icon: the bars and the close mark cross-fade and turn. */
 .jv-header[data-menu-open="true"] .jv-menu-toggle svg { animation: jv-icon-in 200ms var(--ease-out) both; }
 @keyframes jv-icon-in { from { opacity: 0; transform: rotate(-45deg) scale(.8); } }
@@ -657,9 +648,6 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 .pricing-passes-body .pricing-note--lead { margin-top: 0; }
 
 /* Footer, phones: Company is a third full-width block in the same two-column grid and 44px rows as Product and Resources. */
-@media (max-width: 639px) {
-  .jv-footer-links .jv-footer-col:last-child ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; flex-wrap: nowrap; gap: 0 24px; }
-}
 /* The loop's rings are the home band's own motif; inner closing bands carry a page-specific card instead. */
 .jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])) { padding-block: 20px; }
 .jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 40px; }
@@ -878,7 +866,6 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 @media (max-width: 760px) {
   .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { font-size: var(--t-body-sm); }
   .jv-account--standalone .ap-story-free { font-family: var(--font-sans); font-size: var(--t-sm); letter-spacing: 0; }
-  .ap-next-line + .ap-form-expect { display: none; }
 }
 @media (min-width: 761px) { .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { font-size: var(--t-body-sm); } }
 /* Real-content labels are 13px at least on phones; 12px stays for decorative mock chrome. */
@@ -904,12 +891,10 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 .jv-footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 24px; }
 .jv-footer-col-title { margin: 0 0 6px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; letter-spacing: .06em; line-height: 1rem; text-transform: uppercase; }
 @media (max-width: 639px) { .jv-footer-col-title { font-size: var(--t-xs); } }
-.jv-footer-col a { min-height: 40px; }
 @media (min-width: 640px) { .jv-footer-links { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 20px; } }
 @media (min-width: 1024px) {
   .jv-footer-brand { grid-column: 1 / span 4; }
   .jv-footer-links { grid-column: 6 / span 7; }
-  .jv-footer-col a, .jv-footer-col a:where(:hover) { min-height: 36px; }
 }
 /* The close: an oversized, low-contrast wordmark cropped by the bottom edge. Decorative only. */
 .jv-footer-mark { container-type: inline-size; width: var(--shell); margin: 0 auto; aspect-ratio: 6.2 / 1; overflow: hidden; pointer-events: none; user-select: none; }
@@ -1042,3 +1027,71 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
   .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock { width: calc(100% + 48px); margin-left: -48px; }
 }
 @media (min-width: 1024px) { .jv-home .jv-hero:not(.lo-loop-hero) { padding: 64px 0 72px; } }
+
+
+/* ---------- Round 10 ---------- */
+/* Footer: every link row is 44px on every viewport; each column is one stack; the legal row ends on the container edge; the wordmark is whole (no cropped letters). */
+.jv-footer-col a { min-height: 44px; white-space: nowrap; }
+.jv-footer-col ul { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1024px) {
+  .jv-footer-bottom > nav { grid-column: 7 / -1; justify-content: flex-end; margin-right: -8px; }
+}
+.jv-footer-mark { aspect-ratio: auto; overflow: visible; padding-bottom: 2.4cqw; }
+.jv-footer-mark > span { font-size: 15cqw; line-height: 1; color: rgb(var(--jv-brand-rgb) / .12); text-align: center; }
+.jv-footer-mark > span::after { color: rgb(var(--jv-brand-rgb) / .3); }
+/* Product-mock wordmark: the same ink and green period as the header lockup, on the card's own (always white) surface. */
+.jv-brand--static { color: var(--jv-card-ink); }
+.jv-brand--static .jv-brand-period { color: var(--jv-brand); }
+
+/* Mobile type ladder: H1 36px or more on inner pages and home, every H2 (CTA bands included) 28-30px. */
+@media (max-width: 639px) {
+  .jv-cta h2, .jv-cta--page h2 { font-size: var(--t-h2-panel); }
+}
+/* Two section sizes: section titles (--t-h2) and panel / closing-band titles (--t-h2-panel). */
+.jv-cta h2, .jv-cta--page h2, .loop-overview .lo-private h2 { font-size: var(--t-h2-panel); }
+/* 3-up card titles use the card-title size; full-width rows keep the row size. */
+@media (min-width: 768px) { .jv-steps :is(h2, h3), .audience-features .jv-steps h3 { font-size: var(--t-h3-card); line-height: 1.2; } }
+/* Descriptive copy in cards and lists is 15px minimum, with a readable measure. */
+.cg-card p, .jv-steps p:not(.jv-caption), .audience-features p { font-size: var(--t-body-sm); line-height: var(--lh-body-sm); }
+
+/* Help and FAQ openings are left-aligned like every other template. */
+.jv-page-head--center { max-width: none; margin-inline: 0; text-align: left; }
+.jv-page-head--center .jv-lead { margin-inline: 0; }
+.jv-page-head--center .jv-page-actions { justify-content: flex-start; }
+.hc-hero { margin-inline: 0; text-align: left; }
+.help-center .hc-hero > p:not(.hc-eyebrow) { margin-inline: 0; }
+.hc-hero .hc-hero-actions { justify-content: flex-start; }
+
+/* Pricing: the one-time-passes card is one toggle. The whole header row is the control; its +/- sits on the heading line. */
+.pricing-passes-disclosure > summary { align-items: center; }
+.pricing-passes-disclosure > summary::after { margin-top: 0; }
+.pricing-passes-disclosure > summary > .pricing-passes-lead { min-width: 0; }
+@media (max-width: 639px) { .pricing-passes-disclosure > summary { gap: 12px; } .pricing-passes-disclosure .pricing-passes-lead > .jv-caption { white-space: normal; } }
+
+/* Dark tiles use the same glow token as every forest band. */
+.jv-home .jv-tile.jv-dark { background: var(--jv-glow), var(--jv-forest); }
+
+/* Help: the open article, its steps, the callout and the other topic rows share one right edge; only paragraph text keeps its reading measure. */
+.help-center .hc-topic > details { max-width: none; }
+.help-center .hc-topic > details > :is(.hc-steps, .hc-note, .hc-field-help) { max-width: none; }
+.help-center .hc-topic .hc-note > p, .help-center .hc-topic .hc-steps li > * { max-width: 64ch; }
+
+/* Contact: the rail and the form card end together (the rail stretches; its last card spreads its rows). */
+@media (min-width: 1024px) {
+  .jv-contact-grid { align-items: stretch; }
+  .jv-contact-rail, .jv-contact-grid .jv-contact-rail { position: static; grid-template-rows: auto 1fr; }
+  .jv-contact-rail .jv-notecard--links { display: flex; flex-direction: column; }
+  .jv-contact-rail .jv-notecard--links ul { flex: 1; grid-auto-rows: 1fr; }
+}
+
+/* Pricing: the passes card follows the Billing details row with the standard gap. */
+.product-page--pricing .jv-section.pricing-passes { margin-top: 20px; }
+
+/* Home: the two paired tiles end their mock cards on one bottom edge. */
+@media (min-width: 1024px) {
+  .jv-home .jv-tile--schedule, .jv-home .jv-tile--openings { grid-template-rows: auto 1fr; }
+}
+
+/* 320px reflow (WCAG 1.4.10): mock content wraps instead of widening its box. */
+.audience-evidence, .audience-workspace-title, .audience-workspace .jv-caption, .jv-nb { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 359px) { .audience-workspace .jv-caption, .audience-evidence span { white-space: normal; } }

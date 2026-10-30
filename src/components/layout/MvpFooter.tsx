@@ -4,7 +4,7 @@ import { Brand } from "./MvpHeader";
 // The same 8 site links as before, grouped into columns.
 const columns: [string, [string, string][]][] = [
   ["Product", [["/job-loop", "Automated Job Loop"], ["/check", "Free CV Check"], ["/pricing", "Plans & pricing"]]],
-  ["Resources", [["/guides", "Career guides"], ["/walkthroughs", "Walkthroughs"], ["/help", "Help"]]],
+  ["Resources", [["/guides", "Career guides"], ["/walkthroughs", "Walkthroughs"], ["/help", "Help"], ["/faq", "FAQ"]]],
   ["Who it's for", [["/for-students", "Students"], ["/for-mba", "MBA career pivots"], ["/for-career-switchers", "Busy professionals"]]],
   ["Company", [["/about", "About Jobvance"], ["/contact", "Contact"]]],
 ];
@@ -12,7 +12,7 @@ const legal: [string, string][] = [["/privacy", "Privacy"], ["/privacy#advertisi
 
 export default function MvpFooter() {
   const { pathname } = useLocation();
-  const compact = pathname === "/check" || pathname === "/dashboard";
+  const compact = pathname === "/check" || pathname === "/dashboard" || /^\/(auth|onboarding)(\/|$)/.test(pathname);
   return <footer className={`jv-footer${compact ? " jv-footer-compact" : ""}`}>
     <div className="jv-footer-inner">
       <div className="jv-footer-top">

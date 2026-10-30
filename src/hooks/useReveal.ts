@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect } from "react";
+import { useMotionAllowed } from "@/lib/motion";
 
 // Layout effect in the browser (runs before paint); plain effect on the server, where neither runs.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -11,9 +12,10 @@ const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffe
  * so above-the-fold content never flashes hidden.
  */
 export function useReveal() {
+  const motionAllowed = useMotionAllowed();
   useBeforePaint(() => {
     if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
-    if (!window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches) return;
+    if (!motionAllowed) return;
     const root = document.documentElement;
     const pending = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]:not(.is-in)"));
     const fold = window.innerHeight * 0.9;
@@ -32,5 +34,5 @@ export function useReveal() {
     }, { rootMargin: "100000px 0px -10% 0px", threshold: 0.15 }); // the huge top margin also reveals anything a fast scroll jumped past
     for (const element of pending) if (!element.classList.contains("is-in")) observer.observe(element);
     return () => { window.cancelAnimationFrame(frame); observer.disconnect(); root.classList.remove("jv-motion", "jv-motion-ready"); };
-  }, []);
+  }, [motionAllowed]);
 }

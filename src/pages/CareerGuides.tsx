@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BookOpen, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Compass, FileCheck2, ListChecks, MapPin, Search, ShieldCheck, type LucideIcon } from "lucide-react";
 import { careerGuides, editorialPolicy, getCareerGuide, type CareerGuide, type GuideAudience, type GuideCategory } from "@/lib/career-guides";
 import { guideDocumentTitle } from "@/lib/public-route-manifest";
 import { useReveal } from "@/hooks/useReveal";
@@ -20,10 +20,13 @@ function categoryLabel(guide: CareerGuide): string {
   if (guide.category !== REGION_CATEGORY) return guide.category;
   return guide.slug === "verify-job-listing-source" ? "Job listing safety" : "Regional guide";
 }
+const categoryIcon: Record<GuideCategory, LucideIcon> = { "CV evidence": FileCheck2, "Career direction": Compass, "Application workflow": ListChecks, "UAE job search": MapPin, "Privacy & troubleshooting": ShieldCheck };
 const featuredSlugs = ["first-application-pack", "cv-job-description-evidence", "role-filtering-before-applying"];
 
 function GuideCard({ guide, feature = false }: { guide: CareerGuide; feature?: boolean }) {
-  return <article className={`cg-card${feature ? " cg-card--feature" : ""}`}>
+  const Icon = categoryIcon[guide.category];
+  return <article className={`cg-card${feature ? " cg-card--feature" : ""}`} data-category={guide.category}>
+    <span className="cg-card-glyph" aria-hidden="true"><Icon size={18} /></span>
     <div className="cg-card-meta"><span>{categoryLabel(guide)}</span><span>{guide.readingMinutes} min read</span></div>
     <h3><Link to={`/guides/${guide.slug}`}>{guide.title}<ArrowRight size={18} aria-hidden="true" /></Link></h3>
     <p>{guide.description}</p>

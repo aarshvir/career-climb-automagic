@@ -129,9 +129,9 @@ export default function MvpHeader() {
       <button ref={toggle} type="button" className="jv-menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="mobile-navigation" onClick={()=>setOpenPath(open ? null : location.pathname)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
     <nav ref={panel} id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closingNow ? "closing" : undefined} className="jv-mobile-panel">
+      <div className="jv-mobile-account" onClick={()=>setOpenPath(null)}>{account}</div>
       {links.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}
       <div className="jv-mobile-who" role="group" aria-label="Who it's for"><p aria-hidden="true">Who it's for</p>{audienceLinks.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}</div>
-      <div className="jv-mobile-account" onClick={()=>setOpenPath(null)}>{account}</div>
     </nav>
     {(open || closingNow) && <div className="jv-menu-scrim" aria-hidden="true" data-state={closingNow ? "closing" : undefined} onClick={()=>setOpenPath(null)} />}
     {error && <p className="jv-header-error" role="alert">{error}</p>}

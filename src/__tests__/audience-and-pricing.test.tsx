@@ -125,7 +125,17 @@ describe('Automated Job Loop first homepage', () => {
 });
 
 describe('published draft privacy guidance', () => {
-  it('links the concise guest privacy explanation to the full storage choices', () => {
+  it('keeps privacy reachable: the footer links the privacy page and the page keeps the Meta Pixel and opt-out disclosures', async () => {
+    const { default: MvpFooter } = await import('@/components/layout/MvpFooter');
+    render(<MemoryRouter><MvpFooter /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy');
+    expect(screen.getByRole('link', { name: 'Your privacy choices' })).toHaveAttribute('href', '/privacy#advertising-measurement');
+    cleanup();
+    const { container } = render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);
+    expect(container.textContent).toContain('Meta Pixel from Meta Platforms');
+    expect(container.textContent).toContain('Global Privacy Control');
+  });
+  it('shows the home hero link to how it works and keeps the ATS line', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByRole('link', { name: 'See how it works' })).toHaveAttribute('href', '/how-it-works');
     expect(screen.getByText(/^Tailored, role-specific CVs/)).toHaveTextContent('built for a high ATS match');

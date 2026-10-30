@@ -121,3 +121,23 @@
 .career-guides { width: var(--shell); max-width: none; margin-inline: auto; padding-inline: 0; }
 @media (min-width: 1024px) { .career-guides { padding-inline: var(--band-pad-x); } .career-guides .cg-actions.jv-dark { margin-inline: calc(-1 * var(--band-pad-x)); } }
 .career-guides .cg-prose :is(p, li) { max-width: 68ch; }
+
+/* ---------- Round 10: guide library ---------- */
+/* Each category has a glyph and a quiet tint (existing tokens only), so the library reads as five kinds of help, not 20 identical cards. */
+.career-guides .cg-card { --cg-tint: var(--jv-brand-tint); --cg-tint-ink: var(--jv-brand-ink); position: relative; }
+.career-guides .cg-card[data-category="Career direction"] { --cg-tint: #DCEBE2; --cg-tint-ink: #1F5A40; }
+.career-guides .cg-card[data-category="Application workflow"] { --cg-tint: #EAF3C9; --cg-tint-ink: #4A5E10; }
+.career-guides .cg-card[data-category="UAE job search"] { --cg-tint: #E9F0EA; --cg-tint-ink: #3C5A4A; }
+.career-guides .cg-card[data-category="Privacy & troubleshooting"] { --cg-tint: #E1E9E4; --cg-tint-ink: #2F4439; }
+.cg-card-glyph { display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 14px; border-radius: 10px; background: var(--cg-tint); color: var(--cg-tint-ink); }
+.career-guides .cg-card { border-top: 3px solid var(--cg-tint-ink); }
+.career-guides .cg-card:hover { border-top-color: var(--cg-tint-ink); }
+/* Uniform rows: the grid is always whole rows, and the last card is one column wide. */
+@media (min-width: 1001px) {
+  .career-guides .cg-grid { grid-auto-rows: 1fr; }
+  .career-guides .cg-grid > :last-child:nth-child(3n + 1), .career-guides .cg-grid > :last-child:nth-child(3n + 2) { grid-column: auto; }
+  .cg-grid--collapsed > .cg-card:nth-child(n+7) { display: none; }
+  .cg-more { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; margin: 24px auto 0; padding: 0 28px; border: 1px solid var(--jv-line-strong); border-radius: var(--r-pill); background: #fff; color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); }
+  .cg-more:hover { border-color: var(--jv-brand); color: var(--jv-brand); }
+}
+@media (max-width: 639px) { .cg-card-glyph { display: none; } .career-guides .cg-card, .career-guides .cg-card--feature { border-top: 0; } }

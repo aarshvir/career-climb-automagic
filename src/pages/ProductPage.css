@@ -176,7 +176,7 @@
 .pricing-details > p { padding: 0; }
 .product-page .loop-price-market { margin-top: 20px; padding-top: 20px; }
 /* One-line pass captions so title, price and body share baselines across the four cards. */
-.pricing-card > .jv-caption { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; height: 1rem; }
+.pricing-card > .jv-caption { display: block; min-height: 1rem; }
 .pricing-card > .jv-caption::before { display: inline-block; margin-right: 10px; vertical-align: .1em; }
 /* The optional passes are a second-tier block: a section-sized heading, with the lead beside it on desktop. */
 .pricing-passes .jv-section-title--panel { font-size: clamp(1.625rem, 1.4rem + .9vw, 2rem); letter-spacing: -.03em; }

@@ -36,7 +36,7 @@ export function ReceiptAside({ className = "" }: { className?: string }) {
 /** Guides: one real guide as a cover (category, title, reading time) with a drawn document motif. Decorative; the full list sits below. */
 export function GuidesFeaturedAside({ category, title, minutes, className = "" }: { category: string; title: string; minutes: number; className?: string }) {
   return <div className={`pc-card pc-aside pc-cover ${className}`.trim()} aria-hidden="true">
-    <div className="pc-cover-art"><span /><span /><span /><i /></div>
+    <div className="pc-cover-art"><span className="pc-cover-sheet"><span className="pc-cover-sheet-top"><b>Application checklist</b><i>Example</i></span><span className="pc-cover-row is-done">Role and location chosen</span><span className="pc-cover-row is-done">CV evidence matched to the job</span><span className="pc-cover-row">Vacancy link saved</span></span></div>
     <div className="pc-cover-body"><span className="pc-caption"><BookOpen />Featured guide · {category}</span><strong>{title}</strong><span className="pc-cover-meta">{minutes} min read</span></div>
   </div>;
 }

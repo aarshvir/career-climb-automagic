@@ -473,3 +473,25 @@
   .jv-account--standalone .ap-story-free { display: block; margin: 16px 0 0; color: var(--jv-on-dark-body); font-family: var(--font-sans); font-size: var(--t-sm); letter-spacing: 0; white-space: nowrap; }
   .jv-account--standalone .ap-loop-entry { display: none; }
 }
+
+/* ---------- Round 10: the account entry (the page every ad click lands on) ---------- */
+/* Desktop: the forest panel is as tall as the form, so its content is distributed instead of left hanging. The headline group leads at the top,
+   the example run floats in the free space, and the footnote and link close the panel at the bottom. */
+@media (min-width: 761px) {
+  .jv-account--standalone .ap-account-story.jv-dark .ap-story-inner { position: static; flex: 1 1 auto; min-height: 100%; }
+  .jv-account--standalone .ap-account-story.jv-dark .ap-story-run { margin-block: auto; padding-block: 40px; }
+  .jv-account--standalone .ap-account-story.jv-dark .ap-story-footnote { margin-top: 0; }
+  .jv-account--standalone .ap-auth-heading :is(h1, h2) { margin-bottom: 20px; }
+}
+/* Phones: forest strip is the headline and the free line only; Google and the first field sit in the first screen. */
+@media (max-width: 760px) {
+  .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { display: none; }
+  .jv-account--standalone .ap-account-story.jv-dark h1 { margin-bottom: 8px; }
+  .jv-account--standalone .ap-account-story.jv-dark .ap-story-free { margin-top: 4px; }
+  .ap-next-line:has(+ .ap-form-expect) { display: none; }
+  .ap-form-expect { display: block; }
+}
+/* Text spacing (WCAG 1.4.12): the form heading never clips at 320px. */
+.jv-account .ap-auth-heading :is(h1, h2) { overflow: visible; white-space: normal; height: auto; }
+/* The loading placeholder holds the loaded card's phone offset (16px), so the account entry never shifts when the session check resolves. */
+@media (max-width: 760px) { .ap-auth-loading:not(.ap-auth-loading--embedded) { margin-top: 16px; } }

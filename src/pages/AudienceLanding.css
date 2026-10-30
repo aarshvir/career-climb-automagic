@@ -92,3 +92,37 @@
 
 /* ---------- Round 7 ---------- */
 @media (min-width: 1024px) { .audience-copy { grid-column: 1 / span 7; } .audience-copy .jv-lead { max-width: 36em; } }
+
+/* ---------- Round 10: one set piece per audience page, each on its own surface ---------- */
+.audience-setpiece { position: relative; margin-block: 24px; padding: 40px var(--band-pad-x); border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--jv-brand-tint), var(--jv-bg-subtle)); }
+.audience-setpiece.jv-dark { border: 0; }
+.audience-setpiece .jv-head { margin-bottom: 28px; }
+@media (min-width: 1024px) { .audience-setpiece { margin-inline: calc(-1 * var(--band-pad-x)); padding-block: 64px; } }
+.as-flow, .as-bridge { display: grid; gap: 16px; align-items: stretch; }
+.as-join { display: grid; place-items: center; min-height: 28px; }
+.as-join i { position: relative; width: 2px; height: 28px; background: linear-gradient(180deg, var(--jv-signal), var(--jv-brand)); border-radius: 2px; }
+.jv-dark .as-join i { background: var(--jv-signal); }
+.as-join i::after { content: ""; position: absolute; left: 50%; bottom: -1px; width: 8px; height: 8px; border-right: 2px solid var(--jv-brand); border-bottom: 2px solid var(--jv-brand); translate: -50% 0; rotate: 45deg; }
+.jv-dark .as-join i::after { border-color: var(--jv-signal); }
+.as-sources, .as-col ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.as-sources li { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid var(--jv-line); border-radius: var(--r-sm); background: #fff; box-shadow: var(--sh-1); }
+.as-sources li > span, .as-result > span, .as-col > span { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; line-height: 1rem; text-transform: uppercase; }
+.as-sources li > strong { color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); line-height: 1.35; }
+.as-result { display: grid; align-content: center; gap: 10px; padding: 20px; border: 1px solid color-mix(in srgb, var(--jv-brand) 30%, var(--jv-line)); border-radius: var(--r-md); background: #fff; box-shadow: var(--sh-3); }
+.as-result p { margin: 0; color: var(--jv-ink); font-size: var(--t-body); line-height: 1.5; }
+.as-result mark { padding: 1px 3px; border-radius: 4px; background: var(--jv-brand-tint); color: var(--jv-brand-ink); }
+.as-col { display: grid; align-content: start; gap: 12px; }
+.jv-dark .as-col > span { color: var(--jv-on-dark-2); }
+.as-col li { padding: 14px 16px; border: 1px solid var(--jv-line-on-dark); border-radius: var(--r-sm); background: rgb(255 255 255 / .05); color: var(--jv-on-dark-1); font-size: var(--t-body-sm); line-height: 1.4; }
+.as-col--to li { border-color: rgb(var(--jv-signal-rgb) / .4); background: rgb(var(--jv-signal-rgb) / .07); }
+.as-col--to b { color: var(--jv-signal); font-weight: var(--fw-semi); }
+.audience-setpiece .pc-week-strip { box-shadow: var(--sh-3); }
+@media (min-width: 768px) {
+  .as-flow { grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1.1fr); gap: 0; align-items: center; }
+  .as-bridge { grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); gap: 0; }
+  .as-join { min-height: 0; }
+  .as-join i { width: 28px; height: 2px; background: linear-gradient(90deg, var(--jv-signal), var(--jv-brand)); }
+  .jv-dark .as-join i { background: var(--jv-signal); }
+  .as-join i::after { left: auto; right: -1px; bottom: auto; top: 50%; translate: 0 -50%; rotate: -45deg; }
+}
+.audience-setpiece.jv-dark { background: var(--jv-glow), var(--jv-forest); }

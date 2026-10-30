@@ -42,7 +42,9 @@ const mono = (variant = small, scale = MONO_SCALE) => `<svg xmlns="http://www.w3
 /** The 16px frame is drawn on whole pixels, not resampled from the 40-unit geometry: a 3px stem (x 10-13), a 2px bar (y 2-4),
  * a hook of radius 3.5 centred on (8, 8) and a lime dot capping its end at (4.5, 8). No knockout ring at this size. */
 const tile16 = () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" rx="4" fill="${TILE}"/><g fill="none" stroke="${GLYPH}"><path d="M8 3h5" stroke-width="2"/><path d="M11.5 3v5a3.5 3.5 0 0 1-7 0" stroke-width="3"/></g><circle cx="4.5" cy="8" r="1.75" fill="${SIGNAL}"/></svg>`;
-writeFileSync(pub('favicon.svg'), tile(small) + '\n');
+/** Dark browser tab strips: the tile (and the dot's knockout ring) lifts one green step so its edge does not disappear. */
+const darkAware = svg => svg.replaceAll('fill="' + TILE + '"', 'class="t" fill="' + TILE + '"').replace('</svg>', '<style>@media (prefers-color-scheme:dark){.t{fill:#2F7D5C}}</style></svg>');
+writeFileSync(pub('favicon.svg'), darkAware(tile(small)) + '\n');
 writeFileSync(pub('icon-mono.svg'), mono() + '\n');
 console.log('brand svgs written');
 
