@@ -55,6 +55,6 @@ export default function LoopRunMock() {
       </ul>
       <p className="jv-sr-only">Each job moves from found, to CV tailored, to ready for your review.</p>
     </div>
-    <p className="jv-mock-foot"><span aria-hidden="true" />Nothing is sent. You apply yourself.</p>
+    <p className="jv-mock-foot"><span aria-hidden="true" />3 jobs found · 3 tailored CVs ready</p>
   </figure>;
 }

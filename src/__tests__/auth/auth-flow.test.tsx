@@ -234,7 +234,7 @@ describe('Automated Job Loop account entry and confirmation recovery', () => {
     const benefits = await screen.findByRole('list', { name:'What the Automated Job Loop does' });
     expect(benefits).toHaveTextContent('Roles matched to your CV.');
     expect(benefits).toHaveTextContent('A tailored CV for each role.');
-    expect(benefits).toHaveTextContent('Review every CV, then apply yourself. Nothing is sent for you.');
+    expect(benefits).toHaveTextContent('Role-specific CVs written to fit each job’s requirements.');
     expect(screen.getByText('Your account also includes 3 AI-tailored CVs a month, free.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name:'See plans' })).toHaveAttribute('href', '/pricing');
     // The explanation sits above the form fields, and the form is unchanged.
