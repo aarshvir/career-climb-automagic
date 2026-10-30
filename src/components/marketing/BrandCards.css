@@ -1,11 +1,13 @@
 /* Round 6 page artifacts: the /how-it-works timeline and the /about loop mark. */
 .bc-timeline { position: relative; display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.bc-timeline::before { content: ""; position: absolute; left: 5px; top: 14px; bottom: 14px; width: 2px; background: linear-gradient(180deg, var(--jv-brand) 0 50%, var(--jv-line-strong) 50% 100%); border-radius: 2px; }
+/* One rail through every stop: solid green where the step is yours (once), grey where it runs by itself (every run). */
+.bc-timeline li::before { content: ""; position: absolute; left: 5px; top: 14px; bottom: -4px; width: 2px; border-radius: 2px; background: var(--jv-brand); }
+.bc-timeline li.is-auto::before { background: var(--jv-line-strong); }
+.bc-timeline li:last-child::before { bottom: 0; }
 .bc-timeline li { position: relative; display: grid; gap: 8px; padding: 0 0 36px 36px; }
 .bc-timeline li:last-child { padding-bottom: 0; }
-.bc-timeline-node { position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--jv-brand); box-shadow: 0 0 0 4px #fff, 0 0 0 5px var(--jv-line-strong); }
+.bc-timeline-node { position: absolute; z-index: 1; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--jv-brand); box-shadow: 0 0 0 4px #fff, 0 0 0 5px var(--jv-line-strong); }
 .bc-timeline li.is-auto .bc-timeline-node { background: #fff; border: 2px solid var(--jv-brand); }
-.bc-timeline li:nth-child(2) .bc-timeline-node { background: var(--jv-signal); box-shadow: 0 0 0 4px #fff, 0 0 0 5px var(--jv-brand); }
 .bc-timeline h3 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
 .bc-timeline li > p:not(.jv-caption) { margin: 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); text-wrap: pretty; }
 .bc-timeline .jv-caption::before { display: none; }

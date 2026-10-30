@@ -322,7 +322,7 @@
 @media (min-width: 1024px) {
   .jv-home .jv-hero { padding-bottom: 28px; }
   .jv-home .jv-hero-visual { min-height: 520px; }
-  .jv-home .jv-hero-visual::after { content: ""; position: absolute; inset: -8% -12%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(var(--jv-brand-rgb) / .14), transparent 72%), radial-gradient(40% 30% at 70% 80%, rgb(212 242 90 / .16), transparent 80%); }
+  .jv-home .jv-hero-visual::after { content: ""; position: absolute; inset: -8% -12%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(var(--jv-brand-rgb) / .14), transparent 72%), radial-gradient(40% 30% at 70% 80%, rgb(var(--jv-signal-rgb) / .16), transparent 80%); }
   .jv-home .jv-hero-visual::before { background: radial-gradient(circle, rgb(var(--jv-brand-rgb) / .4) 1px, transparent 1.7px) 0 0 / 20px 20px !important; }
 }
 /* Phones: the set-up is explained once. The dark band carries the three steps; the second block keeps its three headings and one proof card. */

@@ -69,3 +69,13 @@ export function StepsDoneCard({ className = "" }: { className?: string }) {
     <div className="pc-foot"><span />Runs on its own from here</div>
   </div>;
 }
+
+const freeSteps = [["Free CV Check", "Compare, edit and download PDF, Word or text"], ["3 AI-tailored CVs a month", "When you are signed in"], ["Applications tracker", "Keep every vacancy together"]];
+/** Closing-band companion for Pricing: what a free account already includes (the same facts as the pricing FAQ). */
+export function FreeAccountCard({ className = "" }: { className?: string }) {
+  return <div className={`pc-card pc-done ${className}`.trim()} aria-hidden="true">
+    <div className="pc-top"><span className="pc-caption">Free account · what you start with</span></div>
+    <ol className="pc-done-list">{freeSteps.map(([title, note]) => <li key={title}><span className="pc-done-check"><Check /></span><span className="pc-done-text"><strong>{title}</strong><span>{note}</span></span></li>)}</ol>
+    <div className="pc-foot"><span />Choose a plan when you want ongoing runs</div>
+  </div>;
+}

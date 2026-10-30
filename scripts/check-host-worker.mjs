@@ -57,7 +57,12 @@ for (const path of ['/onboarding?utm_source=meta', '/auth?mode=signup']) {
   checkHeaders(response);
   assert.match(response.headers.get('Content-Type'), /^text\/html/);
   assert.equal(response.headers.get('Cache-Control'), 'no-cache');
-  const text = Buffer.from(await response.arrayBuffer()).toString('utf8');
+  const raw = Buffer.from(await response.arrayBuffer()).toString('utf8');
+  // The only body difference is the static first paint inside #root: inert markup (no script, link, form, image or input).
+  const paint = raw.match(/<div id="root">(<div aria-hidden="true" style="padding-top:72px">[\s\S]*?<\/main><\/div>)<\/div>/);
+  assert.ok(paint, 'Account entry carries the static first paint.');
+  assert.doesNotMatch(paint[1], /<(script|link|form|img|input|iframe|a)/i, 'The static first paint is inert markup.');
+  const text = raw.replace(paint[0], '<div id="root"></div>');
   const [head, tail] = indexText.split('</head>');
   assert.ok(text.startsWith(head) && text.endsWith('</head>' + tail), 'Account entry must be the built index plus head links only.');
   const added = text.slice(head.length, text.length - tail.length - '</head>'.length);

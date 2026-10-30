@@ -54,9 +54,9 @@ export default function SubscriptionPricing() {
 
   return <>
     <LoopSubscriptionBilling />
-    <section className="jv-section pricing-passes" aria-labelledby="passes-title">
+    <section className="jv-section pricing-passes" aria-labelledby="passes-title" data-reveal>
       <details className="pricing-passes-disclosure" open={picked || params.get('checkout') === 'cancelled' ? true : undefined}>
-      <summary><span className="pricing-passes-lead"><span className="jv-caption">AI CV tailoring · one-time passes from ${cheapestPass}</span><span id="passes-title" className="pricing-passes-title">Just want the CV Check? See one-time passes</span><span className="pricing-passes-sub">{currentOffer.check}</span></span></summary>
+      <summary><span className="pricing-passes-lead"><span className="jv-caption">AI CV tailoring · one-time passes from ${cheapestPass}</span><span id="passes-title" className="pricing-passes-title">Just want the CV Check? See one-time passes</span><span className="pricing-passes-sub">{currentOffer.check}</span><span className="pricing-passes-prices" aria-label="One-time pass prices">{passPlans.map(plan => <span key={plan.key}><strong>${plan.price}</strong> {plan.name}</span>)}</span></span></summary>
       <div className="pricing-passes-body">
       <p className="pricing-note pricing-note--lead">These optional one-time CV Check passes are priced in US dollars. The currency selector above applies to your Automated Job Loop subscriptions.</p>
       {picked && <p className="pricing-picked" role="status">You picked the {passPlan(picked).name} pass (${passPlan(picked).price}, {passPlan(picked).days} days). {user ? `Choose “Buy ${passPlan(picked).name}” when you are ready to pay.` : 'Sign in, then choose it again to pay.'}</p>}
@@ -97,10 +97,6 @@ export default function SubscriptionPricing() {
     <section className="jv-section pricing-faq" aria-labelledby="pricing-faq-title">
       <h2 id="pricing-faq-title" className="jv-section-title">Questions about pricing</h2>
       <div className="jv-faq jv-faq--wide">{faqs.map(([question, answer]) => <details key={question}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>
-    </section>
-    <section className="jv-cta jv-cta--page jv-dark pricing-close" aria-labelledby="loop-offer">
-      <div className="jv-cta-inner"><h2 id="loop-offer">Not ready to choose? Start free.</h2><p>Create a free account and set up your roles and schedule. Choose a plan for ongoing automatic runs.</p>
-        <div className="jv-cta-actions"><Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link></div></div>
     </section>
   </>;
 }

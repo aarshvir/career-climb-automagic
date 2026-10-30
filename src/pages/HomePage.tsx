@@ -107,7 +107,7 @@ export default function HomePage() {
         </div>
         <div className="jv-boundary" data-reveal>
           <p>Tailored, role-specific CVs, built for a high ATS match.</p>
-          <div className="jv-boundary-links"><TextLink to="/job-loop">Explore Automated Job Loop</TextLink><TextLink to="/privacy">How your CV is handled</TextLink></div>
+          <div className="jv-boundary-links"><StartLink>Start my search</StartLink><TextLink to="/how-it-works">See how it works</TextLink></div>
         </div>
       </div>
     </section>

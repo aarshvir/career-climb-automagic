@@ -11,7 +11,7 @@
 /* Brand device: the run trail joins the steps (a node on each row, a lime-to-green line down to the next). */
 .loop-journey-ring { position: relative; padding-left: 28px; }
 .loop-journey-ring li { position: relative; }
-.loop-journey-ring li::before { content: ""; position: absolute; left: -28px; top: 34px; width: 9px; height: 9px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 4px rgb(212 242 90 / .14); }
+.loop-journey-ring li::before { content: ""; position: absolute; left: -28px; top: 34px; width: 9px; height: 9px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 4px rgb(var(--jv-signal-rgb) / .14); }
 .loop-journey-ring li::after { content: ""; position: absolute; left: -24px; top: 46px; bottom: -34px; width: 1px; background: linear-gradient(var(--jv-signal), var(--jv-brand-mid)); transform-origin: top; }
 .loop-journey-ring li:last-child::after { display: none; }
 @media (prefers-reduced-motion: no-preference) {

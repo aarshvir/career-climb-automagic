@@ -118,7 +118,7 @@ export default function MvpHeader() {
       finally { setBusy(false); }
     }}>{busy ? "Signing out…" : "Sign out"}</button>
   </> : signedOutActions(false);
-  return <header className="jv-header" data-menu-open={open}>
+  return <header className="jv-header" data-menu-open={open} {...(open ? { role: "dialog", "aria-modal": true, "aria-label": "Site menu" } : {})}>
     <a className="jv-skip" href="#main-content">Skip to content</a>
     <div className="jv-header-inner">
       <Brand />

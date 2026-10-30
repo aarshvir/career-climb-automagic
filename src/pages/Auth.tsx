@@ -36,6 +36,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const clearField = (key: 'name' | 'phone' | 'email' | 'password' | 'confirm') => setFieldErrors(current => current[key] ? { ...current, [key]: undefined } : current);
   const socialBrowser = detectInAppBrowser();
   const loopEntry = !embedded && accountDestination(searchParams.get('next')) === '/onboarding';
+  // The free CV Check entry (next=/check) opens on its own promise, not the Automated Job Loop setup headline. Copy only.
+  const checkEntry = !embedded && accountDestination(searchParams.get('next')) === '/check';
   const fieldId = useId();
   // Only the newly submitted signup is retained, in this mounted tab for ten minutes.
   // Continuation is deliberate; focus/visibility never starts a password login.
@@ -174,16 +176,16 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
 
   const Container = embedded ? 'section' : 'main';
   const Title = embedded ? 'h3' : 'h2';
-  const pageTitle = loopEntry ? 'Set up your Automated Job Loop | Jobvance' : mode === 'sign-up' ? 'Create your account | Jobvance' : 'Sign in | Jobvance';
+  const pageTitle = checkEntry ? 'Start your free CV Check | Jobvance' : loopEntry ? 'Set up your Automated Job Loop | Jobvance' : mode === 'sign-up' ? 'Create your account | Jobvance' : 'Sign in | Jobvance';
   return (
     <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
       {!embedded && <Helmet><title>{pageTitle}</title><meta name="robots" content="noindex,nofollow" /></Helmet>}
       {!embedded && <aside className="ap-account-story jv-dark" aria-labelledby={`${fieldId}-story`}>
         <div className="ap-story-inner">
-          <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" />Automated Job Loop</p>
-          <h1 id={`${fieldId}-story`}>{mode === 'sign-up' || loopEntry ? <>Set up your <span className="jv-nb">Automated Job Loop</span> <span>and let it run.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h1>
-          <p className="ap-story-description">Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares a tailored, role-specific CV for each.</p>
-          {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance"><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></ul>}
+          <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" />{checkEntry ? 'Free CV Check' : 'Automated Job Loop'}</p>
+          <h1 id={`${fieldId}-story`}>{checkEntry ? <>Start your free <span>CV Check.</span></> : mode === 'sign-up' || loopEntry ? <>Set up your <span className="jv-nb">Automated Job Loop</span> <span>and let it run.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h1>
+          <p className="ap-story-description">{checkEntry ? 'Bring a CV and a job description, review the suggested changes and download your approved version.' : <>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares a tailored, role-specific CV for each.</>}</p>
+          {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance">{checkEntry ? <><li>Compare your CV with a job</li><li>Review every change</li><li>Download PDF, Word or text</li></> : <><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></>}</ul>}
           {showBenefits && <p className="ap-story-free">Free account · 3 AI-tailored CVs a month</p>}
           <div className="ap-story-orbit" aria-hidden="true"><LoopOrbit size={260} variant="dark" labels animate={false}><span className="ap-orbit-core"><span>Set up once</span><span>then it runs</span></span></LoopOrbit></div>
           <MiniRun className="ap-story-run" />
@@ -224,7 +226,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
               </Button>}
               {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
               <form className="ap-auth-form" onSubmit={handleSubmit} noValidate>
-                {showBenefits && <p className="ap-next-line">After this: add your CV, choose roles and locations, pick a schedule.</p>}
+                {showBenefits && <p className="ap-next-line">{checkEntry ? 'After this: add your CV and the job you have in mind.' : 'After this: add your CV, choose roles and locations, pick a schedule.'}</p>}
                 {mode === 'sign-up' && <p className="ap-form-expect">Next: your name, mobile number, email and a password.</p>}
                 {mode === 'sign-up' && <ContactFields value={contact} onChange={next => { setContact(next); if (next.name !== contact.name) clearField('name'); if (next.phone !== contact.phone) clearField('phone'); }} disabled={busy} errors={fieldErrors} />}
                 <div className="ap-field">

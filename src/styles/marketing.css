@@ -721,8 +721,8 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 
 /* Audience pages: the Compare / Reuse / Continue columns share baselines. */
 @media (min-width: 768px) {
-  .audience-features .jv-steps { grid-template-rows: auto auto; }
-  .audience-features .jv-steps > li { grid-row: span 2; grid-template-rows: subgrid; row-gap: 10px; }
+  .audience-features .jv-steps { grid-template-rows: auto auto 1fr; }
+  .audience-features .jv-steps > li { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; align-content: start; }
 }
 .jv-lead, .jv-hero-lead, .audience-copy .jv-lead, .jv-page-head .jv-lead { text-wrap: pretty; }
 .audience-check-copy h2, .jv-check-copy h2, .lo-dashboard h2 { text-wrap: balance; }
@@ -754,6 +754,150 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 .jv-dark .jv-brand-name { color: var(--jv-on-dark-1); }
 
 /* The pricing closing band spans the content column (it lives inside the page shell, not beside it). */
-.pricing-close.jv-cta { width: auto; margin: 48px 0 0; }
 
 .product-page .jv-toc a, .product-page .jv-toc a:hover { text-decoration: none; }
+
+/* ---------- Round 8 ----------
+   Hypothesis: scores stalled because every page opened on the same pale card-on-wash hero, closed on a different band recipe,
+   and carried layered per-page overrides that left dead space (pricing, home, about). This block sets one rhythm for spacing,
+   one closing-band recipe, two forest hero treatments (/job-loop, /about) and one pass on target sizes. */
+
+/* Spacing rhythm: one value between stacked blocks on pricing. */
+.product-page--pricing .loop-subscription-billing { padding-bottom: 0; }
+.product-page--pricing .jv-section.pricing-passes { margin-top: 48px; margin-bottom: 40px; }
+.product-page--pricing .jv-page-head { padding-bottom: 32px; }
+@media (min-width: 1024px) { .product-page--pricing .jv-page-head { padding-bottom: 48px; } }
+.product-page--pricing .jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])) { padding-block: 28px; }
+.pricing-passes-disclosure > summary { align-items: flex-start; }
+.pricing-passes-disclosure > summary::after { margin-top: 2px; }
+.pricing-passes-prices { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 4px; color: var(--jv-ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums lining-nums; }
+.pricing-passes-prices strong { color: var(--jv-ink); font-weight: var(--fw-semi); }
+.product-proposed-grid .pricing-desc { margin: 12px 0 12px; }
+.product-proposed-grid .pricing-outcome { margin: 0 0 20px; text-wrap: balance; }
+@media (min-width: 1024px) { .product-proposed-grid .pricing-outcome { min-height: 3em; } }
+.pricing-free-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; margin-top: 20px; padding: 16px 20px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: var(--jv-bg-subtle); }
+.pricing-free-strip p { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 0; color: var(--jv-ink-2); font-size: var(--t-small); }
+.pricing-free-strip strong { color: var(--jv-ink); font-weight: var(--fw-semi); }
+.pricing-free-strip .jv-link { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* About: the three principle columns share rows (rule, label, heading, body), so nothing sits higher than its neighbour. */
+@media (min-width: 1024px) {
+  .jv-story .product-about-principles { grid-template-rows: auto auto 1fr; }
+  .jv-story .product-about-principles > li { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; align-content: start; border-top: 1px solid var(--jv-line-strong); padding-top: 24px; }
+  .jv-story .product-about-principles h3 { text-wrap: balance; }
+  .jv-story { align-items: start; }
+  .jv-story-body { align-self: start; padding-top: 8px; }
+}
+
+/* How it works: heading breaks in two lines, not three. */
+@media (min-width: 1024px) { .jv-split--timeline .jv-section-title { font-size: clamp(2rem, 1.2rem + 1.7vw, 2.625rem); text-wrap: balance; } }
+
+/* Forest hero: /job-loop and /about open on the dark band the rest of the site closes on (white card on forest, lime on one word). */
+.jv-h-signal { color: var(--jv-signal); }
+.loop-overview.jv-home .lo-loop-hero--forest { width: var(--shell); margin: 12px auto 0; padding: 40px var(--band-pad-x); border-radius: var(--r-lg); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-shell { width: auto; padding: 0; }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-eyebrow { color: var(--jv-on-dark-2); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { color: #fff; font-weight: var(--fw-heading-on-dark); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-lead { color: var(--jv-on-dark-body); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-orbit { --ring: rgb(var(--jv-link-on-dark-rgb) / .3); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-btn--primary { color: var(--jv-forest); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-link { color: var(--jv-on-dark-link); }
+.loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual::before, .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual::after { display: none; }
+.loop-overview.jv-home .lo-loop-hero--forest .pc-card { box-shadow: 0 40px 90px -24px rgb(0 0 0 / .55), 0 0 0 1px rgb(255 255 255 / .06); }
+@media (min-width: 640px) { .loop-overview.jv-home .lo-loop-hero--forest { padding: 56px var(--band-pad-x); } }
+@media (min-width: 1024px) {
+  .loop-overview.jv-home .lo-loop-hero--forest { padding: 72px var(--band-pad-x); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-visual { min-height: 0; }
+  /* The product surface docks to the band's right edge, like an app window opened from the side, with every label intact. */
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock { justify-items: start; margin-right: calc(-1 * var(--band-pad-x)); width: calc(100% + var(--band-pad-x)); }
+  .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-mock .pc-card { max-width: none; width: 100%; border-radius: var(--r-md) 0 0 var(--r-md); }
+}
+@media (max-width: 639px) { .loop-overview.jv-home .lo-loop-hero .jv-hero-cta { width: 100%; } }
+.loop-overview.jv-home .lo-loop-hero { padding-bottom: 40px; }
+.loop-overview.jv-home .lo-loop-hero--forest + .lo-section { border-top: 0; }
+
+.product-page .jv-page-head--forest { margin-top: 12px; padding: 48px var(--band-pad-x); border-radius: var(--r-lg); }
+.jv-page-head--forest > .jv-caption { color: var(--jv-on-dark-2); }
+.jv-page-head--forest .jv-page-title { color: #fff; font-weight: var(--fw-heading-on-dark); }
+.jv-page-head--forest .jv-lead { color: var(--jv-on-dark-body); }
+.jv-page-head--forest .jv-page-visual::before { display: none; }
+.jv-page-head--forest .bc-mark { --ring: rgb(var(--jv-link-on-dark-rgb) / .3); }
+.jv-page-head--forest .bc-mark-core { color: #fff; }
+.jv-page-head--forest .bc-mark-core span { color: var(--jv-on-dark-2); }
+@media (min-width: 640px) { .product-page .jv-page-head--forest { padding: 64px var(--band-pad-x); } }
+@media (min-width: 1024px) { .product-page .jv-page-head--forest { margin-inline: calc(-1 * var(--band-pad-x)); padding: 72px var(--band-pad-x); } .product-page .jv-page-head--forest.jv-page-head--split { align-items: center; } }
+
+/* Closing bands: one recipe. Copy and buttons at the left; an example card or the faint ring at the right; 420-500px tall. */
+.jv-cta--page { padding-block: 64px; }
+@media (min-width: 640px) { .jv-cta--page { padding-block: 80px; } }
+@media (min-width: 1024px) { .jv-cta--page { padding-block: 88px; } }
+.product-page .jv-cta, .audience-page .jv-cta, .loop-overview .jv-cta, .jv-home .jv-cta { margin-bottom: 96px; }
+@media (max-width: 639px) { .product-page .jv-cta, .audience-page .jv-cta, .loop-overview .jv-cta, .jv-home .jv-cta { margin-bottom: 64px; } }
+:is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) { margin-bottom: 96px; }
+@media (min-width: 1024px) { :is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) { padding-block: 64px; } }
+/* Action stacks share one left edge: button and links start at the same x. */
+:is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) > div:last-child { justify-items: start; align-items: flex-start; }
+.help-center .hc-further.jv-dark .hc-button--primary { margin-bottom: 8px; }
+.jv-cta .jv-cta-visual .pc-card { max-width: 360px; }
+
+/* Contact: the form is one bordered card beside the receipt and support cards. */
+.jv-contact-grid .guest-support { padding: 28px; border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: #fff; box-shadow: var(--sh-2); }
+.jv-contact-grid .guest-support > h2 { font-size: var(--t-h4); letter-spacing: -.02em; }
+.jv-contact-grid .guest-support > p { font-size: var(--t-body-sm); }
+.jv-contact-grid .guest-support form { margin-top: 20px; }
+.jv-contact-rail { display: grid; gap: 16px; align-content: start; min-width: 0; }
+@media (min-width: 1024px) { .jv-contact-rail { position: sticky; top: 112px; } .jv-contact-grid .jv-contact-rail .jv-notecard { position: static; } .jv-contact-grid { column-gap: 48px; } }
+.jv-notecard--links ul { display: grid; margin: 12px 0 0; padding: 0; list-style: none; }
+.jv-notecard--links li { border-top: 1px solid var(--jv-line); }
+.jv-notecard--links .jv-link { display: flex; align-items: center; justify-content: space-between; min-height: 48px; width: 100%; }
+@media (max-width: 639px) { .jv-contact-grid .guest-support { padding: 20px; } }
+
+/* Home: the hero hands over to the proof strip and the forest band without empty bands. */
+@media (min-width: 1024px) {
+  .jv-home .jv-hero { padding: 24px 0 28px; }
+  .jv-home .jv-hero-visual { min-height: 500px; }
+  .jv-home .jv-hero-actions { margin-top: 28px; }
+}
+.jv-home .jv-hero-note .jv-meta { color: var(--jv-ink-2); font-size: var(--t-body-sm); }
+.jv-home .jv-loop-band { margin-top: 32px; }
+.jv-home .jv-boundary-links { align-items: center; gap: 8px 28px; }
+.jv-home .jv-check .jv-btn--secondary { background: var(--jv-brand-tint); border-color: rgb(var(--jv-brand-rgb) / .28); color: var(--jv-brand-ink); }
+@media (hover: hover) { .jv-home .jv-check .jv-btn--secondary:hover { background: #fff; border-color: var(--jv-brand); } }
+
+/* Target sizes: 44px at least for footer links and standalone text links; running text keeps its line box. */
+.jv-footer-col a { min-width: 44px; min-height: 44px; }
+@media (min-width: 1024px) and (hover: hover) { .jv-footer-col a { min-height: 44px; } }
+.jv-footer-bottom nav a { min-width: 44px; justify-content: center; }
+.loop-overview .jv-faq details > div a, .loop-overview .lo-lede a { display: inline-block; padding-block: 12px; margin-block: -12px; }
+.career-guides .cg-card h3 a { display: inline-flex; min-height: 44px; align-items: center; }
+
+/* Type: one reading size per template class (long-form 17, UI 16, card 15) and one card-title style. */
+:root { --t-prose: 1.0625rem; --fw-card: 540; }
+.jv-steps h3, .bc-timeline h3, .cg-card h3, .jv-home .jv-control-copy h3 { font-weight: var(--fw-card); letter-spacing: var(--ls-card); }
+.hc-topic > details :is(.hc-topic-summary, .hc-steps li > *, .hc-note p, .hc-field-help dd) { max-width: 62ch; }
+.help-center .hc-topic .hc-steps li > *, .help-center .hc-topic .hc-note > p, .help-center .hc-topic-summary { max-width: 62ch; }
+.help-center .hc-topic > details:not([open]) h2 { font-size: var(--t-card-title); letter-spacing: var(--ls-card); }
+.help-center .hc-topic > details:not([open]) > summary { min-height: 64px; }
+.jv-account .ap-story-free { font-family: var(--font-mono); letter-spacing: .02em; }
+@media (max-width: 760px) {
+  .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { font-size: var(--t-body-sm); }
+  .jv-account--standalone .ap-story-free { font-family: var(--font-mono); font-size: var(--t-sm); }
+  .ap-next-line + .ap-form-expect { display: none; }
+}
+@media (min-width: 761px) { .jv-account--standalone .ap-account-story.jv-dark .ap-story-ticks { font-size: var(--t-body-sm); } }
+/* Real-content labels are 13px at least on phones; 12px stays for decorative mock chrome. */
+@media (max-width: 639px) { .jv-footer-bottom, .jv-footer-col-title, .jv-footer-note, .jv-caption { font-size: var(--t-sm); } }
+
+/* Walkthroughs: the tour and the next-click column share one white surface; the column stays in view beside the tall tour. */
+@media (min-width: 901px) {
+  .walkthroughs-page .wt-storyboard { background: #fff; }
+  .walkthroughs-page .wt-instructions { position: sticky; top: 112px; align-self: start; }
+}
+.walkthroughs-page .wt-step-caption { padding-inline: 0; background: none; border: 0; }
+/* Guides: a last row that does not fill the grid stretches its final card instead of leaving a hole. */
+@media (min-width: 1001px) {
+  .career-guides .cg-grid > :last-child:nth-child(3n + 1) { grid-column: 1 / -1; }
+  .career-guides .cg-grid > :last-child:nth-child(3n + 2) { grid-column: span 2; }
+}
+@media (min-width: 641px) and (max-width: 1000px) { .career-guides .cg-grid > :last-child:nth-child(2n + 1) { grid-column: 1 / -1; } }
+@media (max-width: 479px) { .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: 2rem; } }

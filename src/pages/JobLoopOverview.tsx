@@ -7,15 +7,16 @@ import './JobLoopOverview.css';
 import LoopJourney from '@/components/LoopJourney';
 import LoopOrbit from '@/components/marketing/LoopOrbit';
 import LoopRunMock from '@/components/marketing/LoopRunMock';
-import { DashboardCard, NextRunCard, WeekStrip } from '@/components/marketing/PageCards';
+import { DashboardCard, WeekStrip } from '@/components/marketing/PageCards';
+import { CvCard } from '@/components/marketing/ProductCards';
 import { useReveal } from '@/hooks/useReveal';
 import { currentOffer } from '@/lib/current-offer';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
 const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
 
-function StartLink({ children = 'Start my search', variant = 'primary', size = 'lg' }: { children?: React.ReactNode; variant?: 'primary' | 'secondary'; size?: 'md' | 'lg' }) {
-  return <Link to="/onboarding" className={`jv-btn jv-btn--${variant}${size === 'lg' ? ' jv-btn--lg' : ''}`}>{children}<ArrowRight aria-hidden="true" /></Link>;
+function StartLink({ children = 'Start my search', variant = 'primary', size = 'lg', className = '' }: { children?: React.ReactNode; variant?: 'primary' | 'secondary'; size?: 'md' | 'lg'; className?: string }) {
+  return <Link to="/onboarding" className={`jv-btn jv-btn--${variant}${size === 'lg' ? ' jv-btn--lg' : ''}${className ? ` ${className}` : ''}`}>{children}<ArrowRight aria-hidden="true" /></Link>;
 }
 function TextLink({ to, children }: { to: string; children: React.ReactNode }) {
   return <Link to={to} className="jv-link"><span>{children}</span><ArrowRight aria-hidden="true" /></Link>;
@@ -36,19 +37,19 @@ export default function JobLoopOverview() {
   return <main className="jv-home loop-overview">
     <Helmet><title>{meta?.title ?? 'Automated Job Loop: your job search on a schedule | Jobvance'}</title><meta name="description" content={meta?.description ?? 'Set your roles, locations and schedule. Find jobs from connected sources and review prepared CVs in your Automated Job Loop dashboard.'} /><link rel="canonical" href={`${SITE_ORIGIN}/job-loop`} /></Helmet>
 
-    <section className="jv-hero lo-loop-hero" aria-labelledby="lo-title">
+    <section className="jv-hero lo-loop-hero lo-loop-hero--forest jv-dark" aria-labelledby="lo-title">
       <div className="jv-shell jv-hero-grid">
         <div className="jv-hero-copy">
           <p className="jv-caption jv-hero-eyebrow">Automated Job Loop</p>
-          <h1 id="lo-title" className="jv-hero-title jv-enter-h1"><span className="jv-nb">Automated Job Loop</span> finds the jobs and tailors the CV.</h1>
-          <p className="jv-hero-lead jv-enter" style={delay(60)}>Add your experience and tell us the roles and locations you want. <span className="jv-nb">Automated Job Loop</span> finds jobs from connected sources and prepares separate CVs for your shortlist, ready to review in your dashboard.</p>
+          <h1 id="lo-title" className="jv-hero-title jv-enter-h1"><span className="jv-nb">Automated Job Loop</span> finds the jobs and <span className="jv-h-signal">tailors the CV.</span></h1>
+          <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. Automated Job Loop runs on your schedule, finds jobs from connected sources and prepares a separate CV for each shortlisted role, ready to review in your dashboard.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
-            <StartLink />
+            <StartLink className="jv-hero-cta" />
             <TextLink to="/walkthroughs">Walk through an application</TextLink>
           </div>
         </div>
         <div className="jv-hero-visual">
-          <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} className="jv-hero-orbit" nodes={false} animate={false} /></div>
+          <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} variant="dark" className="jv-hero-orbit" nodes={false} animate={false} /></div>
           <div className="jv-hero-mock jv-enter-card" aria-hidden="true"><DashboardCard /></div>
         </div>
       </div>
@@ -88,7 +89,7 @@ export default function JobLoopOverview() {
           <h2 id="lo-private-title">Save your experience for the next application.</h2>
           <p>Import your CV or choose a saved CV check, confirm the experience you want to reuse, and set up Automated Job Loop in your account. Each saved vacancy keeps its own documents, status and next action.</p>
           <ul className="jv-ticks lo-private-ticks"><li>Save a career record you have reviewed.</li><li>Keep each vacancy and its prepared documents together.</li><li>Choose when to use recurring preparation.</li></ul>
-          <div className="lo-private-actions"><StartLink>Set up my private Automated Job Loop</StartLink><TextLink to="/help#job-loop-start">Read the setup guide</TextLink></div>
+          <div className="lo-private-actions"><StartLink>Set up my search</StartLink><TextLink to="/help#job-loop-start">Read the setup guide</TextLink></div>
         </div>
         <aside className="lo-private-aside" data-reveal>
           <h3>Your search, in one place</h3>
@@ -127,7 +128,7 @@ export default function JobLoopOverview() {
         <p>Add your experience. Choose the jobs and places you want to explore.</p>
         <div className="jv-cta-actions"><StartLink /><Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link></div>
       </div>
-      <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
+      <div className="jv-cta-visual" aria-hidden="true"><CvCard /></div>
       <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
     </section>
   </main>;

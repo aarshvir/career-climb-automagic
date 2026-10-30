@@ -23,7 +23,7 @@ export function JourneyTimeline() {
 /** /about: the brand mark of the product, the loop, with the three words the page is built on. Decorative. */
 export function AboutMark() {
   return <div className="bc-mark" aria-hidden="true">
-    <LoopOrbit size={380} labels animate={false}><span className="bc-mark-core"><strong>Your experience</strong><span>every time</span></span></LoopOrbit>
+    <LoopOrbit size={380} labels variant="dark" animate={false}><span className="bc-mark-core"><strong>Your experience</strong><span>every time</span></span></LoopOrbit>
   </div>;
 }
 

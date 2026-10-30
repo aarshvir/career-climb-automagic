@@ -20,7 +20,7 @@
 .pc-pivot-end--to { border-color: color-mix(in srgb, var(--jv-brand) 35%, transparent); background: var(--jv-brand-tint); box-shadow: inset 0 3px 0 var(--jv-signal); }
 .pc-pivot-arrow { position: relative; height: 2px; background: linear-gradient(90deg, var(--jv-line-strong), var(--jv-brand)); }
 .pc-pivot-arrow::after { content: ""; position: absolute; right: -1px; top: -3px; width: 8px; height: 8px; border-top: 2px solid var(--jv-brand); border-right: 2px solid var(--jv-brand); rotate: 45deg; }
-.pc-pivot-arrow i { position: absolute; left: 50%; top: -3px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(212 242 90 / .3); }
+.pc-pivot-arrow i { position: absolute; left: 50%; top: -3px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(var(--jv-signal-rgb) / .3); }
 .pc-pivot-list { display: grid; margin: 0; padding: 0; list-style: none; }
 .pc-pivot-list li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 11px 0; border-top: 1px solid var(--jv-line); }
 .pc-pivot-list strong { font-size: var(--t-small); font-weight: 500; }

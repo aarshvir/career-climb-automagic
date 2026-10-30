@@ -173,6 +173,7 @@
 .jl-notice { background:var(--jv-bg-subtle); border:1px solid var(--jv-line-strong); border-radius:7px; color:var(--jv-brand-text); padding:15px; font-size:12px; line-height:1.9; }
 .jl-loading { display:flex; align-items:center; gap:9px; color:var(--jv-brand); font-size:12px; line-height:1.8; padding:10px 0; }
 .jl-loading svg { animation:jl-spin 1s linear infinite; }
+@media (prefers-reduced-motion:reduce) { .jl-loading svg { animation:none; } }
 .jl-output-list { display:grid; gap:10px; margin-top:23px; }
 .jl-output-choice { width:100%; display:flex; align-items:center; justify-content:space-between; text-align:left; gap:14px; background:var(--jv-bg-subtle); border:1px solid var(--jv-line-strong); border-radius:8px; padding:17px; cursor:pointer; }
 .jl-output-choice[aria-pressed=true] { border-color:var(--jv-brand); background:var(--jv-brand-tint); }

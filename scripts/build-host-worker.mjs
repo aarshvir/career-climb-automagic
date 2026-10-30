@@ -75,7 +75,10 @@ for (const page of publicRender.pages) {
   const { files, css } = closure(['src/pages/LoopOnboarding.tsx', 'src/pages/Auth.tsx']);
   const links = [...css].filter(file => !shell.includes(file)).map(file => `<link rel="stylesheet" href="/${file}"/>`).join('') + [...files].filter(file => !shell.includes(file)).map(file => `<link rel="modulepreload" href="/${file}"/>`).join('');
   if (links) {
-    const bytes = Buffer.from(shell.replace('</head>', links + '</head>'));
+    // A static first paint for the ad landing routes: the forest story panel (real class names, real copy) is in the HTML, so the
+    // headline paints when the stylesheets arrive instead of after the entry and its ~50 modules run. React replaces #root on mount.
+    const firstPaint = '<div aria-hidden="true" style="padding-top:72px"><main class="jv-account jv-account--standalone"><aside class="ap-account-story jv-dark"><div class="ap-story-inner"><p class="ap-eyebrow"><span class="ap-dot"></span>Automated Job Loop</p><h1>Set up your <span class="jv-nb">Automated Job Loop</span> <span>and let it run.</span></h1><ul class="ap-story-ticks"><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></ul><p class="ap-story-free">Free account · 3 AI-tailored CVs a month</p></div></aside></main></div>';
+    const bytes = Buffer.from(shell.replace('</head>', links + '</head>').replace('<div id="root"></div>', `<div id="root">${firstPaint}</div>`));
     const etag = `"${createHash('sha256').update(bytes).digest('hex')}"`;
     assets['/onboarding'] = [mime['.html'], etag, bytes.length, false, bytes.toString('base64')];
     assets['/auth'] = [mime['.html'], etag, bytes.length, false, '=/onboarding'];
@@ -146,7 +149,7 @@ export default {fetch(request){
   const headers=responseHeaders(request,path);
   headers.set('Content-Type',asset[0]);
   headers.set('ETag',asset[1]);
-  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':served.startsWith('/fonts/')?'public, max-age=2592000':'public, max-age=3600, must-revalidate');
+  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':served.startsWith('/fonts/')?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');
   const condition=request.headers.get('If-None-Match');
   if(condition&&condition.split(',').some(tag=>tag.trim()==='*'||tag.trim().replace(/^W\\//,'')===asset[1]))return new Response(null,{status:304,headers});
   headers.set('Content-Length',String(asset[2]));

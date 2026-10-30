@@ -19,7 +19,7 @@
        featured-plan badge). It is never a large fill, a button or body-text colour. */
     --jv-ink: #0F1D17; --jv-paper: #FFFFFF;
     /* surfaces */
-    --jv-bg: #FFFFFF; --jv-bg-subtle: #F5F8F6; --jv-surface: #FFFFFF; --jv-sunken: #EEF2EF; --jv-bg-muted: #EEF2EF;
+    --jv-bg: #FFFFFF; --jv-bg-subtle: #F3F8F5; --jv-surface: #FFFFFF; --jv-sunken: #ECF3EE; --jv-bg-muted: var(--jv-sunken);
     /* forest: the one dark surface (bands, final CTA, mock footer) */
     --jv-forest: #0C1F17; --jv-forest-2: #12291F; --jv-elevated: #183427;
     /* text on forest (contrast on --jv-forest): 16.3, 11.1, 8.1, 5.4 and 11.2 to 1 */
@@ -39,14 +39,14 @@
     /* one green ramp: brand, brand-hover, brand-2 (gradient end, decorative), brand-mid (strokes on forest, decorative), brand-tint */
     --jv-brand-2: #2B7556; --jv-brand-mid: #6FA888; --jv-line-on-dark: rgb(255 255 255 / .14);
     /* channels for alpha uses, so a palette change cannot leave stragglers */
-    --jv-brand-rgb: 33 92 67; --jv-link-on-dark-rgb: 169 221 188; --jv-signal-rgb: 212 242 90;
+    --jv-brand-rgb: 33 92 67; --jv-link-on-dark-rgb: 169 221 188; --jv-signal-rgb: 212 242 90; --jv-brand-mid-rgb: 111 168 136;
     /* light-surface values that stay fixed inside dark bands (the product cards are always white) */
-    --jv-card-ink: #0F1D17; --jv-card-ink-2: #3B4A43; --jv-card-ink-3: #5F6D66; --jv-card-line: #E3E8E4; --jv-card-line-strong: #CFD7D2; --jv-card-sunken: #EEF2EF; --jv-card-subtle: #F5F8F6; --jv-card-tint: #E6F0EA; --jv-card-brand-ink: #1A4D37;
+    --jv-card-ink: var(--jv-ink); --jv-card-ink-2: var(--jv-ink-2); --jv-card-ink-3: var(--jv-ink-3); --jv-card-line: var(--jv-line); --jv-card-line-strong: var(--jv-line-strong); --jv-card-sunken: var(--jv-sunken); --jv-card-subtle: var(--jv-bg-subtle); --jv-card-tint: var(--jv-brand-tint); --jv-card-brand-ink: var(--jv-brand-ink);
     /* the mark's pale lime glyph, and status colours on forest */
     --jv-brand-glyph: #E2EEAF; --jv-warn-on-dark: #FBBF4A; --jv-danger-on-dark: #FF8A80;
     /* one tinted light-surface moment: the hero wash, painted full-bleed behind every marketing hero */
-    --jv-wash-peak: #D9E9DF; --jv-wash-soft: #E6F0EA;
-    --jv-wash: radial-gradient(52% 58% at 84% 0%, var(--jv-wash-peak) 0%, transparent 72%), radial-gradient(46% 44% at 6% 6%, var(--jv-wash-soft) 0%, transparent 70%);
+    --jv-wash-peak: #CDE3D5; --jv-wash-soft: #E1EEE6;
+    --jv-wash: radial-gradient(56% 62% at 86% 0%, var(--jv-wash-peak) 0%, transparent 74%), radial-gradient(46% 44% at 4% 8%, var(--jv-wash-soft) 0%, transparent 70%), radial-gradient(38% 30% at 0% 62%, var(--jv-brand-tint) 0%, transparent 72%);
     /* status (meaning only, never decoration) */
     --jv-success: #0B7A47; --jv-success-tint: #E8F6EE;
     --jv-warn: #8A5300; --jv-warn-tint: #FFF3DC; --jv-warn-line: #E6C987;

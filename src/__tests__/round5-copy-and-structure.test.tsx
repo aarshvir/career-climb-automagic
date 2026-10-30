@@ -16,7 +16,7 @@ describe('round 5 accuracy and structure', () => {
   it('describes support storage as optional, not as a promise of human review', () => {
     page(<ProductPage kind="contact" />);
     const note = screen.getByRole('complementary', { name: 'How support works' });
-    expect(note).toHaveTextContent('Storing your message is optional');
+    expect(note).toHaveTextContent('You confirm storage before sending');
     expect(note).not.toHaveTextContent(/read by a person/i);
   });
   it('qualifies the privacy at-a-glance claim about files', () => {

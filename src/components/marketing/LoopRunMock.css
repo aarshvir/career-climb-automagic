@@ -39,7 +39,7 @@
 .jv-mock-rows li:nth-child(1) .jv-status--tailored { opacity: 1; }
 .jv-mock-rows li:nth-child(1) .jv-status--ready { display: none; }
 .jv-mock-foot { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 16px; background: var(--jv-forest); color: #fff; font-size: var(--t-sm); line-height: var(--lh-sm); }
-.jv-mock-foot > span { width: 6px; height: 6px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(212 242 90 / .18); flex-shrink: 0; }
+.jv-mock-foot > span { width: 6px; height: 6px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(var(--jv-signal-rgb) / .18); flex-shrink: 0; }
 /* Phones: the search filters give way so the first two rows reach the fold. */
 @media (max-width: 479px) { .jv-mock-filters { display: none; } .jv-mock-head { padding-bottom: 12px; border-bottom: 1px solid var(--jv-line); } }
 /* Phones: the time sits above the role as a mono caption, so role names keep the full width and one line. */

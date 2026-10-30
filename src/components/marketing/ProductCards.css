@@ -16,7 +16,7 @@
 .pc-tag--neutral { background: var(--jv-sunken); color: var(--jv-ink-2); }
 .pc-tag--neutral::before { background: var(--jv-ink-2); }
 .pc-foot { display: flex; align-items: center; gap: 10px; margin: 0 -18px -18px; padding: 12px 18px; border-radius: 0 0 calc(var(--r-md) - 1px) calc(var(--r-md) - 1px); background: var(--jv-forest); color: #fff; font-size: var(--t-sm); line-height: var(--lh-sm); }
-.pc-foot > span { width: 6px; height: 6px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(212 242 90 / .18); flex-shrink: 0; }
+.pc-foot > span { width: 6px; height: 6px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(var(--jv-signal-rgb) / .18); flex-shrink: 0; }
 /* CV */
 .pc-file { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-family: var(--font-mono); font-size: var(--t-sm); color: var(--jv-ink-2); white-space: nowrap; }
 .pc-file svg { width: 16px; height: 16px; flex: none; color: var(--jv-ink-3); }

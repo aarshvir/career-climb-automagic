@@ -29,3 +29,16 @@ an old and a new label. For before/after ad comparisons, add the pairs together.
 | Set up your Automated Job Loop in minutes. (H1) | Set up your Automated Job Loop and let it run. | /onboarding and /auth sign-up |
 
 Destinations are unchanged for every control above. No analytics code was edited.
+
+## Round 8
+
+| Old label | New label | Where |
+| --- | --- | --- |
+| Explore Automated Job Loop / How your CV is handled (two text links) | Start my search (button) / See how it works (text link) | home, "A tailored CV for each prepared role" block |
+| Set up my private Automated Job Loop | Set up my search | /job-loop, "Save your experience" band |
+| Start my search (third hero link) | removed from the hero, kept in the closing band | /help (hero), /walkthroughs keeps Start my search and drops Try the free CV Check from the hero |
+| Find task help / Follow a walkthrough (links inside the form) | same labels, now in the "Find an answer faster" card | /contact |
+
+### Cutover for ad-versus-organic reports (needs the owner's acceptance)
+
+The first-party click tracker (`src/lib/analytics.ts`) labels a click with the control's `aria-label`, or its visible text when there is none. Tracking code was not edited in this branch, and giving a control an `aria-label` that differs from its visible text would fail WCAG 2.5.3 (Label in Name). So a stable tracking id was not added. Instead: whoever reads click reports must sum the old and new labels in the tables above (the label changes happen on the day this branch is deployed; record that date next to the first report that spans it). Destinations are unchanged for every control above.

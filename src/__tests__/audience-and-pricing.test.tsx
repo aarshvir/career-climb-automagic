@@ -61,6 +61,7 @@ describe('current offer', () => {
   it('states the new free allowance everywhere the old beta line was', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
     expect(document.body.textContent).toContain('Choose how often your Automated Job Loop runs. Plans from $29/month, with a free account to start.');
+    expect(screen.getByRole('heading', { name: 'Not ready to choose? Start free.' })).toBeInTheDocument();
     expect(screen.queryByText(/2 tailored CVs a day|8 when signed in/i)).not.toBeInTheDocument();
   });
   it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
@@ -81,7 +82,6 @@ describe('current offer', () => {
 describe('Automated Job Loop access and monthly plans', () => {
   it('leads with monthly Automated Job Loop and requires an account before checking purchase availability', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: 'Not ready to choose? Start free.' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Start my search' })).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: 'Check my CV' })).toHaveAttribute('href', '/check');
     expect(screen.queryByText(/beta|ten accounts|no account needed/i)).not.toBeInTheDocument();
@@ -115,7 +115,7 @@ describe('Automated Job Loop first homepage', () => {
     expect(screen.getByText('Automated Job Loop', { selector: '.jv-hero-eyebrow' })).toBeInTheDocument();
     expect(screen.getByText('How Automated Job Loop works')).toBeInTheDocument();
     const starts = screen.getAllByRole('link', { name: 'Start my search' });
-    expect(starts).toHaveLength(3);
+    expect(starts).toHaveLength(4);
     for (const link of starts) expect(link).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: /Try the free CV Check/ })).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
@@ -127,7 +127,7 @@ describe('Automated Job Loop first homepage', () => {
 describe('published draft privacy guidance', () => {
   it('links the concise guest privacy explanation to the full storage choices', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByRole('link', { name: 'How your CV is handled' })).toHaveAttribute('href', '/privacy');
+    expect(screen.getByRole('link', { name: 'See how it works' })).toHaveAttribute('href', '/how-it-works');
     expect(screen.getByText(/^Tailored, role-specific CVs/)).toHaveTextContent('built for a high ATS match');
   });
   it('publishes the consented tab-storage exposure and requires renewed approval after restoration', () => {

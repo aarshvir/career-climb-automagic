@@ -45,7 +45,6 @@
   .product-about .product-large-copy { grid-column: 1 / span 6; margin-top: 8px; }
   .product-about .product-about-principles { grid-column: 8 / span 5; grid-template-columns: 1fr; margin-top: 0; }
   .product-about .product-about-principles > li { grid-row: auto; grid-template-rows: none; padding: 20px 0; border-top: 1px solid var(--jv-line-strong); }
-  .product-about .product-about-principles > li:first-child { border-top: 0; padding-top: 0; }
 }
 /* Quiet summary cards beside the contact and privacy intros. */
 .jv-notecard { padding: 24px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: var(--jv-bg-subtle); }

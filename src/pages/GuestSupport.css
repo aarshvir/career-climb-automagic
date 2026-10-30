@@ -48,3 +48,11 @@
 .guest-support-consent { min-height: 48px; }
 .guest-support-consent input[type="checkbox"] { width: 28px; height: 28px; }
 .guest-support-fine { margin-top: 0; }
+
+/* Round 8: the checkbox itself is a 44px target; the visible 28px box is drawn inside it. */
+.guest-support-consent input[type="checkbox"] { position: relative; width: 44px; height: 44px; margin: 0 -8px 0 -8px; background: transparent; border: 0; border-radius: 0; }
+.guest-support-consent input[type="checkbox"]::before { content: ""; position: absolute; inset: 8px; border: 1.5px solid var(--jv-line-input); border-radius: 7px; background: #fff; transition: background-color var(--dur-1) var(--ease-press), border-color var(--dur-1) var(--ease-press); }
+.guest-support-consent input[type="checkbox"]:checked { background: transparent; }
+.guest-support-consent input[type="checkbox"]:checked::before { background: var(--jv-brand); border-color: var(--jv-brand); }
+.guest-support-consent input[type="checkbox"]::after { position: relative; z-index: 1; }
+.guest-support-consent input[type="checkbox"][aria-invalid="true"]::before { border-color: var(--jv-danger); }
