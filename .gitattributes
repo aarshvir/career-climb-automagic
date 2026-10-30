@@ -1,3 +1,5 @@
+# Keep source files LF so reviews show only real edits.
+* text=auto eol=lf
 # Deployment artifacts are exact immutable bytes; do not rewrite their line endings.
 docs/supabase-loop-ui/*.js -text
 docs/supabase-loop-ui/manifest.json text eol=lf
