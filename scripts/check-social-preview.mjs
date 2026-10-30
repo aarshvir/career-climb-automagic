@@ -39,7 +39,7 @@ const onboarding = await worker.fetch(new Request('https://jobvance.io/onboardin
 assert.equal(onboarding.status, 200);
 const onboardingHtml = await onboarding.text();
 verify(onboardingHtml, 'Jobvance — automate your job search');
-assert.match(meta(onboardingHtml, 'og:description'), /^Create your account,/);
+assert.match(meta(onboardingHtml, 'og:description'), /^Choose your roles and locations once\. Automated Job Loop/);
 for (const path of [imagePath, '/og-jobvance.png']) {
   const response = await worker.fetch(new Request(`https://jobvance.io${path}`));
   assert.equal(response.status, 200); assert.match(response.headers.get('Content-Type'), /^image\/png/);
