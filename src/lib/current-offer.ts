@@ -1,4 +1,4 @@
-/** Job Loop leads; purchase availability and paid access are established by the billing service. */
+/** Automated Job Loop leads; purchase availability and paid access are established by the billing service. */
 export const currentOffer = {
   statement: 'Choose your Automated Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.',
   check: 'Tailor your CV to a job with AI, check every change and download PDF, Word or text. Sign in to keep your CVs and applications together.',

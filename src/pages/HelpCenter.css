@@ -4,3 +4,12 @@
 @media(prefers-reduced-motion:reduce){.help-center *{scroll-behavior:auto!important;transition:none!important}}
 @media print{.hc-breadcrumb,.hc-start,.hc-filters,.hc-results,.hc-contents,.hc-further,.hc-topic-action,.hc-related{display:none}.hc-reading-layout{display:block}.help-center{max-width:none;padding:0;color:#000}.hc-topic{break-inside:auto}.hc-note,.hc-field-help{break-inside:avoid}}
 @media(max-width:700px){.hc-breadcrumb{align-items:center;padding:8px 0}.hc-breadcrumb a,.hc-text-link,.hc-contents a,.hc-related a,.hc-empty>a,.hc-further>div:last-child>a{display:inline-flex;align-items:center;min-height:44px;padding:8px 0}.hc-contents nav>a{display:flex}.hc-contents li{margin-bottom:5px}.hc-related span{display:inline-block;margin-right:8px}.hc-categories button,.hc-results button{min-height:44px}.hc-results{align-items:center}.hc-results button{padding:8px 0}.hc-search input{font-size:16px}.hc-further>div:last-child{gap:8px}}
+
+/* Keep help in the same visual system as the entry and workspace. */
+.help-center { --hc-ink: var(--jv-ink); --hc-muted: var(--jv-ink-2); --hc-blue: var(--jv-brand); --hc-border: var(--jv-line); }
+.help-center :is(a, button, input):focus-visible { outline-color: var(--hc-blue); }
+.help-center .hc-filters { background: var(--jv-bg-subtle); }
+.help-center .hc-search input { border-color: #7f8ba1; }
+.help-center .hc-start > a:hover, .help-center .hc-button:hover { background: var(--jv-bg-subtle); }
+.help-center :is(.hc-field-help, .hc-further) { background: var(--jv-brand-tint); border-color: var(--hc-border); }
+.help-center .hc-button--primary:hover { background: var(--jv-brand-hover); }

@@ -7,14 +7,20 @@ export default function RouteNavigation() {
   const { pathname, hash } = useLocation();
   const previous = useRef<string | null>(null);
   useEffect(() => {
+    const initial = previous.current === null;
     const changedPage = previous.current !== pathname;
     previous.current = pathname;
+    // A fresh page load keeps focus at the top so the first Tab reaches the skip link.
+    if (initial && !hash) return;
     if (!changedPage && !hash) return;
     let fragment = '';
     try { fragment = decodeURIComponent(hash.slice(1)); } catch { /* malformed fragment has no target */ }
     const targetId = /^[a-zA-Z][a-zA-Z\d_:-]{0,99}$/.test(fragment) ? fragment : '';
     if (!changedPage && !targetId) return;
-    if (changedPage && !targetId) window.scrollTo(0, 0);
+    if (changedPage && !targetId) {
+      // A new page starts at the top instantly. 'instant' overrides html's scroll-behavior:smooth (kept for in-page anchors).
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    }
     let active = true;
     let observer: MutationObserver | undefined;
     const move = () => {

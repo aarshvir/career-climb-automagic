@@ -35,6 +35,22 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearTrackingDraftMemory(); });
 
 describe('account-first owned onboarding', () => {
+  it('focuses an invalid step without overriding CSS motion preferences or saving', async () => {
+    const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollIntoView');
+    const scroll = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', { configurable: true, value: scroll });
+    try {
+      open(); await screen.findByLabelText('Search or add a role');
+      fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+      expect(screen.getByRole('alert')).toHaveFocus();
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Which roles would you like to find?');
+      expect(scroll).toHaveBeenLastCalledWith({ block: 'center', behavior: 'auto' });
+      expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing']);
+    } finally {
+      if (original) Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', original);
+      else Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+    }
+  });
   it('restores a typed but unadded role after leaving and remounting without a cloud write', async () => {
     const view = open(); await screen.findByLabelText('Search or add a role');
     fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Director, Engineering' } });

@@ -1,7 +1,14 @@
 .loop-journey { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; list-style:none; padding:0; margin:28px 0; }
-.loop-journey li { min-width:0; background:#fff; border:1px solid #d9dfd4; border-radius:14px; padding:28px; }
-.loop-journey-top { display:flex; align-items:center; justify-content:space-between; color:#215c43; margin-bottom:24px; }
-.loop-journey-top span { display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:#edf2e7; font-weight:700; }
-.loop-journey h3 { font-size:21px; font-weight:650; line-height:1.3; margin:0 0 15px; color:#172b24; }
-.loop-journey p { font-size:16px; line-height:1.75; color:#58635d; margin:0; overflow-wrap:break-word; }
+.loop-journey li { min-width:0; background:#fff; border:1px solid var(--jv-line); border-radius:14px; padding:28px; }
+.loop-journey-top { display:flex; align-items:center; justify-content:space-between; color:var(--jv-brand); margin-bottom:24px; }
+.loop-journey-top span { display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:var(--jv-brand-tint); font-weight:700; }
+.loop-journey h3 { font-size:21px; font-weight:650; line-height:1.3; margin:0 0 15px; color:var(--jv-ink); }
+.loop-journey p { font-size:16px; line-height:1.75; color:var(--jv-ink-2); margin:0; overflow-wrap:break-word; }
 @media(max-width:700px) { .loop-journey { grid-template-columns:1fr; gap:16px; } .loop-journey li { padding:24px; } .loop-journey-top { margin-bottom:16px; } }
+/* Ring variant: three editorial rows separated by hairlines, for .jv-dark bands. */
+.loop-journey-ring { margin: 40px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line); }
+.loop-journey-ring li { display: grid; gap: 10px; padding: 28px 0; border-bottom: 1px solid var(--jv-line); }
+.loop-journey-ring h3 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading-on-dark); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.loop-journey-ring p:not(.jv-caption) { margin: 0; max-width: 44ch; color: var(--jv-on-dark-body, #C9CCDA); font-size: var(--t-body); line-height: var(--lh-body); text-wrap: pretty; }
+.loop-journey-ring .jv-caption { margin: 0; }
+@media (min-width: 1024px) { .loop-journey-ring li { padding: 32px 0; } }

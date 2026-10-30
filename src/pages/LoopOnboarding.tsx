@@ -158,7 +158,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       <h1 ref={heading} tabIndex={-1}>{saved ? 'Your setup is saved.' : existing ? 'Your Automated Job Loop is ready to continue.' : questions[step]}</h1>
       {!saved && !existing && <><p>Tell us the jobs you want, add your CV, then choose your search schedule.</p><div className="oq-progress" role="progressbar" aria-label="Setup progress" aria-valuemin={0} aria-valuemax={6} aria-valuenow={step + 1}><span style={{ width: `${(step + 1) / 6 * 100}%` }} /></div><p className="oq-step">Step {step + 1} of 6</p></>}
     </header>
-    {error && <div role="alert" className="oq-error" tabIndex={-1} ref={node => { if (node) { node.focus(); node.scrollIntoView?.({ block: "center", behavior: "smooth" }); } }}>{error}<p><Link to="/loop">Check my saved dashboard</Link></p></div>}
+    {error && <div role="alert" className="oq-error" tabIndex={-1} ref={node => { if (node) { node.focus(); node.scrollIntoView?.({ block: "center", behavior: "auto" }); } }}>{error}<p><Link to="/loop">Check my saved dashboard</Link></p></div>}
     {busy && <p role="status"><Loader2 size={18} className="animate-spin" /> {busy}</p>}
     {!busy && !loaded && <button className="jl-button" onClick={() => void load()}>Retry loading my setup</button>}
     {existing && <section className="oq-card"><p>Your saved CV and preferences are already in your account. Continue there to preserve your current drafts, facts and schedule.</p><Link className="jl-button jl-button--primary" to="/loop">Open my Automated Job Loop <ArrowRight size={16} /></Link></section>}

@@ -1,0 +1,36 @@
+/* Motion for the marketing pages: CSS only, purposeful, and off under reduced motion.
+   Animate only opacity, transform, box-shadow, background-color and color. */
+
+@keyframes jv-rise { from { opacity: .001; transform: translateY(var(--rise)); } }
+@keyframes jv-rise-h1 { from { transform: translateY(8px); } }
+@keyframes jv-rise-card { from { opacity: .001; transform: translateY(12px) scale(.985); } }
+@keyframes jv-stage { from { opacity: 0; transform: scale(.96); } }
+@keyframes jv-fade { from { opacity: .001; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero entrance: everything is settled by about 650ms. The H1 (the LCP element) is at full
+     ink from the first frame and only moves 8px. */
+  .jv-enter-h1 { animation: jv-rise-h1 420ms var(--ease-out) both; }
+  .jv-enter { animation: jv-rise 420ms var(--ease-out) both; animation-delay: var(--d, 0ms); }
+  .jv-enter-stage { animation: jv-stage 600ms var(--ease-out) 60ms both; }
+  .jv-enter-card { animation: jv-rise-card 560ms var(--ease-out) 90ms both; }
+  .jv-enter-fade { animation: jv-fade 420ms var(--ease-out) 220ms both; }
+
+  /* Scroll reveals: useReveal adds html.jv-motion only when motion is allowed and
+     IntersectionObserver exists, so content is visible by default (no JS, crawlers, screenshots).
+     Hiding happens without a transition; html.jv-motion-ready (added two frames later) enables the
+     reveal transition, so arming never plays a visible-to-hidden fade. */
+  .jv-motion [data-reveal] { opacity: 0; transform: translateY(var(--rise)); }
+  .jv-motion-ready [data-reveal] { transition: opacity var(--dur-4) var(--ease-out), transform var(--dur-4) var(--ease-out); transition-delay: calc(var(--i, 0) * var(--stagger)); }
+  .jv-motion [data-reveal].is-in { opacity: 1; transform: none; }
+}
+
+/* The server-rendered page is already painted when the client mounts over it: do not replay
+   the entrance (main.tsx sets this class only when it finds prerendered markup). */
+.jv-prerendered .jv-enter, .jv-prerendered .jv-enter-h1, .jv-prerendered .jv-enter-card, .jv-prerendered .jv-enter-fade, .jv-prerendered .jv-enter-stage { animation: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .jv-enter, .jv-enter-h1, .jv-enter-card, .jv-enter-fade, .jv-enter-stage, [data-reveal] { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .jv-mobile-panel[data-open="true"], .jv-menu-scrim { animation: none; }
+  .product-page *, .product-page *::before, .product-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

@@ -225,3 +225,13 @@
 .jl-upgrade .jl-help { font-size:12px !important; margin:0 !important; }
 .jl-upgrade-note { margin:10px 0 0; padding:10px 14px; background:var(--jl-lavender); border:1px solid #cad4f4; border-radius:7px; font-size:13px; line-height:1.7; color:var(--jl-ink); }
 .jl-upgrade-note a { color:var(--jl-blue); font-weight:700; }
+
+/* Carry the public design system into the private workspace without changing state styling. */
+.job-loop-page { --jl-blue: var(--jv-brand); --jl-ink: var(--jv-ink); --jl-muted: var(--jv-ink-2); --jl-line: var(--jv-line); --jl-lavender: var(--jv-brand-tint); }
+.job-loop-page .product-navigation a { color: var(--jl-ink); border-color: var(--jl-line); }
+.job-loop-page .product-navigation span { color: var(--jl-muted); }
+.job-loop-page .product-navigation a[aria-current="page"] { border-color: var(--jl-blue); background: var(--jl-lavender); box-shadow: inset 0 0 0 1px var(--jl-blue); }
+.job-loop-page .product-navigation a:focus-visible { outline-color: var(--jl-blue); }
+.job-loop-page .jl-sidebar { background: var(--jv-bg-subtle); }
+.job-loop-page .jl-sidebar nav button[aria-pressed="true"] { border-color: var(--jl-blue); }
+@media (max-width: 380px) { .job-loop-page .jl-sidebar nav button { padding-inline: 6px; gap: 6px; } }

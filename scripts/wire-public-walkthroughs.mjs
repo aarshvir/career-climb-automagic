@@ -22,7 +22,7 @@ for(const video of produced.videos){
     if(bytes.length!==file.bytes||sha(bytes)!==file.sha256||sha(committed)!==file.sha256)throw new Error(`Asset provenance mismatch:${video.tutorialId}/${kind}`);
   }
   const url=kind=>`https://raw.githubusercontent.com/aarshvir/career-climb-automagic/${commit}/${video.files[kind].path}`;
-  videos.push({tutorialId:video.tutorialId,videoUrl:url('video'),captionUrl:url('captions'),posterUrl:url('poster'),durationSeconds:video.durationSeconds,verifiedAt:video.verifiedAt,usesFictionalData:true,contentKind:'screen_walkthrough',status:'ready',hasBurnedCaptions:true,presenterDisclosure:'Original fictional AI presenter and synthetic narration. These tutorials use real product-screen captures with fictional data; Job Loop demonstrations use a clearly labelled local simulation.',chapters:video.chapters.map(({id,title,startSeconds})=>({id,title,startSeconds}))});
+  videos.push({tutorialId:video.tutorialId,videoUrl:url('video'),captionUrl:url('captions'),posterUrl:url('poster'),durationSeconds:video.durationSeconds,verifiedAt:video.verifiedAt,usesFictionalData:true,contentKind:'screen_walkthrough',status:'ready',hasBurnedCaptions:true,presenterDisclosure:'Original fictional AI presenter and synthetic narration. These tutorials use real product-screen captures with fictional data; Automated Job Loop demonstrations use a clearly labelled local simulation.',chapters:video.chapters.map(({id,title,startSeconds})=>({id,title,startSeconds}))});
 }
 const file=resolve(root,'src/lib/walkthroughs.ts'), source=await readFile(file,'utf8');
 const begin=source.indexOf('export const publicWalkthroughVideoManifest:'), end=source.indexOf('\n\nconst mediaOrigins',begin);

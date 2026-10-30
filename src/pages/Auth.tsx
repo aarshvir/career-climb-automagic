@@ -179,7 +179,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
             <ul className="ap-benefits" aria-label="What the Automated Job Loop does">
               <li><Check size={18} aria-hidden="true" /><span><strong>Roles matched to your CV.</strong> Each run searches the employer job boards we cover for the roles you choose.</span></li>
               <li><Check size={18} aria-hidden="true" /><span><strong>A tailored CV for each role.</strong> Built only from facts you confirm. Nothing is invented.</span></li>
-              <li><Check size={18} aria-hidden="true" /><span><strong>You stay in control.</strong> Review every CV, then apply yourself. Nothing is sent for you.</span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Built for a high ATS match.</strong> Role-specific CVs written to fit each job’s requirements.</span></li>
             </ul>
             <p className="ap-benefits-price">Automated Job Loop plans from US$29/month. <Link to="/pricing">See plans</Link> · <Link to="/job-loop">How it works</Link></p>
             <p className="ap-benefits-free">Your account also includes 3 AI-tailored CVs a month, free.</p>
