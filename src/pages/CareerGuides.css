@@ -100,7 +100,6 @@
 /* Cards: one rhythm. The title sits 12px above its description in every card (featured or not), and the audience line is pinned to the foot. */
 @media (min-width: 1001px) { .career-guides .cg-card h3, .career-guides .cg-card--feature h3 { min-height: 0; } .career-guides .cg-card, .career-guides .cg-card--feature { padding: 24px; } }
 .career-guides .cg-card h3 { margin-bottom: 12px; }
-.career-guides .cg-card h3 a { min-height: 0; }
 .career-guides .cg-card > p { flex: 1 1 auto; margin-bottom: 16px; }
 .career-guides .cg-card-meta { margin-bottom: 14px; gap: 16px; }
 .career-guides .cg-card-meta span:last-child { color: var(--jv-ink-2); }

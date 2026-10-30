@@ -833,7 +833,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 @media (min-width: 1024px) { .jv-cta--page { padding-block: 88px; } }
 .product-page .jv-cta, .audience-page .jv-cta, .loop-overview .jv-cta, .jv-home .jv-cta { margin-bottom: 96px; }
 @media (max-width: 639px) { .product-page .jv-cta, .audience-page .jv-cta, .loop-overview .jv-cta, .jv-home .jv-cta { margin-bottom: 64px; } }
-:is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) { margin-bottom: 96px; }
+:is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) { margin-bottom: 40px; }
 @media (min-width: 1024px) { :is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) { padding-block: 64px; } }
 /* Action stacks share one left edge: button and links start at the same x. */
 :is(.help-center .hc-further.jv-dark, .walkthroughs-page .wt-further.jv-dark, .career-guides .cg-actions.jv-dark) > div:last-child { justify-items: start; align-items: flex-start; }
@@ -858,7 +858,8 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
   .jv-home .jv-hero-visual { min-height: 500px; }
   .jv-home .jv-hero-actions { margin-top: 28px; }
 }
-.jv-home .jv-hero-note .jv-meta { color: var(--jv-ink-2); font-size: var(--t-body-sm); }
+.jv-home .jv-hero-note .jv-meta { color: var(--jv-ink-2); font-size: var(--t-small); }
+@media (min-width: 640px) { .jv-home .jv-hero-note .jv-meta { font-size: var(--t-body-sm); } }
 .jv-home .jv-loop-band { margin-top: 32px; }
 .jv-home .jv-boundary-links { align-items: center; gap: 8px 28px; }
 .jv-home .jv-check .jv-btn--secondary { background: var(--jv-brand-tint); border-color: rgb(var(--jv-brand-rgb) / .28); color: var(--jv-brand-ink); }
@@ -901,3 +902,4 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 }
 @media (min-width: 641px) and (max-width: 1000px) { .career-guides .cg-grid > :last-child:nth-child(2n + 1) { grid-column: 1 / -1; } }
 @media (max-width: 479px) { .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: 2rem; } }
+.jv-related a, .hc-related a { min-width: 44px; justify-content: center; }

@@ -5,6 +5,7 @@
 //                                                     (renders in Chrome through Playwright, a dev tool that is not a project dependency)
 // Optical sizing: the "small" cut (heavier stroke) is for 32px and below (header mark, favicon.svg, 16 and 32px ico frames);
 // the "large" cut is for everything 48px and up (192, 512, maskable, apple-touch, the 48px ico frame).
+// After rendering PNGs run: python scripts/optimize-brand-pngs.py (keeps the Worker within its size limit).
 // Safe zones: the maskable glyph stays inside 190px of a 512px square (the guaranteed 80% circle is 205px); the themed
 // (monochrome) glyph stays inside 160px (the themed-icon crop is about 66%, 169px).
 import { readFileSync, writeFileSync, rmSync } from 'node:fs';
