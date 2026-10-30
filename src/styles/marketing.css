@@ -347,3 +347,8 @@
 /* Closing CTA visual: fully inside the band, never cropped mid-label. */
 @media (min-width: 1024px) { .jv-cta--visual .jv-cta-visual { right: 32px; } }
 .jv-lead { margin-top: 24px; }
+/* Pages whose <main> is already the 1200px shell: the rails sit on its own edges. */
+@media (min-width: 1024px) {
+  :is(.career-guides, .help-center, .walkthroughs-page).jv-rails::before { left: 0; }
+  :is(.career-guides, .help-center, .walkthroughs-page).jv-rails::after { right: 0; }
+}
