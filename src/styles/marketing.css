@@ -73,7 +73,7 @@
   --jv-success: var(--jv-success-on-dark); --jv-warn: var(--jv-warn-on-dark); --jv-danger: var(--jv-danger-on-dark);
   position: relative; isolation: isolate; overflow: hidden; color: var(--jv-on-dark-body);
   /* One soft light from the top edge; no grain or second glow. */
-  background: radial-gradient(60% 55% at 50% 0%, rgb(169 221 188 / .09), transparent 70%), var(--jv-forest);
+  background: radial-gradient(60% 55% at 50% 0%, rgb(var(--jv-link-on-dark-rgb) / .09), transparent 70%), var(--jv-forest);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / .06);
 }
 /* Text links on forest get the mint ring (this also beats .product-page's light-theme ring). */
@@ -94,8 +94,9 @@
 .jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.03em; line-height: 1; text-decoration: none; border-radius: 10px; }
 .jv-brand-name { white-space: nowrap; }
 .jv-brand-period { color: var(--jv-brand-period); }
+.jv-dark .jv-brand-period { color: var(--jv-brand-period-on-dark); }
 /* The mark's lime (#E2EEAF) is a brand constant shared with favicon.svg and the PNG icons; UI uses --jv-signal. The tile radius is 25% at every size, like the favicon. */
-.jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 25%; background: var(--jv-brand); color: var(--jv-brand-glyph); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
+.jv-brand-mark { --mark-tile: var(--jv-brand); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 25%; background: var(--jv-brand); color: var(--jv-brand-glyph); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
 .jv-brand-mark svg { width: 100%; height: 100%; display: block; }
 /* Windows High Contrast drops the tile fill; keep the tile's edge so the mark stays recognisable. */
 @media (forced-colors: active) { .jv-brand-mark { border: 1px solid CanvasText; } }
@@ -213,7 +214,7 @@
 /* Left-aligned copy on forest, lit once from the top-right corner. From 1024px a static orbit ring is anchored to the
    button row: its lime "You review" node sits on the row's vertical centre to the right of the buttons; the rest of
    the ring arcs out of the band. */
-.jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: radial-gradient(90% 45% at 100% 0%, rgb(169 221 188 / .1), transparent 70%), var(--jv-forest); }
+.jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: radial-gradient(90% 45% at 100% 0%, rgb(var(--jv-link-on-dark-rgb) / .1), transparent 70%), var(--jv-forest); }
 .jv-cta .jv-cta-orbit { display: none; }
 .jv-cta-inner { position: relative; z-index: 1; max-width: 640px; }
 .jv-cta h2 { margin: 0; max-width: 8.1em; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: -.04em; text-wrap: balance; }
@@ -226,7 +227,7 @@
   .jv-cta { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 112px var(--band-pad-x); }
   .jv-cta-inner { grid-column: 1 / span 7; max-width: none; }
   /* 720px ring; the "You review" node is at (6.7%, 75%) of it, i.e. 48px in and 540px down. */
-  .jv-cta .jv-cta-orbit { --ring: rgb(169 221 188 / .32); display: block; position: absolute; z-index: -1; left: calc(108% - 48px); top: calc(50% - 540px); width: 720px; max-width: none; }
+  .jv-cta .jv-cta-orbit { --ring: rgb(var(--jv-link-on-dark-rgb) / .32); display: block; position: absolute; z-index: -1; left: calc(108% - 48px); top: calc(50% - 540px); width: 720px; max-width: none; }
 }
 
 /* ---------- FAQ accordion ---------- */
@@ -388,7 +389,7 @@
 }
 
 /* Accordions: the opened answer fades in with the same easing the toggle uses, so the two move together.
-   Only opacity and transform animate; no height animation reflows the page. */
+   The fade is the fallback. Where the browser supports ::details-content, the panel also eases its block-size for 200ms (user-initiated only, contained). */
 @keyframes jv-open { from { opacity: 0; transform: translateY(-4px); } }
 @media (prefers-reduced-motion: no-preference) {
   .jv-faq details[open] > :is(p, div), .hc-note-details[open] > :not(summary) { animation: jv-open var(--dur-3) var(--ease-out) both; }
@@ -484,7 +485,7 @@
    (CSS only, no asset weight). It sits with the orbit ring and the run trail as the site's one visual language. */
 @media (min-width: 1024px) {
   .jv-home .jv-hero-visual, .jv-page-head--split > .jv-page-visual, .audience-hero { position: relative; isolation: isolate; }
-  .jv-home .jv-hero-visual::before, .jv-page-head--split > .jv-page-visual::before, .audience-hero::before { content: ""; position: absolute; inset: -56px -48px; z-index: -1; pointer-events: none; background: radial-gradient(circle, rgb(33 92 67 / .26) 1px, transparent 1.6px) 0 0 / 22px 22px; -webkit-mask-image: radial-gradient(closest-side, #000 25%, transparent 100%); mask-image: radial-gradient(closest-side, #000 25%, transparent 100%); }
+  .jv-home .jv-hero-visual::before, .jv-page-head--split > .jv-page-visual::before, .audience-hero::before { content: ""; position: absolute; inset: -56px -48px; z-index: -1; pointer-events: none; background: radial-gradient(circle, rgb(var(--jv-brand-rgb) / .26) 1px, transparent 1.6px) 0 0 / 22px 22px; -webkit-mask-image: radial-gradient(closest-side, #000 25%, transparent 100%); mask-image: radial-gradient(closest-side, #000 25%, transparent 100%); }
   .audience-hero::before { inset: -16px -24px 8px auto; width: 48%; }
 }
 /* One section rhythm: 48px on phones, 72px on tablets, 96px on desktop; the band after a section adds no second padding. */
@@ -554,7 +555,7 @@
 
 /* ---------- Round 5: closing bands ---------- */
 /* One soft light behind the right-hand card; no stripe along the top edge. */
-.jv-cta { background: radial-gradient(60% 90% at 84% 55%, rgb(169 221 188 / .12), transparent 70%), var(--jv-forest); }
+.jv-cta { background: radial-gradient(60% 90% at 84% 55%, rgb(var(--jv-link-on-dark-rgb) / .12), transparent 70%), var(--jv-forest); }
 .jv-cta--page h2 { max-width: 11em; font-size: var(--t-h2); }
 .jv-cta--page { padding-block: 64px; }
 @media (min-width: 640px) { .jv-cta--page { padding-block: 80px; } }
@@ -573,7 +574,7 @@
 @supports (interpolate-size: allow-keywords) and selector(::details-content) {
   @media (prefers-reduced-motion: no-preference) {
     :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial) { interpolate-size: allow-keywords; }
-    :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial)::details-content { block-size: 0; overflow: hidden; transition: block-size var(--dur-3) var(--ease-out), content-visibility var(--dur-3) allow-discrete; }
+    :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial)::details-content { block-size: 0; overflow: hidden; transition: block-size var(--dur-2) var(--ease-out), content-visibility var(--dur-2) allow-discrete; contain: layout; }
     :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial)[open]::details-content { block-size: auto; }
     :is(.jv-faq details[open] > :is(p, div), details.jv-faq[open] > div, .hc-note-details[open] > :not(summary)) { animation: none; }
   }
@@ -664,10 +665,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 @media (max-width: 639px) {
   .jv-footer-links .jv-footer-col:last-child ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; flex-wrap: nowrap; gap: 0 24px; }
 }
-/* Closing bands without a card carry the loop's rings (CSS only) so they read as part of the same system. */
-@media (min-width: 1024px) {
-  .jv-cta--page:not(.jv-cta--visual) { background: repeating-radial-gradient(circle at 90% 120%, transparent 0 70px, rgb(169 221 188 / .1) 70px 71px), radial-gradient(60% 90% at 84% 55%, rgb(169 221 188 / .12), transparent 70%), var(--jv-forest); }
-}
+/* The loop's rings are the home band's own motif; inner closing bands carry a page-specific card instead. */
 .jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])) { padding-block: 20px; }
 .jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 40px; }
 /* Header and footer text links: 44px wide hit areas, not only 44px tall. */
@@ -681,3 +679,81 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
   .jv-legal .jv-prose > p { max-width: 46rem; font-size: 1.0625rem; color: var(--jv-ink); }
   .jv-toc a[aria-current="true"], .jv-toc a:focus-visible { color: var(--jv-brand); }
 }
+
+/* ---------- Round 7 ---------- */
+/* Cards inside a closing band keep card typography (the band's lead style must not reach them). */
+.jv-cta .pc-card p, .jv-cta .pc-card .pc-line-box p { max-width: none; margin: 0; color: var(--jv-card-ink); font-size: var(--t-small); line-height: 1.45; letter-spacing: 0; }
+.jv-cta .pc-card .pc-source-text span, .jv-cta .pc-card .pc-done-text span { color: var(--jv-card-ink-3); }
+
+/* Heading weights: one token per level (card titles keep --fw-semi). */
+:root { --fw-h1: 540; --fw-h2: 540; --fw-h3: 540; --fw-heading-on-dark: 540; --t-legal-h2: 1.5rem; }
+.jv-legal .jv-prose > h2 { font-weight: var(--fw-h2); font-size: var(--t-legal-h2); }
+.pricing-details > summary { font-size: var(--t-body); font-weight: var(--fw-semi); }
+
+/* Legal and long-form pages: a 38rem measure (65 to 72 characters) for every paragraph and list item. */
+@media (min-width: 1024px) {
+  .jv-legal { grid-template-columns: minmax(0, 38rem) 260px; column-gap: 64px; justify-content: space-between; }
+  .jv-legal .jv-prose > p, .jv-legal .jv-prose li { max-width: 38rem; }
+  .product-page--privacy .jv-page-head--split { grid-template-columns: minmax(0, 1fr); }
+  .product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / -1; }
+  .product-page--privacy .jv-page-head--split > .jv-page-visual { grid-column: 1 / -1; grid-row: auto; margin-top: 32px; max-width: none; }
+  .product-page--privacy .jv-page-visual .jv-notecard { max-width: none; }
+  .product-page--privacy .jv-notecard ol { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
+}
+.jv-toc a { text-decoration: none; }
+.jv-toc a:hover { text-decoration: none; }
+.jv-toc a[aria-current="true"] { box-shadow: inset 2px 0 0 var(--jv-brand); padding-left: 12px; }
+
+/* About: all three principle columns share one top rule and baseline. */
+@media (min-width: 1024px) {
+  .product-about .product-about-principles { align-items: start; }
+  .product-about .product-about-principles > li, .jv-story .product-about-principles > li { border-top: 1px solid var(--jv-line-strong); padding-top: 24px; margin-top: 0; }
+  .product-about .product-about-principles > li > :first-child { margin-top: 0; }
+}
+
+/* Pricing: the one-time-passes card clears the rule below it. */
+.jv-section.pricing-passes { margin-bottom: 48px; }
+.jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])) { padding-block: 24px; }
+.jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 40px; }
+.pricing-billed-line { margin-top: 20px; }
+.pricing-outcome { margin: 10px 0 20px; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.5; }
+.pricing-card.jv-dark .pricing-outcome { color: var(--jv-on-dark-body); }
+
+/* Audience pages: the Compare / Reuse / Continue columns share baselines. */
+@media (min-width: 768px) {
+  .audience-features .jv-steps { grid-template-rows: auto auto; }
+  .audience-features .jv-steps > li { grid-row: span 2; grid-template-rows: subgrid; row-gap: 10px; }
+}
+.jv-lead, .jv-hero-lead, .audience-copy .jv-lead, .jv-page-head .jv-lead { text-wrap: pretty; }
+.audience-check-copy h2, .jv-check-copy h2, .lo-dashboard h2 { text-wrap: balance; }
+
+/* Interaction states: every control eases at --dur-2 and presses at --dur-1. */
+:is(.hc-button, .hc-categories button, .hc-text-link, .hc-start > a, .wt-button, .wt-restart, .wt-task-toggle, .wt-caption-toggle, .wt-step-picker button, .wt-task-picker button, .ap-primary, .cg-primary, .cg-secondary) { transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out); }
+:is(.hc-button, .hc-categories button, .wt-button, .wt-restart, .wt-task-toggle, .wt-caption-toggle, .wt-step-picker button, .cg-primary, .cg-secondary):active:not(:disabled) { transform: scale(.98); }
+@media (prefers-reduced-motion: reduce) { :is(.hc-button, .hc-categories button, .wt-button, .wt-restart, .wt-task-toggle, .wt-caption-toggle, .wt-step-picker button, .cg-primary, .cg-secondary):active { transform: none; } }
+
+/* Focused controls clear the sticky header. */
+:is(a, button, input, select, textarea, summary, [tabindex]) { scroll-margin-top: 96px; }
+
+/* Small sentence copy is 13px or more; 12px stays for uppercase mono tags. */
+.pc-tag, .pc-chip, .jv-status { font-size: var(--t-sm); }
+.pricing-flag, .wt-demo-top > span:last-child { font-size: var(--t-sm); }
+
+/* Phones: block links get a 44px hit area. */
+@media (max-width: 767px) {
+  :is(.jv-related, .hc-related, .cg-hero-sub, .jv-boundary-links) a, .cg-help-link, .hc-top-link, .pricing-billed-line a, .wt-format-links a { display: inline-flex; align-items: center; min-height: 44px; }
+  .cg-card h3 a, .cg-card > a { min-height: 44px; }
+}
+
+/* Hero price note: the ad audience's main free and price signals read at body-small size in the secondary ink. */
+.jv-meta { color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.4; }
+.jv-dark .jv-meta { color: var(--jv-on-dark-body); }
+
+/* Reverse lockup: on forest the tile gets a mint hairline and the wordmark turns light. */
+.jv-dark .jv-brand-mark { box-shadow: inset 0 0 0 1px rgb(var(--jv-link-on-dark-rgb) / .5); }
+.jv-dark .jv-brand-name { color: var(--jv-on-dark-1); }
+
+/* The pricing closing band spans the content column (it lives inside the page shell, not beside it). */
+.pricing-close.jv-cta { width: auto; margin: 48px 0 0; }
+
+.product-page .jv-toc a, .product-page .jv-toc a:hover { text-decoration: none; }

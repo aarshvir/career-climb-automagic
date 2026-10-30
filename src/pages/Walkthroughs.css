@@ -115,7 +115,7 @@
 .walkthroughs-page .wt-demo dd { line-height: var(--lh-body-sm); }
 .walkthroughs-page .wt-hero > .wt-format-note { line-height: var(--lh-body-sm); }
 /* The closing card is the forest band every other page ends on. */
-.walkthroughs-page .wt-further.jv-dark { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px 64px; padding: 40px var(--band-pad-x); border: 0; border-radius: var(--r-lg); margin-bottom: 64px; background: radial-gradient(60% 90% at 84% 55%, rgb(169 221 188 / .12), transparent 70%), var(--jv-forest); color: var(--jv-on-dark-body); }
+.walkthroughs-page .wt-further.jv-dark { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px 64px; padding: 40px var(--band-pad-x); border: 0; border-radius: var(--r-lg); margin-bottom: 64px; background: radial-gradient(60% 90% at 84% 55%, rgb(var(--jv-link-on-dark-rgb) / .12), transparent 70%), var(--jv-forest); color: var(--jv-on-dark-body); }
 .walkthroughs-page .wt-further.jv-dark h2 { margin: 0 0 12px; color: #fff; font-size: var(--t-h3); font-weight: var(--fw-heading-on-dark); }
 .walkthroughs-page .wt-further.jv-dark p { color: var(--jv-on-dark-body); font-size: var(--t-body); line-height: 1.55; max-width: 44ch; }
 .walkthroughs-page .wt-further.jv-dark > div:last-child { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 4px 28px; align-items: center; }
@@ -129,3 +129,19 @@
   .walkthroughs-page .wt-further.jv-dark > div:last-child > a:not(.wt-button) { border-top: 1px solid var(--jv-line-on-dark); }
   .walkthroughs-page .wt-further.jv-dark .wt-button--primary { width: 100%; margin-bottom: 12px; }
 }
+
+/* ---------- Round 7 ---------- */
+/* One page width: the same shell and band padding as Help, Guides and the marketing pages, so the closing band is full width. */
+.walkthroughs-page { width: var(--shell); max-width: none; margin-inline: auto; padding-inline: 0; }
+@media (min-width: 1024px) { .walkthroughs-page { padding-inline: var(--band-pad-x); } .walkthroughs-page .wt-further.jv-dark { margin-inline: calc(-1 * var(--band-pad-x)); } }
+/* Long-form text keeps a readable measure. */
+.walkthroughs-page :is(.wt-player > .wt-format-note, .wt-instructions p, .wt-transcript p, .wt-transcript li, .wt-controls > p, .wt-selected-task p) { max-width: 64ch; }
+/* Controls use the pill and forest system of the marketing buttons. */
+.walkthroughs-page :is(.wt-step-picker button, .wt-task-toggle, .wt-caption-toggle) { border-radius: var(--r-pill); }
+.walkthroughs-page .wt-step-picker button[aria-current="step"] { background: var(--jv-brand-tint); border-color: var(--jv-brand); color: var(--jv-brand-ink); font-weight: var(--fw-semi); }
+.walkthroughs-page .wt-demo-action span { min-height: 44px; font-size: var(--t-small); }
+.walkthroughs-page .wt-demo-top > span:last-child { font-size: var(--t-xs); }
+/* Closing band: one primary pill, then the other routes as a quiet list on a shared axis. */
+.walkthroughs-page .wt-further.jv-dark > div:last-child { display: grid; grid-template-columns: 1fr; gap: 0; justify-items: stretch; min-width: min(100%, 320px); }
+.walkthroughs-page .wt-further.jv-dark .wt-button--primary { justify-self: start; margin-bottom: 12px; }
+.walkthroughs-page .wt-further.jv-dark > div:last-child > a:not(.wt-button) { display: flex; align-items: center; border-top: 1px solid var(--jv-line-on-dark); }

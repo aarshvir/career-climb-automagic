@@ -41,3 +41,10 @@
 .guest-support-consent input[type="checkbox"] { width: 28px; height: 28px; flex-shrink: 0; }
 .guest-support-consent input[aria-invalid="true"] { outline: 2px solid var(--jv-danger); outline-offset: 2px; }
 .guest-support-consent { min-height: 44px; align-items: center; }
+
+/* ---------- Round 7 ---------- */
+.guest-support :is(p, li) { max-width: 60ch; }
+.guest-support > h2 { font-size: var(--t-h3); }
+.guest-support-consent { min-height: 48px; }
+.guest-support-consent input[type="checkbox"] { width: 28px; height: 28px; }
+.guest-support-fine { margin-top: 0; }

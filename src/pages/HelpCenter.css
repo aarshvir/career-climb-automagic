@@ -155,9 +155,23 @@
 .hc-steps li { max-width: none; }
 .hc-note { max-width: none; }
 /* The closing card is the forest band every page ends on. */
-.help-center .hc-further.jv-dark { padding: 40px var(--band-pad-x); border: 0; border-radius: var(--r-lg); background: radial-gradient(60% 90% at 84% 55%, rgb(169 221 188 / .12), transparent 70%), var(--jv-forest); color: var(--jv-on-dark-body); margin-bottom: 64px; }
+.help-center .hc-further.jv-dark { padding: 40px var(--band-pad-x); border: 0; border-radius: var(--r-lg); background: radial-gradient(60% 90% at 84% 55%, rgb(var(--jv-link-on-dark-rgb) / .12), transparent 70%), var(--jv-forest); color: var(--jv-on-dark-body); margin-bottom: 64px; }
 .help-center .hc-further.jv-dark h2 { color: #fff; font-weight: var(--fw-heading-on-dark); }
 .help-center .hc-further.jv-dark p:not(.hc-eyebrow) { color: var(--jv-on-dark-body); }
 .help-center .hc-further.jv-dark a:not(.hc-button) { color: var(--jv-on-dark-link); }
-.help-center .hc-further.jv-dark .hc-button--primary { background: #fff; border-color: #fff; color: var(--jv-forest); }
-.help-center .hc-further.jv-dark .hc-button--primary:hover { background: var(--jv-brand-tint); color: var(--jv-forest); }
+.help-center .hc-further.jv-dark .hc-button--primary { background: #fff; border-color: #fff; color: var(--jv-forest) !important; }
+.help-center .hc-further.jv-dark .hc-button--primary:hover { background: var(--jv-brand-tint); color: var(--jv-forest) !important; }
+
+/* ---------- Round 7 ---------- */
+@media (min-width: 1024px) { .help-center .hc-further.jv-dark { margin-inline: calc(-1 * var(--band-pad-x)); } }
+/* Every paragraph and list item inside a topic keeps a readable measure. */
+.help-center .hc-topic :is(p, li, dd) { max-width: 64ch; }
+.help-center .hc-topic .hc-note { max-width: none; }
+.help-center .hc-topic .hc-steps li { max-width: none; }
+.help-center .hc-topic .hc-steps li > *, .help-center .hc-topic .hc-note > p { max-width: 64ch; }
+.help-center .hc-topic-summary { max-width: 64ch; }
+/* Topic list: a clear hover and open state, with the toggle on the rule's end like every other accordion. */
+.help-center .hc-contents a { border-radius: var(--r-xs); transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out); }
+@media (hover: hover) { .help-center .hc-contents a:hover { background: var(--jv-brand-tint); color: var(--jv-brand-ink); } }
+.help-center .hc-topic > details[open] > summary { box-shadow: inset 3px 0 0 var(--jv-brand); padding-left: 16px; }
+.help-center .hc-button, .help-center .hc-categories button { min-height: 44px; }

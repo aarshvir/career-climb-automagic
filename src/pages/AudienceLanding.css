@@ -89,3 +89,6 @@
   .audience-check-copy { grid-column: 1 / span 5; }
   .audience-check > .audience-workspace { grid-column: 7 / span 6; }
 }
+
+/* ---------- Round 7 ---------- */
+@media (min-width: 1024px) { .audience-copy { grid-column: 1 / span 7; } .audience-copy .jv-lead { max-width: 36em; } }

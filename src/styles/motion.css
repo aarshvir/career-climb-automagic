@@ -1,5 +1,6 @@
 /* Motion for the marketing pages: CSS only, purposeful, and off under reduced motion.
-   Animate only opacity, transform, box-shadow, background-color and color. */
+   Animate opacity, transform, box-shadow, background-color and color. The one exception is the accordion panel's block-size
+   (marketing.css): 200ms, user-initiated, layout-contained, and off under reduced motion. */
 
 @keyframes jv-rise { from { opacity: .001; transform: translateY(var(--rise)); } }
 @keyframes jv-rise-h1 { from { transform: translateY(8px); } }
@@ -33,4 +34,9 @@
   .jv-enter, .jv-enter-h1, .jv-enter-card, .jv-enter-fade, .jv-enter-stage, [data-reveal] { opacity: 1 !important; transform: none !important; animation: none !important; }
   .jv-mobile-panel[data-open="true"], .jv-menu-scrim { animation: none; }
   .product-page *, .product-page *::before, .product-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Print and Save as PDF show every block, revealed or not. */
+@media print {
+  [data-reveal], .jv-enter, .jv-enter-h1, .jv-enter-card, .jv-enter-fade, .jv-enter-stage { opacity: 1 !important; transform: none !important; transition: none !important; animation: none !important; }
 }

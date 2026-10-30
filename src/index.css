@@ -25,7 +25,7 @@
     /* text on forest (contrast on --jv-forest): 16.3, 11.1, 8.1, 5.4 and 11.2 to 1 */
     --jv-on-dark-1: #F2F6F3; --jv-on-dark-body: #C6D3CC; --jv-on-dark-2: #A5B6AD; --jv-on-dark-3: #82948A; --jv-on-dark-link: #A9DDBC; --jv-success-on-dark: #6FDCA0;
     /* the wordmark's period */
-    --jv-brand-period: #2F8F63;
+    --jv-brand-period: var(--jv-brand); --jv-brand-period-on-dark: var(--jv-signal);
     /* lines */
     --jv-line: #E3E8E4; --jv-line-strong: #CFD7D2; --jv-line-input: #85918B;
     /* text: ink 17.4:1, ink-2 9.4:1, ink-3 5.4:1 on #FFF (4.8:1 on --jv-sunken) */
@@ -36,11 +36,17 @@
     /* signal */
     --jv-signal: #D4F25A;
     /* the mid green (strokes and small text on forest) and the hairline on forest */
-    --jv-brand-mid: #6FA888; --jv-line-on-dark: rgb(255 255 255 / .14);
+    /* one green ramp: brand, brand-hover, brand-2 (gradient end, decorative), brand-mid (strokes on forest, decorative), brand-tint */
+    --jv-brand-2: #2B7556; --jv-brand-mid: #6FA888; --jv-line-on-dark: rgb(255 255 255 / .14);
+    /* channels for alpha uses, so a palette change cannot leave stragglers */
+    --jv-brand-rgb: 33 92 67; --jv-link-on-dark-rgb: 169 221 188; --jv-signal-rgb: 212 242 90;
+    /* light-surface values that stay fixed inside dark bands (the product cards are always white) */
+    --jv-card-ink: #0F1D17; --jv-card-ink-2: #3B4A43; --jv-card-ink-3: #5F6D66; --jv-card-line: #E3E8E4; --jv-card-line-strong: #CFD7D2; --jv-card-sunken: #EEF2EF; --jv-card-subtle: #F5F8F6; --jv-card-tint: #E6F0EA; --jv-card-brand-ink: #1A4D37;
     /* the mark's pale lime glyph, and status colours on forest */
     --jv-brand-glyph: #E2EEAF; --jv-warn-on-dark: #FBBF4A; --jv-danger-on-dark: #FF8A80;
     /* one tinted light-surface moment: the hero wash, painted full-bleed behind every marketing hero */
-    --jv-wash: radial-gradient(60% 50% at 80% 0%, #E6F0EA 0%, transparent 70%), radial-gradient(40% 40% at 0% 0%, rgb(33 92 67 / .06), transparent 70%);
+    --jv-wash-peak: #D9E9DF; --jv-wash-soft: #E6F0EA;
+    --jv-wash: radial-gradient(52% 58% at 84% 0%, var(--jv-wash-peak) 0%, transparent 72%), radial-gradient(46% 44% at 6% 6%, var(--jv-wash-soft) 0%, transparent 70%);
     /* status (meaning only, never decoration) */
     --jv-success: #0B7A47; --jv-success-tint: #E8F6EE;
     --jv-warn: #8A5300; --jv-warn-tint: #FFF3DC; --jv-warn-line: #E6C987;
@@ -70,7 +76,7 @@
     /* elevation */
     --sh-1: 0 1px 2px rgb(15 29 23 / .06);
     --sh-2: 0 1px 2px rgb(15 29 23 / .04), 0 6px 16px -4px rgb(15 29 23 / .08);
-    --sh-3: 0 1px 2px rgb(15 29 23 / .06), 0 12px 32px -8px rgb(15 29 23 / .12), 0 40px 80px -24px rgb(33 92 67 / .16);
+    --sh-3: 0 1px 2px rgb(15 29 23 / .06), 0 12px 32px -8px rgb(15 29 23 / .12), 0 40px 80px -24px rgb(33 92 67 / .16), 0 24px 80px -12px rgb(33 92 67 / .18);
     /* layout */
     --gutter: 16px;
     --shell: min(1200px, 100% - 2 * var(--gutter));
@@ -101,7 +107,7 @@
     --shadow-md: 0 8px 24px rgb(15 29 23 / 6%); --shadow-lg: 0 16px 36px rgb(15 29 23 / 8%);
     --shadow-xl: 0 24px 64px rgb(15 29 23 / 10%); --shadow-2xl: 0 32px 80px rgb(15 29 23 / 14%);
     --shadow-premium: var(--shadow-xl); --shadow-glow: 0 4px 20px rgb(33 92 67 / 14%); --shadow-inner: inset 0 1px 3px rgb(15 29 23 / 5%);
-    --gradient-primary: linear-gradient(120deg, var(--jv-brand), #2B7556); --gradient-success: linear-gradient(120deg, var(--jv-brand), #2B7556);
+    --gradient-primary: linear-gradient(120deg, var(--jv-brand), var(--jv-brand-2)); --gradient-success: linear-gradient(120deg, var(--jv-brand), var(--jv-brand-2));
     --gradient-warning: linear-gradient(120deg, var(--jv-warn-line), var(--jv-warn-tint)); --gradient-glass: linear-gradient(135deg, #fff, var(--jv-bg-subtle));
     --gradient-hero: linear-gradient(135deg, var(--jv-forest), var(--jv-brand));
     --glass: rgb(255 255 255 / 94%); --glass-border: rgb(15 29 23 / 8%); --backdrop-blur: blur(16px);
@@ -111,7 +117,8 @@
   @media (min-width: 640px) { :root { --gutter: 24px; --band-pad-x: 40px; } }
   @media (min-width: 1024px) { :root { --gutter: 40px; --section-y: 128px; --band-pad-x: 64px; } }
   * { @apply border-border; }
-  html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+  html { scroll-padding-top: 96px; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
   body { @apply bg-background text-foreground antialiased; margin: 0; font-family: var(--font-sans); line-height: 1.625; font-kerning: normal; font-synthesis-weight: none; }
   h1, h2, h3, h4, h5, h6 { letter-spacing: -.025em; line-height: 1.2; font-weight: var(--fw-strong); }
   button, input, textarea, select { font: inherit; }

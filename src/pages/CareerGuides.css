@@ -109,9 +109,16 @@
 .career-guides .cg-hero-sub { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 24px; }
 @media (max-width: 639px) { .career-guides .cg-hero-sub { display: flex; flex-direction: column; align-items: flex-start; gap: 0; } .career-guides .cg-hero h1 { max-width: 12em; } }
 /* The closing panel is the forest band. */
-.career-guides .cg-actions.jv-dark { background: radial-gradient(60% 90% at 84% 55%, rgb(169 221 188 / .12), transparent 70%), var(--jv-forest); border: 0; color: var(--jv-on-dark-body); padding: 40px var(--band-pad-x); margin-bottom: 64px; }
+.career-guides .cg-actions.jv-dark { background: radial-gradient(60% 90% at 84% 55%, rgb(var(--jv-link-on-dark-rgb) / .12), transparent 70%), var(--jv-forest); border: 0; color: var(--jv-on-dark-body); padding: 40px var(--band-pad-x); margin-bottom: 64px; }
 .career-guides .cg-actions.jv-dark h2 { color: #fff; font-weight: var(--fw-heading-on-dark); }
 .career-guides .cg-actions.jv-dark p, .career-guides .cg-actions.jv-dark > div > p { color: var(--jv-on-dark-body); }
-.career-guides .cg-actions.jv-dark .cg-primary { background: #fff; border: 1px solid #fff; color: var(--jv-forest); border-radius: var(--r-pill); font-weight: var(--fw-semi); }
+.career-guides .cg-actions.jv-dark a.cg-primary, .career-guides .cg-actions.jv-dark a.cg-primary:hover { background: #fff; border: 1px solid #fff; color: var(--jv-forest) !important; border-radius: var(--r-pill); font-weight: var(--fw-semi); }
 .career-guides .cg-actions.jv-dark .cg-secondary { background: rgb(255 255 255 / .06); border: 1px solid rgb(255 255 255 / .42); color: #fff; border-radius: var(--r-pill); font-weight: var(--fw-semi); }
 .career-guides .cg-actions.jv-dark a.cg-help-link { color: var(--jv-on-dark-link); }
+
+.career-guides .cg-actions.jv-dark a.cg-primary:hover { background: var(--jv-brand-tint); }
+
+/* ---------- Round 7 ---------- */
+.career-guides { width: var(--shell); max-width: none; margin-inline: auto; padding-inline: 0; }
+@media (min-width: 1024px) { .career-guides { padding-inline: var(--band-pad-x); } .career-guides .cg-actions.jv-dark { margin-inline: calc(-1 * var(--band-pad-x)); } }
+.career-guides .cg-prose :is(p, li) { max-width: 68ch; }

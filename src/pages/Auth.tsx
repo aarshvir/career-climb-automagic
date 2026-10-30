@@ -75,7 +75,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       if (!validation.valid) { found.password = validation.errors.join('. '); summary.push(found.password); }
     }
     if (summary.length) {
-      setFieldErrors(found); setError(summary[0]);
+      const invalid = Object.keys(found).length;
+      setFieldErrors(found); setError(invalid > 1 ? `Please fix the ${invalid} highlighted fields below.` : summary[0] ?? Object.values(found)[0] ?? '');
       const target = found.name ? form.querySelector<HTMLElement>('input:not([type=hidden])') : found.phone ? form.querySelector<HTMLElement>('.ap-phone-field input') : found.email ? document.getElementById(`${fieldId}-email`) : found.password ? document.getElementById(`${fieldId}-password`) : document.getElementById(`${fieldId}-confirm`);
       target?.focus();
       return;
@@ -183,6 +184,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           <h1 id={`${fieldId}-story`}>{mode === 'sign-up' || loopEntry ? <>Set up your <span className="jv-nb">Automated Job Loop</span> <span>and let it run.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h1>
           <p className="ap-story-description">Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares a tailored, role-specific CV for each.</p>
           {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance"><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></ul>}
+          {showBenefits && <p className="ap-story-free">Free account · 3 AI-tailored CVs a month</p>}
           <div className="ap-story-orbit" aria-hidden="true"><LoopOrbit size={260} variant="dark" labels animate={false}><span className="ap-orbit-core"><span>Set up once</span><span>then it runs</span></span></LoopOrbit></div>
           <MiniRun className="ap-story-run" />
           <p className="ap-story-footnote"><LockKeyhole size={16} aria-hidden="true" /> Choose what you save in your account.</p>
@@ -222,6 +224,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
               </Button>}
               {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
               <form className="ap-auth-form" onSubmit={handleSubmit} noValidate>
+                {showBenefits && <p className="ap-next-line">After this: add your CV, choose roles and locations, pick a schedule.</p>}
                 {mode === 'sign-up' && <p className="ap-form-expect">Next: your name, mobile number, email and a password.</p>}
                 {mode === 'sign-up' && <ContactFields value={contact} onChange={next => { setContact(next); if (next.name !== contact.name) clearField('name'); if (next.phone !== contact.phone) clearField('phone'); }} disabled={busy} errors={fieldErrors} />}
                 <div className="ap-field">

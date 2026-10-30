@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
+import { BRAND_MARK } from '@/lib/brand-mark';
 
 const brandInner = <>
-  <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><g transform="translate(20 20) scale(1.3) translate(-17 -19)" stroke="currentColor" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round"><path d="M24 9v13a7 7 0 0 1-14 0" /><path d="M17 9h7" /><circle cx="10" cy="22" r="3.2" fill="var(--jv-signal)" stroke="none" /></g></svg></span>
+  <span className="jv-brand-mark" aria-hidden="true"><svg viewBox={BRAND_MARK.viewBox} fill="none"><g transform={BRAND_MARK.transform} stroke="currentColor" strokeWidth={BRAND_MARK.variants.small.stroke} strokeLinecap="round" strokeLinejoin="round"><path d={BRAND_MARK.hook} /><path d={BRAND_MARK.bar} /><circle cx={BRAND_MARK.dot.cx} cy={BRAND_MARK.dot.cy} r={BRAND_MARK.variants.small.dotRadius + BRAND_MARK.knockoutExtra} fill="var(--mark-tile)" stroke="none" /><circle cx={BRAND_MARK.dot.cx} cy={BRAND_MARK.dot.cy} r={BRAND_MARK.variants.small.dotRadius} fill="var(--jv-signal)" stroke="none" /></g></svg></span>
   <span className="jv-brand-name">jobvance<span className="jv-brand-period">.</span></span>
 </>;
 export function Brand() {

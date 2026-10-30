@@ -20,13 +20,15 @@ const originalFetch=globalThis.fetch;
 globalThis.fetch=async()=>{throw new Error('Public prerender must not contact a customer or external service.');};
 try {
   const {renderPublicRoute,structuredNodesFor}=await server.ssrLoadModule('/scripts/public-render-entry.tsx');
+  const {careerGuides}=await server.ssrLoadModule('/src/lib/career-guides.ts');
+  const articleNode=(page,canonical,organization)=>{const guide=careerGuides.find(item=>item.slug===page.key);return guide?[{'@type':'Article',headline:guide.title,datePublished:guide.publishedAt,dateModified:guide.updatedAt,author:{'@id':organization['@id']}}]:[];};
   for(const page of publicPages){
     const rendered=renderPublicRoute(page.path);
     if(!rendered.body.includes('<h1'))throw new Error(`Public route has no visible main heading: ${page.path}`);
     if(page.kind==='guide' && (rendered.body.includes('We could not find that guide.') || !rendered.body.includes(page.title.replace(/\s*\|\s*Jobvance$/,''))))throw new Error(`Article did not render its actual route content: ${page.path}`);
     const canonical=SITE_ORIGIN+page.path;
     const organization={'@type':'Organization','@id':SITE_ORIGIN+'/#organization',name:'Jobvance',url:SITE_ORIGIN,logo:SITE_ORIGIN+'/icon-512.png'};
-    const graph={'@context':'https://schema.org','@graph':[organization,{'@type':'WebSite','@id':SITE_ORIGIN+'/#website',name:'Jobvance',url:SITE_ORIGIN,publisher:{'@id':organization['@id']}},{'@type':page.kind==='guides'?'CollectionPage':'WebPage','@id':canonical+'#page',url:canonical,name:page.title,description:page.description,isPartOf:{'@id':SITE_ORIGIN+'/#website'}},...structuredNodesFor(page.path,SITE_ORIGIN),...(page.path!=='/'?[{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Jobvance',item:SITE_ORIGIN},{'@type':'ListItem',position:2,name:page.title.replace(/\s*\|\s*Jobvance$/,''),item:canonical}]}]:[])]};
+    const graph={'@context':'https://schema.org','@graph':[organization,{'@type':'WebSite','@id':SITE_ORIGIN+'/#website',name:'Jobvance',url:SITE_ORIGIN,publisher:{'@id':organization['@id']}},{'@type':page.kind==='guides'?'CollectionPage':'WebPage','@id':canonical+'#page',url:canonical,name:page.title,description:page.description,isPartOf:{'@id':SITE_ORIGIN+'/#website'}},...structuredNodesFor(page.path,SITE_ORIGIN),...(page.kind==='guide'?articleNode(page,canonical,organization):[]),...(page.path!=='/'?[{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Jobvance',item:SITE_ORIGIN},{'@type':'ListItem',position:2,name:page.title.replace(/\s*\|\s*Jobvance$/,''),item:canonical}]}]:[])]};
     const structured=rendered.scripts+`<script type="application/ld+json">${json(graph)}</script>`;
     for(const match of structured.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))scriptHashes.add(`'sha256-${hash(match[1])}'`);
     const entry=buildManifest[cssFor(page.kind)];

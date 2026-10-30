@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "check:buttons": "node scripts/check-invisible-buttons.mjs",
     "build": "node scripts/validate-build-env.mjs && node scripts/generate-public-sitemap.mjs && vite build && node scripts/prerender-public-pages.mjs && node scripts/build-host-worker.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",

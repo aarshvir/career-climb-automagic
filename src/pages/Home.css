@@ -297,13 +297,13 @@
 @media (min-width: 1024px) {
   .jv-home .jv-hero-visual { min-height: 520px; }
   .jv-home .jv-hero-orbit-wrap { width: min(520px, calc(100% + 40px)); rotate: none; }
-  .jv-home .jv-hero-visual::after { content: ""; position: absolute; inset: 8% -6%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(33 92 67 / .09), transparent); }
+  .jv-home .jv-hero-visual::after { content: ""; position: absolute; inset: 8% -6%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(var(--jv-brand-rgb) / .09), transparent); }
 }
 /* The loop pages' hero ring reads as one device: same ring weight on both. */
-.jv-home .jv-hero-orbit { --ring: rgb(33 92 67 / .26); }
+.jv-home .jv-hero-orbit { --ring: rgb(var(--jv-brand-rgb) / .26); }
 /* Phones: the five-fact strip repeats the hero note, and two of the three product cards repeat the hero card; both give way so the page stays short. */
 @media (max-width: 639px) { .jv-home .jv-proof { display: none; } }
-@media (max-width: 767px) { .jv-home .jv-frag--wide-only { display: none; } .jv-home .jv-control-row { padding: 20px 0; } }
+@media (max-width: 767px) { .jv-home .jv-control-row { padding: 20px 0; } }
 /* One eyebrow size: the numbered row labels use the 12px caption spec like every other mono label. */
 .jv-home .jv-control-row p.jv-step-index { margin: 0 0 12px; font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; }
 /* One section heading size; the heading takes a wider measure and the lead aligns to its first line. */
@@ -322,17 +322,32 @@
 @media (min-width: 1024px) {
   .jv-home .jv-hero { padding-bottom: 28px; }
   .jv-home .jv-hero-visual { min-height: 520px; }
-  .jv-home .jv-hero-visual::after { content: ""; position: absolute; inset: -8% -12%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(33 92 67 / .14), transparent 72%), radial-gradient(40% 30% at 70% 80%, rgb(212 242 90 / .16), transparent 80%); }
-  .jv-home .jv-hero-visual::before { background: radial-gradient(circle, rgb(33 92 67 / .4) 1px, transparent 1.7px) 0 0 / 20px 20px !important; }
+  .jv-home .jv-hero-visual::after { content: ""; position: absolute; inset: -8% -12%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(var(--jv-brand-rgb) / .14), transparent 72%), radial-gradient(40% 30% at 70% 80%, rgb(212 242 90 / .16), transparent 80%); }
+  .jv-home .jv-hero-visual::before { background: radial-gradient(circle, rgb(var(--jv-brand-rgb) / .4) 1px, transparent 1.7px) 0 0 / 20px 20px !important; }
 }
 /* Phones: the set-up is explained once. The dark band carries the three steps; the second block keeps its three headings and one proof card. */
 @media (max-width: 767px) {
   .jv-home .jv-loop-timeline { display: none; }
   .jv-home .jv-control .jv-section-head > p { display: none; }
-  .jv-home .jv-control-copy > p { display: none; }
   .jv-home .jv-control-row { padding-block: 20px; }
   .jv-home .jv-control-row .jv-frag:not(.jv-frag--wide-only) { margin-top: 16px; }
   .jv-home .jv-check-example { display: none; }
   .jv-home .jv-guide-index > li:nth-child(n+4) { display: none; }
 }
 @media (max-width: 767px) { .jv-home .jv-loop-steps > .jv-loop-caption { margin-top: 32px; } }
+
+/* ---------- Round 7: phones keep each row's description and its own proof card ---------- */
+@media (max-width: 767px) {
+  .jv-home .jv-control-copy > p:not(.jv-step-index) { display: block; margin: 8px 0 0; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.5; }
+  .jv-home .jv-control-row { position: relative; display: grid; gap: 16px; padding: 28px 0; border-top: 1px solid var(--jv-line); }
+  .jv-home .jv-control-row:first-child { border-top: 0; }
+  .jv-home .jv-control-row .jv-frag { margin-top: 0; max-width: none; justify-self: stretch; }
+  .jv-home .jv-control-row .jv-frag .pc-card { box-shadow: var(--sh-2); }
+}
+
+/* Round 7: the strip leads into the dark band with the standard gap; the Built for row is set off from the list. */
+.jv-home .jv-proof { margin-bottom: 40px; }
+@media (min-width: 1024px) { .jv-home .jv-proof { margin-bottom: 72px; } }
+.jv-home .jv-proof li { color: var(--jv-ink); transition: color var(--dur-2) var(--ease-out); }
+@media (hover: hover) { .jv-home .jv-proof li:hover .jv-proof-num { color: var(--jv-brand); } }
+.jv-home .jv-built-for { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--jv-line); }

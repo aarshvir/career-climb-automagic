@@ -12,7 +12,8 @@ import HomePage from "./HomePage";
 import './JobLoop.css';
 import { currentOffer } from '@/lib/current-offer';
 import { subscriptionPlans } from '@/lib/subscription-plans';
-import { CvDiffCard, NextRunCard, SetupCard } from '@/components/marketing/PageCards';
+import { CvDiffCard, SetupCard } from '@/components/marketing/PageCards';
+import { CvLineCard, StepsDoneCard } from '@/components/marketing/AudienceCards';
 import { AboutMark, JourneyTimeline } from '@/components/marketing/BrandCards';
 import { FaqAside, PacesAside, ReceiptAside } from '@/components/marketing/HeroAsides';
 import { useReveal } from '@/hooks/useReveal';
@@ -39,7 +40,7 @@ const faqs = [
   ["Do I need an account?", "Yes. Your Jobvance account keeps your CVs, preferences and applications together. Create an account, complete your search setup and choose how to prepare your applications."],
   ["Does a finding mean I meet a requirement?", "No. Matching words are a starting point. Read the requirement and the CV example yourself; the check cannot confirm your qualifications or predict what an employer will decide."],
   ["What does the Automated Job Loop prepare for me?", "It finds jobs from connected sources for your roles and locations, prepares a tailored CV for each prepared role and keeps everything in your dashboard. Download PDF, DOCX or TXT and open the employer’s vacancy when you are ready."],
-  ["Does Jobvance rewrite my CV?", "It rewords and reorders what is already in your CV so it reads well for the job, and adds a short profile built only from your own lines. It never adds employers, numbers, tools or qualifications you have not listed, and it asks you about gaps instead of filling them. You check every change before downloading."],
+  ["Does Jobvance rewrite my CV?", "It rewords and reorders what is already in your CV so it reads well for the job, and adds a short profile built only from your own lines. It works from the experience you added, and it asks you about gaps instead of filling them. You check every change before downloading."],
   ["Can I download my documents?", "Your approved CV can be downloaded as PDF, DOCX or TXT. Your original uploaded file can also be downloaded."],
   ["Which files can I upload?", "Text-based PDF, DOCX and TXT files up to 5 MB. Scanned PDFs and old .doc files need conversion to a readable supported format."],
   ["What does Jobvance cost?", `${currentOffer.statement} Your account includes 3 AI-tailored CVs each month. For more, a one-time pass gives you Sprint: 25 tailored CVs over 7 days for $9, Job Search: 100 over 30 days for $19, or Career Move: 300 over 90 days for $39. ${currentOffer.passes}`],
@@ -75,10 +76,11 @@ function TextLink({ to, children }: { to: string; children: React.ReactNode }) {
   return <Link to={to} className="jv-link"><span>{children}</span><ArrowRight aria-hidden="true" /></Link>;
 }
 /** The closing moment on every interior page: the forest band. `visual` picks the right-hand card (the next-run card is kept for the home and Automated Job Loop pages only); utility pages close on text alone. */
-function CtaBand({ start, heading = "Ready to automate your search?", body = "Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.", visual = "none", secondary = true }: { start: string; heading?: string; body?: string; visual?: "none" | "run"; secondary?: boolean }) {
+function CtaBand({ start, heading = "Ready to automate your search?", body = "Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.", visual = "none", secondary = true }: { start: string; heading?: string; body?: string; visual?: "none" | "trail" | "line"; secondary?: boolean }) {
   return <section className={`jv-cta jv-cta--page jv-dark${visual === "none" ? "" : " jv-cta--visual"}`} aria-labelledby="page-cta-title">
     <div className="jv-cta-inner"><h2 id="page-cta-title">{heading}</h2><p>{body}</p><div className="jv-cta-actions"><StartLink to={start} />{secondary && <Link to="/check" className="jv-btn jv-btn--secondary jv-btn--lg">Try the free CV Check</Link>}</div></div>
-    {visual !== "none" && <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>}
+    {visual === "trail" && <div className="jv-cta-visual" aria-hidden="true"><StepsDoneCard /></div>}
+    {visual === "line" && <div className="jv-cta-visual" aria-hidden="true"><CvLineCard before="Looked after the monthly stock reports for the warehouse team." after={<>Prepared monthly <mark>stock reports</mark> for the <mark>operations review</mark> with the warehouse team.</>} /></div>}
   </section>;
 }
 
@@ -176,14 +178,14 @@ export default function ProductPage({ kind }: { kind: Kind }) {
         {kind === "pricing" ? <SubscriptionPricing /> : <div className="product-main-content">
           {kind === "how" && <>
             <section className="jv-section product-section" aria-labelledby="how-journey-title"><div className="jv-split jv-split--timeline"><div className="jv-head" data-reveal><p className="jv-caption">From setup to dashboard</p><h2 id="how-journey-title" className="jv-section-title"><span className="jv-line">Set it up once.</span> <span className="jv-line">It runs on your schedule.</span></h2><p>Two steps are yours, once. After that every run finds jobs and prepares CVs while you do something else.</p></div><JourneyTimeline /></div></section>
-            <section className="jv-section product-section" aria-labelledby="how-cv-title"><div className="jv-split"><div className="product-visual" aria-hidden="true"><CvDiffCard /></div><div data-reveal><p className="jv-caption">Every CV</p><h2 id="how-cv-title" className="jv-section-title">Reworded for the job, from your experience.</h2><ul className="jv-ticks"><li>Each CV starts from experience you added, so it stays accurate to you.</li><li>Wording is matched to what the job asks for, line by line.</li><li>Review it, then download PDF, DOCX or TXT from your dashboard.</li></ul></div></div></section>
+            <section className="jv-section product-section" aria-labelledby="how-cv-title"><div className="jv-split"><div className="product-visual" aria-hidden="true"><CvDiffCard /></div><div data-reveal><p className="jv-caption">Every CV</p><h2 id="how-cv-title" className="jv-section-title">Reworded for the job, from your experience.</h2><ul className="jv-ticks"><li>Each CV starts from the experience you added and the facts you confirm.</li><li>Wording is matched to what the job asks for, line by line.</li><li>Review it, then download PDF, DOCX or TXT from your dashboard.</li></ul></div></div></section>
             <p className="jv-related"><span>Not ready for a schedule?</span><Link to="/check">Try the free CV Check</Link><Link to="/job-loop">See the Automated Job Loop in depth</Link></p>
           </>}
           {kind === "faq" && <div className="jv-faq jv-faq--wide product-faqs" data-reveal>{faqs.map(([question, answer]) => <details key={question}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>}
           {kind === "about" && <div className="product-about">
             <section className="jv-story" aria-labelledby="about-problem"><p className="jv-caption">01 / The problem</p><h2 id="about-problem" className="jv-story-title" data-reveal>Every application starts from zero.</h2><div className="jv-story-body" data-reveal><p>Searching, copying, rewording, saving. A job search repeats the same work for every role, and the work you did last week is gone by Monday.</p></div></section>
             <section className="jv-story" aria-labelledby="about-idea"><p className="jv-caption">02 / The idea</p><h2 id="about-idea" className="jv-story-title" data-reveal>Set it up once. Let it run.</h2><div className="jv-story-body" data-reveal><p>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds matching jobs in the background and prepares a tailored, role-specific CV for each, built from your own experience.</p></div></section>
-            <section className="jv-story" aria-labelledby="about-principles"><p className="jv-caption">03 / How we build it</p><h2 id="about-principles" className="jv-story-title" data-reveal>Your words, not ours.</h2><ol className="jv-steps product-about-principles"><li><p className="jv-caption">Source</p><h3>Your experience, every time</h3><p>Every CV is reworded from experience you added, so it stays accurate to you.</p></li><li><p className="jv-caption">Honesty</p><h3>Nothing invented</h3><p>No employers, numbers, tools or qualifications you have not listed. Gaps become questions.</p></li><li><p className="jv-caption">Time</p><h3>Jobs on your schedule</h3><p>Pick a weekly, three-times-weekly or daily pace. Runs happen in the background.</p></li></ol></section>
+            <section className="jv-story" aria-labelledby="about-principles"><p className="jv-caption">03 / How we build it</p><h2 id="about-principles" className="jv-story-title" data-reveal>Your words, not ours.</h2><ol className="jv-steps product-about-principles"><li><p className="jv-caption">Source</p><h3>Your experience, every time</h3><p>Each CV starts from the experience you added and the facts you confirm.</p></li><li><p className="jv-caption">Honesty</p><h3>Built from your facts</h3><p>CVs use the employers, tools and qualifications you list. Where something is missing, you are asked a question.</p></li><li><p className="jv-caption">Time</p><h3>Jobs on your schedule</h3><p>Pick a weekly, three-times-weekly or daily pace. Runs happen in the background.</p></li></ol></section>
           </div>}
           {kind === "contact" && <><div className="jv-contact-grid"><GuestSupport />{contactNote}</div>{support && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(support) && <div className="product-contact-box"><a className="jv-link" href={`mailto:${support}`}><span>Email Jobvance support</span><ArrowUpRight aria-hidden="true" /></a></div>}</>}
           {legal && <LegalLayout kind={kind} />}
@@ -191,10 +193,10 @@ export default function ProductPage({ kind }: { kind: Kind }) {
           {related.length > 0 && <nav className="jv-related" aria-label="Related pages"><span>Related</span>{related.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav>}
         </div>}
       </div>
-      {kind === "how" && <CtaBand start={start} />}
-      {kind === "about" && <CtaBand start={start} heading="Start with your own experience." />}
-      {kind === "faq" && <CtaBand start={start} />}
-      {(kind === "contact" || kind === "privacy") && <CtaBand start={start} heading="Back to your search?" body="Choose your roles and locations once. Automated Job Loop does the repeat work." secondary={false} />}
+      {kind === "how" && <CtaBand start={start} visual="trail" heading="Set it up once. Come back to results." body="Add your experience, choose roles and locations, pick a schedule. Then come back to matched jobs and a tailored CV for each." />}
+      {kind === "about" && <CtaBand start={start} visual="line" heading="Start with your own experience." body="Your next CV starts from the experience you add and the facts you confirm." />}
+      {kind === "faq" && <CtaBand start={start} heading="Ready when you are." body="Choose your roles and locations once, then let the search run on your schedule." />}
+      {(kind === "contact" || kind === "privacy") && <CtaBand start={start} heading="Need to start or continue a search?" body="Choose your roles and locations once. Automated Job Loop does the repeat work." secondary={false} />}
     </>}
   </main>;
 }

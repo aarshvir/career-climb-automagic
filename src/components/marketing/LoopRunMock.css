@@ -81,7 +81,7 @@
 }
 
 /* Prerendered pages: a forward-only settle on the painted frame (transform and box-shadow only, so nothing shifts). */
-@keyframes jv-settle { 0% { transform: translateY(2px); box-shadow: 0 0 0 0 rgb(33 92 67 / .4); } 45% { box-shadow: 0 0 0 4px rgb(33 92 67 / .16); } 100% { transform: none; box-shadow: 0 0 0 0 rgb(33 92 67 / 0); } }
+@keyframes jv-settle { 0% { transform: translateY(2px); box-shadow: 0 0 0 0 rgb(var(--jv-brand-rgb) / .4); } 45% { box-shadow: 0 0 0 4px rgb(var(--jv-brand-rgb) / .16); } 100% { transform: none; box-shadow: 0 0 0 0 rgb(var(--jv-brand-rgb) / 0); } }
 @media (prefers-reduced-motion: no-preference) {
   .jv-mock.is-settle .jv-mock-rows li .jv-status--ready, .jv-mock.is-settle .jv-mock-rows li:nth-child(1) .jv-status--tailored { animation: jv-settle 700ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 260ms + 500ms); }
   .jv-mock.is-settle .jv-mock-pulse::after { animation: jv-pulse 2.4s var(--ease-out) 500ms 1; }

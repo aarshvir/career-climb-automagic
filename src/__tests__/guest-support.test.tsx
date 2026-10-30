@@ -65,7 +65,7 @@ describe('support without an account', () => {
     const replace = vi.spyOn(window.history, 'replaceState');
     const push = vi.spyOn(window.history, 'pushState');
     showGuest();
-    expect(screen.getByRole('heading', { name: 'Get a support receipt without signing up.' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Tell us what you need help with.' })).toBeInTheDocument();
     expect(screen.getByText(/A receipt confirms storage/)).toHaveTextContent('does not mean someone has reviewed the request or promise a response time');
     await user.click(screen.getByRole('button', { name: 'Save support request' }));
     expect(screen.getByRole('alert')).toHaveTextContent('Write at least five characters and confirm private storage.');

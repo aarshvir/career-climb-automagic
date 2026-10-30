@@ -90,7 +90,7 @@ describe('Applications home actual saved work', () => {
       fireEvent.click(list().getByRole('button', { name: /Saved CV check.*Operations Analyst/ }));
       expect(screen.getByRole('region', { name: 'Application details' })).toHaveFocus();
       expect(screen.getByRole('link', { name: 'Open and edit' })).toHaveAttribute('href', `/check?savedCheck=${id}`);
-      expect(scroll).toHaveBeenCalledExactlyOnceWith({ block: 'start' });
+      expect(scroll).toHaveBeenCalledExactlyOnceWith({ block: 'start', behavior: 'auto' });
       fireEvent.click(screen.getByRole('button', { name: 'Refresh applications' })); await loaded();
       expect(scroll).toHaveBeenCalledTimes(1);
     } finally { if (previous) HTMLElement.prototype.scrollIntoView = previous; else delete HTMLElement.prototype.scrollIntoView; }

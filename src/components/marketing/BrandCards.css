@@ -12,7 +12,7 @@
 .bc-timeline li.is-auto .jv-caption { color: var(--jv-brand-ink); }
 
 .bc-mark { display: grid; place-items: center; padding: 56px 40px; }
-.bc-mark .jv-orbit { --ring: rgb(33 92 67 / .3); }
+.bc-mark .jv-orbit { --ring: rgb(var(--jv-brand-rgb) / .3); }
 .bc-mark-core { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 4px; text-align: center; color: var(--jv-ink); }
 .bc-mark-core strong { font-size: var(--t-h3); font-weight: var(--fw-heading); letter-spacing: -.025em; line-height: 1.1; }
 .bc-mark-core span { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; }

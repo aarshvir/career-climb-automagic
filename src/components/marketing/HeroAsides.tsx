@@ -1,12 +1,12 @@
 import { BookOpen, FileText, Play, Search } from "lucide-react";
 import "./ProductCards.css";
 import "./PageCards.css";
+import "./AudienceCards.css";
 
 // Round 5: the text-first pages (FAQ, pricing, contact, guides, help, walkthroughs) each get one small product moment in the
 // hero, built from the same .pc-card vocabulary as the product pages. Decorative (aria-hidden), labelled as examples, and only
 // ever shows statements the page already makes.
 
-const days = ["M", "T", "W", "T", "F", "S", "S"];
 
 /** FAQ: one open answer and two closed questions, as the page itself shows them. */
 export function FaqAside({ className = "" }: { className?: string }) {
@@ -18,15 +18,21 @@ export function FaqAside({ className = "" }: { className?: string }) {
   </div>;
 }
 
-const paces: [string, string, number[]][] = [["Starter", "1 run a week", [0]], ["Advanced", "3 runs a week", [0, 2, 4]], ["Pro Job Seeker", "1 run a day", [0, 1, 2, 3, 4, 5, 6]]];
-/** Pricing: the run pace behind each plan, drawn on one example week. */
+const paces: [string, string, number, number][] = [["Starter", "1 run a week", 1, 40], ["Advanced", "3 runs a week", 3, 66], ["Pro Job Seeker", "1 run a day", 7, 92]];
+/** Pricing: the run pace behind each plan, drawn as three rings. The dots on each ring are the runs in one example week. */
 export function PacesAside({ className = "" }: { className?: string }) {
   return <div className={`pc-card pc-aside pc-paces ${className}`.trim()} aria-hidden="true">
-    <div className="pc-top"><span className="pc-caption">Example week · M T W T F S S</span></div>
-    {paces.map(([name, pace, on]) => <div className="pc-pace" key={name}>
-      <span className="pc-pace-name"><strong>{name}</strong><span>{pace}</span></span>
-      <span className="pc-pace-dots">{days.map((_, index) => <i key={index} className={on.includes(index) ? "is-on" : ""} />)}</span>
-    </div>)}
+    <div className="pc-top"><span className="pc-caption">Example week · runs per ring</span></div>
+    <div className="pc-rings">
+      <svg viewBox="0 0 200 200" className="pc-rings-svg" focusable="false">
+        {paces.map(([name, , , radius]) => <circle key={name} cx="100" cy="100" r={radius} fill="none" className="pc-ring" />)}
+        {paces.map(([name, , count, radius]) => Array.from({ length: count }, (_, index) => {
+          const angle = -Math.PI / 2 + (index / count) * Math.PI * 2;
+          return <circle key={`${name}-${index}`} cx={100 + radius * Math.cos(angle)} cy={100 + radius * Math.sin(angle)} r={index === 0 ? 5.5 : 4} className={index === 0 ? "pc-ring-dot pc-ring-dot--first" : "pc-ring-dot"} />;
+        }))}
+      </svg>
+      <ul className="pc-rings-legend">{paces.map(([name, pace, count]) => <li key={name}><strong>{name}</strong><span>{pace}</span></li>)}</ul>
+    </div>
   </div>;
 }
 

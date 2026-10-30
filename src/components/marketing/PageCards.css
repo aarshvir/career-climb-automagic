@@ -97,7 +97,7 @@
 .pc-trail-t span { color: var(--jv-ink-3); font-size: var(--t-sm); }
 .pc-trail li.is-now .pc-trail-n { color: var(--jv-brand-ink); }
 .pc-trail li.is-now { box-shadow: inset 2px 0 0 var(--jv-brand); padding-left: 10px; margin-left: -10px; }
-.pc-walk-screen { position: relative; display: grid; align-content: end; gap: 10px; min-height: 148px; padding: 14px; border-radius: 12px; background: radial-gradient(70% 90% at 80% 0%, rgb(169 221 188 / .16), transparent 70%), var(--jv-forest); color: #fff; }
+.pc-walk-screen { position: relative; display: grid; align-content: end; gap: 10px; min-height: 148px; padding: 14px; border-radius: 12px; background: radial-gradient(70% 90% at 80% 0%, rgb(var(--jv-link-on-dark-rgb) / .16), transparent 70%), var(--jv-forest); color: #fff; }
 .pc-walk-play { position: absolute; top: 14px; left: 14px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #fff; color: var(--jv-forest); }
 .pc-walk-play svg { width: 14px; height: 14px; fill: currentColor; margin-left: 2px; }
 .pc-walk-caption { justify-self: start; padding: 4px 8px; border-radius: 6px; background: rgb(0 0 0 / .5); font-size: var(--t-small); line-height: 1.3; }
