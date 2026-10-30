@@ -43,4 +43,4 @@
 .bc-stack-arrow { justify-self: center; width: 20px; height: 20px; color: var(--jv-signal); }
 .bc-stack-one { display: grid; gap: 2px; padding: 16px 18px; border-radius: 14px; background: #fff; color: var(--jv-forest); box-shadow: 0 0 0 4px rgb(var(--jv-signal-rgb) / .22); }
 .bc-stack-one strong { font-size: var(--t-h4); font-weight: var(--fw-heading); letter-spacing: var(--ls-h3); line-height: 1.2; }
-.bc-stack-one span { color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
+.bc-stack-one span { color: var(--jv-card-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }

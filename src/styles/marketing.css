@@ -1361,7 +1361,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 
 /* One toggle: every disclosure (FAQ, guides sources, contact receipt, help topic, pricing one-offs, walkthrough transcript, steps) is the same 32px outlined circle with a drawn plus that turns to a cross, filled brand green when open. */
 :root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .hc-contents details, .pricing-passes-disclosure) > summary::after { content: ""; display: block; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line-strong); border-radius: 50%; color: var(--jv-ink); font-size: 0; background: linear-gradient(currentColor, currentColor) center / 14px 1.75px no-repeat, linear-gradient(currentColor, currentColor) center / 1.75px 14px no-repeat; transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-press), border-color var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
-:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .hc-contents details, .pricing-passes-disclosure)[open] > summary::after { content: ""; background-color: var(--jv-brand); border-color: var(--jv-brand); color: #fff; transform: rotate(45deg); }
+:root :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details, .hc-topic > details, .hc-contents details, .pricing-passes-disclosure)[open] > summary::after { content: ""; background: linear-gradient(currentColor, currentColor) center / 14px 1.75px no-repeat, linear-gradient(currentColor, currentColor) center / 1.75px 14px no-repeat, var(--jv-brand); border-color: var(--jv-brand); color: #fff; transform: rotate(45deg); }
 :root .jv-faq-toggle { border-color: var(--jv-line-strong); }
 :root .jv-faq-toggle svg { width: 14px; height: 14px; stroke-width: 1.75; }
 
@@ -1457,7 +1457,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 /* Hero alignment: the Automated Job Loop hero card is centred against its copy; the privacy heading starts level with the "At a glance" card (no 100px void beside a centred H1); the privacy index uses quiet links. */
 @media (min-width: 1024px) {
   :root .loop-overview .lo-loop-hero .jv-hero-grid { align-items: center; }
-  :root .loop-overview .lo-loop-hero .jv-hero-visual { align-self: center; }
+  :root .loop-overview .lo-loop-hero .jv-hero-visual { align-self: center; min-height: 0; padding-bottom: 0; }
   :root .product-page--privacy .jv-page-head--split { align-items: start; align-content: start; }
   :root .product-page--privacy .jv-page-head--split { grid-template-rows: auto auto auto 1fr; }
   :root .product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { align-self: start; grid-row: auto; }
