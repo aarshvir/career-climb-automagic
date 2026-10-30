@@ -15,7 +15,7 @@ export default function MvpFooter() {
   return <footer className={`jv-footer${compact ? " jv-footer-compact" : ""}`}>
     <div className="jv-footer-inner">
       <div className="jv-footer-top">
-        <div className="jv-footer-brand"><Brand /><p className="jv-footer-description">Automated Job Loop runs in the background and finds the best-matching jobs for you, with tailored, role-specific CVs.</p><p className="jv-footer-note">Tailored CVs for every role you target.</p></div>
+        <div className="jv-footer-brand"><Brand /><p className="jv-footer-description">Automated Job Loop runs in the background and finds the best-matching jobs for you, with tailored, role-specific CVs.</p><p className="jv-footer-note">A tailored CV for each prepared role.</p></div>
         <nav aria-label="Footer navigation" className="jv-footer-links">{columns.map(([head, items]) => <div key={head} className="jv-footer-col"><h2 className="jv-footer-col-title">{head}</h2><ul>{items.map(([to, label]) => <li key={to}><Link to={to}>{label}</Link></li>)}</ul></div>)}</nav>
       </div>
       <div className="jv-footer-bottom"><p>© {new Date().getFullYear()} Jobvance</p><nav aria-label="Legal navigation">{legal.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav></div>

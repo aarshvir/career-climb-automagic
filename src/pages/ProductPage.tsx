@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, ArrowUpRight, CheckCircle2, CircleHelp, FileText, Plus } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import "./ProductPage.css";
-import "./ProductRefresh.css";
 import SubscriptionPricing from "./SubscriptionPricing";
 import LoopJourney from "@/components/LoopJourney";
 import AdsMeasurementChoice from "@/components/AdsMeasurementChoice";
@@ -11,17 +10,21 @@ import GuestSupport from "./GuestSupport";
 import HomePage from "./HomePage";
 import './JobLoop.css';
 import { currentOffer } from '@/lib/current-offer';
+import { subscriptionPlans } from '@/lib/subscription-plans';
+import LoopOrbit from '@/components/marketing/LoopOrbit';
+import { RunCard } from '@/components/marketing/ProductCards';
+import { useReveal } from '@/hooks/useReveal';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
 type Kind = "home" | "pricing" | "how" | "faq" | "about" | "contact" | "privacy" | "terms" | "refund" | "help" | "notfound";
 const titles: Record<Kind, string> = {
-  home: "Automate your job search", pricing: "Choose your Automated Job Loop plan.", how: "How the Automated Job Loop works", faq: "Questions about using Jobvance", about: "Why we built Jobvance", contact: "Get help with Jobvance", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "We couldn’t find that page",
+  home: "Automate your job search", pricing: "Choose your Automated Job Loop plan.", how: "How the Automated Job Loop works", faq: "Questions about the Automated Job Loop", about: "Why we built Jobvance", contact: "Get help with Jobvance", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "We couldn’t find that page",
 };
-const labels: Record<Kind, string> = { home: "Jobvance", pricing: "Access & pricing", how: "How it works", faq: "Questions & answers", about: "About Jobvance", contact: "Contact", privacy: "Your information", terms: "The details", refund: "Refunds", help: "Help with your application", notfound: "Page not found" };
+const labels: Record<Kind, string> = { home: "Jobvance", pricing: "Pricing", how: "How it works", faq: "FAQ", about: "About Jobvance", contact: "Contact", privacy: "Your information", terms: "The details", refund: "Refunds", help: "Help with your application", notfound: "Page not found" };
 const intros: Partial<Record<Kind, string>> = {
-  pricing: currentOffer.statement,
-  how: "Add your experience, choose the roles and locations you want, then review the jobs and documents prepared in your dashboard.",
-  faq: "What the check does, what stays private, and what happens next.",
+  pricing: `Choose how often your Automated Job Loop runs. Plans from $${subscriptionPlans[0].priceUsd}/month, with a free account to start.`,
+  how: "Add your experience, choose the roles and locations you want, then come back to matched jobs and a tailored CV for each.",
+  faq: "How the Automated Job Loop works, what it prepares for you and how your information is handled.",
   about: "Applying for another role shouldn’t mean rebuilding your experience from scratch.",
   contact: "For questions about your documents, your account or service access.",
   privacy: "How the free check, your saved documents, payments and the optional Automated Job Loop handle your information.",
@@ -33,22 +36,37 @@ const intros: Partial<Record<Kind, string>> = {
 const faqs = [
   ["Do I need an account?", "Yes. Your Jobvance account keeps your CVs, preferences and applications together. Create an account, complete your search setup and choose how to prepare your applications."],
   ["Does a finding mean I meet a requirement?", "No. Matching words are a starting point. Read the requirement and the CV example yourself; the check cannot confirm your qualifications or predict what an employer will decide."],
-  ["Does Jobvance apply for me?", "You submit on the employer’s site. The tracker records the progress you report. Opening a link does not count as a submission."],
+  ["What does the Automated Job Loop prepare for me?", "It finds jobs from connected sources for your roles and locations, prepares a tailored CV for each prepared role and keeps everything in your dashboard. Download PDF, DOCX or TXT and open the employer’s vacancy when you are ready."],
   ["Does Jobvance rewrite my CV?", "It rewords and reorders what is already in your CV so it reads well for the job, and adds a short profile built only from your own lines. It never adds employers, numbers, tools or qualifications you have not listed, and it asks you about gaps instead of filling them. You check every change before downloading."],
   ["Can I download my documents?", "Your approved CV can be downloaded as PDF, DOCX or TXT. Your original uploaded file can also be downloaded."],
   ["Which files can I upload?", "Text-based PDF, DOCX and TXT files up to 5 MB. Scanned PDFs and old .doc files need conversion to a readable supported format."],
   ["What does Jobvance cost?", `${currentOffer.statement} Your account includes 3 AI-tailored CVs each month. For more, a one-time pass gives you Sprint: 25 tailored CVs over 7 days for $9, Job Search: 100 over 30 days for $19, or Career Move: 300 over 90 days for $39. ${currentOffer.passes}`],
   ["Are interviews or jobs guaranteed?", "No. Jobvance helps prepare and organize applications; employer decisions and hiring outcomes remain outside its control."],
   ["Can I use projects or internships in my CV?", "Yes. Your reviewed CV can include clearly labelled academic projects, internships, activities and previous employment. Describe your own contribution accurately. Project work is not automatically evidence of required professional experience."],
-  ["How does the Automated Job Loop work?", "Sign in, save your career record, confirm the facts you can share and add real vacancies. Prepare separate CVs and drafts. Review and approve each document before downloading. Search, model and inbox connections depend on operator setup; the workspace shows which are available. You send messages and submit applications yourself."],
+  ["How does the Automated Job Loop work?", "Add your experience, choose your roles, locations and schedule, and the loop searches connected sources and prepares a separate CV for each role. Come back to your dashboard to download PDF, DOCX or TXT. Search, model and inbox connections depend on operator setup; the workspace shows which are available."],
 ];
 
-function StartLink({ children = "Start my Automated Job Loop", light = false, to = "/onboarding" }: { children?: React.ReactNode; light?: boolean; to?: string }) {
-  return <Link to={to} className={`product-button${light ? " product-button--light" : ""}`}>{children}<ArrowRight size={18} aria-hidden="true" /></Link>;
+function StartLink({ children = "Start my Automated Job Loop", to = "/onboarding", variant = "primary", size = "lg" }: { children?: React.ReactNode; to?: string; variant?: "primary" | "secondary"; size?: "md" | "lg" }) {
+  return <Link to={to} className={`jv-btn jv-btn--${variant}${size === "lg" ? " jv-btn--lg" : ""}`}>{children}<ArrowRight aria-hidden="true" /></Link>;
+}
+function TextLink({ to, children }: { to: string; children: React.ReactNode }) {
+  return <Link to={to} className="jv-link"><span>{children}</span><ArrowRight aria-hidden="true" /></Link>;
+}
+/** The closing moment shared by every explainer page: the home page's forest band. */
+function CtaBand({ start }: { start: string }) {
+  return <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="page-cta-title">
+    <div className="jv-cta-inner">
+      <h2 id="page-cta-title">Ready to automate your search?</h2>
+      <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
+      <div className="jv-cta-actions"><StartLink to={start} /><Link to="/check" className="jv-btn jv-btn--secondary jv-btn--lg">Check one CV against a job</Link></div>
+    </div>
+    <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
+    <div className="jv-cta-visual" aria-hidden="true"><RunCard /></div>
+  </section>;
 }
 
 function LegalContent({ kind }: { kind: "privacy" | "terms" | "refund" }) {
-  if (kind === "privacy") return <div className="product-prose">
+  if (kind === "privacy") return <div className="product-prose jv-prose">
     <h2>Your free check</h2><p>The free CV check reads your file on your device; the original file is never uploaded. Comparing without AI runs entirely on your device. If you choose “Tailor my CV for this job”, the text of your CV and the job description is sent to our AI provider (OpenRouter, with model providers’ data collection declined) to prepare one tailored version. Jobvance does not store that text unless you save the check; we keep only a cost record, which also counts your free and pass allowance, and historical network-limit records from earlier guest access, deleted after 90 days. Unsaved drafts can be recovered during in-app navigation from this tab’s memory for up to 30 minutes after your last change. Without optional tab-storage permission, refreshing or closing the tab clears the draft. It does not send check data to advertising tools.</p>
     <h2>Optional refresh recovery</h2><p>Choosing “Keep my draft in this tab across refresh” allows your CV and vacancy texts to be stored temporarily in this browser tab. They are eligible for restoration for 30 minutes after your last change; an expired stored copy is removed when next read. Anyone using the same browser tab may access this copy. Turning off the option, clearing the check or changing accounts removes it; closing the tab also removes tab storage. Restoring a draft clears its approval, so review and approve again. This permission does not save the check to your account.</p>
     <h2>Choosing account saving</h2><p>If you explicitly choose account saving, the role, company, vacancy, reviewed source CV and approved final CV texts are stored privately in your existing Supabase account. The exact save payload is shown before saving. Saved free checks can be deleted in the check page; deletion does not remove files you already downloaded.</p>
@@ -63,7 +81,7 @@ function LegalContent({ kind }: { kind: "privacy" | "terms" | "refund" }) {
     <h2>Optional inbox access</h2><p>Signing in with Google does not connect your inbox. Connecting Gmail requires a separate Google permission screen. When configured, the loop can read relevant job-search messages and store selected summaries. Draft access is optional; creating a draft requires your approval of its recipient and attachment. Jobvance has no email-send or application-submit action. Disconnecting removes its stored connection credentials; it does not delete messages or drafts already in Gmail. Google permissions can also be revoked in your Google account.</p>
     <h2>Document access</h2><p>Approved documents are retained for your access after pack expiry. Public walkthroughs use example CVs and vacancies, not candidate records. <Link to="/contact">Contact and service availability</Link>.</p>
   </div>;
-  if (kind === "terms") return <div className="product-prose">
+  if (kind === "terms") return <div className="product-prose jv-prose">
     <h2>The free check</h2><p>The six-step check and its reviewed downloads are free and do not use preparation-pack credits. Evidence findings are comparisons of supplied English text. They do not verify qualifications, establish eligibility or predict screening results.</p>
     <h2>The information you provide</h2><p>Provide information you have the right to use. Check and approve the wording before downloading or submitting. Do not invent qualifications, experience or achievements.</p>
     <h2>Free access</h2><p>{currentOffer.statement} Your account includes 3 AI-tailored CVs each calendar month (UTC). Compare without AI, editing, downloads and the applications tracker stay free. Automated Job Loop access and processing availability are shown in your account.</p>
@@ -74,7 +92,7 @@ function LegalContent({ kind }: { kind: "privacy" | "terms" | "refund" }) {
     <h2>Cloud loop availability</h2><p>Automated Job Loop is subject to the run limits shown in your account and service availability. The rules mode uses confirmed facts. External models, search and inbox access require their respective configuration and consent. Reports identify unavailable or incomplete stages. A relevance score explains this tool’s comparison; it is not an ATS score or a prediction of hiring. Recurring preparation requires your explicit opt-in and a configured scheduler. The workspace reports the actual next run and execution history. Pause a schedule to stop future scheduling while retaining the current run. Cancel schedule also stops its latest queued or running scheduled job. A separate manual run has its own cancellation control.</p>
     <h2>Current availability</h2><p>These product terms describe the current workflow. Your signed-in billing page confirms whether checkout is available and your current paid access. A price card alone does not start a subscription. Test checkouts are labelled and do not buy live access.</p>
   </div>;
-  return <div className="product-prose">
+  return <div className="product-prose jv-prose">
     <h2>Automated Job Loop cancellation</h2><p>Use Cancel monthly renewal in your Automated Job Loop billing settings to stop the next renewal. Review the confirmation and the exact paid-through date. Your current confirmed access continues to that date unless the underlying payment is refunded, disputed or revoked. Pausing or cancelling the search schedule does not cancel billing. If cancellation is awaiting confirmation, refresh billing or contact us with your receipt reference; an unconfirmed request is not presented as cancelled.</p><p>Cancellation is not a refund request. For an incorrect or duplicate subscription charge, or a service problem, ask through the <Link to="/contact">contact page</Link> with your Dodo Payments receipt reference. We review the actual payment and service record; mandatory consumer rights remain unaffected. We do not promise a job, interview or hiring outcome.</p>
     <h2>7-day money-back promise</h2><p>If a pass is not right for you, ask for a refund within 7 days of buying it. If you have used fewer than 5 tailored CVs from that pass, we refund it in full. Ask through the <Link to="/contact">contact page</Link> with your Dodo Payments receipt reference.</p>
     <h2>What a refund does</h2><p>Refunds are paid back to your original payment method by Dodo Payments, our merchant of record. A refunded pass stops working straight away, including any tailored CVs left on it, and this also applies to a partial refund. Documents you already downloaded stay yours.</p>
@@ -83,27 +101,42 @@ function LegalContent({ kind }: { kind: "privacy" | "terms" | "refund" }) {
   </div>;
 }
 
+const relatedLinks: [string, string][] = [["/faq", "Questions about the Automated Job Loop"], ["/contact", "Contact"], ["/privacy", "Privacy"], ["/terms", "Terms"], ["/refund", "Refunds"], ["/help", "Help"], ["/walkthroughs", "Walkthroughs"]];
+const relatedFor: Partial<Record<Kind, string[]>> = { privacy: ["/faq", "/contact", "/terms"], terms: ["/faq", "/contact", "/refund"], refund: ["/contact", "/terms", "/faq"], contact: ["/help", "/walkthroughs", "/privacy"] };
+
 export default function ProductPage({ kind }: { kind: Kind }) {
   const { user } = useAuth();
+  useReveal();
   const start = user ? "/loop" : "/onboarding";
   const support = import.meta.env.VITE_SUPPORT_EMAIL as string | undefined;
   const legal = kind === "privacy" || kind === "terms" || kind === "refund";
+  const band = kind === "how" || kind === "faq" || kind === "about";
   const path = kind === 'home' ? '/' : kind === 'how' ? '/how-it-works' : `/${kind}`;
   const meta = staticPageMeta(path);
-  return <main className={`product-page product-page--${kind}`}>
+  const related = (relatedFor[kind] ?? []).map(to => relatedLinks.find(([href]) => href === to)!).filter(Boolean);
+  return <main className={`product-page product-page--${kind}${kind === "home" ? "" : " jv-rails"}`}>
     <Helmet><title>{meta?.title ?? `${titles[kind]} | Jobvance`}</title><meta name="description" content={meta?.description ?? intros[kind]} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}{meta && <meta property="og:title" content={meta.title} />}{meta && <meta property="og:description" content={meta.description} />}{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" />{kind === 'notfound' && <meta name="robots" content="noindex,follow" />}</Helmet>
-    {kind === "home" ? <HomePage /> : <div className="product-shell product-inner">
-      <header className="product-page-heading"><p className="product-eyebrow"><Link to="/">Jobvance</Link><span aria-hidden="true">/</span>{labels[kind]}</p><h1>{titles[kind]}</h1><p className="product-page-intro">{intros[kind]}</p></header>
-      {kind === "pricing" ? <SubscriptionPricing /> : <div className="product-content-layout"><article className="product-main-content">
-        {(kind === "how" || kind === "help") && <><LoopJourney /><div className="product-help-bottom"><StartLink /><p>Choose weekly, three-times-weekly or daily preparation from connected sources. Recurring AI preparation uses your selected CV and explicitly confirmed provider. Review your documents before applying.</p><Link to="/check" className="product-text-link">Only need one CV? Try the free CV Check <ArrowRight size={17} aria-hidden="true" /></Link></div></>}
-
-
-        {kind === "faq" && <div className="product-faqs">{faqs.map(([question, answer], index) => <details key={question}><summary><span className="product-faq-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><span>{question}</span><Plus size={20} aria-hidden="true" /></summary><p>{answer}</p></details>)}</div>}
-        {kind === "about" && <div className="product-about"><p className="product-large-copy">Jobvance helps you prepare a CV for a job you want and keep track of what you send. You bring the experience and make the final call on the wording. Your experience stays the source of every application; employer decisions are theirs.</p><div className="product-about-principles"><span><FileText size={22} aria-hidden="true" />A visible source</span><span><CircleHelp size={22} aria-hidden="true" />Room for questions</span><span><CheckCircle2 size={22} aria-hidden="true" />Your final approval</span></div><StartLink /></div>}
-        {kind === "contact" && <><GuestSupport />{support && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(support) && <div className="product-contact-box"><a className="product-text-link" href={`mailto:${support}`}>Email Jobvance support<ArrowUpRight size={17} aria-hidden="true" /></a></div>}</>}
-        {legal && <LegalContent kind={kind} />}
-        {kind === "notfound" && <div className="product-notfound"><span aria-hidden="true">404<span>↗</span></span><p>The address does not match an available page. <Link to="/">Return to Jobvance</Link>.</p><StartLink /></div>}
-      </article><aside className="product-aside"><span className="product-eyebrow">Your next step</span><h2>{legal ? "Questions about the details?" : "Have a vacancy in mind?"}</h2><p>{legal ? "Check service availability or read the answers to common questions." : "Create your account, add your CV and choose the jobs you want."}</p><Link to={legal ? "/contact" : "/check"} className="product-text-link">{legal ? "Contact & availability" : "Start a free check"}<ArrowRight size={17} aria-hidden="true" /></Link><nav aria-label="Related pages"><Link to="/faq">Questions & answers<ArrowUpRight size={14} aria-hidden="true" /></Link><Link to={start}>Your workspace<ArrowUpRight size={14} aria-hidden="true" /></Link><Link to="/privacy">Privacy<ArrowUpRight size={14} aria-hidden="true" /></Link></nav><span className="product-aside-symbol" aria-hidden="true">j↗</span></aside></div>}
-    </div>}
+    {kind === "home" ? <HomePage /> : <>
+      <div className="jv-page product-inner">
+        <header className="jv-page-head product-page-heading"><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title">{titles[kind]}</h1><p className="jv-lead product-page-intro">{intros[kind]}</p>
+          {band && <div className="jv-page-actions"><StartLink to={start} /><TextLink to="/check">Check one CV against a job</TextLink></div>}
+        </header>
+        {kind === "pricing" ? <SubscriptionPricing /> : <div className="product-main-content">
+          {kind === "how" && <>
+            <section className="jv-section product-section" aria-labelledby="how-journey-title"><div className="jv-head"><p className="jv-caption">Your Automated Job Loop journey</p><h2 id="how-journey-title" className="jv-section-title">Set it up once. It runs on your schedule.</h2></div><LoopJourney /></section>
+            <section className="jv-section product-section" aria-labelledby="how-run-title"><div className="jv-split"><div data-reveal><p className="jv-caption">Every run</p><h2 id="how-run-title" className="jv-section-title">Jobs found. A CV tailored for each.</h2><ul className="jv-ticks"><li>Searches the sources connected to your account for your roles and locations.</li><li>Matches openings to the experience you confirmed.</li><li>Prepares a tailored CV for each prepared role.</li><li>Keeps every job, CV and next step together in your dashboard.</li></ul></div><div className="product-visual" aria-hidden="true"><RunCard /></div></div></section>
+            <p className="jv-related"><span>Not ready for a schedule?</span><Link to="/check">Check one CV against a job</Link><Link to="/job-loop">See the Automated Job Loop in depth</Link></p>
+          </>}
+          {kind === "faq" && <div className="jv-faq jv-faq--wide product-faqs">{faqs.map(([question, answer]) => <details key={question}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>}
+          {kind === "about" && <div className="product-about"><p className="product-large-copy">Jobvance automates the repetitive part of a job search. Choose your roles and locations once, and Automated Job Loop finds matching jobs and prepares a tailored, role-specific CV for each, built from your own experience.</p>
+            <ol className="jv-steps product-about-principles"><li><p className="jv-caption">01 / Source</p><h3>Your experience, every time</h3><p>Every CV is reworded from experience you added, so it stays accurate to you.</p></li><li><p className="jv-caption">02 / Schedule</p><h3>Jobs on your schedule</h3><p>Pick roles, locations and a weekly, three-times-weekly or daily pace. Runs happen in the background.</p></li><li><p className="jv-caption">03 / Result</p><h3>A CV for each role</h3><p>Each prepared role comes with its own tailored CV, ready to download.</p></li></ol></div>}
+          {kind === "contact" && <><GuestSupport />{support && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(support) && <div className="product-contact-box"><a className="jv-link" href={`mailto:${support}`}><span>Email Jobvance support</span><ArrowUpRight aria-hidden="true" /></a></div>}</>}
+          {legal && <LegalContent kind={kind} />}
+          {kind === "notfound" && <div className="product-notfound"><p className="product-404" aria-hidden="true">404</p><p>The address does not match an available page. <Link to="/">Return to Jobvance</Link>.</p><StartLink to={start} /></div>}
+          {related.length > 0 && <nav className="jv-related" aria-label="Related pages"><span>Related</span>{related.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav>}
+        </div>}
+      </div>
+      {band && <CtaBand start={start} />}
+    </>}
   </main>;
 }

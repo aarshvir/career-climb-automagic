@@ -19,9 +19,9 @@ afterEach(cleanup);
 describe('audience entry points', () => {
   it.each(['student', 'mba', 'professional'] as const)('offers first value without sign-in for %s', audience => {
     render(page(audience));
-    const start = screen.getByRole('link', { name: 'Check my CV against a job' });
-    expect(start).toHaveAttribute('href', `/check?audience=${audience}`);
-    expect(screen.getByRole('link', { name: /See how the Automated Job Loop works/ })).toHaveAttribute('href', '/job-loop');
+    const start = screen.getByRole('link', { name: 'Start my search' });
+    expect(start).toHaveAttribute('href', '/onboarding');
+    expect(screen.getByRole('link', { name: /Try the free CV Check/ })).toHaveAttribute('href', `/check?audience=${audience}`);
     expect(screen.getByRole('link', { name: /Sign in to save my experience/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].title);
     expect(screen.getByText('Example application')).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe('current offer', () => {
   });
   it('states the new free allowance everywhere the old beta line was', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByText('Choose your Automated Job Loop plan and payment currency. CV Check is free to start, with optional one-time passes.')).toBeInTheDocument();
+    expect(screen.getByText('Choose how often your Automated Job Loop runs. Plans from $29/month, with a free account to start.')).toBeInTheDocument();
     expect(screen.queryByText(/2 tailored CVs a day|8 when signed in/i)).not.toBeInTheDocument();
   });
   it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
@@ -74,7 +74,7 @@ describe('current offer', () => {
 describe('Automated Job Loop access and monthly plans', () => {
   it('leads with monthly Automated Job Loop and requires an account before checking purchase availability', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: 'Start your Automated Job Loop' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pick your pace, then start.' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Start my Automated Job Loop' })).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
     expect(screen.queryByText(/beta|ten accounts|no account needed/i)).not.toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('Automated Job Loop access and monthly plans', () => {
     expect(proposals).toHaveTextContent('1 Automated Job Loop run a week');
     expect(proposals).toHaveTextContent('3 Automated Job Loop runs a week');
     expect(proposals).toHaveTextContent('1 Automated Job Loop run a day');
-    expect(within(proposals).getByRole('link',{name:'Sign in for Starter'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
+    expect(within(proposals).getByRole('link',{name:'Start with Starter'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
     expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
     expect(proposals).toHaveTextContent('does not cancel subscription billing');
   });
@@ -103,7 +103,7 @@ describe('Automated Job Loop first homepage', () => {
     expect(stages[1]).toHaveTextContent('Choose your search');
     expect(stages[1]).toHaveTextContent('roles and locations');
     expect(stages[2]).toHaveTextContent('Review your dashboard');
-    expect(stages[2]).toHaveTextContent('approve your documents');
+    expect(stages[2]).toHaveTextContent('tailored CV for each');
     // Short actions sit under headings that name the product; the final call to action keeps the full name.
     expect(screen.getByText('Automated Job Loop', { selector: '.jv-hero-eyebrow' })).toBeInTheDocument();
     expect(screen.getByText('How Automated Job Loop works')).toBeInTheDocument();

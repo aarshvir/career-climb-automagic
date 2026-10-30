@@ -242,7 +242,7 @@ export default function HelpCenter() {
     const timer = setTimeout(() => document.getElementById(id)?.scrollIntoView?.({ block: 'start' }), 0);
     return () => clearTimeout(timer);
   }, [route.hash]);
-  return <main className="help-center">
+  return <main className="help-center jv-rails">
     <Helmet><title>{meta.title}</title><meta name="description" content={meta.description} /><link rel="canonical" href="https://jobvance.io/help" /></Helmet>
     <nav className="hc-breadcrumb" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">Help center</span></nav>
     <header className="hc-hero"><p className="hc-eyebrow"><BookOpen size={16} aria-hidden="true" /> HELP AT THE NEXT STEP</p><h1>What would you like to get done?</h1><p>Find the next click, understand a field, or get back to your draft. Read a guide, then sign in to set up your Automated Job Loop or use CV Check.</p><Link className="hc-text-link" to="/walkthroughs">Try an interactive walkthrough <ArrowRight size={16} aria-hidden="true" /></Link></header>

@@ -26,10 +26,11 @@
 .jv-home .jv-hero-grid { display: grid; gap: 32px; }
 .jv-home .jv-hero-copy { position: relative; z-index: 1; min-width: 0; }
 .jv-home .jv-hero-eyebrow { margin: 0 0 16px; color: var(--jv-brand-ink); }
-.jv-home .jv-hero-title { margin: 0; max-width: 9.45em; color: var(--jv-ink); font-size: var(--t-display); font-weight: var(--fw-display); line-height: 1.02; letter-spacing: -.045em; }
-.jv-home .jv-hero-lead { margin: 20px 0 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; }
+.jv-home .jv-hero-title { margin: 0; max-width: 10.4em; color: var(--jv-ink); font-size: var(--t-display); font-weight: var(--fw-display); line-height: 1.04; letter-spacing: -.035em; }
+.jv-home .jv-hero-lead { margin: 20px 0 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; }
 .jv-home .jv-hero-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 28px; }
-.jv-home .jv-hero-note { margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.jv-home .jv-hero-note { margin: 12px 0 0; }
+.jv-home .jv-hero-cv { display: none; }
 .jv-home .jv-hero-visual { position: relative; display: grid; place-items: center start; min-width: 0; }
 .jv-home .jv-hero-mock { position: relative; z-index: 1; width: 100%; display: grid; justify-items: start; }
 .jv-home .jv-hero-orbit-wrap { display: none; }
@@ -56,13 +57,18 @@
   .jv-home .jv-hero { padding: 88px 0 64px; }
   .jv-home .jv-hero-eyebrow { margin-bottom: 20px; }
   .jv-home .jv-hero-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: center; }
-  .jv-home .jv-hero-copy { grid-column: 1 / span 6; }
-  .jv-home .jv-hero-visual { grid-column: 7 / span 6; place-items: center; min-height: 520px; }
+  .jv-home .jv-hero-copy { grid-column: 1 / span 7; padding-right: 16px; }
+  .jv-home .jv-hero-visual { grid-column: 8 / span 5; place-items: center; min-height: 560px; }
   .jv-home .jv-hero-mock { justify-items: center; }
   /* The orbit frames the card: 600px, centred on the column, inside the right rail. Turned -30deg, the three stops sit
      at 11, 3 and 7 o'clock: above the card, about 38px clear of its right edge, and below it. None is tangent to it. */
   .jv-home .jv-hero-orbit-wrap { display: block; position: absolute; left: 50%; top: 50%; z-index: 0; width: min(600px, calc(100% + 76px)); translate: -50% -50%; rotate: -30deg; pointer-events: none; }
   .jv-home .jv-hero-orbit { width: 100%; }
+  /* The product surface is larger than its column and crosses the ring: the run log widens to the right rail and a
+     tailored CV overlaps its lower corner, so the hero shows the run and its result together. */
+  .jv-home .jv-hero-mock--wide .jv-mock { max-width: none; width: calc(100% + 72px); margin-left: -40px; margin-right: -32px; margin-bottom: 120px; }
+  .jv-home .jv-hero-cv { display: block; position: absolute; z-index: 2; right: -48px; bottom: 8px; width: 300px; }
+  .jv-home .jv-hero-cv .pc-card { box-shadow: 0 24px 60px -16px rgb(15 29 23 / .28), 0 2px 6px rgb(15 29 23 / .08); }
 }
 /* 1024-1279: the column is barely wider than the card, so a ring would hide two of its stops. */
 @media (min-width: 1024px) and (max-width: 1279px) { .jv-home .jv-hero-orbit-wrap { display: none; } }
@@ -91,11 +97,9 @@
 }
 /* Wide screens: each column takes its label's width plus an equal share, so every label sits on one line. */
 @media (min-width: 1280px) {
-  .jv-home .jv-proof ul { grid-template-columns: repeat(5, auto); }
   .jv-home .jv-proof li, .jv-home .jv-proof li:nth-child(even) { padding-inline: 20px; }
   .jv-home .jv-proof li:first-child { padding-left: var(--band-pad-x); }
   .jv-home .jv-proof li:last-child { padding-right: var(--band-pad-x); }
-  .jv-home .jv-proof li > span:last-child { white-space: nowrap; }
 }
 
 /* 3. How the loop runs (forest band) */
@@ -106,10 +110,11 @@
 /* Two labelled models: the per-run cycle (orbit) and the one-time set-up (steps). */
 .jv-home .jv-loop-caption { justify-self: stretch; margin: 0; color: var(--jv-on-dark-2); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
 .jv-home .jv-loop-steps > .jv-loop-caption { margin-bottom: 20px; }
-.jv-home .jv-loop-visual { display: grid; justify-items: center; padding: 48px 0 72px; }
+.jv-home .jv-loop-visual { display: grid; justify-items: center; padding: 48px 0 24px; }
 .jv-home .jv-loop-visual > .jv-loop-caption { margin-bottom: 48px; }
 .jv-home .jv-loop-visual .jv-orbit { width: min(220px, 60vw); }
 .jv-home .jv-loop-steps { min-width: 0; }
+.jv-home .jv-loop-timeline { width: 100%; margin-top: 56px; }
 .jv-home .jv-loop-steps .loop-journey-ring { margin-top: 0; }
 .jv-home .jv-loop-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin-top: 32px; }
 .jv-home .jv-orbit-core { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 6px; text-align: center; }
@@ -149,7 +154,8 @@
 .jv-home .jv-control-row h3 { color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-semi); line-height: 1.3; letter-spacing: -.015em; }
 .jv-home .jv-control-row p { margin: 8px 0 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
 /* Each fragment is staged on a subtle field (no border), so the card is the only edge. */
-.jv-home .jv-frag { display: grid; align-content: center; padding: 20px; border-radius: var(--r-md); background: var(--jv-bg-subtle); }
+.jv-home .jv-frag { display: grid; align-content: center; padding: 20px; border-radius: var(--r-md); background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-brand-tint)); }
+.jv-home .jv-frag > .pc-card { width: 100%; max-width: 460px; justify-self: center; }
 .jv-home .jv-frag-card { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--jv-line); border-radius: 12px; background: #fff; box-shadow: var(--sh-2); }
 .jv-home .jv-frag-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
 .jv-home .jv-frag-strong { color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); line-height: 1.4; letter-spacing: -.011em; }
@@ -181,7 +187,7 @@
 }
 @media (min-width: 768px) {
   .jv-home .jv-control-row { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
-  .jv-home .jv-frag { min-height: 200px; padding: 32px; }
+  .jv-home .jv-frag { min-height: 340px; padding: 40px; }
 }
 @media (min-width: 1024px) {
   .jv-home .jv-section-head { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; max-width: none; align-items: last baseline; }

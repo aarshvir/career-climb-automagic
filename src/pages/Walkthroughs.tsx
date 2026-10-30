@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { staticPageMeta } from '@/lib/public-site-meta';
 import { ArrowLeft, ArrowRight, Captions, Check, FileText, RotateCcw } from 'lucide-react';
 import { publicWalkthroughVideoManifest, validateWalkthroughVideoManifest, walkthroughs, walkthroughTranscript, type WalkthroughVideoAsset } from '@/lib/walkthroughs';
+import { BrandLockup } from '@/components/layout/MvpHeader';
 import './Walkthroughs.css';
 
 function timeLabel(seconds: number) { const wholeSeconds=Math.floor(seconds); return `${Math.floor(wholeSeconds / 60)}:${String(wholeSeconds % 60).padStart(2, '0')}`; }
@@ -60,7 +61,7 @@ export default function Walkthroughs({ videoManifest = publicWalkthroughVideoMan
     if (event.key === 'Home') { event.preventDefault(); event.currentTarget.focus({preventScroll:true});setStepIndex(0); }
     if (event.key === 'End') { event.preventDefault(); event.currentTarget.focus({preventScroll:true});setStepIndex(tutorial.scenes.length - 1); }
   }
-  return <main className="walkthroughs-page">
+  return <main className="walkthroughs-page jv-rails">
     <Helmet><title>{meta.title}</title><meta name="description" content={meta.description} /><link rel="canonical" href="https://jobvance.io/walkthroughs" /></Helmet>
     <nav className="wt-breadcrumb" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><Link to="/help">Help center</Link><span aria-hidden="true">/</span><span aria-current="page">Walkthroughs</span></nav>
     <header className="wt-hero"><p className="wt-eyebrow"><FileText size={16} aria-hidden="true" /> SHORT STEPS, AT YOUR PACE</p><h1>Watch how to use Jobvance.</h1><p>Choose a task, watch a captioned video or follow the interactive steps at your own pace.</p></header>
@@ -71,7 +72,7 @@ export default function Walkthroughs({ videoManifest = publicWalkthroughVideoMan
       <header className="wt-player-heading"><div><p className="wt-eyebrow">INTERACTIVE WALKTHROUGH</p><h2 id="wt-tutorial-title">{tutorial.title}</h2></div><button className="wt-caption-toggle" type="button" aria-pressed={captions} onClick={() => setCaptions(value => !value)}><Captions size={17} aria-hidden="true" /> Step captions {captions ? 'on' : 'off'}</button></header>
       <p className="wt-format-note">Follow the steps at your own pace. This product tour uses an example application; open your workspace when you are ready to use your own information.</p>
       <p className="wt-step-status" role="status">Step {stepIndex + 1} of {tutorial.scenes.length}: {scene.title}</p>
-      <div className="wt-storyboard"><div className="wt-demo" aria-label="Product tour: example application"><div className="wt-demo-top"><span className="wt-demo-brand">Jobvance</span><span>PRODUCT TOUR</span></div><div className="wt-demo-body"><p className="wt-demo-section">{scene.demo.section}</p><dl>{scene.demo.fields.map(field => <div key={field.label}><dt>{field.label}</dt><dd>{field.value}</dd></div>)}</dl><div className="wt-demo-action"><span>{scene.demo.action}<ArrowRight size={15} aria-hidden="true" /></span></div><p className="wt-demo-note">{scene.demo.note}</p></div></div>
+      <div className="wt-storyboard"><div className="wt-demo" aria-label="Product tour: example application"><div className="wt-demo-top"><BrandLockup /><span>PRODUCT TOUR</span></div><div className="wt-demo-body"><p className="wt-demo-section">{scene.demo.section}</p><dl>{scene.demo.fields.map(field => <div key={field.label}><dt>{field.label}</dt><dd>{field.value}</dd></div>)}</dl><div className="wt-demo-action"><span>{scene.demo.action}<ArrowRight size={15} aria-hidden="true" /></span></div><p className="wt-demo-note">{scene.demo.note}</p></div></div>
         <div className="wt-instructions"><p className="wt-eyebrow">YOUR NEXT CLICK</p><h3>{scene.title}</h3><p>{scene.instruction}</p><p className="wt-demo-disclosure">Follow this step in your workspace using your own information. The tour does not change your account.</p>{captions && <div className="wt-step-caption" aria-label="Current step caption"><Captions size={17} aria-hidden="true" /><p>{scene.caption}</p></div>}</div>
       </div>
       <div className="wt-controls"><div className="wt-navigation"><button className="wt-button" type="button" disabled={stepIndex === 0} onClick={previous}><ArrowLeft size={16} aria-hidden="true" />Previous step</button><button className="wt-button wt-button--primary" type="button" disabled={last} onClick={next}>Next step<ArrowRight size={16} aria-hidden="true" /></button><button className="wt-restart" type="button" onClick={() => setStepIndex(0)}><RotateCcw size={15} aria-hidden="true" />Restart</button></div><p id="wt-keyboard-help">Focus this walkthrough and use ← / → to move, Home to restart, or End for the final step.</p></div>

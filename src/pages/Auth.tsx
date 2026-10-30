@@ -2,10 +2,11 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { RunCard } from '@/components/marketing/ProductCards';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowRight, Check, FileText, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
+import { ArrowRight, Check, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
 import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
@@ -152,21 +153,10 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   return (
     <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
       {!embedded && <aside className="ap-account-story" aria-labelledby={`${fieldId}-story`}>
-        <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> SAVE YOUR WORK FOR THE NEXT APPLICATION</p>
-        <h2 id={`${fieldId}-story`}>Keep your CVs and applications <span>together.</span></h2>
-        <p className="ap-story-description">Bring your actual experience to the next role. Review your wording, keep your versions, and decide what to share.</p>
-        <div className="ap-document-scene" aria-label="Example CV review">
-          <div className="ap-document-back" aria-hidden="true" />
-          <div className="ap-document-sheet">
-            <div className="ap-document-heading"><span className="ap-document-icon"><FileText size={20} aria-hidden="true" /></span><span>YOUR REVIEWED CV<br /><small>Example application</small></span><span className="ap-document-index">01</span></div>
-            <div className="ap-document-lines" aria-hidden="true"><span /><span /><span /></div>
-            <p className="ap-document-label">EXPERIENCE</p>
-            <p className="ap-document-passage">Helped design a pilot, with projected savings.</p>
-            <div className="ap-document-note"><Check size={16} aria-hidden="true" /><p>Your contribution stays clear.<br /><strong>Projected stays projected.</strong></p></div>
-            <div className="ap-document-lines ap-document-lines--short" aria-hidden="true"><span /><span /></div>
-          </div>
-          <div className="ap-review-stamp"><Check size={16} aria-hidden="true" /> Reviewed by you</div>
-        </div>
+        <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> AUTOMATED JOB LOOP</p>
+        <h2 id={`${fieldId}-story`}>{mode === 'sign-up' || loopEntry ? <>Set up your Automated Job Loop <span>in minutes.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h2>
+        <p className="ap-story-description">Choose your roles and locations once. Automated Job Loop finds the best-matching jobs and prepares a tailored, role-specific CV for each.</p>
+        <div className="ap-story-card"><RunCard /></div>
         <p className="ap-story-footnote"><LockKeyhole size={16} aria-hidden="true" /> Choose what you save in your account.</p>
         <Link to="/job-loop" className="ap-story-link">See how the Automated Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
       </aside>}
@@ -187,7 +177,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           </div>}
         </div>
         <div className="ap-auth-content">
-          {visibleError && <Alert variant="destructive" role="alert" className="ap-auth-alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
+          {visibleError && <Alert variant="destructive" role="alert" id={`${fieldId}-error`} className="ap-auth-alert"><AlertDescription>{visibleError}</AlertDescription></Alert>}
           {resetSent && <p role="status" className="ap-auth-notice">If this email has an account, reset instructions were requested. Open the link in a separate tab, then sign in here to keep this CV check open.</p>}
           {socialBrowser && <div className="ap-auth-notice" role="note"><strong>You’re in an app’s browser.</strong><p>For Google sign-in, use the app’s menu to open this page in Safari or Chrome. Email and password are available here. If your confirmation email opens another browser, return here and sign in with your password after confirming.</p>{!embedded && <Button type="button" variant="outline" onClick={() => void copyBrowserLink()}>{copied ? 'Link copied' : 'Copy sign-in link'}</Button>}</div>}
           {confirmationSent ? (
@@ -200,7 +190,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           ) : (
             <>
               {!socialBrowser && <Button type="button" variant="outline" className="ap-google-button" onClick={handleGoogle} disabled={busy || !!configurationError}>
-                <span className="ap-google-mark" aria-hidden="true">G</span>
+                <svg className="ap-google-mark" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M23.5 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.46a5.52 5.52 0 0 1-2.4 3.62v3h3.87c2.27-2.09 3.57-5.17 3.57-8.81Z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.87-3c-1.07.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.37-2.28v-3.1H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.38l4-3.1Z"/><path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.59 1.8l3.44-3.44C17.95 1.19 15.23 0 12 0A12 12 0 0 0 1.27 6.62l4 3.1C6.22 6.86 8.87 4.75 12 4.75Z"/></svg>
                 Continue with Google
               </Button>}
               {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
@@ -208,12 +198,12 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
                 {mode === 'sign-up' && <ContactFields value={contact} onChange={setContact} disabled={busy} />}
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-email`}>Email address</Label>
-                  <Input id={`${fieldId}-email`} type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)} required disabled={busy} />
+                  <Input id={`${fieldId}-email`} type="email" autoComplete="email" placeholder="you@example.com" aria-invalid={visibleError ? true : undefined} aria-describedby={visibleError ? `${fieldId}-error` : undefined} value={email} onChange={event => setEmail(event.target.value)} required disabled={busy} />
                 </div>
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-password`}>Password</Label>
                   <div className="ap-password-field">
-                    <Input id={`${fieldId}-password`} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'} aria-describedby={mode === 'sign-up' ? `${fieldId}-password-help` : undefined} value={password} onChange={event => setPassword(event.target.value)} required disabled={busy} />
+                    <Input id={`${fieldId}-password`} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'} aria-invalid={visibleError ? true : undefined} aria-describedby={[mode === 'sign-up' ? `${fieldId}-password-help` : '', visibleError ? `${fieldId}-error` : ''].filter(Boolean).join(' ') || undefined} value={password} onChange={event => setPassword(event.target.value)} required disabled={busy} />
                     <Button type="button" variant="ghost" size="sm" className="ap-password-toggle" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(current => !current)}>
                       {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                     </Button>

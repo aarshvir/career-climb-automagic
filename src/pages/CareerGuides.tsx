@@ -15,7 +15,7 @@ function GuideCard({ guide }: { guide: CareerGuide }) {
     <div className="cg-card-meta"><span>{guide.category}</span><span>{guide.readingMinutes} min read</span></div>
     <h3><Link to={`/guides/${guide.slug}`}>{guide.title}<ArrowRight size={18} aria-hidden="true" /></Link></h3>
     <p>{guide.description}</p>
-    <span className="cg-card-audience">For {guide.audience.toLowerCase()}</span>
+    <span className="cg-card-audience">For {guide.audience.replace(/^(\w)(?!BA)(.*)$/, (_m: string, first: string, rest: string) => first.toLowerCase() + rest)}</span>
   </article>;
 }
 
@@ -38,12 +38,12 @@ export default function CareerGuides() {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return careerGuides.filter(guide => {
       const haystack = [guide.title, guide.description, guide.summary, guide.audience, guide.category, ...guide.takeaways].join(" ").toLowerCase();
-      return words.every(word => haystack.includes(word)) && (audience === "all" || guide.audience === audience || guide.audience === "All applicants") && (category === "all" || guide.category === category);
+      return words.every(word => haystack.includes(word)) && (category !== "all" || guide.category !== "UAE job search" || words.length > 0) && (audience === "all" || guide.audience === audience || guide.audience === "All applicants") && (category === "all" || guide.category === category);
     });
   }, [query, audience, category]);
   const hasFilters = query.trim() || audience !== "all" || category !== "all";
   function reset() { setQuery(""); setAudience("all"); setCategory("all"); }
-  return <main className="career-guides">
+  return <main className="career-guides jv-rails">
     <Helmet><title>Practical CV and application guides | Jobvance</title><meta name="description" content="Original guides for students, MBA candidates and busy professionals. Review CV evidence, prepare applications, verify UAE job sources and troubleshoot." /><link rel="canonical" href={`${SITE}/guides`} /><meta property="og:title" content="Practical CV and application guides | Jobvance" /><meta property="og:description" content="Useful next steps for your CV, career direction and application workflow. Practical guides with worked examples and source links." /><meta property="og:url" content={`${SITE}/guides`} /><meta property="og:type" content="website" /></Helmet>
     <header className="cg-hero"><p className="cg-eyebrow"><BookOpen size={16} aria-hidden="true" /> JOBVANCE GUIDES</p><h1>Practical help for your <span>next application.</span></h1><p>Practical reading for students, MBA candidates and professionals fitting a move around work. Choose the task in front of you and leave with something you can use.</p><div className="cg-hero-links"><Link to="/guides/first-application-pack">Preparing your first application <ArrowRight size={16} aria-hidden="true" /></Link><Link to="/guides/cv-job-description-evidence">Checking your CV evidence <ArrowRight size={16} aria-hidden="true" /></Link></div><p className="cg-public-note">20 practical guides · Free to read · Worked examples and source links</p></header>
     <section className="cg-library" aria-labelledby="cg-library-title">
@@ -68,7 +68,7 @@ export function CareerGuideArticle() {
     author: { "@type": "Organization", name: editorialPolicy.publisher },
     publisher: { "@type": "Organization", name: "Jobvance", url: SITE },
   };
-  return <main className="career-guides cg-article-page">
+  return <main className="career-guides cg-article-page jv-rails">
     <Helmet><title>{guide.title} | Jobvance</title><meta name="description" content={guide.description} /><link rel="canonical" href={canonical} /><meta property="og:title" content={guide.title} /><meta property="og:description" content={guide.description} /><meta property="og:url" content={canonical} /><meta property="og:type" content="article" /><meta property="article:published_time" content={guide.publishedAt} /><meta property="article:modified_time" content={guide.updatedAt} /><script type="application/ld+json">{JSON.stringify(articleSchema)}</script></Helmet>
     <nav className="cg-breadcrumb" aria-label="Breadcrumb"><Link to="/guides"><ArrowLeft size={16} aria-hidden="true" /> All guides</Link><span aria-hidden="true">/</span><span>{guide.category}</span></nav>
     <article>

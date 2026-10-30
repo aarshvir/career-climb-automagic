@@ -5,11 +5,16 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 
+const brandInner = <>
+  <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 4h7l4 4v9a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M13 4v5h5M13 12v4a2 2 0 0 1-4 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+  <span className="jv-brand-name">jobvance<span className="jv-brand-period">.</span></span>
+</>;
 export function Brand() {
-  return <Link to="/" className="jv-brand" aria-label="Jobvance home">
-    <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 4h7l4 4v9a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M13 4v5h5M13 12v4a2 2 0 0 1-4 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
-    <span className="jv-brand-name">jobvance<span className="jv-brand-period">.</span></span>
-  </Link>;
+  return <Link to="/" className="jv-brand" aria-label="Jobvance home">{brandInner}</Link>;
+}
+/** The same mark and wordmark without a link, for product mocks. */
+export function BrandLockup() {
+  return <span className="jv-brand jv-brand--static" aria-hidden="true">{brandInner}</span>;
 }
 const links = [["/job-loop","Automated Job Loop"],["/check","Free CV Check"],["/pricing","Pricing"],["/guides","Guides"],["/help","Help"]];
 // A stored Supabase session makes "signed in" likely. Only then is the signed-out footprint held invisible while the
@@ -33,6 +38,9 @@ export default function MvpHeader() {
   // Keep the panel mounted for 160ms after it closes so it can clip away (instant under reduced motion).
   const [closing,setClosing] = useState(false);
   const wasOpen = useRef(open);
+  // Derived during render so the panel is never hidden for a frame between "open" and "closing".
+  const canAnimateClose = typeof window !== "undefined" && !window.matchMedia?.("(min-width: 960px)").matches && !!window.matchMedia?.("(prefers-reduced-motion: no-preference)").matches;
+  const closingNow = closing || (wasOpen.current && !open && canAnimateClose);
   // Desktop hides the mobile controls. Release their modal state as well,
   // including when the viewport crosses the breakpoint while the menu is open.
   useEffect(() => {
@@ -116,11 +124,11 @@ export default function MvpHeader() {
       {signedOut && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm jv-header-start">Get started</Link>}
       <button ref={toggle} type="button" className="jv-menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="mobile-navigation" onClick={()=>setOpenPath(open ? null : location.pathname)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
-    <nav ref={panel} id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closing ? "closing" : undefined} className="jv-mobile-panel">
+    <nav ref={panel} id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closingNow ? "closing" : undefined} className="jv-mobile-panel">
       {links.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}
       <div className="jv-mobile-account" onClick={()=>setOpenPath(null)}>{account}</div>
     </nav>
-    {(open || closing) && <div className="jv-menu-scrim" aria-hidden="true" data-state={closing ? "closing" : undefined} onClick={()=>setOpenPath(null)} />}
+    {(open || closingNow) && <div className="jv-menu-scrim" aria-hidden="true" data-state={closingNow ? "closing" : undefined} onClick={()=>setOpenPath(null)} />}
     {error && <p className="jv-header-error" role="alert">{error}</p>}
   </header>;
 }

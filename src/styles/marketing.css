@@ -244,3 +244,106 @@
 
 /* Icons on marketing pages use a lighter stroke; the private app keeps 2. */
 .product-page .lucide, .loop-overview .lucide, .jv-marketing .lucide { stroke-width: 1.75; }
+
+/* ---------- Inner-page system: every marketing page except the home page shares these primitives ---------- */
+/* One container: content starts on the header pill's inner edge (x=184 at 1440) with the same frame rails as home. */
+.jv-rails { position: relative; isolation: isolate; overflow-x: clip; }
+@media (min-width: 1024px) {
+  .jv-rails::before, .jv-rails::after { content: ""; position: absolute; top: 0; bottom: 0; z-index: -1; width: 1px; background: var(--jv-line); pointer-events: none; }
+  .jv-rails::before { left: calc(50% - var(--shell) / 2); }
+  .jv-rails::after { right: calc(50% - var(--shell) / 2); }
+}
+.jv-page { width: var(--shell); margin-inline: auto; }
+@media (min-width: 1024px) { .jv-page { padding-inline: var(--band-pad-x); } }
+.jv-page-head { padding: 40px 0 40px; }
+.jv-page-head > .jv-caption { margin: 0 0 16px; }
+.jv-page-title { margin: 0; max-width: 16em; color: var(--jv-ink); font-size: var(--t-page); font-weight: var(--fw-display); line-height: 1.05; letter-spacing: -.035em; text-wrap: balance; }
+.jv-lead { margin: 20px 0 0; max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; text-wrap: pretty; }
+.jv-page-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 28px; }
+.jv-page-note { margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
+.jv-nb { white-space: nowrap; }
+/* Meta lines: segments never start a line with a separator (each row clips its own leading dot). */
+.jv-meta { display: block; overflow: hidden; margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); font-variant-numeric: tabular-nums; }
+.jv-meta-in { display: flex; flex-wrap: wrap; margin-left: -18px; }
+.jv-meta-in > span { position: relative; padding-left: 18px; white-space: nowrap; }
+.jv-meta-in > span::before { content: "\00B7"; position: absolute; left: 6px; }
+.jv-dark .jv-meta { color: var(--jv-on-dark-2); }
+@media (min-width: 640px) { .jv-page-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 28px; } .jv-page-head { padding-top: 64px; } }
+@media (min-width: 1024px) { .jv-page-head { padding: 88px 0 72px; } }
+@media (max-width: 639px) { .jv-page-actions .jv-btn { width: 100%; } }
+.jv-section { padding: 56px 0; border-top: 1px solid var(--jv-line); }
+@media (min-width: 1024px) { .jv-section { padding: 96px 0; } }
+.jv-section-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: -.035em; text-wrap: balance; }
+.jv-head { display: grid; gap: 16px; max-width: 720px; margin-bottom: 32px; }
+.jv-head > .jv-caption { margin: 0; }
+.jv-head > p:not(.jv-caption) { margin: 0; max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; }
+@media (min-width: 1024px) { .jv-head { margin-bottom: 48px; } }
+/* Numbered hairline list (replaces icon-in-circle step cards). */
+.jv-steps { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line-strong); }
+.jv-steps > li { display: grid; gap: 10px; padding: 28px 0; border-bottom: 1px solid var(--jv-line); min-width: 0; }
+.jv-steps h3 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.jv-steps p:not(.jv-caption) { margin: 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); text-wrap: pretty; }
+.jv-steps .jv-caption { margin: 0; }
+.jv-steps .jv-steps-example { display: inline-flex; width: fit-content; max-width: 100%; margin-top: 6px; padding: 4px 10px; border: 1px solid var(--jv-line); border-radius: var(--r-xs); background: var(--jv-sunken); color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; }
+@media (min-width: 768px) {
+  .jv-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 0; column-gap: 32px; }
+  .jv-steps > li { align-content: start; padding: 24px 0 0; border-top: 1px solid var(--jv-line-strong); border-bottom: 0; }
+}
+/* Two-column rows on the 12-column grid. */
+.jv-split { display: grid; gap: 32px; }
+@media (min-width: 1024px) { .jv-split { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; } .jv-split > :first-child { grid-column: 1 / span 5; } .jv-split > :last-child { grid-column: 7 / span 6; } }
+/* Ticked lists: a square marker, hairline rows. */
+.jv-ticks { display: grid; margin: 0; padding: 0; list-style: none; }
+.jv-ticks li { position: relative; padding: 14px 0 14px 22px; border-top: 1px solid var(--jv-line); color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: var(--lh-body-sm); }
+.jv-ticks li::before { content: ""; position: absolute; left: 0; top: 23px; width: 6px; height: 6px; background: var(--jv-brand); }
+.jv-dark .jv-ticks li { border-color: var(--jv-line); color: var(--jv-on-dark-body); }
+.jv-dark .jv-ticks li::before { background: var(--jv-signal); }
+/* Reading width for prose; legal text shares one token set. */
+.jv-prose { max-width: 68ch; }
+.jv-prose > h2 { margin: 44px 0 0; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }
+.jv-prose > h2:first-child { margin-top: 0; }
+.jv-prose > p { margin: 14px 0 0; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.65; }
+.jv-prose a { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
+/* Related pages row at the end of reading pages. */
+.jv-related { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--jv-line-strong); }
+.jv-related > span { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; }
+/* Inline text links in reading areas keep a 44px hit area without changing their look. */
+.jv-related a, .jv-link-row a { display: inline-flex; align-items: center; min-height: 44px; color: var(--jv-brand); font-size: var(--t-body-sm); font-weight: var(--fw-semi); text-decoration: none; }
+.jv-related a:hover, .jv-link-row a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.jv-link-row { display: flex; flex-wrap: wrap; gap: 0 24px; }
+/* Interactive feedback shared by inner-page buttons and links. */
+.jv-page a:focus-visible, .jv-related a:focus-visible { border-radius: 6px; }
+/* Accordion rows on inner pages use the same +/- accordion everywhere. */
+.jv-faq--wide { max-width: none; }
+/* Mono eyebrow as a link (breadcrumb-free pages). */
+/* Final CTA band: optional right-half visual. */
+.jv-cta .jv-cta-visual { display: none; }
+@media (min-width: 1024px) {
+  .jv-cta--visual .jv-cta-visual { display: block; position: absolute; z-index: 0; right: -40px; top: 50%; width: min(440px, 44%); translate: 0 -50%; rotate: 0deg; pointer-events: none; }
+  .jv-cta--visual .jv-cta-visual .pc-card { box-shadow: 0 30px 80px -20px rgb(0 0 0 / .5); }
+  .jv-cta--visual .jv-cta-visual > .pc-card + .pc-card { position: absolute; right: 150px; top: 170px; width: 260px; }
+  .jv-cta--visual .jv-cta-orbit { display: none; }
+}
+/* Footer note and description measure. */
+.jv-footer-description { max-width: 40ch; hyphens: manual; }
+@media (hover: hover) { .jv-page a.jv-btn, .jv-cta a.jv-btn { text-decoration: none; } }
+.jv-page :is(a, button, summary, input, select, textarea):focus-visible { outline-color: var(--jv-brand); }
+.jv-dark :is(a, button, summary):focus-visible, .jv-page .jv-dark :is(a, button, summary):focus-visible { outline-color: var(--jv-signal); }
+
+/* One disclosure style: every plain <details> summary outside the FAQ markup gets the same +/- toggle as .jv-faq. */
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; list-style: none; cursor: pointer; }
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary::-webkit-details-marker { display: none; }
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary::after { content: "+"; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); font-size: 18px; line-height: 1; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details)[open] > summary::after { content: "\2212"; background: var(--jv-ink); border-color: var(--jv-ink); color: #fff; }
+.jv-brand--static { min-height: 0; pointer-events: none; }
+
+/* Touch targets: 44px minimum on phones. */
+@media (max-width: 959px) {
+  .jv-header .jv-btn--sm { --jv-btn-h: 44px; }
+  .jv-footer-bottom nav a, .jv-footer-col a { min-width: 44px; }
+}
+/* Brand wordmark fallback: Manrope Bold's width is close to this stack, so a late swap does not move the header. */
+.jv-brand { font-synthesis: none; }
+/* Closing CTA visual: fully inside the band, never cropped mid-label. */
+@media (min-width: 1024px) { .jv-cta--visual .jv-cta-visual { right: 32px; } }
+.jv-lead { margin-top: 24px; }

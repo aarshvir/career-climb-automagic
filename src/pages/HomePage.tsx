@@ -1,24 +1,19 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, FileText } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import LoopJourney from "@/components/LoopJourney";
 import LoopOrbit from "@/components/marketing/LoopOrbit";
 import LoopRunMock from "@/components/marketing/LoopRunMock";
+import { CvCard, RunCard, RunTimeline, ScheduleCard } from "@/components/marketing/ProductCards";
 import { useReveal } from "@/hooks/useReveal";
 import { homeGuides } from "@/lib/home-guides";
-import { subscriptionPlans } from "@/lib/subscription-plans";
+import PriceNote from "@/components/marketing/PriceNote";
 import "./Home.css";
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
-const fromPrice = subscriptionPlans[0].priceUsd;
 
 // Facts the site already states (FAQ, pricing, Automated Job Loop page). No counts, ratings or outcomes.
 const proof = ["Jobs and prepared CVs, together", "Up to 3 CV variants", "Weekly, 3×/week or daily", "PDF, DOCX or TXT downloads", "Free CV Check"];
-
-/** One reassurance line, identical under both main buttons. Lines only break between segments. */
-function PriceNote() {
-  return <><span className="jv-nb">Free account</span>{" "}<span className="jv-nb">·&nbsp;plans from ${fromPrice}/month</span>{" "}<span className="jv-nb">·&nbsp;pay only if you choose a plan or pass</span></>;
-}
 
 function StartLink({ children = "Start my Automated Job Loop", to = "/onboarding", size = "md", variant = "primary", className = "" }: { children?: React.ReactNode; to?: string; size?: "md" | "lg"; variant?: "primary" | "secondary"; className?: string }) {
   return <Link to={to} className={`jv-btn jv-btn--${variant}${size === "lg" ? " jv-btn--lg" : ""} ${className}`.trim()}>{children}<ArrowRight aria-hidden="true" /></Link>;
@@ -43,11 +38,12 @@ export default function HomePage() {
             <StartLink size="lg" className="jv-hero-cta">Start my search</StartLink>
             <TextLink to="/check">Try the free CV Check</TextLink>
           </div>
-          <p className="jv-hero-note jv-enter" style={delay(180)}><PriceNote /></p>
+          <div className="jv-hero-note jv-enter" style={delay(180)}><PriceNote /></div>
         </div>
         <div className="jv-hero-visual">
           <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} className="jv-hero-orbit" /></div>
-          <div className="jv-hero-mock jv-enter-card"><LoopRunMock /></div>
+          <div className="jv-hero-mock jv-hero-mock--wide jv-enter-card"><LoopRunMock /></div>
+          <div className="jv-hero-cv jv-enter-card" style={delay(160)}><CvCard compact /></div>
         </div>
       </div>
     </section>
@@ -74,6 +70,7 @@ export default function HomePage() {
               <span className="jv-orbit-core-meta">Mon · Wed · Fri</span>
             </span>
           </LoopOrbit>
+          <div className="jv-loop-timeline"><RunTimeline /></div>
         </div>
         <div className="jv-loop-steps">
           <p className="jv-loop-caption">Set up once · by you</p>
@@ -96,40 +93,15 @@ export default function HomePage() {
         <div className="jv-control-rows">
           <article className="jv-control-row" data-reveal>
             <div className="jv-control-copy"><h3>Your search comes back on schedule.</h3><p>Weekly, three days a week or daily, the next run starts without you rebuilding the same searches. Pause it whenever your plans change.</p></div>
-            <div className="jv-frag" aria-hidden="true">
-              <div className="jv-frag-card">
-                <div className="jv-frag-head"><span className="jv-frag-strong">Schedule</span><span className="jv-frag-muted">3×/week</span></div>
-                <div className="jv-frag-foot">
-                  <span className="jv-frag-days is-on"><span>Mon</span><span>Wed</span><span>Fri</span></span>
-                  <span className="jv-frag-state">Next run <span className="jv-frag-time">Wed 7:00 AM</span></span>
-                </div>
-              </div>
-            </div>
+            <div className="jv-frag" aria-hidden="true"><ScheduleCard /></div>
           </article>
           <article className="jv-control-row" data-reveal>
             <div className="jv-control-copy"><h3>Openings for the roles you chose.</h3><p>Each run looks through connected sources for your roles and locations, so you start from a list instead of a blank search box. Some runs may find nothing new.</p></div>
-            <div className="jv-frag" aria-hidden="true">
-              <div className="jv-frag-card">
-                <span className="jv-frag-label">Example run</span>
-                <ul className="jv-frag-jobs">
-                  <li><span className="jv-frag-strong">Product Analyst</span><span className="jv-frag-muted">Northwind Labs · Remote (US)</span></li>
-                  <li><span className="jv-frag-strong">Data Analyst</span><span className="jv-frag-muted">Contoso Health · Austin, TX</span></li>
-                </ul>
-              </div>
-            </div>
+            <div className="jv-frag" aria-hidden="true"><RunCard /></div>
           </article>
           <article className="jv-control-row" data-reveal>
             <div className="jv-control-copy"><h3>A tailored CV for each prepared role.</h3><p>Each prepared role comes with a CV reworded for that job from your own experience. Review it, download PDF, DOCX or TXT and open the employer’s vacancy from your dashboard.</p></div>
-            <div className="jv-frag" aria-hidden="true">
-              <div className="jv-frag-card">
-                <span className="jv-frag-label">Example application</span>
-                <div className="jv-frag-head"><span className="jv-frag-strong">Product Analyst</span><span className="jv-frag-muted">Northwind Labs</span></div>
-                <div className="jv-frag-foot">
-                  <span className="jv-frag-filename"><FileText aria-hidden="true" />CV_Product_Analyst.pdf</span>
-                  <span className="jv-status-tag">Ready for review</span>
-                </div>
-              </div>
-            </div>
+            <div className="jv-frag" aria-hidden="true"><CvCard /></div>
           </article>
         </div>
         <div className="jv-boundary" data-reveal>
@@ -174,7 +146,7 @@ export default function HomePage() {
     </section>
 
     {/* 7. Final CTA */}
-    <section className="jv-cta jv-dark" aria-labelledby="home-final-title">
+    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="home-final-title">
       <div className="jv-cta-inner">
         <h2 id="home-final-title">Give your job search a routine.</h2>
         <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
@@ -183,8 +155,9 @@ export default function HomePage() {
           <Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link>
           <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
         </div>
-        <p className="jv-cta-note"><PriceNote /></p>
+        <div className="jv-cta-note"><PriceNote /></div>
       </div>
+      <div className="jv-cta-visual" aria-hidden="true"><RunCard /></div>
     </section>
   </div>;
 }
