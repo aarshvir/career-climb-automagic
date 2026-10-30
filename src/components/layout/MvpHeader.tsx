@@ -6,13 +6,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 
 const brandInner = <>
-  <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 4h7l4 4v9a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M13 4v5h5M13 12v4a2 2 0 0 1-4 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+  <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><g transform="translate(20 20) scale(1.3) translate(-17 -19)" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round"><path d="M24 9v13a7 7 0 0 1-14 0" /><path d="M17 9h7" /></g></svg></span>
   <span className="jv-brand-name">jobvance<span className="jv-brand-period">.</span></span>
 </>;
 export function Brand() {
   return <Link to="/" className="jv-brand" aria-label="Jobvance home">{brandInner}</Link>;
 }
-/** The same mark and wordmark without a link, for product mocks. */
+/** The same J mark (the favicon glyph) and wordmark without a link, for product mocks. */
 export function BrandLockup() {
   return <span className="jv-brand jv-brand--static" aria-hidden="true">{brandInner}</span>;
 }

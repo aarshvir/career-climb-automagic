@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { RunCard } from '@/components/marketing/ProductCards';
+import LoopOrbit from '@/components/marketing/LoopOrbit';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -153,25 +153,25 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   return (
     <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
       {!embedded && <aside className="ap-account-story" aria-labelledby={`${fieldId}-story`}>
-        <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" /> AUTOMATED JOB LOOP</p>
+        <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" />Automated Job Loop</p>
         <h2 id={`${fieldId}-story`}>{mode === 'sign-up' || loopEntry ? <>Set up your Automated Job Loop <span>in minutes.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h2>
         <p className="ap-story-description">Choose your roles and locations once. Automated Job Loop finds the best-matching jobs and prepares a tailored, role-specific CV for each.</p>
-        <div className="ap-story-card"><RunCard /></div>
+        <div className="ap-story-orbit" aria-hidden="true"><LoopOrbit size={288} labels animate={false}><span className="ap-orbit-core"><span>Set up once</span><span>then it runs</span></span></LoopOrbit></div>
         <p className="ap-story-footnote"><LockKeyhole size={16} aria-hidden="true" /> Choose what you save in your account.</p>
         <Link to="/job-loop" className="ap-story-link">See how the Automated Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
       </aside>}
       <div className="ap-auth-panel">
         <div className="ap-auth-heading">
-          {!embedded && <p className="ap-eyebrow">{loopEntry ? 'YOUR AUTOMATED JOB LOOP STARTS HERE' : 'YOUR JOBVANCE WORKSPACE'}</p>}
+          {!embedded && <p className="ap-eyebrow ap-eyebrow--form"><span className="ap-dot" aria-hidden="true" />{loopEntry ? 'Your Automated Job Loop' : 'Your Jobvance workspace'}</p>}
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
           {!(loopEntry && !confirmationSent) && <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>}
           {loopEntry && !confirmationSent && <div className="ap-loop-entry">
             <ul className="ap-benefits" aria-label="What the Automated Job Loop does">
-              <li><Check size={18} aria-hidden="true" /><span><strong>Roles matched to your CV.</strong> Each run searches the employer job boards we cover for the roles you choose.</span></li>
-              <li><Check size={18} aria-hidden="true" /><span><strong>A tailored CV for each role.</strong> Built only from facts you confirm. Nothing is invented.</span></li>
-              <li><Check size={18} aria-hidden="true" /><span><strong>Built for a high ATS match.</strong> Role-specific CVs written to fit each job’s requirements.</span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Roles matched to your CV.</strong> Each run searches the job boards we cover.</span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>A tailored CV for each role.</strong> Built only from facts you confirm.</span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Built for a high ATS match.</strong> Written to fit each job’s requirements.</span></li>
             </ul>
-            <p className="ap-benefits-price">Automated Job Loop plans from US$29/month. <Link to="/pricing">See plans</Link> · <Link to="/job-loop">How it works</Link></p>
+            <p className="ap-benefits-price">Automated Job Loop plans from US$29/month. <span className="ap-benefits-links"><Link to="/pricing">See plans</Link><Link to="/job-loop">How it works</Link></span></p>
             <p className="ap-benefits-free">Your account also includes 3 AI-tailored CVs a month, free.</p>
             <details className="ap-steps"><summary>What happens after you sign up</summary><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol></details>
           </div>}

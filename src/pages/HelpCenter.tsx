@@ -1,9 +1,29 @@
-import { useEffect, useId, useMemo, useState } from 'react';
+import { Fragment, useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { staticPageMeta } from '@/lib/public-site-meta';
 import { ArrowRight, BookOpen, ClipboardList, FileText, Search } from 'lucide-react';
 import './HelpCenter.css';
+
+// Names of on-screen controls and headings quoted in the steps, so they can be scanned at a glance.
+const uiLabels = ['Add your CV and the job', 'Review changes', 'Upload your CV', 'The job description', 'Tailor my CV for this job', 'Compare without AI', 'What changed for this job', 'Keep my original', 'Remove this summary', 'Quick questions (answer only if true)', 'Add something the job asks for (optional)', 'Your tailored CV', 'Your CV for this job', 'Continue to download', 'Maximum PDF length', 'Open the exact PDF preview in a new tab', 'Download PDF', 'Download Word', 'Download TXT', 'Draft recovery (optional)', 'Keep my draft in this tab across refresh', 'Keep my CV and job description in this tab while I sign in with Google', 'Clear & start again', 'Clear current check', 'My CV & experience', 'No CV yet? Build one with guided questions', 'No CV yet? Build one here', 'What name should appear on your CV?', 'Preview my CV draft', 'Review your draft', 'Use this CV draft', 'Undo CV builder replacement', 'Continue with this text', 'Refresh records', 'Requirement report', 'What the job asks for'];
+const labelsLongestFirst = [...uiLabels].sort((a, b) => b.length - a.length);
+function withLabels(text: string): ReactNode {
+  const parts: ReactNode[] = [];
+  let rest = text;
+  while (rest) {
+    let at = -1, label = '';
+    for (const candidate of labelsLongestFirst) {
+      const found = rest.indexOf(candidate);
+      if (found !== -1 && (at === -1 || found < at)) { at = found; label = candidate; }
+    }
+    if (at === -1) { parts.push(rest); break; }
+    if (at > 0) parts.push(rest.slice(0, at));
+    parts.push(<strong className="hc-ui" key={parts.length}>{label}</strong>);
+    rest = rest.slice(at + label.length);
+  }
+  return parts.map((part, index) => <Fragment key={index}>{part}</Fragment>);
+}
 
 type HelpCategory = 'Free CV check' | 'Automated Job Loop' | 'Privacy & recovery';
 export interface HelpTopic {
@@ -233,6 +253,8 @@ export default function HelpCenter() {
   const route = useLocation();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<HelpCategory | 'All topics'>('All topics');
+  // The task list starts collapsed on phones so the first topic is not pushed a screen and a half down.
+  const [tasksOpen, setTasksOpen] = useState(() => typeof window === 'undefined' || !window.matchMedia?.('(max-width: 800px)').matches);
   const topics = useMemo(() => searchHelpTopics(query, category), [query, category]);
   function reset() { setQuery(''); setCategory('All topics'); }
   useEffect(() => {
@@ -245,24 +267,24 @@ export default function HelpCenter() {
   return <main className="help-center jv-rails">
     <Helmet><title>{meta.title}</title><meta name="description" content={meta.description} /><link rel="canonical" href="https://jobvance.io/help" /></Helmet>
     <nav className="hc-breadcrumb" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">Help center</span></nav>
-    <header className="hc-hero"><p className="hc-eyebrow"><BookOpen size={16} aria-hidden="true" /> HELP AT THE NEXT STEP</p><h1>What would you like to get done?</h1><p>Find the next click, understand a field, or get back to your draft. Read a guide, then sign in to set up your Automated Job Loop or use CV Check.</p><Link className="hc-text-link" to="/walkthroughs">Try an interactive walkthrough <ArrowRight size={16} aria-hidden="true" /></Link></header>
+    <header className="hc-hero"><p className="hc-eyebrow"><BookOpen size={16} aria-hidden="true" />Help at the next step</p><h1 className="jv-enter-h1">What would you like to get done?</h1><p className="jv-enter">Find the next click, understand a field, or get back to your draft. Read a guide, then sign in to set up your Automated Job Loop or use CV Check.</p><Link className="hc-text-link" to="/walkthroughs">Try an interactive walkthrough <ArrowRight size={16} aria-hidden="true" /></Link></header>
     <section className="hc-start" aria-label="Choose a starting task">
       <a href="#first-check" onClick={reset}><FileText size={22} aria-hidden="true" /><strong>Check your CV against a job</strong><span>Start with the free check.</span><ArrowRight size={16} aria-hidden="true" /></a>
       <a href="#job-loop-start" onClick={reset}><ClipboardList size={22} aria-hidden="true" /><strong>Save experience for your next application</strong><span>Set up your Automated Job Loop record.</span><ArrowRight size={16} aria-hidden="true" /></a>
       <a href="#recovery" onClick={reset}><BookOpen size={22} aria-hidden="true" /><strong>Pick up where you left off</strong><span>Find an interrupted draft.</span><ArrowRight size={16} aria-hidden="true" /></a>
     </section>
-    <section className="hc-filters" aria-label="Find help"><label htmlFor={searchId}>Search help topics</label><div className="hc-search"><Search size={19} aria-hidden="true" /><input id={searchId} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Try PDF, MBA projects, another vacancy…" /></div><div className="hc-categories" aria-label="Help categories">{(['All topics', 'Free CV check', 'Automated Job Loop', 'Privacy & recovery'] as const).map(item => <button key={item} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></section>
+    <section className="hc-filters" aria-label="Find help"><label htmlFor={searchId}>Search help topics</label><div className="hc-search"><Search size={19} aria-hidden="true" /><input id={searchId} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search help" /></div><div className="hc-categories" role="group" aria-label="Help categories">{(['All topics', 'Free CV check', 'Automated Job Loop', 'Privacy & recovery'] as const).map(item => <button key={item} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div></section>
     <div className="hc-results"><p role="status">{topics.length} {topics.length === 1 ? 'topic' : 'topics'}{query || category !== 'All topics' ? ' match your choices' : ' to help you move forward'}</p>{(query || category !== 'All topics') && <button type="button" onClick={reset}>Show all topics</button>}</div>
-    <div className="hc-reading-layout"><aside className="hc-contents"><nav aria-label="Help topics on this page"><h2>Go to a task</h2><ol>{topics.map(topic => <li key={topic.id}><a href={`#${topic.id}`}>{topic.title}</a></li>)}</ol><Link to="/job-loop">How the Automated Job Loop works</Link><Link to="/guides">Career guide library</Link></nav></aside><div className="hc-topic-list">
+    <div className="hc-reading-layout"><aside className="hc-contents"><nav aria-label="Help topics on this page"><details open={tasksOpen} onToggle={event => setTasksOpen(event.currentTarget.open)}><summary><h2>Go to a task</h2></summary><ol>{topics.map(topic => <li key={topic.id}><a href={`#${topic.id}`}>{topic.title}</a></li>)}</ol></details><Link to="/job-loop">How the Automated Job Loop works</Link><Link to="/guides">Career guide library</Link></nav></aside><div className="hc-topic-list">
       {topics.length ? topics.map(topic => <section id={topic.id} className="hc-topic" key={topic.id} aria-labelledby={`hc-${topic.id}`}>
         <p className="hc-eyebrow">{topic.category}</p>
         <h2 id={`hc-${topic.id}`}>{topic.title}</h2>
         <p className="hc-topic-summary">{topic.summary}</p>
-        <ol className="hc-steps">{topic.steps.map((step, index) => <li key={index}>{step}</li>)}</ol>
+        <ol className="hc-steps">{topic.steps.map((step, index) => <li key={index}>{withLabels(step)}</li>)}</ol>
         {topic.fields && <dl className="hc-field-help">{topic.fields.map(field => <div key={field.label}><dt>{field.label}</dt><dd>{field.help}</dd></div>)}</dl>}
         <div className="hc-note">{topic.notes.map(note => <p key={note}>{note}</p>)}</div>
         <div className="hc-topic-action"><Link className="hc-button" to={topic.action.to}>{topic.action.label}<ArrowRight size={16} aria-hidden="true" /></Link></div>
-        {topic.related && <p className="hc-related">Related help: {topic.related.map((related, index) => <span key={related.id}>{index > 0 && ' · '}<Link to={`/help#${related.id}`} onClick={reset}>{related.label}</Link></span>)}</p>}
+        {topic.related && <div className="hc-related"><span>Related help</span>{topic.related.map(related => <Link key={related.id} to={`/help#${related.id}`} onClick={reset}>{related.label}</Link>)}</div>}
       </section>) : <section className="hc-empty">
         <h2>No matching help topic yet.</h2>
         <p>Try a shorter phrase such as “PDF” or “facts”, or show all topics. You can also ask for help with the step you are on.</p>
@@ -270,6 +292,6 @@ export default function HelpCenter() {
         <Link to="/contact">Contact Jobvance</Link>
       </section>}
     </div></div>
-    <section className="hc-further"><div><p className="hc-eyebrow">KEEP MOVING</p><h2>Still need a hand?</h2><p>Tell us which step you reached and the message you saw. Leave confidential CV details out of your request.</p></div><div><Link className="hc-button hc-button--primary" to="/contact">Contact Jobvance<ArrowRight size={16} aria-hidden="true" /></Link><Link to="/guides">Read the career guides</Link></div></section>
+    <section className="hc-further"><div><p className="hc-eyebrow">Keep moving</p><h2>Still need a hand?</h2><p>Tell us which step you reached and the message you saw. Leave confidential CV details out of your request.</p></div><div><Link className="hc-button hc-button--primary" to="/contact">Contact Jobvance<ArrowRight size={16} aria-hidden="true" /></Link><Link to="/guides">Read the career guides</Link></div></section>
   </main>;
 }

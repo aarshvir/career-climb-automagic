@@ -156,7 +156,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     <Helmet><title>Set up your Automated Job Loop | Jobvance</title><meta name="robots" content="noindex,nofollow" /></Helmet>
     <header><Link to="/loop" className="oq-back"><ArrowLeft size={16} /> Back to your Automated Job Loop</Link><p className="oq-eyebrow">AUTOMATED JOB LOOP SETUP</p>
       <h1 ref={heading} tabIndex={-1}>{saved ? 'Your setup is saved.' : existing ? 'Your Automated Job Loop is ready to continue.' : questions[step]}</h1>
-      {!saved && !existing && <><p>Tell us the jobs you want, add your CV, then choose your search schedule.</p><div className="oq-progress" role="progressbar" aria-label="Setup progress" aria-valuemin={0} aria-valuemax={6} aria-valuenow={step + 1}><span style={{ width: `${(step + 1) / 6 * 100}%` }} /></div><p className="oq-step">Step {step + 1} of 6</p></>}
+      {!saved && !existing && <><p>Tell us the jobs you want, add your CV, then choose your search schedule.</p><div className="oq-progress" role="progressbar" aria-label="Setup progress" aria-valuemin={0} aria-valuemax={6} aria-valuenow={step + 1}><span style={{ transform: `scaleX(${(step + 1) / 6})` }} /></div><p className="oq-step">Step {step + 1} of 6</p></>}
     </header>
     {error && <div role="alert" className="oq-error" tabIndex={-1} ref={node => { if (node) { node.focus(); node.scrollIntoView?.({ block: "center", behavior: "auto" }); } }}>{error}<p><Link to="/loop">Check my saved dashboard</Link></p></div>}
     {busy && <p role="status"><Loader2 size={18} className="animate-spin" /> {busy}</p>}

@@ -7,7 +7,7 @@
 
 /* ---------- Type helpers ---------- */
 /* Mono is reserved for uppercase captions, section numbers and schedule/time values. */
-.jv-caption { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
+.jv-caption { display: flex; width: fit-content; max-width: 100%; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
 /* Marker rule: a 6px SQUARE marks a label or list item (brand on light, lime signal on forest); a CIRCLE marks only live state. */
 .jv-caption::before { content: ""; width: 6px; height: 6px; background: var(--jv-brand); flex-shrink: 0; }
 .jv-dark .jv-caption { color: var(--jv-on-dark-2); }
@@ -92,13 +92,13 @@
 .jv-dark .jv-btn--primary:active { background: #D5E5DB; }
 .jv-dark .jv-btn:focus-visible { outline-color: var(--jv-signal); }
 
-/* The approved document-J mark (the same green tile as the favicon and the ads) and the Manrope wordmark. */
+/* The approved J mark: one glyph (the favicon's hooked J) on the green tile at every size, plus the Manrope wordmark. */
 @font-face { font-family: "Jobvance Brand"; src: url("/fonts/Manrope-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
 .jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.04em; line-height: 1; text-decoration: none; border-radius: 10px; }
 .jv-brand-name { white-space: nowrap; }
 .jv-brand-period { color: var(--jv-brand); }
 .jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #215C43; color: #E2EEAF; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
-.jv-brand-mark svg { width: 24px; height: 24px; }
+.jv-brand-mark svg { width: 100%; height: 100%; display: block; }
 /* Windows High Contrast drops the tile fill; keep the tile's edge so the mark stays recognisable. */
 @media (forced-colors: active) { .jv-brand-mark { border: 1px solid CanvasText; } }
 @media (max-width: 760px) { .jv-brand { font-size: 20px; } }
@@ -136,13 +136,13 @@
 .jv-menu-scrim { position: fixed; inset: 56px 0 0; z-index: 1; background: rgb(15 29 23 / .32); animation: jv-scrim-in 180ms var(--ease-out) both; }
 .jv-account-status { color: var(--jv-ink-3); font-size: var(--t-sm); }
 .jv-header-error { width: var(--shell); margin: 0 auto 12px; color: var(--jv-danger); font-size: var(--t-sm); }
-/* Open and close clip the panel from its top edge, so its text never overlaps the page text behind it. */
-@keyframes jv-menu-in { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+/* Open and close slide and fade the panel (transform and opacity only, so it stays on the compositor). */
+@keyframes jv-menu-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 @keyframes jv-scrim-in { from { opacity: 0; } }
-/* Closing: the panel stays mounted for 160ms and is clipped away (MvpHeader sets data-state="closing"). */
+/* Closing: the panel stays mounted for 160ms and fades away (MvpHeader sets data-state="closing"). */
 .jv-mobile-panel[data-state="closing"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(15 29 23 / .18); pointer-events: none; animation: jv-menu-out 160ms var(--ease-inout) both; }
 .jv-menu-scrim[data-state="closing"] { pointer-events: none; animation: jv-scrim-out 160ms var(--ease-inout) both; }
-@keyframes jv-menu-out { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }
+@keyframes jv-menu-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-8px); } }
 @keyframes jv-scrim-out { to { opacity: 0; } }
 /* The full wordmark and navigation fit narrow phones; the main page keeps its primary start action. */
 @media (max-width: 359px) { .jv-header-inner > .jv-header-start { display: none; } .jv-header-inner > .jv-header-start ~ .jv-menu-toggle { margin-left: auto; } }
@@ -154,7 +154,7 @@
   .jv-header-inner { display: grid; grid-template-columns: 1fr auto 1fr; min-height: 64px; padding: 0 12px 0 16px; gap: 16px; border: 1px solid var(--jv-line); border-radius: 14px; box-shadow: var(--sh-1), 0 8px 24px -12px rgb(15 29 23 / .12); background: rgb(255 255 255 / .82); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
   .jv-header-inner > .jv-brand { justify-self: start; }
   .jv-header-nav { display: flex; align-items: center; gap: 2px; }
-  .jv-header-nav > a { display: inline-flex; align-items: center; min-height: 36px; padding: 8px 12px; border-radius: var(--r-pill); color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; letter-spacing: 0; text-decoration: none; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
+  .jv-header-nav > a { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 12px; border-radius: var(--r-pill); color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; letter-spacing: 0; text-decoration: none; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
   .jv-header-nav > a[aria-current="page"] { background: var(--jv-bg-muted); color: var(--jv-ink); }
   .jv-header-actions { display: flex; align-items: center; justify-self: end; gap: 4px; }
   .jv-header .jv-btn--sm { --jv-btn-h: 40px; }
@@ -184,7 +184,7 @@
 .jv-footer-col a { display: inline-flex; align-items: center; min-height: 44px; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; text-decoration: none; transition: color var(--dur-2) var(--ease-press); }
 @media (hover: hover) { .jv-footer-col a:hover { color: var(--jv-ink); } }
 /* Desktop with a pointer: 32px link rows (touch keeps 44px). */
-@media (min-width: 1024px) and (hover: hover) { .jv-footer-col a { min-height: 32px; } .jv-footer-col ul { gap: 2px; } }
+@media (min-width: 1024px) and (hover: hover) { .jv-footer-col a { min-height: 40px; } .jv-footer-col ul { gap: 0; } }
 .jv-footer-bottom { display: flex; flex-direction: column; gap: 4px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--jv-line); color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-footer-bottom p { margin: 0; }
 .jv-footer-bottom nav { display: flex; flex-wrap: wrap; column-gap: 20px; }
@@ -218,9 +218,9 @@
 .jv-cta .jv-cta-orbit { display: none; }
 .jv-cta-inner { position: relative; z-index: 1; max-width: 640px; }
 .jv-cta h2 { margin: 0; max-width: 8.1em; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: -.04em; text-wrap: balance; }
-.jv-cta p { margin: 16px 0 0; max-width: 46ch; color: var(--jv-on-dark-body); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; text-wrap: pretty; }
+.jv-cta p:not(.jv-caption) { margin: 16px 0 0; max-width: 46ch; color: var(--jv-on-dark-body); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; text-wrap: pretty; }
 .jv-cta-actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 32px; }
-.jv-cta .jv-cta-note { max-width: none; margin-top: 20px; color: var(--jv-on-dark-2); font-size: var(--t-sm); line-height: var(--lh-sm); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.jv-cta p.jv-cta-note { max-width: none; margin-top: 20px; color: var(--jv-on-dark-2); font-size: var(--t-sm); line-height: var(--lh-sm); letter-spacing: 0; font-variant-numeric: tabular-nums; }
 @media (max-width: 639px) { .jv-cta-actions .jv-btn { width: 100%; } }
 @media (min-width: 640px) { .jv-cta { padding: 96px var(--band-pad-x); } }
 @media (min-width: 1024px) {
@@ -233,14 +233,14 @@
 /* ---------- FAQ accordion ---------- */
 .jv-faq { max-width: 720px; border-top: 1px solid var(--jv-line); }
 .jv-faq details { border-bottom: 1px solid var(--jv-line); }
-.jv-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; padding: 20px 0; list-style: none; color: var(--jv-ink); font-size: 17px; line-height: 26px; font-weight: 500; cursor: pointer; transition: color var(--dur-2) var(--ease-press); border-radius: 10px; }
+.jv-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; padding: 20px 0; list-style: none; color: var(--jv-ink); font-size: 1.0625rem; line-height: 1.5rem; font-weight: 500; cursor: pointer; transition: color var(--dur-2) var(--ease-press); border-radius: 10px; }
 .jv-faq summary::-webkit-details-marker { display: none; }
 .jv-faq summary:hover { color: var(--jv-brand); }
 .jv-faq summary:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: -2px; }
 .jv-faq-toggle { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
 .jv-faq-toggle svg { width: 16px; height: 16px; }
 .jv-faq details[open] .jv-faq-toggle { background: var(--jv-ink); border-color: var(--jv-ink); color: #fff; transform: rotate(45deg); }
-.jv-faq details > p, .jv-faq details > div { max-width: 64ch; margin: 0; padding: 0 0 24px; color: var(--jv-ink-2); font-size: 16px; line-height: 26px; }
+.jv-faq details > p, .jv-faq details > div { max-width: 34em; margin: 0; padding: 0 0 24px; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
 
 /* Icons on marketing pages use a lighter stroke; the private app keeps 2. */
 .product-page .lucide, .loop-overview .lucide, .jv-marketing .lucide { stroke-width: 1.75; }
@@ -258,7 +258,7 @@
 .jv-page-head { padding: 40px 0 40px; }
 .jv-page-head > .jv-caption { margin: 0 0 16px; }
 .jv-page-title { margin: 0; max-width: 16em; color: var(--jv-ink); font-size: var(--t-page); font-weight: var(--fw-display); line-height: 1.05; letter-spacing: -.035em; text-wrap: balance; }
-.jv-lead { margin: 20px 0 0; max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; text-wrap: pretty; }
+.jv-lead { margin: var(--gap-lead) 0 0; max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; text-wrap: pretty; }
 .jv-page-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 28px; }
 .jv-page-note { margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-nb { white-space: nowrap; }
@@ -276,12 +276,12 @@
 .jv-section-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: -.035em; text-wrap: balance; }
 .jv-head { display: grid; gap: 16px; max-width: 720px; margin-bottom: 32px; }
 .jv-head > .jv-caption { margin: 0; }
-.jv-head > p:not(.jv-caption) { margin: 0; max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; }
+.jv-head > p:not(.jv-caption) { margin: 0; max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; }
 @media (min-width: 1024px) { .jv-head { margin-bottom: 48px; } }
 /* Numbered hairline list (replaces icon-in-circle step cards). */
 .jv-steps { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line-strong); }
 .jv-steps > li { display: grid; gap: 10px; padding: 28px 0; border-bottom: 1px solid var(--jv-line); min-width: 0; }
-.jv-steps h3 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.jv-steps :is(h2, h3) { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
 .jv-steps p:not(.jv-caption) { margin: 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); text-wrap: pretty; }
 .jv-steps .jv-caption { margin: 0; }
 .jv-steps .jv-steps-example { display: inline-flex; width: fit-content; max-width: 100%; margin-top: 6px; padding: 4px 10px; border: 1px solid var(--jv-line); border-radius: var(--r-xs); background: var(--jv-sunken); color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; }
@@ -299,7 +299,7 @@
 .jv-dark .jv-ticks li { border-color: var(--jv-line); color: var(--jv-on-dark-body); }
 .jv-dark .jv-ticks li::before { background: var(--jv-signal); }
 /* Reading width for prose; legal text shares one token set. */
-.jv-prose { max-width: 68ch; }
+.jv-prose { max-width: 36em; }
 .jv-prose > h2 { margin: 44px 0 0; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }
 .jv-prose > h2:first-child { margin-top: 0; }
 .jv-prose > p { margin: 14px 0 0; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.65; }
@@ -346,9 +346,54 @@
 .jv-brand { font-synthesis: none; }
 /* Closing CTA visual: fully inside the band, never cropped mid-label. */
 @media (min-width: 1024px) { .jv-cta--visual .jv-cta-visual { right: 32px; } }
-.jv-lead { margin-top: 24px; }
 /* Pages whose <main> is already the 1200px shell: the rails sit on its own edges. */
 @media (min-width: 1024px) {
   :is(.career-guides, .help-center, .walkthroughs-page).jv-rails::before { left: 0; }
   :is(.career-guides, .help-center, .walkthroughs-page).jv-rails::after { right: 0; }
+}
+
+/* ---------- Spacing rhythm (one set of gaps for every page) ---------- */
+:root { --gap-eyebrow: 16px; --gap-lead: 20px; --gap-band: 64px; --gap-block: 40px; }
+@media (min-width: 1024px) { :root { --gap-lead: 24px; --gap-band: 96px; --gap-block: 48px; } }
+/* An eyebrow always sits one token above its heading; containers that already space their children by gap opt out. */
+.jv-caption + :is(h1, h2) { margin-top: var(--gap-eyebrow); }
+:is(.jv-head, .jv-page-head, .jv-loop-head, .jv-hero-copy, .audience-copy) > .jv-caption + :is(h1, h2) { margin-top: 0; }
+/* A heading is always followed by the same space before its lead, whichever page owns the lead. */
+:is(h1, h2) + :is(.jv-lead, p.jv-lead) { margin-top: var(--gap-lead); }
+/* Dark closing band never abuts the section above it. */
+.jv-page + .jv-cta, .jv-section + .jv-cta { margin-top: var(--gap-band); }
+/* One soft green atmosphere on every inner page (static, under 8% opacity, no lime on white). */
+main.jv-rails { background-image: radial-gradient(70% 520px at 82% 0%, rgb(33 92 67 / .07), transparent 70%); background-repeat: no-repeat; }
+
+/* Explainer pages with one product fragment beside the intro (how it works, about). */
+.jv-page-head--split { display: grid; column-gap: 24px; }
+.jv-page-head--split > .jv-page-visual { margin-top: 40px; }
+.jv-page-visual .pc-card { max-width: 420px; }
+@media (min-width: 1024px) {
+  .jv-page-head--split { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+  .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / span 7; }
+  .jv-page-head--split > .jv-page-visual { grid-column: 9 / span 4; grid-row: 1 / span 4; align-self: center; margin-top: 0; }
+}
+
+/* Long legal pages: a sticky index beside a 36em reading column. */
+.jv-legal { display: grid; gap: 32px; padding-bottom: 72px; }
+.jv-toc { min-width: 0; }
+.jv-toc ol { display: grid; margin: 12px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line); }
+.jv-toc li { border-bottom: 1px solid var(--jv-line); }
+.jv-toc a { display: flex; align-items: center; min-height: 44px; padding: 6px 0; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; line-height: 1.35; text-decoration: none; }
+@media (hover: hover) { .jv-toc a:hover { color: var(--jv-brand); } }
+.jv-prose > h2 { scroll-margin-top: 112px; }
+.jv-legal .jv-prose > h2 { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--jv-line); }
+.jv-legal .jv-prose > h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+@media (min-width: 1024px) {
+  .jv-legal { grid-template-columns: minmax(0, 1fr) 280px; column-gap: 96px; align-items: start; }
+  .jv-legal .jv-prose { order: 1; }
+  .jv-toc { order: 2; position: sticky; top: 112px; max-height: calc(100vh - 144px); overflow-y: auto; }
+  .jv-toc a { min-height: 36px; padding: 4px 0; font-size: var(--t-sm); }
+}
+
+/* Accordions: the opened answer fades in with the same easing the toggle uses, so the two move together. */
+@keyframes jv-open { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: no-preference) {
+  .jv-faq details[open] > :is(p, div), .hc-note-details[open] > :not(summary) { animation: jv-open var(--dur-3) var(--ease-out) both; }
 }

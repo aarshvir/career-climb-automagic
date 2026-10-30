@@ -19,9 +19,9 @@ afterEach(cleanup);
 describe('audience entry points', () => {
   it.each(['student', 'mba', 'professional'] as const)('offers first value without sign-in for %s', audience => {
     render(page(audience));
-    const start = screen.getByRole('link', { name: 'Start my search' });
-    expect(start).toHaveAttribute('href', '/onboarding');
-    expect(screen.getByRole('link', { name: /Try the free CV Check/ })).toHaveAttribute('href', `/check?audience=${audience}`);
+    // Destinations match the live site: the hero leads with the check the page describes.
+    expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', `/check?audience=${audience}`);
+    expect(screen.getByRole('link', { name: /See how the Automated Job Loop works/ })).toHaveAttribute('href', '/job-loop');
     expect(screen.getByRole('link', { name: /Sign in to save my experience/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].title);
     expect(screen.getByText('Example application')).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe('current offer', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
     const passes = screen.getByRole('region', { name: /AI CV tailoring/ });
     expect(within(passes).getAllByRole('heading', { level: 3 }).map(heading => heading.textContent)).toEqual(['Free', 'Sprint', 'Job Search', 'Career Move']);
-    expect(within(passes).getByRole('link', { name: /Check my CV against a job/ })).toHaveAttribute('href', '/check');
+    expect(within(passes).getByRole('link', { name: 'Check my CV' })).toHaveAttribute('href', '/check');
     expect(within(passes).queryByText(/\$15|\$29|ten application packs|per month, billed|cancel anytime|free trial/i)).not.toBeInTheDocument();
     expect(screen.getByText('One-time payment. No subscription, nothing renews.')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
@@ -75,8 +75,8 @@ describe('Automated Job Loop access and monthly plans', () => {
   it('leads with monthly Automated Job Loop and requires an account before checking purchase availability', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
     expect(screen.getByRole('heading', { name: 'Pick your pace, then start.' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Start my Automated Job Loop' })).toHaveAttribute('href', '/onboarding');
-    expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', '/check');
+    expect(screen.getByRole('link', { name: 'Start my search' })).toHaveAttribute('href', '/onboarding');
+    expect(screen.getByRole('link', { name: 'Check my CV' })).toHaveAttribute('href', '/check');
     expect(screen.queryByText(/beta|ten accounts|no account needed/i)).not.toBeInTheDocument();
     const proposals = screen.getByRole('region', { name: 'Automated Job Loop monthly plans' });
     expect(proposals).toHaveTextContent('No trial or subscription starts automatically');
@@ -107,7 +107,7 @@ describe('Automated Job Loop first homepage', () => {
     // Short actions sit under headings that name the product; the final call to action keeps the full name.
     expect(screen.getByText('Automated Job Loop', { selector: '.jv-hero-eyebrow' })).toBeInTheDocument();
     expect(screen.getByText('How Automated Job Loop works')).toBeInTheDocument();
-    const starts = [...screen.getAllByRole('link', { name: 'Start my search' }), ...screen.getAllByRole('link', { name: 'Start my Automated Job Loop' })];
+    const starts = screen.getAllByRole('link', { name: 'Start my search' });
     expect(starts).toHaveLength(3);
     for (const link of starts) expect(link).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: /Try the free CV Check/ })).toHaveAttribute('href', '/check');

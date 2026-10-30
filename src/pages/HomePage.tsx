@@ -15,7 +15,7 @@ const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 // Facts the site already states (FAQ, pricing, Automated Job Loop page). No counts, ratings or outcomes.
 const proof = ["Jobs and prepared CVs, together", "Up to 3 CV variants", "Weekly, 3×/week or daily", "PDF, DOCX or TXT downloads", "Free CV Check"];
 
-function StartLink({ children = "Start my Automated Job Loop", to = "/onboarding", size = "md", variant = "primary", className = "" }: { children?: React.ReactNode; to?: string; size?: "md" | "lg"; variant?: "primary" | "secondary"; className?: string }) {
+function StartLink({ children = "Start my search", to = "/onboarding", size = "md", variant = "primary", className = "" }: { children?: React.ReactNode; to?: string; size?: "md" | "lg"; variant?: "primary" | "secondary"; className?: string }) {
   return <Link to={to} className={`jv-btn jv-btn--${variant}${size === "lg" ? " jv-btn--lg" : ""} ${className}`.trim()}>{children}<ArrowRight aria-hidden="true" /></Link>;
 }
 
@@ -63,7 +63,7 @@ export default function HomePage() {
           <h2 id="home-loop-journey">Set it up once. Come back to your next applications.</h2>
         </div>
         <div className="jv-loop-visual">
-          <p className="jv-loop-caption">Every run · automatic</p>
+          <p className="jv-loop-caption">Example run · illustrative times</p>
           <LoopOrbit size={480} variant="dark" labels once>
             <span className="jv-orbit-core">
               <span className="jv-orbit-core-time">7:00 AM</span>
@@ -146,7 +146,7 @@ export default function HomePage() {
     </section>
 
     {/* 7. Final CTA */}
-    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="home-final-title">
+    <section className="jv-cta jv-dark" aria-labelledby="home-final-title">
       <div className="jv-cta-inner">
         <h2 id="home-final-title">Give your job search a routine.</h2>
         <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
@@ -157,7 +157,6 @@ export default function HomePage() {
         </div>
         <div className="jv-cta-note"><PriceNote /></div>
       </div>
-      <div className="jv-cta-visual" aria-hidden="true"><RunCard /></div>
     </section>
   </div>;
 }

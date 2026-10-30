@@ -14,7 +14,7 @@ import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
 const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
 
-function StartLink({ children = 'Start my Automated Job Loop', variant = 'primary', size = 'lg' }: { children?: React.ReactNode; variant?: 'primary' | 'secondary'; size?: 'md' | 'lg' }) {
+function StartLink({ children = 'Start my search', variant = 'primary', size = 'lg' }: { children?: React.ReactNode; variant?: 'primary' | 'secondary'; size?: 'md' | 'lg' }) {
   return <Link to="/onboarding" className={`jv-btn jv-btn--${variant}${size === 'lg' ? ' jv-btn--lg' : ''}`}>{children}<ArrowRight aria-hidden="true" /></Link>;
 }
 function TextLink({ to, children }: { to: string; children: React.ReactNode }) {
@@ -124,14 +124,12 @@ export default function JobLoopOverview() {
       </div>
     </section>
 
-    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="lo-final-title">
+    <section className="jv-cta jv-dark" aria-labelledby="lo-final-title">
       <div className="jv-cta-inner">
         <h2 id="lo-final-title">Set up your next search.</h2>
         <p>Add your experience. Choose the jobs and places you want to explore.</p>
-        <div className="jv-cta-actions"><StartLink /><Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link></div>
+        <div className="jv-cta-actions"><StartLink /><Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link><LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" /></div>
       </div>
-      <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
-      <div className="jv-cta-visual" aria-hidden="true"><CvCard /></div>
     </section>
   </main>;
 }

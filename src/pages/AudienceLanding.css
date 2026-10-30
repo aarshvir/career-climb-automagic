@@ -1,11 +1,11 @@
 /* Audience pages (/for-students, /for-mba, /for-career-switchers): the shared jv-* page system plus the example application mock. */
 .audience-page { color: var(--jv-ink); background: #fff; overflow-wrap: break-word; }
 .audience-page * { box-sizing: border-box; }
-.audience-page :where(h1, h2, h3, p, figure) { margin: 0; }
+:where(.audience-page) :where(h1, h2, h3, p, figure) { margin: 0; }
 .audience-page :is(a, button):focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 3px; }
 .audience-page .jv-cta { margin-bottom: 64px; }
 .audience-page .jv-cta h2 { max-width: 14em; }
-.audience-page .jv-cta .jv-caption { margin-bottom: 16px; }
+.audience-page .jv-cta .jv-caption { margin-bottom: var(--gap-eyebrow); }
 
 /* Audience switch: a pill tab row. Short labels on phones; the full label stays in the accessible name. */
 .audience-switch { display: flex; flex-wrap: wrap; gap: 4px; width: fit-content; max-width: 100%; margin-top: 24px; padding: 4px; background: var(--jv-bg-subtle); border: 1px solid var(--jv-line); border-radius: var(--r-pill); }
@@ -20,7 +20,7 @@
   .audience-switch-short { display: inline; }
 }
 
-.audience-hero { display: grid; gap: 40px; padding: 40px 0 64px; }
+.audience-hero { display: grid; gap: 40px; padding: 32px 0 64px; }
 .audience-copy .jv-caption { margin-bottom: 16px; }
 .audience-note { margin-top: 12px; }
 .audience-note .jv-meta { margin-top: 0; }
@@ -29,7 +29,6 @@
 .audience-workspace-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--jv-line); }
 .audience-workspace-bar .jv-brand { min-height: 0; font-size: 18px; }
 .audience-workspace-bar .jv-brand-mark { width: 26px; height: 26px; border-radius: 8px; }
-.audience-workspace-bar .jv-brand-mark svg { width: 19px; height: 19px; }
 .audience-workspace-bar > span:last-child { display: inline-flex; align-items: center; gap: 6px; color: var(--jv-ink-3); font-size: var(--t-sm); }
 .audience-workspace-body { display: grid; gap: 12px; padding: 24px; }
 .audience-workspace-body h2 { margin: 0 0 4px; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }
@@ -46,11 +45,12 @@
 .audience-next p { margin-top: 2px; color: var(--jv-ink-2); font-size: var(--t-sm); line-height: 1.5; }
 .audience-path { display: grid; gap: 32px; }
 .audience-path .jv-head { margin-bottom: 0; }
+.audience-path .jv-head h2 { text-wrap: pretty; }
 .audience-path .jv-head > p:not(.jv-caption) { font-size: var(--t-body); }
 .audience-features { padding-bottom: 72px; }
 .audience-features .jv-steps h2 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
 @media (min-width: 1024px) {
-  .audience-hero { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; padding: 56px 0 96px; }
+  .audience-hero { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; padding: 40px 0 96px; }
   .audience-copy { grid-column: 1 / span 6; }
   .audience-workspace { grid-column: 8 / span 5; }
   .audience-path { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; }

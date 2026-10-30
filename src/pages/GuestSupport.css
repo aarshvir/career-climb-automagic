@@ -7,7 +7,8 @@
 .guest-support label { color: var(--jv-ink); font-size: var(--t-small); font-weight: var(--fw-semi); }
 .guest-support textarea, .guest-support select { width: 100%; min-height: 48px; padding: 12px 14px; color: var(--jv-ink); background: #fff; border: 1px solid var(--jv-line-input); border-radius: 12px; font-size: var(--t-body-sm); transition: border-color var(--dur-2) var(--ease-press), box-shadow var(--dur-2) var(--ease-press); }
 .guest-support textarea { min-height: 128px; line-height: 1.5; }
-.guest-support textarea:focus-visible, .guest-support select:focus-visible { outline: none; border-color: var(--jv-brand); box-shadow: 0 0 0 3px rgb(33 92 67 / .18); }
+.guest-support :is(input, textarea, select):focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; border-color: var(--jv-brand); }
+.guest-support > h2 { text-wrap: balance; }
 .guest-support form > p { margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.5; }
 .guest-support button { display: inline-flex; align-items: center; justify-content: center; width: fit-content; min-height: 48px; padding: 0 22px; border: 1px solid transparent; border-radius: var(--r-pill); background: var(--jv-brand); color: #fff; font-size: var(--t-body-sm); font-weight: var(--fw-semi); box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(15 29 23 / .2); transition: background var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
 .guest-support button:hover:not(:disabled) { background: var(--jv-brand-hover); }

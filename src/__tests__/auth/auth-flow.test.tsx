@@ -224,7 +224,7 @@ it('cache cleanup also removes only the current account’s interest-form marker
 describe('Automated Job Loop account entry and confirmation recovery', () => {
   it('keeps the Automated Job Loop outcome and first steps beside signup on mobile markup', async () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
-    expect(await screen.findByText('YOUR AUTOMATED JOB LOOP STARTS HERE')).toBeInTheDocument();
+    expect(await screen.findByText('Your Automated Job Loop')).toBeInTheDocument();
     expect(screen.getByRole('list', { name:'After creating your account' })).toHaveTextContent('run your first search');
     expect(screen.getByText(/Automated Job Loop plans from US\$29\/month/)).toBeInTheDocument();
     expect(sdk.signUp).not.toHaveBeenCalled();
@@ -234,7 +234,8 @@ describe('Automated Job Loop account entry and confirmation recovery', () => {
     const benefits = await screen.findByRole('list', { name:'What the Automated Job Loop does' });
     expect(benefits).toHaveTextContent('Roles matched to your CV.');
     expect(benefits).toHaveTextContent('A tailored CV for each role.');
-    expect(benefits).toHaveTextContent('Role-specific CVs written to fit each job’s requirements.');
+    expect(benefits).toHaveTextContent('Written to fit each job’s requirements.');
+    expect(benefits).toHaveTextContent('Built only from facts you confirm.');
     expect(screen.getByText('Your account also includes 3 AI-tailored CVs a month, free.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name:'See plans' })).toHaveAttribute('href', '/pricing');
     // The explanation sits above the form fields, and the form is unchanged.

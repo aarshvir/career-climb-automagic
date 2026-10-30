@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import CareerGuides, { CareerGuideArticle } from "@/pages/CareerGuides";
 import { careerGuides } from "@/lib/career-guides";
+import { guideDocumentTitle } from "@/lib/public-route-manifest";
 
 vi.unmock("react-router-dom");
 vi.unmock("react-helmet-async");
@@ -17,11 +18,11 @@ describe("public career guides", () => {
   it("shows the full library, labelled filters and a free first action", () => {
     renderPage();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Practical help for your next application.");
-    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(17);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
     expect(screen.getByLabelText("Search the guides")).toHaveAttribute("type", "search");
     expect(screen.getByLabelText("Your stage")).toHaveValue("all");
     expect(screen.getByLabelText("Your task")).toHaveValue("all");
-    expect(screen.getByRole("status")).toHaveTextContent("17 guides to explore");
+    expect(screen.getByRole("status")).toHaveTextContent("20 guides to explore");
     expect(screen.getByRole("link", { name: "Check my CV for free" })).toHaveAttribute("href", "/check");
     expect(screen.queryByRole("link", { name: /sign up/i })).not.toBeInTheDocument();
   });
@@ -49,7 +50,7 @@ describe("public career guides", () => {
     expect(screen.getByRole("link", { name: "ask for workflow help" })).toHaveAttribute("href", "/contact");
     await user.click(screen.getByRole("button", { name: "Show all guides" }));
     expect(screen.getByLabelText("Search the guides")).toHaveValue("");
-    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(17);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
   });
 
   it("renders a complete article with working contents, citations and honest attribution", async () => {
@@ -65,7 +66,7 @@ describe("public career guides", () => {
     expect(screen.getByText("Jobvance Editorial", { selector: ".cg-byline span" })).toBeInTheDocument();
     expect(container.querySelectorAll(".cg-source-note")).toHaveLength(2);
     expect(screen.getByRole("heading", { name: "Sources and further reading" })).toBeInTheDocument();
-    await waitFor(() => expect(document.title).toBe(`${guide.title} | Jobvance`));
+    await waitFor(() => expect(document.title).toBe(guideDocumentTitle(guide.title)));
     expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute("href", `https://jobvance.io/guides/${guide.slug}`);
   });
 

@@ -7,15 +7,15 @@ import { staticPageMeta } from '@/lib/public-site-meta';
 import type { LoopAudience } from '../../supabase/functions/_shared/job-loop-types';
 import { BrandLockup } from '@/components/layout/MvpHeader';
 import PriceNote from '@/components/marketing/PriceNote';
-import { RunCard } from '@/components/marketing/ProductCards';
+import LoopOrbit from '@/components/marketing/LoopOrbit';
 import { useReveal } from '@/hooks/useReveal';
 import './AudienceLanding.css';
 
 export default function AudienceLanding({ audience }: { audience: LoopAudience }) {
   useReveal();
   const content = loopAudienceContent[audience], { user } = useAuth();
-  const start = user ? loopAudiencePath(audience) : '/onboarding';
-  const checkPath = `/check?audience=${audience}`;
+  // Link destinations are unchanged from the live site: the hero leads with the check this page describes.
+  const firstAction = user ? loopAudiencePath(audience) : `/check?audience=${audience}`;
   const saveRecord = user ? loopAudiencePath(audience) : loopSignInPath(audience);
   const meta = staticPageMeta(content.path)!;
   const short: Record<LoopAudience, string> = { student: 'Students', mba: 'MBAs', professional: 'Professionals' };
@@ -29,8 +29,8 @@ export default function AudienceLanding({ audience }: { audience: LoopAudience }
           <h1 id="audience-title" className="jv-page-title">{content.title}</h1>
           <p className="jv-lead">{content.intro}</p>
           <div className="jv-page-actions">
-            <Link className="jv-btn jv-btn--primary jv-btn--lg" to={start}>{user ? 'Open my saved applications' : 'Start my search'}<ArrowRight aria-hidden="true" /></Link>
-            <Link className="jv-link" to={checkPath}><span>{user ? 'Prepare for another job' : 'Try the free CV Check'}</span><ArrowRight aria-hidden="true" /></Link>
+            <Link className="jv-btn jv-btn--primary jv-btn--lg" to={firstAction}>{user ? 'Open my saved applications' : 'Check my CV against a job'}<ArrowRight aria-hidden="true" /></Link>
+            <Link className="jv-link" to={user ? `/check?audience=${audience}` : '/job-loop'}><span>{user ? 'Prepare for another job' : 'See how the Automated Job Loop works'}</span><ArrowRight aria-hidden="true" /></Link>
           </div>
           <div className="audience-note"><PriceNote /></div>
         </div>
@@ -48,9 +48,8 @@ export default function AudienceLanding({ audience }: { audience: LoopAudience }
         </ul>
       </section>
     </div>
-    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="audience-final-title">
-      <div className="jv-cta-inner"><p className="jv-caption">Save your experience for next time</p><h2 id="audience-final-title">Start your private record with the CV you have.</h2><p>{content.recordHint}</p><div className="jv-cta-actions"><Link className="jv-btn jv-btn--primary jv-btn--lg" to={saveRecord}>{user ? 'Open my career record' : 'Sign in to save my experience'}<ArrowRight aria-hidden="true" /></Link></div></div>
-      <div className="jv-cta-visual" aria-hidden="true"><RunCard /></div>
+    <section className="jv-cta jv-dark" aria-labelledby="audience-final-title">
+      <div className="jv-cta-inner"><p className="jv-caption">Save your experience for next time</p><h2 id="audience-final-title">Start your private record with the CV you have.</h2><p>{content.recordHint}</p><div className="jv-cta-actions"><Link className="jv-btn jv-btn--primary jv-btn--lg" to={saveRecord}>{user ? 'Open my career record' : 'Sign in to save my experience'}<ArrowRight aria-hidden="true" /></Link><LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" /></div></div>
     </section>
   </main>;
 }

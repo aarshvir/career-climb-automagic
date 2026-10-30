@@ -2,9 +2,12 @@ import { publicStaticPages, SITE_ORIGIN, type PublicPage } from './public-site-m
 export { SITE_ORIGIN, type PublicPage } from './public-site-meta.ts';
 import { careerGuides } from './career-guides.ts';
 
+/** Document title for a guide: "Title | Jobvance", dropping the suffix when it would pass 60 characters. */
+export function guideDocumentTitle(title:string):string { const full=`${title} | Jobvance`; return full.length>60?title:full; }
+
 export const publicPages: PublicPage[] = [
   ...publicStaticPages,
-  ...careerGuides.map(guide=>({path:`/guides/${guide.slug}`,kind:'guide' as const,key:guide.slug,title:`${guide.title} | Jobvance`,description:guide.description,modified:guide.updatedAt})),
+  ...careerGuides.map(guide=>({path:`/guides/${guide.slug}`,kind:'guide' as const,key:guide.slug,title:guideDocumentTitle(guide.title),description:guide.description,modified:guide.updatedAt})),
 ];
 
 export const clientOnlyPaths = ['/applications','/loop','/onboarding','/dashboard','/admin','/admin-original','/admin2','/marketing-admin','/auth','/auth/callback','/auth/forgot-password','/auth/reset'];

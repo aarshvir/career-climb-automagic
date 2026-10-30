@@ -6,7 +6,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '../src/contexts/AuthContext';
 import Header from '../src/components/layout/MvpHeader';
 import Footer from '../src/components/layout/MvpFooter';
-import ProductPage from '../src/pages/ProductPage';
+import ProductPage, { productFaqs } from '../src/pages/ProductPage';
+import { subscriptionPlans } from '../src/lib/subscription-plans';
 import AudienceLanding from '../src/pages/AudienceLanding';
 import JobLoopOverview from '../src/pages/JobLoopOverview';
 import HelpCenter from '../src/pages/HelpCenter';
@@ -24,6 +25,13 @@ function element(page:PublicPage) {
   if(page.kind==='walkthroughs')return <Walkthroughs />;
   if(page.kind==='guides')return <CareerGuides />;
   return <CareerGuideArticle />;
+}
+
+/** Extra schema.org nodes for pages whose visible content states them: the FAQ's own questions, and the published plan prices. No ratings, reviews or outcomes. */
+export function structuredNodesFor(path:string,siteOrigin:string):object[] {
+  if(path==='/faq')return [{'@type':'FAQPage',mainEntity:productFaqs.filter(([,answer])=>typeof answer==='string').map(([question,answer])=>({'@type':'Question',name:question,acceptedAnswer:{'@type':'Answer',text:answer as string}}))}];
+  if(path==='/'||path==='/pricing')return [{'@type':'SoftwareApplication',name:'Jobvance Automated Job Loop',url:siteOrigin+'/',applicationCategory:'BusinessApplication',operatingSystem:'Web',offers:[{'@type':'Offer',name:'Free account',price:'0',priceCurrency:'USD',url:siteOrigin+'/check'},...subscriptionPlans.map(plan=>({'@type':'Offer',name:plan.name+' monthly plan',price:String(plan.priceUsd),priceCurrency:'USD',url:siteOrigin+'/pricing'}))]}];
+  return [];
 }
 
 /** Builds public guest markup only. No account data, browser state or API call is rendered. */

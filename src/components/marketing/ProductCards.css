@@ -18,7 +18,7 @@
 .pc-foot { display: flex; align-items: center; gap: 10px; margin: 0 -18px -18px; padding: 12px 18px; border-radius: 0 0 calc(var(--r-md) - 1px) calc(var(--r-md) - 1px); background: var(--jv-forest); color: #fff; font-size: var(--t-sm); line-height: var(--lh-sm); }
 .pc-foot > span { width: 6px; height: 6px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(212 242 90 / .18); flex-shrink: 0; }
 /* CV */
-.pc-file { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-family: var(--font-mono); font-size: var(--t-sm); color: var(--jv-ink-2); overflow-wrap: anywhere; }
+.pc-file { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-family: var(--font-mono); font-size: var(--t-sm); color: var(--jv-ink-2); white-space: nowrap; }
 .pc-file svg { width: 16px; height: 16px; flex: none; color: var(--jv-ink-3); }
 .pc-doc { display: grid; gap: 8px; padding: 16px; border: 1px solid var(--jv-line); border-radius: 10px; background: var(--jv-bg-subtle); }
 .pc-line { display: block; height: 7px; border-radius: 4px; background: var(--jv-line-strong); }
@@ -34,9 +34,9 @@
 .pc-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
 .pc-week span { display: grid; place-items: center; min-height: 36px; border: 1px solid var(--jv-line); border-radius: 10px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; }
 .pc-week .is-on { border-color: color-mix(in srgb, var(--jv-brand) 30%, transparent); background: var(--jv-brand-tint); color: var(--jv-brand-ink); }
-.pc-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid var(--jv-line); font-size: var(--t-small); }
+.pc-meta { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; padding-top: 12px; border-top: 1px solid var(--jv-line); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .pc-meta span { color: var(--jv-ink-3); }
-.pc-meta strong { font-weight: 500; text-align: right; }
+.pc-meta strong { margin-left: auto; font-weight: 500; text-align: right; white-space: nowrap; }
 /* Timeline (forest surface) */
 .pc-timeline { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line); }
 .pc-timeline li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--jv-line); color: var(--jv-on-dark-body); font-size: var(--t-small); line-height: 1.4; }

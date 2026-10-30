@@ -11,6 +11,10 @@
 .loop-overview .lo-card-cv { display: none; }
 @media (min-width: 640px) { .loop-overview .lo-dashboard-visual { padding: 40px; } }
 @media (min-width: 1024px) {
+  /* Copy takes 5 columns and the cluster 7, so no label, file name or chip in the cards has to wrap. */
+  .loop-overview .lo-dashboard { align-items: start; }
+  .loop-overview .lo-dashboard > :first-child { grid-column: 1 / span 5; }
+  .loop-overview .lo-dashboard > :last-child { grid-column: 6 / span 7; }
   .loop-overview .lo-dashboard-visual { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; padding: 40px; }
   .loop-overview .lo-card-sched { grid-column: 1; }
   .loop-overview .lo-card-run { grid-column: 1 / -1; grid-row: 2; }

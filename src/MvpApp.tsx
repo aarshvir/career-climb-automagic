@@ -17,6 +17,7 @@ import AnalyticsPages from '@/components/AnalyticsPages';
 import { ContactGate } from '@/components/ContactDetails';
 import SiteShareMetadata from '@/components/SiteShareMetadata';
 import { accountDestination, workspaceReturnPath } from '@/lib/account-return';
+import { lazyRoute, routeLoaders } from '@/lib/route-modules';
 const Auth = lazy(() => import("@/pages/Auth")),
   AuthCallback = lazy(() => import("@/pages/AuthCallback"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
@@ -25,16 +26,16 @@ const ApplicationsHome = lazy(() => import("@/pages/ApplicationsHome"));
 const Workspace = lazy(() => import("@/pages/Workspace"));
 const JobLoop = lazy(() => import("@/pages/JobLoop"));
 const LoopOnboarding = lazy(() => import("@/pages/LoopOnboarding"));
-const AudienceLanding = lazy(() => import("@/pages/AudienceLanding"));
+const AudienceLanding = lazyRoute("audience", routeLoaders.audience);
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
 const AdminPortal = lazy(() => import("@/pages/admin/AdminPortal"));
 const AdminHome = lazy(() => import("@/pages/admin/home/AdminHome"));
 const MarketingAdmin = lazy(() => import("@/pages/admin/MarketingAdmin"));
-const JobLoopOverview = lazy(() => import('@/pages/JobLoopOverview'));
-const CareerGuides = lazy(() => import('@/pages/CareerGuides'));
-const CareerGuideArticle = lazy(() => import('@/pages/CareerGuides').then(module=>({default:module.CareerGuideArticle})));
-const HelpCenter = lazy(() => import('@/pages/HelpCenter'));
-const Walkthroughs = lazy(() => import('@/pages/Walkthroughs'));
+const JobLoopOverview = lazyRoute("jobLoop", routeLoaders.jobLoop);
+const CareerGuides = lazyRoute("guides", routeLoaders.guides);
+const CareerGuideArticle = lazyRoute("guideArticle", routeLoaders.guideArticle);
+const HelpCenter = lazyRoute("help", routeLoaders.help);
+const Walkthroughs = lazyRoute("walkthroughs", routeLoaders.walkthroughs);
 const client = new QueryClient({
   defaultOptions: { queries: { staleTime: 20000, retry: 1 } },
 });

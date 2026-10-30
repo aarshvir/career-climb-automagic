@@ -58,13 +58,13 @@ export default function SubscriptionPricing() {
         <div className="pricing-start-body" data-reveal>
           <p>{currentOffer.loop}</p>
           <p>Upload a CV or build one from guided questions. Choose the jobs and locations you want, then review matched jobs and prepared documents in your dashboard. Your dashboard lists connected sources and reports the result of each run.</p>
-          <Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my Automated Job Loop <ArrowRight aria-hidden="true" /></Link>
+          <Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link>
           <p className="pricing-note">The CV check remains available when cloud preparation is full or paused. Your account shows current access.</p>
         </div>
       </div>
     </section>
     <section className="jv-section pricing-passes" aria-labelledby="passes-title">
-      <div className="jv-section-head"><p className="jv-caption">AI CV tailoring · available now</p><h2 id="passes-title" className="jv-section-title">AI CV tailoring: free to start, passes when you need more</h2><p>{currentOffer.check}</p></div>
+      <div className="jv-head"><p className="jv-caption">AI CV tailoring · available now</p><h2 id="passes-title" className="jv-section-title jv-section-title--panel">AI CV tailoring: free to start, passes when you need more</h2><p>{currentOffer.check}</p></div>
       <p className="pricing-note pricing-note--lead">These optional one-time CV Check passes are priced in US dollars. The currency selector above applies to your Automated Job Loop subscriptions.</p>
       {picked && <p className="pricing-picked" role="status">You picked the {passPlan(picked).name} pass (${passPlan(picked).price}, {passPlan(picked).days} days). {user ? `Choose “Buy ${passPlan(picked).name}” when you are ready to pay.` : 'Sign in, then choose it again to pay.'}</p>}
       {params.get('checkout') === 'cancelled' && <p className="pricing-picked" role="status">Checkout was cancelled. You have not been charged.</p>}
@@ -74,7 +74,7 @@ export default function SubscriptionPricing() {
           <h3 id="pricing-free">Free</h3>
           <p className="pricing-price"><span className="pricing-amount">$0</span><span className="pricing-unit">Always free to start</span></p>
           <ul>{freeFeatures.map(item => <li key={item}><Check size={16} aria-hidden="true" />{item}</li>)}</ul>
-          <Link className="jv-btn jv-btn--secondary jv-btn--block" to="/check">Check my CV against a job</Link>
+          <Link className="jv-btn jv-btn--secondary jv-btn--block" to="/check">Check my CV</Link>
         </section>
         {passPlans.map(plan => <section key={plan.key} className={`pricing-card pricing-tier${plan.badge === 'Best value' ? ' pricing-tier--featured jv-dark' : ''}${picked === plan.key ? ' pricing-tier--picked' : ''}`} aria-labelledby={`pricing-${plan.key}`}>
           <p className="jv-caption">{plan.badge ?? `${plan.days} days · one-time`}</p>
@@ -88,7 +88,7 @@ export default function SubscriptionPricing() {
           </ul>
           {user
             ? <button type="button" className={`jv-btn jv-btn--block ${plan.badge === 'Best value' ? 'jv-btn--primary' : 'jv-btn--secondary'}`} disabled={!!busy} onClick={() => void buy(plan.key)}>{busy === plan.key ? 'Opening secure checkout…' : `Buy ${plan.name}`}</button>
-            : <Link className={`jv-btn jv-btn--block ${plan.badge === 'Best value' ? 'jv-btn--primary' : 'jv-btn--secondary'}`} to={`/auth?next=${encodeURIComponent(`/pricing?plan=${plan.key}`)}`}>Sign in to buy {plan.name}</Link>}
+            : <Link className={`jv-btn jv-btn--block ${plan.badge === 'Best value' ? 'jv-btn--primary' : 'jv-btn--secondary'}`} to={`/auth?next=${encodeURIComponent(`/pricing?plan=${plan.key}`)}`}aria-label={`Sign in to buy ${plan.name}`}>Sign in to buy</Link>}
         </section>)}
       </div>
       {message && <p className={`pricing-message pricing-message--${message.kind}`} role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</p>}

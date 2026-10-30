@@ -110,7 +110,7 @@
   input[type="checkbox"] { accent-color: var(--jv-brand); }
   textarea { resize: vertical; }
 }
-.jv-loading { width: var(--shell); margin: 0 auto; min-height: 70vh; min-height: 70svh; padding: 56px 0 32px; }
+.jv-loading { width: var(--shell); margin: 0 auto; min-height: 100vh; min-height: 100svh; padding: 56px 0 32px; }
 .jv-loading-line { height: 10px; max-width: 380px; background: var(--jv-sunken); border-radius: 8px; margin: 24px 0; }
 .jv-loading-line:first-child { width: 150px; height: 28px; } .jv-loading-line:last-child { width: 65%; }
 /* While the route gate resolves nothing is rendered; keep the footer below the fold instead of flashing under the header. */

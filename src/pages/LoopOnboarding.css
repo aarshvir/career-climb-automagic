@@ -20,3 +20,6 @@
 .loop-onboarding :is(button, input, textarea, select):disabled { opacity: .55; cursor: not-allowed; }
 .loop-onboarding .oq-error { background: var(--jv-danger-tint); border-color: var(--jv-danger); }
 @media(max-width:520px) { .loop-onboarding .jl-button { font-size: 13px; } }
+/* Progress fills with transform (compositor-only), on the shared easing and the brand token. */
+.loop-onboarding .oq-progress span { width: 100%; background: var(--jv-brand); transform-origin: left center; transition: transform var(--dur-3) var(--ease-out); will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .loop-onboarding .oq-progress span { transition: none; } }

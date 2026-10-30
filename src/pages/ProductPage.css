@@ -15,7 +15,7 @@
   overflow-wrap: break-word;
 }
 .product-page *, .product-page *::before, .product-page *::after { box-sizing: border-box; }
-.product-page :where(h1, h2, h3, p, figure) { margin: 0; }
+:where(.product-page) :where(h1, h2, h3, p, figure) { margin: 0; }
 .product-page .jv-cta { margin-bottom: 64px; }
 .product-page .jv-cta h2 { max-width: 12em; }
 .product-main-content { min-width: 0; padding-bottom: 72px; }
@@ -39,30 +39,37 @@
 
 /* About */
 .product-large-copy { max-width: 28em; color: var(--jv-ink); font-size: var(--t-h3); line-height: 1.35; letter-spacing: -.02em; font-weight: var(--fw-medium); text-wrap: pretty; }
-.product-about-principles { margin-top: 56px; }
+.product-about .product-about-principles { margin-top: var(--gap-block); }
+@media (min-width: 768px) { .product-about-principles > li { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; } }
 .product-about { padding-bottom: 72px; }
 .product-contact-box { margin-top: 24px; }
 .product-notfound { display: grid; justify-items: start; gap: 20px; }
 .product-404 { color: var(--jv-brand); font-family: var(--font-mono); font-size: clamp(5rem, 14vw, 9rem); font-weight: 500; line-height: 1; letter-spacing: -.04em; }
 .product-notfound > p:not(.product-404) { color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
 .product-notfound a:not(.jv-btn) { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
-.product-page .product-plan-note { margin-top: 20px; max-width: 68ch; color: var(--jv-ink-2); font-size: var(--t-sm); line-height: 1.6; }
+.product-page .product-plan-note { margin-top: 20px; max-width: 40em; color: var(--jv-ink-2); font-size: var(--t-sm); line-height: 1.6; }
 .product-page .product-plan-note a { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------- Pricing ---------- */
 .product-page--pricing .product-main-content, .product-page--pricing .jv-page { padding-bottom: 0; }
 .product-page--pricing .loop-subscription-billing { margin: 0; padding: 0 0 48px; }
-.loop-subscription-billing > .jv-caption { margin: 0 0 14px; }
-.loop-subscription-billing > h2 { margin: 0; font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: -.035em; }
-.loop-subscription-billing > h2 + p { max-width: 52ch; margin: 16px 0 0; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; }
+.loop-subscription-billing > .jv-caption { margin: 0 0 var(--gap-eyebrow); }
+.loop-subscription-billing > h2:not(.jv-sr-only) { margin: 0; font-size: var(--t-h2-panel); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: -.035em; }
+.loop-subscription-billing > h2 + p { max-width: 31em; margin: var(--gap-lead) 0 0; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; }
+/* The plans lead the page: the hero is compact and the cards sit inside the first viewport. */
+.product-page--pricing .jv-page-head { padding-bottom: 32px; }
+@media (min-width: 1024px) { .product-page--pricing .jv-page-head { padding: 64px 0 32px; } }
+.loop-bill-line { margin: 0; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.5; }
 /* Compact currency control. */
-.product-page .loop-price-market { display: grid; grid-template-columns: repeat(2, minmax(0, 260px)); gap: 12px 16px; max-width: none; margin: 28px 0 0; align-items: end; }
+.product-page .loop-price-market { display: grid; grid-template-columns: repeat(2, minmax(0, 260px)); gap: 12px 16px; max-width: none; margin: 24px 0 0; padding-top: 24px; border-top: 1px solid var(--jv-line); align-items: end; }
 .product-page .loop-price-market label { display: grid; gap: 6px; color: var(--jv-ink-2); font-size: var(--t-sm); font-weight: 500; }
 .product-page .loop-price-market select { min-height: 44px; padding: 8px 12px; color: var(--jv-ink); background: #fff; border: 1px solid var(--jv-line-input); border-radius: 10px; font-size: var(--t-small); }
-.product-page .loop-price-market p { grid-column: 1 / -1; max-width: 68ch; margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.5; }
+.product-page .loop-price-market p { grid-column: 1 / -1; max-width: 40em; margin: 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.5; }
 @media (max-width: 639px) { .product-page .loop-price-market { grid-template-columns: 1fr; } }
 /* Plan cards: equal grid, price and CTA aligned across cards, one emphasised in forest. */
-.product-proposed-grid, .pricing-tiers { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 32px 0 24px; }
+.product-proposed-grid, .pricing-tiers { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 0 0 20px; }
+.pricing-passes .jv-head + .pricing-note { margin-top: 0; }
+.pricing-passes .pricing-tiers { margin-top: 24px; }
 .pricing-card { display: flex; flex-direction: column; align-items: stretch; min-width: 0; padding: 28px 24px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: #fff; box-shadow: var(--sh-2); }
 .pricing-card > .jv-caption { margin: 0 0 14px; min-height: 1rem; }
 .pricing-card h3 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; }
@@ -74,7 +81,7 @@
 .pricing-card ul li { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-top: 1px solid var(--jv-line); color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.45; }
 .pricing-card ul svg { flex-shrink: 0; margin-top: 2px; color: var(--jv-brand); }
 .pricing-card > :is(a, button):last-child { margin-top: auto; }
-.pricing-card .jv-btn { width: 100%; white-space: normal; text-align: center; padding-block: 12px; }
+.pricing-card .jv-btn { width: 100%; height: 48px; white-space: nowrap; text-align: center; padding-block: 0; padding-inline: 14px; }
 .pricing-card--featured, .pricing-tier--featured { border-color: transparent; box-shadow: 0 24px 56px -24px rgb(12 31 23 / .55); }
 .pricing-card.jv-dark { border-radius: var(--r-md); overflow: hidden; }
 .pricing-card.jv-dark h3, .pricing-card.jv-dark .pricing-amount { color: #fff; }
@@ -87,8 +94,8 @@
 @media (min-width: 768px) { .product-proposed-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .pricing-tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .pricing-tiers { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* Fine print sits below the cards at 13px or larger. */
-.pricing-note, .pricing-trust, .loop-subscription-billing .product-plan-note { max-width: 68ch; color: var(--jv-ink-2); font-size: var(--t-sm); line-height: 1.6; }
-.pricing-note--lead { margin: 0 0 8px; }
+.pricing-note, .pricing-trust, .loop-subscription-billing .product-plan-note { max-width: 40em; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.6; }
+.pricing-note--lead { margin: 20px 0 0; }
 .pricing-trust { display: flex; flex-wrap: wrap; gap: 8px 28px; max-width: none; margin: 24px 0 0; padding: 0; list-style: none; }
 .pricing-trust li { display: flex; align-items: center; gap: 8px; }
 .pricing-trust svg { flex-shrink: 0; color: var(--jv-brand); }
@@ -97,11 +104,16 @@
 .pricing-message--error { border-color: var(--jv-danger); background: var(--jv-danger-tint); }
 .pricing-details { margin-top: 8px; }
 .pricing-start-body { display: grid; justify-items: start; gap: 16px; }
-.pricing-start-body > p:not(.pricing-note) { max-width: 52ch; margin: 0; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
+.pricing-start-body > p:not(.pricing-note) { max-width: 34em; margin: 0; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
 .pricing-teams { display: flex; align-items: center; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; }
 .pricing-teams h2 { color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; }
-.pricing-teams p { max-width: 52ch; margin-top: 8px; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.5; }
+.pricing-teams p { max-width: 34em; margin-top: 8px; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.5; }
 .pricing-faq { padding-bottom: 96px; }
 .pricing-faq .jv-section-title { margin-bottom: 32px; }
 .product-page--pricing .loop-subscription-billing button.jv-btn:disabled { opacity: .55; cursor: not-allowed; }
 @media (min-width: 768px) { .pricing-desc { min-height: 3em; } }
+
+/* "Pick your pace" and its body share one top edge. */
+.pricing-start .jv-split { align-items: start; }
+.jv-section-title--panel { font-size: var(--t-h2-panel); }
+.pricing-passes .jv-head > p:not(.jv-caption) { margin-top: 0; }

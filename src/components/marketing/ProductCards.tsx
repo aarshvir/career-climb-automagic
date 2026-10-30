@@ -19,7 +19,7 @@ export function RunCard({ className = "" }: { className?: string }) {
       <span className="pc-job"><strong>{run.role}</strong><span>{run.company} · {run.place}</span></span>
       <span className={`pc-tag${run.tag === "CV tailored" ? " pc-tag--neutral" : ""}`}>{run.tag}</span>
     </li>)}</ul>
-    <div className="pc-foot"><span />3 jobs found · 3 tailored CVs</div>
+    <div className="pc-foot"><span />3 jobs · 3 tailored CVs</div>
   </div>;
 }
 
