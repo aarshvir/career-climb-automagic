@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerTrackingDraftOwner, trackingDraftAuthority } from '@/lib/tracking-draft-memory';
 import { openPaymentCheckout } from '@/lib/payment-checkout';
+import { reportMetaCheckout } from '@/lib/meta-commerce';
 import { subscriptionPlans, isLoopSubscriptionPlan, loopSubscriptionPlan, type LoopSubscriptionPlan } from '@/lib/subscription-plans';
 import { cancelLoopSubscription, captureLoopCancelIntent, captureLoopCheckoutIntent, captureLoopQuoteIntent,createLoopSubscriptionCheckout, readLoopBilling,requestLoopPriceQuote,quotePricing, LoopBillingError, type LoopBillingStatus, type LoopCancelIntent, type LoopCheckoutIntent,type LoopPriceQuote,type LoopPricing } from '@/lib/loop-subscription-billing';
 import {LOOP_LOCAL_COUNTRIES,LOOP_LOCAL_CURRENCIES,initialLoopPriceMarket,isLoopLocalCountry,isLoopLocalCurrency,loopPricingReturn,type LoopPriceMarket} from '@/lib/loop-local-prices';
@@ -84,7 +85,7 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
     if(original&&(original.plan!==selected.id||original.expectedGeneration!==status.generation||original.quoteId!==(payablePrice.quoteId??undefined))){setError('Confirm the previous checkout with Refresh billing before choosing another plan or currency.');return;}
     const intent=original??captureLoopCheckoutIntent(selected.id,status.generation,checkoutPending?status.checkout.requestId:crypto.randomUUID(),payablePrice.quoteId??undefined);
     checkoutIntent.current=intent;attemptedPrice.current=payablePrice;purchaseConsentScope.current=null;lock.current=true;setBusy(true);setConsent(false);setError('');
-    try{const receipt=await createLoopSubscriptionCheckout(scope,intent,valid);if(!valid())return;await openPaymentCheckout(receipt,()=>undefined);if(valid())setMessage('Checkout opened. Access starts only after payment is confirmed.');}
+    try{const receipt=await createLoopSubscriptionCheckout(scope,intent,valid);if(!valid())return;await reportMetaCheckout(receipt.requestId,scope.ownerId);await openPaymentCheckout(receipt,()=>undefined);if(valid())setMessage('Checkout opened. Access starts only after payment is confirmed.');}
     catch(failure){if(valid()){
       // These explicit server codes prove the provider checkout was never sent.
       // Unknown failures retain their original identity to prevent a second charge.
