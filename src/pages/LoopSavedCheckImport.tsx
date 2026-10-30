@@ -1,18 +1,10 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { listFreeChecks, type FreeCvCheck } from '@/lib/free-check-api';
-import { savedCheckContinuationPath } from '@/lib/saved-check-continuation';
+import { usableSavedCheck } from '@/lib/saved-check-usable';
 import './LoopSavedCheckImport.css';
 
 export type SavedCheckScope = { ownerId: string; generation: number; authority: number };
 export type SavedCheckVersion = 'final' | 'source';
-
-export function usableSavedCheck(check: FreeCvCheck, ownerId: string): boolean {
-  return check.user_id === ownerId && check.status === 'approved' && !!savedCheckContinuationPath(check.id)
-    && typeof check.job_title === 'string' && check.job_title.trim().length >= 2 && check.job_title.length <= 200
-    && typeof check.company === 'string' && check.company.length <= 200
-    && typeof check.job_description === 'string' && check.job_description.trim().length >= 80 && check.job_description.length <= 20000
-    && [check.reviewed_text, check.original_text].every(text => typeof text === 'string' && text.trim().length >= 80 && text.length <= 60000);
-}
 
 export default function LoopSavedCheckImport({ scope, intentId, busy, blockedReason, draftKey, needsReplacement, copyHeader, isCurrent, onUse, onClose }: {
   scope: SavedCheckScope; intentId: string | null; busy: boolean; blockedReason: string; draftKey: string; needsReplacement: boolean; copyHeader: boolean;
@@ -52,6 +44,7 @@ export default function LoopSavedCheckImport({ scope, intentId, busy, blockedRea
       if (active && callbacks.current.isCurrent(scope)) setError('Your saved checks could not be loaded. Retry, or keep working with your current draft.');
     }).finally(() => { if (active && callbacks.current.isCurrent(scope)) setLoading(false); });
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed to scopeKey (the scope's identity as a string); the scope object itself is recreated on every render.
   }, [open, scopeKey, intentId, retry]);
   const selected = records.find(row => row.id === selectedId);
   const source = selected ? version === 'final' ? selected.reviewed_text : selected.original_text : '';

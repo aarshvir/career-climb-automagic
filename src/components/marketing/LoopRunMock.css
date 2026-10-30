@@ -70,6 +70,11 @@
   .jv-mock.is-live .jv-mock-pulse::after { animation: jv-pulse 2.4s var(--ease-out) 700ms 1; }
   .jv-mock.is-offscreen .jv-status, .jv-mock.is-offscreen .jv-mock-pulse::after { animation-play-state: paused; }
 }
+/* Phones show about two rows above the fold, so the pass starts sooner and the rows follow each other closer: the visible rows finish first. */
+@media (max-width: 479px) and (prefers-reduced-motion: no-preference) {
+  .jv-mock.is-live .jv-status { animation-delay: calc(var(--i, 0) * 200ms + 450ms); }
+  .jv-mock.is-live .jv-mock-pulse::after { animation-delay: 450ms; }
+}
 /* Crossfaded: the outgoing tag fades while the incoming one rises, so a tag is always at least partly visible. */
 @keyframes jv-status-found { 0%, 32% { opacity: 1; } 35%, 100% { opacity: 0; } }
 @keyframes jv-status-tailored { 0%, 36% { opacity: 0; transform: translateY(3px); } 40%, 62% { opacity: 1; transform: none; } 65%, 100% { opacity: 0; } }

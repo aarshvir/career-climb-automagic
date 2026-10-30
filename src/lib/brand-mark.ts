@@ -13,6 +13,8 @@ export const BRAND_MARK = {
   dot: { cx: 10, cy: 22 },
   /** A tile-coloured ring under the signal dot so it reads as its own element, not a blob on the stroke. */
   knockoutExtra: 1.6,
+  /** At 48px and up the ring is a thin 1.0 gap, so it separates the dot without chamfering the hook's round end into a blade. */
+  knockoutExtraLarge: 1.0,
   variants: {
     small: { stroke: 4.8, dotRadius: 3.4 },
     large: { stroke: 4.4, dotRadius: 3.2 },

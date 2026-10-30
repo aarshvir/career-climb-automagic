@@ -81,6 +81,7 @@ export default function HomePage() {
             <span className="jv-orbit-core">
               <span className="jv-orbit-core-time">7:00 AM</span>
               <span className="jv-orbit-core-meta">Mon · Wed · Fri</span>
+              <span className="jv-orbit-core-stage"><b>Find</b><b>Tailor</b><b>Review</b></span>
             </span>
           </LoopOrbit>
           <div className="jv-loop-timeline"><RunTimeline /></div>

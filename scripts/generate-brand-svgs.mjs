@@ -20,6 +20,7 @@ const transform = pick(/transform: '([^']+)'/);
 const hook = pick(/hook: '([^']+)'/);
 const bar = pick(/bar: '([^']+)'/);
 const extra = Number(pick(/knockoutExtra: ([0-9.]+)/));
+const extraLarge = Number(pick(/knockoutExtraLarge: ([0-9.]+)/));
 const [cx, cy] = [Number(pick(/cx: (\d+)/)), Number(pick(/cy: (\d+)/))];
 const cut = name => ({ stroke: Number(pick(new RegExp(`${name}: \\{ stroke: ([0-9.]+)`))), r: Number(pick(new RegExp(`${name}: \\{ stroke: [0-9.]+, dotRadius: ([0-9.]+)`))) });
 const small = cut('small');
@@ -31,7 +32,7 @@ const RX = 10;
 const fit = scale => scale === 1 ? '' : ` transform="translate(20 20) scale(${scale}) translate(-20 -20)"`;
 const strokes = `<path d="${hook}"/><path d="${bar}"/>`;
 const group = (variant, stroke, inner) => `<g transform="${transform}" fill="none" stroke="${stroke}" stroke-width="${variant.stroke}" stroke-linecap="round" stroke-linejoin="round">${inner}</g>`;
-const ring = variant => Number((variant.r + extra).toFixed(2));
+const ring = variant => Number((variant.r + (variant.stroke === large.stroke ? extraLarge : extra)).toFixed(2));
 /** Colour glyph: a tile-coloured ring under the signal dot so the dot reads as its own element. */
 const glyph = (variant, scale = 1) => `<g${fit(scale)}>${group(variant, GLYPH, `${strokes}<circle cx="${cx}" cy="${cy}" r="${ring(variant)}" fill="${TILE}" stroke="none"/><circle cx="${cx}" cy="${cy}" r="${variant.r}" fill="${SIGNAL}" stroke="none"/>`)}</g>`;
 const tile = (variant, { rx = RX, scale = 1 } = {}) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="${rx}" fill="${TILE}"/>${glyph(variant, scale)}</svg>`;

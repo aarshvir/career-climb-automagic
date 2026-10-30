@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, loading: authLoading, authError, configurationError, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth();
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>(searchParams.get('mode') === 'signup' ? 'sign-up' : 'sign-in');
@@ -179,7 +180,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const pageTitle = checkEntry ? 'Start your free CV Check | Jobvance' : loopEntry || mode === 'sign-up' ? 'Set up your Automated Job Loop | Jobvance' : 'Sign in | Jobvance';
   return (
     <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
-      {!embedded && <Helmet><title>{pageTitle}</title><meta name="robots" content="noindex,nofollow" /></Helmet>}
+      {!embedded && <Helmet><title>{pageTitle}</title><meta name="description" content="Create your free Jobvance account, then set up your Automated Job Loop: choose roles and locations once and come back to matched jobs and tailored CVs." /><meta property="og:url" content={`https://jobvance.io${location.pathname}`} /><meta name="robots" content="noindex,nofollow" /></Helmet>}
       {!embedded && <aside className="ap-account-story jv-dark" aria-labelledby={`${fieldId}-story`}>
         <div className="ap-story-inner">
           <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" />{checkEntry ? 'Free CV Check' : 'Automated Job Loop'}</p>

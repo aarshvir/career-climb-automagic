@@ -85,7 +85,8 @@ for(const page of publicRender.pages){
   assert.equal(response.status,200);checkHeaders(response);
   assert.equal(response.headers.get('Cache-Control'),'no-cache');
   assert.ok(html.includes('<h1'),'Initial HTML must have a visible page heading.');
-  assert.ok(html.includes(`href="https://jobvance.io${page.path}"`),'Each initial page needs its canonical URL.');
+  if(page.kind==='check')assert.ok(html.includes('name="robots" content="noindex,follow"')&&!html.includes('rel="canonical"'),'The guest-redirected /check page is noindex with no competing canonical.');
+  else assert.ok(html.includes(`href="https://jobvance.io${page.path}"`),'Each initial page needs its canonical URL.');
   assert.ok(html.includes(page.title.replaceAll('&','&amp;')),'Each public page needs its own title.');
   assert.equal(response.headers.get('X-Robots-Tag'),null);
   if(page.path==='/') assert.ok(!/href="\/check\?audience=/.test(html),'Examples must not select a persona for a neutral visitor.');
@@ -137,7 +138,7 @@ for (const path of ['/pilot','/pilot/','/pilot?utm_source=review','/pilot/?utm_s
   }
 }
 const sitemap=await (await request('/sitemap.xml')).text();
-assert.equal((sitemap.match(/<url>/g)??[]).length,publicRender.pages.length);
+assert.equal((sitemap.match(/<url>/g)??[]).length,publicRender.pages.filter(page=>page.kind!=='check').length);
 assert.ok(!sitemap.includes('https://jobvance.io/pilot'));
 assert.ok(!publicRender.pages.some(page=>page.path==='/pilot'));
 const home=await (await request('/')).text();

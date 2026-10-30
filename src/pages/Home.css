@@ -412,3 +412,19 @@
 @media (min-width: 375px) { .jv-home :is(.jv-h-bind, .jv-h-mark) { white-space: nowrap; } }
 
 .jv-home .jv-proof { position: relative; z-index: 2; background: #fff; }
+
+/* The 7:00 AM ring names the stage the sweep is on (Find, Tailor, Review), in step with the comet. Opacity only; at rest, and under reduced motion, it reads "Review". */
+.jv-home .jv-orbit-core-stage { display: grid; margin-top: 6px; color: var(--jv-signal); font-size: var(--t-sm); font-weight: var(--fw-medium); line-height: 1.25rem; }
+.jv-home .jv-orbit-core-stage > b { grid-area: 1 / 1; font-weight: inherit; opacity: 0; }
+.jv-home .jv-orbit-core-stage > b:last-child { opacity: 1; }
+.jv-home .jv-orbit--once.is-armed .jv-orbit-core-stage > b:last-child { opacity: 0; }
+.jv-home .jv-orbit--once.is-armed .jv-orbit-core-stage > b:first-child { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .jv-home .jv-orbit--once.is-armed.is-in .jv-orbit-core-stage > b { animation: jv-stage-word 3200ms linear 200ms both; }
+  .jv-home .jv-orbit--once.is-armed.is-in .jv-orbit-core-stage > b:nth-child(1) { animation-name: jv-stage-find; }
+  .jv-home .jv-orbit--once.is-armed.is-in .jv-orbit-core-stage > b:nth-child(2) { animation-name: jv-stage-tailor; }
+  .jv-home .jv-orbit--once.is-armed.is-in .jv-orbit-core-stage > b:nth-child(3) { animation-name: jv-stage-review; }
+}
+@keyframes jv-stage-find { 0%, 38% { opacity: 1; } 44%, 100% { opacity: 0; } }
+@keyframes jv-stage-tailor { 0%, 38% { opacity: 0; } 44%, 80% { opacity: 1; } 86%, 100% { opacity: 0; } }
+@keyframes jv-stage-review { 0%, 80% { opacity: 0; } 86%, 100% { opacity: 1; } }
