@@ -37,7 +37,7 @@ function GuideCard({ guide, feature = false }: { guide: CareerGuide; feature?: b
 function GuideActions() {
   return <aside className="cg-actions jv-dark" aria-labelledby="cg-actions-title" data-reveal>
     <div><h2 id="cg-actions-title">Start with one real vacancy.</h2><p>Bring your CV and one job description. Create a free account, see which experience fits, and download a tailored CV.</p></div>
-    <div className="cg-action-links"><Link className="cg-primary" to="/check">Try the free CV Check <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/loop">Explore saving and reuse</Link><p>CV Check and Automated Job Loop need a free account. <Link className="cg-help-link" to="/contact">Get help with the workflow</Link></p></div>
+    <div className="cg-action-links"><Link className="cg-primary" to="/onboarding">Start my search <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/check">Try the free CV Check</Link><p>CV Check and Automated Job Loop need a free account. <Link className="cg-help-link" to="/loop">Explore saving and reuse</Link> · <Link className="cg-help-link" to="/contact">Get help with the workflow</Link></p></div>
   </aside>;
 }
 

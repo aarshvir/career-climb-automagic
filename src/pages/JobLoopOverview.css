@@ -2,7 +2,7 @@
 .loop-overview .lo-loop-hero { padding-bottom: 56px; }
 /* The section rule is the content-width ::after hairline in marketing.css (a full-bleed border here ran past the frame rails). */
 .loop-overview .lo-section .jv-ticks { margin-top: 28px; }
-.loop-overview .lo-lede { margin: 20px 0 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; }
+.loop-overview .lo-lede { margin: 20px 0 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); }
 .loop-overview .lo-audience-cta { margin-top: 28px; }
 
 /* Dashboard visual: one full dashboard card on a staging field, centred against the copy. */
@@ -20,7 +20,7 @@
 .loop-overview .lo-private { width: var(--shell); margin: 0 auto; padding: 56px var(--band-pad-x); border-radius: var(--r-lg); }
 .loop-overview .lo-private .jv-shell { width: auto; padding: 0; }
 .loop-overview .lo-private-grid { display: grid; gap: 40px; align-items: stretch; }
-.loop-overview .lo-private h2 { max-width: 12em; margin: 16px 0 20px; font-size: var(--t-h2-panel); line-height: 1.08; letter-spacing: -.035em; }
+.loop-overview .lo-private h2 { max-width: 12em; margin: 16px 0 20px; font-size: var(--t-h2-panel); line-height: 1.08; letter-spacing: var(--ls-display); }
 .loop-overview .lo-private-copy > p:not(.jv-caption) { max-width: 54ch; margin: 0 0 16px; color: var(--jv-on-dark-body); font-size: var(--t-body); line-height: var(--lh-body); }
 .loop-overview .lo-private-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin-top: 28px; }
 .loop-overview .lo-private-aside { display: flex; flex-direction: column; padding: 28px; border: 1px solid rgb(255 255 255 / .14); border-radius: var(--r-md); background: rgb(255 255 255 / .04); }
@@ -40,7 +40,7 @@
 /* Audience links: hairline rows with a trailing arrow. */
 .loop-overview .lo-audience-links { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line-strong); }
 .loop-overview .lo-audience-links li { border-bottom: 1px solid var(--jv-line); }
-.loop-overview .lo-audience-links a { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; color: var(--jv-ink); font-size: var(--t-h4); font-weight: 500; letter-spacing: -.014em; text-decoration: none; transition: color var(--dur-2) var(--ease-press); }
+.loop-overview .lo-audience-links a { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; color: var(--jv-ink); font-size: var(--t-h4); font-weight: 500; letter-spacing: var(--ls-card); text-decoration: none; transition: color var(--dur-2) var(--ease-press); }
 .loop-overview .lo-audience-links svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--jv-ink-3); transition: transform var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
 @media (hover: hover) { .loop-overview .lo-audience-links a:hover { color: var(--jv-brand); } .loop-overview .lo-audience-links a:hover svg { color: var(--jv-brand); transform: translateX(3px); } }
 .loop-overview .lo-faq { padding-bottom: var(--section-y); }

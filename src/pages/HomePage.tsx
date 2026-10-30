@@ -106,7 +106,7 @@ export default function HomePage() {
         <div className="jv-bento">
           <article className="jv-tile jv-tile--schedule" data-reveal>
             <div className="jv-tile-copy"><p className="jv-step-index">01 · Schedule</p><h3>Your search comes back on schedule.</h3><p>Weekly, three days a week or daily, the next run starts without you rebuilding the same searches. Pause it whenever your plans change.</p></div>
-            <div className="jv-tile-card" aria-hidden="true"><ScheduleCard /></div>
+            <div className="jv-tile-card" aria-hidden="true"><p className="jv-tile-next"><span className="jv-mock-pulse" />Next run · <b>Wed 7:00 AM</b><i>Example</i></p><ScheduleCard /></div>
           </article>
           <article className="jv-tile jv-tile--openings" data-reveal>
             <div className="jv-tile-copy"><p className="jv-step-index">02 · Openings</p><h3>Openings for the roles you chose.</h3><p>Each run looks through connected sources for your roles and locations, so you start from a list instead of a blank search box. Some runs may find nothing new.</p></div>

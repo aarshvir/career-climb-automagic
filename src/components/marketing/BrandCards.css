@@ -8,7 +8,7 @@
 .bc-timeline li:last-child { padding-bottom: 0; }
 .bc-timeline-node { position: absolute; z-index: 1; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--jv-brand); box-shadow: 0 0 0 4px #fff, 0 0 0 5px var(--jv-line-strong); }
 .bc-timeline li.is-auto .bc-timeline-node { background: #fff; border: 2px solid var(--jv-brand); }
-.bc-timeline h3 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.bc-timeline h3 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: var(--ls-h3); text-wrap: balance; }
 .bc-timeline li > p:not(.jv-caption) { margin: 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); text-wrap: pretty; }
 .bc-timeline .jv-caption::before { display: none; }
 .bc-timeline li.is-auto .jv-caption { color: var(--jv-brand-ink); }
@@ -16,7 +16,7 @@
 .bc-mark { display: grid; place-items: center; padding: 56px 40px; }
 .bc-mark .jv-orbit { --ring: rgb(var(--jv-brand-rgb) / .3); }
 .bc-mark-core { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 4px; text-align: center; color: var(--jv-ink); }
-.bc-mark-core strong { font-size: var(--t-h3); font-weight: var(--fw-heading); letter-spacing: -.025em; line-height: 1.1; }
+.bc-mark-core strong { font-size: var(--t-h3); font-weight: var(--fw-heading); letter-spacing: var(--ls-h3); line-height: 1.1; }
 .bc-mark-core span { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; }
 .jv-page-visual .bc-mark { padding: 40px 28px; }
 
@@ -42,5 +42,5 @@
 .bc-stack-doc > i.is-short { width: 62%; }
 .bc-stack-arrow { justify-self: center; width: 20px; height: 20px; color: var(--jv-signal); }
 .bc-stack-one { display: grid; gap: 2px; padding: 16px 18px; border-radius: 14px; background: #fff; color: var(--jv-forest); box-shadow: 0 0 0 4px rgb(var(--jv-signal-rgb) / .22); }
-.bc-stack-one strong { font-size: var(--t-h4); font-weight: var(--fw-heading); letter-spacing: -.02em; line-height: 1.2; }
+.bc-stack-one strong { font-size: var(--t-h4); font-weight: var(--fw-heading); letter-spacing: var(--ls-h3); line-height: 1.2; }
 .bc-stack-one span { color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }

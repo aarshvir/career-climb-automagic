@@ -24,7 +24,7 @@ describe('audience entry points', () => {
     expect(screen.getByRole('link', { name: /See how the Automated Job Loop works/ })).toHaveAttribute('href', '/job-loop');
     expect(screen.getByRole('link', { name: /Sign in to save my experience/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].searchTitle);
-    expect(screen.getByText('Example application')).toBeInTheDocument();
+    expect(screen.getByText(/^Example application/)).toBeInTheDocument();
   });
   it('opens the selected private setup for a signed-in candidate', () => {
     account.user = { id: 'fictional-owner' }; render(page('professional'));

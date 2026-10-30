@@ -365,4 +365,21 @@ describe('round 8: free CV Check entry copy and the signup contract', () => {
     expect(sdk.signUp.mock.calls[0][0]).toMatchObject({ email: 'person@example.test', password: 'Password123' });
     expect(JSON.stringify(sdk.signUp.mock.calls[0][0])).toContain('Casey Person');
   });
+  it('does not spend rate-limit attempts on blank or invalid submits: three blank submits, then a valid one, still signs up', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
+    const user = userEvent.setup();
+    const email = 'limiter-order@example.test';
+    await user.type(await screen.findByLabelText('Email address'), email);
+    for (let attempt = 0; attempt < 6; attempt++) await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Too many attempts/)).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.type(screen.getByLabelText('Confirm password'), 'Password123');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(await screen.findByText('Check your email')).toBeInTheDocument();
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+  });
 });

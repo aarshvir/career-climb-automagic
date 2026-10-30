@@ -16,5 +16,6 @@ export const routeRedirects: Record<string,string> = {
 };
 export function publicPage(path:string): PublicPage | undefined { return publicPages.find(page=>page.path===path); }
 export function escapedXml(value:string):string {return value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');}
+/** /check is not listed: it is prerendered for a fast first paint, but guests are sent to the account page, so it is noindex rather than a competing canonical. */
 /** Only guides carry a real modified date (their own updatedAt); static pages omit lastmod rather than assert one. */
-export function publicSitemap():string {return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+publicPages.map(page=>`<url><loc>${escapedXml(SITE_ORIGIN+page.path)}</loc>${page.modified?`<lastmod>${escapedXml(page.modified)}</lastmod>`:''}</url>`).join('')+'</urlset>';}
+export function publicSitemap():string {return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+publicPages.filter(page=>page.kind!=='check').map(page=>`<url><loc>${escapedXml(SITE_ORIGIN+page.path)}</loc>${page.modified?`<lastmod>${escapedXml(page.modified)}</lastmod>`:''}</url>`).join('')+'</urlset>';}

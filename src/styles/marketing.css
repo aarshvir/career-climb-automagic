@@ -91,7 +91,7 @@
 
 /* The approved J mark: one glyph (the favicon's hooked J) on the green tile at every size, plus the Manrope wordmark. */
 @font-face { font-family: "Jobvance Brand"; src: url("/fonts/Manrope-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
-.jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.03em; line-height: 1; text-decoration: none; border-radius: 10px; }
+.jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: var(--ls-h2); line-height: 1; text-decoration: none; border-radius: 10px; }
 .jv-brand-name { white-space: nowrap; }
 .jv-brand-period { color: var(--jv-brand-period); }
 .jv-dark .jv-brand-period { color: var(--jv-brand-period-on-dark); }
@@ -125,7 +125,7 @@
 .jv-account-pending > .jv-btn { visibility: hidden; }
 .jv-mobile-panel { display: none; }
 .jv-mobile-panel[data-open="true"] { position: absolute; top: 100%; left: 0; right: 0; z-index: 2; display: flex; flex-direction: column; max-height: calc(100dvh - 56px); overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--jv-line); box-shadow: 0 24px 48px -16px rgb(var(--jv-ink-rgb) / .18); animation: jv-menu-in 200ms var(--ease-out) both; }
-.jv-mobile-panel > a { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid var(--jv-line); color: var(--jv-ink); font-size: 20px; font-weight: 500; letter-spacing: -.02em; text-decoration: none; }
+.jv-mobile-panel > a { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid var(--jv-line); color: var(--jv-ink); font-size: 20px; font-weight: 500; letter-spacing: var(--ls-h3); text-decoration: none; }
 .jv-mobile-panel > a[aria-current="page"] { color: var(--jv-brand); }
 .jv-mobile-panel > a:focus-visible { outline-offset: -2px; border-radius: 6px; }
 .jv-mobile-account { display: flex; flex-direction: column; gap: 10px; padding: 12px 0 16px; border-bottom: 1px solid var(--jv-line); }
@@ -217,8 +217,8 @@
 .jv-cta { width: var(--shell); margin: 0 auto 96px; padding: 64px var(--band-pad-x); border-radius: var(--r-lg); background: radial-gradient(90% 45% at 100% 0%, rgb(var(--jv-link-on-dark-rgb) / .1), transparent 70%), var(--jv-forest); }
 .jv-cta .jv-cta-orbit { display: none; }
 .jv-cta-inner { position: relative; z-index: 1; max-width: 640px; }
-.jv-cta h2 { margin: 0; max-width: 8.1em; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: -.04em; text-wrap: balance; }
-.jv-cta p:not(.jv-caption) { margin: 16px 0 0; max-width: 46ch; color: var(--jv-on-dark-body); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; text-wrap: pretty; }
+.jv-cta h2 { margin: 0; max-width: 8.1em; color: #fff; font-size: var(--t-h1); font-weight: var(--fw-heading-on-dark); line-height: 1.06; letter-spacing: var(--ls-display); text-wrap: balance; }
+.jv-cta p:not(.jv-caption) { margin: 16px 0 0; max-width: 46ch; color: var(--jv-on-dark-body); font-size: var(--t-h4); line-height: 1.55; letter-spacing: var(--ls-lead); text-wrap: pretty; }
 .jv-cta-actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 32px; }
 .jv-cta p.jv-cta-note { max-width: none; margin-top: 20px; color: var(--jv-on-dark-2); font-size: var(--t-sm); line-height: var(--lh-sm); letter-spacing: 0; font-variant-numeric: tabular-nums; }
 @media (max-width: 639px) { .jv-cta-actions .jv-btn { width: 100%; } }
@@ -257,8 +257,8 @@
 @media (min-width: 1024px) { .jv-page { padding-inline: var(--band-pad-x); } }
 .jv-page-head { padding: 40px 0 40px; }
 .jv-page-head > .jv-caption { margin: 0 0 16px; }
-.jv-page-title { margin: 0; max-width: 16em; color: var(--jv-ink); font-size: var(--t-page); font-weight: var(--fw-display); line-height: 1.05; letter-spacing: -.035em; text-wrap: balance; }
-.jv-lead { margin: var(--gap-lead) 0 0; max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; text-wrap: pretty; }
+.jv-page-title { margin: 0; max-width: 16em; color: var(--jv-ink); font-size: var(--t-page); font-weight: var(--fw-display); line-height: 1.05; letter-spacing: var(--ls-display); text-wrap: balance; }
+.jv-lead { margin: var(--gap-lead) 0 0; max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); text-wrap: pretty; }
 .jv-page-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 28px; }
 .jv-page-note { margin: 12px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-nb { white-space: nowrap; }
@@ -275,15 +275,15 @@
 @media (max-width: 639px) { .jv-page-actions .jv-btn { width: 100%; } }
 .jv-section { padding: 56px 0; border-top: 1px solid var(--jv-line); }
 @media (min-width: 1024px) { .jv-section { padding: 96px 0; } }
-.jv-section-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: -.035em; text-wrap: balance; }
+.jv-section-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: var(--ls-display); text-wrap: balance; }
 .jv-head { display: grid; gap: 16px; max-width: 720px; margin-bottom: 32px; }
 .jv-head > .jv-caption { margin: 0; }
-.jv-head > p:not(.jv-caption) { margin: 0; max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; }
+.jv-head > p:not(.jv-caption) { margin: 0; max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); }
 @media (min-width: 1024px) { .jv-head { margin-bottom: 48px; } }
 /* Numbered hairline list (replaces icon-in-circle step cards). */
 .jv-steps { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--jv-line-strong); }
 .jv-steps > li { display: grid; gap: 10px; padding: 28px 0; border-bottom: 1px solid var(--jv-line); min-width: 0; }
-.jv-steps :is(h2, h3) { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.jv-steps :is(h2, h3) { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: var(--ls-h3); text-wrap: balance; }
 .jv-steps p:not(.jv-caption) { margin: 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); text-wrap: pretty; }
 .jv-steps .jv-caption { margin: 0; }
 .jv-steps .jv-steps-example { display: inline-flex; width: fit-content; max-width: 100%; margin-top: 6px; padding: 4px 10px; border: 1px solid var(--jv-line); border-radius: var(--r-xs); background: var(--jv-sunken); color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; }
@@ -302,7 +302,7 @@
 .jv-dark .jv-ticks li::before { background: var(--jv-signal); }
 /* Reading width for prose; legal text shares one token set. */
 .jv-prose { max-width: 36em; }
-.jv-prose > h2 { margin: 44px 0 0; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }
+.jv-prose > h2 { margin: 44px 0 0; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: var(--ls-h3); }
 .jv-prose > h2:first-child { margin-top: 0; }
 .jv-prose > p { margin: 14px 0 0; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.65; }
 .jv-prose a { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
@@ -404,7 +404,7 @@
 .jv-toc details[open] > summary::after { content: "\2212"; }
 @media (min-width: 1024px) { .jv-toc details > summary { pointer-events: none; min-height: 0; } .jv-toc details > summary::after { display: none; } }
 /* Legal headings: a clear step above 16px body, short paragraphs. */
-.jv-legal .jv-prose > h2 { margin-top: 56px; font-size: 1.5rem; font-weight: var(--fw-semi); line-height: 1.25; letter-spacing: -.02em; }
+.jv-legal .jv-prose > h2 { margin-top: 56px; font-size: 1.5rem; font-weight: var(--fw-semi); line-height: 1.25; letter-spacing: var(--ls-h3); }
 .jv-legal .jv-prose > p { margin: 12px 0 0; }
 
 /* ---------- Round 3: hero actions, headings, eyebrows ---------- */
@@ -438,7 +438,7 @@
 
 /* Closing bar: heading, one line and the actions in one tinted row. The dark band stays on the home page and the Automated Job Loop page. */
 .jv-cta-bar { display: grid; gap: 24px; width: var(--shell); margin: var(--gap-band) auto 64px; padding: 32px var(--band-pad-x); border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-brand-tint)); }
-.jv-cta-bar-copy h2 { margin: 0; max-width: 20ch; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.15; letter-spacing: -.03em; text-wrap: balance; }
+.jv-cta-bar-copy h2 { margin: 0; max-width: 20ch; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.15; letter-spacing: var(--ls-h2); text-wrap: balance; }
 .jv-cta-bar-copy p { margin: 8px 0 0; max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.5; text-wrap: pretty; }
 .jv-cta-bar-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 @media (max-width: 639px) { .jv-cta-bar-actions .jv-btn { width: 100%; } }
@@ -512,7 +512,7 @@
 .career-guides .cg-public-note, .career-guides .cg-library-heading > p { font-size: var(--t-small); max-width: 62ch; }
 .walkthroughs-page :is(.wt-hero, .wt-player, .wt-recorded, .wt-instructions, .wt-context) p:not(.wt-eyebrow):not(.wt-demo *) { font-size: var(--t-body-sm); line-height: 1.55; max-width: 68ch; }
 /* One heading step per level: h3 never exceeds the h2 above it, card titles are 20-24px, and per-page tracking overrides are gone. */
-.career-guides h2, .walkthroughs-page h2 { letter-spacing: -.03em; }
+.career-guides h2, .walkthroughs-page h2 { letter-spacing: var(--ls-h2); }
 
 /* Eyebrows are for section openers and the home hero; utility headings (walkthroughs, guides, help) lead with the heading alone. */
 .walkthroughs-page .wt-hero > .wt-eyebrow, .career-guides .cg-hero > .cg-eyebrow, .career-guides .cg-library-heading .cg-eyebrow, .audience-path .jv-head > .jv-caption { display: none; }
@@ -544,7 +544,7 @@
 .audience-switch-full { overflow: visible; }
 
 /* Walkthroughs and help share the one hero lead and hero link sizes; the hero asides need the full width. */
-.walkthroughs-page .wt-hero > p:not(.wt-eyebrow):not(.wt-demo *) { max-width: 31em; font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; color: var(--jv-ink-2); }
+.walkthroughs-page .wt-hero > p:not(.wt-eyebrow):not(.wt-demo *) { max-width: 31em; font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); color: var(--jv-ink-2); }
 .help-center .hc-hero.jv-aside-grid { max-width: none; }
 .help-center .hc-hero-actions .hc-text-link, .help-center .hc-hero-actions .hc-text-link span { font-size: var(--t-body-sm); font-weight: var(--fw-semi); }
 @media (max-width: 1023px) { .jv-aside-grid > .jv-aside-slot { display: none; } }
@@ -606,8 +606,8 @@
 .jv-story { display: grid; gap: 16px; padding: 48px 0; border-top: 1px solid var(--jv-line); }
 .jv-story:first-child { border-top: 0; }
 .jv-story > .jv-caption { margin: 0; }
-.jv-story-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: -.035em; text-wrap: balance; }
-.jv-story-body p { margin: 0; max-width: 34em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; text-wrap: pretty; }
+.jv-story-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: var(--ls-display); text-wrap: balance; }
+.jv-story-body p { margin: 0; max-width: 34em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: var(--ls-lead); text-wrap: pretty; }
 .jv-story .product-about-principles { margin-top: 24px; }
 @media (min-width: 1024px) {
   .jv-story { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; padding: 80px 0; }
@@ -642,7 +642,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 .pricing-passes-disclosure[open] > summary::after { content: "\2212"; background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; }
 .pricing-passes-disclosure > summary:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 4px; }
 .pricing-passes-lead { display: grid; gap: 12px; }
-.pricing-passes-title { display: block; color: var(--jv-ink); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.pricing-passes-title { display: block; color: var(--jv-ink); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: var(--ls-h3); text-wrap: balance; }
 .pricing-passes-sub { max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.5; }
 .pricing-passes-body { padding-top: 32px; }
 .pricing-passes-body .pricing-note--lead { margin-top: 0; }
@@ -825,7 +825,7 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 
 /* Contact: the form is one bordered card beside the receipt and support cards. */
 .jv-contact-grid .guest-support { padding: 28px; border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: #fff; box-shadow: var(--sh-2); }
-.jv-contact-grid .guest-support > h2 { font-size: var(--t-h4); letter-spacing: -.02em; }
+.jv-contact-grid .guest-support > h2 { font-size: var(--t-h4); letter-spacing: var(--ls-h3); }
 .jv-contact-grid .guest-support > p { font-size: var(--t-body-sm); }
 .jv-contact-grid .guest-support form { margin-top: 20px; }
 .jv-contact-rail { display: grid; gap: 16px; align-content: start; min-width: 0; }
@@ -1095,3 +1095,237 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 /* 320px reflow (WCAG 1.4.10): mock content wraps instead of widening its box. */
 .audience-evidence, .audience-workspace-title, .audience-workspace .jv-caption, .jv-nb { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 359px) { .audience-workspace .jv-caption, .audience-evidence span { white-space: normal; } }
+
+/* ---------- Round 11 ----------
+   Reviewer themes: a less templated rhythm (eyebrows and dark foot bars are exceptions, not the grammar), one type system
+   (width-aware H1, tracking tokens, sentence-case secondary labels), balanced heroes on the text-led pages, a warmer light surface,
+   and a few defects (walkthrough controls, closing band padding, footer grid). Everything below uses tokens; no raw colours. *//* Type: one H1 token for every marketing page. The longest unbreakable run ("Automated Job Loop", about 9.2em) must always fit, so the size is capped by the
+   viewport (the gutter on both sides); the forest heroes also lose their band padding. */
+
+
+:root {
+  --t-page: min(clamp(2.25rem, 1.9rem + 2.2vw, 3.75rem), calc((100vw - 2 * var(--gutter)) / 9.4));
+  --t-page-band: min(var(--t-page), calc((100vw - 2 * var(--gutter) - 2 * var(--band-pad-x)) / 9.4));
+  --lh-display: 1.04;
+  --t-eyebrow: .8125rem;
+}
+:root .jv-page-title, :root .jv-home .jv-hero-title, :root .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title, :root .career-guides .cg-hero h1, :root .help-center .hc-hero h1, :root .walkthroughs-page .wt-hero h1 { line-height: var(--lh-display); overflow-wrap: break-word; }
+:root .jv-page-head--forest .jv-page-title { font-size: var(--t-page-band); }
+@media (min-width: 640px) { :root .jv-page-head--forest .jv-page-title { font-size: var(--t-page); } }
+@media (min-width: 1024px) {
+  :root .jv-home .jv-hero-title { font-size: var(--t-page); }
+  :root .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: var(--t-page); }
+}
+@media (max-width: 1023px) { :root .loop-overview.jv-home .lo-loop-hero--forest .jv-hero-title { font-size: var(--t-page-band); } }/* Section and panel titles are two sizes everywhere (the how-it-works split heading and the home closing band no longer carry their own). */
+
+@media (min-width: 1024px) { :root .jv-split--timeline .jv-section-title { font-size: var(--t-h2-panel); } }
+:root .jv-home .jv-cta h2 { font-size: var(--t-h2-panel); }/* Running text: three tiers (16 body, 15 secondary, 14 caption); 13px stays for chips and mono data. */
+
+
+:root .career-guides .cg-card > p, :root .career-guides .cg-card-audience { font-size: var(--t-body-sm); line-height: 1.55; color: var(--jv-ink-2); }
+:root .walkthroughs-page :is(.wt-instructions > p:not(.wt-eyebrow), .wt-step-caption p, .wt-controls > p, .wt-selected-task p:not(.wt-eyebrow), .wt-transcript > p, .wt-transcript li > p, .wt-player > .wt-format-note, .wt-recorded > p, .wt-ready p, .wt-further p, .wt-task-picker small, .wt-step-status) { font-size: var(--t-body-sm); line-height: 1.55; }
+:root :is(.pricing-note, .pricing-trust li, .pricing-billed-line, .product-plan-note, .pricing-free-strip p, .pricing-passes-sub, .pricing-outcome, .jv-contact-grid .guest-support > p) { font-size: var(--t-body-sm); line-height: 1.55; }
+:root .guest-support form > p, :root .guest-support-fine, :root .ap-field-help, :root .ap-form-expect, :root .ap-next-line, :root .ap-auth-footnote { font-size: var(--t-small); line-height: 1.5; }/* Form labels share one style (14px, 500) on the account and contact forms. */
+
+:root .jv-account .ap-field label, :root .jv-account .ap-phone-field label, :root .guest-support label, :root .guest-support .guest-support-consent { font-size: var(--t-small); font-weight: var(--fw-medium); line-height: 1.4; color: var(--jv-ink); }
+:root .wt-task-toggle { min-height: 44px; padding: 0 18px; border-radius: var(--r-pill); font-size: var(--t-body-sm); font-weight: var(--fw-semi); line-height: 1; white-space: nowrap; }/* Labels: eyebrows stay mono caps (a little larger, a little tighter); secondary labels become sentence-case Geist at 13px; mono is left for times, files and days. */
+
+
+:root .jv-caption, :root .ap-eyebrow, :root .hc-eyebrow, :root .cg-eyebrow, :root .wt-eyebrow, :root .jv-home .jv-step-index { font-size: var(--t-eyebrow); letter-spacing: .04em; }
+:root .jv-chip--caption, :root .jv-related > span, :root .hc-related > span, :root .jv-footer-col-title, :root .jv-mobile-who > p, :root .jv-home .jv-loop-caption, :root .jv-home .jv-appwin-pane-label, :root .pc-source-kind, :root .bc-mini-cap, :root .bc-stack-cap, :root .pc-dash-h, :root .pc-week-strip-caption, :root .pc-caption, :root .pc-doc-h, :root .pricing-includes-label, :root .audience-workspace figcaption, :root .audience-evidence span, :root .as-sources li > span, :root .as-result > span, :root .as-col > span, :root .wt-task-picker button > span:first-child, :root .cg-example figcaption, :root .cg-card-meta span:first-child, :root .ap-board-caption { font-family: var(--font-sans); font-size: var(--t-sm); font-weight: var(--fw-medium); letter-spacing: 0; line-height: var(--lh-sm); text-transform: none; }
+:root .pricing-includes-label { font-size: var(--t-sm) !important; }
+:root .jv-chip--caption::before { display: none; }
+:root .jv-chip--caption { padding-inline: 10px; }/* Rhythm: eyebrows lead heroes and the first section only; later sections open on their heading. The dark foot bar is kept for three hero cards (home, Automated Job Loop, audience heroes). */
+
+
+:root .loop-overview .lo-section ~ .lo-section .jv-head > .jv-caption, :root .loop-overview .lo-section ~ .lo-section .jv-caption:first-child, :root .loop-overview .lo-private .jv-caption, :root .product-main-content > .jv-section ~ .jv-section .jv-head > .jv-caption, :root .product-main-content > .jv-section ~ .jv-section [data-reveal] > .jv-caption:first-child, :root .audience-setpiece .jv-head > .jv-caption, :root .jv-story ~ .jv-story > .jv-caption { display: none; }
+:root .pc-foot { margin: 14px -18px -18px; background: var(--jv-bg-subtle); border-top: 1px solid var(--jv-line); color: var(--jv-ink-2); font-weight: var(--fw-medium); }
+:root .pc-foot > span { background: var(--jv-brand); box-shadow: 0 0 0 3px rgb(var(--jv-brand-rgb) / .14); }
+:root :is(.audience-hero-visual, .lo-loop-hero--forest .jv-hero-mock) .pc-foot { background: var(--jv-forest); border-top: 0; color: #fff; }
+:root :is(.audience-hero-visual, .lo-loop-hero--forest .jv-hero-mock) .pc-foot > span { background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(var(--jv-signal-rgb) / .18); }/* Light surfaces: a warmer wash (a faint lime light at one corner), softer rails, and a footer that carries the same tint. */
+
+
+:root { --jv-wash: radial-gradient(38% 28% at 94% 0%, rgb(var(--jv-signal-rgb) / .16), transparent 70%), linear-gradient(180deg, var(--jv-wash-soft) 0%, var(--jv-paper) 100%); }
+@media (min-width: 1024px) {
+  :root .jv-rails::before, :root .jv-rails::after, :root .jv-home::before, :root .jv-home::after { background: color-mix(in srgb, var(--jv-line) 50%, transparent); }
+}
+:root .jv-footer { background: linear-gradient(180deg, var(--jv-paper), var(--jv-wash-soft)); }/* A quiet dot field and a soft glow behind the pale-page heroes, so the pages without a mock still have one detail. */
+
+@media (min-width: 1024px) {
+  :root .jv-page-head:not(.jv-page-head--forest):not(.jv-page-head--split), :root .career-guides .cg-hero { position: relative; isolation: isolate; }
+  :root .jv-page-head:not(.jv-page-head--forest):not(.jv-page-head--split)::before, :root .career-guides .cg-hero::before { content: ""; position: absolute; z-index: -1; inset: 0 -24px 0 auto; width: 46%; pointer-events: none; background: radial-gradient(circle, rgb(var(--jv-brand-rgb) / .2) 1px, transparent 1.6px) 0 0 / 22px 22px; -webkit-mask-image: radial-gradient(closest-side at 70% 40%, black 20%, transparent 100%); mask-image: radial-gradient(closest-side at 70% 40%, black 20%, transparent 100%); }
+  :root .jv-page-head--split:not(.jv-page-head--forest) > .jv-page-visual::after { content: ""; position: absolute; inset: -14% -18%; z-index: -2; pointer-events: none; background: radial-gradient(closest-side, rgb(var(--jv-brand-rgb) / .12), transparent 74%); }
+}/* Vertical rhythm: the gap after a section is one value. */
+
+:root { --gap-section: clamp(64px, 8vw, 112px); }
+:root .jv-related { margin-top: 40px; }
+:root .jv-legal { padding-bottom: 40px; }
+:root .loop-overview .lo-faq { padding-bottom: 48px; }/* Page heroes: the copy and its card are centred against each other (no empty lower-left), and the faq, privacy and help heroes carry a compact right-hand card. */
+
+
+@media (min-width: 1024px) {
+  :root .jv-page-head--split { grid-template-rows: 1fr auto auto auto auto 1fr; align-items: center; }
+  :root .jv-page-head--split > .jv-caption { grid-row: 2; }
+  :root .jv-page-head--split > .jv-page-title { grid-row: 3; }
+  :root .jv-page-head--split > .jv-lead { grid-row: 4; }
+  :root .jv-page-head--split > .jv-page-actions { grid-row: 5; }
+  :root .jv-page-head--split > .jv-page-visual { grid-row: 1 / -1; align-self: center; margin-top: 0; }
+  :root .product-page--privacy .jv-page-head--split, :root .product-page--faq .jv-page-head--split { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  :root .product-page--privacy .jv-page-head--split > :not(.jv-page-visual), :root .product-page--faq .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / span 7; }
+  :root .product-page--privacy .jv-page-head--split > .jv-page-visual, :root .product-page--faq .jv-page-head--split > .jv-page-visual { grid-column: 9 / span 4; grid-row: 1 / -1; margin-top: 0; max-width: none; }
+  :root .product-page--privacy .jv-notecard ol { grid-template-columns: minmax(0, 1fr); }
+  :root .product-page--privacy .jv-page-head, :root .product-page--faq .jv-page-head { padding-bottom: 56px; }
+}
+:root .jv-faq-index ol { display: grid; margin: 12px 0 0; padding: 0; list-style: none; }
+:root .jv-faq-index li { border-top: 1px solid var(--jv-line); }
+:root .jv-faq-index li::before { content: none; }
+:root .jv-faq-index a { display: flex; align-items: center; min-height: 48px; padding: 8px 0; color: var(--jv-ink); font-size: var(--t-small); font-weight: var(--fw-medium); line-height: 1.35; text-decoration: none; }
+@media (hover: hover) { :root .jv-faq-index a:hover { color: var(--jv-brand); } }
+:root .jv-faq-index.jv-notecard li { padding: 0; }
+@media (max-width: 767px) { :root .product-page--faq .jv-page-head--split > .jv-page-visual { display: none; } }/* Help: the three starting tasks are a compact "Popular tasks" card beside the heading from 1024px, and the original cards below it on phones. */
+
+:root .hc-start-title { display: none; }
+@media (min-width: 1024px) {
+  :root .help-center .hc-hero { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; max-width: none; padding-bottom: 40px; }
+  :root .help-center .hc-hero > :not(.hc-start) { grid-column: 1 / span 7; }
+  :root .help-center .hc-hero > .hc-start { grid-column: 9 / span 4; grid-row: 1 / span 4; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 20px 24px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: var(--jv-paper); box-shadow: var(--sh-3); }
+  :root .help-center .hc-start-title { display: block; margin: 0 0 8px; color: var(--jv-ink-3); font-size: var(--t-sm); font-weight: var(--fw-medium); }
+  :root .help-center .hc-start > a { grid-row: auto; grid-template-rows: none; grid-template-columns: 40px minmax(0, 1fr) 16px; align-items: center; gap: 2px 12px; padding: 14px 0; border: 0; border-top: 1px solid var(--jv-line); border-radius: 0; background: none; box-shadow: none; }
+  :root .help-center .hc-start > a > svg:first-child { grid-column: 1; grid-row: 1 / span 2; }
+  :root .help-center .hc-start > a > strong { grid-column: 2; font-size: var(--t-body-sm); line-height: 1.3; }
+  :root .help-center .hc-start > a > span { grid-column: 2; font-size: var(--t-sm); }
+  :root .help-center .hc-start > a > svg:last-child { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+  :root .help-center .hc-start > a:hover { transform: none; box-shadow: none; border-color: var(--jv-line); }
+}
+:root .help-center .hc-contents, :root .help-center .hc-contents ol a, :root .help-center .hc-contents nav > a, :root .help-center .hc-contents summary { font-size: var(--t-small); }/* Pricing: the price control is on the page (not behind a disclosure), plan cards carry their own points and cadence, and the free path is a real row. */
+
+
+:root .pricing-market-line { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; margin: 0 0 16px; color: var(--jv-ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+:root .pricing-market-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--jv-brand); font: inherit; font-weight: var(--fw-semi); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+:root .pricing-market-link:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; border-radius: 4px; }
+:root .pricing-week { display: flex; gap: 4px; margin: 14px 0 0; }
+:root .pricing-week > i { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--jv-sunken); color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-style: normal; font-weight: 500; line-height: 1; }
+:root .pricing-week > i.is-on { background: var(--jv-brand); color: #fff; }
+:root .pricing-card.jv-dark .pricing-week > i { background: rgb(255 255 255 / .1); color: var(--jv-on-dark-2); }
+:root .pricing-card.jv-dark .pricing-week > i.is-on { background: var(--jv-signal); color: var(--jv-forest); }
+:root .pricing-cadence { color: var(--jv-brand-ink); font-size: var(--t-h4); font-weight: var(--fw-medium); letter-spacing: var(--ls-card); line-height: 1.3; }
+:root .pricing-cadence strong { font-weight: var(--fw-semi); }
+:root .pricing-card.jv-dark .pricing-cadence { color: var(--jv-on-dark-link); }
+:root .pricing-points { display: grid; margin: 18px 0 24px; padding: 0; list-style: none; }
+:root .pricing-card > .pricing-points ~ :is(a, button) { margin-top: auto; }
+:root .pricing-card .pricing-points li { padding: 8px 0; }
+:root .product-proposed-grid .pricing-desc { min-height: 0; margin-bottom: 0; }/* Pro gets its own identity (a tinted surface and a brand rule) so the three tiers read as three. */
+
+:root .product-proposed-grid .pricing-card:not(.jv-dark):nth-child(3) { background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-paper) 60%); box-shadow: inset 0 3px 0 var(--jv-brand), var(--sh-2); }
+:root .pricing-free-strip { margin-top: 24px; padding: 20px 24px; border-radius: var(--r-md); background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-brand-tint)); }
+:root .pricing-free-strip p { font-size: var(--t-body-sm); }
+:root .pricing-free-strip .jv-btn { flex: none; }/* One-time passes: a quiet "prefer a one-off?" row, below the free path. */
+
+:root .product-page--pricing .jv-section.pricing-passes { margin-top: 20px; padding-block: 4px; border-color: var(--jv-line); background: none; border-style: dashed; }
+:root .pricing-passes-title { font-size: var(--t-h4); }
+:root .pricing-passes-lead > .jv-caption { display: none; }
+:root .jv-cta-bar--plans .jv-cta-bar-copy p { max-width: 52ch; }
+:root .jv-plan-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+:root .jv-plan-pills li { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 14px; border: 1px solid var(--jv-line-strong); border-radius: var(--r-pill); background: var(--jv-paper); color: var(--jv-ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+:root .jv-plan-pills strong { color: var(--jv-ink); font-weight: var(--fw-semi); }/* Audience pages: the section heading starts at the top of its card, and each audience has its own example layout. */
+
+
+@media (min-width: 1024px) {
+  :root .audience-check { align-items: start; }
+  :root .audience-check-copy { align-content: start; position: sticky; top: 112px; }
+  :root .audience-hero { align-items: center; padding-bottom: 56px; }
+}
+:root .audience-bridge { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: stretch; }
+:root .audience-bridge .audience-evidence { min-width: 0; }
+:root .audience-bridge-arrow { align-self: center; width: 20px; height: 20px; color: var(--jv-brand); }
+@media (max-width: 639px) { :root .audience-bridge { grid-template-columns: minmax(0, 1fr); } :root .audience-bridge-arrow { rotate: 90deg; justify-self: center; } }
+:root .audience-reuse { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-left: 2px solid var(--jv-line-strong); }
+:root .audience-reuse li { position: relative; padding: 4px 0 14px 18px; }
+:root .audience-reuse li::before { content: ""; position: absolute; left: -6px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--jv-brand); box-shadow: 0 0 0 3px var(--jv-paper); }
+:root .audience-reuse li:last-child::before { background: var(--jv-signal); box-shadow: 0 0 0 3px var(--jv-paper), 0 0 0 4px var(--jv-brand); }
+:root .audience-reuse span { color: var(--jv-ink-3); font-size: var(--t-sm); font-weight: var(--fw-medium); }
+:root .audience-reuse p { margin: 2px 0 0; color: var(--jv-ink); font-size: var(--t-small); line-height: 1.5; }
+:root .audience-workspace--mba figcaption { background: var(--jv-wash-peak); }
+:root .audience-workspace--professional figcaption { background: var(--jv-sunken); }
+:root .audience-workspace--professional .audience-workspace-body { gap: 14px; }/* Closing bands: the visual sits in the grid (not absolutely), so the card sets the band height and every band keeps the same padding around it. */
+
+
+@media (min-width: 1024px) {
+  :root .jv-cta--visual .jv-cta-visual { position: relative; right: auto; top: auto; translate: none; grid-column: 9 / span 4; grid-row: 1; align-self: center; width: auto; }
+  :root .jv-cta--visual { align-items: center; }
+}/* Walkthroughs: controls hold their size on phones, the shortcut hint is for keyboards, and the tour and its next click share one surface. */
+
+
+@media (max-width: 639px) {
+  :root .walkthroughs-page .wt-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root .walkthroughs-page .wt-navigation :is(.wt-button, .wt-restart) { min-height: 48px; padding-inline: 12px; white-space: nowrap; justify-content: center; }
+  :root .walkthroughs-page .wt-navigation .wt-restart { grid-column: 1 / -1; min-height: 44px; }
+}
+@media (pointer: coarse), (max-width: 767px) {
+  :root #wt-keyboard-help { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+}
+:root .walkthroughs-page :is(.wt-format-links a, .wt-video-chapters button, .wt-step-picker button) { min-height: 44px; display: inline-flex; align-items: center; }
+:root .walkthroughs-page .wt-selected-task :is(a, button) { min-height: 44px; }/* Guides: one card surface, one top rule, titles clamped to three lines in a fixed block so the descriptions start together, one hairline between list rows. */
+
+
+:root .career-guides .cg-card, :root .career-guides .cg-card--feature { background: var(--jv-paper); }
+:root .career-guides .cg-card h3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; line-height: 1.3; }
+@media (min-width: 1001px) { :root .career-guides .cg-card h3 { min-height: calc(3 * 1.3em); } }/* Footer: four balanced columns, 44px rows with no extra margin on phones, and a wordmark whose descender is never clipped. */
+
+
+@media (max-width: 639px) {
+  :root .jv-footer-col a { min-height: 44px; margin-block: 0; }
+  :root .jv-footer-links { row-gap: 20px; }
+}
+:root .jv-footer-mark { padding-bottom: 5cqw; }
+@supports not (font-size: 1cqw) { :root .jv-footer-mark { padding-bottom: 5vw; } }/* Brand: the wordmark's stem is thickened to match the J's stroke (the Manrope file is a static Bold; a hairline stroke adds the missing weight), and the period is the lime signal dot. */
+
+
+:root .jv-brand { font-size: 24px; }
+@media (max-width: 760px) { :root .jv-brand { font-size: 22px; } }
+:root .jv-brand-name { -webkit-text-stroke: .45px currentColor; }
+:root .jv-brand-period { position: relative; display: inline-block; width: .26em; height: .26em; margin-left: .08em; overflow: hidden; border-radius: 50%; color: transparent; -webkit-text-stroke: 0; background: var(--jv-signal); box-shadow: 0 0 0 1.5px var(--jv-brand); vertical-align: baseline; }
+:root .jv-dark .jv-brand-period { color: transparent; box-shadow: none; }
+:root .jv-dark .jv-brand--static .jv-brand-period { box-shadow: 0 0 0 1.5px var(--jv-brand); }/* Targets: inline link rows keep a 44px hit area. */
+
+
+:root :is(.jv-related, .hc-related, .wt-format-links, .jv-link-row) a { min-height: 44px; }/* Account entry (the ad landing): the story panel is one grouped column from the top (sticky beside the long form), the phone strip carries the outcome and the three steps. */
+
+
+:root .ap-story-steps { display: none; margin: 0; padding: 0; list-style: none; counter-reset: ap-step; }
+:root .ap-story-steps li { counter-increment: ap-step; position: relative; color: var(--jv-on-dark-1); font-size: var(--t-body-sm); font-weight: var(--fw-medium); line-height: 1.4; }
+:root .ap-story-steps li::before { content: counter(ap-step); display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 10px; border-radius: 50%; background: rgb(var(--jv-link-on-dark-rgb) / .16); color: var(--jv-on-dark-link); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; }
+:root .ap-story-footnote svg { color: var(--jv-signal); }
+@media (min-width: 761px) {
+  :root .jv-account--standalone .ap-account-story.jv-dark { justify-content: flex-start; padding-top: 56px; padding-bottom: 0; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-inner { position: sticky; top: 96px; flex: none; min-height: 0; padding-bottom: 40px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-steps { display: grid; gap: 12px; margin: 28px 0 0; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-run { display: grid; margin: 32px 0 0; padding: 16px 18px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-footnote { display: flex; margin: 24px 0 8px; color: var(--jv-on-dark-body); font-size: var(--t-small); }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-link { margin-top: 4px; }
+}
+@media (max-width: 760px) {
+  :root .jv-account--standalone .ap-account-story .ap-story-description { display: block; margin: 0 0 6px; color: var(--jv-on-dark-body); font-size: var(--t-small); line-height: 1.45; max-width: 36ch; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-steps { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-steps li { font-size: var(--t-sm); }
+  :root .jv-account--standalone .ap-account-story.jv-dark .ap-story-steps li::before { width: 18px; height: 18px; margin-right: 6px; font-size: .6875rem; }
+}/* Home: a clear gutter between the lead and the product window, the sheet laid over the window's lower edge (never over its footer text), and the ring centred on the window. */
+
+
+:root .jv-home .jv-hero-lead { max-width: 37rem; }
+@media (min-width: 1280px) {
+  :root .jv-home .jv-hero { padding: 32px 0 0; }
+  :root .jv-home .jv-hero-visual { padding-bottom: 212px; }
+  :root .jv-home .jv-hero-cv { right: -16px; bottom: 0; width: 268px; }
+  :root .jv-home .jv-hero-orbit-wrap { top: calc(50% - 106px); width: min(500px, calc(100% + 8px)); }
+  :root .jv-home .jv-hero-visual::after { inset: -10% -8% 8% -8%; }
+}
+:root .jv-home .jv-tile-next { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; color: var(--jv-ink-2); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+:root .jv-home .jv-tile-next b { color: var(--jv-ink); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; }
+:root .jv-home .jv-tile-next i { margin-left: auto; padding: 2px 8px; border-radius: var(--r-pill); background: var(--jv-paper); color: var(--jv-ink-3); font-size: var(--t-sm); font-style: normal; }
+@media (min-width: 1024px) { :root .jv-home .jv-tile--schedule .jv-tile-card { align-self: center; } }/* Disclosures open on the shorter step (the reveal itself is in motion.css). */
+
+
+@media (prefers-reduced-motion: no-preference) {
+  :root .jv-faq details[open] > :is(p, div), :root .hc-note-details[open] > :not(summary) { animation-duration: var(--dur-2); }
+}

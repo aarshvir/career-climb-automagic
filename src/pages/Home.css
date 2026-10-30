@@ -5,7 +5,7 @@
 .jv-home h1, .jv-home h2, .jv-home h3 { text-wrap: balance; }
 /* Heading measures are in em, not ch: ch follows the "0" of whichever face is showing, so a fallback would change the box. (1ch of Geist ~ .675em.) */
 .jv-home p, .jv-home li, .jv-home dd { text-wrap: pretty; }
-.jv-home h2 { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: -.035em; }
+.jv-home h2 { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: var(--ls-display); }
 .jv-home .jv-dark h2 { color: #fff; font-weight: var(--fw-heading-on-dark); }
 .jv-home h3 { margin: 0; }
 .jv-home mark { padding: 1px 3px; white-space: nowrap; border-radius: 4px; background: var(--jv-brand-tint); color: var(--jv-brand-ink); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
@@ -28,8 +28,8 @@
 .jv-home .jv-hero-grid { display: grid; gap: 32px; }
 .jv-home .jv-hero-copy { position: relative; z-index: 1; min-width: 0; }
 .jv-home .jv-hero-eyebrow { margin: 0 0 16px; color: var(--jv-brand-ink); }
-.jv-home .jv-hero-title { margin: 0; max-width: 10.4em; color: var(--jv-ink); font-size: var(--t-display); font-weight: var(--fw-display); line-height: 1.04; letter-spacing: -.035em; }
-.jv-home .jv-hero-lead { margin: 20px 0 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; }
+.jv-home .jv-hero-title { margin: 0; max-width: 10.4em; color: var(--jv-ink); font-size: var(--t-display); font-weight: var(--fw-display); line-height: 1.04; letter-spacing: var(--ls-display); }
+.jv-home .jv-hero-lead { margin: 20px 0 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: var(--ls-lead); }
 .jv-home .jv-hero-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 28px; }
 .jv-home .jv-hero-note { margin: 12px 0 0; }
 .jv-home .jv-hero-cv { display: none; }
@@ -38,7 +38,7 @@
 .jv-home .jv-hero-orbit-wrap { display: none; }
 @media (max-width: 639px) {
   .jv-home .jv-hero-cta { width: 100%; }
-  .jv-home .jv-hero-title { font-size: 2.25rem; letter-spacing: -.03em; }
+  .jv-home .jv-hero-title { font-size: 2.25rem; letter-spacing: var(--ls-h2); }
 }
 /* 320-359px: a slightly smaller full-width button keeps its label on one line (it still wraps under text spacing). */
 @media (max-width: 359px) {
@@ -150,12 +150,12 @@
 /* 4. The work it takes off your hands */
 .jv-home .jv-control { padding: var(--section-y) 0; }
 .jv-home .jv-section-head { display: grid; gap: 16px; max-width: 720px; }
-.jv-home .jv-section-head p { margin: 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; }
+.jv-home .jv-section-head p { margin: 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: var(--ls-lead); }
 .jv-home .jv-step-index { margin: 0 0 12px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
 /* Each fragment is staged on a subtle field (no border), so the card is the only edge. */
 .jv-home .jv-frag-card { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--jv-line); border-radius: 12px; background: #fff; box-shadow: var(--sh-2); }
 .jv-home .jv-frag-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
-.jv-home .jv-frag-strong { color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); line-height: 1.4; letter-spacing: -.011em; }
+.jv-home .jv-frag-strong { color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); line-height: 1.4; letter-spacing: var(--ls-lead); }
 .jv-home .jv-frag-muted { color: var(--jv-ink-3); font-size: var(--t-small); line-height: 1.25rem; letter-spacing: 0; font-variant-numeric: tabular-nums; }
 .jv-home .jv-frag-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; padding-top: 14px; border-top: 1px solid var(--jv-line); }
 .jv-home .jv-frag-filename { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-sm); line-height: var(--lh-sm); overflow-wrap: anywhere; }
@@ -176,7 +176,7 @@
 .jv-home .jv-frag-label { display: block; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: var(--lh-sm); font-weight: 500; letter-spacing: 0; }
 /* Where Jobvance stops: one sentence and the two places to read more. */
 .jv-home .jv-boundary { display: grid; gap: 8px; padding-top: 28px; border-top: 1px solid var(--jv-line-strong); }
-.jv-home .jv-boundary p { margin: 0; max-width: 52ch; color: var(--jv-ink); font-size: var(--t-body); font-weight: 500; line-height: var(--lh-body); letter-spacing: -.011em; }
+.jv-home .jv-boundary p { margin: 0; max-width: 52ch; color: var(--jv-ink); font-size: var(--t-body); font-weight: 500; line-height: var(--lh-body); letter-spacing: var(--ls-lead); }
 .jv-home .jv-boundary-links { display: flex; flex-wrap: wrap; gap: 0 28px; }
 /* Phones: the card stands alone (no staging panel), so the section stays short. */
 @media (max-width: 767px) {
@@ -195,7 +195,7 @@
 /* 5. Free CV Check panel: a neutral surface tone (the control rows' field colour). Brand colour appears only in the
    highlights and the "Suggested for this job" label. */
 .jv-home .jv-check { display: grid; gap: 32px; width: var(--shell); margin: 0 auto; padding: 40px var(--band-pad-x); border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: var(--jv-bg-subtle); box-shadow: inset 0 1px 0 rgb(255 255 255 / .7); }
-.jv-home .jv-check-copy h2 { max-width: none; font-size: var(--t-h2-panel); line-height: 1.08; letter-spacing: -.035em; }
+.jv-home .jv-check-copy h2 { max-width: none; font-size: var(--t-h2-panel); line-height: 1.08; letter-spacing: var(--ls-display); }
 .jv-home .jv-check-copy p { margin: 16px 0 28px; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
 .jv-home .jv-check-example { display: grid; gap: 12px; align-content: start; padding: 20px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: #fff; box-shadow: var(--sh-2); }
 .jv-home .jv-check-example > .jv-badge { justify-self: start; min-height: 24px; padding: 0 10px; background: var(--jv-bg-muted); color: var(--jv-ink-2); font-size: var(--t-sm); }
@@ -231,7 +231,7 @@
 .jv-home .jv-guide-index a { position: relative; isolation: isolate; display: grid; grid-template-columns: 32px minmax(0, 1fr) 16px; gap: 4px 12px; align-items: baseline; padding: 18px 0; color: var(--jv-ink); text-decoration: none; }
 .jv-home .jv-guide-index a::before { content: ""; position: absolute; inset: 4px -12px; z-index: -1; border-radius: 10px; background: var(--jv-bg-subtle); opacity: 0; transition: opacity var(--dur-2) var(--ease-press); }
 .jv-home .jv-guide-num { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
-.jv-home .jv-guide-title { font-size: var(--t-body); font-weight: 500; line-height: 1.4; letter-spacing: -.011em; transition: color var(--dur-2) var(--ease-press); }
+.jv-home .jv-guide-title { font-size: var(--t-body); font-weight: 500; line-height: 1.4; letter-spacing: var(--ls-lead); transition: color var(--dur-2) var(--ease-press); }
 .jv-home .jv-guide-meta { grid-column: 2; color: var(--jv-ink-3); font-size: var(--t-small); line-height: 1.25rem; letter-spacing: 0; }
 .jv-home .jv-guide-arrow { grid-column: 3; grid-row: 1; align-self: start; width: 16px; height: 16px; margin-top: 3px; color: var(--jv-ink-3); transition: opacity var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
 .jv-home .jv-guide-index a:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; border-radius: 8px; }
@@ -264,13 +264,13 @@
 @media (prefers-reduced-motion: reduce) { .jv-home .jv-guide-arrow { transform: none !important; } }
 @media (min-width: 1024px) {
   .jv-home .jv-guide-index { margin-top: 40px; }
-  .jv-home .jv-guide-title { font-size: 1.125rem; letter-spacing: -.014em; line-height: 1.35; }
+  .jv-home .jv-guide-title { font-size: 1.125rem; letter-spacing: var(--ls-card); line-height: 1.35; }
 }
 
 /* 7. Final CTA on home */
 .jv-home .jv-cta { margin-bottom: 96px; }
 @media (min-width: 1024px) { .jv-home .jv-cta { padding-block: 88px; } }
-.jv-home .jv-cta h2 { max-width: 8.1em; font-size: var(--t-h1); line-height: 1.06; letter-spacing: -.04em; }
+.jv-home .jv-cta h2 { max-width: 8.1em; font-size: var(--t-h1); line-height: 1.06; letter-spacing: var(--ls-display); }
 @media (max-width: 639px) { .jv-home .jv-cta { margin-bottom: 64px; } }
 
 /* ---------- Round 4 ---------- */
@@ -326,7 +326,7 @@
 
 /* ---------- Round 9 ---------- */
 /* Hero: a display-size headline beside one large product window (chrome, tab strip, run log and a selected CV) that bleeds off the right edge. */
-.jv-home .jv-hero-title { max-width: none; letter-spacing: -.04em; line-height: 1.03; text-wrap: balance; }
+.jv-home .jv-hero-title { max-width: none; letter-spacing: var(--ls-display); line-height: 1.03; text-wrap: balance; }
 @media (min-width: 640px) { .jv-home .jv-hero-title { font-size: var(--t-display-xl); } }
 .jv-home .jv-appwin { position: relative; z-index: 1; width: 100%; overflow: hidden; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: #fff; box-shadow: var(--sh-3); }
 .jv-home .jv-appwin-bar { display: none; }
@@ -370,7 +370,7 @@
 
 /* Proof strip: four outcomes, each a display-weight lead with one quiet line under it. */
 .jv-home .jv-proof li { display: grid; align-content: start; gap: 4px; }
-.jv-home .jv-proof strong { color: var(--jv-ink); font-size: 1.375rem; font-weight: var(--fw-heading); letter-spacing: -.028em; line-height: 1.2; }
+.jv-home .jv-proof strong { color: var(--jv-ink); font-size: 1.375rem; font-weight: var(--fw-heading); letter-spacing: var(--ls-h2); line-height: 1.2; }
 .jv-home .jv-proof li > span:last-child { color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 400; line-height: 1.4; }
 .jv-home .jv-proof-num { width: auto; margin-bottom: 8px; }
 @media (min-width: 1024px) {
@@ -389,7 +389,7 @@
 .jv-home .jv-tile.jv-dark { border: 0; background: radial-gradient(60% 55% at 50% 0%, rgb(var(--jv-link-on-dark-rgb) / .09), transparent 70%), var(--jv-forest); }
 .jv-home .jv-tile .jv-step-index { margin: 0 0 12px; color: var(--jv-brand-ink); }
 .jv-home .jv-tile.jv-dark .jv-step-index { color: var(--jv-signal); }
-.jv-home .jv-tile h3 { color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-card); line-height: 1.15; letter-spacing: -.03em; }
+.jv-home .jv-tile h3 { color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-card); line-height: 1.15; letter-spacing: var(--ls-h2); }
 .jv-home .jv-tile.jv-dark h3 { color: #fff; }
 .jv-home .jv-tile-copy p:not(.jv-step-index) { margin: 12px 0 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
 .jv-home .jv-tile.jv-dark .jv-tile-copy p:not(.jv-step-index) { color: var(--jv-on-dark-body); }

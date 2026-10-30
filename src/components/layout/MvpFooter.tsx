@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { Brand } from "./MvpHeader";
 
-// The same 8 site links as before, grouped into columns.
+// The same site links as before, grouped into four balanced columns of three.
 const columns: [string, [string, string][]][] = [
   ["Product", [["/job-loop", "Automated Job Loop"], ["/check", "Free CV Check"], ["/pricing", "Plans & pricing"]]],
-  ["Resources", [["/guides", "Career guides"], ["/walkthroughs", "Walkthroughs"], ["/help", "Help"], ["/faq", "FAQ"]]],
+  ["Resources", [["/guides", "Career guides"], ["/walkthroughs", "Walkthroughs"], ["/help", "Help"]]],
   ["Who it's for", [["/for-students", "Students"], ["/for-mba", "MBA career pivots"], ["/for-career-switchers", "Busy professionals"]]],
-  ["Company", [["/about", "About Jobvance"], ["/contact", "Contact"]]],
+  ["Company", [["/about", "About Jobvance"], ["/contact", "Contact"], ["/faq", "FAQ"]]],
 ];
 const legal: [string, string][] = [["/privacy", "Privacy"], ["/privacy#advertising-measurement", "Your privacy choices"], ["/terms", "Terms"], ["/refund", "Refunds"]];
 

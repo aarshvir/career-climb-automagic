@@ -28,7 +28,7 @@
 .check-stage { overflow: hidden; border-color: hsl(var(--border)); box-shadow: 0 8px 32px color-mix(in srgb, var(--jv-ink) 3%, transparent); border-radius: 22px; }
 .check-stage-content { display: flex; flex-direction: column; gap: 24px; padding: 28px; }
 .check-stage-heading { border-bottom: 1px solid hsl(var(--border)); padding-bottom: 24px; }
-.check-stage-heading h2 { font-size: 27px; margin-top: 9px; letter-spacing: -.04em; scroll-margin-top: 120px; }
+.check-stage-heading h2 { font-size: 27px; margin-top: 9px; letter-spacing: var(--ls-display); scroll-margin-top: 120px; }
 .check-stage-heading > p { color: hsl(var(--muted-foreground)); margin-top: 9px; font-size: 13px; }
 .check-stage-index { font-size: 10px; color: var(--jv-brand); letter-spacing: .1em; font-weight: 650; }
 .check-stage-content > p { font-size: 14px; line-height: 1.75; }

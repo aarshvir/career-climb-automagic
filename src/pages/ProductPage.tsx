@@ -63,11 +63,8 @@ function StartLink({ children = "Start my search", to = "/onboarding", variant =
 function TextLink({ to, children }: { to: string; children: React.ReactNode }) {
   return <Link to={to} className="jv-link"><span>{children}</span><ArrowRight aria-hidden="true" /></Link>;
 }
-/** Two-sentence closing headings put the lime marker on the last sentence (the one that tells the visitor what to do). */
-function signal(heading: string): ReactNode {
-  const parts = heading.match(/^(.+?[.?!])\s+(.+[.?!])$/);
-  return parts ? <>{parts[1]} <span className="jv-h-signal">{parts[2]}</span></> : heading;
-}
+/** Closing headings carry no accent colour on any page (one rule: the lime signal marks heroes and small status marks, never a closing line). */
+function signal(heading: string): ReactNode { return heading; }
 /** The closing moment on every interior page: the forest band. `visual` picks the right-hand card (the next-run card is kept for the home and Automated Job Loop pages only); utility pages close on text alone. */
 function CtaBand({ start, heading = "Ready to automate your search?", body = "Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.", visual = "none", secondary = true }: { start: string; heading?: string; body?: string; visual?: "none" | "trail" | "line" | "free" | "run" | "schedule"; secondary?: boolean }) {
   return <section className={`jv-cta jv-cta--page jv-dark${visual === "none" ? "" : " jv-cta--visual"}`} aria-labelledby="page-cta-title">
@@ -162,9 +159,11 @@ export default function ProductPage({ kind }: { kind: Kind }) {
   const meta = staticPageMeta(path);
   // One product fragment beside the intro on the explainer pages that would otherwise open on text alone.
   // Contact and privacy get a quiet summary card (real facts from the policy); the explainers get their own product moment.
-  const visual = kind === "how" ? <SetupCard /> : kind === "about" ? <RepeatStack /> : kind === "pricing" ? <PacesAside /> : kind === "contact" ? <ReceiptAside /> : kind === "privacy" ? <aside className="jv-notecard" aria-label="Your information at a glance"><p className="jv-caption">At a glance</p><ol><li><strong>The free check runs on your device</strong><span>Comparing without AI never uploads your file.</span></li><li><strong>Saving is your choice</strong><span>Nothing is stored in your account until you confirm.</span></li><li><strong>Advertising measurement is optional</strong><span>You can turn it off further down this page.</span></li></ol></aside> : null;
+  const openAnswer = (index: number) => () => { const box = document.getElementById(`faq-${index}`); if (box instanceof HTMLDetailsElement) box.open = true; };
+  const faqIndex = <aside className="jv-notecard jv-faq-index" aria-label="Popular questions"><p className="jv-caption">Popular questions</p><ol>{faqs.slice(0, 5).map(([question], index) => <li key={question}><a href={`#faq-${index}`} onClick={openAnswer(index)}>{question}</a></li>)}</ol></aside>;
+  const visual = kind === "faq" ? faqIndex : kind === "how" ? <SetupCard /> : kind === "about" ? <RepeatStack /> : kind === "pricing" ? <PacesAside /> : kind === "contact" ? <ReceiptAside /> : kind === "privacy" ? <aside className="jv-notecard" aria-label="Your information at a glance"><p className="jv-caption">At a glance</p><ol><li><strong>The free check runs on your device</strong><span>Comparing without AI never uploads your file.</span></li><li><strong>Saving is your choice</strong><span>Nothing is stored in your account until you confirm.</span></li><li><strong>Advertising measurement is optional</strong><span>You can turn it off further down this page.</span></li></ol></aside> : null;
   const contactNote = <aside className="jv-notecard" aria-label="How support works"><p className="jv-caption">How support works</p><ol><li><strong>No account needed</strong><span>Public support needs no name or email.</span></li><li><strong>Keep your receipt code</strong><span>It lets you read the status and any reply.</span></li><li><strong>Kept up to 90 days</strong><span>You confirm storage before sending. It is available for review, then removed.</span></li></ol></aside>;
-  const visualDecor = kind === "how" || kind === "about" || kind === "faq" || kind === "pricing" || kind === "contact";
+  const visualDecor = kind === "how" || kind === "about" || kind === "pricing" || kind === "contact";
   const related = (relatedFor[kind] ?? []).map(to => relatedLinks.find(([href]) => href === to)!).filter(Boolean);
   return <main className={`product-page product-page--${kind}${kind === "home" ? "" : " jv-rails"}`}>
     <Helmet><title>{meta?.title ?? `${titles[kind]} | Jobvance`}</title><meta name="description" content={meta?.description ?? intros[kind]} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}{meta && <meta property="og:title" content={meta.title} />}{meta && <meta property="og:description" content={meta.description} />}{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" />{kind === 'notfound' && <meta name="robots" content="noindex,follow" />}</Helmet>
@@ -180,7 +179,7 @@ export default function ProductPage({ kind }: { kind: Kind }) {
             <section className="jv-section product-section" aria-labelledby="how-cv-title"><div className="jv-split"><div className="product-visual" aria-hidden="true"><CvDiffCard /></div><div data-reveal><p className="jv-caption">Every CV</p><h2 id="how-cv-title" className="jv-section-title">Reworded for the job, from your experience.</h2><ul className="jv-ticks"><li>Each CV starts from the experience you added and the facts you confirm.</li><li>Wording is matched to what the job asks for, line by line.</li><li>Review it, then download PDF, DOCX or TXT from your dashboard.</li></ul></div></div></section>
             <p className="jv-related"><span>Not ready for a schedule?</span><Link to="/check">Try the free CV Check</Link><Link to="/job-loop">See the Automated Job Loop in depth</Link></p>
           </>}
-          {kind === "faq" && <div className="jv-faq jv-faq--wide product-faqs" data-reveal>{faqs.map(([question, answer]) => <details key={question}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>}
+          {kind === "faq" && <div className="jv-faq jv-faq--wide product-faqs" data-reveal>{faqs.map(([question, answer], index) => <details key={question} id={`faq-${index}`}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>}
           {kind === "about" && <div className="product-about">
             <section className="jv-story" aria-labelledby="about-problem"><p className="jv-caption">01 / The problem</p><h2 id="about-problem" className="jv-story-title" data-reveal>Every application starts from zero.</h2><div className="jv-story-body" data-reveal><p>Searching, copying, rewording, saving. A&nbsp;job search repeats the same work for every role, and the work you did last week is gone by Monday.</p></div></section>
             <section className="jv-story" aria-labelledby="about-idea"><p className="jv-caption">02 / The idea</p><h2 id="about-idea" className="jv-story-title" data-reveal>Set it up once. Let it run.</h2><div className="jv-story-body" data-reveal><p>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds matching jobs in the background and prepares a tailored, role-specific CV for each, built from your own experience.</p></div></section>
@@ -194,7 +193,11 @@ export default function ProductPage({ kind }: { kind: Kind }) {
       </div>
       {kind === "how" && <CtaBand start={start} visual="trail" heading="Set it up once. Come back to results." body="Add your experience, choose roles and locations, pick a schedule. Then come back to matched jobs and a tailored CV for each." />}
       {kind === "about" && <CtaBand start={start} visual="line" heading="Start with your own experience." body="Your next CV starts from the experience you add and the facts you confirm." />}
-      {kind === "pricing" && <CtaBand start={start} heading="Not ready to choose? Start free." body="Create a free account and set up your roles and schedule. Choose a plan for ongoing automatic runs." secondary={false} visual="free" />}
+      {kind === "pricing" && <section className="jv-cta-bar jv-cta-bar--plans" aria-labelledby="pricing-close-title">
+        <div className="jv-cta-bar-copy"><h2 id="pricing-close-title">Not ready to choose? Start free.</h2><p>Create a free account and set up your roles and schedule. Choose a plan for ongoing automatic runs.</p>
+          <ul className="jv-plan-pills" aria-label="Plans at a glance">{subscriptionPlans.map(plan => <li key={plan.id}><strong>{plan.name}</strong> ${plan.priceUsd}/month</li>)}</ul></div>
+        <div className="jv-cta-bar-actions"><StartLink to={start} /></div>
+      </section>}
       {kind === "faq" && <CtaBand start={start} heading="Ready when you are." body="Choose your roles and locations once, then let the search run on your schedule." visual="run" />}
       {(kind === "contact" || kind === "privacy") && <CtaBand start={start} heading="Need to start or continue a search?" body="Choose your roles and locations once. Automated Job Loop does the repeat work." secondary={false} visual="schedule" />}
     </>}

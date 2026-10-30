@@ -32,7 +32,7 @@
 .audience-workspace-bar .jv-brand-mark { width: 26px; height: 26px; }
 .audience-workspace-bar > span:last-child { display: inline-flex; align-items: center; gap: 6px; color: var(--jv-ink-3); font-size: var(--t-sm); }
 .audience-workspace-body { display: grid; gap: 12px; padding: 24px; }
-.audience-workspace-body .audience-workspace-title { margin: 0 0 4px; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }
+.audience-workspace-body .audience-workspace-title { margin: 0 0 4px; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: var(--ls-h3); }
 .audience-evidence { padding: 16px; border: 1px solid var(--jv-line); border-radius: 12px; background: var(--jv-bg-subtle); }
 .audience-evidence span { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
 .audience-evidence p { margin-top: 6px; color: var(--jv-ink); font-size: var(--t-small); line-height: 1.5; }
@@ -49,7 +49,7 @@
 .audience-path .jv-head h2 { text-wrap: pretty; }
 .audience-path .jv-head > p:not(.jv-caption) { font-size: var(--t-body); }
 .audience-features { padding-bottom: 72px; }
-.audience-features .jv-steps h2 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.audience-features .jv-steps h2 { margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: var(--ls-h3); text-wrap: balance; }
 @media (min-width: 1024px) {
   .audience-hero { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; padding: 40px 0 96px; }
   .audience-copy { grid-column: 1 / span 6; }

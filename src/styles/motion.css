@@ -20,9 +20,11 @@
   /* Scroll reveals: useReveal adds html.jv-motion only when motion is allowed and
      IntersectionObserver exists, so content is visible by default (no JS, crawlers, screenshots).
      Hiding happens without a transition; html.jv-motion-ready (added two frames later) enables the
-     reveal transition, so arming never plays a visible-to-hidden fade. */
+     reveal transition, so arming never plays a visible-to-hidden fade. Reveals take 420ms (the same step as the hero entrance). */
   .jv-motion [data-reveal] { opacity: 0; transform: translateY(var(--rise)); }
-  .jv-motion-ready [data-reveal] { transition: opacity var(--dur-4) var(--ease-out), transform var(--dur-4) var(--ease-out); transition-delay: calc(var(--i, 0) * var(--stagger)); }
+  .jv-motion-ready [data-reveal] { transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out); transition-delay: calc(var(--i, 0) * var(--stagger)); }
+  /* Once a block has played its reveal (useReveal adds .is-done), its own hover transitions and delays are never overridden by the reveal's. */
+  .jv-motion-ready [data-reveal].is-done { transition: border-color var(--dur-2) var(--ease-press), box-shadow var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press), background-color var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); transition-delay: 0s; }
   .jv-motion [data-reveal].is-in { opacity: 1; transform: none; }
 }
 

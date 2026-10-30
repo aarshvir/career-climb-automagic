@@ -61,9 +61,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     // Native validation bubbles are transient and unannounced. Every failing field gets its own message, and focus moves to the first one.
     const form = event.currentTarget as HTMLFormElement;
     const found: typeof fieldErrors = {}, summary: string[] = [];
-    const emailOk = isValidEmail(email.trim());
-    if (!emailOk) { found.email = 'Please enter a valid email address.'; summary.push(found.email); }
-    else if (!authRateLimiter.check(email.trim().toLowerCase())) { setFieldErrors({}); setError('Too many attempts. Please try again in a minute.'); return; }
+    if (!isValidEmail(email.trim())) { found.email = 'Please enter a valid email address.'; summary.push(found.email); }
     const details = mode === 'sign-up' ? checkContact(contact) : null;
     if (mode === 'sign-up') {
       if (!validName(contact.name)) found.name = 'Please enter your full name.';
@@ -84,6 +82,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       return;
     }
     setFieldErrors({});
+    // The limiter counts real attempts only: it runs once every field has passed, immediately before the network call (blank or wrong submits never use one up).
+    if (!authRateLimiter.check(email.trim().toLowerCase())) { setError('Too many attempts. Please try again in a minute.'); return; }
     setBusy(true);
     const turn = ++attempt.current, epoch = trackingAuthEpoch();
     try {
@@ -187,8 +187,9 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           <p className="ap-story-description">{checkEntry ? 'Bring a CV and a job description, review the suggested changes and download your approved version.' : <>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares a tailored, role-specific CV for each.</>}</p>
           {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance">{checkEntry ? <><li>Compare your CV with a job</li><li>Review every change</li><li>Download PDF, Word or text</li></> : <><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></>}</ul>}
           {showBenefits && <p className="ap-story-free">Free account · 3 tailored CVs a month</p>}
+          {showBenefits && !checkEntry && <ol className="ap-story-steps" aria-label="What happens next"><li>Add your CV</li><li>Choose roles and locations</li><li>Review your matches</li></ol>}
           <MiniRun className="ap-story-run" />
-          <p className="ap-story-footnote"><LockKeyhole size={16} aria-hidden="true" /> Choose what you save in your account.</p>
+          <p className="ap-story-footnote"><Check size={16} aria-hidden="true" /> Matched jobs and a tailored CV for each role, in your dashboard.</p>
           <Link to="/job-loop" className="ap-story-link">See how the Automated Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
         </div>
       </aside>}

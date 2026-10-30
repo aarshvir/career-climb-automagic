@@ -7,7 +7,7 @@
 .jv-mock-top .jv-mock-tag { white-space: normal; min-width: 0; flex: 0 1 auto; }
 .jv-mock-tag.jv-chip--caption::before { background: var(--jv-ink-3); }
 .jv-mock-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 16px; }
-.jv-mock-title { flex: 1 0 100%; margin: 0; color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); letter-spacing: -.011em; line-height: 1.3; }
+.jv-mock-title { flex: 1 0 100%; margin: 0; color: var(--jv-ink); font-size: var(--t-body-sm); font-weight: var(--fw-semi); letter-spacing: var(--ls-lead); line-height: 1.3; }
 /* Neutral pill: brand green is kept for the "ready, needs you" state. */
 .jv-mock-schedule { display: inline-flex; align-items: center; gap: 6px; min-height: 26px; padding: 2px 10px 2px 8px; border-radius: var(--r-pill); background: var(--jv-sunken); color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; white-space: nowrap; }
 .jv-mock-schedule svg { width: 14px; height: 14px; margin-top: 1px; color: var(--jv-ink-3); stroke-width: var(--icon-stroke-meta, 1.75); }

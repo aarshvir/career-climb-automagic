@@ -63,7 +63,7 @@
 .jl-next-cards small { display:block; margin-top:5px; font-size:10px; color:var(--jl-muted); line-height:1.9; }
 .jl-budget { display:grid; gap:7px; padding:17px 0 0; margin-top:22px; border-top:1px solid var(--jl-line); }
 .jl-budget span { color:var(--jl-muted); font-size:10px; line-height:1.7; }
-.jl-budget strong { font-size:16px; font-weight:600; letter-spacing:-.02em; }
+.jl-budget strong { font-size:16px; font-weight:600; letter-spacing:var(--ls-h3); }
 .jl-budget p { color:var(--jl-muted); font-size:10px; line-height:1.8; }
 .jl-discovery-sources > ul { list-style:none; padding:0; margin:18px 0; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .jl-discovery-sources li { padding:15px; border:1px solid var(--jl-line); border-radius:7px; background:var(--jv-bg-subtle); }
@@ -114,7 +114,7 @@
 .product-page--contact .jl-button { font:inherit; font-size:12px; }
 .product-page--contact .jl-support-history > h3 { font-size:16px; font-weight:600; margin-bottom:12px; }
 .jl-panel { min-width:0; padding:29px; background:#fff; border:1px solid var(--jl-line); border-radius:12px; }
-.jl-panel h2 { font-size:25px; font-weight:650; letter-spacing:-.035em; line-height:1.3; margin-bottom:14px; }
+.jl-panel h2 { font-size:25px; font-weight:650; letter-spacing:var(--ls-display); line-height:1.3; margin-bottom:14px; }
 .jl-panel h3 { font-size:16px; font-weight:650; line-height:1.6; }
 .jl-panel > p, .jl-panel form > p { color:var(--jl-muted); font-size:13px; line-height:1.9; margin-bottom:17px; }
 .jl-panel > .jl-eyebrow { color:var(--jv-brand); margin-bottom:11px; }
