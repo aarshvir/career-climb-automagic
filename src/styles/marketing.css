@@ -68,12 +68,9 @@
 
 /* ---------- Dark band (forest) ---------- */
 .jv-dark {
-  --jv-bg: var(--jv-forest); --jv-surface: var(--jv-forest-2); --jv-elevated: #183427; --jv-line: rgb(255 255 255 / .09);
-  --jv-ink: #F2F6F3; --jv-ink-2: #A5B6AD; --jv-ink-3: #82948A; --jv-brand-text: #A9DDBC;
-  --jv-success: #6FDCA0; --jv-warn: var(--jv-warn-on-dark); --jv-danger: var(--jv-danger-on-dark);
-  /* text on forest, with contrast on #0C1F17 */
-  --jv-on-dark-1: #F2F6F3; /* 16.3:1 */ --jv-on-dark-body: #C6D3CC; /* 11.1:1 */ --jv-on-dark-2: #A5B6AD; /* 8.1:1 */
-  --jv-on-dark-3: #82948A; /* 5.4:1 */ --jv-on-dark-link: #A9DDBC; /* 11.2:1 */
+  --jv-bg: var(--jv-forest); --jv-surface: var(--jv-forest-2); --jv-line: rgb(255 255 255 / .09);
+  --jv-ink: var(--jv-on-dark-1); --jv-ink-2: var(--jv-on-dark-2); --jv-ink-3: var(--jv-on-dark-3); --jv-brand-text: var(--jv-on-dark-link);
+  --jv-success: var(--jv-success-on-dark); --jv-warn: var(--jv-warn-on-dark); --jv-danger: var(--jv-danger-on-dark);
   position: relative; isolation: isolate; overflow: hidden; color: var(--jv-on-dark-body);
   /* One soft light from the top edge; no grain or second glow. */
   background: radial-gradient(60% 55% at 50% 0%, rgb(169 221 188 / .09), transparent 70%), var(--jv-forest);
@@ -89,14 +86,14 @@
   .jv-dark .jv-btn--primary:hover { background: var(--jv-brand-tint); }
   .jv-dark .jv-btn--secondary:hover { background: rgb(255 255 255 / .1); border-color: rgb(255 255 255 / .6); }
 }
-.jv-dark .jv-btn--primary:active { background: #D5E5DB; }
+.jv-dark .jv-btn--primary:active { background: color-mix(in srgb, var(--jv-brand-tint), var(--jv-forest) 8%); }
 .jv-dark .jv-btn:focus-visible { outline-color: var(--jv-signal); }
 
 /* The approved J mark: one glyph (the favicon's hooked J) on the green tile at every size, plus the Manrope wordmark. */
 @font-face { font-family: "Jobvance Brand"; src: url("/fonts/Manrope-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
 .jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.03em; line-height: 1; text-decoration: none; border-radius: 10px; }
 .jv-brand-name { white-space: nowrap; }
-.jv-brand-period { color: var(--jv-brand-period, #2F8F63); }
+.jv-brand-period { color: var(--jv-brand-period); }
 /* The mark's lime (#E2EEAF) is a brand constant shared with favicon.svg and the PNG icons; UI uses --jv-signal. The tile radius is 25% at every size, like the favicon. */
 .jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 25%; background: var(--jv-brand); color: var(--jv-brand-glyph); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
 .jv-brand-mark svg { width: 100%; height: 100%; display: block; }
@@ -587,3 +584,100 @@
 @media (prefers-reduced-motion: reduce) { .jv-menu-toggle svg { animation: none; } }
 /* Hover that needs a pointer: touch screens never get a stuck hover. */
 @media (hover: none) { .hc-start > a:hover { transform: none; box-shadow: var(--sh-1); } }
+
+/* ---------- Round 6 ---------- */
+/* One breadcrumb on every utility page: quiet sans, muted separators. */
+@media screen {
+  .help-center .hc-breadcrumb, .career-guides .cg-breadcrumb { font-family: var(--font-sans); font-size: var(--t-sm); letter-spacing: 0; text-transform: none; color: var(--jv-ink-3); }
+  .help-center .hc-breadcrumb a, .career-guides .cg-breadcrumb a { font-weight: var(--fw-medium); }
+  .help-center .hc-breadcrumb > span[aria-hidden], .career-guides .cg-breadcrumb > span[aria-hidden] { color: var(--jv-line-strong); }
+}
+/* Two short sentences in a heading each get their own line. */
+.jv-line { display: block; }
+/* The /how-it-works title may break inside the product name, so the last line is never a lone word. */
+.product-page--how .jv-page-title .jv-nb { white-space: normal; }
+
+/* One divider system: every section rule and its lime-to-green lead-in stops at the content edge (never the viewport edge). */
+.jv-home .jv-section, .loop-overview .lo-section { border-top: 0; }
+.jv-home .jv-section::after, .loop-overview .lo-section::after { content: ""; position: absolute; top: 0; left: calc(50% - var(--shell) / 2); width: var(--shell); height: 1px; background: var(--jv-line); pointer-events: none; }
+@media (min-width: 1024px) { .jv-home .jv-section::after, .loop-overview .lo-section::after { left: calc(50% - var(--shell) / 2 + var(--band-pad-x)); width: calc(var(--shell) - 2 * var(--band-pad-x)); } }
+.jv-home .jv-section::before { z-index: 1; }
+.jv-dark + .jv-section::after, .jv-dark + .lo-section::after { display: none; }
+
+/* One closing-band heading size on every page. */
+.jv-cta h2, .jv-cta--page h2 { font-size: var(--t-h2); }
+.jv-cta:not(.jv-cta--visual) .jv-cta-inner { max-width: 720px; }
+@media (min-width: 1024px) { .jv-cta:not(.jv-cta--visual) .jv-cta-inner { grid-column: 1 / span 8; max-width: none; } }
+
+/* Explainer timeline beside its heading. */
+@media (min-width: 1024px) { .jv-split--timeline { align-items: start; } .jv-split--timeline > .jv-head { margin-bottom: 0; position: sticky; top: 112px; } }
+.jv-split--timeline > .jv-head > p:not(.jv-caption) { max-width: 28em; }
+
+/* About: three story blocks in the eyebrow and large-heading rhythm. */
+.product-about { display: block; padding-bottom: 0; }
+.product-page--about .product-main-content { padding-top: 0; border-top: 0; }
+.jv-story { display: grid; gap: 16px; padding: 48px 0; border-top: 1px solid var(--jv-line); }
+.jv-story:first-child { border-top: 0; }
+.jv-story > .jv-caption { margin: 0; }
+.jv-story-title { margin: 0; color: var(--jv-ink); font-size: var(--t-h2); font-weight: var(--fw-heading); line-height: 1.08; letter-spacing: -.035em; text-wrap: balance; }
+.jv-story-body p { margin: 0; max-width: 34em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; text-wrap: pretty; }
+.jv-story .product-about-principles { margin-top: 24px; }
+@media (min-width: 1024px) {
+  .jv-story { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; padding: 80px 0; }
+  .jv-story > .jv-caption { grid-column: 1 / span 6; grid-row: 1; }
+  .jv-story-title { grid-column: 1 / span 6; grid-row: 2; }
+  .jv-story-body { grid-column: 8 / span 5; grid-row: 1 / span 2; align-self: center; }
+  .jv-story .product-about-principles { grid-column: 1 / -1; grid-row: 3; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 32px; }
+  .jv-story .product-about-principles > li { grid-row: auto; grid-template-rows: none; }
+}
+
+/* Selects: one control, the same height, radius, border and chevron as the text inputs beside them. */
+main :is(.loop-price-market, .guest-support, .cg-field, .ap-phone-field, .ap-field)[class] select { appearance: none; -webkit-appearance: none; width: 100%; min-height: 48px; padding: 0 40px 0 14px; color: var(--jv-ink); background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233B4A43' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center / 16px 16px; border: 1px solid var(--jv-line-input); border-radius: var(--r-sm); font-size: var(--t-small); font-weight: var(--fw-regular); line-height: 1.2; text-overflow: ellipsis; }
+main :is(.loop-price-market, .guest-support, .cg-field, .ap-phone-field, .ap-field)[class] select:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; border-color: var(--jv-brand); }
+main .ap-phone-field[class] select { padding-right: 34px; background-position: right 10px center; }
+.product-page .loop-price-market[class] { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; }
+.product-page .loop-price-market[class] label { font-size: var(--t-small); color: var(--jv-ink); }
+
+/* Pricing */
+.pricing-billed-line { margin: 12px 0 0; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.5; font-variant-numeric: tabular-nums; }
+.pricing-flag { box-shadow: inset 0 0 0 1px var(--jv-forest); }
+.pricing-card--featured .pricing-flag { box-shadow: inset 0 0 0 1px var(--jv-forest), 0 0 0 4px #fff; }
+.pricing-tier--featured { border-color: var(--jv-brand); box-shadow: 0 0 0 1px var(--jv-brand), var(--sh-3); }
+.pricing-tier--featured > .jv-caption { color: var(--jv-brand-ink); font-weight: 600; }
+@media (max-width: 639px) {
+  .pricing-includes { display: grid; gap: 0; padding: 8px 0; }
+  .pricing-includes li { min-height: 36px; }
+}
+.pricing-passes .jv-section-title--panel, .pricing-passes-title { font-size: var(--t-h3); }
+.pricing-passes-disclosure > summary { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 56px; list-style: none; cursor: pointer; border-radius: var(--r-sm); }
+.pricing-passes-disclosure > summary::-webkit-details-marker { display: none; }
+.pricing-passes-disclosure > summary::after { content: "+"; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line-strong); border-radius: 50%; color: var(--jv-ink); font-size: 18px; line-height: 1; }
+.pricing-passes-disclosure[open] > summary::after { content: "\2212"; background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; }
+.pricing-passes-disclosure > summary:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 4px; }
+.pricing-passes-lead { display: grid; gap: 12px; }
+.pricing-passes-title { display: block; color: var(--jv-ink); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.pricing-passes-sub { max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.5; }
+.pricing-passes-body { padding-top: 32px; }
+.pricing-passes-body .pricing-note--lead { margin-top: 0; }
+
+/* Footer, phones: Company is a third full-width block in the same two-column grid and 44px rows as Product and Resources. */
+@media (max-width: 639px) {
+  .jv-footer-links .jv-footer-col:last-child ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; flex-wrap: nowrap; gap: 0 24px; }
+}
+/* Closing bands without a card carry the loop's rings (CSS only) so they read as part of the same system. */
+@media (min-width: 1024px) {
+  .jv-cta--page:not(.jv-cta--visual) { background: repeating-radial-gradient(circle at 90% 120%, transparent 0 70px, rgb(169 221 188 / .1) 70px 71px), radial-gradient(60% 90% at 84% 55%, rgb(169 221 188 / .12), transparent 70%), var(--jv-forest); }
+}
+.jv-section.pricing-passes:has(> .pricing-passes-disclosure:not([open])) { padding-block: 20px; }
+.jv-section.pricing-passes:has(> .pricing-passes-disclosure[open]) { padding-block: 40px; }
+/* Header and footer text links: 44px wide hit areas, not only 44px tall. */
+.jv-header .jv-header-nav > a, .jv-footer-bottom nav a { min-width: 44px; justify-content: center; }
+/* The open mobile menu's close button keeps its focus ring inside the viewport edge. */
+.jv-menu-toggle:focus-visible { outline-offset: -2px; }
+/* Legal pages: a 46rem reading column and a 260px index share the content width; no dead gap between them. */
+@media (min-width: 1024px) {
+  .jv-legal { grid-template-columns: minmax(0, 46rem) 260px; column-gap: 64px; justify-content: space-between; }
+  .jv-legal .jv-prose { max-width: none; }
+  .jv-legal .jv-prose > p { max-width: 46rem; font-size: 1.0625rem; color: var(--jv-ink); }
+  .jv-toc a[aria-current="true"], .jv-toc a:focus-visible { color: var(--jv-brand); }
+}

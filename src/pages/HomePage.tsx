@@ -64,7 +64,7 @@ export default function HomePage() {
           <h2 id="home-loop-journey">Set it up once. Come back to your next applications.</h2>
         </div>
         <div className="jv-loop-visual">
-          <p className="jv-loop-caption">Example run · illustrative times</p>
+          <p className="jv-loop-caption">Example run · illustrative</p>
           <LoopOrbit size={480} variant="dark" labels once>
             <span className="jv-orbit-core">
               <span className="jv-orbit-core-time">7:00 AM</span>

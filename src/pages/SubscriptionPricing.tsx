@@ -59,7 +59,9 @@ export default function SubscriptionPricing() {
       </div>
     </section>
     <section className="jv-section pricing-passes" aria-labelledby="passes-title">
-      <div className="jv-head"><p className="jv-caption">AI CV tailoring · available now</p><h2 id="passes-title" className="jv-section-title jv-section-title--panel">Optional: one-time CV Check passes</h2><p>{currentOffer.check}</p></div>
+      <details className="pricing-passes-disclosure" open={picked || params.get('checkout') === 'cancelled' ? true : undefined}>
+      <summary><span className="pricing-passes-lead"><span className="jv-caption">AI CV tailoring · available now</span><span id="passes-title" className="pricing-passes-title">Just want the CV Check? See one-time passes</span><span className="pricing-passes-sub">{currentOffer.check}</span></span></summary>
+      <div className="pricing-passes-body">
       <p className="pricing-note pricing-note--lead">These optional one-time CV Check passes are priced in US dollars. The currency selector above applies to your Automated Job Loop subscriptions.</p>
       {picked && <p className="pricing-picked" role="status">You picked the {passPlan(picked).name} pass (${passPlan(picked).price}, {passPlan(picked).days} days). {user ? `Choose “Buy ${passPlan(picked).name}” when you are ready to pay.` : 'Sign in, then choose it again to pay.'}</p>}
       {params.get('checkout') === 'cancelled' && <p className="pricing-picked" role="status">Checkout was cancelled. You have not been charged.</p>}
@@ -89,6 +91,8 @@ export default function SubscriptionPricing() {
       </div>
       {message && <p className={`pricing-message pricing-message--${message.kind}`} role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</p>}
       <ul className="pricing-trust" aria-label="About payment">{trustLines.map(line => <li key={line}><Check size={15} aria-hidden="true" />{line}</li>)}</ul>
+      </div>
+      </details>
     </section>
     <section className="jv-section pricing-teams" aria-labelledby="pricing-teams-title">
       <div><h2 id="pricing-teams-title">Coaches &amp; universities</h2><p>Supporting a group of job seekers? We can arrange passes for career coaches, bootcamps and university career services.</p></div>

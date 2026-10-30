@@ -37,9 +37,9 @@ export function CvDiffCard({ className = "" }: { className?: string }) {
 }
 
 const history = [
-  ["Mon 7:04 AM", "3 jobs found", "3 CVs ready"],
-  ["Fri 7:02 AM", "2 jobs found", "2 CVs ready"],
-  ["Wed 7:01 AM", "No new jobs found", "Nothing to prepare"],
+  ["Mon 7:00 AM", "3 jobs found", "3 CVs ready"],
+  ["Fri 7:00 AM", "2 jobs found", "2 CVs ready"],
+  ["Wed 7:00 AM", "No new jobs found", "Nothing to prepare"],
 ];
 const prepared = [["CV_Operations_Analyst.pdf", "Ready for review"], ["CV_Supply_Chain_Analyst.pdf", "Ready for review"], ["CV_Business_Analyst.pdf", "CV tailored"]];
 /** The Automated Job Loop dashboard: run history beside prepared CVs, with a role filter. */

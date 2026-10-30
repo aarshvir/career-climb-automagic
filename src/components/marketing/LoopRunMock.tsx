@@ -8,9 +8,9 @@ const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffe
 // Placeholder employers and times only. No scores, percentages or result counts: this is an illustration.
 // One US 12-hour format throughout. Rows run newest first and every run precedes the next one (Wed), so Monday leads Friday.
 const rows = [
-  { role: "Junior Product Analyst", company: "Fabrikam", time: "Mon 7:04 AM" },
-  { role: "Data Analyst", company: "Contoso Health", time: "Mon 7:02 AM" },
-  { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:02 AM" },
+  { role: "Junior Product Analyst", company: "Fabrikam", time: "Mon 7:00 AM" },
+  { role: "Data Analyst", company: "Contoso Health", time: "Wed 7:00 AM" },
+  { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:00 AM" },
 ];
 
 /** Hero product mock: an example Automated Job Loop run, laid out as a run log in HTML and CSS.

@@ -22,7 +22,7 @@ export const SearchAndFilters = ({ searchQuery, onSearchChange }: SearchAndFilte
     { label: "Remote", icon: MapPin, count: 125, color: "bg-blue-500/10 text-blue-600 hover:bg-blue-500 hover:text-white" },
     { label: "Full-time", icon: Briefcase, count: 89, color: "bg-green-500/10 text-green-600 hover:bg-green-500 hover:text-white" },
     { label: "$100k+", icon: DollarSign, count: 67, color: "bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500 hover:text-white" },
-    { label: "Recent", icon: Clock, count: 45, color: "bg-purple-500/10 text-purple-600 hover:bg-purple-500 hover:text-white" }
+    { label: "Recent", icon: Clock, count: 45, color: "bg-[var(--jv-brand-tint)] text-[var(--jv-brand)] hover:bg-[var(--jv-brand)] hover:text-white" }
   ];
 
   const aiSuggestions = [

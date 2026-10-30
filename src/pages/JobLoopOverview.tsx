@@ -39,18 +39,17 @@ export default function JobLoopOverview() {
     <section className="jv-hero lo-loop-hero" aria-labelledby="lo-title">
       <div className="jv-shell jv-hero-grid">
         <div className="jv-hero-copy">
-          <p className="jv-caption jv-hero-eyebrow">How Automated Job Loop works</p>
-          <h1 id="lo-title" className="jv-hero-title jv-enter-h1">Your job search, on a schedule.</h1>
-          <p className="jv-hero-lead jv-enter" style={delay(60)}>Add your experience and tell us the roles and locations you want. Automated Job Loop finds jobs from connected sources and prepares separate CVs for your shortlist, ready to review in your dashboard.</p>
+          <p className="jv-caption jv-hero-eyebrow">Automated Job Loop</p>
+          <h1 id="lo-title" className="jv-hero-title jv-enter-h1"><span className="jv-nb">Automated Job Loop</span> finds the jobs and tailors the CV.</h1>
+          <p className="jv-hero-lead jv-enter" style={delay(60)}>Add your experience and tell us the roles and locations you want. <span className="jv-nb">Automated Job Loop</span> finds jobs from connected sources and prepares separate CVs for your shortlist, ready to review in your dashboard.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
             <StartLink />
             <TextLink to="/walkthroughs">Walk through an application</TextLink>
           </div>
-          <ol className="jv-mini-steps jv-enter" style={delay(180)} aria-label="Three steps"><li><span>1</span>Add your experience</li><li><span>2</span>Choose roles and locations</li><li><span>3</span>Pick a schedule</li></ol>
         </div>
         <div className="jv-hero-visual">
           <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} className="jv-hero-orbit" nodes={false} animate={false} /></div>
-          <div className="jv-hero-mock jv-enter-card"><LoopRunMock /></div>
+          <div className="jv-hero-mock jv-enter-card" aria-hidden="true"><DashboardCard /></div>
         </div>
       </div>
     </section>
@@ -76,8 +75,8 @@ export default function JobLoopOverview() {
             <li>Keep vacancies, prepared CVs and next actions together.</li>
           </ul>
         </div>
-        <div className="lo-dashboard-visual" aria-hidden="true" data-reveal>
-          <DashboardCard />
+        <div className="lo-dashboard-visual" data-reveal>
+          <LoopRunMock />
         </div>
       </div>
     </section>
@@ -88,12 +87,12 @@ export default function JobLoopOverview() {
           <p className="jv-caption">Keep your work for next time</p>
           <h2 id="lo-private-title">Save your experience for the next application.</h2>
           <p>Import your CV or choose a saved CV check, confirm the experience you want to reuse, and set up Automated Job Loop in your account. Each saved vacancy keeps its own documents, status and next action.</p>
+          <ul className="jv-ticks lo-private-ticks"><li>Save a career record you have reviewed.</li><li>Keep each vacancy and its prepared documents together.</li><li>Choose when to use recurring preparation.</li></ul>
           <div className="lo-private-actions"><StartLink>Set up my private Automated Job Loop</StartLink><TextLink to="/help#job-loop-start">Read the setup guide</TextLink></div>
         </div>
         <aside className="lo-private-aside" data-reveal>
           <h3>Your search, in one place</h3>
           <p>{currentOffer.statement} Your account shows your available preparation allowance.</p>
-          <ul className="jv-ticks"><li>Save a career record you have reviewed.</li><li>Keep each vacancy and its prepared documents together.</li><li>Choose when to use recurring preparation.</li></ul>
           <TextLink to="/pricing">See what’s included</TextLink>
         </aside>
       </div>

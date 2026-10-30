@@ -66,6 +66,23 @@ for (const page of publicRender.pages) {
   totalAssetBytes += bytes.length;
 }
 
+// The ad landing routes (/onboarding, /auth) are client-only. Their shell is the generic index.html plus parallel preloads for the
+// account-entry chunks, so those download beside the entry script instead of after it runs (the entry used to discover them late).
+{
+  const viteManifest = JSON.parse(await readFile(join(dist, '.vite/manifest.json'), 'utf8'));
+  const shell = await readFile(join(dist, 'index.html'), 'utf8');
+  const closure = keys => { const files = new Set(), css = new Set(), seen = new Set(); const visit = key => { const entry = viteManifest[key]; if (!entry || seen.has(key)) return; seen.add(key); files.add(entry.file); (entry.css ?? []).forEach(file => css.add(file)); (entry.imports ?? []).forEach(visit); }; keys.forEach(visit); return { files, css }; };
+  const { files, css } = closure(['src/pages/LoopOnboarding.tsx', 'src/pages/Auth.tsx']);
+  const links = [...css].filter(file => !shell.includes(file)).map(file => `<link rel="stylesheet" href="/${file}"/>`).join('') + [...files].filter(file => !shell.includes(file)).map(file => `<link rel="modulepreload" href="/${file}"/>`).join('');
+  if (links) {
+    const bytes = Buffer.from(shell.replace('</head>', links + '</head>'));
+    const etag = `"${createHash('sha256').update(bytes).digest('hex')}"`;
+    assets['/onboarding'] = [mime['.html'], etag, bytes.length, false, bytes.toString('base64')];
+    assets['/auth'] = [mime['.html'], etag, bytes.length, false, '=/onboarding'];
+    totalAssetBytes += bytes.length;
+  }
+}
+
 // Generated Worker has no imports, dependencies, filesystem access or bindings.
 // Binary decoding is lazy and shared within an isolate, never performed for the entire map per request.
 const worker = `const SECURITY=${JSON.stringify(security)};
@@ -129,7 +146,7 @@ export default {fetch(request){
   const headers=responseHeaders(request,path);
   headers.set('Content-Type',asset[0]);
   headers.set('ETag',asset[1]);
-  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]||served.startsWith('/fonts/')?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');
+  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':served.startsWith('/fonts/')?'public, max-age=2592000':'public, max-age=3600, must-revalidate');
   const condition=request.headers.get('If-None-Match');
   if(condition&&condition.split(',').some(tag=>tag.trim()==='*'||tag.trim().replace(/^W\\//,'')===asset[1]))return new Response(null,{status:304,headers});
   headers.set('Content-Length',String(asset[2]));

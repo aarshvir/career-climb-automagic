@@ -57,7 +57,7 @@ export default function PilotDemo() {
   }
 
   return (
-    <section id="demo" aria-labelledby={`${componentId}-title`} className="scroll-mt-48 sm:scroll-mt-32 rounded-3xl border border-[var(--jv-line)] bg-[#faf8ff] p-4 text-slate-900 sm:p-7 lg:p-9">
+    <section id="demo" aria-labelledby={`${componentId}-title`} className="scroll-mt-48 sm:scroll-mt-32 rounded-3xl border border-[var(--jv-line)] bg-[var(--jv-bg-subtle)] p-4 text-[var(--jv-ink)] sm:p-7 lg:p-9">
       <div className="max-w-3xl">
         <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--jv-line)] bg-white px-3 py-1 text-xs font-semibold tracking-wide text-[var(--jv-brand-ink)]">
           <FileText size={14} aria-hidden="true" /> EXAMPLE APPLICATION

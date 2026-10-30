@@ -54,12 +54,12 @@ export function ScheduleCard({ className = "" }: { className?: string }) {
 }
 
 const steps = [
-  ["7:00 AM", "Searches your connected sources"],
-  ["7:02 AM", "Matches openings to your roles"],
-  ["7:04 AM", "Tailors a CV for each prepared role"],
-  ["7:05 AM", "Your dashboard is ready to review"],
+  ["Find", "Searches your connected sources"],
+  ["Match", "Matches openings to your roles"],
+  ["Tailor", "Tailors a CV for each prepared role"],
+  ["Review", "Your dashboard is ready to review"],
 ];
-/** A run, as a timeline. Illustrative times only. */
+/** A run, as a timeline. Illustrative. */
 export function RunTimeline() {
-  return <ol className="pc-timeline" aria-label="What a run does, illustrative times">{steps.map(([time, text]) => <li key={time}><span className="pc-time">{time}</span><span>{text}</span></li>)}</ol>;
+  return <ol className="pc-timeline" aria-label="What a run does">{steps.map(([time, text]) => <li key={time}><span className="pc-time">{time}</span><span>{text}</span></li>)}</ol>;
 }

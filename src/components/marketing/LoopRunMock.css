@@ -71,10 +71,10 @@
   .jv-mock.is-offscreen .jv-status, .jv-mock.is-offscreen .jv-mock-pulse::after { animation-play-state: paused; }
 }
 /* Crossfaded: the outgoing tag fades while the incoming one rises, so a tag is always at least partly visible. */
-@keyframes jv-status-found { 0%, 34% { opacity: 1; } 38%, 100% { opacity: 0; } }
-@keyframes jv-status-tailored { 0%, 34% { opacity: 0; transform: translateY(2px); } 38%, 66% { opacity: 1; transform: none; } 70%, 100% { opacity: 0; } }
-@keyframes jv-status-tailored-rest { 0%, 34% { opacity: 0; transform: translateY(2px); } 38%, 100% { opacity: 1; transform: none; } }
-@keyframes jv-status-ready { 0%, 66% { opacity: 0; transform: translateY(2px); } 70%, 100% { opacity: 1; transform: none; } }
+@keyframes jv-status-found { 0%, 32% { opacity: 1; } 35%, 100% { opacity: 0; } }
+@keyframes jv-status-tailored { 0%, 36% { opacity: 0; transform: translateY(3px); } 40%, 62% { opacity: 1; transform: none; } 65%, 100% { opacity: 0; } }
+@keyframes jv-status-tailored-rest { 0%, 36% { opacity: 0; transform: translateY(3px); } 40%, 100% { opacity: 1; transform: none; } }
+@keyframes jv-status-ready { 0%, 66% { opacity: 0; transform: translateY(3px); } 70%, 100% { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .jv-mock-pulse::after { animation: none !important; display: none; }
   .jv-status { animation: none !important; }

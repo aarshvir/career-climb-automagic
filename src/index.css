@@ -7,7 +7,7 @@
    than Geist; Courier New has Geist Mono's exact 600/1000 advance. Swapping in the webfont does not reflow.
    Headings (520-600) get their own face: Arial Bold is 1.8% wider than Geist at 540, so heading line counts hold too. */
 @font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica Neue");font-weight:100 519;size-adjust:102.3%;ascent-override:98.2%;descent-override:28.8%;line-gap-override:0%;}
-@font-face{font-family:"Geist Fallback";src:local("Helvetica Neue Medium"),local("Arial");font-weight:520 900;size-adjust:101.2%;ascent-override:102.3%;descent-override:30%;line-gap-override:0%;}
+@font-face{font-family:"Geist Fallback";src:local("Arial Bold"),local("Arial-BoldMT"),local("Helvetica Neue Medium"),local("Arial");font-weight:520 900;size-adjust:99.4%;ascent-override:102.3%;descent-override:30%;line-gap-override:0%;}
 @font-face{font-family:"Geist Mono Fallback";src:local("Courier New"),local("CourierNewPSMT");size-adjust:100%;ascent-override:100.5%;descent-override:29.5%;line-gap-override:0%;}
 /* Alias for admin-home.css, which still names Manrope; it now resolves to Geist. */
 @font-face{font-family:"Manrope";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-display:swap;}
@@ -21,7 +21,11 @@
     /* surfaces */
     --jv-bg: #FFFFFF; --jv-bg-subtle: #F5F8F6; --jv-surface: #FFFFFF; --jv-sunken: #EEF2EF; --jv-bg-muted: #EEF2EF;
     /* forest: the one dark surface (bands, final CTA, mock footer) */
-    --jv-forest: #0C1F17; --jv-forest-2: #12291F;
+    --jv-forest: #0C1F17; --jv-forest-2: #12291F; --jv-elevated: #183427;
+    /* text on forest (contrast on --jv-forest): 16.3, 11.1, 8.1, 5.4 and 11.2 to 1 */
+    --jv-on-dark-1: #F2F6F3; --jv-on-dark-body: #C6D3CC; --jv-on-dark-2: #A5B6AD; --jv-on-dark-3: #82948A; --jv-on-dark-link: #A9DDBC; --jv-success-on-dark: #6FDCA0;
+    /* the wordmark's period */
+    --jv-brand-period: #2F8F63;
     /* lines */
     --jv-line: #E3E8E4; --jv-line-strong: #CFD7D2; --jv-line-input: #85918B;
     /* text: ink 17.4:1, ink-2 9.4:1, ink-3 5.4:1 on #FFF (4.8:1 on --jv-sunken) */
@@ -36,7 +40,7 @@
     /* the mark's pale lime glyph, and status colours on forest */
     --jv-brand-glyph: #E2EEAF; --jv-warn-on-dark: #FBBF4A; --jv-danger-on-dark: #FF8A80;
     /* one tinted light-surface moment: the hero wash, painted full-bleed behind every marketing hero */
-    --jv-wash: radial-gradient(60% 50% at 80% 0%, #E6F0EA 0%, transparent 70%), radial-gradient(40% 40% at 0% 0%, rgb(212 242 90 / .10), transparent 70%);
+    --jv-wash: radial-gradient(60% 50% at 80% 0%, #E6F0EA 0%, transparent 70%), radial-gradient(40% 40% at 0% 0%, rgb(33 92 67 / .06), transparent 70%);
     /* status (meaning only, never decoration) */
     --jv-success: #0B7A47; --jv-success-tint: #E8F6EE;
     --jv-warn: #8A5300; --jv-warn-tint: #FFF3DC; --jv-warn-line: #E6C987;
@@ -98,7 +102,7 @@
     --shadow-xl: 0 24px 64px rgb(15 29 23 / 10%); --shadow-2xl: 0 32px 80px rgb(15 29 23 / 14%);
     --shadow-premium: var(--shadow-xl); --shadow-glow: 0 4px 20px rgb(33 92 67 / 14%); --shadow-inner: inset 0 1px 3px rgb(15 29 23 / 5%);
     --gradient-primary: linear-gradient(120deg, var(--jv-brand), #2B7556); --gradient-success: linear-gradient(120deg, var(--jv-brand), #2B7556);
-    --gradient-warning: linear-gradient(120deg, #f1c77a, #f9dda5); --gradient-glass: linear-gradient(135deg, #fff, #F5F8F6);
+    --gradient-warning: linear-gradient(120deg, var(--jv-warn-line), var(--jv-warn-tint)); --gradient-glass: linear-gradient(135deg, #fff, var(--jv-bg-subtle));
     --gradient-hero: linear-gradient(135deg, var(--jv-forest), var(--jv-brand));
     --glass: rgb(255 255 255 / 94%); --glass-border: rgb(15 29 23 / 8%); --backdrop-blur: blur(16px);
     --content-max-width: 1240px; --header-height: 80px; --sidebar-width: 240px;

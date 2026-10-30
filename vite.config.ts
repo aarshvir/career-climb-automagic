@@ -5,6 +5,6 @@ export default defineConfig({
   // Vite 8's bundled OXC handles TypeScript/automatic React JSX without the
   // additional SWC native cache, which is unavailable on restricted Windows.
   oxc: { jsx: { runtime: 'automatic' } },
-  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)), html2canvas: fileURLToPath(new URL('./src/lib/unused-module.ts', import.meta.url)) } },
   build: { chunkSizeWarningLimit: 600, manifest: true },
 });

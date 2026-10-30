@@ -4,16 +4,17 @@ import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import LoopOrbit from '@/components/marketing/LoopOrbit';
+import { MiniRun } from '@/components/marketing/BrandCards';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowRight, Check, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
+import { ArrowRight, Check, CircleAlert, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
 import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { ContactFields } from '@/components/ContactDetails';
-import { blankContact, checkContact } from '@/lib/contact-details';
+import { blankContact, checkContact, normalizePhone, validName } from '@/lib/contact-details';
 import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
@@ -31,6 +32,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; phone?: string; email?: string; password?: string; confirm?: string }>({});
+  const clearField = (key: 'name' | 'phone' | 'email' | 'password' | 'confirm') => setFieldErrors(current => current[key] ? { ...current, [key]: undefined } : current);
   const socialBrowser = detectInAppBrowser();
   const loopEntry = !embedded && accountDestination(searchParams.get('next')) === '/onboarding';
   const fieldId = useId();
@@ -53,24 +56,37 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     event.preventDefault();
     if (busy || configurationError) return;
     setError('');
-    // Native validation bubbles are transient and unannounced; the checks below show an inline alert and move focus to the field.
-    const focusField = (suffix: string) => document.getElementById(`${fieldId}-${suffix}`)?.focus();
-    if (!isValidEmail(email.trim())) { setError('Please enter a valid email address.'); focusField('email'); return; }
-    if (!authRateLimiter.check(email.trim().toLowerCase())) { setError('Too many attempts. Please try again in a minute.'); return; }
+    // Native validation bubbles are transient and unannounced. Every failing field gets its own message, and focus moves to the first one.
+    const form = event.currentTarget as HTMLFormElement;
+    const found: typeof fieldErrors = {}, summary: string[] = [];
+    const emailOk = isValidEmail(email.trim());
+    if (!emailOk) { found.email = 'Please enter a valid email address.'; summary.push(found.email); }
+    else if (!authRateLimiter.check(email.trim().toLowerCase())) { setFieldErrors({}); setError('Too many attempts. Please try again in a minute.'); return; }
     const details = mode === 'sign-up' ? checkContact(contact) : null;
-    if (typeof details === 'string') { setError(details); (event.currentTarget as HTMLFormElement).querySelector<HTMLElement>('input:not([type=hidden])')?.focus(); return; }
-    if (!password) { setError(mode === 'sign-up' ? 'Choose a password to continue.' : 'Enter your password to continue.'); focusField('password'); return; }
     if (mode === 'sign-up') {
-      if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
-      const validation = validatePassword(password);
-      if (!validation.valid) { setError(validation.errors.join('. ')); return; }
+      if (!validName(contact.name)) found.name = 'Please enter your full name.';
+      if (!normalizePhone(contact.phone, contact.countryCode)) found.phone = 'Please enter a valid mobile number, including the country code.';
+      if (typeof details === 'string') summary.push(details);
     }
+    if (!password) { found.password = mode === 'sign-up' ? 'Choose a password to continue.' : 'Enter your password to continue.'; summary.push(found.password); }
+    else if (mode === 'sign-up') {
+      if (password !== confirmPassword) { found.confirm = 'Passwords do not match.'; summary.push(found.confirm); }
+      const validation = validatePassword(password);
+      if (!validation.valid) { found.password = validation.errors.join('. '); summary.push(found.password); }
+    }
+    if (summary.length) {
+      setFieldErrors(found); setError(summary[0]);
+      const target = found.name ? form.querySelector<HTMLElement>('input:not([type=hidden])') : found.phone ? form.querySelector<HTMLElement>('.ap-phone-field input') : found.email ? document.getElementById(`${fieldId}-email`) : found.password ? document.getElementById(`${fieldId}-password`) : document.getElementById(`${fieldId}-confirm`);
+      target?.focus();
+      return;
+    }
+    setFieldErrors({});
     setBusy(true);
     const turn = ++attempt.current, epoch = trackingAuthEpoch();
     try {
       if (!embedded && mode === 'sign-up') rememberLoopReturn(searchParams.get('next'));
       if (mode === 'sign-up') {
-        const result = await signUpWithEmail(email, password, details ?? undefined);
+        const result = await signUpWithEmail(email, password, typeof details === 'object' && details ? details : undefined);
         if (!alive.current || attempt.current !== turn || trackingAuthEpoch() !== epoch) return;
         if (result.error) setError(result.error);
         else if (result.requiresEmailConfirmation) {
@@ -104,6 +120,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     pending.current = null; attempt.current++;
     setMode(current => current === 'sign-in' ? 'sign-up' : 'sign-in');
     setError('');
+    setFieldErrors({});
     setConfirmationSent(false);
     setPassword('');
     setConfirmPassword('');
@@ -160,12 +177,14 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   return (
     <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
       {!embedded && <Helmet><title>{pageTitle}</title><meta name="robots" content="noindex,nofollow" /></Helmet>}
-      {!embedded && <aside className="ap-account-story" aria-labelledby={`${fieldId}-story`}>
+      {!embedded && <aside className="ap-account-story jv-dark" aria-labelledby={`${fieldId}-story`}>
         <div className="ap-story-inner">
           <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" />Automated Job Loop</p>
-          <h1 id={`${fieldId}-story`}>{mode === 'sign-up' || loopEntry ? <>Set up your <span className="jv-nb">Automated Job Loop</span> <span>in minutes.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h1>
+          <h1 id={`${fieldId}-story`}>{mode === 'sign-up' || loopEntry ? <>Set up your <span className="jv-nb">Automated Job Loop</span> <span>and let it run.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h1>
           <p className="ap-story-description">Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares a tailored, role-specific CV for each.</p>
-          <div className="ap-story-orbit" aria-hidden="true"><LoopOrbit size={288} labels animate={false}><span className="ap-orbit-core"><span>Set up once</span><span>then it runs</span></span></LoopOrbit></div>
+          {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance"><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></ul>}
+          <div className="ap-story-orbit" aria-hidden="true"><LoopOrbit size={260} variant="dark" labels animate={false}><span className="ap-orbit-core"><span>Set up once</span><span>then it runs</span></span></LoopOrbit></div>
+          <MiniRun className="ap-story-run" />
           <p className="ap-story-footnote"><LockKeyhole size={16} aria-hidden="true" /> Choose what you save in your account.</p>
           <Link to="/job-loop" className="ap-story-link">See how the Automated Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
         </div>
@@ -203,24 +222,28 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
               </Button>}
               {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
               <form className="ap-auth-form" onSubmit={handleSubmit} noValidate>
-                {mode === 'sign-up' && <ContactFields value={contact} onChange={setContact} disabled={busy} />}
+                {mode === 'sign-up' && <p className="ap-form-expect">Next: your name, mobile number, email and a password.</p>}
+                {mode === 'sign-up' && <ContactFields value={contact} onChange={next => { setContact(next); if (next.name !== contact.name) clearField('name'); if (next.phone !== contact.phone) clearField('phone'); }} disabled={busy} errors={fieldErrors} />}
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-email`}>Email address</Label>
-                  <Input id={`${fieldId}-email`} type="email" autoComplete="email" placeholder="you@example.com" aria-invalid={visibleError ? true : undefined} aria-describedby={visibleError ? `${fieldId}-error` : undefined} value={email} onChange={event => setEmail(event.target.value)} required disabled={busy} />
+                  <Input id={`${fieldId}-email`} type="email" autoComplete="email" placeholder="you@example.com" aria-invalid={fieldErrors.email ? true : undefined} aria-describedby={fieldErrors.email ? `${fieldId}-email-error` : undefined} value={email} onChange={event => { setEmail(event.target.value); clearField('email'); }} required disabled={busy} />
+                  {fieldErrors.email && <p id={`${fieldId}-email-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{fieldErrors.email}</p>}
                 </div>
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-password`}>Password</Label>
                   <div className="ap-password-field">
-                    <Input id={`${fieldId}-password`} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'} aria-invalid={visibleError ? true : undefined} aria-describedby={[mode === 'sign-up' ? `${fieldId}-password-help` : '', visibleError ? `${fieldId}-error` : ''].filter(Boolean).join(' ') || undefined} value={password} onChange={event => setPassword(event.target.value)} required disabled={busy} />
+                    <Input id={`${fieldId}-password`} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'} aria-invalid={fieldErrors.password ? true : undefined} aria-describedby={[mode === 'sign-up' ? `${fieldId}-password-help` : '', fieldErrors.password ? `${fieldId}-password-error` : ''].filter(Boolean).join(' ') || undefined} value={password} onChange={event => { setPassword(event.target.value); clearField('password'); }} required disabled={busy} />
                     <Button type="button" variant="ghost" size="sm" className="ap-password-toggle" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(current => !current)}>
                       {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                     </Button>
                   </div>
+                  {fieldErrors.password && <p id={`${fieldId}-password-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{fieldErrors.password}</p>}
                   {mode === 'sign-up' && <p id={`${fieldId}-password-help`} className="ap-field-help">Use at least 8 characters, uppercase and lowercase letters, and a number.</p>}
                 </div>
                 {mode === 'sign-up' && <div className="ap-field">
                   <Label htmlFor={`${fieldId}-confirm`}>Confirm password</Label>
-                  <Input id={`${fieldId}-confirm`} type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} required disabled={busy} />
+                  <Input id={`${fieldId}-confirm`} type={showPassword ? 'text' : 'password'} autoComplete="new-password" aria-invalid={fieldErrors.confirm ? true : undefined} aria-describedby={fieldErrors.confirm ? `${fieldId}-confirm-error` : undefined} value={confirmPassword} onChange={event => { setConfirmPassword(event.target.value); clearField('confirm'); }} required disabled={busy} />
+                  {fieldErrors.confirm && <p id={`${fieldId}-confirm-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{fieldErrors.confirm}</p>}
                 </div>}
                 <Button type="submit" className="ap-primary ap-auth-submit" disabled={busy || !!configurationError}>
                   {busy ? <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />Please wait...</> : <>{mode === 'sign-up' ? 'Create account' : 'Sign in'}<ArrowRight size={17} aria-hidden="true" /></>}
@@ -237,9 +260,9 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           )}
         </div>
         {showBenefits && <div className="ap-loop-more">
-          <details className="ap-steps"><summary>What happens after you sign up</summary><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol></details>
           <p className="ap-benefits-price">Automated Job Loop plans from US$29/month.</p>
           <p className="ap-benefits-links"><Link to="/pricing">See plans</Link><Link to="/job-loop">How it works</Link></p>
+          <details className="ap-steps"><summary>What happens after you sign up</summary><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol><p className="ap-steps-free">Includes 3 AI-tailored CVs a month, free.</p></details>
         </div>}
         {!embedded && <p className="ap-auth-footnote"><LockKeyhole size={14} aria-hidden="true" /> Your account keeps your CVs, search preferences and applications together.</p>}
       </div>

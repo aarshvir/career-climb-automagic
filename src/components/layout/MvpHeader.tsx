@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 
 const brandInner = <>
-  <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><g transform="translate(20 20) scale(1.3) translate(-17 -19)" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round"><path d="M24 9v13a7 7 0 0 1-14 0" /><path d="M17 9h7" /></g></svg></span>
+  <span className="jv-brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><g transform="translate(20 20) scale(1.3) translate(-17 -19)" stroke="currentColor" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round"><path d="M24 9v13a7 7 0 0 1-14 0" /><path d="M17 9h7" /><circle cx="10" cy="22" r="3.2" fill="var(--jv-signal)" stroke="none" /></g></svg></span>
   <span className="jv-brand-name">jobvance<span className="jv-brand-period">.</span></span>
 </>;
 export function Brand() {
@@ -123,7 +123,7 @@ export default function MvpHeader() {
       <Brand />
       <nav aria-label="Main navigation" className="jv-header-nav">{links.map(([to,label])=><NavLink key={to} to={to}>{label}</NavLink>)}</nav>
       <div className="jv-header-actions">{account}</div>
-      {signedOut && !onEntry && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm jv-header-start">Get started</Link>}
+      {signedOut && !onEntry && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm jv-header-start">Start my search</Link>}
       <button ref={toggle} type="button" className="jv-menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="mobile-navigation" onClick={()=>setOpenPath(open ? null : location.pathname)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
     <nav ref={panel} id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closingNow ? "closing" : undefined} className="jv-mobile-panel">

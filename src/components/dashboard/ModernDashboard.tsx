@@ -118,8 +118,8 @@ export const ModernDashboard: React.FC<ModernDashboardProps> = ({
                 <p className="text-sm font-medium text-gray-600">Resumes</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.customResumes}</p>
               </div>
-              <div className="h-10 w-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                <FileText className="h-5 w-5 text-purple-600" />
+              <div className="h-10 w-10 bg-[var(--jv-brand-tint)] rounded-lg flex items-center justify-center">
+                <FileText className="h-5 w-5 text-[var(--jv-brand)]" />
               </div>
             </div>
           </CardContent>

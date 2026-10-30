@@ -34,3 +34,10 @@
 .guest-support-lookup > summary { min-height: 56px; padding: 14px 0; }
 .guest-support-lookup > form { padding-bottom: 20px; }
 .guest-support-fine { margin: 16px 0 0; color: var(--jv-ink-3); font-size: var(--t-sm); line-height: 1.6; }
+
+/* Round 6: inline field errors with a visible border state (never colour alone: the message names the fix). */
+.guest-support-error { margin: 6px 0 0; color: var(--jv-danger); font-size: var(--t-sm); font-weight: var(--fw-medium); line-height: 1.4; }
+.guest-support textarea[aria-invalid="true"] { border-color: var(--jv-danger); box-shadow: 0 0 0 1px var(--jv-danger); }
+.guest-support-consent input[type="checkbox"] { width: 28px; height: 28px; flex-shrink: 0; }
+.guest-support-consent input[aria-invalid="true"] { outline: 2px solid var(--jv-danger); outline-offset: 2px; }
+.guest-support-consent { min-height: 44px; align-items: center; }

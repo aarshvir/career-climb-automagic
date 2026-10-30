@@ -20,7 +20,7 @@ describe('audience entry points', () => {
   it.each(['student', 'mba', 'professional'] as const)('offers first value without sign-in for %s', audience => {
     render(page(audience));
     // Destinations match the live site: the hero leads with the check the page describes.
-    expect(screen.getByRole('link', { name: 'Check my CV against a job' })).toHaveAttribute('href', `/check?audience=${audience}`);
+    expect(screen.getByRole('link', { name: 'Try the free CV Check' })).toHaveAttribute('href', `/check?audience=${audience}`);
     expect(screen.getByRole('link', { name: /See how the Automated Job Loop works/ })).toHaveAttribute('href', '/job-loop');
     expect(screen.getByRole('link', { name: /Sign in to save my experience/ })).toHaveAttribute('href', `/auth?next=${encodeURIComponent(`/loop?audience=${audience}`)}`);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(loopAudienceContent[audience].searchTitle);
@@ -51,7 +51,7 @@ function sectionText(heading: Element) {
 describe('current offer', () => {
   it('starts free and offers only the three one-time passes, never the legacy pack or a subscription', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    const passes = screen.getByRole('region', { name: /one-time CV Check passes/ });
+    const passes = screen.getByRole('region', { name: /one-time passes/ });
     expect(within(passes).getAllByRole('heading', { level: 3 }).map(heading => heading.textContent)).toEqual(['Free', 'Sprint', 'Job Search', 'Career Move']);
     expect(within(passes).getByRole('link', { name: 'Check my CV' })).toHaveAttribute('href', '/check');
     expect(within(passes).queryByText(/\$15|\$29|ten application packs|per month, billed|cancel anytime|free trial/i)).not.toBeInTheDocument();

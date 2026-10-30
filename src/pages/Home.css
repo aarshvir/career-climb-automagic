@@ -316,3 +316,23 @@
 /* Closing band: a typographic band with the loop ring arcing out of it (the next-run card stays inside the page). */
 .jv-home .jv-cta { overflow: hidden; }
 /* The loop steps share the run trail: a lime-to-green line joins the three numbered rows. */
+
+/* ---------- Round 6 ---------- */
+/* Desktop hero: the product stack is lit from behind and the dot field is stronger, so the right column carries as much weight as the headline. */
+@media (min-width: 1024px) {
+  .jv-home .jv-hero { padding-bottom: 28px; }
+  .jv-home .jv-hero-visual { min-height: 520px; }
+  .jv-home .jv-hero-visual::after { content: ""; position: absolute; inset: -8% -12%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(33 92 67 / .14), transparent 72%), radial-gradient(40% 30% at 70% 80%, rgb(212 242 90 / .16), transparent 80%); }
+  .jv-home .jv-hero-visual::before { background: radial-gradient(circle, rgb(33 92 67 / .4) 1px, transparent 1.7px) 0 0 / 20px 20px !important; }
+}
+/* Phones: the set-up is explained once. The dark band carries the three steps; the second block keeps its three headings and one proof card. */
+@media (max-width: 767px) {
+  .jv-home .jv-loop-timeline { display: none; }
+  .jv-home .jv-control .jv-section-head > p { display: none; }
+  .jv-home .jv-control-copy > p { display: none; }
+  .jv-home .jv-control-row { padding-block: 20px; }
+  .jv-home .jv-control-row .jv-frag:not(.jv-frag--wide-only) { margin-top: 16px; }
+  .jv-home .jv-check-example { display: none; }
+  .jv-home .jv-guide-index > li:nth-child(n+4) { display: none; }
+}
+@media (max-width: 767px) { .jv-home .jv-loop-steps > .jv-loop-caption { margin-top: 32px; } }

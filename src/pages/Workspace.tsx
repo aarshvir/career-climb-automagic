@@ -1,3 +1,4 @@
+import { smoothBehavior } from '@/lib/motion';
 import { readApplicationSource } from '@/lib/application-source-selection';
 import { workspaceReturnPath } from '@/lib/account-return';
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -619,7 +620,7 @@ export default function Workspace() {
                               const text = await extractCvText(original);
                               setFile(original);
                               setCvText(text);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
+                              window.scrollTo({ top: 0, behavior: smoothBehavior() });
                             }, "Review the imported text, then save your CV.")
                           }
                         >

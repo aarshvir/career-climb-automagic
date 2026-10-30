@@ -292,3 +292,44 @@ it('does not reuse pending signup credentials after an SDK account change and si
   act(()=>{sdk.listener!('SIGNED_IN',signedIn);sdk.listener!('SIGNED_OUT',null);});
   await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(sdk.signInWithPassword).not.toHaveBeenCalled();expect(screen.getByLabelText('Password',{exact:true})).toHaveValue('');
 });
+
+describe('signup validation blocks submission and names each failing field', () => {
+  const open = () => render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
+
+  it('makes no signUp call for a blank form and marks every required field invalid with its own message', async () => {
+    open();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Create account' }));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    const name = screen.getByLabelText('Full name'), phone = screen.getByLabelText('Mobile number'), email = screen.getByLabelText('Email address');
+    const password = screen.getByLabelText('Password', { exact: true });
+    for (const field of [name, phone, email, password]) expect(field).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByText('Please enter your full name.')).toBeInTheDocument();
+    expect(screen.getByText('Please enter a valid mobile number, including the country code.')).toBeInTheDocument();
+    expect(screen.getAllByText('Please enter a valid email address.').length).toBeGreaterThan(0);
+    expect(screen.getByText('Choose a password to continue.')).toBeInTheDocument();
+    expect(name).toHaveFocus();
+  });
+
+  it('makes no signUp call when the confirmation does not match', async () => {
+    open();
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.type(screen.getByLabelText('Email address'), 'person@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.type(screen.getByLabelText('Confirm password'), 'Password124');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Confirm password')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getAllByText('Passwords do not match.').length).toBeGreaterThan(0);
+  });
+
+  it('clears a field message when that field is edited', async () => {
+    open();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Create account' }));
+    await user.type(screen.getByLabelText('Full name'), 'Casey Person');
+    expect(screen.getByLabelText('Full name')).not.toHaveAttribute('aria-invalid');
+  });
+});

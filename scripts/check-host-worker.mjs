@@ -39,7 +39,7 @@ const index = await readFile(join(dist, 'index.html'));
 const undecodedHead = await request('/dashboard', { method: 'HEAD' });
 assert.equal(undecodedHead.status, 200);
 assert.equal(decodedAssets, 0, 'HEAD must not decode an asset body.');
-for (const path of ['/dashboard?tab=cv', '/onboarding', '/auth/callback?code=synthetic', '/auth/reset']) {
+for (const path of ['/dashboard?tab=cv', '/auth/callback?code=synthetic', '/auth/reset']) {
   const response = await request(path);
   assert.equal(response.status, 200, `SPA route ${path} must serve the frontend.`);
   checkHeaders(response);
@@ -48,6 +48,23 @@ for (const path of ['/dashboard?tab=cv', '/onboarding', '/auth/callback?code=syn
   assert.ok(Buffer.from(await response.arrayBuffer()).equals(index), 'SPA output must match the built index bytes.');
 }
 assert.equal(decodedAssets, 1, 'SPA routes must reuse one lazily decoded index.');
+// The ad landing routes are the same shell plus parallel preloads of the account-entry chunks (nothing else differs).
+const indexText = index.toString('utf8');
+let entryShell = null;
+for (const path of ['/onboarding?utm_source=meta', '/auth?mode=signup']) {
+  const response = await request(path);
+  assert.equal(response.status, 200, `Account entry ${path} must serve the frontend.`);
+  checkHeaders(response);
+  assert.match(response.headers.get('Content-Type'), /^text\/html/);
+  assert.equal(response.headers.get('Cache-Control'), 'no-cache');
+  const text = Buffer.from(await response.arrayBuffer()).toString('utf8');
+  const [head, tail] = indexText.split('</head>');
+  assert.ok(text.startsWith(head) && text.endsWith('</head>' + tail), 'Account entry must be the built index plus head links only.');
+  const added = text.slice(head.length, text.length - tail.length - '</head>'.length);
+  assert.match(added, /^(<link rel="(stylesheet|modulepreload)" href="\/assets\/[^"]+"\/>)+$/, 'Account entry adds only asset preloads.');
+  assert.ok(entryShell === null || entryShell === text, '/onboarding and /auth share one shell.');
+  entryShell = text;
+}
 for (const path of ['/admin', '/admin2', '/admin2/ops?days=7', '/admin/users', '/ADMIN2', '/marketing-admin']) {
   const response = await request(path);
   assert.equal(response.status, 200);
@@ -178,6 +195,6 @@ for (const method of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
   assert.equal(response.headers.get('Cache-Control'), 'no-store');
   checkHeaders(response);
 }
-assert.equal(decodedAssets, 1 + pageDecodes + 3 + cases.length, 'ETag and HEAD requests must not decode additional assets; sitemap and IndexNow key each decode once.');
+assert.equal(decodedAssets, 1 + 1 + pageDecodes + 3 + cases.length, 'ETag and HEAD requests must not decode additional assets; sitemap and IndexNow key each decode once.');
 globalThis.atob = nativeAtob;
 console.log(JSON.stringify({ result: 'passed', publicPages:publicRender.pages.length, guideArticles:publicRender.pages.filter(page=>page.kind==='guide').length, checks: ['security-headers-and-jsonld-hashes','private-client-routes','rendered-public-content','canonical-redirects','real-notfound-status','asset-bytes-and-mime','etag-and-cache','head','missing-and-private-paths','unsafe-methods','project-identity','compressed-size'], compressedBytes }));

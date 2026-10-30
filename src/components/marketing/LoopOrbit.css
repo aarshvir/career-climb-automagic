@@ -1,12 +1,12 @@
 /* Light ring: a quiet brand-green tint (the signature motif, not a pencil circle); the comet and nodes carry full green. */
 .jv-orbit { --ring: rgb(33 92 67 / .22); --node-ring: var(--jv-forest); --label: var(--jv-ink-3); position: relative; width: min(var(--size), 100%); aspect-ratio: 1; flex-shrink: 0; pointer-events: none; user-select: none; }
-.jv-orbit--dark { --ring: rgb(169 221 188 / .3); --node-ring: var(--jv-forest); --label: var(--jv-on-dark-2, #A5B6AD); }
+.jv-orbit--dark { --ring: rgb(169 221 188 / .3); --node-ring: var(--jv-forest); --label: var(--jv-on-dark-2); }
 .jv-orbit-ring { position: absolute; inset: 0; border: 1.5px solid var(--ring); border-radius: 50%; }
 /* The comet's head sits 40deg past its rotation, so rotate(200deg) parks it on "You review" (8 o'clock).
    The head is soft-edged as well as the tail, so there is no hard brightness step on the ring. */
-.jv-orbit-comet { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, rgb(111 168 136 / 0) 2deg, #6FA888 30deg, #215C43 38deg, rgb(33 92 67 / 0) 42deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px)); transform: rotate(200deg); }
+.jv-orbit-comet { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, rgb(111 168 136 / 0) 2deg, var(--jv-brand-mid) 30deg, var(--jv-brand) 38deg, rgb(33 92 67 / 0) 42deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px)); transform: rotate(200deg); }
 /* On forest the head must be the brightest point, not brand green (2.2:1 there). */
-.jv-orbit--dark .jv-orbit-comet { background: conic-gradient(from 0deg, transparent 0deg, rgb(169 221 188 / 0) 4deg, rgb(169 221 188 / .55) 30deg, #E6F5EC 38deg, rgb(230 245 236 / 0) 42deg); }
+.jv-orbit--dark .jv-orbit-comet { background: conic-gradient(from 0deg, transparent 0deg, rgb(169 221 188 / 0) 4deg, rgb(169 221 188 / .55) 30deg, var(--jv-brand-tint) 38deg, rgb(230 245 236 / 0) 42deg); }
 /* Client-only single pass (hero): fades in at 12 o'clock, then Find, Tailor and You review; done by about 4.3s. */
 .jv-orbit--animate .jv-orbit-comet { animation: jv-orbit-pass 3800ms var(--ease-inout) 500ms 1 both; }
 .jv-orbit.is-offscreen .jv-orbit-comet { animation-play-state: paused; }
@@ -17,7 +17,7 @@
 @keyframes jv-orbit-once { from { transform: rotate(-40deg); } to { transform: rotate(200deg); } }
 /* Nodes: 12 o'clock (Find), 4 o'clock (Tailor), 8 o'clock (You review). */
 .jv-orbit-node { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--jv-brand); box-shadow: 0 0 0 4px rgb(33 92 67 / .12); }
-.jv-orbit--dark .jv-orbit-node { background: #A9DDBC; box-shadow: 0 0 0 4px rgb(169 221 188 / .14); }
+.jv-orbit--dark .jv-orbit-node { background: var(--jv-on-dark-link); box-shadow: 0 0 0 4px rgb(169 221 188 / .14); }
 .jv-orbit-node--find { left: 50%; top: 0; }
 .jv-orbit-node--tailor { left: 93.3%; top: 75%; }
 /* "You review" is the stop that matters. On forest it is the lime signal; on light it is forest. */

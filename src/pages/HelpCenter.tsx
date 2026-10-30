@@ -280,7 +280,7 @@ export default function HelpCenter() {
   return <main className="help-center jv-rails" id="help-top">
     <Helmet><title>{meta.title}</title><meta name="description" content={meta.description} /><link rel="canonical" href="https://jobvance.io/help" /></Helmet>
     <nav className="hc-breadcrumb" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span aria-current="page">Help center</span></nav>
-    <header className="hc-hero jv-aside-grid"><div className="jv-aside-slot"><HelpAside /></div><h1 className="jv-enter-h1">What would you like to get done?</h1><p className="jv-enter">Find a step-by-step answer, then get back to your Automated Job Loop.</p><div className="hc-hero-actions jv-enter" style={{ '--d': '100ms' } as React.CSSProperties}><Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search<ArrowRight size={16} aria-hidden="true" /></Link><Link className="hc-text-link" to="/walkthroughs">Try an interactive walkthrough <ArrowRight size={16} aria-hidden="true" /></Link></div></header>
+    <header className="hc-hero jv-aside-grid"><div className="jv-aside-slot"><HelpAside /></div><h1 className="jv-enter-h1">What would you like to get done?</h1><p className="jv-enter">Find a step-by-step answer, then get back to your <span className="jv-nb">Automated Job Loop</span>.</p><div className="hc-hero-actions jv-enter" style={{ '--d': '100ms' } as React.CSSProperties}><Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search<ArrowRight size={16} aria-hidden="true" /></Link><Link className="hc-text-link" to="/walkthroughs">Try an interactive walkthrough <ArrowRight size={16} aria-hidden="true" /></Link></div></header>
     <section className="hc-start" aria-label="Choose a starting task" data-reveal>
       <a href="#first-check" onClick={() => { reset(); openTopic('first-check'); }}><FileText size={22} aria-hidden="true" /><strong>Check your CV against a job</strong><span>Start with the free check.</span><ArrowRight size={16} aria-hidden="true" /></a>
       <a href="#job-loop-start" onClick={() => { reset(); openTopic('job-loop-start'); }}><ClipboardList size={22} aria-hidden="true" /><strong>Save experience for your next application</strong><span>Set up your Automated Job Loop record.</span><ArrowRight size={16} aria-hidden="true" /></a>
@@ -306,6 +306,6 @@ export default function HelpCenter() {
         <Link to="/contact">Contact Jobvance</Link>
       </section>}
     </div></div>
-    <section className="hc-further" data-reveal><div><h2>Still need a hand?</h2><p>Tell us which step you reached and the message you saw. Leave confidential CV details out of your request.</p></div><div><Link className="hc-button hc-button--primary" to="/contact">Contact Jobvance<ArrowRight size={16} aria-hidden="true" /></Link><Link to="/guides">Read the career guides</Link></div></section>
+    <section className="hc-further jv-dark" data-reveal><div><h2>Still need a hand?</h2><p>Tell us which step you reached and the message you saw. Leave confidential CV details out of your request.</p></div><div><Link className="hc-button hc-button--primary" to="/contact">Contact Jobvance<ArrowRight size={16} aria-hidden="true" /></Link><Link to="/guides">Read the career guides</Link></div></section>
   </main>;
 }
