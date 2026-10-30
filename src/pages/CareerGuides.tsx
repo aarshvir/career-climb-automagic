@@ -12,7 +12,7 @@ const audiences: GuideAudience[] = ["Students", "MBA candidates", "Working profe
 const categories: GuideCategory[] = ["CV evidence", "Career direction", "Application workflow", "UAE job search", "Privacy & troubleshooting"];
 const dateLabel = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 
-// The site is aimed at US jobseekers: region-specific guides sit behind the task filter instead of the default view.
+// Region-specific guides stay in the default library (all guides are listed); the task filter narrows them.
 const REGION_CATEGORY: GuideCategory = "UAE job search";
 const featuredSlugs = ["first-application-pack", "cv-job-description-evidence", "role-filtering-before-applying"];
 
@@ -27,8 +27,8 @@ function GuideCard({ guide, feature = false }: { guide: CareerGuide; feature?: b
 
 function GuideActions() {
   return <aside className="cg-actions" aria-labelledby="cg-actions-title" data-reveal>
-    <div><p className="cg-eyebrow">PUT IT INTO PRACTICE</p><h2 id="cg-actions-title">Start with one real vacancy.</h2><p>Bring your CV and one job description. Create a free account, review the evidence, approve your wording and download your CV.</p></div>
-    <div className="cg-action-links"><Link className="cg-primary" to="/check">Check my CV for free <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/loop">Explore saving and reuse</Link><Link className="cg-help-link" to="/contact">Get help with the workflow</Link><p>CV Check and Automated Job Loop need a free account.</p></div>
+    <div><h2 id="cg-actions-title">Start with one real vacancy.</h2><p>Bring your CV and one job description. Create a free account, review the evidence, approve your wording and download your CV.</p></div>
+    <div className="cg-action-links"><Link className="cg-primary" to="/check">Check my CV for free <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/loop">Explore saving and reuse</Link><p>CV Check and Automated Job Loop need a free account. <Link className="cg-help-link" to="/contact">Get help with the workflow</Link></p></div>
   </aside>;
 }
 
@@ -45,11 +45,11 @@ export default function CareerGuides() {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return careerGuides.filter(guide => {
       const haystack = [guide.title, guide.description, guide.summary, guide.audience, guide.category, ...guide.takeaways].join(" ").toLowerCase();
-      return words.every(word => haystack.includes(word)) && (audience === "all" || guide.audience === audience || guide.audience === "All applicants") && (category === "all" ? (words.length > 0 || guide.category !== REGION_CATEGORY) : guide.category === category);
+      return words.every(word => haystack.includes(word)) && (audience === "all" || guide.audience === audience || guide.audience === "All applicants") && (category === "all" || guide.category === category);
     });
   }, [query, audience, category]);
   const hasFilters = query.trim() || audience !== "all" || category !== "all";
-  const regionCount = careerGuides.filter(guide => guide.category === REGION_CATEGORY).length;
+  const [showAll, setShowAll] = useState(false);
   const featured = hasFilters ? [] : featuredSlugs.map(slug => filtered.find(guide => guide.slug === slug)).filter((guide): guide is CareerGuide => Boolean(guide));
   const rest = filtered.filter(guide => !featured.includes(guide));
   function reset() { setQuery(""); setAudience("all"); setCategory("all"); }
@@ -60,7 +60,7 @@ export default function CareerGuides() {
       <div className="cg-library-heading"><div><p className="cg-eyebrow">FIND YOUR TASK</p><h2 id="cg-library-title">The guide library</h2></div><p>Common guides appear alongside your audience's guides.</p></div>
       <div className="cg-filters"><div className="cg-field cg-search"><label htmlFor="cg-search">Search the guides</label><div><Search size={17} aria-hidden="true" /><input id="cg-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Try projects, PDF or follow-up" /></div></div><div className="cg-field"><label htmlFor="cg-audience">Your stage</label><select id="cg-audience" value={audience} onChange={event => setAudience(event.target.value)}><option value="all">All stages</option>{audiences.map(item => <option key={item} value={item}>{item}</option>)}</select></div><div className="cg-field"><label htmlFor="cg-category">Your task</label><select id="cg-category" value={category} onChange={event => setCategory(event.target.value)}><option value="all">All tasks</option>{categories.map(item => <option key={item} value={item}>{item === REGION_CATEGORY ? "Region: UAE job search" : item}</option>)}</select></div></div>
       <div className="cg-results-bar"><p role="status" aria-live="polite">{filtered.length} {filtered.length === 1 ? "guide" : "guides"}{hasFilters ? " match your choices" : " to explore"}</p>{hasFilters && <button type="button" onClick={reset}>Clear search and filters</button>}</div>
-      {filtered.length ? <>{featured.length > 0 && <div className="cg-featured" data-reveal>{featured.map(guide => <GuideCard key={guide.slug} guide={guide} feature />)}</div>}<div className="cg-grid">{rest.map(guide => <GuideCard key={guide.slug} guide={guide} />)}{!hasFilters && regionCount > 0 && <article className="cg-card cg-card--region"><div className="cg-card-meta"><span>Other regions</span></div><h3>Looking for work in the UAE?</h3><p>{regionCount} guides on sources, qualifications and listing checks for UAE roles.</p><button type="button" className="cg-region-button" onClick={() => setCategory(REGION_CATEGORY)}>Show the UAE guides <ArrowRight size={16} aria-hidden="true" /></button></article>}</div></> : <div className="cg-empty"><h3>No guide matches these choices yet.</h3><p>Try a shorter phrase such as “CV”, “projects” or “privacy”, or clear the filters to browse all {careerGuides.length} guides.</p><button className="cg-primary" type="button" onClick={reset}>Show all guides</button><p>You can start with <Link to="/guides/first-application-pack">preparing a first application pack</Link> or <Link to="/contact">ask for workflow help</Link>.</p></div>}
+      {filtered.length ? <>{featured.length > 0 && <div className="cg-featured" data-reveal>{featured.map(guide => <GuideCard key={guide.slug} guide={guide} feature />)}</div>}<div className={`cg-grid${showAll ? "" : " cg-grid--collapsed"}`}>{rest.map(guide => <GuideCard key={guide.slug} guide={guide} />)}</div>{rest.length > 6 && !showAll && <button type="button" className="cg-more" onClick={() => setShowAll(true)}>Show all {rest.length + featured.length} guides</button>}</> : <div className="cg-empty"><h3>No guide matches these choices yet.</h3><p>Try a shorter phrase such as “CV”, “projects” or “privacy”, or clear the filters to browse all {careerGuides.length} guides.</p><button className="cg-primary" type="button" onClick={reset}>Show all guides</button><p>You can start with <Link to="/guides/first-application-pack">preparing a first application pack</Link> or <Link to="/contact">ask for workflow help</Link>.</p></div>}
     </section>
     <EditorialNote /><GuideActions />
   </main>;

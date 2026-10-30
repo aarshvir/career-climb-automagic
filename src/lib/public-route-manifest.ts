@@ -16,4 +16,6 @@ export const routeRedirects: Record<string,string> = {
 };
 export function publicPage(path:string): PublicPage | undefined { return publicPages.find(page=>page.path===path); }
 export function escapedXml(value:string):string {return value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');}
-export function publicSitemap():string {return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+publicPages.map(page=>`<url><loc>${escapedXml(SITE_ORIGIN+page.path)}</loc>${page.modified?`<lastmod>${escapedXml(page.modified)}</lastmod>`:''}</url>`).join('')+'</urlset>';}
+/** Date the public marketing pages were last reviewed; guides carry their own updatedAt. */
+const STATIC_PAGES_REVIEWED = '2026-10-30';
+export function publicSitemap():string {return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+publicPages.map(page=>`<url><loc>${escapedXml(SITE_ORIGIN+page.path)}</loc><lastmod>${escapedXml(page.modified ?? STATIC_PAGES_REVIEWED)}</lastmod></url>`).join('')+'</urlset>';}

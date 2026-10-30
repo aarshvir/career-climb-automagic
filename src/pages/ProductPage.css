@@ -10,7 +10,7 @@
   --product-lavender: var(--jv-brand-tint);
   --product-lime: var(--jv-signal);
   color: var(--jv-ink);
-  background: #fff;
+  background: transparent; /* the hero wash on #main-content shows through */
   font-family: var(--font-sans);
   overflow-wrap: break-word;
 }
@@ -152,3 +152,10 @@
 .pricing-details > p { padding: 8px 0 24px; }
 .product-page .loop-price-market { margin-bottom: 24px; }
 .pricing-details summary:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; }
+
+/* ---------- Round 4: pricing alignment ---------- */
+/* The badge sits on the featured card's top edge, so name, price, description and list start on the same lines in all three cards. */
+.pricing-card--featured.jv-dark { position: relative; overflow: visible; }
+.pricing-card--featured .pricing-flag { position: absolute; top: -13px; left: 24px; min-height: 26px; box-shadow: 0 0 0 4px #fff; }
+.pricing-card-head { flex-wrap: nowrap; }
+@media (max-width: 1023px) { .pricing-card--featured.jv-dark { margin-block: 14px 0; } }

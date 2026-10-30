@@ -67,7 +67,7 @@
 .hc-contents summary::-webkit-details-marker { display: none; }
 .hc-contents summary::after { content: "+"; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); font-size: 18px; line-height: 1; }
 .hc-contents details[open] > summary::after { content: "\2212"; }
-.hc-contents summary h2 { margin: 0; color: var(--hc-ink); font-size: var(--t-small); font-weight: var(--fw-semi); letter-spacing: 0; }
+.hc-contents summary :is(h2, .hc-contents-title) { margin: 0; color: var(--hc-ink); font-size: var(--t-small); font-weight: var(--fw-semi); letter-spacing: 0; }
 .hc-contents ol { display: grid; margin: 0 0 16px; padding: 0; list-style: none; }
 .hc-contents li { border-top: 1px solid var(--hc-border); }
 .hc-contents ol a { display: flex; align-items: center; min-height: 44px; padding: 6px 0; color: var(--hc-body); font-size: var(--t-small); line-height: 1.35; text-decoration: none; }
@@ -79,7 +79,7 @@
 .hc-topic > details > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; padding: 20px 0; list-style: none; cursor: pointer; }
 .hc-topic > details > summary::-webkit-details-marker { display: none; }
 .hc-topic > details > summary::after { content: "+"; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); font-size: 18px; line-height: 1; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
-.hc-topic > details[open] > summary::after { content: "\2212"; background: var(--jv-ink); border-color: var(--jv-ink); color: #fff; }
+.hc-topic > details[open] > summary::after { content: "\2212"; background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; }
 .hc-summary-text { display: grid; gap: 8px; min-width: 0; }
 .hc-topic > details > summary:hover h2 { color: var(--jv-brand); }
 .hc-topic > details > :not(summary) { padding-bottom: 0; }
@@ -133,3 +133,10 @@
   .hc-further > div:last-child { align-items: flex-start; }
 }
 .hc-topic, .hc-note { overflow-wrap: anywhere; }
+
+/* Round 4 */
+.hc-hero { padding: 24px 0 24px; }
+.hc-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 24px; }
+@media (max-width: 639px) { .hc-hero-actions .jv-btn { width: 100%; } }
+/* The open answer reads at a full line length, not a narrow column inside a wide panel. */
+.hc-topic > details > :is(.hc-topic-summary, .hc-steps, .hc-note, .hc-field-help) { max-width: 68ch; }

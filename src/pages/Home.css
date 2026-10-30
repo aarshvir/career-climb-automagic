@@ -291,3 +291,28 @@
 @media (min-width: 1024px) { .jv-home .jv-cta { padding-block: 88px; } }
 .jv-home .jv-cta h2 { max-width: 8.1em; font-size: var(--t-h1); line-height: 1.06; letter-spacing: -.04em; }
 @media (max-width: 639px) { .jv-home .jv-cta { margin-bottom: 64px; } }
+
+/* ---------- Round 4 ---------- */
+/* Hero: one static ring centred on the card column (no stray stops), a soft glow behind it, and no dead band below the actions. */
+@media (min-width: 1024px) {
+  .jv-home .jv-hero-visual { min-height: 520px; }
+  .jv-home .jv-hero-orbit-wrap { width: min(520px, calc(100% + 40px)); rotate: none; }
+  .jv-home .jv-hero-visual::after { content: ""; position: absolute; inset: 8% -6%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgb(33 92 67 / .09), transparent); }
+}
+/* The loop pages' hero ring reads as one device: same ring weight on both. */
+.jv-home .jv-hero-orbit { --ring: rgb(33 92 67 / .26); }
+/* Phones: the five-fact strip repeats the hero note, and two of the three product cards repeat the hero card; both give way so the page stays short. */
+@media (max-width: 639px) { .jv-home .jv-proof { display: none; } }
+@media (max-width: 767px) { .jv-home .jv-frag--wide-only { display: none; } .jv-home .jv-control-row { padding: 20px 0; } }
+/* One eyebrow size: the numbered row labels use the 12px caption spec like every other mono label. */
+.jv-home .jv-control-row p.jv-step-index { margin: 0 0 12px; font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; }
+/* One section heading size; the heading takes a wider measure and the lead aligns to its first line. */
+.jv-home .jv-check-copy h2 { font-size: var(--t-h2); }
+@media (min-width: 1024px) {
+  .jv-home .jv-section-head { align-items: start; }
+  .jv-home .jv-section-head h2 { grid-column: 1 / span 6; }
+  .jv-home .jv-section-head p { grid-column: 8 / span 5; margin-top: .6rem; }
+}
+/* Closing band: a typographic band with the loop ring arcing out of it (the next-run card stays inside the page). */
+.jv-home .jv-cta { overflow: hidden; }
+/* The loop steps share the run trail: a lime-to-green line joins the three numbered rows. */

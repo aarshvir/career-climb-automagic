@@ -13,7 +13,7 @@ import './JobLoop.css';
 import { currentOffer } from '@/lib/current-offer';
 import { subscriptionPlans } from '@/lib/subscription-plans';
 import { RunCard } from '@/components/marketing/ProductCards';
-import { CvDiffCard, NextRunCard, SetupCard } from '@/components/marketing/PageCards';
+import { CvDiffCard, SetupCard } from '@/components/marketing/PageCards';
 import { useReveal } from '@/hooks/useReveal';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
@@ -73,15 +73,11 @@ function StartLink({ children = "Start my search", to = "/onboarding", variant =
 function TextLink({ to, children }: { to: string; children: React.ReactNode }) {
   return <Link to={to} className="jv-link"><span>{children}</span><ArrowRight aria-hidden="true" /></Link>;
 }
-/** The closing moment shared by every explainer page: typographic, with the next-run card as its one product object (the orbit is kept for the home hero and the dark section). */
-function CtaBand({ start }: { start: string }) {
-  return <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="page-cta-title">
-    <div className="jv-cta-inner">
-      <h2 id="page-cta-title">Ready to automate your search?</h2>
-      <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
-      <div className="jv-cta-actions"><StartLink to={start} /><Link to="/check" className="jv-btn jv-btn--secondary jv-btn--lg">Try the free CV Check</Link></div>
-    </div>
-    <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
+/** The closing moment on explainer and utility pages: one tinted bar (heading, one line, two actions). The full dark band is kept for the home page and the Automated Job Loop page. */
+function CtaBar({ start, heading = "Ready to automate your search?", body = "Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.", secondary = true }: { start: string; heading?: string; body?: string; secondary?: boolean }) {
+  return <section className="jv-cta-bar" aria-labelledby="page-cta-title">
+    <div className="jv-cta-bar-copy"><h2 id="page-cta-title">{heading}</h2><p>{body}</p></div>
+    <div className="jv-cta-bar-actions"><StartLink to={start} />{secondary && <TextLink to="/check">Try the free CV Check</TextLink>}</div>
   </section>;
 }
 
@@ -164,7 +160,8 @@ export default function ProductPage({ kind }: { kind: Kind }) {
   const meta = staticPageMeta(path);
   // One product fragment beside the intro on the explainer pages that would otherwise open on text alone.
   // Contact and privacy get a quiet summary card (real facts from the policy); the explainers get their own product moment.
-  const visual = kind === "how" ? <SetupCard /> : kind === "about" ? <CvDiffCard /> : kind === "contact" ? <aside className="jv-notecard" aria-label="How support works"><p className="jv-caption">How support works</p><ol><li><strong>No account needed</strong><span>Public support needs no name or email.</span></li><li><strong>Keep your receipt code</strong><span>It lets you read the status and any reply.</span></li><li><strong>Kept up to 90 days</strong><span>Your message is read by a person, then removed.</span></li></ol></aside> : kind === "privacy" ? <aside className="jv-notecard" aria-label="Your information at a glance"><p className="jv-caption">At a glance</p><ol><li><strong>Your file stays on your device</strong><span>The free check reads it locally.</span></li><li><strong>Saving is your choice</strong><span>Nothing is stored in your account until you confirm.</span></li><li><strong>Advertising measurement is optional</strong><span>You can turn it off further down this page.</span></li></ol></aside> : null;
+  const visual = kind === "how" ? <SetupCard /> : kind === "about" ? <CvDiffCard /> : kind === "privacy" ? <aside className="jv-notecard" aria-label="Your information at a glance"><p className="jv-caption">At a glance</p><ol><li><strong>Your file stays on your device</strong><span>The free check reads it locally.</span></li><li><strong>Saving is your choice</strong><span>Nothing is stored in your account until you confirm.</span></li><li><strong>Advertising measurement is optional</strong><span>You can turn it off further down this page.</span></li></ol></aside> : null;
+  const contactNote = <aside className="jv-notecard" aria-label="How support works"><p className="jv-caption">How support works</p><ol><li><strong>No account needed</strong><span>Public support needs no name or email.</span></li><li><strong>Keep your receipt code</strong><span>It lets you read the status and any reply.</span></li><li><strong>Kept up to 90 days</strong><span>Your message is read by a person, then removed.</span></li></ol></aside>;
   const visualDecor = kind === "how" || kind === "about";
   const related = (relatedFor[kind] ?? []).map(to => relatedLinks.find(([href]) => href === to)!).filter(Boolean);
   return <main className={`product-page product-page--${kind}${kind === "home" ? "" : " jv-rails"}`}>
@@ -185,13 +182,14 @@ export default function ProductPage({ kind }: { kind: Kind }) {
           {kind === "faq" && <div className="jv-faq jv-faq--wide product-faqs" data-reveal>{faqs.map(([question, answer]) => <details key={question}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>}
           {kind === "about" && <div className="product-about"><p className="product-large-copy" data-reveal>Jobvance automates the repetitive part of a job search. Choose your roles and locations once, and <span className="jv-nb">Automated Job Loop</span> finds matching jobs and prepares a tailored, role-specific CV for each, built from your own experience.</p>
             <ol className="jv-steps product-about-principles"><li><p className="jv-caption">01 / Source</p><h2>Your experience, every time</h2><p>Every CV is reworded from experience you added, so it stays accurate to you.</p></li><li><p className="jv-caption">02 / Schedule</p><h2>Jobs on your schedule</h2><p>Pick roles, locations and a weekly, three-times-weekly or daily pace. Runs happen in the background.</p></li><li><p className="jv-caption">03 / Result</p><h2>A CV for each role</h2><p>Each prepared role comes with its own tailored CV, ready to download.</p></li></ol></div>}
-          {kind === "contact" && <><GuestSupport />{support && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(support) && <div className="product-contact-box"><a className="jv-link" href={`mailto:${support}`}><span>Email Jobvance support</span><ArrowUpRight aria-hidden="true" /></a></div>}</>}
+          {kind === "contact" && <><div className="jv-contact-grid"><GuestSupport />{contactNote}</div>{support && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(support) && <div className="product-contact-box"><a className="jv-link" href={`mailto:${support}`}><span>Email Jobvance support</span><ArrowUpRight aria-hidden="true" /></a></div>}</>}
           {legal && <LegalLayout kind={kind} />}
           {kind === "notfound" && <div className="product-notfound"><p className="product-404" aria-hidden="true">404</p><p>The address does not match an available page. <Link to="/">Return to Jobvance</Link>.</p><StartLink to={start} /></div>}
           {related.length > 0 && <nav className="jv-related" aria-label="Related pages"><span>Related</span>{related.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav>}
         </div>}
       </div>
-      {band && <CtaBand start={start} />}
+      {band && <CtaBar start={start} />}
+      {(kind === "contact" || kind === "privacy") && <CtaBar start={start} heading="Back to your search?" body="Choose your roles and locations once. Automated Job Loop does the repeat work." secondary={false} />}
     </>}
   </main>;
 }

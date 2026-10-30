@@ -75,3 +75,17 @@ export function NextRunCard({ className = "" }: { className?: string }) {
     <div className="pc-foot"><span />Last run · 3 jobs · 3 tailored CVs</div>
   </div>;
 }
+
+const weekRuns: [string, string, string][] = [["Mon", "7:00 AM", "3 jobs"], ["Tue", "", ""], ["Wed", "7:00 AM", "No new jobs"], ["Thu", "", ""], ["Fri", "7:00 AM", "2 jobs"], ["Sat", "", ""], ["Sun", "", ""]];
+/** One example week on a 3x/week schedule: the days it runs, and what each run left for review. Decorative. */
+export function WeekStrip({ className = "" }: { className?: string }) {
+  return <div className={`pc-week-strip ${className}`.trim()} aria-hidden="true">
+    <p className="pc-week-strip-caption"><span className="pc-week-strip-dot" />Example week · 3×/week · illustrative data</p>
+    <ol>{weekRuns.map(([day, time, result]) => <li key={day} className={time ? "is-run" : ""}>
+      <span className="pc-week-day">{day}</span>
+      <span className="pc-week-mark" />
+      <span className="pc-week-time">{time || "Rest day"}</span>
+      <span className="pc-week-result">{result}</span>
+    </li>)}</ol>
+  </div>;
+}

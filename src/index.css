@@ -2,7 +2,7 @@
 @config "../tailwind.config.ts";
 
 @font-face{font-family:"Geist";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2197,U+2212,U+2215,U+FEFF,U+FFFD;}
-@font-face{font-family:"Geist Mono";src:url('/fonts/GeistMono-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:optional;unicode-range:U+0000-00FF,U+2000-206F;}
+@font-face{font-family:"Geist Mono";src:url('/fonts/GeistMono-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+2000-206F;}
 /* Metric-matched fallbacks (measured in Chrome against the self-hosted files): Arial is 2.3% narrower
    than Geist; Courier New has Geist Mono's exact 600/1000 advance. Swapping in the webfont does not reflow.
    Headings (520-600) get their own face: Arial Bold is 1.8% wider than Geist at 540, so heading line counts hold too. */
@@ -15,8 +15,8 @@
 @layer base {
   :root {
     /* "Jobvance Green": the approved mark's #215c43 is the primary action colour. Lime (--jv-signal) is only a small
-       signal on the forest surface, never a fill on white. Legacy names map onto the same tokens. */
-    --jv-ink: #0F1D17; --jv-blue: #215C43; --jv-paper: #FFFFFF; --jv-lavender: #E6F0EA; --jv-lime: #E6F0EA;
+       signal on the forest surface, never a fill on white. */
+    --jv-ink: #0F1D17; --jv-paper: #FFFFFF;
     /* surfaces */
     --jv-bg: #FFFFFF; --jv-bg-subtle: #F5F8F6; --jv-surface: #FFFFFF; --jv-sunken: #EEF2EF; --jv-bg-muted: #EFF3F0;
     /* forest: the one dark surface (bands, final CTA, mock footer) */
@@ -32,6 +32,8 @@
     --jv-signal: #D4F25A;
     /* the mid green (strokes and small text on forest) and the hairline on forest */
     --jv-brand-mid: #6FA888; --jv-line-on-dark: rgb(255 255 255 / .14);
+    /* the mark's pale lime glyph, and status colours on forest */
+    --jv-brand-glyph: #E2EEAF; --jv-warn-on-dark: #FBBF4A; --jv-danger-on-dark: #FF8A80;
     /* one tinted light-surface moment: the hero wash, painted full-bleed behind every marketing hero */
     --jv-wash: radial-gradient(60% 50% at 80% 0%, #E6F0EA 0%, transparent 70%), radial-gradient(40% 40% at 0% 0%, rgb(212 242 90 / .10), transparent 70%);
     /* status (meaning only, never decoration) */
@@ -43,12 +45,12 @@
     --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Consolas, monospace;
     --fw-regular: 400; --fw-medium: 500; --fw-semi: 560; --fw-strong: 600;
     /* heading weights: dark surfaces get 20 less for optical balance */
-    --fw-display: 560; --fw-heading: 540; --fw-heading-on-dark: 520;
+    --fw-display: 540; --fw-heading: 540; --fw-heading-on-dark: 520;
     --t-display: clamp(2.75rem, 2.1rem + 2.667vw, 3.75rem);
     --t-h1: clamp(2.25rem, 1.786rem + 1.905vw, 3.5rem);
     --t-h2: clamp(1.875rem, 1.457rem + 1.714vw, 3rem);
-    /* H2 inside a panel: matches --t-h2 on phones, a deliberate 1.2x step down (40px) on desktop. */
-    --t-h2-panel: clamp(1.875rem, 1.6rem + 1.1vw, 2.5rem);
+    /* One section heading size everywhere (48px desktop, 30px phones); panels use the same token. */
+    --t-h2-panel: var(--t-h2);
     --t-h3: clamp(1.375rem, 1.236rem + .571vw, 1.75rem);
     --t-h4: clamp(1.125rem, 1.079rem + .19vw, 1.25rem);
     --t-card-title: 1.25rem; --ls-display: -.035em; --ls-h3: -.025em; --ls-card: -.015em;
@@ -121,8 +123,10 @@
 /* While the route gate resolves nothing is rendered; keep the footer below the fold instead of flashing under the header. */
 /* A containing block for margins, so the empty placeholder and the mounted page share one top edge (no layout shift). */
 #main-content { display: flow-root; }
+/* The pre-hydration shell holds the viewport so the first paint never shifts (CLS 0 with or without motion). */
+html, body, #root { min-height: 100vh; min-height: 100dvh; }
 /* One full-bleed wash behind every marketing hero (never clipped at the shell edge). */
-#main-content:has(> main.jv-rails, > main.jv-home, > main.product-page, > main.audience-page, > main.jv-account-utility) { background: var(--jv-wash) top center / 100% 680px no-repeat; }
+#main-content:has(main.jv-rails, main.jv-home, main.product-page, main.audience-page) { background-image: var(--jv-wash); background-position: top center; background-size: 100% 680px; background-repeat: no-repeat; }
 #main-content:empty, #main-content:has(> div:is([hidden], :empty):only-child) { min-height: 100svh; }
 .jv-loading > p { margin: 0; color: var(--jv-ink-3); font-size: var(--t-small); }
 .custom-scrollbar { scrollbar-width: thin; scrollbar-color: var(--jv-line-strong) transparent; }

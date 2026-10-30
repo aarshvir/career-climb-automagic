@@ -59,7 +59,7 @@
 }
 
 /* One short pass per row: Found, then CV tailored, then Ready for review (sequential 50-60ms swaps), rows 350ms apart.
-   The last row turns ready at about 3.5s, as the hero comet reaches "You review"; everything is still by 4.8s.
+   The entrance (about 650ms) finishes first, then this one pass runs alone (the hero ring is static); the last row is ready at about 3.5s and everything is still by 4.8s.
    It runs only after the app mounts on a page that was not prerendered (LoopRunMock adds .is-live). */
 @media (prefers-reduced-motion: no-preference) {
   .jv-mock.is-live .jv-status { animation-duration: 2.4s; animation-timing-function: linear; animation-iteration-count: 1; animation-fill-mode: both; animation-delay: calc(var(--i, 0) * 350ms + 700ms); }
@@ -67,7 +67,7 @@
   .jv-mock.is-live .jv-status--tailored { animation-name: jv-status-tailored; }
   .jv-mock.is-live .jv-status--ready { animation-name: jv-status-ready; }
   .jv-mock.is-live li:nth-child(1) .jv-status--tailored { animation-name: jv-status-tailored-rest; }
-  .jv-mock.is-live .jv-mock-pulse::after { animation: jv-pulse 2.4s var(--ease-out) 2; }
+  .jv-mock.is-live .jv-mock-pulse::after { animation: jv-pulse 2.4s var(--ease-out) 700ms 1; }
   .jv-mock.is-offscreen .jv-status, .jv-mock.is-offscreen .jv-mock-pulse::after { animation-play-state: paused; }
 }
 /* Crossfaded: the outgoing tag fades while the incoming one rises, so a tag is always at least partly visible. */

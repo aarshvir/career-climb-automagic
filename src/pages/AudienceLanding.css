@@ -32,7 +32,7 @@
 .audience-workspace-bar .jv-brand-mark { width: 26px; height: 26px; }
 .audience-workspace-bar > span:last-child { display: inline-flex; align-items: center; gap: 6px; color: var(--jv-ink-3); font-size: var(--t-sm); }
 .audience-workspace-body { display: grid; gap: 12px; padding: 24px; }
-.audience-workspace-body h2 { margin: 0 0 4px; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }
+.audience-workspace-body .audience-workspace-title { margin: 0 0 4px; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }
 .audience-evidence { padding: 16px; border: 1px solid var(--jv-line); border-radius: 12px; background: var(--jv-bg-subtle); }
 .audience-evidence span { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
 .audience-evidence p { margin-top: 6px; color: var(--jv-ink); font-size: var(--t-small); line-height: 1.5; }
@@ -61,3 +61,17 @@
   .audience-path .jv-steps { border-top: 1px solid var(--jv-line-strong); }
 }
 @media (max-width: 639px) { .audience-hero { padding-top: 24px; } }
+
+/* ---------- Round 4 ---------- */
+/* The tab strip sits clear of the header; labels wrap instead of clipping under text-spacing overrides. */
+.audience-switch { margin-top: 32px; }
+.audience-switch a { white-space: normal; text-align: center; line-height: 1.25; padding-block: 8px; }
+/* One lead, one proof line: the Automated Job Loop sentence sits under the price note in the same quiet style. */
+.audience-note { display: grid; gap: 10px; margin-top: 12px; }
+.audience-note .audience-outcome { margin: 0; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 400; line-height: 1.5; }
+.audience-hero { padding-bottom: 48px; }
+@media (min-width: 1024px) { .audience-hero { padding-bottom: 72px; } }
+.audience-features { padding-bottom: 48px; }
+.audience-path .jv-head .jv-link { margin-top: 4px; }
+/* Each audience page stages its example on the dot field; the workspace card does not clip it. */
+.audience-workspace { overflow: hidden; }

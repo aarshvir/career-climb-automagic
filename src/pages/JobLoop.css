@@ -98,7 +98,7 @@
 .jl-pdf-frame { width:100%; height:640px; border:1px solid #cedcd5; border-radius:7px; background:var(--jv-bg-subtle); }
 .jl-optional-connection > summary { cursor:pointer; font-size:16px; font-weight:600; min-height:44px; padding-block:9px; }
 .jl-optional-connection > p { color:var(--jl-muted); font-size:12px; line-height:1.9; margin-block:14px; }
-.jl-unsaved-notice { color:#7b5621; border:1px solid #dfcda9; background:#fffbf1; padding:13px 17px; border-radius:7px; font-size:12px; line-height:1.8; }
+.jl-unsaved-notice { color:var(--jv-warn); border:1px solid #dfcda9; background:#fffbf1; padding:13px 17px; border-radius:7px; font-size:12px; line-height:1.8; }
 .jl-support-history { border-top:1px solid var(--jl-line); padding-top:23px; margin-top:24px; }
 .jl-support-history ul { list-style:none; padding:0; margin:17px 0 0; }
 .jl-support-history li { border:1px solid var(--jl-line); background:var(--jv-bg-subtle); padding:17px; margin-top:12px; border-radius:7px; }
@@ -106,8 +106,8 @@
 .jl-support-history p { font-size:12px; color:var(--jl-muted); line-height:1.9; white-space:pre-wrap; }
 .jl-support-history small { display:block; color:var(--jl-muted); font-size:10px; line-height:1.9; margin-top:9px; }
 .jl-erasure-confirm { padding:20px; margin-top:20px; border:1px solid #dfc6c0; border-radius:7px; background:#fff8f5; }
-.jl-button--danger { color:#fff; background:#a84335; border-color:#a84335; }
-.jl-button--danger:hover { background:#8e3327; color:#fff; border-color:#8e3327; }
+.jl-button--danger { color:#fff; background:var(--jv-danger); border-color:var(--jv-danger); }
+.jl-button--danger:hover { background:var(--jv-danger); color:#fff; border-color:var(--jv-danger); }
 .product-page--contact .jl-panel { --jl-ink:var(--jv-ink); --jl-muted:var(--jv-ink-3); --jl-line:var(--jv-line); }
 .product-page--contact .jl-profile-form { font:inherit; }
 .product-page--contact .jl-field textarea { min-height:150px; font:inherit; font-size:14px; }
@@ -124,7 +124,7 @@
 .jl-row-heading h2 { margin-bottom:7px; }
 .jl-row-heading p { color:var(--jl-muted); font-size:12px; line-height:1.8; }
 .jl-tag { display:inline-flex; align-items:center; border:1px solid #d2ded8; border-radius:5px; padding:5px 8px; background:var(--jv-bg-subtle); color:#4a6558; font-size:10px; line-height:1.7; }
-.jl-tag--withdrawn { color:#8b3f35; background:#fff3ed; border-color:#e6cbbf; }
+.jl-tag--withdrawn { color:var(--jv-danger); background:#fff3ed; border-color:#e6cbbf; }
 .jl-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; border:1px solid var(--jv-line-input); border-radius:8px; padding:10px 14px; background:#fff; color:var(--jl-ink); font-size:12px; font-weight:600; line-height:1.6; text-decoration:none; cursor:pointer; }
 .jl-button:hover { background:var(--jv-bg-subtle); border-color:var(--jv-brand); color:var(--jv-brand); }
 .jl-button--primary { background:var(--jv-brand); color:#fff; border-color:var(--jv-brand); }
@@ -140,7 +140,7 @@
 .jl-field label { font-size:12px; font-weight:650; line-height:1.8; color:var(--jl-ink); }
 .jl-field :is(input,select,textarea), .jl-file-input input { width:100%; min-height:46px; padding:11px 12px; border:1px solid var(--jv-line-input); border-radius:7px; background:#fff; color:var(--jl-ink); font-size:14px; }
 .jl-field textarea { min-height:112px; resize:vertical; line-height:1.8; }
-.jl-field textarea[readonly] { min-height:300px; max-height:550px; background:#f7f8fa; }
+.jl-field textarea[readonly] { min-height:300px; max-height:550px; background:var(--jv-bg-subtle); }
 .jl-field :is(input,select,textarea):focus { border-color:var(--jv-brand); }
 .jl-field p, .jl-help { color:var(--jl-muted); font-size:11px; line-height:1.9; }
 .jl-consent { display:flex; align-items:flex-start; gap:10px; margin-block:16px; font-size:12px; line-height:1.9; color:var(--jl-ink); }
@@ -164,17 +164,17 @@
 .jl-opportunity > .jl-form-grid, .jl-opportunity > .jl-field { margin-block:15px; }
 .jl-signal > p, .jl-run > p { color:var(--jl-muted); font-size:12px; line-height:1.9; margin-top:10px; }
 .jl-lanes { display:grid; gap:10px; margin:20px 0; padding:0; list-style:none; }
-.jl-lanes li { background:#f7f8fa; border:1px solid var(--jl-line); padding:14px; border-radius:7px; }
+.jl-lanes li { background:var(--jv-bg-subtle); border:1px solid var(--jl-line); padding:14px; border-radius:7px; }
 .jl-lanes strong { font-size:12px; margin-right:8px; }
 .jl-lanes p { color:var(--jl-muted); font-size:12px; line-height:1.9; margin-top:8px; }
 .jl-lanes small { color:var(--jl-muted); display:block; font-size:10px; line-height:1.8; margin-top:5px; }
-.jl-alert, .jl-warning { padding:16px; background:#fff5e3; color:#694806; border:1px solid #e6c987; border-radius:7px; font-size:12px; line-height:1.9; margin-bottom:17px; }
+.jl-alert, .jl-warning { padding:16px; background:#fff5e3; color:var(--jv-warn); border:1px solid #e6c987; border-radius:7px; font-size:12px; line-height:1.9; margin-bottom:17px; }
 .jl-alert p + p { margin-top:8px; }
 .jl-notice { background:var(--jv-bg-subtle); border:1px solid #d7e5de; border-radius:7px; color:#3c9d6d; padding:15px; font-size:12px; line-height:1.9; }
 .jl-loading { display:flex; align-items:center; gap:9px; color:var(--jv-brand); font-size:12px; line-height:1.8; padding:10px 0; }
 .jl-loading svg { animation:jl-spin 1s linear infinite; }
 .jl-output-list { display:grid; gap:10px; margin-top:23px; }
-.jl-output-choice { width:100%; display:flex; align-items:center; justify-content:space-between; text-align:left; gap:14px; background:#f7f8fa; border:1px solid #d0dbd6; border-radius:8px; padding:17px; cursor:pointer; }
+.jl-output-choice { width:100%; display:flex; align-items:center; justify-content:space-between; text-align:left; gap:14px; background:var(--jv-bg-subtle); border:1px solid #d0dbd6; border-radius:8px; padding:17px; cursor:pointer; }
 .jl-output-choice[aria-pressed=true] { border-color:var(--jv-brand); background:var(--jv-brand-tint); }
 .jl-output-choice strong { display:block; font-size:14px; line-height:1.6; }
 .jl-output-choice small { display:block; color:var(--jl-muted); font-size:11px; line-height:1.8; margin-top:4px; }
@@ -183,7 +183,7 @@
 .jl-mailbox-confirmation { border-color:#c3d8ce; background:var(--jv-bg-subtle); }
 .jl-mailbox-confirmation > .jl-button { margin-right:9px; margin-top:12px; }
 .jl-mailbox-confirmation .jl-mailbox-identity { display:flex; align-items:center; gap:9px; color:var(--jl-ink); font-size:16px; font-weight:650; }
-.jl-contact-fields { display:grid; gap:17px; border:1px solid #d0dbd6; border-radius:8px; padding:20px; background:#f7f8fa; }
+.jl-contact-fields { display:grid; gap:17px; border:1px solid #d0dbd6; border-radius:8px; padding:20px; background:var(--jv-bg-subtle); }
 .jl-page-footnote { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px; margin-top:29px !important; color:var(--jl-muted); font-size:11px; line-height:1.9; }
 .jl-page-footnote svg, .jl-page-footnote a { color:var(--jv-brand); }
 @keyframes jl-spin { to { transform:rotate(360deg); } }
@@ -235,3 +235,9 @@
 .job-loop-page .jl-sidebar { background: var(--jv-bg-subtle); }
 .job-loop-page .jl-sidebar nav button[aria-pressed="true"] { border-color: var(--jv-brand); }
 @media (max-width: 380px) { .job-loop-page .jl-sidebar nav button { padding-inline: 6px; gap: 6px; } }
+
+/* Reduced motion: the loading spinner does not rotate; it holds still and breathes in opacity so the state still reads as "working". */
+@keyframes jl-breathe { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) {
+  .jl-loading svg { animation: jl-breathe 1.6s ease-in-out infinite !important; animation-duration: 1.6s !important; animation-iteration-count: infinite !important; }
+}

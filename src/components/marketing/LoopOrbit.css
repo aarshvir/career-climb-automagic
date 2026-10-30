@@ -21,7 +21,7 @@
 .jv-orbit-node--find { left: 50%; top: 0; }
 .jv-orbit-node--tailor { left: 93.3%; top: 75%; }
 /* "You review" is the stop that matters. On forest it is the lime signal; on light it is forest. */
-.jv-orbit-node--approve { left: 6.7%; top: 75%; width: 14px; height: 14px; margin: -7px 0 0 -7px; background: var(--jv-forest) !important; box-shadow: 0 0 0 2px #fff, 0 0 0 7px rgb(33 92 67 / .16) !important; }
+.jv-orbit-node--approve { left: 6.7%; top: 75%; width: 14px; height: 14px; margin: -7px 0 0 -7px; background: var(--jv-brand) !important; box-shadow: 0 0 0 2px #fff, 0 0 0 7px rgb(33 92 67 / .16) !important; }
 .jv-orbit--dark .jv-orbit-node--approve { background: var(--jv-signal) !important; box-shadow: 0 0 0 2px var(--node-ring), 0 0 0 9px rgb(212 242 90 / .12) !important; }
 /* All three labels share one weight and colour; the lime node alone marks the stop that needs you. */
 .jv-orbit-label { position: absolute; font-family: var(--font-mono); font-size: .75rem; line-height: 1rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--label); white-space: nowrap; }

@@ -70,7 +70,7 @@
 .jv-dark {
   --jv-bg: var(--jv-forest); --jv-surface: var(--jv-forest-2); --jv-elevated: #183427; --jv-line: rgb(255 255 255 / .09);
   --jv-ink: #F2F6F3; --jv-ink-2: #A5B6AD; --jv-ink-3: #82948A; --jv-brand-text: #A9DDBC;
-  --jv-success: #6FDCA0; --jv-warn: #FBBF4A; --jv-danger: #FF8A80;
+  --jv-success: #6FDCA0; --jv-warn: var(--jv-warn-on-dark); --jv-danger: var(--jv-danger-on-dark);
   /* text on forest, with contrast on #0C1F17 */
   --jv-on-dark-1: #F2F6F3; /* 16.3:1 */ --jv-on-dark-body: #C6D3CC; /* 11.1:1 */ --jv-on-dark-2: #A5B6AD; /* 8.1:1 */
   --jv-on-dark-3: #82948A; /* 5.4:1 */ --jv-on-dark-link: #A9DDBC; /* 11.2:1 */
@@ -98,7 +98,7 @@
 .jv-brand-name { white-space: nowrap; }
 .jv-brand-period { color: var(--jv-brand); }
 /* The mark's lime (#E2EEAF) is a brand constant shared with favicon.svg and the PNG icons; UI uses --jv-signal. The tile radius is 25% at every size, like the favicon. */
-.jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 25%; background: #215C43; color: #E2EEAF; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
+.jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 25%; background: var(--jv-brand); color: var(--jv-brand-glyph); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
 .jv-brand-mark svg { width: 100%; height: 100%; display: block; }
 /* Windows High Contrast drops the tile fill; keep the tile's edge so the mark stays recognisable. */
 @media (forced-colors: active) { .jv-brand-mark { border: 1px solid CanvasText; } }
@@ -241,7 +241,7 @@
 .jv-faq summary:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: -2px; }
 .jv-faq-toggle { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press), transform var(--dur-2) var(--ease-press); }
 .jv-faq-toggle svg { width: 16px; height: 16px; }
-.jv-faq details[open] .jv-faq-toggle { background: var(--jv-ink); border-color: var(--jv-ink); color: #fff; transform: rotate(45deg); }
+.jv-faq details[open] .jv-faq-toggle { background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; transform: rotate(45deg); }
 .jv-faq details > p, .jv-faq details > div { max-width: 34em; margin: 0; padding: 0 0 24px; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
 
 /* Icons on marketing pages use a lighter stroke; the private app keeps 2. */
@@ -335,7 +335,7 @@
 :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; list-style: none; cursor: pointer; }
 :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary::-webkit-details-marker { display: none; }
 :is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details) > summary::after { content: "+"; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line); border-radius: 50%; color: var(--jv-ink); font-size: 18px; line-height: 1; transition: background var(--dur-2) var(--ease-press), color var(--dur-2) var(--ease-press); }
-:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details)[open] > summary::after { content: "\2212"; background: var(--jv-ink); border-color: var(--jv-ink); color: #fff; }
+:is(.wt-transcript, .cg-editorial, .ap-steps, .hc-note-details)[open] > summary::after { content: "\2212"; background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; }
 .jv-brand--static { min-height: 0; pointer-events: none; }
 
 /* Touch targets: 44px minimum on phones. */
@@ -352,8 +352,8 @@
 }
 
 /* ---------- Spacing rhythm (one set of gaps for every page) ---------- */
-:root { --gap-eyebrow: 16px; --gap-lead: 20px; --gap-band: 64px; --gap-block: 40px; }
-@media (min-width: 1024px) { :root { --gap-lead: 24px; --gap-band: 96px; --gap-block: 48px; } }
+:root { --gap-eyebrow: 16px; --gap-lead: 20px; --gap-band: 32px; --gap-block: 40px; }
+@media (min-width: 1024px) { :root { --gap-lead: 24px; --gap-band: 64px; --gap-block: 48px; } }
 /* An eyebrow always sits one token above its heading; containers that already space their children by gap opt out. */
 .jv-caption + :is(h1, h2) { margin-top: var(--gap-eyebrow); }
 :is(.jv-head, .jv-page-head, .jv-loop-head, .jv-hero-copy, .audience-copy) > .jv-caption + :is(h1, h2) { margin-top: 0; }
@@ -390,17 +390,11 @@
   .jv-toc a { min-height: 36px; padding: 4px 0; font-size: var(--t-sm); }
 }
 
-/* Accordions: the opened answer fades in with the same easing the toggle uses, so the two move together. */
+/* Accordions: the opened answer fades in with the same easing the toggle uses, so the two move together.
+   Only opacity and transform animate; no height animation reflows the page. */
 @keyframes jv-open { from { opacity: 0; transform: translateY(-4px); } }
 @media (prefers-reduced-motion: no-preference) {
   .jv-faq details[open] > :is(p, div), .hc-note-details[open] > :not(summary) { animation: jv-open var(--dur-3) var(--ease-out) both; }
-  /* Where supported, the answer's height animates open and closed together with the toggle (nothing below it snaps). */
-  @supports (interpolate-size: allow-keywords) and selector(::details-content) {
-    :root { interpolate-size: allow-keywords; }
-    :is(.jv-faq, .hc-accordion) details::details-content { block-size: 0; overflow: clip; transition: block-size var(--dur-3) var(--ease-out), content-visibility var(--dur-3) allow-discrete; }
-    :is(.jv-faq, .hc-accordion) details[open]::details-content { block-size: auto; }
-    .jv-faq details[open] > :is(p, div) { animation: none; }
-  }
 }
 /* Phones: explainer heroes stay short; the product fragment appears from tablet width. */
 @media (max-width: 767px) { .jv-page-head--split > .jv-page-visual { display: none; } }
@@ -435,3 +429,93 @@
 :is(.hc-breadcrumb, .cg-breadcrumb, .wt-breadcrumb) a { min-width: 44px; justify-content: center; }
 .jv-footer-col a { padding-inline: 4px; margin-inline: -4px; }
 @media (min-width: 1024px) { .jv-toc a { min-height: 44px; } }
+
+/* ---------- Round 4 ---------- */
+/* Header: 44px targets on desktop too (the pill keeps its 64px height). */
+@media (min-width: 960px) {
+  .jv-header-nav > a { min-height: 44px; }
+  .jv-header .jv-btn--sm { --jv-btn-h: 44px; }
+}
+
+/* Closing bar: heading, one line and the actions in one tinted row. The dark band stays on the home page and the Automated Job Loop page. */
+.jv-cta-bar { display: grid; gap: 24px; width: var(--shell); margin: var(--gap-band) auto 64px; padding: 32px var(--band-pad-x); border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-brand-tint)); }
+.jv-cta-bar-copy h2 { margin: 0; max-width: 20ch; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.15; letter-spacing: -.03em; text-wrap: balance; }
+.jv-cta-bar-copy p { margin: 8px 0 0; max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.5; text-wrap: pretty; }
+.jv-cta-bar-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+@media (max-width: 639px) { .jv-cta-bar-actions .jv-btn { width: 100%; } }
+@media (min-width: 640px) { .jv-cta-bar-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 24px; } }
+@media (min-width: 1024px) {
+  .jv-cta-bar { grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 48px; padding: 40px var(--band-pad-x); }
+}
+
+/* Brand device: the run trail. Each section's top hairline starts with a short lime-to-green segment, the same trail
+   the week strip and the loop steps use. Static, so it never competes with the content. */
+.jv-section { position: relative; }
+.jv-section::before { content: ""; position: absolute; top: -1px; left: 0; width: 72px; height: 2px; background: linear-gradient(90deg, var(--jv-signal), var(--jv-brand)); border-radius: 2px; }
+
+/* Utility pages (contact): the form and its note share one top edge. */
+.jv-contact-grid { display: grid; gap: 32px; }
+.jv-contact-grid .guest-support { min-width: 0; }
+.jv-contact-grid .jv-notecard { align-self: start; }
+@media (min-width: 1024px) {
+  .jv-contact-grid { grid-template-columns: minmax(0, 1fr) 340px; column-gap: 96px; align-items: start; }
+  .jv-contact-grid .jv-notecard { position: sticky; top: 112px; }
+}
+.product-page--contact .jv-page-head { padding-bottom: 32px; }
+/* Privacy: the at-a-glance card is a full-width row under the intro, three facts across. */
+.product-page--privacy .jv-page-head--split { grid-template-columns: minmax(0, 1fr); }
+.product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / -1; }
+.product-page--privacy .jv-page-head--split > .jv-page-visual { grid-column: 1 / -1; grid-row: auto; margin-top: 32px; max-width: none; }
+.product-page--privacy .jv-page-visual .jv-notecard { max-width: none; }
+@media (min-width: 768px) {
+  .product-page--privacy .jv-notecard ol { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
+}
+@media (max-width: 767px) { .product-page--privacy .jv-page-head--split > .jv-page-visual { display: block; } }
+.product-page--privacy .jv-page-head { padding-bottom: 40px; }
+/* Typography: breadcrumb is one style (mono, 12px); lead is one size and measure on every page. */
+.hc-breadcrumb { font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
+.hc-breadcrumb a { color: var(--jv-brand); }
+.walkthroughs-page .wt-hero > p:not(.wt-eyebrow), .jv-lead { max-width: 31em; font-size: var(--t-lead); line-height: 1.5; }
+/* Notes and fine print hold a readable measure and a 14px floor where they carry meaning. */
+:is(.pricing-note, .pricing-trust, .product-plan-note, .cg-note, .guest-support-fine, .wt-format-note) { max-width: 62ch; font-size: var(--t-small); line-height: 1.5; }
+.pricing-trust svg { margin-top: 3px; }
+.pricing-trust li { align-items: flex-start; }
+
+/* Brand device, part two: the dot field. A faint green dot grid fades out from behind the product card on every hero that has one
+   (CSS only, no asset weight). It sits with the orbit ring and the run trail as the site's one visual language. */
+@media (min-width: 1024px) {
+  .jv-home .jv-hero-visual, .jv-page-head--split > .jv-page-visual, .audience-hero { position: relative; isolation: isolate; }
+  .jv-home .jv-hero-visual::before, .jv-page-head--split > .jv-page-visual::before, .audience-hero::before { content: ""; position: absolute; inset: -56px -48px; z-index: -1; pointer-events: none; background: radial-gradient(circle, rgb(33 92 67 / .26) 1px, transparent 1.6px) 0 0 / 22px 22px; -webkit-mask-image: radial-gradient(closest-side, #000 25%, transparent 100%); mask-image: radial-gradient(closest-side, #000 25%, transparent 100%); }
+  .audience-hero::before { inset: -16px -24px 8px auto; width: 48%; }
+}
+/* One section rhythm: 48px on phones, 72px on tablets, 96px on desktop; the band after a section adds no second padding. */
+.jv-section { padding-block: 48px; }
+@media (min-width: 640px) { .jv-section { padding-block: 72px; } }
+@media (min-width: 1024px) { .jv-section { padding-block: 96px; } }
+.jv-page + :is(.jv-cta, .jv-cta-bar), .jv-section + :is(.jv-cta, .jv-cta-bar) { margin-top: var(--gap-band); }
+/* Explainer heads: the product card spans a spare row, so the heading never stretches away from its lead. */
+@media (min-width: 1024px) {
+  .jv-page-head--split { grid-template-rows: repeat(4, auto) 1fr; }
+  .jv-page-head--split > .jv-page-visual { grid-row: 1 / span 5; }
+  .product-page--about .product-main-content { border-top: 1px solid var(--jv-line); }
+}
+/* On the full-width pages the trail starts on the content edge, not the viewport edge. */
+.jv-home .jv-section::before { left: var(--gutter); }
+@media (min-width: 1024px) { .jv-home .jv-section::before { left: calc(50% - var(--shell) / 2 + var(--band-pad-x)); } }
+.product-page--about .product-main-content { padding-top: 56px; }
+
+/* Type floor: 13px is the smallest sans size anywhere; anything a visitor must read or act on is 14px or more. */
+.guest-support form > p, .guest-support-fine { font-size: var(--t-small); line-height: 1.5; }
+.pricing-details > p, .pricing-note, .pricing-trust { max-width: 62ch; }
+.pricing-trust li, .pricing-note { font-size: var(--t-small); line-height: 1.5; }
+.career-guides .cg-public-note, .career-guides .cg-library-heading > p { font-size: var(--t-small); max-width: 62ch; }
+.walkthroughs-page :is(.wt-hero, .wt-player, .wt-recorded, .wt-instructions, .wt-context) p:not(.wt-eyebrow):not(.wt-demo *) { font-size: max(var(--t-small), .875rem); line-height: 1.55; max-width: 68ch; }
+/* One heading step per level: h3 never exceeds the h2 above it, card titles are 20-24px, and per-page tracking overrides are gone. */
+.career-guides h2, .walkthroughs-page h2 { letter-spacing: -.03em; }
+
+/* Eyebrows are for section openers and the home hero; utility headings (walkthroughs, guides, help) lead with the heading alone. */
+.walkthroughs-page .wt-hero > .wt-eyebrow, .career-guides .cg-hero > .cg-eyebrow, .career-guides .cg-library-heading .cg-eyebrow, .audience-path .jv-head > .jv-caption { display: none; }
+/* Tonal range: one tinted panel on the long pages (the passes on pricing, the workflow on the audience pages), from existing tokens only. */
+.jv-section.pricing-passes, .jv-section.audience-features { margin-top: 48px; padding-inline: var(--band-pad-x); border: 1px solid var(--jv-line); border-radius: var(--r-lg); background: linear-gradient(180deg, var(--jv-bg-subtle), #fff 70%); }
+.jv-section.pricing-passes::before, .jv-section.audience-features::before { left: 24px; }
+@media (min-width: 1024px) { .jv-section.pricing-passes, .jv-section.audience-features { padding-block: 72px; } }

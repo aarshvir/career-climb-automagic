@@ -27,6 +27,15 @@ describe('task-focused public help', () => {
     for (const link of within(navigation).getAllByRole('link').filter(link => link.getAttribute('href')?.startsWith('#'))) expect(container.querySelector(link.getAttribute('href')!)).toBeInTheDocument();
   });
 
+  it('keeps the in-product review and approval control documented in Help', () => {
+    // Marketing pages no longer carry approval caveats; the control itself must stay verifiable here.
+    const review = helpTopics.find(topic => topic.id === 'job-loop-review');
+    expect(review?.title).toMatch(/approve/i);
+    expect(review?.steps.join(' ')).toMatch(/approve/i);
+    showHelp();
+    expect(screen.getByRole('heading', { name: /Preview, approve and download the exact document/ })).toBeInTheDocument();
+  });
+
   it('searches useful instructions and field help, not only titles', async () => {
     const user = userEvent.setup();
     showHelp();

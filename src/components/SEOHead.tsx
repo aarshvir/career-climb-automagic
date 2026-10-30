@@ -90,7 +90,7 @@ export const defaultOrganizationJsonLd: JsonLd = {
   "@type": "Organization",
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/images/logo.svg`
+  logo: `${SITE_URL}/icon-512.png`
 };
 
 export const searchActionJsonLd: JsonLd = {

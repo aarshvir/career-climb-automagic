@@ -28,13 +28,14 @@ const mime = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.xml': 'application/xml; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif', '.webp': 'image/webp', '.avif': 'image/avif', '.ico': 'image/x-icon',
+  '.gif': 'image/gif', '.webp': 'image/webp', '.avif': 'image/avif', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.ttf': 'font/ttf', '.otf': 'font/otf', '.woff': 'font/woff', '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.pdf': 'application/pdf',
 };
 const privateRoots = new Set(['server', 'src', 'scripts', 'docs', 'supabase', 'node_modules', 'api', 'functions']);
 const assets = {};
 const assetRoots = new Set();
 let totalAssetBytes = 0;
+const firstByDigest = new Map(); // byte-identical files are stored once; later paths alias the first (no second base64 copy in the Worker)
 async function collect(directory, prefix = '') {
   const entries = (await readdir(directory, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name, 'en'));
   for (const entry of entries) {
@@ -48,8 +49,11 @@ async function collect(directory, prefix = '') {
     const path = `/${relative}`;
     if (prefix) assetRoots.add(relative.split('/')[0]);
     const immutable = path.startsWith('/assets/') && /-[a-z\d_-]{8,}\.[a-z\d]+$/i.test(path);
+    const digest = createHash('sha256').update(bytes).digest('hex');
+    const twin = bytes.length > 1024 ? firstByDigest.get(digest) : undefined;
+    if (!twin) firstByDigest.set(digest, path);
     assets[path] = [mime[extname(entry.name).toLowerCase()] ?? 'application/octet-stream',
-      `"${createHash('sha256').update(bytes).digest('hex')}"`, bytes.length, immutable, bytes.toString('base64')];
+      `"${digest}"`, bytes.length, immutable, twin ? `=${twin}` : bytes.toString('base64')];
     totalAssetBytes += bytes.length;
   }
 }
@@ -97,6 +101,7 @@ function publicPath(request){
   return path;
 }
 function bytesFor(path,asset){
+  if(asset[4][0]==='='){const twin=asset[4].slice(1);return bytesFor(twin,ASSETS[twin]);}
   let bytes=decoded.get(path);
   if(!bytes){const binary=atob(asset[4]);bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);decoded.set(path,bytes);}
   return bytes;
@@ -124,7 +129,7 @@ export default {fetch(request){
   const headers=responseHeaders(request,path);
   headers.set('Content-Type',asset[0]);
   headers.set('ETag',asset[1]);
-  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');
+  headers.set('Cache-Control',asset[0].startsWith('text/html')?'no-cache':asset[3]||served.startsWith('/fonts/')?'public, max-age=31536000, immutable':'public, max-age=3600, must-revalidate');
   const condition=request.headers.get('If-None-Match');
   if(condition&&condition.split(',').some(tag=>tag.trim()==='*'||tag.trim().replace(/^W\\//,'')===asset[1]))return new Response(null,{status:304,headers});
   headers.set('Content-Length',String(asset[2]));

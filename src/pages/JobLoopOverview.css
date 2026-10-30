@@ -53,3 +53,7 @@
 .jv-mini-steps { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 16px 0 0; padding: 0; list-style: none; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; }
 .jv-mini-steps li { display: inline-flex; align-items: center; gap: 8px; }
 .jv-mini-steps li > span { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-family: var(--font-mono); font-size: var(--t-xs); }
+
+/* Round 4: the week strip sits under the three set-up steps. */
+.lo-week { margin-top: 40px; }
+@media (min-width: 1024px) { .lo-week { margin-top: 56px; } }

@@ -33,3 +33,28 @@
 .pc-next-time { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--jv-ink); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.1; letter-spacing: -.025em; }
 .pc-next-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--jv-brand); box-shadow: 0 0 0 4px var(--jv-brand-tint); }
 @media (min-width: 640px) { .pc-dash-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 24px; } }
+
+/* Week strip: seven day columns on a hairline rail; run days carry a brand node and the lime-to-green run trail to the next run. */
+.pc-week-strip { display: grid; gap: 16px; padding: 20px; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: #fff; box-shadow: var(--sh-2); }
+.pc-week-strip-caption { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
+.pc-week-strip-dot { width: 6px; height: 6px; background: var(--jv-brand); }
+.pc-week-strip ol { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; }
+.pc-week-strip li { position: relative; display: grid; justify-items: center; gap: 6px; text-align: center; min-width: 0; }
+.pc-week-day { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
+.pc-week-mark { position: relative; z-index: 1; width: 10px; height: 10px; border-radius: 50%; background: var(--jv-line-strong); }
+.pc-week-strip li::before { content: ""; position: absolute; left: 0; right: 0; top: 26px; height: 2px; background: var(--jv-line); }
+.pc-week-strip li:first-child::before { left: 50%; }
+.pc-week-strip li:last-child::before { right: 50%; }
+.pc-week-strip li.is-run .pc-week-mark { width: 14px; height: 14px; margin: -2px 0; background: var(--jv-brand); box-shadow: 0 0 0 4px var(--jv-brand-tint); }
+.pc-week-strip li.is-run::before { background: linear-gradient(90deg, var(--jv-signal), var(--jv-brand)); }
+.pc-week-time { color: var(--jv-ink-2); font-size: var(--t-sm); line-height: var(--lh-sm); font-variant-numeric: tabular-nums; }
+.pc-week-strip li:not(.is-run) .pc-week-time { color: var(--jv-ink-3); }
+.pc-week-result { min-height: 1.25rem; color: var(--jv-ink); font-size: var(--t-sm); line-height: var(--lh-sm); font-weight: 500; }
+@media (max-width: 639px) {
+  .pc-week-strip ol { grid-template-columns: 1fr; }
+  .pc-week-strip li { grid-template-columns: 44px 18px minmax(0, 1fr) auto; align-items: center; justify-items: start; gap: 0 10px; padding: 8px 0; text-align: left; }
+  .pc-week-strip li::before { left: 56px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
+  .pc-week-strip li:first-child::before { top: 50%; }
+  .pc-week-strip li:last-child::before { bottom: 50%; }
+  .pc-week-strip li:not(.is-run) .pc-week-result { display: none; }
+}

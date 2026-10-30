@@ -54,7 +54,7 @@ export default function SubscriptionPricing() {
     <LoopSubscriptionBilling />
     <section className="jv-section pricing-start" aria-labelledby="loop-offer">
       <div className="pricing-start-row" data-reveal>
-        <div><h2 id="loop-offer" className="pricing-start-title">Not ready to choose? Start free.</h2><p>Create a free account, set your roles and schedule, and pick a plan when you are ready.</p></div>
+        <div><h2 id="loop-offer" className="pricing-start-title">Not ready to choose? Start free.</h2><p>Create a free account and set up your roles and schedule. Choose a plan when you want searches to run.</p></div>
         <Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link>
       </div>
     </section>

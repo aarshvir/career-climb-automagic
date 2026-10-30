@@ -82,7 +82,7 @@
 .ap-mode-link { height: auto; min-height: 44px; padding: 0 3px; margin-left: 3px; font-size: 13px; color: var(--jv-brand); font-weight: 650; }
 .ap-auth-footnote { display: flex; align-items: flex-start; gap: 7px; margin: 26px 0 0; font-size: 12px; color: var(--ap-muted); line-height: 1.8; }
 .ap-auth-footnote svg { margin-top: 2px; }
-.ap-auth-alert { font-size: 12px; line-height: 1.8; border-radius: 9px; background: #fff4f3; color: #9a312c; border-color: #ebcecc; }
+.ap-auth-alert { font-size: 12px; line-height: 1.8; border-radius: 9px; background: #fff4f3; color: var(--jv-danger); border-color: #ebcecc; }
 .ap-auth-notice { border: 1px solid #dae8e1; border-radius: 9px; padding: 14px; background: #f1f4e8; color: var(--ap-ink); font-size: 13px; line-height: 1.8; margin: 0; }
 .ap-confirmation { display: grid; gap: 20px; font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
 .ap-confirmation p { margin: 0; }
@@ -176,7 +176,7 @@
 .ap-pilot-form select { text-overflow: ellipsis; padding-right: 22px; }
 .ap-pilot-form .ap-primary { justify-self: start; padding: 13px 18px; font-size: 12px; gap: 9px; }
 .ap-request-help { color: var(--ap-muted); font-size: 12px; line-height: 1.8; margin: 6px 0 0; }
-.ap-form-error { color: #9a312c; font-size: 12px; line-height: 1.8; margin: 0; }
+.ap-form-error { color: var(--jv-danger); font-size: 12px; line-height: 1.8; margin: 0; }
 .ap-prepared-request { padding: 22px; border: 1px solid #d4e4dc; border-radius: 12px; background: #fff; }
 .ap-draft-status { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--ap-ink); font-weight: 650; font-size: 12px; line-height: 1.7; }
 .ap-draft-status svg { color: var(--jv-brand); margin-top: 2px; }
@@ -276,7 +276,7 @@
 /* Mobile number: dialling code plus the local number. */
 .ap-phone-field { display: grid; grid-template-columns: minmax(96px, 128px) minmax(0, 1fr); gap: 8px; }
 .ap-phone-field select { min-height: 48px; border: 1px solid var(--ap-control-line, var(--jv-line-strong)); border-radius: 9px; padding: 0 8px; background: #fff; color: var(--ap-ink, var(--jv-ink)); font-size: 14px; }
-.ap-field-error { color: #b42318; font-size: 13px; margin: 0; }
+.ap-field-error { color: var(--jv-danger); font-size: 13px; margin: 0; }
 
 /* Account surfaces share the public design system; the research pilot stays separate. */
 .jv-account {
@@ -356,3 +356,36 @@
 .ap-story-orbit .jv-orbit-label--tailor { transform: translate(-4px, 20px); }
 .ap-story-orbit .jv-orbit-label--approve { transform: translate(calc(-100% + 4px), 20px); text-align: right; }
 .ap-story-footnote { margin-top: auto; }
+
+/* ---------- Round 4: auth and onboarding entry ---------- */
+/* Same frame as the header and footer, pill buttons like the rest of the site, one input radius. */
+.jv-account--standalone { width: var(--shell); }
+.jv-account :is(.ap-primary, .ap-outline, .ap-google-button) { border-radius: var(--r-pill); }
+.jv-account .ap-field input, .jv-account .ap-phone-field select { border-radius: var(--r-sm); }
+/* The story panel balances itself: copy at the top, the loop diagram centred in the free height, the foot line at the bottom. */
+.jv-account--standalone .ap-story-orbit { margin: auto 0; align-self: center; padding: 64px 0 32px; }
+.jv-account--standalone .ap-story-footnote { margin-top: 0; }
+/* The three outcome lines stay one line each; the detail sentences are not needed beside the form. */
+.ap-benefit-detail { display: none; }
+.ap-loop-more { display: grid; gap: 0; margin-top: 24px; padding-top: 4px; border-top: 1px solid var(--ap-line); }
+.ap-loop-more .ap-steps { margin-top: 8px; border-top: 0; padding-top: 0; }
+.ap-loop-more .ap-benefits-price { margin-top: 4px; }
+.ap-loop-more .ap-benefits-links { margin-top: 0; }
+/* Help and fine print: 13px floor, 14px where it carries meaning. */
+.jv-account .ap-field-help, .jv-account .ap-auth-footnote, .jv-account .ap-story-footnote, .jv-account .ap-auth-divider { font-size: var(--t-sm); line-height: 1.5; }
+.jv-account .ap-benefits-price, .jv-account .ap-benefits-free, .jv-account .ap-steps { font-size: var(--t-small); }
+/* One check icon weight in benefits, pricing and pills: 16px, 1.75 stroke. */
+.ap-benefits svg { width: 16px; height: 16px; stroke-width: 1.75; margin-top: 4px; }
+.ap-benefits li { grid-template-columns: 16px minmax(0, 1fr); }
+/* Narrow phones (WCAG 1.4.10 reflow at 320px): the product name may wrap and the headline steps down, so nothing clips. */
+@media (max-width: 400px) {
+  .jv-account--standalone .ap-account-story h1 { font-size: 1.875rem; overflow-wrap: anywhere; }
+  .jv-account :is(.ap-account-story h1, .ap-story-description) .jv-nb { white-space: normal; }
+  .jv-account--standalone .ap-account-story, .jv-account--standalone .ap-auth-panel { padding-inline: 16px; }
+}
+/* Desktop: the story content rides the viewport (sticky), so the loop diagram and the foot line stay visible beside the long form. */
+.ap-story-inner { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+@media (min-width: 761px) {
+  .jv-account--standalone .ap-account-story { padding-bottom: 0; }
+  .jv-account--standalone .ap-story-inner { position: sticky; top: 96px; flex: none; min-height: min(640px, calc(100svh - 160px)); padding-bottom: 36px; }
+}

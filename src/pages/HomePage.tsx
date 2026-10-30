@@ -5,7 +5,7 @@ import LoopJourney from "@/components/LoopJourney";
 import LoopOrbit from "@/components/marketing/LoopOrbit";
 import LoopRunMock from "@/components/marketing/LoopRunMock";
 import { CvCard, RunTimeline, ScheduleCard } from "@/components/marketing/ProductCards";
-import { CvDiffCard, NextRunCard, OpeningsCard } from "@/components/marketing/PageCards";
+import { CvDiffCard, OpeningsCard } from "@/components/marketing/PageCards";
 import { useReveal } from "@/hooks/useReveal";
 import { homeGuides } from "@/lib/home-guides";
 import PriceNote from "@/components/marketing/PriceNote";
@@ -42,7 +42,7 @@ export default function HomePage() {
           <div className="jv-hero-note jv-enter" style={delay(180)}><PriceNote /></div>
         </div>
         <div className="jv-hero-visual">
-          <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} className="jv-hero-orbit" /></div>
+          <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} className="jv-hero-orbit" nodes={false} animate={false} /></div>
           <div className="jv-hero-mock jv-hero-mock--wide jv-enter-card"><LoopRunMock /></div>
           <div className="jv-hero-cv jv-enter-card" style={delay(160)}><CvCard compact /></div>
         </div>
@@ -94,11 +94,11 @@ export default function HomePage() {
         <div className="jv-control-rows">
           <article className="jv-control-row" data-reveal>
             <div className="jv-control-copy"><p className="jv-step-index">01 · Schedule</p><h3>Your search comes back on schedule.</h3><p>Weekly, three days a week or daily, the next run starts without you rebuilding the same searches. Pause it whenever your plans change.</p></div>
-            <div className="jv-frag" aria-hidden="true"><ScheduleCard /></div>
+            <div className="jv-frag jv-frag--wide-only" aria-hidden="true"><ScheduleCard /></div>
           </article>
           <article className="jv-control-row jv-control-row--flip" data-reveal>
             <div className="jv-control-copy"><p className="jv-step-index">02 · Openings</p><h3>Openings for the roles you chose.</h3><p>Each run looks through connected sources for your roles and locations, so you start from a list instead of a blank search box. Some runs may find nothing new.</p></div>
-            <div className="jv-frag" aria-hidden="true"><OpeningsCard /></div>
+            <div className="jv-frag jv-frag--wide-only" aria-hidden="true"><OpeningsCard /></div>
           </article>
           <article className="jv-control-row" data-reveal>
             <div className="jv-control-copy"><p className="jv-step-index">03 · Tailored CV</p><h3>A tailored CV for each prepared role.</h3><p>Each prepared role comes with a CV reworded for that job from your own experience. Review it, download PDF, DOCX or TXT and open the employer’s vacancy from your dashboard.</p></div>
@@ -147,7 +147,7 @@ export default function HomePage() {
     </section>
 
     {/* 7. Final CTA */}
-    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="home-final-title">
+    <section className="jv-cta jv-dark" aria-labelledby="home-final-title">
       <div className="jv-cta-inner">
         <h2 id="home-final-title">Give your job search a routine.</h2>
         <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
@@ -157,7 +157,7 @@ export default function HomePage() {
         </div>
         <div className="jv-cta-note"><PriceNote /></div>
       </div>
-      <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
+      <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
     </section>
   </div>;
 }
