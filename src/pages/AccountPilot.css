@@ -26,7 +26,7 @@
 .ap-eyebrow { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
 .ap-dot { width: 6px; height: 6px; background: var(--jv-brand); border-radius: 0; flex-shrink: 0; }
 .ap-primary { background: var(--ap-cobalt); color: #fff; border: 1px solid var(--ap-cobalt); border-radius: 10px; min-height: 48px; box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), 0 1px 2px rgb(15 29 23 / .2); }
-.ap-primary:hover { background: #174832; border-color: #174832; color: #fff; }
+.ap-primary:hover { background: var(--jv-brand-hover); border-color: var(--jv-brand-hover); color: #fff; }
 .ap-outline { min-height: 48px; border: 1px solid var(--ap-control-line); border-radius: 10px; background: #fff; color: var(--ap-ink); }
 .ap-outline:hover { background: var(--ap-lavender); border-color: #adbd9d; color: var(--ap-ink); }
 
@@ -92,7 +92,7 @@
 .jv-account--embedded .ap-auth-panel { max-width: 100%; padding: 0; }
 .jv-account--embedded .ap-auth-heading h3 { font-size: 22px; margin-top: 0; }
 .jv-account--embedded .ap-auth-heading > p:last-child { margin-bottom: 20px; }
-.ap-auth-loading { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 60vh; color: var(--jv-blue); }
+.ap-auth-loading { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 100vh; min-height: 100svh; color: var(--jv-brand); }
 .ap-auth-loading--embedded { min-height: 100px; }
 
 /* Research pilot */

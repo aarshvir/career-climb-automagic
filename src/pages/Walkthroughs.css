@@ -59,3 +59,8 @@
   .walkthroughs-page .wt-step-caption { border: 0; }
   .walkthroughs-page .wt-demo dd { border-color: var(--jv-line); }
 }
+@media screen {
+  .walkthroughs-page a.jv-btn--primary { color: #fff; text-decoration: none; }
+  .walkthroughs-page a.jv-btn--primary:hover { background: var(--jv-brand-hover); }
+  .walkthroughs-page .wt-hero > p:not(.wt-eyebrow) { color: var(--jv-ink-2); }
+}

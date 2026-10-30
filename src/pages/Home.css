@@ -126,7 +126,6 @@
 .jv-home .jv-orbit-core-time { font-family: var(--font-mono); font-size: clamp(1.125rem, .9rem + .9vw, 1.5rem); line-height: 1.2; font-weight: 500; letter-spacing: 0; color: #fff; font-variant-numeric: tabular-nums; }
 .jv-home .jv-orbit-core-meta { font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; color: var(--jv-on-dark-2); }
 @media (max-width: 639px) {
-  .jv-home .jv-orbit-core-meta { font-size: .6875rem; }
   .jv-home .jv-loop-cta { width: 100%; }
   /* Small rings: the lower labels sit centred under their nodes, below the ring, so they stay inside the band padding. */
   .jv-home .jv-loop-visual .jv-orbit-label--tailor, .jv-home .jv-loop-visual .jv-orbit-label--approve { top: 100%; transform: translate(-50%, 6px); text-align: center; }

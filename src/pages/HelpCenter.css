@@ -5,9 +5,10 @@
   --hc-body: var(--jv-ink-2);
   --hc-blue: var(--jv-brand);
   --hc-border: var(--jv-line);
-  max-width: 1180px;
+  width: var(--shell);
+  max-width: none;
   margin: auto;
-  padding: 0 var(--gutter) 72px;
+  padding: 0 0 72px;
   color: var(--hc-ink);
   font-size: var(--t-body);
   line-height: var(--lh-body);

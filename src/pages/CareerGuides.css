@@ -29,3 +29,5 @@
 .career-guides .cg-breadcrumb > * { display: inline-flex; align-items: center; min-height: 44px; }
 .career-guides .cg-prose, .career-guides .cg-summary { max-width: 36em; }
 .career-guides .cg-card > p { font-size: var(--t-body-sm); line-height: 1.55; }
+.career-guides .cg-hero > p:not(.cg-eyebrow):not(.cg-public-note) { max-width: 31em; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; }
+.career-guides .cg-public-note { color: var(--jv-ink-3); font-size: var(--t-small); }
