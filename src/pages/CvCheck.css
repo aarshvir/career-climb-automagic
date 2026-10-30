@@ -130,7 +130,7 @@
 .check-stage [aria-invalid="true"] { border-color: #b42318; outline-color: #b42318; }
 .cv-check-page button:focus-visible, .cv-check-page summary:focus-visible { outline: 2px solid var(--jv-blue); outline-offset: 3px; }
 .check-stage-heading { scroll-margin-top: 100px; }
-.check-pdf-frame { width: 100%; min-height: 520px; border: 1px solid hsl(var(--border)); border-radius: 8px; background: #f3f4f6; }
+.check-pdf-frame { width: 100%; min-height: 520px; border: 1px solid hsl(var(--border)); border-radius: 8px; background: var(--jv-bg-muted); }
 @media (max-width: 740px) { .check-recovery { padding: 14px 16px; } .check-recovery label { max-width: none; } .check-pdf-frame { min-height: 360px; } }
 @media (max-width: 740px) { .check-audience-guidance { padding: 4px 14px; } }
 @media (max-width: 740px) { .check-recovery summary span { display: block; margin: 3px 0 0; } .check-reuse-action { align-items: stretch; flex-direction: column; } .check-reuse-action button { width: 100%; } }

@@ -41,10 +41,17 @@ describe('audience entry points', () => {
   });
 });
 
+/** Legal sections are split into short paragraphs: read a section as all text up to the next heading. */
+function sectionText(heading: Element) {
+  let text = '';
+  for (let node = heading.nextElementSibling; node && node.tagName !== 'H2'; node = node.nextElementSibling) text += ` ${node.textContent}`;
+  return text;
+}
+
 describe('current offer', () => {
   it('starts free and offers only the three one-time passes, never the legacy pack or a subscription', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    const passes = screen.getByRole('region', { name: /AI CV tailoring/ });
+    const passes = screen.getByRole('region', { name: /one-time CV Check passes/ });
     expect(within(passes).getAllByRole('heading', { level: 3 }).map(heading => heading.textContent)).toEqual(['Free', 'Sprint', 'Job Search', 'Career Move']);
     expect(within(passes).getByRole('link', { name: 'Check my CV' })).toHaveAttribute('href', '/check');
     expect(within(passes).queryByText(/\$15|\$29|ten application packs|per month, billed|cancel anytime|free trial/i)).not.toBeInTheDocument();
@@ -53,7 +60,7 @@ describe('current offer', () => {
   });
   it('states the new free allowance everywhere the old beta line was', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByText('Choose how often your Automated Job Loop runs. Plans from $29/month, with a free account to start.')).toBeInTheDocument();
+    expect(document.body.textContent).toContain('Choose how often your Automated Job Loop runs. Plans from $29/month, with a free account to start.');
     expect(screen.queryByText(/2 tailored CVs a day|8 when signed in/i)).not.toBeInTheDocument();
   });
   it('names Dodo Payments as merchant of record and publishes the refund promise', () => {
@@ -63,10 +70,10 @@ describe('current offer', () => {
     cleanup();
     render(<HelmetProvider><MemoryRouter><ProductPage kind="refund" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByRole('heading', { name: '7-day money-back promise' }).nextElementSibling).toHaveTextContent(/within 7 days of buying it.*fewer than 5 tailored CVs/);
-    expect(screen.getByRole('heading', { name: 'What a refund does' }).nextElementSibling).toHaveTextContent(/stops working straight away.*partial refund/);
+    expect(sectionText(screen.getByRole('heading', { name: 'What a refund does' }))).toMatch(/stops working straight away.*partial refund/);
     cleanup();
     render(<HelmetProvider><MemoryRouter><ProductPage kind="terms" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByRole('heading', { name: 'Passes' }).nextElementSibling).toHaveTextContent(/Sprint \(\$9, 7 days, 25 AI-tailored CVs\).*Nothing renews/);
+    expect(sectionText(screen.getByRole('heading', { name: 'Passes' }))).toMatch(/Sprint \(\$9, 7 days, 25 AI-tailored CVs\).*Nothing renews/);
     expect(screen.queryByText(/No paid plan is currently offered for sale/)).not.toBeInTheDocument();
   });
 });
@@ -74,7 +81,7 @@ describe('current offer', () => {
 describe('Automated Job Loop access and monthly plans', () => {
   it('leads with monthly Automated Job Loop and requires an account before checking purchase availability', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: 'Pick your pace, then start.' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Not ready to choose? Start free.' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Start my search' })).toHaveAttribute('href', '/onboarding');
     expect(screen.getByRole('link', { name: 'Check my CV' })).toHaveAttribute('href', '/check');
     expect(screen.queryByText(/beta|ten accounts|no account needed/i)).not.toBeInTheDocument();
@@ -86,7 +93,7 @@ describe('Automated Job Loop access and monthly plans', () => {
     expect(proposals).toHaveTextContent('1 Automated Job Loop run a week');
     expect(proposals).toHaveTextContent('3 Automated Job Loop runs a week');
     expect(proposals).toHaveTextContent('1 Automated Job Loop run a day');
-    expect(within(proposals).getByRole('link',{name:'Start with Starter'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
+    expect(within(proposals).getByRole('link',{name:'Choose Starter'})).toHaveAttribute('href','/auth?next=%2Fpricing%3FloopPlan%3Dweekly%26country%3DUS%26currency%3DUSD');
     expect(within(proposals).queryByRole('button')).not.toBeInTheDocument();
     expect(proposals).toHaveTextContent('does not cancel subscription billing');
   });
@@ -125,14 +132,14 @@ describe('published draft privacy guidance', () => {
   });
   it('publishes the consented tab-storage exposure and requires renewed approval after restoration', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);
-    const paragraph = screen.getByRole('heading', { name: 'Optional refresh recovery' }).nextElementSibling;
-    expect(paragraph).toHaveTextContent(/Anyone using the same browser tab may access this copy/);
-    expect(paragraph).toHaveTextContent(/Restoring a draft clears its approval/);
-    expect(paragraph).toHaveTextContent(/does not save the check to your account/);
-    const models = screen.getByRole('heading', { name: 'Optional models and search' }).nextElementSibling;
-    expect(models).toHaveTextContent('comparison without AI runs on your device');
-    expect(models).toHaveTextContent('AI tailoring sends your CV and vacancy text');
-    const local = screen.getByRole('heading', { name: 'Your free check' }).nextElementSibling;
-    expect(local).toHaveTextContent(/Without optional tab-storage permission, refreshing or closing the tab clears the draft/);
+    const paragraph = sectionText(screen.getByRole('heading', { name: 'Optional refresh recovery' }));
+    expect(paragraph).toMatch(/Anyone using the same browser tab may access this copy/);
+    expect(paragraph).toMatch(/Restoring a draft clears its approval/);
+    expect(paragraph).toMatch(/does not save the check to your account/);
+    const models = sectionText(screen.getByRole('heading', { name: 'Optional models and search' }));
+    expect(models).toContain('comparison without AI runs on your device');
+    expect(models).toContain('AI tailoring sends your CV and vacancy text');
+    const local = sectionText(screen.getByRole('heading', { name: 'Your free check' }));
+    expect(local).toMatch(/Without optional tab-storage permission, refreshing or closing the tab clears the draft/);
   });
 });

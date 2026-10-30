@@ -38,7 +38,7 @@
   .walkthroughs-page .wt-further > div:last-child { align-items: flex-start; }
   .walkthroughs-page .wt-further h2 { font-weight: var(--fw-heading); letter-spacing: -.035em; }
   .walkthroughs-page .wt-demo-top .jv-brand { min-height: 0; font-size: var(--t-h4); }
-  .walkthroughs-page .wt-demo-top .jv-brand-mark { width: 26px; height: 26px; border-radius: 8px; }
+  .walkthroughs-page .wt-demo-top .jv-brand-mark { width: 26px; height: 26px; }
   .walkthroughs-page :is(h2, h3) { font-weight: var(--fw-heading); }
   .walkthroughs-page .wt-transcript :is(p, li) { max-width: 68ch; }
 }
@@ -63,4 +63,14 @@
   .walkthroughs-page a.jv-btn--primary { color: #fff; text-decoration: none; }
   .walkthroughs-page a.jv-btn--primary:hover { background: var(--jv-brand-hover); }
   .walkthroughs-page .wt-hero > p:not(.wt-eyebrow) { color: var(--jv-ink-2); }
+}
+
+/* Round 3: intro measure and size, 44px targets, link rows that stack cleanly on phones. */
+.walkthroughs-page .wt-hero > p:not(.wt-eyebrow) { max-width: 62ch; font-size: var(--t-body); }
+.walkthroughs-page .wt-breadcrumb a { min-height: 44px; min-width: 44px; justify-content: center; }
+.walkthroughs-page .wt-button, .walkthroughs-page .wt-video-chapters button { min-height: 44px; }
+.walkthroughs-page :is(small, .wt-step-status, .wt-selected-task span) { font-size: var(--t-sm); }
+@media (max-width: 700px) {
+  .walkthroughs-page .wt-format-links { display: grid; gap: 0; }
+  .walkthroughs-page .wt-format-links a, .walkthroughs-page .wt-format-links button { display: flex; align-items: center; min-height: 44px; border-top: 1px solid var(--jv-line); }
 }

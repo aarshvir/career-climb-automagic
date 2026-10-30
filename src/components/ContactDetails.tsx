@@ -18,7 +18,7 @@ export function ContactFields({ value, onChange, disabled }: { value: ContactVal
       <Label htmlFor={`${id}-phone`}>Mobile number</Label>
       <div className="ap-phone-field">
         <select aria-label="Country code" value={value.countryCode} onChange={event => onChange({ ...value, countryCode: event.target.value })} disabled={disabled}>
-          {countryCodes.map(([code, dial, name]) => <option key={code} value={dial} aria-label={`${name} ${dial}`}>{code} {dial}</option>)}
+          {countryCodes.map(([code, dial, name]) => <option key={code} value={dial} aria-label={`${code} ${dial}, ${name}`}>{code} {dial}</option>)}
         </select>
         <Input id={`${id}-phone`} type="tel" inputMode="tel" autoComplete="tel-national" placeholder="Number" value={value.phone} onChange={event => onChange({ ...value, phone: event.target.value })} required disabled={disabled} maxLength={24} />
       </div>

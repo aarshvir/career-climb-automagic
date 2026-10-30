@@ -103,7 +103,7 @@
 .ws-review-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .jv-workspace textarea.ws-document-editor { min-height: 340px; padding: 22px; border: 1px solid #dce6e1; border-radius: 10px; background: #fff; color: #2e3f37; font-family: Georgia, 'Times New Roman', serif; font-size: 14px; line-height: 1.9; box-shadow: 0 3px 12px #17233804; }
 .jv-workspace textarea.ws-original-document { background: #fafbfd; color: #5e7f6e; }
-.ws-approval-confirmation { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid #deeae4; border-radius: 10px; background: #f6faf8; color: #307d57; font-size: 13px; line-height: 1.7; }
+.ws-approval-confirmation { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid #deeae4; border-radius: 10px; background: var(--jv-bg-subtle); color: #307d57; font-size: 13px; line-height: 1.7; }
 .ws-approval-confirmation input { margin-top: 4px; flex-shrink: 0; accent-color: var(--ws-cobalt); }
 .ws-download-actions { padding-top: 16px; border-top: 1px solid #e9f0ec; }
 .ws-pack-row { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 14px; width: 100%; min-width: 0; padding: 17px 19px; border: 1px solid var(--ws-line); border-radius: 11px; background: white; text-align: left; transition: border-color .15s ease, background .15s ease; }
@@ -112,7 +112,7 @@
 .ws-status-pill { display: inline-flex; align-items: center; flex-shrink: 0; max-width: 100%; padding: 5px 9px; border: 1px solid #e4ece8; border-radius: 6px; background: #f6f8fb; color: var(--jv-ink-3); font-size: 10px; line-height: 1.5; font-weight: 600; }
 .ws-status-pill[data-status="approved"], .ws-status-pill[data-status="offer"] { border-color: #cfe6dc; background: #edf8f1; color: #337655; }
 .ws-status-pill[data-status="draft"], .ws-status-pill[data-status="saved"] { border-color: #e3ede8; background: #f5f9f7; color: #6a907d; }
-.ws-status-pill[data-status="applied"], .ws-status-pill[data-status="interview"] { border-color: #e0ebe5; background: #f4f8f6; color: #3b9d6c; }
+.ws-status-pill[data-status="applied"], .ws-status-pill[data-status="interview"] { border-color: #e0ebe5; background: var(--jv-bg-subtle); color: #3b9d6c; }
 .ws-status-pill[data-status="rejected"], .ws-status-pill[data-status="withdrawn"] { border-color: #ecdede; background: #fbf4f4; color: #865a5a; }
 .ws-tracker-layout { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 25px; margin-top: 20px; }
 .ws-tracker-records > .ws-card { margin-bottom: 14px; }

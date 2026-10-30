@@ -126,7 +126,7 @@ export const ModernSidebar = ({ userPlan }: ModernSidebarProps) => {
             <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
               Your Plan
             </SidebarGroupLabel>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-[var(--jv-brand-tint)] border border-[var(--jv-line-strong)] rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-900">{getPlanDisplayName(userPlan)}</span>
                 <Crown className="h-4 w-4 text-yellow-500" />
@@ -292,7 +292,7 @@ export const MobileSidebarContent = ({ userPlan, onClose }: MobileSidebarContent
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             Your Plan
           </p>
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-[var(--jv-brand-tint)] border border-[var(--jv-line-strong)] rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold text-gray-900">
                 {getPlanDisplayName(userPlan)}

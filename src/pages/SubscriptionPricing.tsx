@@ -53,18 +53,13 @@ export default function SubscriptionPricing() {
   return <>
     <LoopSubscriptionBilling />
     <section className="jv-section pricing-start" aria-labelledby="loop-offer">
-      <div className="jv-split">
-        <div data-reveal><p className="jv-caption">Automated Job Loop · account needed</p><h2 id="loop-offer" className="jv-section-title">Pick your pace, then start.</h2></div>
-        <div className="pricing-start-body" data-reveal>
-          <p>{currentOffer.loop}</p>
-          <p>Upload a CV or build one from guided questions. Choose the jobs and locations you want, then review matched jobs and prepared documents in your dashboard. Your dashboard lists connected sources and reports the result of each run.</p>
-          <Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link>
-          <p className="pricing-note">The CV check remains available when cloud preparation is full or paused. Your account shows current access.</p>
-        </div>
+      <div className="pricing-start-row" data-reveal>
+        <div><h2 id="loop-offer" className="pricing-start-title">Not ready to choose? Start free.</h2><p>Create a free account, set your roles and schedule, and pick a plan when you are ready.</p></div>
+        <Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link>
       </div>
     </section>
     <section className="jv-section pricing-passes" aria-labelledby="passes-title">
-      <div className="jv-head"><p className="jv-caption">AI CV tailoring · available now</p><h2 id="passes-title" className="jv-section-title jv-section-title--panel">AI CV tailoring: free to start, passes when you need more</h2><p>{currentOffer.check}</p></div>
+      <div className="jv-head"><p className="jv-caption">AI CV tailoring · available now</p><h2 id="passes-title" className="jv-section-title jv-section-title--panel">Optional: one-time CV Check passes</h2><p>{currentOffer.check}</p></div>
       <p className="pricing-note pricing-note--lead">These optional one-time CV Check passes are priced in US dollars. The currency selector above applies to your Automated Job Loop subscriptions.</p>
       {picked && <p className="pricing-picked" role="status">You picked the {passPlan(picked).name} pass (${passPlan(picked).price}, {passPlan(picked).days} days). {user ? `Choose “Buy ${passPlan(picked).name}” when you are ready to pay.` : 'Sign in, then choose it again to pay.'}</p>}
       {params.get('checkout') === 'cancelled' && <p className="pricing-picked" role="status">Checkout was cancelled. You have not been charged.</p>}
@@ -73,10 +68,11 @@ export default function SubscriptionPricing() {
           <p className="jv-caption">Start here · no card</p>
           <h3 id="pricing-free">Free</h3>
           <p className="pricing-price"><span className="pricing-amount">$0</span><span className="pricing-unit">Always free to start</span></p>
+          <p className="pricing-desc">Try AI tailoring before you pay for anything.</p>
           <ul>{freeFeatures.map(item => <li key={item}><Check size={16} aria-hidden="true" />{item}</li>)}</ul>
           <Link className="jv-btn jv-btn--secondary jv-btn--block" to="/check">Check my CV</Link>
         </section>
-        {passPlans.map(plan => <section key={plan.key} className={`pricing-card pricing-tier${plan.badge === 'Best value' ? ' pricing-tier--featured jv-dark' : ''}${picked === plan.key ? ' pricing-tier--picked' : ''}`} aria-labelledby={`pricing-${plan.key}`}>
+        {passPlans.map(plan => <section key={plan.key} className={`pricing-card pricing-tier${plan.badge === 'Best value' ? ' pricing-tier--featured' : ''}${picked === plan.key ? ' pricing-tier--picked' : ''}`} aria-labelledby={`pricing-${plan.key}`}>
           <p className="jv-caption">{plan.badge ?? `${plan.days} days · one-time`}</p>
           <h3 id={`pricing-${plan.key}`}>{plan.name}</h3>
           <p className="pricing-price"><span className="pricing-amount">${plan.price}</span><span className="pricing-unit">One-time · {plan.days} days</span></p>

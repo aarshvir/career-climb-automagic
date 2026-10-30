@@ -18,11 +18,13 @@ describe("public career guides", () => {
   it("shows the full library, labelled filters and a free first action", () => {
     renderPage();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Practical help for your next application.");
-    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
+    // The default view is the US-first set (17 guides) plus one tile that opens the UAE region guides.
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(18);
+    expect(screen.queryByRole("link", { name: /Where to look for jobs in the UAE/ })).not.toBeInTheDocument();
     expect(screen.getByLabelText("Search the guides")).toHaveAttribute("type", "search");
     expect(screen.getByLabelText("Your stage")).toHaveValue("all");
     expect(screen.getByLabelText("Your task")).toHaveValue("all");
-    expect(screen.getByRole("status")).toHaveTextContent("20 guides to explore");
+    expect(screen.getByRole("status")).toHaveTextContent("17 guides to explore");
     expect(screen.getByRole("link", { name: "Check my CV for free" })).toHaveAttribute("href", "/check");
     expect(screen.queryByRole("link", { name: /sign up/i })).not.toBeInTheDocument();
   });
@@ -50,7 +52,9 @@ describe("public career guides", () => {
     expect(screen.getByRole("link", { name: "ask for workflow help" })).toHaveAttribute("href", "/contact");
     await user.click(screen.getByRole("button", { name: "Show all guides" }));
     expect(screen.getByLabelText("Search the guides")).toHaveValue("");
-    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
+    // The default view is the US-first set (17 guides) plus one tile that opens the UAE region guides.
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(18);
+    expect(screen.queryByRole("link", { name: /Where to look for jobs in the UAE/ })).not.toBeInTheDocument();
   });
 
   it("renders a complete article with working contents, citations and honest attribution", async () => {

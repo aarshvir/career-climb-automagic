@@ -1,7 +1,7 @@
 /* Home page. Scoped under .jv-home so legacy .product-page rules never win.
    Two devices only, both meaningful: hairline frame rails (the grid, header to footer) and the orbit (the scheduled loop).
    Grid: from 1024px every two-column block uses the hero's 12-column grid (24px gaps), so right columns share one edge. */
-.jv-home { position: relative; isolation: isolate; overflow-x: clip; color: var(--jv-ink); background: #fff; overflow-wrap: normal; }
+.jv-home { position: relative; isolation: isolate; overflow-x: clip; color: var(--jv-ink); background: transparent; overflow-wrap: normal; }
 .jv-home h1, .jv-home h2, .jv-home h3 { text-wrap: balance; }
 /* Heading measures are in em, not ch: ch follows the "0" of whichever face is showing, so a fallback would change the box. (1ch of Geist ~ .675em.) */
 .jv-home p, .jv-home li, .jv-home dd { text-wrap: pretty; }
@@ -22,9 +22,9 @@
 }
 
 /* 1. Hero */
-.jv-home .jv-hero { position: relative; isolation: isolate; padding: 28px 0 48px; overflow: clip; }
-/* One static green atmosphere (under 8% opacity, no lime on white): the light behind the product surface. */
-.jv-home .jv-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(60% 55% at 80% 18%, rgb(33 92 67 / .08), transparent 70%), radial-gradient(40% 40% at 0% 100%, rgb(33 92 67 / .04), transparent 70%); }
+.jv-home .jv-hero { position: relative; isolation: isolate; padding: 28px 0 40px; overflow: clip; }
+/* One lime moment on the light page: a marker under the closing phrase (decoration only, text stays ink). */
+.jv-home .jv-h-mark { background: linear-gradient(var(--jv-signal), var(--jv-signal)) 0 92% / 100% .16em no-repeat; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .jv-home .jv-hero-grid { display: grid; gap: 32px; }
 .jv-home .jv-hero-copy { position: relative; z-index: 1; min-width: 0; }
 .jv-home .jv-hero-eyebrow { margin: 0 0 16px; color: var(--jv-brand-ink); }
@@ -38,13 +38,14 @@
 .jv-home .jv-hero-orbit-wrap { display: none; }
 @media (max-width: 639px) {
   .jv-home .jv-hero-cta { width: 100%; }
+  .jv-home .jv-hero-title { font-size: 2.25rem; letter-spacing: -.03em; }
 }
 /* 320-359px: a slightly smaller full-width button keeps its label on one line (it still wraps under text spacing). */
 @media (max-width: 359px) {
   .jv-home .jv-hero-cta, .jv-home .jv-cta-actions .jv-btn { padding-inline: 18px; font-size: var(--t-body-sm); }
 }
 @media (min-width: 640px) {
-  .jv-home .jv-hero { padding: 64px 0 72px; }
+  .jv-home .jv-hero { padding: 56px 0 56px; }
   .jv-home .jv-hero-lead { margin-top: 24px; }
   /* Both actions stay side by side at every width from 640px; the note sits on its own row underneath. */
   .jv-home .jv-hero-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 28px; margin-top: 32px; }
@@ -56,7 +57,7 @@
   .jv-home .jv-hero-mock .jv-mock { max-width: 600px; }
 }
 @media (min-width: 1024px) {
-  .jv-home .jv-hero { padding: 88px 0 64px; }
+  .jv-home .jv-hero { padding: 40px 0 40px; }
   .jv-home .jv-hero-eyebrow { margin-bottom: 20px; }
   .jv-home .jv-hero-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: center; }
   .jv-home .jv-hero-copy { grid-column: 1 / span 7; padding-right: 16px; }
@@ -70,7 +71,7 @@
      tailored CV sits under it, tucked over the footer bar's empty right end (the footer text ends well short of the
      card), so the hero shows the run and its result together and no row, tag or label is ever covered. */
   .jv-home .jv-hero-mock--wide .jv-mock { max-width: none; width: calc(100% + 72px); margin-left: -40px; margin-right: -32px; }
-  .jv-home .jv-hero-cv { display: block; position: relative; z-index: 2; width: 284px; margin: -26px -40px 0 auto; }
+  .jv-home .jv-hero-cv { display: block; position: relative; z-index: 2; width: 284px; margin: 16px -40px 0 auto; }
   .jv-home .jv-hero-cv .pc-foot-row { display: none; }
   .jv-home .jv-hero-cv .pc-card { box-shadow: 0 24px 60px -16px rgb(15 29 23 / .28), 0 2px 6px rgb(15 29 23 / .08); }
 }
@@ -80,8 +81,7 @@
 /* 2. Proof strip: a spec table. Phones: one ruled list. Tablets: two columns of hairline cells (the fifth spans both).
    From 1024px: five cells closed by the frame rails, so the rails run straight through the strip and meet its
    full-bleed hairlines as cross-rules. */
-.jv-home .jv-proof { border-block: 1px solid var(--jv-line); }
-.jv-home .jv-proof ul { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--jv-line); }
+.jv-home .jv-proof ul { display: grid; border-block: 1px solid var(--jv-line); grid-template-columns: minmax(0, 1fr); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--jv-line); }
 .jv-home .jv-proof li { display: flex; align-items: baseline; gap: 16px; min-height: 48px; padding: 14px 0; background: #fff; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; line-height: 1.25rem; letter-spacing: 0; font-variant-numeric: tabular-nums; }
 .jv-home .jv-proof-num { flex: none; width: 20px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; letter-spacing: .06em; }
 @media (min-width: 640px) {
@@ -92,7 +92,7 @@
 }
 @media (min-width: 1024px) {
   .jv-home .jv-proof .jv-shell { padding-inline: 0; }
-  .jv-home .jv-proof ul { grid-template-columns: repeat(5, minmax(0, 1fr)); border-inline: 1px solid var(--jv-line); }
+  .jv-home .jv-proof ul { grid-template-columns: repeat(5, minmax(0, 1fr)); border-inline: 1px solid var(--jv-line); align-items: start; }
   .jv-home .jv-proof li, .jv-home .jv-proof li:nth-child(even) { min-height: 96px; padding: 20px 24px; text-wrap: balance; }
   /* First and last labels sit on the page's content axis (shell edge plus the band inset). */
   .jv-home .jv-proof li:first-child { padding-left: var(--band-pad-x); }
@@ -136,9 +136,9 @@
   .jv-home .jv-loop-visual .jv-orbit { width: min(360px, 80%); }
 }
 @media (min-width: 1024px) {
-  .jv-home .jv-loop-band { padding: 112px var(--band-pad-x) 104px; }
+  .jv-home .jv-loop-band { padding: 88px var(--band-pad-x) 80px; }
   /* The headline leads from the page's left axis; the orbit (every run) and the steps (set up once) share row 2. */
-  .jv-home .jv-loop-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 64px; align-items: start; }
+  .jv-home .jv-loop-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; row-gap: 48px; align-items: start; }
   .jv-home .jv-loop-head { grid-column: 1 / span 7; grid-row: 1; gap: 20px; }
   .jv-home .jv-loop-head h2 { max-width: 12.15em; }
   .jv-home .jv-loop-visual { grid-column: 1 / span 5; grid-row: 2; padding: 0; }
@@ -152,7 +152,9 @@
 .jv-home .jv-section-head { display: grid; gap: 16px; max-width: 720px; }
 .jv-home .jv-section-head p { margin: 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-h4); line-height: 1.55; letter-spacing: -.011em; }
 .jv-home .jv-control-rows { margin-top: 40px; border-top: 1px solid var(--jv-line); }
-.jv-home .jv-control-row { display: grid; gap: 20px; padding: 28px 0; border-bottom: 1px solid var(--jv-line); }
+.jv-home .jv-control-row { display: grid; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--jv-line); }
+.jv-home .jv-step-index { margin: 0 0 12px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
+.jv-home .jv-control-row p.jv-step-index { max-width: none; color: var(--jv-brand-ink); }
 .jv-home .jv-control-row:last-child { border-bottom: 0; }
 .jv-home .jv-control-row h3 { color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-semi); line-height: 1.3; letter-spacing: -.015em; }
 .jv-home .jv-control-row p { margin: 8px 0 0; max-width: 44ch; color: var(--jv-ink-2); font-size: var(--t-body); line-height: var(--lh-body); }
@@ -189,17 +191,21 @@
   .jv-home .jv-frag { padding: 0; border: 0; background: none; }
 }
 @media (min-width: 768px) {
-  .jv-home .jv-control-row { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
-  .jv-home .jv-frag { min-height: 340px; padding: 40px; }
+  .jv-home .jv-control-row { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: start; }
+  .jv-home .jv-control-row--flip { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
+  .jv-home .jv-control-row--flip .jv-frag { order: -1; }
+  .jv-home .jv-frag { min-height: 0; padding: 32px; }
 }
 @media (min-width: 1024px) {
   .jv-home .jv-section-head { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; max-width: none; align-items: last baseline; }
   .jv-home .jv-section-head h2 { grid-column: 1 / span 5; }
   .jv-home .jv-section-head p { grid-column: 7 / span 6; }
   .jv-home .jv-control-rows { margin-top: 56px; }
-  .jv-home .jv-control-row { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 32px 0; }
-  .jv-home .jv-control-copy { grid-column: 1 / span 5; }
+  .jv-home .jv-control-row { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; padding: 28px 0; }
+  .jv-home .jv-control-copy { grid-column: 1 / span 5; padding-top: 8px; }
   .jv-home .jv-frag { grid-column: 7 / span 6; }
+  .jv-home .jv-control-row--flip .jv-control-copy { grid-column: 8 / span 5; }
+  .jv-home .jv-control-row--flip .jv-frag { grid-column: 1 / span 6; order: -1; }
   .jv-home .jv-boundary { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; padding-top: 32px; }
   .jv-home .jv-boundary p { grid-column: 1 / span 6; }
   .jv-home .jv-boundary-links { grid-column: 7 / span 6; }
@@ -282,5 +288,6 @@
 
 /* 7. Final CTA on home */
 .jv-home .jv-cta { margin-bottom: 96px; }
+@media (min-width: 1024px) { .jv-home .jv-cta { padding-block: 88px; } }
 .jv-home .jv-cta h2 { max-width: 8.1em; font-size: var(--t-h1); line-height: 1.06; letter-spacing: -.04em; }
 @media (max-width: 639px) { .jv-home .jv-cta { margin-bottom: 64px; } }

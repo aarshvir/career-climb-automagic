@@ -8,6 +8,8 @@ import JobLoopOverview from '@/pages/JobLoopOverview';
 import MvpFooter from '@/components/layout/MvpFooter';
 import CareerGuides from '@/pages/CareerGuides';
 import AudienceLanding from '@/pages/AudienceLanding';
+import Auth from '@/pages/Auth';
+import Walkthroughs from '@/pages/Walkthroughs';
 import { publicStaticPages } from '@/lib/public-site-meta';
 
 vi.unmock('react-router-dom');
@@ -41,6 +43,10 @@ const surfaces: [string, () => React.ReactElement][] = [
   ['for-students', () => <AudienceLanding audience="student" />],
   ['for-mba', () => <AudienceLanding audience="mba" />],
   ['for-career-switchers', () => <AudienceLanding audience="professional" />],
+  // The account entry (the ad landing page) and the walkthrough hero are guarded too. Help and the recorded walkthrough
+  // scripts are left out on purpose: in-product instructions legitimately say where you apply yourself.
+  ['auth', () => <Auth />],
+  ['walkthroughs', () => <Walkthroughs />],
 ];
 
 describe('public marketing copy rules', () => {

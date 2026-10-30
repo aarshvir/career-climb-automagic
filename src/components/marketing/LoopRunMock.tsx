@@ -6,16 +6,16 @@ import "./LoopRunMock.css";
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // Placeholder employers and times only. No scores, percentages or result counts: this is an illustration.
-// One US 12-hour format throughout, and every row precedes the next run.
+// One US 12-hour format throughout. Rows run newest first and every run precedes the next one (Wed), so Monday leads Friday.
 const rows = [
-  { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:02 AM" },
-  { role: "Data Analyst", company: "Contoso Health", time: "Mon 7:02 AM" },
   { role: "Junior Product Analyst", company: "Fabrikam", time: "Mon 7:04 AM" },
+  { role: "Data Analyst", company: "Contoso Health", time: "Mon 7:02 AM" },
+  { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:02 AM" },
 ];
 
 /** Hero product mock: an example Automated Job Loop run, laid out as a run log in HTML and CSS.
  * Its one short pass (each row: found, CV tailored, ready for review) ends within 5 seconds, so it needs no pause control.
- * The third row (desktop only) rests on "CV tailored", so the resting state shows the progression, not three identical tags. */
+ * The newest row rests on "CV tailored", so the resting state shows the progression, not three identical tags. All three rows show at every width, so the footer count always matches. */
 export default function LoopRunMock() {
   const ref = useRef<HTMLElement>(null);
   useBeforePaint(() => {

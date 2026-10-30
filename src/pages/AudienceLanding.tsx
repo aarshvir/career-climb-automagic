@@ -7,7 +7,7 @@ import { staticPageMeta } from '@/lib/public-site-meta';
 import type { LoopAudience } from '../../supabase/functions/_shared/job-loop-types';
 import { BrandLockup } from '@/components/layout/MvpHeader';
 import PriceNote from '@/components/marketing/PriceNote';
-import LoopOrbit from '@/components/marketing/LoopOrbit';
+import { NextRunCard } from '@/components/marketing/PageCards';
 import { useReveal } from '@/hooks/useReveal';
 import './AudienceLanding.css';
 
@@ -28,6 +28,7 @@ export default function AudienceLanding({ audience }: { audience: LoopAudience }
           <p className="jv-caption">{content.eyebrow.toLowerCase().replace(/^./, c => c.toUpperCase())}</p>
           <h1 id="audience-title" className="jv-page-title">{content.title}</h1>
           <p className="jv-lead">{content.intro}</p>
+          <p className="audience-outcome">Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds matching jobs and prepares a tailored CV for each.</p>
           <div className="jv-page-actions">
             <Link className="jv-btn jv-btn--primary jv-btn--lg" to={firstAction}>{user ? 'Open my saved applications' : 'Check my CV against a job'}<ArrowRight aria-hidden="true" /></Link>
             <Link className="jv-link" to={user ? `/check?audience=${audience}` : '/job-loop'}><span>{user ? 'Prepare for another job' : 'See how the Automated Job Loop works'}</span><ArrowRight aria-hidden="true" /></Link>
@@ -48,8 +49,8 @@ export default function AudienceLanding({ audience }: { audience: LoopAudience }
         </ul>
       </section>
     </div>
-    <section className="jv-cta jv-dark" aria-labelledby="audience-final-title">
-      <div className="jv-cta-inner"><p className="jv-caption">Save your experience for next time</p><h2 id="audience-final-title">Start your private record with the CV you have.</h2><p>{content.recordHint}</p><div className="jv-cta-actions"><Link className="jv-btn jv-btn--primary jv-btn--lg" to={saveRecord}>{user ? 'Open my career record' : 'Sign in to save my experience'}<ArrowRight aria-hidden="true" /></Link><LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" /></div></div>
+    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="audience-final-title">
+      <div className="jv-cta-inner"><p className="jv-caption">Save your experience for next time</p><h2 id="audience-final-title">Start your private record with the CV you have.</h2><p>{content.recordHint}</p><div className="jv-cta-actions"><Link className="jv-btn jv-btn--primary jv-btn--lg" to={saveRecord}>{user ? 'Open my career record' : 'Sign in to save my experience'}<ArrowRight aria-hidden="true" /></Link></div></div><div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
     </section>
   </main>;
 }

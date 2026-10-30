@@ -21,7 +21,7 @@
 /* Run log rows: timestamp, job, then the status tag flush with the card's inner right edge. */
 .jv-mock-rows li { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 0; border-bottom: 1px solid var(--jv-line); }
 .jv-mock-rows li:last-child { border-bottom: 0; }
-.jv-mock-when { flex: none; width: 80px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; font-weight: 500; letter-spacing: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.jv-mock-when { flex: none; width: 80px; color: var(--jv-ink-2); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; font-weight: 500; letter-spacing: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .jv-mock-job { display: grid; min-width: 0; flex: 1; }
 /* Names wrap rather than truncate, so nothing is lost when people increase text spacing. */
 .jv-mock-role { color: var(--jv-ink); font-size: var(--t-small); font-weight: 500; line-height: 1.25rem; letter-spacing: 0; overflow-wrap: anywhere; }
@@ -35,12 +35,11 @@
 .jv-status--tailored { --dot: var(--jv-ink-2); color: var(--jv-ink-2); background: var(--jv-sunken); }
 .jv-status--ready { --dot: var(--jv-brand); color: var(--jv-brand-ink); background: var(--jv-brand-tint); }
 .jv-status--found, .jv-status--tailored { opacity: 0; }
-/* Row 3 rests one step earlier: CV tailored (neutral), so the column ramps instead of repeating. */
-.jv-mock-rows li:nth-child(3) .jv-status--tailored { opacity: 1; }
-.jv-mock-rows li:nth-child(3) .jv-status--ready { display: none; }
+/* The newest row rests one step earlier: CV tailored (neutral), so the column ramps instead of repeating. */
+.jv-mock-rows li:nth-child(1) .jv-status--tailored { opacity: 1; }
+.jv-mock-rows li:nth-child(1) .jv-status--ready { display: none; }
 .jv-mock-foot { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 16px; background: var(--jv-forest); color: #fff; font-size: var(--t-sm); line-height: var(--lh-sm); }
 .jv-mock-foot > span { width: 6px; height: 6px; border-radius: 50%; background: var(--jv-signal); box-shadow: 0 0 0 3px rgb(212 242 90 / .18); flex-shrink: 0; }
-@media (max-width: 767px) { .jv-mock-rows li:nth-child(3) { display: none; } .jv-mock-rows li:nth-child(2) { border-bottom: 0; } }
 /* Phones: the search filters give way so the first two rows reach the fold. */
 @media (max-width: 479px) { .jv-mock-filters { display: none; } .jv-mock-head { padding-bottom: 12px; border-bottom: 1px solid var(--jv-line); } }
 /* Phones: the time sits above the role as a mono caption, so role names keep the full width and one line. */
@@ -67,15 +66,15 @@
   .jv-mock.is-live .jv-status--found { animation-name: jv-status-found; }
   .jv-mock.is-live .jv-status--tailored { animation-name: jv-status-tailored; }
   .jv-mock.is-live .jv-status--ready { animation-name: jv-status-ready; }
-  .jv-mock.is-live li:nth-child(3) .jv-status--tailored { animation-name: jv-status-tailored-rest; }
+  .jv-mock.is-live li:nth-child(1) .jv-status--tailored { animation-name: jv-status-tailored-rest; }
   .jv-mock.is-live .jv-mock-pulse::after { animation: jv-pulse 2.4s var(--ease-out) 2; }
   .jv-mock.is-offscreen .jv-status, .jv-mock.is-offscreen .jv-mock-pulse::after { animation-play-state: paused; }
 }
-/* Sequential, never overlapping: the outgoing tag is gone before the incoming one appears, which settles 2px. */
-@keyframes jv-status-found { 0%, 34% { opacity: 1; } 36%, 100% { opacity: 0; } }
-@keyframes jv-status-tailored { 0%, 36% { opacity: 0; transform: translateY(2px); } 38.5%, 68% { opacity: 1; transform: none; } 70%, 100% { opacity: 0; } }
-@keyframes jv-status-tailored-rest { 0%, 36% { opacity: 0; transform: translateY(2px); } 38.5%, 100% { opacity: 1; transform: none; } }
-@keyframes jv-status-ready { 0%, 70% { opacity: 0; transform: translateY(2px); } 72.5%, 100% { opacity: 1; transform: none; } }
+/* Crossfaded: the outgoing tag fades while the incoming one rises, so a tag is always at least partly visible. */
+@keyframes jv-status-found { 0%, 34% { opacity: 1; } 38%, 100% { opacity: 0; } }
+@keyframes jv-status-tailored { 0%, 34% { opacity: 0; transform: translateY(2px); } 38%, 66% { opacity: 1; transform: none; } 70%, 100% { opacity: 0; } }
+@keyframes jv-status-tailored-rest { 0%, 34% { opacity: 0; transform: translateY(2px); } 38%, 100% { opacity: 1; transform: none; } }
+@keyframes jv-status-ready { 0%, 66% { opacity: 0; transform: translateY(2px); } 70%, 100% { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .jv-mock-pulse::after { animation: none !important; display: none; }
   .jv-status { animation: none !important; }

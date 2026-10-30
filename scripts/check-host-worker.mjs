@@ -65,7 +65,8 @@ for(const page of publicRender.pages){
   assert.equal(response.headers.get('X-Robots-Tag'),null);
   if(page.path==='/') assert.ok(!/href="\/check\?audience=/.test(html),'Examples must not select a persona for a neutral visitor.');
   if(page.path==='/pricing') {
-    assert.ok(html.includes('Choose how often your Automated Job Loop runs. Plans from $29/month, with a free account to start.'));
+    // The product name sits in a no-break span, so compare the visible text rather than the raw markup.
+    assert.ok(html.replace(/<[^>]*>/g,'').replaceAll('<!-- -->','').includes('Choose how often your Automated Job Loop runs. Plans from $29/month, with a free account to start.'));
     // React inserts this exact empty comment between adjacent text nodes ($ and price).
     // Normalize only that separator; require each price inside its actual visible card.
     const pricingHtml = html.replaceAll('<!-- -->', '');

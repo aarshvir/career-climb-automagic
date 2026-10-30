@@ -1,10 +1,10 @@
-.loop-subscription-billing { --jl-ink:var(--product-ink,var(--jv-ink)); --jl-blue:var(--product-blue,#215c43); --jl-muted:var(--product-muted,var(--jv-ink-3)); }
+.loop-subscription-billing { --jl-ink:var(--product-ink,var(--jv-ink)); --jl-muted:var(--product-muted,var(--jv-ink-3)); }
 .loop-subscription-billing button:disabled { opacity:.55; cursor:not-allowed; box-shadow:none; }
-.loop-subscription-billing button:focus-visible,.loop-subscription-billing input:focus-visible { outline:3px solid var(--jl-blue); outline-offset:4px; }
+.loop-subscription-billing button:focus-visible,.loop-subscription-billing input:focus-visible { outline:3px solid var(--jv-brand); outline-offset:4px; }
 .loop-subscription-billing [aria-label="Current Automated Job Loop subscription"],.loop-subscription-billing [aria-label="Confirm Automated Job Loop purchase"] { margin-block:24px; padding:22px; border:1px solid var(--product-line,var(--jv-line)); border-radius:10px; background:#fff; }
 .loop-subscription-billing :is([aria-label="Current Automated Job Loop subscription"],[aria-label="Confirm Automated Job Loop purchase"]) h3 { font-size:20px; margin-bottom:14px; }
 .loop-subscription-billing :is([aria-label="Current Automated Job Loop subscription"],[aria-label="Confirm Automated Job Loop purchase"]) p { margin-block:12px; line-height:1.8; }
-.loop-subscription-billing .product-button[aria-pressed="true"] { outline:2px solid var(--jl-blue); outline-offset:3px; }
+.loop-subscription-billing .product-button[aria-pressed="true"] { outline:2px solid var(--jv-brand); outline-offset:3px; }
 .loop-subscription-billing > div > .jl-button { margin:8px 12px 8px 0; }
 .loop-price-market { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:760px; margin-block:24px; }
 .loop-price-market label { display:grid; gap:8px; font-size:14px; font-weight:600; }

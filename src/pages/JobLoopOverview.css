@@ -5,21 +5,16 @@
 .loop-overview .lo-lede { margin: 20px 0 0; max-width: 46ch; color: var(--jv-ink-2); font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; }
 .loop-overview .lo-audience-cta { margin-top: 28px; }
 
-/* Dashboard visual: three real-looking fragments stacked with depth. */
-.loop-overview .lo-dashboard-visual { position: relative; display: grid; gap: 16px; padding: 24px; border-radius: var(--r-md); background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-brand-tint)); }
+/* Dashboard visual: one full dashboard card on a staging field, centred against the copy. */
+.loop-overview .lo-dashboard-visual { position: relative; display: grid; padding: 24px; border-radius: var(--r-md); background: linear-gradient(180deg, var(--jv-bg-subtle), var(--jv-brand-tint)); }
 .loop-overview .lo-dashboard-visual .pc-card { width: 100%; }
-.loop-overview .lo-card-cv { display: none; }
-@media (min-width: 640px) { .loop-overview .lo-dashboard-visual { padding: 40px; } }
+@media (min-width: 640px) { .loop-overview .lo-dashboard-visual { padding: 32px; } }
 @media (min-width: 1024px) {
-  /* Copy takes 5 columns and the cluster 7, so no label, file name or chip in the cards has to wrap. */
-  .loop-overview .lo-dashboard { align-items: start; }
+  .loop-overview .lo-dashboard { align-items: center; }
   .loop-overview .lo-dashboard > :first-child { grid-column: 1 / span 5; }
   .loop-overview .lo-dashboard > :last-child { grid-column: 6 / span 7; }
-  .loop-overview .lo-dashboard-visual { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; padding: 40px; }
-  .loop-overview .lo-card-sched { grid-column: 1; }
-  .loop-overview .lo-card-run { grid-column: 1 / -1; grid-row: 2; }
-  .loop-overview .lo-card-cv { display: grid; grid-column: 2; grid-row: 1; }
 }
+.loop-overview .lo-section:has(.lo-dashboard) { padding-bottom: 72px; }
 
 /* Forest band: the home dark-section tokens (mint links, white buttons, lime only as a marker). */
 .loop-overview .lo-private { width: var(--shell); margin: 0 auto; padding: 56px var(--band-pad-x); border-radius: var(--r-lg); }
@@ -54,3 +49,7 @@
 .loop-overview .jv-faq details > div p { margin: 0 0 12px; }
 .loop-overview .jv-faq a { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
 .loop-overview .jv-cta { margin-bottom: 96px; }
+/* Three numbered mini steps under the hero actions. */
+.jv-mini-steps { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 16px 0 0; padding: 0; list-style: none; color: var(--jv-ink-2); font-size: var(--t-small); font-weight: 500; }
+.jv-mini-steps li { display: inline-flex; align-items: center; gap: 8px; }
+.jv-mini-steps li > span { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-family: var(--font-mono); font-size: var(--t-xs); }

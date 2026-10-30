@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
+import { Children, cloneElement, Fragment, isValidElement, useState, type ReactElement, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowRight, ArrowUpRight, Plus } from "lucide-react";
@@ -12,14 +12,14 @@ import HomePage from "./HomePage";
 import './JobLoop.css';
 import { currentOffer } from '@/lib/current-offer';
 import { subscriptionPlans } from '@/lib/subscription-plans';
-import LoopOrbit from '@/components/marketing/LoopOrbit';
-import { CvCard, RunCard, ScheduleCard } from '@/components/marketing/ProductCards';
+import { RunCard } from '@/components/marketing/ProductCards';
+import { CvDiffCard, NextRunCard, SetupCard } from '@/components/marketing/PageCards';
 import { useReveal } from '@/hooks/useReveal';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
 type Kind = "home" | "pricing" | "how" | "faq" | "about" | "contact" | "privacy" | "terms" | "refund" | "help" | "notfound";
 const titles: Record<Kind, string> = {
-  home: "Automate your job search", pricing: "Choose your Automated Job Loop plan.", how: "How the Automated Job Loop works", faq: "Questions about the Automated Job Loop", about: "Why we built Jobvance", contact: "Get help with Jobvance", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "We couldn’t find that page",
+  home: "Automate your job search", pricing: "Choose your plan.", how: "How the Automated Job Loop works", faq: "Questions about the Automated Job Loop", about: "Why we built Jobvance", contact: "Get help with Jobvance", privacy: "Privacy", terms: "Terms of use", refund: "Refunds and failed tasks", help: "Using your workspace", notfound: "We couldn’t find that page",
 };
 const labels: Record<Kind, string> = { home: "Jobvance", pricing: "Pricing", how: "How it works", faq: "FAQ", about: "About Jobvance", contact: "Contact", privacy: "Your information", terms: "The details", refund: "Refunds", help: "Help with your application", notfound: "Page not found" };
 const intros: Partial<Record<Kind, string>> = {
@@ -50,20 +50,38 @@ const faqs = [
 /** The visible FAQ, exported so the prerender can describe exactly the questions on the page. */
 export const productFaqs = faqs;
 
+/** Wraps the product name in a no-break span so it never splits across lines. */
+function nb(text: string): ReactNode {
+  const parts = text.split("Automated Job Loop");
+  return parts.map((part, index) => <Fragment key={index}>{index > 0 && <span className="jv-nb">Automated Job Loop</span>}{part}</Fragment>);
+}
+/** Long legal paragraphs break at sentence ends into short paragraphs (about two or three sentences each). */
+function readable(text: string): string[] {
+  const sentences = text.split(/(?<=[.!?])\s+(?=[A-Z“"(])/);
+  const out: string[] = [];
+  let current = "";
+  for (const sentence of sentences) {
+    current = current ? `${current} ${sentence}` : sentence;
+    if (current.length >= 240) { out.push(current); current = ""; }
+  }
+  if (current) { if (out.length && current.length < 90) out[out.length - 1] += ` ${current}`; else out.push(current); }
+  return out;
+}
 function StartLink({ children = "Start my search", to = "/onboarding", variant = "primary", size = "lg" }: { children?: React.ReactNode; to?: string; variant?: "primary" | "secondary"; size?: "md" | "lg" }) {
   return <Link to={to} className={`jv-btn jv-btn--${variant}${size === "lg" ? " jv-btn--lg" : ""}`}>{children}<ArrowRight aria-hidden="true" /></Link>;
 }
 function TextLink({ to, children }: { to: string; children: React.ReactNode }) {
   return <Link to={to} className="jv-link"><span>{children}</span><ArrowRight aria-hidden="true" /></Link>;
 }
-/** The closing moment shared by every explainer page: typographic, with the loop ring as its one device (the example card stays in the hero and one mid-page proof moment). */
+/** The closing moment shared by every explainer page: typographic, with the next-run card as its one product object (the orbit is kept for the home hero and the dark section). */
 function CtaBand({ start }: { start: string }) {
-  return <section className="jv-cta jv-dark" aria-labelledby="page-cta-title">
+  return <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="page-cta-title">
     <div className="jv-cta-inner">
       <h2 id="page-cta-title">Ready to automate your search?</h2>
       <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
-      <div className="jv-cta-actions"><StartLink to={start} /><Link to="/check" className="jv-btn jv-btn--secondary jv-btn--lg">Try the free CV Check</Link><LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" /></div>
+      <div className="jv-cta-actions"><StartLink to={start} /><Link to="/check" className="jv-btn jv-btn--secondary jv-btn--lg">Try the free CV Check</Link></div>
     </div>
+    <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
   </section>;
 }
 
@@ -73,6 +91,8 @@ function textOf(node: ReactNode): string {
 }
 function slugOf(text: string) { return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 function LegalLayout({ kind }: { kind: "privacy" | "terms" | "refund" }) {
+  // The index is a single disclosure on phones so the first section starts above the fold.
+  const [tocOpen, setTocOpen] = useState(() => typeof window === 'undefined' || !window.matchMedia?.('(max-width: 1023px)').matches);
   const prose = LegalContent({ kind }) as ReactElement<{ children?: ReactNode }>;
   const toc: { id: string; text: string }[] = [];
   const body = Children.toArray(prose.props.children).map(node => {
@@ -82,10 +102,14 @@ function LegalLayout({ kind }: { kind: "privacy" | "terms" | "refund" }) {
       toc.push({ id, text });
       return cloneElement(node as ReactElement<{ id?: string }>, { id });
     }
+    if (isValidElement(node) && node.type === 'p') {
+      const only = (node.props as { children?: ReactNode }).children;
+      if (typeof only === 'string') return <Fragment key={node.key ?? undefined}>{readable(only).map((chunk, index) => <p key={index}>{chunk}</p>)}</Fragment>;
+    }
     return node;
   });
   return <div className="jv-legal">
-    <nav className="jv-toc" aria-label="On this page"><p className="jv-caption">On this page</p><ol>{toc.map(item => <li key={item.id}><a href={`#${item.id}`}>{item.text}</a></li>)}</ol></nav>
+    <nav className="jv-toc" aria-label="On this page"><details open={tocOpen} onToggle={event => setTocOpen(event.currentTarget.open)}><summary className="jv-caption">On this page</summary><ol>{toc.map(item => <li key={item.id}><a href={`#${item.id}`}>{item.text}</a></li>)}</ol></details></nav>
     <div className="product-prose jv-prose">{body}</div>
   </div>;
 }
@@ -139,24 +163,27 @@ export default function ProductPage({ kind }: { kind: Kind }) {
   const path = kind === 'home' ? '/' : kind === 'how' ? '/how-it-works' : `/${kind}`;
   const meta = staticPageMeta(path);
   // One product fragment beside the intro on the explainer pages that would otherwise open on text alone.
-  const visual = kind === "how" ? <ScheduleCard /> : kind === "about" ? <CvCard compact /> : null;
+  // Contact and privacy get a quiet summary card (real facts from the policy); the explainers get their own product moment.
+  const visual = kind === "how" ? <SetupCard /> : kind === "about" ? <CvDiffCard /> : kind === "contact" ? <aside className="jv-notecard" aria-label="How support works"><p className="jv-caption">How support works</p><ol><li><strong>No account needed</strong><span>Public support needs no name or email.</span></li><li><strong>Keep your receipt code</strong><span>It lets you read the status and any reply.</span></li><li><strong>Kept up to 90 days</strong><span>Your message is read by a person, then removed.</span></li></ol></aside> : kind === "privacy" ? <aside className="jv-notecard" aria-label="Your information at a glance"><p className="jv-caption">At a glance</p><ol><li><strong>Your file stays on your device</strong><span>The free check reads it locally.</span></li><li><strong>Saving is your choice</strong><span>Nothing is stored in your account until you confirm.</span></li><li><strong>Advertising measurement is optional</strong><span>You can turn it off further down this page.</span></li></ol></aside> : null;
+  const visualDecor = kind === "how" || kind === "about";
   const related = (relatedFor[kind] ?? []).map(to => relatedLinks.find(([href]) => href === to)!).filter(Boolean);
   return <main className={`product-page product-page--${kind}${kind === "home" ? "" : " jv-rails"}`}>
     <Helmet><title>{meta?.title ?? `${titles[kind]} | Jobvance`}</title><meta name="description" content={meta?.description ?? intros[kind]} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}{meta && <meta property="og:title" content={meta.title} />}{meta && <meta property="og:description" content={meta.description} />}{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" />{kind === 'notfound' && <meta name="robots" content="noindex,follow" />}</Helmet>
     {kind === "home" ? <HomePage /> : <>
       <div className="jv-page product-inner">
-        <header className={`jv-page-head product-page-heading${visual ? " jv-page-head--split" : ""}`}><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title jv-enter-h1">{titles[kind]}</h1><p className="jv-lead product-page-intro jv-enter" style={{ "--d": "60ms" } as React.CSSProperties}>{intros[kind]}</p>
+        <header className={`jv-page-head product-page-heading${visual ? " jv-page-head--split" : ""}`}><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title jv-enter-h1">{nb(titles[kind])}</h1><p className="jv-lead product-page-intro jv-enter" style={{ "--d": "60ms" } as React.CSSProperties}>{nb(intros[kind] ?? "")}</p>
           {band && <div className="jv-page-actions"><StartLink to={start} /><TextLink to="/check">Try the free CV Check</TextLink></div>}
-          {visual && <div className="jv-page-visual" aria-hidden="true">{visual}</div>}
+          {visual && <div className="jv-page-visual" {...(visualDecor ? { "aria-hidden": true } : {})}>{visual}</div>}
         </header>
         {kind === "pricing" ? <SubscriptionPricing /> : <div className="product-main-content">
           {kind === "how" && <>
             <section className="jv-section product-section" aria-labelledby="how-journey-title"><div className="jv-head"><p className="jv-caption">Your Automated Job Loop journey</p><h2 id="how-journey-title" className="jv-section-title">Set it up once. It runs on your schedule.</h2></div><LoopJourney /></section>
             <section className="jv-section product-section" aria-labelledby="how-run-title"><div className="jv-split"><div data-reveal><p className="jv-caption">Every run</p><h2 id="how-run-title" className="jv-section-title">Jobs found. A CV tailored for each.</h2><ul className="jv-ticks"><li>Searches the sources connected to your account for your roles and locations.</li><li>Matches openings to the experience you confirmed.</li><li>Prepares a tailored CV for each prepared role.</li><li>Keeps every job, CV and next step together in your dashboard.</li></ul></div><div className="product-visual" aria-hidden="true"><RunCard /></div></div></section>
+            <section className="jv-section product-section" aria-labelledby="how-cv-title"><div className="jv-split"><div className="product-visual" aria-hidden="true"><CvDiffCard /></div><div data-reveal><p className="jv-caption">Every CV</p><h2 id="how-cv-title" className="jv-section-title">Reworded for the job, from your experience.</h2><ul className="jv-ticks"><li>Each CV starts from experience you added, so it stays accurate to you.</li><li>Wording is matched to what the job asks for, line by line.</li><li>Review it, then download PDF, DOCX or TXT from your dashboard.</li></ul></div></div></section>
             <p className="jv-related"><span>Not ready for a schedule?</span><Link to="/check">Try the free CV Check</Link><Link to="/job-loop">See the Automated Job Loop in depth</Link></p>
           </>}
-          {kind === "faq" && <div className="jv-faq jv-faq--wide product-faqs">{faqs.map(([question, answer]) => <details key={question}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>}
-          {kind === "about" && <div className="product-about"><p className="product-large-copy">Jobvance automates the repetitive part of a job search. Choose your roles and locations once, and <span className="jv-nb">Automated Job Loop</span> finds matching jobs and prepares a tailored, role-specific CV for each, built from your own experience.</p>
+          {kind === "faq" && <div className="jv-faq jv-faq--wide product-faqs" data-reveal>{faqs.map(([question, answer]) => <details key={question}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>}
+          {kind === "about" && <div className="product-about"><p className="product-large-copy" data-reveal>Jobvance automates the repetitive part of a job search. Choose your roles and locations once, and <span className="jv-nb">Automated Job Loop</span> finds matching jobs and prepares a tailored, role-specific CV for each, built from your own experience.</p>
             <ol className="jv-steps product-about-principles"><li><p className="jv-caption">01 / Source</p><h2>Your experience, every time</h2><p>Every CV is reworded from experience you added, so it stays accurate to you.</p></li><li><p className="jv-caption">02 / Schedule</p><h2>Jobs on your schedule</h2><p>Pick roles, locations and a weekly, three-times-weekly or daily pace. Runs happen in the background.</p></li><li><p className="jv-caption">03 / Result</p><h2>A CV for each role</h2><p>Each prepared role comes with its own tailored CV, ready to download.</p></li></ol></div>}
           {kind === "contact" && <><GuestSupport />{support && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(support) && <div className="product-contact-box"><a className="jv-link" href={`mailto:${support}`}><span>Email Jobvance support</span><ArrowUpRight aria-hidden="true" /></a></div>}</>}
           {legal && <LegalLayout kind={kind} />}

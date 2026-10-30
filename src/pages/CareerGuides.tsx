@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, BookOpen, Search } from "lucide-react";
 import { careerGuides, editorialPolicy, getCareerGuide, type CareerGuide, type GuideAudience, type GuideCategory } from "@/lib/career-guides";
 import { guideDocumentTitle } from "@/lib/public-route-manifest";
+import { useReveal } from "@/hooks/useReveal";
 import "./CareerGuides.css";
 
 const SITE = "https://jobvance.io";
@@ -11,17 +12,21 @@ const audiences: GuideAudience[] = ["Students", "MBA candidates", "Working profe
 const categories: GuideCategory[] = ["CV evidence", "Career direction", "Application workflow", "UAE job search", "Privacy & troubleshooting"];
 const dateLabel = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 
-function GuideCard({ guide }: { guide: CareerGuide }) {
-  return <article className="cg-card">
+// The site is aimed at US jobseekers: region-specific guides sit behind the task filter instead of the default view.
+const REGION_CATEGORY: GuideCategory = "UAE job search";
+const featuredSlugs = ["first-application-pack", "cv-job-description-evidence", "role-filtering-before-applying"];
+
+function GuideCard({ guide, feature = false }: { guide: CareerGuide; feature?: boolean }) {
+  return <article className={`cg-card${feature ? " cg-card--feature" : ""}`}>
     <div className="cg-card-meta"><span>{guide.category}</span><span>{guide.readingMinutes} min read</span></div>
     <h3><Link to={`/guides/${guide.slug}`}>{guide.title}<ArrowRight size={18} aria-hidden="true" /></Link></h3>
     <p>{guide.description}</p>
-    <span className="cg-card-audience">For {guide.audience.replace(/^(\w)(?!BA)(.*)$/, (_m: string, first: string, rest: string) => first.toLowerCase() + rest)}</span>
+    {guide.audience !== "All applicants" && <span className="cg-card-audience">For {guide.audience.replace(/^(\w)(?!BA)(.*)$/, (_m: string, first: string, rest: string) => first.toLowerCase() + rest)}</span>}
   </article>;
 }
 
 function GuideActions() {
-  return <aside className="cg-actions" aria-labelledby="cg-actions-title">
+  return <aside className="cg-actions" aria-labelledby="cg-actions-title" data-reveal>
     <div><p className="cg-eyebrow">PUT IT INTO PRACTICE</p><h2 id="cg-actions-title">Start with one real vacancy.</h2><p>Bring your CV and one job description. Create a free account, review the evidence, approve your wording and download your CV.</p></div>
     <div className="cg-action-links"><Link className="cg-primary" to="/check">Check my CV for free <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-secondary" to="/loop">Explore saving and reuse</Link><Link className="cg-help-link" to="/contact">Get help with the workflow</Link><p>CV Check and Automated Job Loop need a free account.</p></div>
   </aside>;
@@ -32,6 +37,7 @@ function EditorialNote() {
 }
 
 export default function CareerGuides() {
+  useReveal();
   const [query, setQuery] = useState("");
   const [audience, setAudience] = useState("all");
   const [category, setCategory] = useState("all");
@@ -39,19 +45,22 @@ export default function CareerGuides() {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return careerGuides.filter(guide => {
       const haystack = [guide.title, guide.description, guide.summary, guide.audience, guide.category, ...guide.takeaways].join(" ").toLowerCase();
-      return words.every(word => haystack.includes(word)) && (audience === "all" || guide.audience === audience || guide.audience === "All applicants") && (category === "all" || guide.category === category);
+      return words.every(word => haystack.includes(word)) && (audience === "all" || guide.audience === audience || guide.audience === "All applicants") && (category === "all" ? (words.length > 0 || guide.category !== REGION_CATEGORY) : guide.category === category);
     });
   }, [query, audience, category]);
   const hasFilters = query.trim() || audience !== "all" || category !== "all";
+  const regionCount = careerGuides.filter(guide => guide.category === REGION_CATEGORY).length;
+  const featured = hasFilters ? [] : featuredSlugs.map(slug => filtered.find(guide => guide.slug === slug)).filter((guide): guide is CareerGuide => Boolean(guide));
+  const rest = filtered.filter(guide => !featured.includes(guide));
   function reset() { setQuery(""); setAudience("all"); setCategory("all"); }
   return <main className="career-guides jv-rails">
-    <Helmet><title>Practical CV and application guides | Jobvance</title><meta name="description" content="Original guides for students, MBA candidates and busy professionals. Review CV evidence, prepare applications, verify UAE job sources and troubleshoot." /><link rel="canonical" href={`${SITE}/guides`} /><meta property="og:title" content="Practical CV and application guides | Jobvance" /><meta property="og:description" content="Useful next steps for your CV, career direction and application workflow. Practical guides with worked examples and source links." /><meta property="og:url" content={`${SITE}/guides`} /><meta property="og:type" content="website" /></Helmet>
-    <header className="cg-hero"><p className="cg-eyebrow"><BookOpen size={16} aria-hidden="true" /> JOBVANCE GUIDES</p><h1 className="jv-enter-h1">Practical help for your next application.</h1><p className="jv-enter">Practical reading for students, MBA candidates and professionals fitting a move around work. Choose the task in front of you and leave with something you can use.</p><div className="cg-hero-links"><Link className="jv-btn jv-btn--primary jv-btn--lg cg-hero-cta" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link><Link to="/guides/first-application-pack">Preparing your first application <ArrowRight size={16} aria-hidden="true" /></Link><Link to="/guides/cv-job-description-evidence">Checking your CV evidence <ArrowRight size={16} aria-hidden="true" /></Link></div><p className="cg-public-note">{careerGuides.length} practical guides · Free to read · Worked examples and source links</p></header>
+    <Helmet><title>Practical CV and application guides | Jobvance</title><meta name="description" content="Original guides for students, MBA candidates and busy professionals. Review CV evidence, prepare applications, check job listings and troubleshoot." /><link rel="canonical" href={`${SITE}/guides`} /><meta property="og:title" content="Practical CV and application guides | Jobvance" /><meta property="og:description" content="Useful next steps for your CV, career direction and application workflow. Practical guides with worked examples and source links." /><meta property="og:url" content={`${SITE}/guides`} /><meta property="og:type" content="website" /></Helmet>
+    <header className="cg-hero"><p className="cg-eyebrow"><BookOpen size={16} aria-hidden="true" /> JOBVANCE GUIDES</p><h1 className="jv-enter-h1">Practical help for your next application.</h1><p className="jv-enter">Practical reading for students, MBA candidates and professionals fitting a move around work. Choose the task in front of you and leave with something you can use.</p><div className="cg-hero-links"><Link className="jv-btn jv-btn--primary jv-btn--lg cg-hero-cta" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link><Link className="jv-link" to="/guides/first-application-pack"><span>Preparing your first application</span><ArrowRight aria-hidden="true" /></Link><Link className="jv-link" to="/guides/cv-job-description-evidence"><span>Checking your CV evidence</span><ArrowRight aria-hidden="true" /></Link></div><p className="cg-public-note">{careerGuides.length} practical guides · Free to read · Worked examples and source links</p></header>
     <section className="cg-library" aria-labelledby="cg-library-title">
       <div className="cg-library-heading"><div><p className="cg-eyebrow">FIND YOUR TASK</p><h2 id="cg-library-title">The guide library</h2></div><p>Common guides appear alongside your audience's guides.</p></div>
-      <div className="cg-filters"><div className="cg-field cg-search"><label htmlFor="cg-search">Search the guides</label><div><Search size={17} aria-hidden="true" /><input id="cg-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Try projects, PDF or follow-up" /></div></div><div className="cg-field"><label htmlFor="cg-audience">Your stage</label><select id="cg-audience" value={audience} onChange={event => setAudience(event.target.value)}><option value="all">All stages</option>{audiences.map(item => <option key={item} value={item}>{item}</option>)}</select></div><div className="cg-field"><label htmlFor="cg-category">Your task</label><select id="cg-category" value={category} onChange={event => setCategory(event.target.value)}><option value="all">All tasks</option>{categories.map(item => <option key={item} value={item}>{item}</option>)}</select></div></div>
+      <div className="cg-filters"><div className="cg-field cg-search"><label htmlFor="cg-search">Search the guides</label><div><Search size={17} aria-hidden="true" /><input id="cg-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Try projects, PDF or follow-up" /></div></div><div className="cg-field"><label htmlFor="cg-audience">Your stage</label><select id="cg-audience" value={audience} onChange={event => setAudience(event.target.value)}><option value="all">All stages</option>{audiences.map(item => <option key={item} value={item}>{item}</option>)}</select></div><div className="cg-field"><label htmlFor="cg-category">Your task</label><select id="cg-category" value={category} onChange={event => setCategory(event.target.value)}><option value="all">All tasks</option>{categories.map(item => <option key={item} value={item}>{item === REGION_CATEGORY ? "Region: UAE job search" : item}</option>)}</select></div></div>
       <div className="cg-results-bar"><p role="status" aria-live="polite">{filtered.length} {filtered.length === 1 ? "guide" : "guides"}{hasFilters ? " match your choices" : " to explore"}</p>{hasFilters && <button type="button" onClick={reset}>Clear search and filters</button>}</div>
-      {filtered.length ? <div className="cg-grid">{filtered.map(guide => <GuideCard key={guide.slug} guide={guide} />)}</div> : <div className="cg-empty"><h3>No guide matches these choices yet.</h3><p>Try a shorter phrase such as “CV”, “projects” or “privacy”, or clear the filters to browse all {careerGuides.length} guides.</p><button className="cg-primary" type="button" onClick={reset}>Show all guides</button><p>You can start with <Link to="/guides/first-application-pack">preparing a first application pack</Link> or <Link to="/contact">ask for workflow help</Link>.</p></div>}
+      {filtered.length ? <>{featured.length > 0 && <div className="cg-featured" data-reveal>{featured.map(guide => <GuideCard key={guide.slug} guide={guide} feature />)}</div>}<div className="cg-grid">{rest.map(guide => <GuideCard key={guide.slug} guide={guide} />)}{!hasFilters && regionCount > 0 && <article className="cg-card cg-card--region"><div className="cg-card-meta"><span>Other regions</span></div><h3>Looking for work in the UAE?</h3><p>{regionCount} guides on sources, qualifications and listing checks for UAE roles.</p><button type="button" className="cg-region-button" onClick={() => setCategory(REGION_CATEGORY)}>Show the UAE guides <ArrowRight size={16} aria-hidden="true" /></button></article>}</div></> : <div className="cg-empty"><h3>No guide matches these choices yet.</h3><p>Try a shorter phrase such as “CV”, “projects” or “privacy”, or clear the filters to browse all {careerGuides.length} guides.</p><button className="cg-primary" type="button" onClick={reset}>Show all guides</button><p>You can start with <Link to="/guides/first-application-pack">preparing a first application pack</Link> or <Link to="/contact">ask for workflow help</Link>.</p></div>}
     </section>
     <EditorialNote /><GuideActions />
   </main>;

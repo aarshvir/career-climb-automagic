@@ -7,7 +7,7 @@ import './JobLoopOverview.css';
 import LoopJourney from '@/components/LoopJourney';
 import LoopOrbit from '@/components/marketing/LoopOrbit';
 import LoopRunMock from '@/components/marketing/LoopRunMock';
-import { CvCard, RunCard, ScheduleCard } from '@/components/marketing/ProductCards';
+import { DashboardCard, NextRunCard } from '@/components/marketing/PageCards';
 import { useReveal } from '@/hooks/useReveal';
 import { currentOffer } from '@/lib/current-offer';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
@@ -46,7 +46,7 @@ export default function JobLoopOverview() {
             <StartLink />
             <TextLink to="/walkthroughs">Walk through an application</TextLink>
           </div>
-          <div className="jv-hero-note jv-enter" style={delay(180)}><span className="jv-meta"><span className="jv-meta-in"><span>Your account</span><span>Your search</span><span>Your schedule</span></span></span></div>
+          <ol className="jv-mini-steps jv-enter" style={delay(180)} aria-label="Three steps"><li><span>1</span>Add your experience</li><li><span>2</span>Choose roles and locations</li><li><span>3</span>Pick a schedule</li></ol>
         </div>
         <div className="jv-hero-visual">
           <div className="jv-hero-orbit-wrap jv-enter-stage"><LoopOrbit size={560} className="jv-hero-orbit" /></div>
@@ -76,9 +76,7 @@ export default function JobLoopOverview() {
           </ul>
         </div>
         <div className="lo-dashboard-visual" aria-hidden="true" data-reveal>
-          <ScheduleCard className="lo-card-sched" />
-          <RunCard className="lo-card-run" />
-          <CvCard className="lo-card-cv" compact />
+          <DashboardCard />
         </div>
       </div>
     </section>
@@ -124,12 +122,13 @@ export default function JobLoopOverview() {
       </div>
     </section>
 
-    <section className="jv-cta jv-dark" aria-labelledby="lo-final-title">
+    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="lo-final-title">
       <div className="jv-cta-inner">
         <h2 id="lo-final-title">Set up your next search.</h2>
         <p>Add your experience. Choose the jobs and places you want to explore.</p>
-        <div className="jv-cta-actions"><StartLink /><Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link><LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" /></div>
+        <div className="jv-cta-actions"><StartLink /><Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link></div>
       </div>
+      <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
     </section>
   </main>;
 }

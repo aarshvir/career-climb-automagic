@@ -1,5 +1,5 @@
 /* Audience pages (/for-students, /for-mba, /for-career-switchers): the shared jv-* page system plus the example application mock. */
-.audience-page { color: var(--jv-ink); background: #fff; overflow-wrap: break-word; }
+.audience-page { color: var(--jv-ink); background: transparent; overflow-wrap: break-word; }
 .audience-page * { box-sizing: border-box; }
 :where(.audience-page) :where(h1, h2, h3, p, figure) { margin: 0; }
 .audience-page :is(a, button):focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 3px; }
@@ -23,12 +23,13 @@
 .audience-hero { display: grid; gap: 40px; padding: 32px 0 64px; }
 .audience-copy .jv-caption { margin-bottom: 16px; }
 .audience-note { margin-top: 12px; }
+.audience-outcome { margin-top: 12px; max-width: 34em; color: var(--jv-ink); font-size: var(--t-body); font-weight: 500; line-height: 1.5; text-wrap: pretty; }
 .audience-note .jv-meta { margin-top: 0; }
 .audience-workspace { min-width: 0; overflow: hidden; border: 1px solid var(--jv-line); border-radius: var(--r-md); background: #fff; box-shadow: var(--sh-3); }
 .audience-workspace figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 14px 20px; background: var(--jv-brand-tint); color: var(--jv-brand-ink); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; letter-spacing: .06em; text-transform: uppercase; }
 .audience-workspace-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--jv-line); }
 .audience-workspace-bar .jv-brand { min-height: 0; font-size: 18px; }
-.audience-workspace-bar .jv-brand-mark { width: 26px; height: 26px; border-radius: 8px; }
+.audience-workspace-bar .jv-brand-mark { width: 26px; height: 26px; }
 .audience-workspace-bar > span:last-child { display: inline-flex; align-items: center; gap: 6px; color: var(--jv-ink-3); font-size: var(--t-sm); }
 .audience-workspace-body { display: grid; gap: 12px; padding: 24px; }
 .audience-workspace-body h2 { margin: 0 0 4px; color: var(--jv-ink); font-size: var(--t-h4); font-weight: var(--fw-heading); line-height: 1.3; letter-spacing: -.02em; }

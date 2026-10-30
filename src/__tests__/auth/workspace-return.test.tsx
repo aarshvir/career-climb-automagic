@@ -79,7 +79,7 @@ describe('protected legacy workspace return through real app routes', () => {
   });
   it('returns a signed-out bare dashboard visit to your Automated Job Loop after sign-in', async () => {
     const view = open('/dashboard');
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     expect(new URLSearchParams(window.location.search).get('next')).toBe('/loop');
     await finishEmail(view);
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/loop$/);
@@ -94,7 +94,7 @@ describe('protected legacy workspace return through real app routes', () => {
   });
   it('normalizes a signed-out payment return to billing without carrying payment query data', async () => {
     const view = open('/dashboard?tab=billing&checkout=success');
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     expect(new URLSearchParams(window.location.search).get('next')).toBe('/dashboard?tab=billing');
     await finishEmail(view);
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent('/dashboard?tab=billing');
@@ -138,7 +138,7 @@ describe('protected legacy workspace return through real app routes', () => {
     ['/job-preferences', 'tailor'], ['/preferences', 'tailor'], ['/settings', 'billing'], ['/thank-you', 'billing'],
   ])('preserves %s as its requested tab before sign-in', async (path, tab) => {
     open(path);
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     expect(window.location.pathname).toBe('/auth');
     expect(new URLSearchParams(window.location.search).get('next')).toBe(path === '/applications' ? '/applications' : `/dashboard?tab=${tab}`);
     expect(screen.queryByTestId('workspace-path')).not.toBeInTheDocument();
@@ -147,7 +147,7 @@ describe('protected legacy workspace return through real app routes', () => {
 
   it.each(['cv', 'tailor', 'tracker', 'billing'])('returns an email sign-in to the requested %s tab', async tab => {
     const view = open(`/dashboard?tab=${tab}`);
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     await finishEmail(view);
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent(`/dashboard?tab=${tab}`);
     expect(screen.getByRole('heading', { name: `Workspace for ${owner.id}` })).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe('protected legacy workspace return through real app routes', () => {
 
   it.each(['cv', 'tailor', 'tracker', 'billing'])('returns a Google callback to the requested %s tab once', async tab => {
     const view = open(`/dashboard?tab=${tab}`);
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     await userEvent.setup().click(screen.getByRole('button', { name: 'Continue with Google' }));
     expect(state.signInWithGoogle).toHaveBeenCalledOnce();
     const retained = sessionStorage.getItem('jobvance_account_return_v1');
@@ -175,7 +175,7 @@ describe('protected legacy workspace return through real app routes', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Restoring your sign-in');
     expect(window.location.pathname).toBe('/dashboard');
     await act(async () => { state.loading = false; view.rerender(<MvpApp />); });
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     expect(window.location.pathname + window.location.search).toBe('/auth?next=%2Fdashboard%3Ftab%3Dtracker');
     expect(window.location.hash).toBe('');
     expect(sessionStorage.length).toBe(0);
@@ -183,21 +183,21 @@ describe('protected legacy workspace return through real app routes', () => {
 
   it('keeps the ordinary sign-in default at /loop', async () => {
     const view = open('/auth');
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     await finishEmail(view);
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/loop$/);
   });
 
   it('falls back to /loop for an arbitrary supplied email return', async () => {
     const view = open(`/auth?next=${encodeURIComponent('//evil.example/dashboard?tab=tracker')}`);
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     await finishEmail(view);
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/loop$/);
   });
   it('preserves a saved-check selector through email sign-in without carrying its text', async () => {
     const path = '/loop?fromCheck=afe62064-a331-4ce6-9e51-2849e091ba54';
     const view = open(path);
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     expect(new URLSearchParams(window.location.search).get('next')).toBe(path);
     await finishEmail(view);
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent(path);
@@ -206,7 +206,7 @@ describe('protected legacy workspace return through real app routes', () => {
   it('preserves a saved-check selector through the Google callback once', async () => {
     const path = '/loop?fromCheck=afe62064-a331-4ce6-9e51-2849e091ba54';
     const view = open(path);
-    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 1 });
+    await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
     await userEvent.setup().click(screen.getByRole('button', { name: 'Continue with Google' }));
     expect(JSON.parse(sessionStorage.getItem('jobvance_account_return_v1')!).path).toBe(path);
     view.unmount(); adoptOwner();

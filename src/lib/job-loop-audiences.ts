@@ -24,7 +24,7 @@ export const loopAudienceContent = {
     pageTarget: 1 as const, discreetSearch: false,
   },
   professional: {
-    label: 'Busy professionals', path: '/for-career-switchers', eyebrow: 'FOR PROFESSIONALS WITH 5–10 YEARS OF EXPERIENCE',
+    label: 'Busy professionals', path: '/for-career-switchers', eyebrow: 'FOR PROFESSIONALS · 5–10 YEARS IN',
     title: 'Prepare your next application without rebuilding your CV.',
     intro: 'Use the CV you already have to prepare for a role at another employer or a change of direction. Compare your experience with the vacancy, review the relevant wording, and reuse confirmed facts when the next opportunity comes up.',
     recordHint: 'Save the experience you want to reuse and remove confidential client details or figures first. Your next application can start from that reviewed record.',

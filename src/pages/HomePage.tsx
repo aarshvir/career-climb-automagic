@@ -4,7 +4,8 @@ import { ArrowRight } from "lucide-react";
 import LoopJourney from "@/components/LoopJourney";
 import LoopOrbit from "@/components/marketing/LoopOrbit";
 import LoopRunMock from "@/components/marketing/LoopRunMock";
-import { CvCard, RunCard, RunTimeline, ScheduleCard } from "@/components/marketing/ProductCards";
+import { CvCard, RunTimeline, ScheduleCard } from "@/components/marketing/ProductCards";
+import { CvDiffCard, NextRunCard, OpeningsCard } from "@/components/marketing/PageCards";
 import { useReveal } from "@/hooks/useReveal";
 import { homeGuides } from "@/lib/home-guides";
 import PriceNote from "@/components/marketing/PriceNote";
@@ -13,7 +14,7 @@ import "./Home.css";
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 // Facts the site already states (FAQ, pricing, Automated Job Loop page). No counts, ratings or outcomes.
-const proof = ["Jobs and prepared CVs, together", "Up to 3 CV variants", "Weekly, 3×/week or daily", "PDF, DOCX or TXT downloads", "Free CV Check"];
+const proof = ["Jobs and CVs, together", "Up to 3 CV variants", "Weekly, 3×/week or daily", "PDF, DOCX or TXT downloads", "Free CV Check"];
 
 function StartLink({ children = "Start my search", to = "/onboarding", size = "md", variant = "primary", className = "" }: { children?: React.ReactNode; to?: string; size?: "md" | "lg"; variant?: "primary" | "secondary"; className?: string }) {
   return <Link to={to} className={`jv-btn jv-btn--${variant}${size === "lg" ? " jv-btn--lg" : ""} ${className}`.trim()}>{children}<ArrowRight aria-hidden="true" /></Link>;
@@ -32,7 +33,7 @@ export default function HomePage() {
         <div className="jv-hero-copy">
           {/* The product is named right above the pitch, so the main action can stay short. */}
           <p className="jv-caption jv-hero-eyebrow">Automated Job Loop</p>
-          <h1 id="home-title" className="jv-hero-title jv-enter-h1">Jobvance automates your job search end to end.</h1>
+          <h1 id="home-title" className="jv-hero-title jv-enter-h1">Jobvance automates your job search <span className="jv-h-mark">end to end.</span></h1>
           <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. Automated Job Loop runs in the background and finds the best-matching jobs for you, with tailored, role-specific CVs built for a high ATS match.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
             <StartLink size="lg" className="jv-hero-cta">Start my search</StartLink>
@@ -92,16 +93,16 @@ export default function HomePage() {
         </div>
         <div className="jv-control-rows">
           <article className="jv-control-row" data-reveal>
-            <div className="jv-control-copy"><h3>Your search comes back on schedule.</h3><p>Weekly, three days a week or daily, the next run starts without you rebuilding the same searches. Pause it whenever your plans change.</p></div>
+            <div className="jv-control-copy"><p className="jv-step-index">01 · Schedule</p><h3>Your search comes back on schedule.</h3><p>Weekly, three days a week or daily, the next run starts without you rebuilding the same searches. Pause it whenever your plans change.</p></div>
             <div className="jv-frag" aria-hidden="true"><ScheduleCard /></div>
           </article>
-          <article className="jv-control-row" data-reveal>
-            <div className="jv-control-copy"><h3>Openings for the roles you chose.</h3><p>Each run looks through connected sources for your roles and locations, so you start from a list instead of a blank search box. Some runs may find nothing new.</p></div>
-            <div className="jv-frag" aria-hidden="true"><RunCard /></div>
+          <article className="jv-control-row jv-control-row--flip" data-reveal>
+            <div className="jv-control-copy"><p className="jv-step-index">02 · Openings</p><h3>Openings for the roles you chose.</h3><p>Each run looks through connected sources for your roles and locations, so you start from a list instead of a blank search box. Some runs may find nothing new.</p></div>
+            <div className="jv-frag" aria-hidden="true"><OpeningsCard /></div>
           </article>
           <article className="jv-control-row" data-reveal>
-            <div className="jv-control-copy"><h3>A tailored CV for each prepared role.</h3><p>Each prepared role comes with a CV reworded for that job from your own experience. Review it, download PDF, DOCX or TXT and open the employer’s vacancy from your dashboard.</p></div>
-            <div className="jv-frag" aria-hidden="true"><CvCard /></div>
+            <div className="jv-control-copy"><p className="jv-step-index">03 · Tailored CV</p><h3>A tailored CV for each prepared role.</h3><p>Each prepared role comes with a CV reworded for that job from your own experience. Review it, download PDF, DOCX or TXT and open the employer’s vacancy from your dashboard.</p></div>
+            <div className="jv-frag" aria-hidden="true"><CvDiffCard /></div>
           </article>
         </div>
         <div className="jv-boundary" data-reveal>
@@ -146,17 +147,17 @@ export default function HomePage() {
     </section>
 
     {/* 7. Final CTA */}
-    <section className="jv-cta jv-dark" aria-labelledby="home-final-title">
+    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="home-final-title">
       <div className="jv-cta-inner">
         <h2 id="home-final-title">Give your job search a routine.</h2>
         <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
         <div className="jv-cta-actions">
           <StartLink size="lg" />
           <Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link>
-          <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
         </div>
         <div className="jv-cta-note"><PriceNote /></div>
       </div>
+      <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
     </section>
   </div>;
 }

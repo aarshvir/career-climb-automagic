@@ -31,11 +31,13 @@ try {
     for(const match of structured.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))scriptHashes.add(`'sha256-${hash(match[1])}'`);
     const entry=buildManifest[cssFor(page.kind)];
     const css=[...new Set(entry?.css??[])].map(path=>`<link rel="stylesheet" href="/${escape(path)}"/>`).join('');
+    // The route chunk downloads in parallel with the entry script instead of after it.
+    const preloads=[...new Set(entry?[entry.file,...(entry.imports??[]).map(key=>buildManifest[key]?.file)].filter(Boolean):[])].map(path=>`<link rel="modulepreload" href="/${escape(path)}"/>`).join('');
     const metadata=`<title>${escape(page.title)}</title><meta name="description" content="${escape(page.description)}"/><link rel="canonical" href="${escape(canonical)}"/><meta property="og:title" content="${escape(page.title)}"/><meta property="og:description" content="${escape(page.description)}"/><meta property="og:url" content="${escape(canonical)}"/><meta property="og:type" content="${page.kind==='guide'?'article':'website'}"/><meta name="twitter:title" content="${escape(page.title)}"/><meta name="twitter:description" content="${escape(page.description)}"/>`;
     // Helmet owns route text/canonical tags on the client; common image tags are
     // kept by the always-mounted SiteShareMetadata component across navigation.
     const managedMetadata=metadata.replace(/<(title|meta|link)(?=[\s>])/g,'<$1 data-rh="true"');
-    const html=template.replace(/<title\b[^>]*>[\s\S]*?<\/title>/,'').replace(/<meta\b[^>]*\bname="description"[^>]*>/,'').replace(/<meta\b[^>]*\b(?:name|property)="(?:og|twitter):(?:title|description)"[^>]*>/g,'').replace('</head>',managedMetadata+css+structured+'</head>').replace('<div id="root"></div>',`<div id="root">${rendered.body}</div>`).replace(/<noscript>[\s\S]*?<\/noscript>/,'<noscript>These guides are available to read without JavaScript. Enable JavaScript for the interactive CV check, accounts and document preparation.</noscript>');
+    const html=template.replace(/<title\b[^>]*>[\s\S]*?<\/title>/,'').replace(/<meta\b[^>]*\bname="description"[^>]*>/,'').replace(/<meta\b[^>]*\b(?:name|property)="(?:og|twitter):(?:title|description)"[^>]*>/g,'').replace('</head>',managedMetadata+css+preloads+structured+'</head>').replace('<div id="root"></div>',`<div id="root">${rendered.body}</div>`).replace(/<noscript>[\s\S]*?<\/noscript>/,'<noscript>These guides are available to read without JavaScript. Enable JavaScript for the interactive CV check, accounts and document preparation.</noscript>');
     const filename=hash(page.path).replace(/[^a-z\d]/gi,'').slice(0,24)+'.html';
     await writeFile(resolve(dist,'.prerender',filename),html);
     pages.push({path:page.path,file:`.prerender/${filename}`,title:page.title,kind:page.kind});

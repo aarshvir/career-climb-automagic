@@ -2,12 +2,12 @@
 @config "../tailwind.config.ts";
 
 @font-face{font-family:"Geist";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2197,U+2212,U+2215,U+FEFF,U+FFFD;}
-@font-face{font-family:"Geist Mono";src:url('/fonts/GeistMono-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+2000-206F;}
+@font-face{font-family:"Geist Mono";src:url('/fonts/GeistMono-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:optional;unicode-range:U+0000-00FF,U+2000-206F;}
 /* Metric-matched fallbacks (measured in Chrome against the self-hosted files): Arial is 2.3% narrower
    than Geist; Courier New has Geist Mono's exact 600/1000 advance. Swapping in the webfont does not reflow.
    Headings (520-600) get their own face: Arial Bold is 1.8% wider than Geist at 540, so heading line counts hold too. */
 @font-face{font-family:"Geist Fallback";src:local("Arial"),local("Helvetica Neue");font-weight:100 519;size-adjust:102.3%;ascent-override:98.2%;descent-override:28.8%;line-gap-override:0%;}
-@font-face{font-family:"Geist Fallback";src:local("Arial Bold"),local("Arial-BoldMT"),local("Helvetica Neue Bold");font-weight:520 900;size-adjust:98.2%;ascent-override:102.3%;descent-override:30%;line-gap-override:0%;}
+@font-face{font-family:"Geist Fallback";src:local("Helvetica Neue Medium"),local("Arial");font-weight:520 900;size-adjust:101.2%;ascent-override:102.3%;descent-override:30%;line-gap-override:0%;}
 @font-face{font-family:"Geist Mono Fallback";src:local("Courier New"),local("CourierNewPSMT");size-adjust:100%;ascent-override:100.5%;descent-override:29.5%;line-gap-override:0%;}
 /* Alias for admin-home.css, which still names Manrope; it now resolves to Geist. */
 @font-face{font-family:"Manrope";src:url('/fonts/Geist-latin-wght.woff2') format('woff2');font-weight:100 900;font-display:swap;}
@@ -30,6 +30,10 @@
     --jv-brand-tint: #E6F0EA; --jv-brand-ink: #1A4D37; --jv-brand-text: #215C43;
     /* signal */
     --jv-signal: #D4F25A;
+    /* the mid green (strokes and small text on forest) and the hairline on forest */
+    --jv-brand-mid: #6FA888; --jv-line-on-dark: rgb(255 255 255 / .14);
+    /* one tinted light-surface moment: the hero wash, painted full-bleed behind every marketing hero */
+    --jv-wash: radial-gradient(60% 50% at 80% 0%, #E6F0EA 0%, transparent 70%), radial-gradient(40% 40% at 0% 0%, rgb(212 242 90 / .10), transparent 70%);
     /* status (meaning only, never decoration) */
     --jv-success: #0B7A47; --jv-success-tint: #E8F6EE;
     --jv-warn: #8A5300; --jv-warn-tint: #FFF3DC;
@@ -47,6 +51,7 @@
     --t-h2-panel: clamp(1.875rem, 1.6rem + 1.1vw, 2.5rem);
     --t-h3: clamp(1.375rem, 1.236rem + .571vw, 1.75rem);
     --t-h4: clamp(1.125rem, 1.079rem + .19vw, 1.25rem);
+    --t-card-title: 1.25rem; --ls-display: -.035em; --ls-h3: -.025em; --ls-card: -.015em;
     --t-price: clamp(2.5rem, 2.2rem + 1.2vw, 3.25rem);
     /* one page-title size for every inner page (home keeps --t-display); lead is the shared intro size */
     --t-page: clamp(2.375rem, 1.9rem + 2.2vw, 3.75rem); --t-lead: clamp(1.0625rem, 1rem + .3vw, 1.25rem);
@@ -114,6 +119,10 @@
 .jv-loading-line { height: 10px; max-width: 380px; background: var(--jv-sunken); border-radius: 8px; margin: 24px 0; }
 .jv-loading-line:first-child { width: 150px; height: 28px; } .jv-loading-line:last-child { width: 65%; }
 /* While the route gate resolves nothing is rendered; keep the footer below the fold instead of flashing under the header. */
+/* A containing block for margins, so the empty placeholder and the mounted page share one top edge (no layout shift). */
+#main-content { display: flow-root; }
+/* One full-bleed wash behind every marketing hero (never clipped at the shell edge). */
+#main-content:has(> main.jv-rails, > main.jv-home, > main.product-page, > main.audience-page, > main.jv-account-utility) { background: var(--jv-wash) top center / 100% 680px no-repeat; }
 #main-content:empty, #main-content:has(> div:is([hidden], :empty):only-child) { min-height: 100svh; }
 .jv-loading > p { margin: 0; color: var(--jv-ink-3); font-size: var(--t-small); }
 .custom-scrollbar { scrollbar-width: thin; scrollbar-color: var(--jv-line-strong) transparent; }
