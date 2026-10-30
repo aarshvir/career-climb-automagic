@@ -8,8 +8,14 @@ import { staticPageMeta } from '@/lib/public-site-meta';
 import type { LoopAudience } from '../../supabase/functions/_shared/job-loop-types';
 import { BrandLockup } from '@/components/layout/MvpHeader';
 import PriceNote from '@/components/marketing/PriceNote';
+import { AudienceRunCard, NextRunCard } from '@/components/marketing/PageCards';
 import { useReveal } from '@/hooks/useReveal';
 import './AudienceLanding.css';
+
+/** Keeps the product name on one line wherever it appears. */
+function nb(text: string) {
+  return text.split('Automated Job Loop').flatMap((part, index) => index === 0 ? [part] : [<span key={index} className="jv-nb">Automated Job Loop</span>, part]);
+}
 
 export default function AudienceLanding({ audience }: { audience: LoopAudience }) {
   useReveal();
@@ -26,16 +32,20 @@ export default function AudienceLanding({ audience }: { audience: LoopAudience }
       <section className="audience-hero" aria-labelledby="audience-title">
         <div className="audience-copy">
           <p className="jv-caption">{content.eyebrow.toLowerCase().replace(/^./, c => c.toUpperCase())}</p>
-          <h1 id="audience-title" className="jv-page-title jv-enter-h1">{content.title}</h1>
-          <p className="jv-lead jv-enter" style={{ '--d': '60ms' } as CSSProperties}>{content.intro}</p>
+          <h1 id="audience-title" className="jv-page-title jv-enter-h1">{content.searchTitle}</h1>
+          <p className="jv-lead jv-enter" style={{ '--d': '60ms' } as CSSProperties}>{nb(content.searchIntro)}</p>
           <div className="jv-page-actions jv-enter" style={{ '--d': '140ms' } as CSSProperties}>
             {user
               ? <Link className="jv-btn jv-btn--primary jv-btn--lg" to={firstAction}>Open my saved applications<ArrowRight aria-hidden="true" /></Link>
               : <Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search<ArrowRight aria-hidden="true" /></Link>}
             <Link className="jv-link" to={user ? `/check?audience=${audience}` : firstAction}><span>{user ? 'Prepare for another job' : 'Check my CV against a job'}</span><ArrowRight aria-hidden="true" /></Link>
           </div>
-          <div className="audience-note jv-enter" style={{ '--d': '180ms' } as CSSProperties}><PriceNote /><p className="audience-outcome">Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds matching jobs and prepares a tailored CV for each.</p></div>
+          <div className="audience-note jv-enter" style={{ '--d': '180ms' } as CSSProperties}><PriceNote /></div>
         </div>
+        <div className="audience-hero-visual jv-enter" style={{ '--d': '120ms' } as CSSProperties} aria-hidden="true"><AudienceRunCard roles={content.suggestedRoles} /></div>
+      </section>
+      <section className="jv-section audience-check" aria-labelledby="audience-check-title">
+        <div className="audience-check-copy" data-reveal><p className="jv-caption">The free CV Check</p><h2 id="audience-check-title" className="jv-section-title">{content.title}</h2><p>{content.intro}</p></div>
         <figure className="audience-workspace" data-reveal><figcaption><span>Example application</span></figcaption><div className="audience-workspace-bar"><BrandLockup /><span><LockKeyhole size={14} aria-hidden="true" />Private workspace</span></div><div className="audience-workspace-body"><p className="jv-caption">Your CV → job requirements → review</p><p className="audience-workspace-title">See the experience behind each requirement.</p><div className="audience-evidence"><span>The vacancy asks</span><p>{content.exampleRequirement}</p></div><div className="audience-evidence audience-evidence--fact"><span>Your source · {content.exampleContext}</span><p>{content.exampleFact}</p><small><Check size={14} aria-hidden="true" />Compare the original wording</small></div><div className="audience-question"><CircleHelp size={18} aria-hidden="true" /><p>{content.exampleQuestion}</p></div><div className="audience-next"><CalendarClock size={18} aria-hidden="true" /><div><strong>Ready for your review</strong><p>Read the CV preview, then download your CV.</p></div></div></div></figure>
       </section>
       <section className="jv-section audience-path" aria-labelledby="audience-path-title">
@@ -50,9 +60,10 @@ export default function AudienceLanding({ audience }: { audience: LoopAudience }
         </ul>
       </section>
     </div>
-    <section className="jv-cta-bar" aria-labelledby="audience-final-title">
-      <div className="jv-cta-bar-copy"><h2 id="audience-final-title">Start your private record with the CV you have.</h2><p>{content.recordHint}</p></div>
-      <div className="jv-cta-bar-actions">{user ? <Link className="jv-btn jv-btn--primary jv-btn--lg" to={saveRecord}>Open my career record<ArrowRight aria-hidden="true" /></Link> : <><Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search<ArrowRight aria-hidden="true" /></Link><Link className="jv-link" to={saveRecord}><span>Sign in to save my experience</span><ArrowRight aria-hidden="true" /></Link></>}</div>
+    <section className="jv-cta jv-cta--visual jv-cta--page jv-dark" aria-labelledby="audience-final-title">
+      <div className="jv-cta-inner"><h2 id="audience-final-title">Start your private record with the CV you have.</h2><p>{content.recordHint}</p>
+        <div className="jv-cta-actions">{user ? <Link className="jv-btn jv-btn--primary jv-btn--lg" to={saveRecord}>Open my career record<ArrowRight aria-hidden="true" /></Link> : <><Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search<ArrowRight aria-hidden="true" /></Link><Link className="jv-btn jv-btn--secondary jv-btn--lg" to={saveRecord}>Sign in to save my experience</Link></>}</div></div>
+      <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
     </section>
   </main>;
 }

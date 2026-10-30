@@ -521,7 +521,7 @@ export default function JobLoop() {
       if (!mounted.current || !importAuthReady.current || owner.current !== scope.ownerId || trackingDraftAuthority(scope.ownerId) !== scope.authority || snapshotRef.current?.lifecycleGeneration !== scope.generation) return;
       const panel = document.getElementById(target);
       if (panel instanceof HTMLDetailsElement) panel.open = true;
-      panel?.focus({ preventScroll: true }); panel?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+      panel?.focus({ preventScroll: true }); panel?.scrollIntoView?.({ block: 'start', behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     });
   }
   function reviewSetupFacts() {

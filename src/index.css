@@ -14,11 +14,12 @@
 
 @layer base {
   :root {
-    /* "Jobvance Green": the approved mark's #215c43 is the primary action colour. Lime (--jv-signal) is only a small
-       signal on the forest surface, never a fill on white. */
+    /* "Jobvance Green": the approved mark's #215c43 is the primary action colour. Lime (--jv-signal) is the brand's one
+       accent: a small signal on the forest surface, plus two deliberate uses on white (the home H1 underline and the
+       featured-plan badge). It is never a large fill, a button or body-text colour. */
     --jv-ink: #0F1D17; --jv-paper: #FFFFFF;
     /* surfaces */
-    --jv-bg: #FFFFFF; --jv-bg-subtle: #F5F8F6; --jv-surface: #FFFFFF; --jv-sunken: #EEF2EF; --jv-bg-muted: #EFF3F0;
+    --jv-bg: #FFFFFF; --jv-bg-subtle: #F5F8F6; --jv-surface: #FFFFFF; --jv-sunken: #EEF2EF; --jv-bg-muted: #EEF2EF;
     /* forest: the one dark surface (bands, final CTA, mock footer) */
     --jv-forest: #0C1F17; --jv-forest-2: #12291F;
     /* lines */
@@ -38,8 +39,8 @@
     --jv-wash: radial-gradient(60% 50% at 80% 0%, #E6F0EA 0%, transparent 70%), radial-gradient(40% 40% at 0% 0%, rgb(212 242 90 / .10), transparent 70%);
     /* status (meaning only, never decoration) */
     --jv-success: #0B7A47; --jv-success-tint: #E8F6EE;
-    --jv-warn: #8A5300; --jv-warn-tint: #FFF3DC;
-    --jv-danger: #C42B2F; --jv-danger-tint: #FDECEC;
+    --jv-warn: #8A5300; --jv-warn-tint: #FFF3DC; --jv-warn-line: #E6C987;
+    --jv-danger: #C42B2F; --jv-danger-tint: #FDECEC; --jv-danger-line: #F0C4C4;
     /* type */
     --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Consolas, monospace;
@@ -96,7 +97,7 @@
     --shadow-md: 0 8px 24px rgb(15 29 23 / 6%); --shadow-lg: 0 16px 36px rgb(15 29 23 / 8%);
     --shadow-xl: 0 24px 64px rgb(15 29 23 / 10%); --shadow-2xl: 0 32px 80px rgb(15 29 23 / 14%);
     --shadow-premium: var(--shadow-xl); --shadow-glow: 0 4px 20px rgb(33 92 67 / 14%); --shadow-inner: inset 0 1px 3px rgb(15 29 23 / 5%);
-    --gradient-primary: linear-gradient(120deg, var(--jv-brand), #2B7556); --gradient-success: linear-gradient(120deg, #1b765a, #2c9070);
+    --gradient-primary: linear-gradient(120deg, var(--jv-brand), #2B7556); --gradient-success: linear-gradient(120deg, var(--jv-brand), #2B7556);
     --gradient-warning: linear-gradient(120deg, #f1c77a, #f9dda5); --gradient-glass: linear-gradient(135deg, #fff, #F5F8F6);
     --gradient-hero: linear-gradient(135deg, var(--jv-forest), var(--jv-brand));
     --glass: rgb(255 255 255 / 94%); --glass-border: rgb(15 29 23 / 8%); --backdrop-blur: blur(16px);
@@ -126,7 +127,9 @@
 /* The pre-hydration shell holds the viewport so the first paint never shifts (CLS 0 with or without motion). */
 html, body, #root { min-height: 100vh; min-height: 100dvh; }
 /* One full-bleed wash behind every marketing hero (never clipped at the shell edge). */
-#main-content:has(main.jv-rails, main.jv-home, main.product-page, main.audience-page) { background-image: var(--jv-wash); background-position: top center; background-size: 100% 680px; background-repeat: no-repeat; }
+/* The wash starts at the very top of the document (behind the floating header), so no edge shows under the header. */
+body:has(#main-content main.jv-rails, #main-content main.jv-home, #main-content main.product-page, #main-content main.audience-page) { background-image: var(--jv-wash); background-position: top center; background-size: 100% 756px; background-repeat: no-repeat; }
+@media (max-width: 959px) { body:has(#main-content main.jv-rails, #main-content main.jv-home, #main-content main.product-page, #main-content main.audience-page) { background-position: center 56px; background-size: 100% 680px; } }
 #main-content:empty, #main-content:has(> div:is([hidden], :empty):only-child) { min-height: 100svh; }
 .jv-loading > p { margin: 0; color: var(--jv-ink-3); font-size: var(--t-small); }
 .custom-scrollbar { scrollbar-width: thin; scrollbar-color: var(--jv-line-strong) transparent; }

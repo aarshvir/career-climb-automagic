@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 /** Navigation waits for lazy content and respects the actual help anchor.
@@ -8,6 +8,10 @@ export default function RouteNavigation() {
   const navigationType = useNavigationType();
   const previous = useRef<string | null>(null);
   const mountedAt = useRef(Date.now());
+  // The first in-app navigation ends the "prerendered page is already painted" state, so later pages get their entrance too.
+  // A layout effect runs before the new page paints, so nothing replays on screen.
+  const firstPath = useRef(pathname);
+  useLayoutEffect(() => { if (pathname !== firstPath.current) document.documentElement.classList.remove('jv-prerendered'); }, [pathname]);
   useEffect(() => {
     const initial = previous.current === null;
     const changedPage = previous.current !== pathname;

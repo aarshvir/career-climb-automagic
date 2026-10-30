@@ -43,7 +43,7 @@ export default function LoopOrbit({ size, variant = "light", labels = false, nod
       observer.observe(node);
       return () => observer.disconnect();
     }
-    if (document.documentElement.classList.contains("jv-prerendered")) return;
+    // A prerendered page also plays its pass: the comet rests on "You review" in the painted frame and sweeps round once.
     setLive(true);
     // Pause the pass while the orbit is off screen.
     const observer = new IntersectionObserver(([entry]) => node.classList.toggle("is-offscreen", !entry.isIntersecting));

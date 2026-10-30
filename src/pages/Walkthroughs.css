@@ -61,7 +61,11 @@
 }
 @media screen {
   .walkthroughs-page a.jv-btn--primary { color: #fff; text-decoration: none; }
+}
+@media screen and (hover: hover) {
   .walkthroughs-page a.jv-btn--primary:hover { background: var(--jv-brand-hover); }
+}
+@media screen {
   .walkthroughs-page .wt-hero > p:not(.wt-eyebrow) { color: var(--jv-ink-2); }
 }
 

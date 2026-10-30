@@ -7,7 +7,7 @@ import './JobLoopOverview.css';
 import LoopJourney from '@/components/LoopJourney';
 import LoopOrbit from '@/components/marketing/LoopOrbit';
 import LoopRunMock from '@/components/marketing/LoopRunMock';
-import { DashboardCard, WeekStrip } from '@/components/marketing/PageCards';
+import { DashboardCard, NextRunCard, WeekStrip } from '@/components/marketing/PageCards';
 import { useReveal } from '@/hooks/useReveal';
 import { currentOffer } from '@/lib/current-offer';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
@@ -87,8 +87,7 @@ export default function JobLoopOverview() {
         <div className="lo-private-copy" data-reveal>
           <p className="jv-caption">Keep your work for next time</p>
           <h2 id="lo-private-title">Save your experience for the next application.</h2>
-          <p>Set up Automated Job Loop in your existing account. Import your CV or choose a saved CV check, then confirm the experience you want to reuse. You can copy that check’s reviewed CV and vacancy into drafts before saving them. Each saved vacancy has its own documents, status and next action.</p>
-          <p>Add vacancies yourself or use the selected employer feeds. You can also opt into recurring preparation, review what was prepared, and pause it when you need to.</p>
+          <p>Import your CV or choose a saved CV check, confirm the experience you want to reuse, and set up Automated Job Loop in your account. Each saved vacancy keeps its own documents, status and next action.</p>
           <div className="lo-private-actions"><StartLink>Set up my private Automated Job Loop</StartLink><TextLink to="/help#job-loop-start">Read the setup guide</TextLink></div>
         </div>
         <aside className="lo-private-aside" data-reveal>
@@ -123,12 +122,13 @@ export default function JobLoopOverview() {
       </div>
     </section>
 
-    <section className="jv-cta jv-dark" aria-labelledby="lo-final-title">
+    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="lo-final-title">
       <div className="jv-cta-inner">
         <h2 id="lo-final-title">Set up your next search.</h2>
         <p>Add your experience. Choose the jobs and places you want to explore.</p>
         <div className="jv-cta-actions"><StartLink /><Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link></div>
       </div>
+      <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
       <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
     </section>
   </main>;

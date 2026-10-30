@@ -1,7 +1,7 @@
 export const SITE_ORIGIN = 'https://jobvance.io';
 export type PublicPage = { path: string; title: string; description: string; kind: 'product' | 'audience' | 'check' | 'pilot' | 'loop-overview' | 'help' | 'walkthroughs' | 'guides' | 'guide'; key?: string; modified?: string };
 export const publicStaticPages: PublicPage[] = [
-  { path:'/',kind:'product',key:'home',title:'Jobvance: Automated Job Loop for your job search',description:'Set your roles and locations once. Automated Job Loop finds matching jobs in the background and prepares a tailored, role-specific CV for each.' },
+  { path:'/',kind:'product',key:'home',title:'Automated Job Loop: automate your job search | Jobvance',description:'Set your roles and locations once. Automated Job Loop finds matching jobs in the background and prepares a tailored, role-specific CV for each.' },
   { path:'/job-loop',kind:'loop-overview',title:'Automated Job Loop: your search on a schedule | Jobvance',description:'Set your roles, locations and schedule. Automated Job Loop finds jobs from connected sources and prepares tailored CVs for your dashboard.' },
   { path:'/for-students',kind:'audience',key:'student',title:'CV and applications for students and graduates | Jobvance',description:'Prepare internship and graduate applications from coursework, projects and internships. Keep academic work labelled and review evidence before you download.' },
   { path:'/for-mba',kind:'audience',key:'mba',title:'MBA CV preparation and career pivots | Jobvance',description:'Connect your previous work and MBA projects to a new role. Turn the examples that fit into a tailored CV for each application.' },

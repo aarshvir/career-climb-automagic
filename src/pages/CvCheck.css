@@ -14,7 +14,7 @@
 .check-step-number { width: 28px; height: 28px; flex-shrink: 0; border: 1px solid hsl(var(--border)); border-radius: 50%; display: grid; place-items: center; font-size: 10px; background: white; }
 .check-progress li[aria-current="step"] > div { background: hsl(var(--muted)); color: var(--jv-brand); font-weight: 650; }
 .check-progress li[aria-current="step"] .check-step-number { background: var(--jv-brand); color: white; border-color: var(--jv-brand); box-shadow: 0 3px 9px color-mix(in srgb, var(--jv-brand) 15%, transparent); }
-.check-progress li[data-complete="true"] .check-step-number { background: #e8f3ed; color: #176244; border-color: #c8e1d2; }
+.check-progress li[data-complete="true"] .check-step-number { background: var(--jv-bg-muted); color: #176244; border-color: #c8e1d2; }
 .check-rail-caption { margin: 16px 12px; font-size: 11px; line-height: 1.6; color: hsl(var(--muted-foreground)); }
 .check-context { margin-top: 30px; border: 1px solid hsl(var(--border)); padding: 20px; border-radius: 16px; background: white; overflow-wrap: anywhere; }
 .check-context > svg { color: var(--jv-brand); margin-bottom: 12px; }

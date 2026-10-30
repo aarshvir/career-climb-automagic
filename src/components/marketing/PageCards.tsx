@@ -76,6 +76,20 @@ export function NextRunCard({ className = "" }: { className?: string }) {
   </div>;
 }
 
+const placeholderEmployers: [string, string][] = [["Lumen Freight", "Chicago, IL"], ["Bluebird Retail", "Remote (US)"], ["Kestrel Energy", "Houston, TX"]];
+/** An example run for one audience: the roles that audience usually targets, with placeholder employers. */
+export function AudienceRunCard({ roles, schedule = "3×/week", className = "" }: { roles: readonly string[]; schedule?: string; className?: string }) {
+  return <div className={`pc-card pc-run ${className}`.trim()} aria-hidden="true">
+    <div className="pc-top"><span className="pc-caption">Example run · illustrative data</span></div>
+    <div className="pc-head"><strong>Automated Job Loop</strong><span className="pc-pill"><Repeat2 />{schedule}</span></div>
+    <ul className="pc-jobs">{roles.slice(0, 3).map((role, index) => <li key={role}>
+      <span className="pc-job"><strong>{role}</strong><span>{placeholderEmployers[index][0]} · {placeholderEmployers[index][1]}</span></span>
+      <span className={`pc-tag${index === 2 ? " pc-tag--neutral" : ""}`}>{index === 2 ? "CV tailored" : "Ready for review"}</span>
+    </li>)}</ul>
+    <div className="pc-foot"><span />{Math.min(roles.length, 3)} jobs · {Math.min(roles.length, 3)} tailored CVs</div>
+  </div>;
+}
+
 const weekRuns: [string, string, string][] = [["Mon", "7:00 AM", "3 jobs"], ["Tue", "", ""], ["Wed", "7:00 AM", "No new jobs"], ["Thu", "", ""], ["Fri", "7:00 AM", "2 jobs"], ["Sat", "", ""], ["Sun", "", ""]];
 /** One example week on a 3x/week schedule: the days it runs, and what each run left for review. Decorative. */
 export function WeekStrip({ className = "" }: { className?: string }) {

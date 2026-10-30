@@ -5,7 +5,7 @@ import LoopJourney from "@/components/LoopJourney";
 import LoopOrbit from "@/components/marketing/LoopOrbit";
 import LoopRunMock from "@/components/marketing/LoopRunMock";
 import { CvCard, RunTimeline, ScheduleCard } from "@/components/marketing/ProductCards";
-import { CvDiffCard, OpeningsCard } from "@/components/marketing/PageCards";
+import { CvDiffCard, NextRunCard, OpeningsCard } from "@/components/marketing/PageCards";
 import { useReveal } from "@/hooks/useReveal";
 import { homeGuides } from "@/lib/home-guides";
 import PriceNote from "@/components/marketing/PriceNote";
@@ -147,7 +147,7 @@ export default function HomePage() {
     </section>
 
     {/* 7. Final CTA */}
-    <section className="jv-cta jv-dark" aria-labelledby="home-final-title">
+    <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="home-final-title">
       <div className="jv-cta-inner">
         <h2 id="home-final-title">Give your job search a routine.</h2>
         <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
@@ -157,6 +157,7 @@ export default function HomePage() {
         </div>
         <div className="jv-cta-note"><PriceNote /></div>
       </div>
+      <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
       <LoopOrbit size={720} variant="dark" animate={false} className="jv-cta-orbit" />
     </section>
   </div>;

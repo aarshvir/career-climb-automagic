@@ -81,3 +81,17 @@
 }
 .career-guides .cg-card h3 { font-weight: var(--fw-heading); }
 .career-guides .cg-card > p { font-size: var(--t-small); }
+
+/* ---------- Round 5: guides ---------- */
+.career-guides .cg-card { display: flex; flex-direction: column; }
+.career-guides .cg-card > p { flex: 1 1 auto; }
+.career-guides .cg-card-audience { margin-top: auto; padding-top: 12px; font-size: var(--t-sm); }
+@media (min-width: 1001px) { .career-guides .cg-card h3 { min-height: 3.75em; } .career-guides .cg-card--feature h3 { min-height: 3.75em; } }
+.cg-primary, .cg-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; line-height: 1.2; text-align: center; }
+.cg-action-links { display: grid; grid-template-columns: 1fr; gap: 10px; max-width: 360px; }
+.cg-action-links > :is(.cg-primary, .cg-secondary) { width: 100%; }
+.cg-action-links p { margin: 4px 0 0 !important; line-height: 1.5 !important; text-align: left; }
+.cg-action-links p .cg-help-link { display: inline; }
+@media (max-width: 1000px) { .cg-action-links { max-width: none; } }
+
+.career-guides .cg-hero.jv-aside-grid { max-width: none; }

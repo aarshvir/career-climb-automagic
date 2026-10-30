@@ -75,3 +75,17 @@
 .audience-path .jv-head .jv-link { margin-top: 4px; }
 /* Each audience page stages its example on the dot field; the workspace card does not clip it. */
 .audience-workspace { overflow: hidden; }
+
+/* ---------- Round 5: the audience hero leads with the run, the CV check is the second section ---------- */
+.audience-hero-visual { min-width: 0; }
+.audience-hero-visual .pc-card { max-width: 460px; }
+.audience-check { display: grid; gap: 32px; }
+.audience-check-copy { display: grid; align-content: center; gap: 16px; max-width: 34em; }
+.audience-check-copy h2 { text-wrap: balance; }
+.audience-check-copy p:not(.jv-caption) { margin: 0; color: var(--jv-ink-2); font-size: var(--t-body); line-height: 1.55; }
+@media (min-width: 1024px) {
+  .audience-hero-visual { grid-column: 8 / span 5; }
+  .audience-check { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; }
+  .audience-check-copy { grid-column: 1 / span 5; }
+  .audience-check > .audience-workspace { grid-column: 7 / span 6; }
+}

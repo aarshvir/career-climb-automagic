@@ -86,7 +86,7 @@
 .jv-dark .jv-btn--primary { color: var(--jv-forest); background: #fff; box-shadow: inset 0 -1px 0 rgb(15 29 23 / .08), 0 1px 2px rgb(0 0 0 / .2); }
 .jv-dark .jv-btn--secondary { color: #fff; background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .42); box-shadow: none; }
 @media (hover: hover) {
-  .jv-dark .jv-btn--primary:hover { background: #E6F0EA; }
+  .jv-dark .jv-btn--primary:hover { background: var(--jv-brand-tint); }
   .jv-dark .jv-btn--secondary:hover { background: rgb(255 255 255 / .1); border-color: rgb(255 255 255 / .6); }
 }
 .jv-dark .jv-btn--primary:active { background: #D5E5DB; }
@@ -94,9 +94,9 @@
 
 /* The approved J mark: one glyph (the favicon's hooked J) on the green tile at every size, plus the Manrope wordmark. */
 @font-face { font-family: "Jobvance Brand"; src: url("/fonts/Manrope-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
-.jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.04em; line-height: 1; text-decoration: none; border-radius: 10px; }
+.jv-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; color: var(--jv-ink); font-family: "Jobvance Brand", sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.03em; line-height: 1; text-decoration: none; border-radius: 10px; }
 .jv-brand-name { white-space: nowrap; }
-.jv-brand-period { color: var(--jv-brand); }
+.jv-brand-period { color: var(--jv-brand-period, #2F8F63); }
 /* The mark's lime (#E2EEAF) is a brand constant shared with favicon.svg and the PNG icons; UI uses --jv-signal. The tile radius is 25% at every size, like the favicon. */
 .jv-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 25%; background: var(--jv-brand); color: var(--jv-brand-glyph); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
 .jv-brand-mark svg { width: 100%; height: 100%; display: block; }
@@ -462,14 +462,17 @@
   .jv-contact-grid .jv-notecard { position: sticky; top: 112px; }
 }
 .product-page--contact .jv-page-head { padding-bottom: 32px; }
-/* Privacy: the at-a-glance card is a full-width row under the intro, three facts across. */
-.product-page--privacy .jv-page-head--split { grid-template-columns: minmax(0, 1fr); }
-.product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / -1; }
-.product-page--privacy .jv-page-head--split > .jv-page-visual { grid-column: 1 / -1; grid-row: auto; margin-top: 32px; max-width: none; }
-.product-page--privacy .jv-page-visual .jv-notecard { max-width: none; }
-@media (min-width: 768px) {
+/* Privacy: from 1024px the at-a-glance card sits beside the heading (three facts stacked); below that it is a full-width row. */
+@media (max-width: 1023px) {
+  .product-page--privacy .jv-page-head--split { grid-template-columns: minmax(0, 1fr); }
+  .product-page--privacy .jv-page-head--split > :not(.jv-page-visual) { grid-column: 1 / -1; }
+  .product-page--privacy .jv-page-head--split > .jv-page-visual { grid-column: 1 / -1; grid-row: auto; margin-top: 32px; max-width: none; }
+  .product-page--privacy .jv-page-visual .jv-notecard { max-width: none; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
   .product-page--privacy .jv-notecard ol { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; }
 }
+.jv-notecard li { align-content: start; }
 .product-page--privacy .jv-page-head { padding-bottom: 40px; }
 /* Typography: breadcrumb is one style (mono, 12px); lead is one size and measure on every page. */
 .hc-breadcrumb { font-family: var(--font-mono); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--jv-ink-3); }
@@ -508,7 +511,7 @@
 .pricing-details > p, .pricing-note, .pricing-trust { max-width: 62ch; }
 .pricing-trust li, .pricing-note { font-size: var(--t-small); line-height: 1.5; }
 .career-guides .cg-public-note, .career-guides .cg-library-heading > p { font-size: var(--t-small); max-width: 62ch; }
-.walkthroughs-page :is(.wt-hero, .wt-player, .wt-recorded, .wt-instructions, .wt-context) p:not(.wt-eyebrow):not(.wt-demo *) { font-size: max(var(--t-small), .875rem); line-height: 1.55; max-width: 68ch; }
+.walkthroughs-page :is(.wt-hero, .wt-player, .wt-recorded, .wt-instructions, .wt-context) p:not(.wt-eyebrow):not(.wt-demo *) { font-size: var(--t-body-sm); line-height: 1.55; max-width: 68ch; }
 /* One heading step per level: h3 never exceeds the h2 above it, card titles are 20-24px, and per-page tracking overrides are gone. */
 .career-guides h2, .walkthroughs-page h2 { letter-spacing: -.03em; }
 
@@ -524,3 +527,63 @@
   .jv-footer-links .jv-footer-col:last-child { grid-column: 1 / -1; }
   .jv-footer-links .jv-footer-col:last-child ul { display: flex; flex-wrap: wrap; gap: 0 24px; }
 }
+
+/* ---------- Round 5 ---------- */
+/* Panels and dark bands carry no run-trail rule: it would straddle a rounded edge or peek out under a filled band. */
+.jv-section.pricing-passes::before, .jv-section.audience-features::before, .jv-dark + .jv-section::before, .jv-dark + .jv-section--flat::before { display: none; }
+.jv-section.pricing-passes { padding-top: 56px; }
+/* Header pill: opaque enough that it never turns grey over a forest band. */
+@media (min-width: 960px) {
+  .jv-header-inner { background: rgb(255 255 255 / .96); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+}
+/* Reflow: the product name may wrap on narrow phones (WCAG 1.4.10 at 320px). */
+@media (max-width: 400px) { .jv-nb, .jv-prod { white-space: normal; } .jv-page-title .jv-nb { white-space: normal; } }
+/* Text links in the header and footer, and small controls, keep 44px targets. */
+.jv-header-nav > a, .jv-footer-bottom nav a { min-width: 44px; justify-content: center; }
+.jv-toc details > summary { min-height: 44px; }
+@media (min-width: 1024px) { .jv-toc details > summary { min-height: 44px; } }
+.wt-caption-toggle, .wt-restart { min-height: 44px; min-width: 44px; }
+/* Secondary and ghost buttons: a 3:1 edge against white (WCAG 1.4.11). */
+.jv-btn--secondary { border-color: var(--jv-line-input); }
+.jv-faq-toggle { border-color: var(--jv-line-strong); }
+/* Text spacing (WCAG 1.4.12): nothing in the account entry or audience switch clips when spacing is raised. */
+.audience-switch-full { overflow: visible; }
+
+/* Walkthroughs and help share the one hero lead and hero link sizes; the hero asides need the full width. */
+.walkthroughs-page .wt-hero > p:not(.wt-eyebrow):not(.wt-demo *) { max-width: 31em; font-size: var(--t-lead); line-height: 1.5; letter-spacing: -.011em; color: var(--jv-ink-2); }
+.help-center .hc-hero.jv-aside-grid { max-width: none; }
+.help-center .hc-hero-actions .hc-text-link, .help-center .hc-hero-actions .hc-text-link span { font-size: var(--t-body-sm); font-weight: var(--fw-semi); }
+@media (max-width: 1023px) { .jv-aside-grid > .jv-aside-slot { display: none; } }
+
+/* ---------- Round 5: closing bands ---------- */
+/* One soft light behind the right-hand card; no stripe along the top edge. */
+.jv-cta { background: radial-gradient(60% 90% at 84% 55%, rgb(169 221 188 / .12), transparent 70%), var(--jv-forest); }
+.jv-cta--page h2 { max-width: 11em; font-size: var(--t-h2); }
+.jv-cta--page { padding-block: 64px; }
+@media (min-width: 640px) { .jv-cta--page { padding-block: 80px; } }
+@media (min-width: 1024px) { .jv-cta--page { padding-block: 96px; } .jv-cta--visual { align-items: center; } .jv-cta--visual .jv-cta-inner { grid-column: 1 / span 7; } }
+/* The quiet bar for utility pages: a heading that sits on one or two balanced lines, with room before its line of copy. */
+.jv-cta-bar-copy h2 { max-width: none; font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem); line-height: 1.12; }
+.jv-cta-bar-copy p { margin-top: 12px; max-width: 48ch; }
+.jv-cta-bar-copy { max-width: 40em; }
+/* The dark section on the Automated Job Loop page centres its copy against the card. */
+@media (min-width: 1024px) { .loop-overview .lo-private-grid { align-items: center; } }
+
+.help-center .hc-hero-actions .jv-btn--primary { color: #fff; text-decoration: none; }
+.help-center .hc-hero-actions .jv-btn--primary:hover { color: #fff; }
+
+/* Accordions open and close with a height transition where the browser supports it (the fade above is the fallback). */
+@supports (interpolate-size: allow-keywords) and selector(::details-content) {
+  @media (prefers-reduced-motion: no-preference) {
+    :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial) { interpolate-size: allow-keywords; }
+    :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial)::details-content { block-size: 0; overflow: hidden; transition: block-size var(--dur-3) var(--ease-out), content-visibility var(--dur-3) allow-discrete; }
+    :is(.jv-faq details, details.jv-faq, .hc-note-details, .wt-transcript, .cg-editorial)[open]::details-content { block-size: auto; }
+    :is(.jv-faq details[open] > :is(p, div), details.jv-faq[open] > div, .hc-note-details[open] > :not(summary)) { animation: none; }
+  }
+}
+/* Menu icon: the bars and the close mark cross-fade and turn. */
+.jv-header[data-menu-open="true"] .jv-menu-toggle svg { animation: jv-icon-in 200ms var(--ease-out) both; }
+@keyframes jv-icon-in { from { opacity: 0; transform: rotate(-45deg) scale(.8); } }
+@media (prefers-reduced-motion: reduce) { .jv-menu-toggle svg { animation: none; } }
+/* Hover that needs a pointer: touch screens never get a stuck hover. */
+@media (hover: none) { .hc-start > a:hover { transform: none; box-shadow: var(--sh-1); } }

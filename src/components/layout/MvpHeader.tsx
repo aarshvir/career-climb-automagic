@@ -98,9 +98,11 @@ export default function MvpHeader() {
   }, [open]);
   const pending = !!authError || (loading && sessionLikely);
   const signedOut = !pending && !user;
+  // On the pages that already are the start (the ad landing form and the sign-in screens) the header keeps only Sign in.
+  const onEntry = /^\/(onboarding|auth)(\/|$)/.test(location.pathname);
   const signedOutActions = (hold: boolean) => <>
     <Link to="/auth?next=%2Floop" className="jv-btn jv-btn--ghost jv-btn--sm" tabIndex={hold ? -1 : undefined}>Sign in</Link>
-    <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm" tabIndex={hold ? -1 : undefined}>Get started</Link>
+    {!onEntry && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm" tabIndex={hold ? -1 : undefined}>Start my search</Link>}
   </>;
   const account = pending ? <>
     {/* Holds the signed-out footprint (invisible) while the account check runs, so nothing shifts. */}
@@ -121,7 +123,7 @@ export default function MvpHeader() {
       <Brand />
       <nav aria-label="Main navigation" className="jv-header-nav">{links.map(([to,label])=><NavLink key={to} to={to}>{label}</NavLink>)}</nav>
       <div className="jv-header-actions">{account}</div>
-      {signedOut && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm jv-header-start">Get started</Link>}
+      {signedOut && !onEntry && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm jv-header-start">Get started</Link>}
       <button ref={toggle} type="button" className="jv-menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="mobile-navigation" onClick={()=>setOpenPath(open ? null : location.pathname)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
     <nav ref={panel} id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closingNow ? "closing" : undefined} className="jv-mobile-panel">

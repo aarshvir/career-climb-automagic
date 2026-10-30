@@ -45,7 +45,8 @@
 .hc-start span { color: var(--hc-muted); font-size: var(--t-small); line-height: 1.5; }
 .hc-start > a > svg:last-child { align-self: end; justify-self: end; grid-column: 2; color: var(--hc-muted); }
 .hc-start > a > span { grid-column: 1 / -1; }
-.hc-start > a:hover { border-color: color-mix(in srgb, var(--jv-brand) 30%, var(--jv-line)); box-shadow: var(--sh-2); }
+.hc-start > a:focus-visible { border-color: color-mix(in srgb, var(--jv-brand) 30%, var(--jv-line)); box-shadow: var(--sh-2); }
+@media (hover: hover) { .hc-start > a:hover { border-color: color-mix(in srgb, var(--jv-brand) 30%, var(--jv-line)); box-shadow: var(--sh-2); } }
 
 .hc-filters { padding: 24px; background: var(--jv-bg-subtle); border: 1px solid var(--hc-border); border-radius: var(--r-md); }
 .hc-filters > label { display: block; margin-bottom: 10px; font-size: var(--t-small); font-weight: var(--fw-semi); }

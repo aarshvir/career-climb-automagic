@@ -18,14 +18,14 @@ import { ContactGate } from '@/components/ContactDetails';
 import SiteShareMetadata from '@/components/SiteShareMetadata';
 import { accountDestination, workspaceReturnPath } from '@/lib/account-return';
 import { lazyRoute, routeLoaders } from '@/lib/route-modules';
-const Auth = lazy(() => import("@/pages/Auth")),
+const Auth = lazy(routeLoaders.auth),
   AuthCallback = lazy(() => import("@/pages/AuthCallback"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword")),
   ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const ApplicationsHome = lazy(() => import("@/pages/ApplicationsHome"));
 const Workspace = lazy(() => import("@/pages/Workspace"));
 const JobLoop = lazy(() => import("@/pages/JobLoop"));
-const LoopOnboarding = lazy(() => import("@/pages/LoopOnboarding"));
+const LoopOnboarding = lazy(routeLoaders.onboarding);
 const AudienceLanding = lazyRoute("audience", routeLoaders.audience);
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
 const AdminPortal = lazy(() => import("@/pages/admin/AdminPortal"));

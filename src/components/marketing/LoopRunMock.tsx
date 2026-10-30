@@ -21,7 +21,10 @@ export default function LoopRunMock() {
   useBeforePaint(() => {
     const node = ref.current;
     // A prerendered page keeps its server-painted "Ready for review" frame, so nothing steps backwards on mount.
-    if (!node || document.documentElement.classList.contains("jv-prerendered")) return;
+    if (!node) return;
+    // A prerendered page keeps its painted "Ready for review" frame and only settles forward: a 2px rise and a brief ring on each
+    // status, in row order. Nothing steps backwards. Other pages play the full found, tailored, ready pass.
+    if (document.documentElement.classList.contains("jv-prerendered")) { node.classList.add("is-settle"); return; }
     node.classList.add("is-live");
     if (typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(([entry]) => node.classList.toggle("is-offscreen", !entry.isIntersecting));

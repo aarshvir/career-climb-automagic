@@ -54,7 +54,7 @@ export default function SubscriptionPricing() {
     <LoopSubscriptionBilling />
     <section className="jv-section pricing-start" aria-labelledby="loop-offer">
       <div className="pricing-start-row" data-reveal>
-        <div><h2 id="loop-offer" className="pricing-start-title">Not ready to choose? Start free.</h2><p>Create a free account and set up your roles and schedule. Choose a plan when you want searches to run.</p></div>
+        <div><h2 id="loop-offer" className="pricing-start-title">Not ready to choose? Start free.</h2><p>Create a free account and set up your roles and schedule. Choose a plan for ongoing automatic runs.</p></div>
         <Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search <ArrowRight aria-hidden="true" /></Link>
       </div>
     </section>
@@ -65,7 +65,7 @@ export default function SubscriptionPricing() {
       {params.get('checkout') === 'cancelled' && <p className="pricing-picked" role="status">Checkout was cancelled. You have not been charged.</p>}
       <div className="pricing-tiers">
         <section className="pricing-card pricing-tier pricing-tier--free" aria-labelledby="pricing-free">
-          <p className="jv-caption">Start here · no card</p>
+          <p className="jv-caption">Start free</p>
           <h3 id="pricing-free">Free</h3>
           <p className="pricing-price"><span className="pricing-amount">$0</span><span className="pricing-unit">Always free to start</span></p>
           <p className="pricing-desc">Try AI tailoring before you pay for anything.</p>

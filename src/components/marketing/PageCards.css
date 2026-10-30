@@ -58,3 +58,71 @@
   .pc-week-strip li:last-child::before { bottom: 50%; }
   .pc-week-strip li:not(.is-run) .pc-week-result { display: none; }
 }
+
+/* ---------- Round 5: hero asides for the text-first pages ---------- */
+.pc-aside { gap: 12px; max-width: 420px; box-shadow: var(--sh-3); }
+.pc-aside .pc-caption { display: inline-flex; align-items: center; gap: 8px; }
+.pc-aside .pc-caption svg { width: 14px; height: 14px; stroke-width: 1.75; }
+.pc-qa { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--jv-line); border-radius: 12px; background: #fff; font-size: var(--t-small); line-height: 1.35; }
+.pc-qa-q { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--jv-ink); font-weight: 500; }
+.pc-qa-q i { position: relative; flex: none; width: 20px; height: 20px; border: 1px solid var(--jv-line-strong); border-radius: 50%; }
+.pc-qa-q i::before, .pc-qa-q i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 1.5px; background: var(--jv-ink-2); translate: -50% -50%; }
+.pc-qa-q i::after { rotate: 90deg; }
+.pc-qa p { margin: 0; color: var(--jv-ink-2); font-size: var(--t-sm); line-height: 1.5; }
+.pc-qa.is-open { border-color: color-mix(in srgb, var(--jv-brand) 30%, var(--jv-line)); background: var(--jv-bg-subtle); }
+.pc-qa.is-open .pc-qa-q i { border-color: var(--jv-brand); background: var(--jv-brand); }
+.pc-qa.is-open .pc-qa-q i::before { background: #fff; } .pc-qa.is-open .pc-qa-q i::after { display: none; }
+.pc-pace-days { display: grid; grid-template-columns: 132px repeat(7, 1fr); gap: 0; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1rem; text-align: center; }
+.pc-pace-days span:first-child { grid-column: 2; }
+.pc-pace { display: grid; grid-template-columns: 132px minmax(0, 1fr); align-items: center; padding-top: 10px; border-top: 1px solid var(--jv-line); }
+.pc-pace-name { display: grid; line-height: 1.3; }
+.pc-pace-name strong { font-size: var(--t-small); font-weight: 500; }
+.pc-pace-name span { color: var(--jv-ink-3); font-size: var(--t-sm); }
+.pc-pace-dots { display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; }
+.pc-pace-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--jv-sunken); box-shadow: inset 0 0 0 1px var(--jv-line-strong); }
+.pc-pace-dots i.is-on { background: var(--jv-brand); box-shadow: 0 0 0 3px var(--jv-brand-tint); }
+.pc-receipt-code { display: grid; gap: 6px; padding: 14px; border: 1px dashed var(--jv-line-strong); border-radius: 12px; background: var(--jv-bg-subtle); }
+.pc-receipt-code strong { font-family: var(--font-mono); font-size: var(--t-body); font-weight: 500; letter-spacing: .04em; }
+.pc-receipt-rows { display: grid; gap: 6px; color: var(--jv-ink-2); font-size: var(--t-sm); line-height: 1.4; }
+.pc-receipt-rows span { position: relative; padding-left: 16px; }
+.pc-receipt-rows span::before { content: ""; position: absolute; left: 0; top: .5em; width: 6px; height: 6px; background: var(--jv-brand); }
+.pc-index-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.pc-index-list li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--jv-line); font-size: var(--t-small); }
+.pc-index-list strong { color: var(--jv-ink); font-family: var(--font-mono); font-size: var(--t-small); font-weight: 500; }
+.pc-trail { display: grid; margin: 0; padding: 0; list-style: none; }
+.pc-trail li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; padding: 11px 0; border-top: 1px solid var(--jv-line); }
+.pc-trail-n { color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); line-height: 1.4rem; }
+.pc-trail-t { display: grid; line-height: 1.35; }
+.pc-trail-t strong { font-size: var(--t-small); font-weight: 500; }
+.pc-trail-t span { color: var(--jv-ink-3); font-size: var(--t-sm); }
+.pc-trail li.is-now .pc-trail-n { color: var(--jv-brand-ink); }
+.pc-trail li.is-now { box-shadow: inset 2px 0 0 var(--jv-brand); padding-left: 10px; margin-left: -10px; }
+.pc-walk-screen { position: relative; display: grid; align-content: end; gap: 10px; min-height: 148px; padding: 14px; border-radius: 12px; background: radial-gradient(70% 90% at 80% 0%, rgb(169 221 188 / .16), transparent 70%), var(--jv-forest); color: #fff; }
+.pc-walk-play { position: absolute; top: 14px; left: 14px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #fff; color: var(--jv-forest); }
+.pc-walk-play svg { width: 14px; height: 14px; fill: currentColor; margin-left: 2px; }
+.pc-walk-caption { justify-self: start; padding: 4px 8px; border-radius: 6px; background: rgb(0 0 0 / .5); font-size: var(--t-small); line-height: 1.3; }
+.pc-walk-bar { display: block; height: 3px; border-radius: 3px; background: rgb(255 255 255 / .22); }
+.pc-walk-bar i { display: block; width: 38%; height: 100%; border-radius: 3px; background: var(--jv-signal); }
+/* Where the aside sits: beside the heading from 1024px, never on phones (the page's own first block stays above the fold). */
+.jv-aside-slot { display: none; }
+@media (min-width: 1024px) {
+  .jv-aside-grid { position: relative; }
+  .jv-aside-grid > .jv-aside-slot { display: block; position: absolute; right: 0; top: 50%; width: min(400px, 34%); translate: 0 -50%; pointer-events: none; }
+  .jv-aside-grid > .jv-aside-slot .pc-aside { max-width: none; }
+  .jv-aside-grid > :not(.jv-aside-slot) { max-width: calc(100% - min(400px, 34%) - 48px); }
+}
+
+.pc-paces { gap: 8px; padding: 16px 18px; }
+.pc-paces .pc-pace { grid-template-columns: 150px minmax(0, 1fr); padding-top: 8px; }
+.pc-paces .pc-pace-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; }
+.pc-paces .pc-pace-name span { font-size: var(--t-sm); }
+.pc-paces .pc-pace-name { display: grid; gap: 0; }
+
+/* Mobile week strip: one continuous rail through the centre of the dot column (the desktop first/last-child rules no longer leak in). */
+@media (max-width: 639px) {
+  .pc-week-strip li .pc-week-mark { justify-self: center; margin: 0; }
+  .pc-week-strip li::before, .pc-week-strip li:first-child::before, .pc-week-strip li:last-child::before { left: 62px; right: auto; width: 2px; height: auto; top: 0; bottom: 0; }
+  .pc-week-strip li:first-child::before { top: 50%; }
+  .pc-week-strip li:last-child::before { bottom: 50%; }
+  .pc-week-strip li.is-run::before { background: linear-gradient(180deg, var(--jv-signal), var(--jv-brand)); }
+}

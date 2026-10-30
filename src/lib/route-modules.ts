@@ -34,7 +34,16 @@ export const routeLoaders = {
   guideArticle: () => import("@/pages/CareerGuides").then(module => ({ default: module.CareerGuideArticle })),
   help: () => import("@/pages/HelpCenter"),
   walkthroughs: () => import("@/pages/Walkthroughs"),
+  onboarding: () => import("@/pages/LoopOnboarding"),
+  auth: () => import("@/pages/Auth"),
 } as const;
+
+/** Client-only account entry routes (the Meta ad landing page): start their chunks at once, in parallel, instead of after the entry and the first route hop. */
+export function warmAccountEntry(path: string): void {
+  const quiet = () => undefined;
+  if (path === "/onboarding") { routeLoaders.onboarding().catch(quiet); routeLoaders.auth().catch(quiet); }
+  else if (path === "/auth") routeLoaders.auth().catch(quiet);
+}
 
 /** The chunk keys a prerendered public path needs on its first client render. */
 export function routeKeysFor(path: string): Array<keyof typeof routeLoaders> {

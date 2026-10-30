@@ -13,7 +13,8 @@ import './JobLoop.css';
 import { currentOffer } from '@/lib/current-offer';
 import { subscriptionPlans } from '@/lib/subscription-plans';
 import { RunCard } from '@/components/marketing/ProductCards';
-import { CvDiffCard, SetupCard } from '@/components/marketing/PageCards';
+import { CvDiffCard, NextRunCard, SetupCard } from '@/components/marketing/PageCards';
+import { FaqAside, PacesAside, ReceiptAside } from '@/components/marketing/HeroAsides';
 import { useReveal } from '@/hooks/useReveal';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 
@@ -78,6 +79,14 @@ function CtaBar({ start, heading = "Ready to automate your search?", body = "Set
   return <section className="jv-cta-bar" aria-labelledby="page-cta-title">
     <div className="jv-cta-bar-copy"><h2 id="page-cta-title">{heading}</h2><p>{body}</p></div>
     <div className="jv-cta-bar-actions"><StartLink to={start} />{secondary && <TextLink to="/check">Try the free CV Check</TextLink>}</div>
+  </section>;
+}
+
+/** The closing moment on the main marketing pages: the forest band, with the next run echoed on the right. */
+function CtaBand({ start, heading = "Ready to automate your search?", body = "Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs." }: { start: string; heading?: string; body?: string }) {
+  return <section className="jv-cta jv-cta--visual jv-cta--page jv-dark" aria-labelledby="page-cta-title">
+    <div className="jv-cta-inner"><h2 id="page-cta-title">{heading}</h2><p>{body}</p><div className="jv-cta-actions"><StartLink to={start} /><Link to="/check" className="jv-btn jv-btn--secondary jv-btn--lg">Try the free CV Check</Link></div></div>
+    <div className="jv-cta-visual" aria-hidden="true"><NextRunCard /></div>
   </section>;
 }
 
@@ -160,9 +169,9 @@ export default function ProductPage({ kind }: { kind: Kind }) {
   const meta = staticPageMeta(path);
   // One product fragment beside the intro on the explainer pages that would otherwise open on text alone.
   // Contact and privacy get a quiet summary card (real facts from the policy); the explainers get their own product moment.
-  const visual = kind === "how" ? <SetupCard /> : kind === "about" ? <CvDiffCard /> : kind === "privacy" ? <aside className="jv-notecard" aria-label="Your information at a glance"><p className="jv-caption">At a glance</p><ol><li><strong>Your file stays on your device</strong><span>The free check reads it locally.</span></li><li><strong>Saving is your choice</strong><span>Nothing is stored in your account until you confirm.</span></li><li><strong>Advertising measurement is optional</strong><span>You can turn it off further down this page.</span></li></ol></aside> : null;
-  const contactNote = <aside className="jv-notecard" aria-label="How support works"><p className="jv-caption">How support works</p><ol><li><strong>No account needed</strong><span>Public support needs no name or email.</span></li><li><strong>Keep your receipt code</strong><span>It lets you read the status and any reply.</span></li><li><strong>Kept up to 90 days</strong><span>Your message is read by a person, then removed.</span></li></ol></aside>;
-  const visualDecor = kind === "how" || kind === "about";
+  const visual = kind === "how" ? <SetupCard /> : kind === "about" ? <CvDiffCard /> : kind === "faq" ? <FaqAside /> : kind === "pricing" ? <PacesAside /> : kind === "contact" ? <ReceiptAside /> : kind === "privacy" ? <aside className="jv-notecard" aria-label="Your information at a glance"><p className="jv-caption">At a glance</p><ol><li><strong>The free check runs on your device</strong><span>Comparing without AI never uploads your file.</span></li><li><strong>Saving is your choice</strong><span>Nothing is stored in your account until you confirm.</span></li><li><strong>Advertising measurement is optional</strong><span>You can turn it off further down this page.</span></li></ol></aside> : null;
+  const contactNote = <aside className="jv-notecard" aria-label="How support works"><p className="jv-caption">How support works</p><ol><li><strong>No account needed</strong><span>Public support needs no name or email.</span></li><li><strong>Keep your receipt code</strong><span>It lets you read the status and any reply.</span></li><li><strong>Kept up to 90 days, if you choose</strong><span>Storing your message is optional. It is available for review, then removed.</span></li></ol></aside>;
+  const visualDecor = kind === "how" || kind === "about" || kind === "faq" || kind === "pricing" || kind === "contact";
   const related = (relatedFor[kind] ?? []).map(to => relatedLinks.find(([href]) => href === to)!).filter(Boolean);
   return <main className={`product-page product-page--${kind}${kind === "home" ? "" : " jv-rails"}`}>
     <Helmet><title>{meta?.title ?? `${titles[kind]} | Jobvance`}</title><meta name="description" content={meta?.description ?? intros[kind]} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}{meta && <meta property="og:title" content={meta.title} />}{meta && <meta property="og:description" content={meta.description} />}{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" />{kind === 'notfound' && <meta name="robots" content="noindex,follow" />}</Helmet>
@@ -188,7 +197,8 @@ export default function ProductPage({ kind }: { kind: Kind }) {
           {related.length > 0 && <nav className="jv-related" aria-label="Related pages"><span>Related</span>{related.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav>}
         </div>}
       </div>
-      {band && <CtaBar start={start} />}
+      {(kind === "how" || kind === "about") && <CtaBand start={start} />}
+      {kind === "faq" && <CtaBar start={start} />}
       {(kind === "contact" || kind === "privacy") && <CtaBar start={start} heading="Back to your search?" body="Choose your roles and locations once. Automated Job Loop does the repeat work." secondary={false} />}
     </>}
   </main>;

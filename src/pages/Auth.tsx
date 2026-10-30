@@ -53,10 +53,13 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     event.preventDefault();
     if (busy || configurationError) return;
     setError('');
-    if (!isValidEmail(email.trim())) { setError('Please enter a valid email address.'); return; }
+    // Native validation bubbles are transient and unannounced; the checks below show an inline alert and move focus to the field.
+    const focusField = (suffix: string) => document.getElementById(`${fieldId}-${suffix}`)?.focus();
+    if (!isValidEmail(email.trim())) { setError('Please enter a valid email address.'); focusField('email'); return; }
     if (!authRateLimiter.check(email.trim().toLowerCase())) { setError('Too many attempts. Please try again in a minute.'); return; }
     const details = mode === 'sign-up' ? checkContact(contact) : null;
-    if (typeof details === 'string') { setError(details); return; }
+    if (typeof details === 'string') { setError(details); (event.currentTarget as HTMLFormElement).querySelector<HTMLElement>('input:not([type=hidden])')?.focus(); return; }
+    if (!password) { setError(mode === 'sign-up' ? 'Choose a password to continue.' : 'Enter your password to continue.'); focusField('password'); return; }
     if (mode === 'sign-up') {
       if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
       const validation = validatePassword(password);
@@ -199,7 +202,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
                 Continue with Google
               </Button>}
               {!socialBrowser && <div className="ap-auth-divider"><span>or use your email and password</span></div>}
-              <form className="ap-auth-form" onSubmit={handleSubmit}>
+              <form className="ap-auth-form" onSubmit={handleSubmit} noValidate>
                 {mode === 'sign-up' && <ContactFields value={contact} onChange={setContact} disabled={busy} />}
                 <div className="ap-field">
                   <Label htmlFor={`${fieldId}-email`}>Email address</Label>

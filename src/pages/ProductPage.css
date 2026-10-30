@@ -159,3 +159,39 @@
 .pricing-card--featured .pricing-flag { position: absolute; top: -13px; left: 24px; min-height: 26px; box-shadow: 0 0 0 4px #fff; }
 .pricing-card-head { flex-wrap: nowrap; }
 @media (max-width: 1023px) { .pricing-card--featured.jv-dark { margin-block: 14px 0; } }
+
+/* ---------- Round 5: pricing ---------- */
+/* Each plan card leads with its run pace; the lines every plan shares sit once in a row under the cards. */
+.pricing-cadence { margin: 16px 0 0; color: var(--jv-brand); font-size: var(--t-h3); font-weight: var(--fw-heading); line-height: 1.15; letter-spacing: var(--ls-h3); }
+.pricing-cadence strong { font-weight: 600; }
+.pricing-card.jv-dark .pricing-cadence { color: var(--jv-brand-text); }
+.pricing-cadence + .pricing-price { margin-top: 12px; }
+.pricing-includes { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 28px; margin: 4px 0 0; padding: 14px 0; border-block: 1px solid var(--jv-line); list-style: none; }
+.pricing-includes li { display: inline-flex; align-items: center; gap: 8px; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.5; }
+.pricing-includes-label { color: var(--jv-ink-3) !important; font-family: var(--font-mono); font-size: var(--t-xs) !important; letter-spacing: .06em; text-transform: uppercase; }
+.pricing-includes svg, .pricing-card ul svg, .pricing-trust svg { color: var(--jv-brand); stroke-width: 2.25; }
+.pricing-card.jv-dark ul svg { color: var(--jv-signal); }
+.pricing-details > div { padding: 8px 0 24px; }
+.pricing-details > div > p { max-width: 62ch; margin: 0 0 10px; color: var(--jv-ink-2); font-size: var(--t-small); line-height: 1.55; }
+.pricing-details > div > p:last-child { margin-bottom: 0; }
+.pricing-details > p { padding: 0; }
+.product-page .loop-price-market { margin-top: 20px; padding-top: 20px; }
+/* One-line pass captions so title, price and body share baselines across the four cards. */
+.pricing-card > .jv-caption { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; height: 1rem; }
+.pricing-card > .jv-caption::before { display: inline-block; margin-right: 10px; vertical-align: .1em; }
+/* The optional passes are a second-tier block: a section-sized heading, with the lead beside it on desktop. */
+.pricing-passes .jv-section-title--panel { font-size: clamp(1.625rem, 1.4rem + .9vw, 2rem); letter-spacing: -.03em; }
+.pricing-start, .pricing-teams { padding-block: 40px; }
+@media (min-width: 1024px) {
+  .pricing-start, .pricing-teams { padding-block: 56px; }
+  .jv-section.pricing-passes { margin-top: 24px; padding-block: 56px; }
+  .pricing-passes > .jv-head { max-width: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 64px; align-items: end; }
+  .pricing-passes > .jv-head > .jv-caption { grid-column: 1 / -1; }
+  .pricing-passes > .jv-head > p:not(.jv-caption) { margin: 0; max-width: 34em; font-size: var(--t-body); }
+  .pricing-passes .pricing-note--lead { margin-top: 0; }
+}
+
+.product-proposed-grid .pricing-desc { margin: 12px 0 24px; }
+
+.jv-section.pricing-start, .jv-section.pricing-teams { padding-block: 40px; }
+@media (min-width: 1024px) { .jv-section.pricing-start, .jv-section.pricing-teams { padding-block: 56px; } }

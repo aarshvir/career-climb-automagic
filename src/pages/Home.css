@@ -191,7 +191,7 @@
   .jv-home .jv-frag { padding: 0; border: 0; background: none; }
 }
 @media (min-width: 768px) {
-  .jv-home .jv-control-row { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: start; }
+  .jv-home .jv-control-row { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; }
   .jv-home .jv-control-row--flip { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
   .jv-home .jv-control-row--flip .jv-frag { order: -1; }
   .jv-home .jv-frag { min-height: 0; padding: 32px; }
