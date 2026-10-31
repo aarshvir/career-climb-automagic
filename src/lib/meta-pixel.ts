@@ -1,7 +1,8 @@
-// Meta Pixel advertising measurement: the public page a visit lands on, plus the moment a new
-// account is created. It only starts on a fresh load of a public page, never on sign-in, reset,
-// mailbox or checkout return URLs (which can carry login codes or payment references). Meta's
-// history tracking is off, so nothing is reported as the visitor moves into private pages.
+// Meta Pixel advertising measurement: the public page a visit lands on, the moment the sign-up form
+// is submitted (content-free), plus the moment a new account is created. It only starts on a fresh
+// load of a public page, never on sign-in, reset, mailbox or checkout return URLs (which can carry
+// login codes or payment references). Meta's history tracking is off, so nothing is reported as
+// the visitor moves into private pages.
 // It never sends CV, vacancy, document, payment or email data.
 import { supabase } from '@/integrations/supabase/client';
 import { cvVariantSessionIdentity } from '@/lib/loop-cv-variant-recovery';
@@ -29,7 +30,7 @@ const current = (scope: RegistrationScope) => authority.owner === scope.owner &&
 const measuredPaths = new Set(['/', '/onboarding', '/auth', '/job-loop', '/pricing', '/how-it-works', '/faq', '/about', '/contact', '/privacy', '/terms', '/refund', '/help', '/guides', '/walkthroughs', '/for-students', '/for-mba', '/for-career-switchers']);
 const europeanZones = /^(Europe\/|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
 
-type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean; jobvanceLastPage?: string };
+type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean; jobvanceLastPage?: string; jobvanceSignupAttempts?: string[] };
 declare global { interface Window { fbq?: Fbq; _fbq?: Fbq } interface Navigator { globalPrivacyControl?: boolean } }
 
 const attributionKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid'];
@@ -54,7 +55,9 @@ function safePublicUrl(value: URL): boolean {
   for (const [key, content] of value.searchParams) {
     if (attributionKeys.includes(key) && content.length <= 300 && ![...content].some(char => char.charCodeAt(0) < 32)) continue;
     if (key === 'mode' && /^(signup|signin|login)$/.test(content)) continue;
-    if (key === 'next' && ['/', '/onboarding', '/loop', '/dashboard', '/applications'].includes(content)) continue;
+    // `/check` is the signed-in CV Check: the sign-up page may name it as its destination, but the Check page itself is private
+    // and never measured (it is not in measuredPaths), and a destination with its own query (`/check?savedCheck=...`) never matches.
+    if (key === 'next' && ['/', '/onboarding', '/loop', '/dashboard', '/applications', '/check'].includes(content)) continue;
     if (['country', 'currency', 'plan', 'lang'].includes(key) && /^[a-z\d-]{2,30}$/i.test(content)) continue;
     return false;
   }
@@ -111,6 +114,23 @@ export function trackMetaPage(pathname: string): void {
     fbq('trackSingle', META_PIXEL_ID, 'PageView');
   }
   flushRegistration(fbq);
+}
+
+/**
+ * The sign-up form passed validation and was submitted. A browser-only funnel-intent signal, sent before email confirmation:
+ * it is not a registration and has no server copy, so it never touches `CompleteRegistration` or its `reg_` event ID.
+ * It takes exactly the PageView gating (production build, no opt-out, no GPC, not Europe, safe public URL and referrer),
+ * is sent once per submit attempt, and carries no parameters at all (no name, email, phone, password or attempt ID).
+ */
+export function trackMetaSignupSubmitted(attemptId: string): boolean {
+  if (!attemptId) return false;
+  try {
+    const fbq = ensurePixel();
+    if (!fbq || fbq.jobvanceSignupAttempts?.includes(attemptId)) return false;
+    fbq.jobvanceSignupAttempts = [...(fbq.jobvanceSignupAttempts ?? []), attemptId].slice(-20);
+    fbq('trackSingleCustom', META_PIXEL_ID, 'SignupSubmitted');
+    return true;
+  } catch { return false; } // Measurement must never get in the way of creating an account.
 }
 
 async function accountKey(userId: string): Promise<string> {
