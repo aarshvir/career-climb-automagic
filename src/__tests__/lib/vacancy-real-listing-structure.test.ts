@@ -226,6 +226,108 @@ describe('result on the whole ad', () => {
     expect(report.summary.total).toBe(report.requirements.length);
     // The same ad used to produce 28 items; six real duties and criteria remain.
     expect(report.summary.total).toBe(6);
-    expect(report.methodVersion).toBe('english-literal-evidence-v6');
+    expect(report.methodVersion).toBe('english-literal-evidence-v7');
+  });
+});
+
+// An employer named in the heading ("About Acme") and pay or perks headings that are not on the short list.
+const ABOUT_NAMED = [
+  'Data Analyst II',
+  '',
+  'About Example Retail Group',
+  'Example Retail Group is a fast-growing retailer on a mission to make shopping simple for everyone. We are proud of our inclusive culture.',
+  '',
+  "What you'll do",
+  '- Build a weekly SQL and Excel report on store stock-outs',
+  '- Present findings to regional managers',
+  '',
+  "What we're looking for",
+  '- Strong Excel skills',
+  '- Experience with Salesforce',
+  '- Applicants need a valid work permit',
+  '',
+  'Compensation and perks',
+  '- Salary range: $70,000 - $85,000 per year',
+  '- 25 days of holiday and private medical cover',
+  '',
+  'Apply by 31 December 2026.',
+].join('\n');
+
+describe('an employer named in the heading is company context', () => {
+  it('drops the heading and the blurb under it, keeps duties, criteria, conditions and the deadline', () => {
+    expect(quotes(ABOUT_NAMED)).toEqual([
+      'Build a weekly SQL and Excel report on store stock-outs',
+      'Present findings to regional managers',
+      'Strong Excel skills',
+      'Experience with Salesforce',
+      'Applicants need a valid work permit',
+      'Apply by 31 December 2026.',
+    ]);
+  });
+
+  it('keeps every dropped line available verbatim in the omitted sections', () => {
+    const dropped = omitted(ABOUT_NAMED);
+    for (const line of ['About Example Retail Group', 'Compensation and perks', '$70,000 - $85,000 per year', '25 days of holiday and private medical cover']) {
+      expect(dropped).toContain(line);
+    }
+    expect(dropped.some(line => line.startsWith('Example Retail Group is a fast-growing retailer'))).toBe(true);
+  });
+
+  it.each([
+    'About Acme',
+    'About Acme:',
+    'ABOUT ACME',
+    'About Acme Pay Ltd.',
+    'About Bank of Example',
+    '\u{1F3E2} About Example Retail Group',
+  ])('treats "%s" as a company heading', heading => {
+    const job = `Analyst\n${heading}\nAcme is a payments company with offices in three countries.\nRequirements\nPrepare reports.`;
+    expect(quotes(job)).toEqual(['Prepare reports.']);
+  });
+
+  it.each([
+    'About you',
+    'About the role',
+    'About the role...',
+    'About this role:',
+    'ABOUT THE ROLE:',
+  ])('still reads "%s" as a requirement heading', heading => {
+    const job = `Analyst\n${heading}\nPrepare monthly reports.\nStrong SQL skills.`;
+    expect(quotes(job)).toEqual(['Prepare monthly reports.', 'Strong SQL skills.']);
+  });
+
+  it.each([
+    'About 3 years of experience with Salesforce',
+    'About half of your time will be spent building reports',
+    'About SQL and Excel skills are needed for this job',
+  ])('keeps a requirement line that starts with "About": %s', value => {
+    expect(quotes(`Analyst\nRequirements\nPrepare reports.\n${value}`)).toContain(value);
+  });
+
+  it('keeps a mandatory criterion inside a named company section', () => {
+    const job = 'About Acme\nAcme is a payments company. Candidates must have a valid right to work. We offer free lunch.\nRequirements\nPrepare reports.';
+    const found = quotes(job);
+    expect(found).toContain('Candidates must have a valid right to work.');
+    expect(found).not.toContain('We offer free lunch.');
+    expect(found).not.toContain('Acme is a payments company.');
+  });
+
+  it.each([
+    'Compensation and perks',
+    'Perks and benefits',
+    'Pay and benefits',
+    'Salary, benefits and perks',
+    'Compensation & benefits',
+    "What's in it for you",
+    "What you'll get",
+    '\u{1F4B0} Compensation and perks',
+  ])('treats "%s" as a perks heading', heading => {
+    const job = `Analyst\nRequirements\nPrepare reports.\n${heading}\n- Private medical cover\n- Free lunch on Fridays`;
+    expect(quotes(job)).toEqual(['Prepare reports.']);
+  });
+
+  it('still reads a requirement that sits after the perks block', () => {
+    const job = 'Analyst\nPerks and benefits\n- Free lunch\nRequirements\nPrepare reports.\nStrong SQL skills';
+    expect(quotes(job)).toEqual(['Prepare reports.', 'Strong SQL skills']);
   });
 });
