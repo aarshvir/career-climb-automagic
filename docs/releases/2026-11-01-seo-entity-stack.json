@@ -1,0 +1,243 @@
+{
+  "release": "Organisation disambiguation, internal links and guide structured data",
+  "publicVersion": 73,
+  "publishedUrl": "https://jobvance.io",
+  "source": "c4eaebf28ca8a4219d778ec2b859466e98f2de63",
+  "base": "5da902c23e6ddcb33f9d0f344f1af264d79701a8",
+  "prs": [
+    {
+      "number": 48,
+      "head": "450ba6740d9ef16a5082fd818f2713491a046b4c",
+      "merge": "6aa08bb52881f501283ee8092af8eec6b4f1979d"
+    },
+    {
+      "number": 49,
+      "head": "a9c0dc08a6bd1e0c948ed99254ed8445d8cdf13d",
+      "merge": "160773567f96e4c10dd8c8dd8ce8f7bcc6252e89"
+    },
+    {
+      "number": 50,
+      "head": "c4eaebf28ca8a4219d778ec2b859466e98f2de63",
+      "merge": "61205e57c29d89e76afb77ddaea1a879cb9e3e76"
+    }
+  ],
+  "mergeTree": "e903d730e31f3ba5b9800e928919997922dece38",
+  "fullMergeTreeEqualsReviewedCandidate": true,
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_4a5a29d0365481918137cf4ca67441a2",
+  "deploymentId": "appgdep_6ae65cdfc560819194d6b7ee1c9199ba",
+  "deployedAt": "2026-10-31T21:26:16.325930+00:00",
+  "changes": [
+    "Owner-confirmed no connection to Jobva/jobvance.com in Organization data, About, FAQ and llms.txt; no operator identity or fabricated profiles.",
+    "Ten home guide links, five footer groups, audience related-reading and remaining public CV Check CTAs repointed.",
+    "One Article/Organization per prerendered guide, three-level breadcrumb; duplicate client BlogPosting removed.",
+    "Current main/v72 corrections integrated preserving every author commit; llms conflict retains both bounded product facts and disambiguation.",
+    "Root wide-screen footer correction aligns five groups across the full rail; mobile/tablet grids retained. Inherited About each-role wording corrected without changing home hero/meta."
+  ],
+  "validation": {
+    "ci": [
+      {
+        "run": 41242537265,
+        "job": 124659202002,
+        "head": "450ba6740d9ef16a5082fd818f2713491a046b4c",
+        "allStepsPassed": true
+      },
+      {
+        "run": 41242875472,
+        "job": 124660202017,
+        "head": "a9c0dc08a6bd1e0c948ed99254ed8445d8cdf13d",
+        "allStepsPassed": true
+      },
+      {
+        "run": 41242893121,
+        "job": 124660254344,
+        "head": "c4eaebf28ca8a4219d778ec2b859466e98f2de63",
+        "allStepsPassed": true
+      }
+    ],
+    "local": {
+      "tests": 3808,
+      "files": 217,
+      "typeScript": "passed",
+      "lintErrors": 0,
+      "inheritedLintWarnings": 50,
+      "sourceWhitespace": "passed"
+    },
+    "build": {
+      "pages": 38,
+      "guides": 20,
+      "sitemapUrls": 37,
+      "structuredDataHashes": 38,
+      "compressedBytes": 2202639,
+      "limitBytes": 3145728,
+      "hostingGroups": 12,
+      "social": "38-page metadata and two unchanged exact 1200x630 PNG routes pass"
+    },
+    "live": {
+      "at": "2026-10-31T21:26:56.985Z",
+      "paths": 164,
+      "allStatus200": true,
+      "passed": 164,
+      "rawExact": 118,
+      "applicationExactWithRecognizedCloudflareTail": 46,
+      "javascriptExecutedByHttpChecks": false,
+      "rawHtmlParityClaimed": false,
+      "adTaggedQa": false
+    },
+    "browser": {
+      "localProduction": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "documentWidth": 1425,
+          "alignedFooterGroups": 5,
+          "aboutDisambiguation": true
+        },
+        {
+          "viewport": [
+            375,
+            812
+          ],
+          "documentWidth": 360,
+          "footerGroups": 5,
+          "linksPerGroup": 3,
+          "audienceRelatedLinks": true
+        },
+        {
+          "guide": "/guides/academic-qualifications-uae-cv",
+          "oneArticle": true,
+          "oneOrganization": true,
+          "noBlogPosting": true,
+          "breadcrumbItems": 3,
+          "protectedTitleUnchanged": true
+        }
+      ],
+      "live": [
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "documentWidth": 1425,
+          "alignedFooterGroups": 5,
+          "aboutDisambiguation": true
+        },
+        {
+          "viewport": [
+            375,
+            812
+          ],
+          "documentWidth": 360,
+          "guide": "/guides/academic-qualifications-uae-cv",
+          "oneArticle": true,
+          "oneOrganization": true,
+          "noBlogPosting": true,
+          "breadcrumbItems": 3
+        }
+      ],
+      "limits": "No form/account/contact/Google/AI/provider/checkout/payment submission or ad-tagged QA. No real-handset, authenticated private-check, genuine-customer, ranking or AI-citation outcome acceptance. Header signed-in branch unchanged/source-reviewed, not exercised with a real account."
+    }
+  },
+  "boundaries": {
+    "backendTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "protectedObjectCount": 17,
+    "protectedObjectsUnchanged": "Whole Supabase; Auth/signup/ContactGate; Pixel/commerce/UK-consent hook; parser v7; v72 landing/FAQ limits; owner home/meta; header; CSP; dependencies; CI.",
+    "cssBasePrefixPreserved": true,
+    "commerceMigration": "20261030041314 already applied, never replayed",
+    "metaConversionsVersion": 3,
+    "mutations": "No backend/schema/function/payment/ad/funding/provider/permission/outreach/indexing or YouTube change."
+  },
+  "cloudflare": {
+    "securityEventsRead": false,
+    "surface": "In-app browser",
+    "observedUrl": "https://dash.cloudflare.com/login",
+    "observedHeading": "Sign in to Cloudflare",
+    "botChallengeState": "Unknown for Googlebot, Bingbot, OAI-SearchBot, Claude-SearchBot and PerplexityBot",
+    "settingsChanged": false,
+    "limits": "Authenticated zone access not established; no login, credentials or authentication bypass. Ordinary HTTP200 or crawler-UA requests do not prove actual verified-bot Security Events."
+  },
+  "measurement": {
+    "conversionReadAt": "2026-10-31 21:28:38.60297+00",
+    "dailyCounts": [
+      {
+        "read_at": "2026-10-31 21:28:38.60297+00",
+        "zone": "Asia/Dubai",
+        "local_day": "2026-11-01",
+        "day_start": "2026-10-31 20:00:00+00",
+        "day_end": "2026-10-31 21:28:38.60297+00",
+        "any_ad_tagged_visits": 0,
+        "meta_ad_visits": 0,
+        "exact_campaign_entry_visits": 0,
+        "purchase_campaign_tagged_visits": 0,
+        "purchase_campaign_first_touch_linked_signups": 0,
+        "classified_signups": 0,
+        "first_touch_meta_linked_signups": 0,
+        "live_provider_checkout_sessions_created": 0,
+        "classified_live_paid_rows_by_retained_date": 0,
+        "eligible_first_paid_cycles": 0,
+        "matching_first_purchase_claims": 0,
+        "matching_first_purchase_sent": 0,
+        "live_commerce_claims_today": 0,
+        "live_commerce_sent_today": 0,
+        "live_commerce_totals": {
+          "sent": 0,
+          "claims": 0,
+          "checkout_sent": 0,
+          "purchase_sent": 0,
+          "checkout_claims": 0,
+          "purchase_claims": 0
+        }
+      },
+      {
+        "read_at": "2026-10-31 21:28:38.60297+00",
+        "zone": "UTC",
+        "local_day": "2026-10-31",
+        "day_start": "2026-10-31 00:00:00+00",
+        "day_end": "2026-10-31 21:28:38.60297+00",
+        "any_ad_tagged_visits": 107,
+        "meta_ad_visits": 107,
+        "exact_campaign_entry_visits": 29,
+        "purchase_campaign_tagged_visits": 68,
+        "purchase_campaign_first_touch_linked_signups": 0,
+        "classified_signups": 0,
+        "first_touch_meta_linked_signups": 0,
+        "live_provider_checkout_sessions_created": 0,
+        "classified_live_paid_rows_by_retained_date": 0,
+        "eligible_first_paid_cycles": 0,
+        "matching_first_purchase_claims": 0,
+        "matching_first_purchase_sent": 0,
+        "live_commerce_claims_today": 0,
+        "live_commerce_sent_today": 0,
+        "live_commerce_totals": {
+          "sent": 0,
+          "claims": 0,
+          "checkout_sent": 0,
+          "purchase_sent": 0,
+          "checkout_claims": 0,
+          "purchase_claims": 0
+        }
+      }
+    ],
+    "v73EntryBaseline": [
+      {
+        "cutoff": "2026-10-31 21:26:16.32593+00",
+        "read_at": "2026-10-31 21:28:39.802935+00",
+        "pooled_cv_check_link_sessions": 0,
+        "cv_check_page_sessions": 0,
+        "same_session_auth_after_landing": 0,
+        "first_touch_linked_new_accounts": 0,
+        "meta_cv_check_page_sessions": 0
+      }
+    ],
+    "limits": "No new daily threshold or shared conversion-change line. First-party sessions are not verified people; existing same-destination links pool header/footer/others. Known v72 untagged Codex QA remains historical, not customer proof. v73 is a separate intervention."
+  },
+  "rollback": {
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_c4e0d5ba61a08191b527498c77f891e3",
+    "source": "a2d5333653d3f5d2342510730053f817e1282f6d",
+    "localTag": "jobvance-before-seo-entity-stack-2026-11-01",
+    "tagPushed": false,
+    "limits": "Frontend rollback only; no restoration of external/financial/customer events or data implied."
+  },
+  "handoff": "Codex bounded integration/release baton finished. Claude resumes sole product/design writer, preserves local commits and reconciles current main before future fixes. Claude owns remaining live/indexing work; check existing v72 receipts before repeating requests. No chat acknowledgement or completed indexing is claimed. Same active four-hour follow-up continues."
+}
