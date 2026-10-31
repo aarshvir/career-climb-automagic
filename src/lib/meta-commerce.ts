@@ -3,11 +3,11 @@
 // here can invent a purchase, and no card, billing or CV data is involved. Same opt-outs as the pixel:
 // Global Privacy Control, European time zones (the United Kingdom is measured) and the saved device choice.
 import { supabase } from '@/integrations/supabase/client';
-import { adsMeasurementAllowed, metaCookie } from '@/lib/meta-pixel';
+import { adsMeasurementAllowed, adsMeasurementAuthority, metaCookie, META_CHECKOUT_PENDING_KEY } from '@/lib/meta-pixel';
 import { trackingAuthEpoch, trackingDraftAuthority } from '@/lib/tracking-draft-memory';
 
 const UUID = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
-const PENDING_KEY = 'jobvance_meta_checkout_pending_v1';
+const PENDING_KEY = META_CHECKOUT_PENDING_KEY;
 const CHECKED_KEY = 'jobvance_meta_purchase_check_v1';
 const CHECK_INTERVAL = 30 * 60 * 1000;
 const PENDING_LIFETIME = 5 * 24 * 60 * 60 * 1000;
@@ -18,7 +18,8 @@ type Pending = { requestId: string; owner: string; at: number };
 type Current = () => boolean;
 function currentLifetime(owner: string): Current {
   const epoch = trackingAuthEpoch();
-  return () => trackingAuthEpoch() === epoch && trackingDraftAuthority(owner) === epoch && adsMeasurementAllowed();
+  const privacy = adsMeasurementAuthority();
+  return () => trackingAuthEpoch() === epoch && trackingDraftAuthority(owner) === epoch && adsMeasurementAuthority() === privacy && adsMeasurementAllowed();
 }
 
 /** Resolves with the function's reply, or null when it could not be asked (opted out, signed out, failed). */

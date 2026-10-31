@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { adAttributionQuery, adsMeasurementAllowed, isMeasuredPath, META_PIXEL_ID, noteAccountForMeta, setAdsOptOut, trackMetaPage } from '@/lib/meta-pixel';
+import { adAttributionQuery, adsMeasurementAllowed, isMeasuredPath, META_PIXEL_ID, noteAccountForMeta, setAdsOptOut, setUkAdsConsent, trackMetaPage, trackMetaSignupSubmitted } from '@/lib/meta-pixel';
 import { registrationEventId } from '../../supabase/functions/_shared/meta-conversions';
 
 const invoke = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: { sent: false }, error: null })));
@@ -72,6 +72,44 @@ describe('Meta Pixel measurement boundaries', () => {
     expect(document.querySelector('script[src*="fbevents"]')).toBeNull();
   });
 
+  it('counts the sign-up page an ad reaches from the CV Check redirect, with its campaign tags', () => {
+    window.history.replaceState(null, '', '/auth?mode=signup&next=%2Fcheck&utm_source=instagram&utm_medium=paid&utm_campaign=free-cv-check&utm_content=c01&fbclid=abc123');
+    trackMetaPage('/auth');
+    expect(pageViews()).toHaveLength(1);
+    expect(document.querySelectorAll('script[src="https://connect.facebook.net/en_US/fbevents.js"]')).toHaveLength(1);
+    expect(window.fbq?.disablePushState).toBe(true);
+  });
+
+  it('never starts on the CV Check itself, with or without a query, and /check stays out of the public path list', () => {
+    expect(isMeasuredPath('/check')).toBe(false);
+    expect(isMeasuredPath('/check/')).toBe(false);
+    for (const url of ['/check', '/check?utm_source=instagram&fbclid=abc', '/check?savedCheck=afe62064-a331-4ce6-9e51-2849e091ba54', '/check?reuseCheck=afe62064-a331-4ce6-9e51-2849e091ba54', '/check?audience=student', '/check#tailor']) {
+      window.history.replaceState(null, '', url);
+      trackMetaPage('/check');
+      trackMetaPage(window.location.pathname);
+    }
+    expect(window.fbq).toBeUndefined();
+    expect(document.querySelector('script[src*="fbevents"]')).toBeNull();
+  });
+
+  it('accepts only the bare /check destination on the sign-up page, never a CV Check destination with its own query or path', () => {
+    for (const next of ['%2Fcheck%3FsavedCheck%3Dafe62064-a331-4ce6-9e51-2849e091ba54', '%2Fcheck%3FreuseCheck%3Dx', '%2Fcheck%2F', '%2Fcheck%2Fextra', '%2Fchecks', '%2Fcheckout', '%2Fcheck%23x', '%2FCheck', 'check', 'https%3A%2F%2Fevil.example%2Fcheck']) {
+      window.history.replaceState(null, '', `/auth?mode=signup&next=${next}&utm_source=instagram`);
+      trackMetaPage('/auth');
+      expect(window.fbq, next).toBeUndefined();
+    }
+    window.history.replaceState(null, '', '/auth?mode=signup&next=%2Fcheck&savedCheck=afe62064-a331-4ce6-9e51-2849e091ba54');
+    trackMetaPage('/auth');
+    expect(window.fbq).toBeUndefined();
+  });
+
+  it('does not start from the sign-up page when the visitor just came from a private CV Check URL on this site', () => {
+    window.history.replaceState(null, '', '/auth?mode=signup&next=%2Fcheck&utm_source=instagram');
+    vi.spyOn(document, 'referrer', 'get').mockReturnValue(`${window.location.origin}/check?savedCheck=afe62064-a331-4ce6-9e51-2849e091ba54`);
+    trackMetaPage('/auth');
+    expect(window.fbq).toBeUndefined();
+  });
+
   it('does not start when the browser is still on a return link', () => {
     window.history.replaceState(null, '', '/auth/callback');
     trackMetaPage('/onboarding');
@@ -92,9 +130,12 @@ describe('Meta Pixel measurement boundaries', () => {
     expect(adsMeasurementAllowed()).toBe(false);
   });
 
-  it('measures United Kingdom visitors and still excludes other European zones', () => {
+  it('requires UK consent and still excludes other European zones even with a UK choice saved', () => {
     for (const uk of ['Europe/London', 'Europe/Belfast']) {
       vi.restoreAllMocks(); zone(uk);
+      localStorage.clear();
+      expect(adsMeasurementAllowed()).toBe(false);
+      expect(setUkAdsConsent(true)).toBe(true);
       expect(adsMeasurementAllowed()).toBe(true);
     }
     for (const other of ['Europe/Dublin', 'Europe/Paris', 'Europe/Londonderry', 'Atlantic/Canary']) {
@@ -164,6 +205,83 @@ describe('Meta sign-up event', () => {
     window.history.replaceState(null, '', '/auth');
     await noteAccountForMeta(user, now);
     expect(window.fbq).toBeUndefined();
+  });
+});
+
+describe('Meta sign-up submitted event', () => {
+  const submitted = () => calls().filter(args => args[0] === 'trackSingleCustom');
+  const onSignup = (search = '?mode=signup&next=%2Fonboarding&utm_source=instagram&utm_content=c01&fbclid=abc') => window.history.replaceState(null, '', `/auth${search}`);
+
+  it('sends one custom SignupSubmitted for the pixel, with no parameters of any kind', () => {
+    onSignup();
+    expect(trackMetaSignupSubmitted('attempt-1')).toBe(true);
+    expect(submitted()).toEqual([['trackSingleCustom', META_PIXEL_ID, 'SignupSubmitted']]);
+    expect(submitted()[0]).toHaveLength(3);
+    expect(events('CompleteRegistration')).toHaveLength(0);
+    expect(JSON.stringify(calls())).not.toMatch(/attempt-1|@|password|phone|email/i);
+  });
+
+  it('is sent once per submit attempt id and again for a genuinely new attempt', () => {
+    onSignup();
+    trackMetaSignupSubmitted('attempt-1'); trackMetaSignupSubmitted('attempt-1');
+    expect(submitted()).toHaveLength(1);
+    trackMetaSignupSubmitted('attempt-2');
+    expect(submitted()).toHaveLength(2);
+    expect(trackMetaSignupSubmitted('')).toBe(false);
+    expect(submitted()).toHaveLength(2);
+  });
+
+  it('takes the same gating as a PageView: production only, opt-out, GPC and European zones all stop it', () => {
+    onSignup();
+    vi.stubEnv('PROD', false);
+    expect(trackMetaSignupSubmitted('attempt-1')).toBe(false);
+    expect(window.fbq).toBeUndefined();
+    vi.stubEnv('PROD', true);
+    setAdsOptOut(true);
+    expect(trackMetaSignupSubmitted('attempt-2')).toBe(false);
+    expect(window.fbq).toBeUndefined();
+    setAdsOptOut(false);
+    Object.defineProperty(navigator, 'globalPrivacyControl', { value: true, configurable: true });
+    expect(trackMetaSignupSubmitted('attempt-3')).toBe(false);
+    Object.defineProperty(navigator, 'globalPrivacyControl', { value: undefined, configurable: true });
+    vi.restoreAllMocks(); zone('Europe/Berlin');
+    expect(trackMetaSignupSubmitted('attempt-4')).toBe(false);
+    expect(window.fbq).toBeUndefined();
+    expect(document.querySelector('script[src*="fbevents"]')).toBeNull();
+  });
+
+  it('sends nothing when an opt-out arrives after the pixel started', () => {
+    onSignup(); trackMetaPage('/auth');
+    setAdsOptOut(true);
+    expect(trackMetaSignupSubmitted('attempt-1')).toBe(false);
+    expect(submitted()).toHaveLength(0);
+  });
+
+  it('never fires from a private page, a return link, an unknown query key or a token-bearing URL', () => {
+    for (const url of ['/check', '/loop', '/auth/callback', '/auth?code=private-code', '/auth?mode=signup&token=abc', '/auth?mode=signup&savedCheck=afe62064-a331-4ce6-9e51-2849e091ba54', '/auth?mode=signup#access_token=private', '/onboarding?next=%2Fapplications%2Fprivate-id']) {
+      window.history.replaceState(null, '', url);
+      expect(trackMetaSignupSubmitted('attempt-1'), url).toBe(false);
+    }
+    expect(window.fbq).toBeUndefined();
+    expect(document.querySelector('script[src*="fbevents"]')).toBeNull();
+  });
+
+  it('does not fire when this site’s private referrer led to the sign-up page', () => {
+    onSignup();
+    vi.spyOn(document, 'referrer', 'get').mockReturnValue(`${window.location.origin}/auth/callback?code=private-code`);
+    expect(trackMetaSignupSubmitted('attempt-1')).toBe(false);
+    expect(window.fbq).toBeUndefined();
+  });
+
+  it('leaves the registration event and its server de-duplication ID alone', async () => {
+    const user = { id: '7d3f2a10-0c1e-4b5e-9a77-3a1e2b4c5d6e', created_at: '2026-10-25T09:58:00Z' };
+    onSignup('?mode=signup');
+    trackMetaSignupSubmitted('attempt-1');
+    await noteAccountForMeta(user, Date.parse('2026-10-25T10:00:00Z'));
+    const registration = events('CompleteRegistration');
+    expect(registration).toHaveLength(1);
+    expect(registration[0]).toEqual(['track', 'CompleteRegistration', {}, { eventID: await registrationEventId(user.id) }]);
+    expect(submitted()).toHaveLength(1);
   });
 });
 

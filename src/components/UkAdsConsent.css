@@ -1,0 +1,8 @@
+.jv-ads-choice { max-width: 1200px; margin: 12px auto; padding: 16px 24px; border: 1px solid #cbd8d0; border-radius: 12px; background: #f5f8f5; color: #172b22; }
+.jv-ads-choice h2 { margin: 0 0 6px; font-size: 18px; line-height: 1.4; }
+.jv-ads-choice p { margin: 0 0 12px; font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+.jv-ads-choice a { text-decoration: underline; }
+.jv-ads-choice-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.jv-ads-choice-button { min-height: 44px; padding: 10px 16px; border: 1px solid #215c43; border-radius: 8px; background: #fff; color: #215c43; font-size: 16px; line-height: 1.4; cursor: pointer; }
+.jv-ads-choice-button:focus-visible { outline: 3px solid #215c43; outline-offset: 3px; }
+@media (max-width: 640px) { .jv-ads-choice { margin: 12px; padding: 16px; } .jv-ads-choice-actions { flex-direction: column; } .jv-ads-choice-button { width: 100%; } }
