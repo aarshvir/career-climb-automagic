@@ -15,9 +15,9 @@ export const cvCheckCostText = `A free account includes unlimited comparisons wi
 /** One list feeds the visible FAQ and the page's FAQPage data, so they always say the same thing. */
 export const cvCheckFaqs: [string, string][] = [
   ['Do I need an account to use the CV check?', 'Yes, a free one. Comparing without AI has no limit, and editing and downloads are free.'],
-  ['What does the check show me?', 'Each requirement from the job ad, one of four outcomes (Covered, Partly covered, Not shown in your CV, Needs your judgment) and the closest line from your CV with its line number.'],
+  ['What does the check show me?', 'Up to the first 40 parsed requirements in English, one of four outcomes (Covered, Partly covered, Not shown in your CV, Needs your judgment) and the closest line from your CV with its line number. Additional and omitted passages remain available for review.'],
   ['Why is there no match percentage or ATS score?', 'A percentage hides which requirement is missing and differs between tools. Jobvance shows the requirement and the CV line behind it. It is a guide to what to strengthen, not a hiring prediction.'],
-  ['Does my CV leave my device?', 'Your file stays on your device and comparing without AI runs entirely on it. If you choose AI tailoring, the CV text and job description are sent to our AI provider to prepare one version; they are not stored unless you save.'],
+  ['Does my CV leave my device?', 'Your file stays on your device and comparing without AI runs entirely on it. If you choose AI tailoring, the CV text and job description are sent to our AI provider to prepare one version. Saving a check to your Jobvance account is optional; see the privacy page for how your information is handled.'],
   ['Can the AI invent experience on my CV?', 'It is built not to. Each change is checked against the line it came from, and a change that adds a number, a capitalised name or tool, a qualification word or a stronger ownership verb is rejected. The check is a rule check on wording, so you still read every change before you download.'],
   ['How much does it cost?', cvCheckCostText],
   ['Which files and languages work?', 'Text-based PDF, DOCX and TXT files up to 5 MB, or pasted text. Scanned PDFs and old .doc files need converting first. The wording check is for English text.'],
