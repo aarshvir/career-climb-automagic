@@ -1,0 +1,239 @@
+{
+  "date": "2026-10-31",
+  "timezone": "Asia/Dubai",
+  "site": "https://jobvance.io",
+  "publicVersion": 69,
+  "status": "succeeded",
+  "runtimeSource": "e2c3784a5c8b4ea2ac2efb74ac0dcd9b2fa07987",
+  "githubMergeSource": "06eeff10885acaa48589c4b808633b06c4196519",
+  "fullMergeTree": "4d1ddd64ae3632f22a727d535b89aae20dffa53a",
+  "mergeTreeEqualsReviewedHead": true,
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/43",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_b5897a27c7a88191b3f003ece019a996",
+  "deploymentId": "appgdep_6ae63a63ebc8819185aca7c1cde24253",
+  "deployedAt": "2026-10-31T22:59:06.595996+04:00",
+  "authorization": "Latest direct owner overnight/fix-verified-blockers request; Claude READY handoff reports exact owner product decision 'Yes, make optional' for mobile now. Asking later is deferred, not implemented.",
+  "behavior": {
+    "requiredFields": [
+      "name",
+      "email",
+      "password"
+    ],
+    "optionalField": "mobile; validate if entered",
+    "blankPhone": "Omitted from signup/contact metadata writes; existing number preserved, not cleared",
+    "contactGate": "Name-only account readiness; original owner/session/epoch/readback guards retained",
+    "cvCheckContinuation": "Confirmed live mismatch with Loop pricing/setup steps now corrected to CV Check email confirmation/CV+job-ad/compare or optionalAI/review+approval/download; Help link; Loop branch unchanged"
+  },
+  "validation": {
+    "ci": {
+      "run": 41231234203,
+      "job": 124625708521,
+      "head": "e2c3784a5c8b4ea2ac2efb74ac0dcd9b2fa07987",
+      "conclusion": "success",
+      "allStepsPassed": true
+    },
+    "local": {
+      "tests": 3750,
+      "files": 212,
+      "typeScript": "passed",
+      "lintErrors": 0,
+      "lintInheritedWarnings": 50,
+      "sourceWhitespace": "passed",
+      "initialFocused": "107 tests at a94; final full suite includes final follow-up cases"
+    },
+    "build": {
+      "pages": 37,
+      "guides": 20,
+      "hostingGroups": 12,
+      "compressedBytes": 2184912,
+      "limitBytes": 3145728,
+      "social": "37 metadata/two1200x630PNG routes pass; PNG bytes unchanged"
+    },
+    "live": {
+      "http": {
+        "at": "2026-10-31T18:59:37.419Z",
+        "paths": 159,
+        "rawExact": 113,
+        "recognizedCloudflareTail": 46,
+        "passed": 159
+      },
+      "all200": true,
+      "securityExact": true,
+      "js": 68,
+      "css": 17,
+      "browser": {
+        "source": "e2c3784a5c8b4ea2ac2efb74ac0dcd9b2fa07987",
+        "phone43Live390": {
+          "at": "2026-10-31T19:00:02.652Z",
+          "clientWidth": 375,
+          "detailsOpen": true,
+          "height": 844,
+          "loopPrice": false,
+          "phoneRequired": false,
+          "requiredInputs": [
+            {
+              "fontSize": "16px",
+              "type": "text"
+            },
+            {
+              "fontSize": "16px",
+              "type": "email"
+            },
+            {
+              "fontSize": "16px",
+              "type": "password"
+            }
+          ],
+          "scrollWidth": 375,
+          "steps": [
+            "Confirm your email if we ask",
+            "Add your CV and the job ad",
+            "Compare without AI, or choose AI-tailored changes",
+            "Review each change, tick that your CV is accurate, then download"
+          ],
+          "width": 390
+        },
+        "phone43LiveSignin": {
+          "inputs": [
+            "email",
+            "password"
+          ],
+          "steps": 0,
+          "width": 390
+        },
+        "submitted": false,
+        "adTags": false
+      }
+    },
+    "limits": "No actual registration/Google/email-confirmation/provider/checkout/payment/AI/customer/device acceptance. SDK-mocked tests prove blank-phone write/gate/session cases; native UI proves rendering and disclosure only. No ad-tagged QA, no causal conversion lift/phone-cause/unique-people claim."
+  },
+  "boundaries": {
+    "supabaseTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "backendDeployed": false,
+    "migrationReplayed": false,
+    "commerceMigration": "20261030041314",
+    "metaConversionsVersion": 3,
+    "metaPixelCommerceConsentCspSecurityMvpRoutesCssPackagesCiEqualBase": true,
+    "billingPricesEntitlementsWebhooksAdsFundingPermissionsChanged": false,
+    "authChange": "Optional phone metadata type/omission only; existing name and password/limiter/confirmation/owner/session behavior preserved."
+  },
+  "archive": {
+    "sha256": "7a8a946463ec004879f4b41c9c57b83c7aeca8e93dd8608b4de11bf8babe79d9",
+    "bytes": 4335661,
+    "entries": 163,
+    "privatePaths": [],
+    "workerSha256": "7f38724e8dfad13cd8a5832f47343d949b6ff7fd0f1d0f2c2700d0cdc1e6835f",
+    "storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_0000000072fc820785b425e7f255e20d",
+      "content_hash": "sha256:d6decce345ce78b1a83d1976b1e85130cb34e9c183525eaac3841820abd3a47f",
+      "size_bytes": 14469120,
+      "file_count": 155
+    }
+  },
+  "rollback": {
+    "source": "6ad5d4e6c007561b354bda1cf65f6b65faaec429",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_5701ff1eabec81918542e61edae598b9",
+    "localTag": "jobvance-before-optional-phone-2026-10-31",
+    "tagPushed": false
+  },
+  "diagnosis": {
+    "readAt": "2026-10-31T18:41:33.711257Z",
+    "coverage": "Dubai31Oct",
+    "eligibleTrackedMetaSessions": 107,
+    "authOrOnboardingObserved": 103,
+    "authControlClicked": 5,
+    "emailFormSubmissionObserved": 0,
+    "purchaseCampaign": {
+      "sessions": 68,
+      "authObserved": 68,
+      "authControlClicked": 4,
+      "recordedFormSubmissions": 0,
+      "onboardingDurationReported": 62,
+      "under5Seconds": 41,
+      "medianReportedVisibleSeconds": 2,
+      "unknownOnboardingDuration": 5
+    },
+    "lastAdSessionStart": "2026-10-31T14:19:08.85Z",
+    "startedSinceV66At18_42": 0,
+    "limits": "All observed ad sessions precede v66-v68. Generic private click labels cannot identify Google or field/error stages; no causal reason proven."
+  },
+  "lastConversionRead": [
+    {
+      "read_at": "2026-10-31 18:59:37.742961+00",
+      "zone": "Asia/Dubai",
+      "local_day": "2026-10-31",
+      "day_start": "2026-10-30 20:00:00+00",
+      "day_end": "2026-10-31 18:59:37.742961+00",
+      "any_ad_tagged_visits": 107,
+      "meta_ad_visits": 107,
+      "exact_campaign_entry_visits": 29,
+      "purchase_campaign_tagged_visits": 68,
+      "purchase_campaign_first_touch_linked_signups": 0,
+      "classified_signups": 0,
+      "first_touch_meta_linked_signups": 0,
+      "live_provider_checkout_sessions_created": 0,
+      "classified_live_paid_rows_by_retained_date": 0,
+      "eligible_first_paid_cycles": 0,
+      "matching_first_purchase_claims": 0,
+      "matching_first_purchase_sent": 0,
+      "live_commerce_claims_today": 0,
+      "live_commerce_sent_today": 0,
+      "live_commerce_totals": {
+        "sent": 0,
+        "claims": 0,
+        "checkout_sent": 0,
+        "purchase_sent": 0,
+        "checkout_claims": 0,
+        "purchase_claims": 0
+      }
+    },
+    {
+      "read_at": "2026-10-31 18:59:37.742961+00",
+      "zone": "UTC",
+      "local_day": "2026-10-31",
+      "day_start": "2026-10-31 00:00:00+00",
+      "day_end": "2026-10-31 18:59:37.742961+00",
+      "any_ad_tagged_visits": 107,
+      "meta_ad_visits": 107,
+      "exact_campaign_entry_visits": 29,
+      "purchase_campaign_tagged_visits": 68,
+      "purchase_campaign_first_touch_linked_signups": 0,
+      "classified_signups": 0,
+      "first_touch_meta_linked_signups": 0,
+      "live_provider_checkout_sessions_created": 0,
+      "classified_live_paid_rows_by_retained_date": 0,
+      "eligible_first_paid_cycles": 0,
+      "matching_first_purchase_claims": 0,
+      "matching_first_purchase_sent": 0,
+      "live_commerce_claims_today": 0,
+      "live_commerce_sent_today": 0,
+      "live_commerce_totals": {
+        "sent": 0,
+        "claims": 0,
+        "checkout_sent": 0,
+        "purchase_sent": 0,
+        "checkout_claims": 0,
+        "purchase_claims": 0
+      }
+    }
+  ],
+  "measurement": {
+    "v63": "2026-10-27T17:44:00.120558Z",
+    "v64": "2026-10-30T04:15:39.034668Z",
+    "v65": "2026-10-30T20:25:45.450435Z",
+    "v66": "2026-10-31T14:32:22.069243Z",
+    "v67": "2026-10-31T15:22:25.777469Z",
+    "v68": "2026-10-31T16:17:51.715216Z",
+    "v69": "2026-10-31T22:59:06.595996+04:00",
+    "limits": "Separate intervention boundaries; no post-release exposure/causal lift claim."
+  },
+  "releaseNotes": {
+    "upload": "First archive upload524 timed out before saving; native Site remainedv68. Same unchanged archive retry savedv69 and deployed successfully; no app outage or duplicate runtime deployment.",
+    "sourceOpening": "TTY output included a wrapped41-character SHA; canonical HEAD verified and supported packaging helper reopened source, returning exact40-character e2 head. No source or guard change.",
+    "cleanup": "Owned QA tab/server closed; viewport reset; user Google login untouched."
+  },
+  "evidence": "jobvance-repair-evidence/optional-phone-pr43-review-2026-10-31/",
+  "diagnosticEvidence": "jobvance-repair-evidence/signup-dropoff-2026-10-31/"
+}
