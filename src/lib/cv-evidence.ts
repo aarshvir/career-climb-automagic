@@ -45,7 +45,7 @@ export interface EvidenceReport {
   warnings: string[];
 }
 
-const METHOD_VERSION = 'english-literal-evidence-v6';
+const METHOD_VERSION = 'english-literal-evidence-v7';
 const MAX_REQUIREMENTS = 40;
 const SCOPE = 'This is an English wording check of user-provided text. The claims are not verified. Read the job requirements yourself; this check does not decide whether you qualify or predict an interview.';
 type Span = { start: number; end: number };
@@ -57,7 +57,10 @@ const REQUIRED_HEADING_LABEL = /(?:requirements?|qualifications?|(?:minimum|basi
 // Combine only known section labels. Prose such as "Responsibilities include SQL"
 // must remain a requirement, while a colon's following criteria are parsed separately.
 const REQUIRED_HEADING = new RegExp(`^${REQUIRED_HEADING_LABEL}(?:\\s*(?:and|&|/)\\s*${REQUIRED_HEADING_LABEL})*(?:\\s*:|\\s*$)`, 'i');
-const OTHER_HEADING = /^(?:about (?:us|the company|our company|the team|our team|the business)|company (?:overview|description)|who we are|(?:our )?(?:benefits|perks)(?:\s*(?:and|&)\s*(?:benefits|perks))?|what we offer|why (?:join|work (?:with|at|for)) [^:]{1,40}|life at [^:]{1,40}|(?:\([^)]{1,20}\)\s*)?the good stuff|salary(?: range)?|(?:base )?pay(?: range| transparency)?|compensation(?: and benefits)?|total rewards|how to apply|application process|equal opportunit(?:y|ies)(?:\s*(?:and|&)\s*[\w ]{1,30})?|diversity(?:,? equity)?(?: and inclusion)?|reasonable adjustments|accommodations|a note on [^:]{1,40}|our (?:values|mission|culture))(?:\s*:|\s*$)/i;
+const OTHER_HEADING = /^(?:about (?:us|the company|our company|the team|our team|the business)|company (?:overview|description)|who we are|(?:our )?(?:benefits|perks)(?:\s*(?:and|&)\s*(?:benefits|perks))?|what we offer|what(?:'|’)s in it for you|what you(?:'|’)ll get|(?:compensation|pay|salary|benefits|perks)(?:\s*,\s*|\s*(?:and|&)\s*)(?:compensation|pay|benefits|perks)(?:\s*(?:and|&)\s*(?:benefits|perks))?|why (?:join|work (?:with|at|for)) [^:]{1,40}|life at [^:]{1,40}|(?:\([^)]{1,20}\)\s*)?the good stuff|salary(?: range)?|(?:base )?pay(?: range| transparency)?|compensation(?: and benefits)?|total rewards|how to apply|application process|equal opportunit(?:y|ies)(?:\s*(?:and|&)\s*[\w ]{1,30})?|diversity(?:,? equity)?(?: and inclusion)?|reasonable adjustments|accommodations|a note on [^:]{1,40}|our (?:values|mission|culture))(?:\s*:|\s*$)/i;
+// "About Acme" or "About Example Retail Group" names the employer, so what follows is the employer's own text.
+// Case-sensitive on purpose, and "About you / the role / this job" stay requirement headings (REQUIRED_HEADING).
+const ABOUT_COMPANY = /^(?:[Aa]bout|ABOUT)\s+(?!(?:[Yy]ou|YOU|[Yy]ours?|[Tt]he|THE|[Tt]his|THIS|[Tt]hat|[Tt]hese|[Mm]e|[Ii]t)\b)[A-Z][\w&.'’-]*(?:\s+(?:(?:and|of|the|for|de|la|van|von|&)\s+)?[A-Z0-9][\w&.'’-]*){0,4}(?:\s*:|\s*$)/;
 const MANDATORY = /\b(?:must|required|mandatory|essential|need to|minimum|at least)\b/i;
 const DEADLINE = /\b(?:applications? (?:close|deadline)|apply by|closing date|deadline)\b/i;
 const CONDITION = /\b(?:visa|sponsorship|work (?:authorization|authorisation|permit)|right to work|eligible to work|citizenship|nationality|relocat(?:e|ion)|security clearance)\b/i;
@@ -263,7 +266,7 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
     const heading = headingKey(line.text);
     if (listingRoleHeading(line.text, i,enteredTitle)) { omitted.push(raw); continue; }
     const required = REQUIRED_HEADING.exec(heading);
-    const other = OTHER_HEADING.exec(heading);
+    const other = OTHER_HEADING.exec(heading) ?? (required ? null : ABOUT_COMPANY.exec(heading));
     if (required || other) {
       ignoreSection = !!other;
       const colon = line.text.indexOf(':');
