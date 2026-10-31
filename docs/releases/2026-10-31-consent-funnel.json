@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-31",
+  "dateTimezone": "Asia/Dubai",
+  "site": "https://jobvance.io",
+  "publicVersion": 66,
+  "runtimeSource": "39d2989872826ca40a44eb176f3cb6df31b81faa",
+  "githubMergeSource": "6ec09150b76f3c461aa0d68e918501e2caf69c00",
+  "pullRequests": [
+    "https://github.com/aarshvir/career-climb-automagic/pull/38",
+    "https://github.com/aarshvir/career-climb-automagic/pull/39"
+  ],
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_a76d7cf9a48c819193f67ffb51b28442",
+  "deploymentId": "appgdep_6ae5fbdb8e248191af5449e2ba5a9c8e",
+  "deployedAt": "2026-10-31T14:32:22.069243Z",
+  "status": "succeeded",
+  "authorization": "Direct owner request to fix consent and security-check blockers in PR38/39, recheck final versions and publish once checks pass.",
+  "source": {
+    "reviewedHead": "39d2989872826ca40a44eb176f3cb6df31b81faa",
+    "mergeTree": "f92110f9e1366eae818183e0236a45a5b819fb2b",
+    "mergeTreeEqualsReviewedHead": true,
+    "pr38Repair": "a637b6b7ec361ea8a974b612cc45918822fb5caa",
+    "pr38Merge": "f45fda5d9cfd6a0c751aa59156dea818ff9a880c",
+    "unchangedSupabaseTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "scope": "Frontend consent, funnel, tests and pinned dependency resolution only; original CI audit gate retained.",
+    "preservedSeparateLocalCommit": "b2a392a0142f43f3711e2cfd4b6016586b996f0b (Claude checkout; advisory-audit proposal not included, no runtime changes lost)"
+  },
+  "behavior": {
+    "uk": "Europe/London and Europe/Belfast default off until explicit Allow; equal Reject and privacy withdrawal; 180-day versioned device preference. Missing, invalid, expired or unreadable choice and save failure remain off.",
+    "gates": "GPC and explicit opt-out win; all other European zones remain excluded. Pixel, browser signup, registration/server copy and commerce share the permission gate; pending continuations are bound to the choice revision.",
+    "withdrawal": "Cancels pending registration/timers and unsent checkout retries; blocks stale async continuations even after regrant. Already-sent external events cannot be recalled.",
+    "signup": "Name, mobile, email and one password remain required. Show-password/rules retained. Content-free browser-only SignupSubmitted follows validation/limiter; registration IDs/server copy unchanged.",
+    "urls": "Only bare next=/check added to safe public auth URLs. Private /check remains unmeasured/account-required; bounded campaign tags survive its signup redirect.",
+    "security": "Pinned minimatch11.0.1 repairs the full inherited audit without lowering severity or making tooling checks advisory."
+  },
+  "validation": {
+    "ci": {
+      "run": 41209247747,
+      "job": 124562612905,
+      "head": "39d2989872826ca40a44eb176f3cb6df31b81faa",
+      "attempt": 2,
+      "conclusion": "success",
+      "allStepsPassed": true
+    },
+    "pr38Ci": {
+      "run": 41207944877,
+      "job": 124556787111,
+      "conclusion": "success"
+    },
+    "local": {
+      "tests": 3705,
+      "files": 209,
+      "independentBoundaryTests": 6,
+      "ukConsentIntegrationTests": 16,
+      "appTypeScript": "passed",
+      "lintErrors": 0,
+      "lintWarnings": 50,
+      "npmAuditVulnerabilities": 0,
+      "denoAuthTests": 28,
+      "denoTrackingTests": 6
+    },
+    "integrity": {
+      "firstAttempt": "Deno auth CDN response hash differed from the preserved lock; failure retained. Two fresh downloads matched the ORIGINAL trusted hash, frozen local suites passed, and unchanged CI retry passed. Exact CDN response cause unestablished.",
+      "expectedHash": "a92d005e4a8a03063aa2c46d7d69161fa776ce1bacccc43daa70e28fe367068e",
+      "trustedHashChanged": false,
+      "guardBypassed": false
+    },
+    "build": {
+      "publicPages": 37,
+      "guides": 20,
+      "hostingGroups": 12,
+      "social": "37 page metadata and two1200x630 PNG routes passed",
+      "compressedBytes": 2181888,
+      "limitBytes": 3145728,
+      "workerSha256": "95af3d055de868844f84f8134604bcc372781b42a79ae39204f3550375b8f554"
+    },
+    "liveHttp": {
+      "at": "2026-10-31T14:32:48.268Z",
+      "source": "39d2989872826ca40a44eb176f3cb6df31b81faa",
+      "javascriptExecuted": false,
+      "adTaggedQa": false,
+      "paths": 158,
+      "rawExact": 113,
+      "recognizedCloudflareTail": 45,
+      "passed": 158,
+      "status200": 158,
+      "js": 68,
+      "css": 17,
+      "securityHeadersMatch": true,
+      "limits": "113 raw exact and45 HTML application exact with only the recognized appended Cloudflare JSD tail; not raw HTML parity."
+    },
+    "browser": {
+      "observedLiveViewport": {
+        "width": 933,
+        "height": 884,
+        "documentWidth": 918
+      },
+      "fourRequiredInputsAt16px": true,
+      "confirmPasswordAbsent": true,
+      "showHidePasswordPassed": true,
+      "privacyNoticeRead": true,
+      "privateCheckRedirect": "/auth?mode=signup&next=%2Fcheck",
+      "limits": "375/320 viewport overrides did not change the final observed live viewport. Do not claim fresh phone/device or UK-timezone browser acceptance; UK choice/withdrawal are SDK-mocked DOM integration evidence. No form/account/provider/checkout/payment submission, ad-tagged QA or positive Meta acceptance."
+    }
+  },
+  "archive": {
+    "localSha256": "6f7de3de499b3329056d0d1d0825fa2bd3f8322498659ebcadb6c7c7bdb30f37",
+    "localBytes": 4331045,
+    "localEntries": 163,
+    "storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000b9308207b7c48a7ebddcf183",
+      "content_hash": "sha256:125288abf973287256fe211b188b2b085b6ae5f3def2fc0e3df83cd810885ea7",
+      "size_bytes": 14458880,
+      "file_count": 155
+    }
+  },
+  "productionBoundary": {
+    "backendDeployed": false,
+    "migrationReplayed": false,
+    "metaConversionsVersion": 3,
+    "existingMigration": "20261030041314",
+    "billingWebhookEntitlementChanged": false,
+    "adsFundingOrPermissionsChanged": false,
+    "candidateRowsReadOrChanged": false
+  },
+  "rollback": {
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_3c5fcf65383c8191a4aea4337d66c4b3",
+    "source": "b999ca3b0f8f872f89c8ad704617c019c69e39dd",
+    "localTag": "jobvance-before-consent-funnel-2026-10-31",
+    "tagPushed": false,
+    "limits": "Restore the saved frontend if needed; retain applied additive schema and external/financial/event records. No data restoration implied."
+  },
+  "measurement": {
+    "v63Cutoff": "2026-10-27T17:44:00.120558Z",
+    "v64Cutoff": "2026-10-30T04:15:39.034668Z",
+    "v65Cutoff": "2026-10-30T20:25:45.450435Z",
+    "v66Cutoff": "2026-10-31T14:32:22.069243Z",
+    "limits": "Separate intervention boundaries. No post-v66 conversion query, causal lift or customer/ATS claim in this release."
+  },
+  "evidence": "jobvance-repair-evidence/pr38-pr39-repair-2026-10-31/"
+}
