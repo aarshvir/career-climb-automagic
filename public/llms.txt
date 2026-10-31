@@ -1,6 +1,6 @@
 # Jobvance
 
-> Jobvance (jobvance.io) is an online job-search tool for job seekers. Its CV Check compares your CV with one job ad and shows which requirements your CV covers, with no fit percentage or ATS score. Its Automated Job Loop searches connected sources for the roles and locations you choose and prepares a tailored CV for each match. Jobvance is not a recruitment agency, staffing firm or virtual-assistant service.
+> Jobvance (jobvance.io) is an online job-search tool for job seekers. Its CV Check compares your CV with one job ad and shows which requirements your CV covers, with no fit percentage or ATS score. Its Automated Job Loop searches connected sources for the roles and locations you choose and prepares a tailored CV for each match. Jobvance is not a recruitment agency, staffing firm or virtual-assistant service, and it has no connection to Jobva or the company at jobvance.com.
 
 Facts last checked 1 November 2026. The pricing page (https://jobvance.io/pricing) is the source of truth for prices and limits.
 

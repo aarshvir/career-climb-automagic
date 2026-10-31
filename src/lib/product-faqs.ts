@@ -14,4 +14,5 @@ export const productFaqs: [string, string][] = [
   ["Are interviews or jobs guaranteed?", "No. Jobvance helps prepare and organize applications; employer decisions and hiring outcomes remain outside its control."],
   ["Can I use projects or internships in my CV?", "Yes. Your reviewed CV can include clearly labelled academic projects, internships, activities and previous employment. Describe your own contribution accurately. Project work is not automatically evidence of required professional experience."],
   ["How do I read my CV Check results?", "Matching words are a starting point, not a verdict. Read the requirement and the CV example yourself; the check cannot confirm your qualifications or predict what an employer will decide."],
+  ["Is Jobvance connected to Jobva or jobvance.com?", "No. Jobvance at jobvance.io is a job-search and CV tool. It is not a recruitment agency or a virtual-assistant service, and it has no connection to Jobva or the company at jobvance.com. For help, use the public support page; you do not need an account."],
 ];
