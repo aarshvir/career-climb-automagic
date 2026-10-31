@@ -232,9 +232,9 @@ describe('Automated Job Loop account entry and confirmation recovery', () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding&utm_source=meta']}><Auth /></MemoryRouter></AuthProvider>);
     const benefits = await screen.findByRole('list', { name:'What the Automated Job Loop does' });
     expect(benefits).toHaveTextContent('Roles matched to your CV.');
-    expect(benefits).toHaveTextContent('A tailored CV for each role.');
-    expect(benefits).toHaveTextContent('Written to fit each job’s requirements.');
-    expect(benefits).toHaveTextContent('Built only from facts you confirm.');
+    expect(benefits).toHaveTextContent('Tailored CVs for matching roles.');
+    expect(benefits).toHaveTextContent('Read and approve the prepared CV first.');
+    expect(benefits).toHaveTextContent('Based on facts you confirm.');
     expect(screen.getByText('Your account also includes 3 AI-tailored CVs a month, free.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name:'See plans' })).toHaveAttribute('href', '/pricing');
     // The explanation sits above the form fields, and the form is unchanged.

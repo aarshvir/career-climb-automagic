@@ -46,16 +46,19 @@ describe('sign-up page reached from the free CV Check ad', () => {
     expect(list).toHaveTextContent('Compare your CV with a job ad.');
     expect(list).toHaveTextContent('With AI, each change sits beside your original.');
     expect(list).toHaveTextContent('You tick that your CV is accurate first.');
-    expect(screen.getByText('Your account is free. Compare without AI has no limit. AI tailoring is 3 CVs a month.')).toBeInTheDocument();
+    expect(screen.getByText('Your account is free. Unlimited comparisons without AI. 3 free AI-tailored CVs per calendar month.')).toBeInTheDocument();
     expect(screen.queryByRole('list', { name: 'What the Automated Job Loop does' })).not.toBeInTheDocument();
-    for (const loopClaim of [/Roles matched to your CV/, /A tailored CV for each role/, /Built for a high ATS match/, /Each run searches/]) {
+    for (const loopClaim of [/Roles matched to your CV/, /Tailored CVs for matching roles/, /Review before you download/, /connected employer career sites/]) {
       expect(screen.queryByText(loopClaim)).not.toBeInTheDocument();
     }
   });
 
-  it('keeps the Job Loop outcome list for the Job Loop entry', async () => {
+  it('keeps the Job Loop mechanism list for the Job Loop entry', async () => {
     open('?mode=signup&next=%2Fonboarding&utm_source=meta');
-    expect(await screen.findByRole('list', { name: 'What the Automated Job Loop does' })).toBeInTheDocument();
+    const list = await screen.findByRole('list', { name: 'What the Automated Job Loop does' });
+    expect(list).toHaveTextContent('Tailored CVs for matching roles.');
+    expect(list).toHaveTextContent('Review before you download.');
+    expect(list).not.toHaveTextContent('high ATS match');
     expect(screen.queryByRole('list', { name: 'What the free CV Check does' })).not.toBeInTheDocument();
   });
 

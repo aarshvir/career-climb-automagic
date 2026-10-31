@@ -3,7 +3,7 @@ import './LoopJourney.css';
 const stages = [
   { title: 'Add your experience', caption: 'Add', example: 'CV · PDF, DOCX or TXT', text: 'Upload a CV, reuse a saved check, or build your first CV from guided questions. Review the experience you want to use.', short: 'Upload a CV, reuse a saved check, or build your first CV from guided questions.' },
   { title: 'Choose your search', caption: 'Choose', example: 'Product Analyst · Remote (US)', text: 'Tell the Automated Job Loop the roles and locations you want. Choose an available frequency and turn on recurring preparation when you are ready.', short: 'Tell the Automated Job Loop the roles and locations you want, then choose how often it runs.' },
-  { title: 'Review your dashboard', caption: 'Review', example: '3 jobs · 3 tailored CVs (example)', text: 'Come back to matched jobs and a tailored CV for each prepared role. Download PDF, DOCX or TXT and open each vacancy from your dashboard.', short: 'Come back to matched jobs and a tailored CV for each. Download PDF, DOCX or TXT.' },
+  { title: 'Review your dashboard', caption: 'Review', example: 'Prepared CVs for review (example)', text: 'Come back to matched jobs and role-specific CVs for review. Download PDF, DOCX or TXT and open each vacancy from your dashboard.', short: 'Come back to matched jobs and role-specific CVs for review. Download PDF, DOCX or TXT.' },
 ];
 
 /** The three-step journey. `ring` is the editorial version used beside the orbit on dark bands; the default is the same

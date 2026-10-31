@@ -37,7 +37,7 @@ export function CvDiffCard({ className = "" }: { className?: string }) {
 }
 
 const history = [
-  ["Mon 7:00 AM", "3 jobs found", "3 CVs ready"],
+  ["Mon 7:00 AM", "3 jobs found", "CVs for review"],
   ["Fri 7:00 AM", "2 jobs found", "2 CVs ready"],
   ["Wed 7:00 AM", "No new jobs found", "Nothing to prepare"],
 ];
@@ -72,7 +72,7 @@ export function NextRunCard({ className = "" }: { className?: string }) {
     <div className="pc-top"><span className="pc-caption">Example · next run</span><span className="pc-pill"><Repeat2 />3×/week</span></div>
     <div className="pc-next-time"><span className="pc-next-pulse" />Wed 7:00 AM</div>
     <div className="pc-week">{week.map((day, index) => <span key={index} className={[0, 2, 4].includes(index) ? "is-on" : ""}>{day}</span>)}</div>
-    <div className="pc-foot"><span />Example last run · 3 jobs · 3 tailored CVs</div>
+    <div className="pc-foot"><span />Example last run · matched jobs · prepared CVs</div>
   </div>;
 }
 

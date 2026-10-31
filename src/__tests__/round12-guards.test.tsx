@@ -32,7 +32,7 @@ describe('round 12 guards', () => {
   it('the account entry shell and the React panel carry the same description, and the page keeps no duplicate steps or check line', () => {
     const shell = read('scripts/build-host-worker.mjs');
     const auth = read('src/pages/Auth.tsx');
-    const sentence = 'Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares a tailored, role-specific CV for each.';
+    const sentence = 'Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares role-specific CVs from the facts you confirm.';
     expect(auth).toContain(sentence);
     expect(shell).toContain(`<p class="ap-story-description">${sentence.replace('className', 'class')}</p>`);
     expect(shell).toContain('Free account · 3 tailored CVs a month');

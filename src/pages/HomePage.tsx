@@ -14,7 +14,7 @@ import "./Home.css";
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 // Outcomes the product already promises elsewhere (FAQ, pricing, Automated Job Loop page). No counts, ratings or results.
-const proof: [string, string][] = [["Matched jobs", "for your roles and locations"], ["A tailored CV", "for each prepared role"], ["Your schedule", "Weekly, 3×/week or daily"], ["Your formats", "PDF, DOCX or TXT downloads"]];
+const proof: [string, string][] = [["Matched jobs", "for your roles and locations"], ["Tailored CVs", "for matching roles"], ["Your schedule", "Weekly, 3×/week or daily"], ["Your formats", "PDF, DOCX or TXT downloads"]];
 
 function StartLink({ children = "Start my search", to = "/onboarding", size = "md", variant = "primary", className = "" }: { children?: React.ReactNode; to?: string; size?: "md" | "lg"; variant?: "primary" | "secondary"; className?: string }) {
   return <Link to={to} className={`jv-btn jv-btn--${variant}${size === "lg" ? " jv-btn--lg" : ""} ${className}`.trim()}>{children}<ArrowRight aria-hidden="true" /></Link>;
@@ -34,7 +34,7 @@ export default function HomePage() {
           {/* The product is named right above the pitch, so the main action can stay short. */}
           <p className="jv-caption jv-hero-eyebrow">Automated Job Loop</p>
           <h1 id="home-title" className="jv-hero-title jv-enter-h1"><span className="jv-h-bind">Jobvance automates</span> <span className="jv-h-bind">your job search</span> <span className="jv-h-mark">end to end.</span></h1>
-          <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> runs in the background and finds the best-matching jobs for you, with tailored, role-specific CVs built for a high ATS match.</p>
+          <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> runs in the background and finds the best-matching jobs for you, with tailored, role-specific CVs built from the facts you confirm.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
             <StartLink size="lg" className="jv-hero-cta">Start my search</StartLink>
             <TextLink to="/check">Try the free CV Check</TextLink>
@@ -99,12 +99,12 @@ export default function HomePage() {
             <div className="jv-tile-card" aria-hidden="true"><OpeningsCard /></div>
           </article>
           <article className="jv-tile jv-tile--cv jv-dark" data-reveal>
-            <div className="jv-tile-copy"><p className="jv-step-index">03 · Tailored CV</p><h3>A tailored CV for each prepared role.</h3><p>Each prepared role comes with a CV reworded for that job from your own experience. Review it, download PDF, DOCX or TXT and open the employer’s vacancy from your dashboard.</p></div>
+            <div className="jv-tile-copy"><p className="jv-step-index">03 · Tailored CV</p><h3>Tailored CVs for matching roles.</h3><p>Your prepared CVs use the facts you confirm for the role. Review it, download PDF, DOCX or TXT and open the employer’s vacancy from your dashboard.</p></div>
             <div className="jv-tile-card" aria-hidden="true"><CvDiffCard /></div>
           </article>
         </div>
         <div className="jv-boundary" data-reveal>
-          <p>Tailored, role-specific CVs, built for a high ATS match.</p>
+          <p>Tailored, role-specific CVs, built from the facts you confirm.</p>
           <div className="jv-boundary-links"><StartLink>Start my search</StartLink><TextLink to="/how-it-works">See how it works</TextLink></div>
         </div>
       </div>

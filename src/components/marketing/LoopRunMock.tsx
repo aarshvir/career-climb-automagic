@@ -31,10 +31,10 @@ export default function LoopRunMock() {
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  return <figure ref={ref} className="jv-mock" aria-label="Example of an Automated Job Loop run">
+  return <figure ref={ref} className="jv-mock" aria-label="Example of Automated Job Loop history">
     <div className="jv-mock-card">
       <div className="jv-mock-top">
-        <span className="jv-chip jv-chip--caption jv-mock-tag">Example run · illustrative data</span>
+        <span className="jv-chip jv-chip--caption jv-mock-tag">Example history · illustrative data</span>
       </div>
       <div className="jv-mock-head">
         <p className="jv-mock-title">Automated Job Loop</p>
@@ -56,8 +56,8 @@ export default function LoopRunMock() {
           </span>
         </li>)}
       </ul>
-      <p className="jv-sr-only">Each job moves from found, to CV tailored, to ready for your review.</p>
+      <p className="jv-sr-only">Prepared roles move from found, to CV tailored, to ready for your review.</p>
     </div>
-    <p className="jv-mock-foot"><span aria-hidden="true" />3 jobs · 3 tailored CVs</p>
+    <p className="jv-mock-foot"><span aria-hidden="true" />Matched jobs · prepared CVs</p>
   </figure>;
 }
