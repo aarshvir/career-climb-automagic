@@ -1,0 +1,165 @@
+{
+  "date": "2026-10-31",
+  "site": "https://jobvance.io",
+  "status": "succeeded",
+  "runtimeSource": "6ad5d4e6c007561b354bda1cf65f6b65faaec429",
+  "fullMergeTree": "ed6ff7eca0ee10f384f58c0c37aec691583826fc",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/42",
+  "source": {
+    "initialHead": "4f22fcda40a0bf4c17071da13b9fb821a69707e9",
+    "currentMainIntegrated": "8243b9045e73330f0fcd4e2a50d4a84b9cfdb299",
+    "integrationCommit": "f18952528edbe4840c6914885708655d8bdc8543",
+    "filesChanged": 23
+  },
+  "behavior": {
+    "cvCheck": "Own comparison/review/approval benefits and free terms visible at phone and desktop; no Loop card/sample.",
+    "loopClaims": "Matching-role CVs from confirmed facts; removed unqualified each-role and high-ATS promises on affected routed surfaces; two-prepared plus matched example; separate multi-day history labeled.",
+    "ownerH1": "Jobvance automates your job search end to end.",
+    "freeTerms": "Unlimited comparisons without AI; three free AI-tailored CVs per calendar month.",
+    "scope": "No measured ATS score, employer outcome, customer, NPS or signup lift claim."
+  },
+  "validation": {
+    "fullTests": 3744,
+    "testFiles": 212,
+    "focusedTests": 61,
+    "typeScript": "passed",
+    "lintErrors": 0,
+    "lintInheritedWarnings": 50,
+    "sourceWhitespace": "passed",
+    "ci": {
+      "run": 41218465130,
+      "job": 124587853394,
+      "head": "6ad5d4e6c007561b354bda1cf65f6b65faaec429",
+      "status": "completed",
+      "conclusion": "success",
+      "allStepsPassed": true
+    },
+    "build": {
+      "pages": 37,
+      "guides": 20,
+      "hostingGroups": 12,
+      "compressedBytes": 2185043,
+      "limitBytes": 3145728,
+      "social": "37page metadata/two1200x630PNGs pass, PNG bytes unchanged"
+    },
+    "browser": "Actual local production Worker at390x844,320x844,1440x1000; DOM/screenshots saved; no overflow; four required16px inputs; signin two fields; no submission.",
+    "limits": "No real SDK/email/signup/provider/AI/checkout/payment or customer acceptance, no ad-tagged QA. Query-specific CV Check card appears after hydration; raw Auth fallback remains shared. Phone details use existing compact styling; card leads remain visible. Longer phone form requires scrolling.",
+    "liveHttp": {
+      "at": "2026-10-31T16:18:11.232Z",
+      "source": "6ad5d4e6c007561b354bda1cf65f6b65faaec429",
+      "paths": 159,
+      "rawExact": 113,
+      "recognizedCloudflareTail": 46,
+      "passed": 159,
+      "js": 68,
+      "css": 17,
+      "all200": true,
+      "security": true,
+      "limits": "113 raw exact /46 HTML application exact except recognized appended Cloudflare JSD tail; not rawHTMLparity."
+    },
+    "liveBrowser": {
+      "source": "6ad5d4e6c007561b354bda1cf65f6b65faaec429",
+      "liveCheck390": {
+        "at": "2026-10-31T16:18:24.598Z",
+        "clientWidth": 375,
+        "height": 844,
+        "loopCard": false,
+        "sample": false,
+        "scrollWidth": 375,
+        "terms": "Your account is free. Unlimited comparisons without AI. 3 free AI-tailored CVs per calendar month.",
+        "url": "https://jobvance.io/auth?mode=signup&next=%2Fcheck",
+        "visibleCard": "block",
+        "visibleFields": [
+          {
+            "fontSize": "16px",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "fontSize": "16px",
+            "required": true,
+            "type": "tel"
+          },
+          {
+            "fontSize": "16px",
+            "required": true,
+            "type": "email"
+          },
+          {
+            "fontSize": "16px",
+            "required": true,
+            "type": "password"
+          }
+        ],
+        "width": 390
+      },
+      "submitted": false,
+      "adTags": false,
+      "liveSignin": {
+        "checkCard": false,
+        "fields": [
+          "email",
+          "password"
+        ],
+        "width": 390
+      },
+      "liveHome": {
+        "clientWidth": 1425,
+        "h1": "Jobvance automates your job search end to end.",
+        "height": 1000,
+        "oldClaims": false,
+        "scrollWidth": 1425,
+        "width": 1440
+      }
+    }
+  },
+  "productionBoundary": {
+    "supabaseTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "backendDeployed": false,
+    "migrationReplayed": false,
+    "existingMigration": "20261030041314",
+    "metaConversionsVersion": 3,
+    "authHandlersHooksEventBindingsChanged": false,
+    "consentTrackingContactCspChanged": false,
+    "billingChange": "ONE text node only; handlers/prices/entitlements unchanged",
+    "adsFundingPermissionsChanged": false,
+    "dependenciesCiChanged": false,
+    "css": "Entire AccountPilot.css prefix retained with scoped CV Check card display override appended"
+  },
+  "rollback": {
+    "source": "be0dbbfc6121adcb2cc3120218216ebc2fef5702",
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_066db2b1e7d88191bfbf662889c1bc97",
+    "localTag": "jobvance-before-check-entry-copy-2026-10-31",
+    "tagPushed": false
+  },
+  "measurement": {
+    "v63": "2026-10-27T17:44:00.120558Z",
+    "v64": "2026-10-30T04:15:39.034668Z",
+    "v65": "2026-10-30T20:25:45.450435Z",
+    "v66": "2026-10-31T14:32:22.069243Z",
+    "v67": "2026-10-31T15:22:25.777469Z",
+    "limits": "No new conversion query in this release; separate cutoffs, no pooling or causal lift.",
+    "v68": "2026-10-31T20:17:51.715216+04:00"
+  },
+  "evidence": "jobvance-repair-evidence/check-entry-pr42-review-2026-10-31/",
+  "publicVersion": 68,
+  "githubMergeSource": "ec0e99abc1702c0dae533021fc459fe5d4a9f330",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_5701ff1eabec81918542e61edae598b9",
+  "deploymentId": "appgdep_6ae614958a748191883ac1c68696f380",
+  "deployedAt": "2026-10-31T20:17:51.715216+04:00",
+  "archive": {
+    "archiveSha256": "53a298a4e805a739c6af8a33dfde03cdebb49ffbf66450c4f351d1ae2cdbb0c0",
+    "bytes": 4336010,
+    "entries": 163,
+    "privatePaths": [],
+    "workerSha256": "44c67dc5e8b67791183402dd68228db784b4c7214f94d585cebf1403e5d277d5",
+    "storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_000000002b048211a6a1a8ca888dc904",
+      "content_hash": "sha256:6ff107f50ba1d107ec9e395784e4779ee25bcd5d9fedd375895525658ef187bb",
+      "size_bytes": 14469120,
+      "file_count": 155
+    }
+  }
+}
