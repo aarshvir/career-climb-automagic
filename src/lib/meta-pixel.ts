@@ -27,7 +27,8 @@ function revokePending(): void {
 const current = (scope: RegistrationScope) => authority.owner === scope.owner && authority.sessionId === scope.sessionId && authority.epoch === scope.epoch && adsMeasurementAllowed();
 
 const measuredPaths = new Set(['/', '/onboarding', '/auth', '/job-loop', '/pricing', '/how-it-works', '/faq', '/about', '/contact', '/privacy', '/terms', '/refund', '/help', '/guides', '/walkthroughs', '/for-students', '/for-mba', '/for-career-switchers']);
-const europeanZones = /^(Europe\/|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
+// The United Kingdom is an ad market (Europe/London, Europe/Belfast); every other European zone stays excluded.
+const europeanZones = /^(Europe\/(?!(London|Belfast)$)|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
 
 type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean; jobvanceLastPage?: string };
 declare global { interface Window { fbq?: Fbq; _fbq?: Fbq } interface Navigator { globalPrivacyControl?: boolean } }

@@ -1,7 +1,7 @@
 // Tells Meta (through our meta-conversions function) that a signed-in owner opened checkout or paid.
 // The browser only asks. The function takes the order and payment facts from the database, so nothing
 // here can invent a purchase, and no card, billing or CV data is involved. Same opt-outs as the pixel:
-// Global Privacy Control, European time zones and the saved device choice.
+// Global Privacy Control, European time zones (the United Kingdom is measured) and the saved device choice.
 import { supabase } from '@/integrations/supabase/client';
 import { adsMeasurementAllowed, metaCookie } from '@/lib/meta-pixel';
 import { trackingAuthEpoch, trackingDraftAuthority } from '@/lib/tracking-draft-memory';

@@ -92,6 +92,17 @@ describe('Meta Pixel measurement boundaries', () => {
     expect(adsMeasurementAllowed()).toBe(false);
   });
 
+  it('measures United Kingdom visitors and still excludes other European zones', () => {
+    for (const uk of ['Europe/London', 'Europe/Belfast']) {
+      vi.restoreAllMocks(); zone(uk);
+      expect(adsMeasurementAllowed()).toBe(true);
+    }
+    for (const other of ['Europe/Dublin', 'Europe/Paris', 'Europe/Londonderry', 'Atlantic/Canary']) {
+      vi.restoreAllMocks(); zone(other);
+      expect(adsMeasurementAllowed()).toBe(false);
+    }
+  });
+
   it('never loads outside production builds', () => {
     vi.stubEnv('PROD', false);
     trackMetaPage('/');
