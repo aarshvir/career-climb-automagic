@@ -13,9 +13,9 @@ const rows = [
   { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:00 AM" },
 ];
 
-/** Hero product mock: an example Automated Job Loop run, laid out as a run log in HTML and CSS.
+/** Hero product mock: example Automated Job Loop history across separate scheduled runs.
  * Its one short pass (each row: found, CV tailored, ready for review) ends within 5 seconds, so it needs no pause control.
- * The newest row rests on "CV tailored", so the resting state shows the progression, not three identical tags. All three rows show at every width, so the footer count always matches. */
+ * The newest row rests on "CV tailored", so the resting state shows the progression, not three identical tags. All three illustrative history rows show at every width. */
 export default function LoopRunMock() {
   const ref = useRef<HTMLElement>(null);
   useBeforePaint(() => {
