@@ -60,6 +60,8 @@ function AudienceWorkspace({ audience, content }: { audience: LoopAudience; cont
   return <figure className="audience-workspace audience-workspace--student" data-reveal><figcaption><span>Example application · from a project</span></figcaption>{bar}<div className="audience-workspace-body"><p className="jv-caption">Your project<ArrowRight className="jv-inline-arrow" aria-hidden="true" /><span className="jv-sr-only"> to </span>job requirement<ArrowRight className="jv-inline-arrow" aria-hidden="true" /><span className="jv-sr-only"> to </span>review</p><p className="audience-workspace-title">See the experience behind each requirement.</p><div className="audience-evidence"><span>The vacancy asks</span><p>{content.exampleRequirement}</p></div><div className="audience-evidence audience-evidence--fact"><span>Your source · {content.exampleContext}</span><p>{content.exampleFact}</p><small><Check size={14} aria-hidden="true" />Compare the original wording</small></div>{question}{next}</div></figure>;
 }
 
+const relatedReading: Record<LoopAudience, [string, string][]> = {student: [["/guides/student-projects-on-cv","Describe student projects on your CV"],["/guides/academic-qualifications-uae-cv","List qualifications on a UAE CV"],["/cv-check","Try the free CV check"]],mba: [["/guides/mba-career-pivot-cv","Pivot your CV after an MBA"],["/guides/cv-job-description-evidence","Compare your CV with a job description"],["/cv-check","Try the free CV check"]],professional: [["/guides/confidential-career-switch","Plan a confidential job search"],["/guides/mba-career-pivot-cv","Reframe your experience for a new role"],["/cv-check","Try the free CV check"]]};
+
 export default function AudienceLanding({ audience }: { audience: LoopAudience }) {
   useReveal();
   const content = loopAudienceContent[audience], { user } = useAuth();
@@ -109,5 +111,6 @@ export default function AudienceLanding({ audience }: { audience: LoopAudience }
         <div className="jv-cta-actions">{user ? <Link className="jv-btn jv-btn--primary jv-btn--lg" to={saveRecord}>Open my career record<ArrowRight aria-hidden="true" /></Link> : <><Link className="jv-btn jv-btn--primary jv-btn--lg" to="/onboarding">Start my search<ArrowRight aria-hidden="true" /></Link><Link className="jv-btn jv-btn--secondary jv-btn--lg" to={saveRecord}>Sign in to save my experience</Link></>}</div></div>
       <div className="jv-cta-visual" aria-hidden="true"><CvLineCard before={content.exampleFact} after={closing[audience].after} /></div>
     </section>
+    <nav className="jv-related" aria-label="Related reading"><span>Related reading</span>{relatedReading[audience].map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav>
   </main>;
 }

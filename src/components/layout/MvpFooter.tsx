@@ -1,12 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { Brand } from "./MvpHeader";
 
-// The same site links as before, grouped into four balanced columns of three.
+// The same site links as before, grouped into five balanced columns of three, the last one the guides that answer the most searched questions.
 const columns: [string, [string, string][]][] = [
   ["Product", [["/job-loop", "Automated Job Loop"], ["/cv-check", "Free CV Check"], ["/pricing", "Plans & pricing"]]],
   ["Resources", [["/guides", "Career guides"], ["/walkthroughs", "Walkthroughs"], ["/help", "Help"]]],
   ["Who it's for", [["/for-students", "Students"], ["/for-mba", "MBA career pivots"], ["/for-career-switchers", "Busy professionals"]]],
   ["Company", [["/about", "About Jobvance"], ["/contact", "Contact"], ["/faq", "FAQ"]]],
+  ["Popular guides", [["/guides/cv-job-description-evidence", "Match your CV to a job"], ["/guides/cv-check-no-fit-percentage", "Reading a match score"], ["/guides/resume-privacy-before-upload", "Before you upload a CV"]]],
 ];
 const legal: [string, string][] = [["/privacy", "Privacy"], ["/privacy#advertising-measurement", "Your privacy choices"], ["/terms", "Terms"], ["/refund", "Refunds"]];
 

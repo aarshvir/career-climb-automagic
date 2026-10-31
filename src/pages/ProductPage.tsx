@@ -173,14 +173,14 @@ export default function ProductPage({ kind }: { kind: Kind }) {
     {kind === "home" ? <HomePage /> : <>
       <div className="jv-page product-inner">
         <header className={`jv-page-head product-page-heading${visual ? " jv-page-head--split" : ""}${kind === "about" || kind === "pricing" ? " jv-page-head--forest jv-dark" : ""}${kind === "faq" ? " jv-page-head--center" : ""}`}><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title jv-enter-h1">{nb(titles[kind])}</h1><p className="jv-lead product-page-intro jv-enter" style={{ "--d": "60ms" } as React.CSSProperties}>{nb(intros[kind] ?? "")}</p>
-          {(band || kind === "pricing") && <div className="jv-page-actions"><StartLink to={start}>{kind === "pricing" ? "Start free" : undefined}</StartLink><TextLink to="/check">Try the free CV Check</TextLink></div>}
+          {(band || kind === "pricing") && <div className="jv-page-actions"><StartLink to={start}>{kind === "pricing" ? "Start free" : undefined}</StartLink><TextLink to="/cv-check">Try the free CV Check</TextLink></div>}
           {visual && <div className="jv-page-visual" {...(visualDecor ? { "aria-hidden": true } : {})}>{visual}</div>}
         </header>
         {kind === "pricing" ? <SubscriptionPricing /> : <div className="product-main-content">
           {kind === "how" && <>
             <section className="jv-section product-section" aria-labelledby="how-journey-title"><div className="jv-split jv-split--timeline"><div className="jv-head" data-reveal><p className="jv-caption">From setup to dashboard</p><h2 id="how-journey-title" className="jv-section-title"><span className="jv-line">Set it up once.</span> <span className="jv-line">It runs on your schedule.</span></h2><p>Two steps are yours, once. After that every run finds jobs and prepares CVs while you do something else.</p></div><JourneyTimeline /></div></section>
             <section className="jv-section product-section" aria-labelledby="how-cv-title"><div className="jv-split"><div className="product-visual" aria-hidden="true"><CvDiffCard /></div><div data-reveal><p className="jv-caption">Every CV</p><h2 id="how-cv-title" className="jv-section-title">Reworded for the job, from your experience.</h2><ul className="jv-ticks"><li>Each CV starts from the experience you added and the facts you confirm.</li><li>Wording is matched to what the job asks for, line by line.</li><li>Review it, then download PDF, DOCX or TXT from your dashboard.</li></ul></div></div></section>
-            <p className="jv-related"><span>Not ready for a schedule?</span><Link to="/check">Try the free CV Check</Link><Link to="/job-loop">See the Automated Job Loop in depth</Link></p>
+            <p className="jv-related"><span>Not ready for a schedule?</span><Link to="/cv-check">Try the free CV Check</Link><Link to="/job-loop">See the Automated Job Loop in depth</Link></p>
           </>}
           {kind === "faq" && <div className="jv-faq jv-faq--wide product-faqs" data-reveal>{faqs.map(([question, answer], index) => <details key={question} id={`faq-${index}`}><summary><span>{question}</span><span className="jv-faq-toggle" aria-hidden="true"><Plus /></span></summary><p>{answer}</p></details>)}</div>}
           {kind === "about" && <div className="product-about">
