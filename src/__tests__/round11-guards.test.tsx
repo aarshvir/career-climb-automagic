@@ -45,7 +45,7 @@ describe('round 11 guards', () => {
     expect(document.getElementById('faq-0')).toBeInstanceOf(HTMLDetailsElement);
   });
 
-  it('the footer has four balanced columns of three links', () => {
+  it('the footer has five balanced columns of three links', () => {
     render(<MemoryRouter><MvpFooter /></MemoryRouter>);
     for (const group of screen.getAllByRole('group')) expect(within(group).getAllByRole('link')).toHaveLength(3);
   });

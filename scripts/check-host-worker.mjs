@@ -148,7 +148,7 @@ assert.ok(!sitemap.includes('https://jobvance.io/pilot'));
 assert.ok(!publicRender.pages.some(page=>page.path==='/pilot'));
 const home=await (await request('/')).text();
 const homeGuides=[...new Set([...home.matchAll(/href="(\/guides\/[^"?#]+)"/g)].map(match=>match[1]))];
-assert.equal(homeGuides.length,6,'Six article links must be in the actual initial HTML.');
+assert.equal(homeGuides.length,10,'Ten article links must be in the actual initial HTML.');
 for(const path of homeGuides) assert.ok(publicRender.pages.some(page=>page.path===path&&page.kind==='guide'),'Every linked article must actually render.');
 for(const path of ['/for-students','/for-mba','/for-career-switchers']) assert.ok(home.includes(`href="${path}"`),'Existing audience guidance must be reachable from home.');
 const key='74fd2bde8727baaf27cf4f939db81717';
