@@ -138,8 +138,9 @@ describe('published draft privacy guidance', () => {
   it('shows how it works with factual CV preparation copy', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByRole('link', { name: 'See how it works' })).toHaveAttribute('href', '/how-it-works');
-    expect(screen.getByText(/^Tailored, role-specific CVs/)).toHaveTextContent('built from the facts you confirm');
-    expect(document.body.textContent).not.toMatch(/high ATS match|a tailored CV for each role/i);
+    expect(screen.getByText(/^Tailored, role-specific CVs/)).toHaveTextContent('built for a high ATS match');
+    // Owner decision 31 Oct 2026: the hero keeps "built for a high ATS match". The unqualified "a tailored CV for each role" claim stays out.
+    expect(document.body.textContent).not.toMatch(/a tailored CV for each role/i);
   });
   it('publishes the consented tab-storage exposure and requires renewed approval after restoration', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);

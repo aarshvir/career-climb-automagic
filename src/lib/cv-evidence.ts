@@ -53,14 +53,21 @@ type Line = Span & { text: string; line: number; newline: string };
 type Section = 'experience' | 'internships' | 'volunteering' | 'personal_projects' | 'skills' | 'education' | 'credentials' | 'projects' | 'other';
 type Passage = EvidencePassage & { section: Section; matchText: string; terms: string[]; negative: boolean; pending: boolean; weakened: boolean; sourceSpan: Span; sourceLine: number; sourceQuote: string };
 
-const REQUIRED_HEADING_LABEL = /(?:requirements?|qualifications?|(?:minimum|basic|preferred|desired|additional) qualifications|essential(?: criteria| requirements)?|desirable(?: criteria| requirements)?|responsibilities|key responsibilities|duties|what (?:you(?:'|’)ll (?:do|achieve|need|own|learn|work on|be doing)|you will (?:do|achieve|need)|you(?:'|’)ll need to bring|you bring|we need|we(?:'|’)re looking for|excites (?:you|us))|skills you(?:'|’)ll need(?: to bring)?|nice[- ]to[- ]haves?|must[- ]haves?|bonus(?: points| skills)?|ideal candidate|who you are|you (?:will|have|bring)|exceptional candidates will have|about you|about (?:the|this) role|your (?:role|responsibilities|profile)|skills(?: and experience)?|experience(?: and qualifications)?)/.source;
+const REQUIRED_HEADING_LABEL = /(?:requirements?|qualifications?|(?:minimum|basic|preferred|desired|additional) qualifications|essential(?: criteria| requirements)?|desirable(?: criteria| requirements)?|responsibilities|key responsibilities|duties|what (?:you(?:'|’)ll (?:do|achieve|need|own|learn|work on|be doing)|you will (?:do|achieve|need)|you(?:'|’)ll need to bring|you bring|we need|we(?:'|’)re looking for|excites (?:you|us))|skills you(?:'|’)ll need(?: to bring)?|nice[- ]to[- ]haves?|must[- ]haves?|bonus(?: points| skills)?|ideal candidate|who you are|you (?:will|have|bring)|exceptional candidates will have|about you|about your (?:background|skills|experience|qualifications|profile)|about (?:the|this) role|your (?:role|responsibilities|profile)|skills(?: and experience)?|experience(?: and qualifications)?)/.source;
 // Combine only known section labels. Prose such as "Responsibilities include SQL"
 // must remain a requirement, while a colon's following criteria are parsed separately.
 const REQUIRED_HEADING = new RegExp(`^${REQUIRED_HEADING_LABEL}(?:\\s*(?:and|&|/)\\s*${REQUIRED_HEADING_LABEL})*(?:\\s*:|\\s*$)`, 'i');
 const OTHER_HEADING = /^(?:about (?:us|the company|our company|the team|our team|the business)|company (?:overview|description)|who we are|(?:our )?(?:benefits|perks)(?:\s*(?:and|&)\s*(?:benefits|perks))?|what we offer|what(?:'|’)s in it for you|what you(?:'|’)ll get|(?:compensation|pay|salary|benefits|perks)(?:\s*,\s*|\s*(?:and|&)\s*)(?:compensation|pay|benefits|perks)(?:\s*(?:and|&)\s*(?:benefits|perks))?|why (?:join|work (?:with|at|for)) [^:]{1,40}|life at [^:]{1,40}|(?:\([^)]{1,20}\)\s*)?the good stuff|salary(?: range)?|(?:base )?pay(?: range| transparency)?|compensation(?: and benefits)?|total rewards|how to apply|application process|equal opportunit(?:y|ies)(?:\s*(?:and|&)\s*[\w ]{1,30})?|diversity(?:,? equity)?(?: and inclusion)?|reasonable adjustments|accommodations|a note on [^:]{1,40}|our (?:values|mission|culture))(?:\s*:|\s*$)/i;
 // "About Acme" or "About Example Retail Group" names the employer, so what follows is the employer's own text.
-// Case-sensitive on purpose, and "About you / the role / this job" stay requirement headings (REQUIRED_HEADING).
+// Employer names remain case-sensitive; applicant pronouns are excluded in every case.
 const ABOUT_COMPANY = /^(?:[Aa]bout|ABOUT)\s+(?!(?:[Yy]ou|YOU|[Yy]ours?|[Tt]he|THE|[Tt]his|THIS|[Tt]hat|[Tt]hese|[Mm]e|[Ii]t)\b)[A-Z][\w&.'’-]*(?:\s+(?:(?:and|of|the|for|de|la|van|von|&)\s+)?[A-Z0-9][\w&.'’-]*){0,4}(?:\s*:|\s*$)/;
+function companyHeading(value: string): RegExpExecArray | null {
+  if (/^about (?:you|yours?|the|this|that|these|me|it)\b/i.test(value)) return null;
+  return ABOUT_COMPANY.exec(value);
+}
+// Explicit applicant criteria survive even when placed inside a company/pay section.
+// Employer prose mentioning a tool ("Acme supplies SQL products") is still context.
+const CRITERION_START = /^(?:(?:candidates?|applicants?)\s+(?:(?:should|will|would|can|may)\s+)?(?:have|bring|demonstrate|possess|be able to)\b|(?:(?:strong|excellent|good|advanced|intermediate|basic|proven|demonstrable|demonstrated|practical|working|hands[- ]on|relevant|professional|prior|previous)\s+){0,3}(?:experience|knowledge|understanding|proficiency|expertise|familiarity|ability)\b|(?:strong|excellent|good|advanced|intermediate|basic)\b[^.!?\n]{0,100}\b(?:skills|communication)\b|\d+(?:\.\d+)?\+?\s*(?:years?|yrs?|months?)\s+(?:of\s+)?experience\b)/i;
 const MANDATORY = /\b(?:must|required|mandatory|essential|need to|minimum|at least)\b/i;
 const DEADLINE = /\b(?:applications? (?:close|deadline)|apply by|closing date|deadline)\b/i;
 const CONDITION = /\b(?:visa|sponsorship|work (?:authorization|authorisation|permit)|right to work|eligible to work|citizenship|nationality|relocat(?:e|ion)|security clearance)\b/i;
@@ -81,7 +88,7 @@ const CURRENCY_RANGE = /^[$€£]\s?\d[\d,.]*(?:\s*[kKmM])?(?:\s*(?:[-–—]|to
 // A bare duty verb opens a task, never the employer's offer ("Process fringe benefits and equity").
 const DUTY_START = /^(?:administer|assist|audit|analy[sz]e|build|calculate|collaborate|complete|conduct|coordinate|create|define|deliver|design|develop|drive|ensure|evaluate|execute|identify|implement|improve|lead|liaise|maintain|manage|monitor|negotiate|own|partner|plan|prepare|process|produce|provide|reconcile|report|review|run|serve|support|track|train|update|work|write)\b/i;
 // An explicit applicant task remains a criterion even when framed with employer/role language.
-const CANDIDATE_TASK = /^(?:(?:your\s+(?:responsibilities|duties|work|role|tasks)|(?:the|this)\s+(?:role|position))\s+(?:(?:will|would|can|could)\s+)?(?:includes?|involves?|entails?|covers?)\b|(?:the|this)\s+(?:role|position)\s+(?:is|will be)\s+(?:responsible|accountable)\s+for\b|our\s+(?:ideal|successful|next|new)\s+(?:candidate|applicant|hire|team member)\b)/i;
+const CANDIDATE_TASK = /^(?:(?:responsibilities|duties|tasks)\s+(?:include|involve|entail|cover)\b|(?:your\s+(?:responsibilities|duties|work|role|tasks)|(?:the|this)\s+(?:role|position))\s+(?:(?:will|would|can|could)\s+)?(?:includes?|involves?|entails?|covers?)\b|(?:the|this)\s+(?:role|position)\s+(?:is|will be)\s+(?:responsible|accountable)\s+for\b|our\s+(?:ideal|successful|next|new)\s+(?:candidate|applicant|hire|team member)\b)/i;
 const UNSUPPORTED_SCRIPT = /[\u0400-\u052f]|[\u0600-\u06ff]|[\u0900-\u097f]|[\u3040-\u30ff]|[\u3400-\u9fff]|[\uac00-\ud7af]/u;
 const BULLET = /^(\s*(?:[-*•▪◦‣–—]|\d+[.)])\s+)/;
 const SYMBOL_BULLET = /^\s*[-*•▪◦‣–—]\s+/;
@@ -193,7 +200,7 @@ function mandatory(value: string): boolean {
 
 /** These applicant clauses still need comparison/manual review, whatever heading precedes them. */
 function retainedInContext(value: string): boolean {
-  return mandatory(value) || CANDIDATE_TASK.test(value) || DEADLINE.test(value) || CONDITION.test(value);
+  return mandatory(value) || CANDIDATE_TASK.test(value) || CRITERION_START.test(value) || DEADLINE.test(value) || CONDITION.test(value);
 }
 
 /** True when the clause itself states something a CV could be held against. */
@@ -266,7 +273,7 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
     const heading = headingKey(line.text);
     if (listingRoleHeading(line.text, i,enteredTitle)) { omitted.push(raw); continue; }
     const required = REQUIRED_HEADING.exec(heading);
-    const other = OTHER_HEADING.exec(heading) ?? (required ? null : ABOUT_COMPANY.exec(heading));
+    const other = OTHER_HEADING.exec(heading) ?? (required ? null : companyHeading(heading));
     if (required || other) {
       ignoreSection = !!other;
       const colon = line.text.indexOf(':');
@@ -292,7 +299,7 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
     if (bullet) {
       while (i + 1 < sourceLines.length) {
         const next = sourceLines[i + 1];
-        if (!/^\s{2,}\S/.test(next.text) || BULLET.test(next.text) || REQUIRED_HEADING.test(headingText(next.text)) || OTHER_HEADING.test(headingText(next.text))) break;
+        if (!/^\s{2,}\S/.test(next.text) || BULLET.test(next.text) || REQUIRED_HEADING.test(headingKey(next.text)) || OTHER_HEADING.test(headingKey(next.text)) || companyHeading(headingKey(next.text))) break;
         end = next.end;
         i++;
       }

@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-31",
+  "timezone": "Asia/Dubai",
+  "site": "https://jobvance.io",
+  "publicVersion": 70,
+  "status": "succeeded",
+  "runtimeSource": "fd546b671c7040468f93b3b91c86f940172e24b9",
+  "githubMergeSource": "feee872a04a6b791012f01e7dd031d028d34e094",
+  "fullMergeTree": "479ad3c524ca69488bf446413038924384ce3635",
+  "mergeTreeEqualsReviewedHead": true,
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/44",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_190ea49da944819190c2960ccf07eefe",
+  "deploymentId": "appgdep_6ae63f77abe08191844f00afc5858dbd",
+  "deployedAt": "2026-10-31T23:20:49.126027+04:00",
+  "authorization": "Direct handoff records owner decision 'Restore ATS' for home hero/boundary/home description only; supersedes previous copy choice at those locations.",
+  "claimAssessment": "Accepted as stated design intent/owner-selected wording, not empirical ATS/high-score/vendor compatibility or hiring validation. No such outcome was tested or certified.",
+  "scope": {
+    "files": 3,
+    "productionFiles": 2,
+    "changed": [
+      "src/pages/HomePage.tsx: two text nodes",
+      "src/lib/public-site-meta.ts: home description only",
+      "src/__tests__/audience-and-pricing.test.tsx: expected boundary wording/comment, each-role guard retained"
+    ],
+    "kept": "Signup/audience/FAQ/Auth-onboarding fallback confirmed-facts wording; exact owner H1, approved look and all other source preserved",
+    "prerender": "Homepage HTML and derived page/OG/Twitter descriptions intentionally update; social PNG bytes unchanged"
+  },
+  "validation": {
+    "ci": {
+      "run": 41233190963,
+      "job": 124631450527,
+      "head": "fd546b671c7040468f93b3b91c86f940172e24b9",
+      "conclusion": "success",
+      "allStepsPassed": true,
+      "tests": 3750,
+      "files": 212,
+      "countEvidence": [
+        "2026-10-31T19:19:02.3370929Z  Test Files  212 passed (212)",
+        "2026-10-31T19:19:02.3412134Z       Tests  3750 passed (3750)"
+      ]
+    },
+    "local": {
+      "affectedTests": 13,
+      "affectedFiles": 1,
+      "typeScript": "passed",
+      "sourceWhitespace": "passed",
+      "fullSuite": "CI, not a fresh local full-suite claim"
+    },
+    "build": {
+      "pages": 37,
+      "guides": 20,
+      "hostingGroups": 12,
+      "compressedBytes": 2185273,
+      "limitBytes": 3145728,
+      "social": "37page metadata/two1200x630PNG routes pass; PNG bytes unchanged"
+    },
+    "browser": "Actual local1440/390/320 and live1440/390; exactH1/requestedlead+boundary/oneeachpage-OG-Twitterdescription, no overflow.",
+    "live": {
+      "http": {
+        "at": "2026-10-31T19:21:09.853Z",
+        "paths": 159,
+        "rawExact": 113,
+        "recognizedCloudflareTail": 46,
+        "passed": 159
+      },
+      "all200": true,
+      "securityExact": true,
+      "js": 68,
+      "css": 17,
+      "browser": {
+        "source": "fd546b671c7040468f93b3b91c86f940172e24b9",
+        "ats44LiveDesktop": {
+          "at": "2026-10-31T19:21:24.546Z",
+          "boundary": "Tailored, role-specific CVs, built for a high ATS match.",
+          "clientWidth": 1425,
+          "descriptions": [
+            {
+              "content": "Choose roles and locations once. Automated Job Loop runs in the background and finds the best-matching jobs, with tailored, role-specific CVs built for a high ATS match.",
+              "name": "description"
+            },
+            {
+              "content": "Choose roles and locations once. Automated Job Loop runs in the background and finds the best-matching jobs, with tailored, role-specific CVs built for a high ATS match.",
+              "name": "og:description"
+            },
+            {
+              "content": "Choose roles and locations once. Automated Job Loop runs in the background and finds the best-matching jobs, with tailored, role-specific CVs built for a high ATS match.",
+              "name": "twitter:description"
+            }
+          ],
+          "h1": "Jobvance automates your job search end to end.",
+          "height": 1000,
+          "lead": "Choose your roles and locations once. Automated Job Loop runs in the background and finds the best-matching jobs for you, with tailored, role-specific CVs built for a high ATS match.",
+          "scrollWidth": 1425,
+          "width": 1440
+        },
+        "ats44LivePhone": {
+          "clientWidth": 375,
+          "height": 844,
+          "lead": "Choose your roles and locations once. Automated Job Loop runs in the background and finds the best-matching jobs for you, with tailored, role-specific CVs built for a high ATS match.",
+          "scrollWidth": 375,
+          "width": 390
+        },
+        "submitted": false,
+        "adTags": false
+      }
+    },
+    "limits": "No native ATS score/compatibility/customer/hiring or conversion acceptance; no forms/accounts/Google/AI/provider/checkout/payment submit; no ad tags; ordinary QA not ad traffic."
+  },
+  "boundaries": {
+    "base": "efd16ff10bc57b1e43166fc2262a76ef5b23d261",
+    "supabaseTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "authOptionalPhoneContactsPixelCommerceConsentSecurityCssCspBillingPackagesCiUnchanged": true,
+    "migrationReplayed": false,
+    "backendDeployed": false,
+    "metaConversionsVersion": 3,
+    "commerceMigration": "20261030041314",
+    "adsFundingPermissionsOutreachPurchase": false
+  },
+  "archive": {
+    "sha256": "ac332626ab6503508c81d63c34bfc68a919ec0dae66fcaa74ceaa2f830da5a37",
+    "bytes": 4336457,
+    "entries": 163,
+    "privatePaths": [],
+    "workerSha256": "b8ad7ad8eefb97dc00edff84cb2d5ae5b6dea4384aadf22d06177a3b908ec22c",
+    "storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000399482088de2753d3b8537e6",
+      "content_hash": "sha256:076c42d2e56457d0d2fc1436381b2eb3ffab7c803293d260454774e91e9ca23e",
+      "size_bytes": 14469120,
+      "file_count": 155
+    }
+  },
+  "rollback": {
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_b5897a27c7a88191b3f003ece019a996",
+    "source": "e2c3784a5c8b4ea2ac2efb74ac0dcd9b2fa07987",
+    "localTag": "jobvance-before-ats-hero-2026-10-31",
+    "tagPushed": false
+  },
+  "measurement": {
+    "v63": "2026-10-27T17:44:00.120558Z",
+    "v64": "2026-10-30T04:15:39.034668Z",
+    "v65": "2026-10-30T20:25:45.450435Z",
+    "v66": "2026-10-31T14:32:22.069243Z",
+    "v67": "2026-10-31T15:22:25.777469Z",
+    "v68": "2026-10-31T16:17:51.715216Z",
+    "v69": "2026-10-31T18:59:06.595996Z",
+    "v70": "2026-10-31T23:20:49.126027+04:00",
+    "limits": "No conversion query during this copy release; last actual18:59:37UTC107Meta/68Purchase and0signup/LIVEcheckout/paid/matchedPurchaseaccepted remain dated. No pooled-release causal effect."
+  },
+  "cleanup": "Owned preview server/tab closed,viewportreset; userGoogleloginuntouched.",
+  "evidence": "jobvance-repair-evidence/ats-hero-pr44-review-2026-10-31/"
+}
