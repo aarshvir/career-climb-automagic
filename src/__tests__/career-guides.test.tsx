@@ -23,7 +23,7 @@ describe("public career guides", () => {
     expect(screen.getByLabelText("Your stage")).toHaveValue("all");
     expect(screen.getByLabelText("Your task")).toHaveValue("all");
     expect(screen.getByRole("status")).toHaveTextContent("20 guides to explore");
-    expect(screen.getByRole("link", { name: "Try the free CV Check" })).toHaveAttribute("href", "/check");
+    expect(screen.getByRole("link", { name: "Try the free CV Check" })).toHaveAttribute("href", "/cv-check");
     expect(screen.queryByRole("link", { name: /sign up/i })).not.toBeInTheDocument();
   });
 

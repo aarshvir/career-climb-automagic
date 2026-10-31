@@ -11,6 +11,8 @@ import { productFaqs } from '../src/lib/product-faqs';
 import { subscriptionPlans } from '../src/lib/subscription-plans';
 import { passPlans } from '../src/lib/pass-plans';
 import AudienceLanding from '../src/pages/AudienceLanding';
+import CvCheckLanding from '../src/pages/CvCheckLanding';
+import { cvCheckStructuredNodes } from '../src/lib/cv-check-structured-data';
 import JobLoopOverview from '../src/pages/JobLoopOverview';
 import HelpCenter from '../src/pages/HelpCenter';
 import Walkthroughs from '../src/pages/Walkthroughs';
@@ -20,6 +22,7 @@ import { publicPages, type PublicPage } from '../src/lib/public-route-manifest';
 function element(page:PublicPage) {
   if(page.kind==='product')return <ProductPage kind={page.key as Parameters<typeof ProductPage>[0]['kind']} />;
   if(page.kind==='audience')return <AudienceLanding audience={page.key as Parameters<typeof AudienceLanding>[0]['audience']} />;
+  if(page.kind==='landing')return <CvCheckLanding />;
   if(page.kind==='check')return <main className="product-page"><section className="product-shell product-inner"><h1>CV Check, in your Jobvance account.</h1><p>Compare your CV with a job, review tailored wording and download your approved version. Keep it ready for your next application.</p><Link className="product-button" to="/auth?mode=signup&next=%2Fcheck">Create my account</Link><p><Link to="/auth?next=%2Fcheck">Already have an account? Sign in</Link></p></section></main>;
   if(page.kind==='pilot')return <JobLoopOverview />;
   if(page.kind==='loop-overview')return <JobLoopOverview />;
@@ -32,6 +35,7 @@ function element(page:PublicPage) {
 /** Extra schema.org nodes for pages whose visible content states them: the FAQ's own questions, and the published plan prices. No ratings, reviews or outcomes. */
 export function structuredNodesFor(path:string,siteOrigin:string):object[] {
   if(path==='/faq')return [{'@type':'FAQPage',mainEntity:productFaqs.filter(([,answer])=>typeof answer==='string').map(([question,answer])=>({'@type':'Question',name:question,acceptedAnswer:{'@type':'Answer',text:answer as string}}))}];
+  if(path==='/cv-check')return cvCheckStructuredNodes(siteOrigin);
   if(path==='/'||path==='/pricing')return [{'@type':'SoftwareApplication',name:'Jobvance Automated Job Loop',url:siteOrigin+(path==='/pricing'?'/pricing':'/'),applicationCategory:'BusinessApplication',operatingSystem:'Web',offers:[{'@type':'Offer',name:'Free account',price:'0',priceCurrency:'USD',url:siteOrigin+'/onboarding'},...subscriptionPlans.map(plan=>({'@type':'Offer',name:plan.name+' monthly plan',price:String(plan.priceUsd),priceCurrency:'USD',url:siteOrigin+'/pricing'})),...(path==='/pricing'?passPlans.map(plan=>({'@type':'Offer',name:plan.name+' one-time CV pass',price:String(plan.price),priceCurrency:'USD',url:siteOrigin+'/pricing'})):[])]}];
   return [];
 }

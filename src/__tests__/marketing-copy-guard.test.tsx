@@ -8,6 +8,7 @@ import JobLoopOverview from '@/pages/JobLoopOverview';
 import MvpFooter from '@/components/layout/MvpFooter';
 import CareerGuides from '@/pages/CareerGuides';
 import AudienceLanding from '@/pages/AudienceLanding';
+import CvCheckLanding from '@/pages/CvCheckLanding';
 import Auth from '@/pages/Auth';
 import Walkthroughs from '@/pages/Walkthroughs';
 import { publicStaticPages } from '@/lib/public-site-meta';
@@ -38,6 +39,7 @@ const surfaces: [string, () => React.ReactElement][] = [
   ['about', () => <ProductPage kind="about" />],
   ['pricing', () => <ProductPage kind="pricing" />],
   ['job-loop', () => <JobLoopOverview />],
+  ['cv-check', () => <CvCheckLanding />],
   ['footer', () => <MvpFooter />],
   ['guides', () => <CareerGuides />],
   ['for-students', () => <AudienceLanding audience="student" />],

@@ -21,6 +21,11 @@ describe('public search routes remain distinct and exclude private state',()=>{
     expect(locations).toHaveLength(listed.length);
     for(const location of locations){expect(location).not.toContain('?');expect(location).not.toContain('#');}
   });
+  it('lists the public CV Check page for search while the account-gated check stays out',()=>{
+    expect(publicPages.find(page=>page.path==='/cv-check')?.kind).toBe('landing');
+    expect(publicSitemap()).toContain('<loc>https://jobvance.io/cv-check</loc>');
+    expect(publicSitemap()).not.toContain('<loc>https://jobvance.io/check</loc>');
+  });
   it('moves old blog and jobs entries to an explanatory public page',()=>{
     expect(routeRedirects['/blog']).toBe('/guides');expect(routeRedirects['/jobs']).toBe('/job-loop');
     expect(routeRedirects['/product']).toBe('/job-loop');

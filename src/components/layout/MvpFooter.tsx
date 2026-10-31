@@ -3,7 +3,7 @@ import { Brand } from "./MvpHeader";
 
 // The same site links as before, grouped into four balanced columns of three.
 const columns: [string, [string, string][]][] = [
-  ["Product", [["/job-loop", "Automated Job Loop"], ["/check", "Free CV Check"], ["/pricing", "Plans & pricing"]]],
+  ["Product", [["/job-loop", "Automated Job Loop"], ["/cv-check", "Free CV Check"], ["/pricing", "Plans & pricing"]]],
   ["Resources", [["/guides", "Career guides"], ["/walkthroughs", "Walkthroughs"], ["/help", "Help"]]],
   ["Who it's for", [["/for-students", "Students"], ["/for-mba", "MBA career pivots"], ["/for-career-switchers", "Busy professionals"]]],
   ["Company", [["/about", "About Jobvance"], ["/contact", "Contact"], ["/faq", "FAQ"]]],

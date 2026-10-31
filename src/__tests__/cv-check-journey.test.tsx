@@ -549,7 +549,7 @@ describe("three-stage free CV check", () => {
     expect(within(screen.getByRole("region", { name: "How your CV covers this job" })).getByText("Lead a transformation programme.")).toBeInTheDocument();
     const leadershipFinding = screen.getByRole("article", { name: "Vacancy finding: Lead a transformation programme." });
     expect(within(leadershipFinding).getByText("Supported a transformation pilot across five units.", { exact: true })).toBeInTheDocument();
-    expect(within(leadershipFinding).getByText("Related passage — review needed")).toBeInTheDocument();
+    expect(within(leadershipFinding).getByText("Partly covered")).toBeInTheDocument();
     expect(screen.queryByText(/\d+\/100/)).not.toBeInTheDocument();
     await toDownload();
     expect(screen.getByText('Reuse these edits later (optional)').closest('details')).not.toHaveAttribute('open');

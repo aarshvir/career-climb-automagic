@@ -1,12 +1,8 @@
 import type { EvidenceReport, EvidenceStatus } from '@/lib/cv-evidence';
+import { evidenceStatusLabels } from '@/lib/evidence-labels';
 
-const ROWS: [EvidenceStatus, string][] = [
-  ['direct', 'Covered'],
-  ['partial', 'Partly covered'],
-  ['missing', 'Not shown in your CV'],
-  ['review', 'Needs your judgment'],
-];
-const LABEL = Object.fromEntries(ROWS) as Record<EvidenceStatus, string>;
+const ROWS = (['direct', 'partial', 'missing', 'review'] as const).map(status => [status, evidenceStatusLabels[status]] as [EvidenceStatus, string]);
+const LABEL = evidenceStatusLabels;
 
 /** How the CV covers each requirement in the ad: counts, never a percentage or a pass/fail verdict. */
 export default function RequirementCoverage({ before, after, changed }: { before: EvidenceReport | null; after: EvidenceReport; changed: boolean }) {

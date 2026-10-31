@@ -12,7 +12,7 @@ const buildManifest=JSON.parse(await readFile(resolve(dist,'.vite/manifest.json'
 const escape=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const json=value=>JSON.stringify(value).replace(/</g,'\\u003c');
 const hash=value=>createHash('sha256').update(value).digest('base64');
-const cssFor=kind=>kind==='guide'||kind==='guides'?'src/pages/CareerGuides.tsx':kind==='loop-overview'?'src/pages/JobLoopOverview.tsx':kind==='help'?'src/pages/HelpCenter.tsx':kind==='walkthroughs'?'src/pages/Walkthroughs.tsx':kind==='audience'?'src/pages/AudienceLanding.tsx':kind==='check'?'src/pages/CvCheck.tsx':kind==='pilot'?'src/pages/PilotLanding.tsx':'src/main.tsx';
+const cssFor=kind=>kind==='guide'||kind==='guides'?'src/pages/CareerGuides.tsx':kind==='loop-overview'?'src/pages/JobLoopOverview.tsx':kind==='help'?'src/pages/HelpCenter.tsx':kind==='walkthroughs'?'src/pages/Walkthroughs.tsx':kind==='audience'?'src/pages/AudienceLanding.tsx':kind==='check'?'src/pages/CvCheck.tsx':kind==='landing'?'src/pages/CvCheckLanding.tsx':kind==='pilot'?'src/pages/PilotLanding.tsx':'src/main.tsx';
 const pages=[],scriptHashes=new Set();
 await mkdir(resolve(dist,'.prerender'),{recursive:true});
 const server=await createServer({root,mode:'production',cacheDir:resolve(root,'.sites-runtime/prerender-vite-cache'),server:{middlewareMode:true,watch:null,hmr:false},ssr:{noExternal:['react-helmet-async']},appType:'custom'});

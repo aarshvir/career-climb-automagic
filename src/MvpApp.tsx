@@ -29,6 +29,7 @@ const Workspace = lazy(() => import("@/pages/Workspace"));
 const JobLoop = lazy(() => import("@/pages/JobLoop"));
 const LoopOnboarding = lazy(routeLoaders.onboarding);
 const AudienceLanding = lazyRoute("audience", routeLoaders.audience);
+const CvCheckLanding = lazyRoute("cvCheckLanding", routeLoaders.cvCheckLanding);
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
 const AdminPortal = lazy(() => import("@/pages/admin/AdminPortal"));
 const AdminHome = lazy(() => import("@/pages/admin/home/AdminHome"));
@@ -115,6 +116,7 @@ export default function MvpApp() {
                     <Route path="/" element={<ProductPage kind="home" />} />
                     <Route path="/pilot" element={<Navigate to="/job-loop" replace />} />
                     <Route path="/check" element={<ProtectedCvCheck />} />
+                    <Route path="/cv-check" element={<CvCheckLanding />} />
                     <Route path="/onboarding" element={<LoopOnboarding />} />
                     <Route path="/loop" element={<ProtectedJobLoop />} />
                     <Route path="/job-loop" element={<JobLoopOverview />} />

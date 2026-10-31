@@ -1,0 +1,25 @@
+/* Public CV Check page: reuses the product page rails; only the example table, glance list and outcome badges are new. */
+.product-page--cvcheck .cvl-note { margin: 14px 0 0; color: var(--jv-ink-2); font-size: var(--t-small, 0.9rem); max-width: 60ch; }
+.product-page--cvcheck .cvl { display: grid; gap: 8px; }
+.product-page--cvcheck .cvl p, .product-page--cvcheck .cvl li { max-width: 68ch; line-height: 1.6; }
+.product-page--cvcheck .cvl a { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
+.cvl-glance { display: grid; gap: 0; margin: 12px 0 0; border: 1px solid var(--jv-line); border-radius: 14px; overflow: hidden; }
+.cvl-glance > div { display: grid; grid-template-columns: minmax(120px, 190px) 1fr; gap: 16px; padding: 14px 18px; border-top: 1px solid var(--jv-line); }
+.cvl-glance > div:first-child { border-top: 0; }
+.cvl-glance dt { font-weight: 600; color: var(--jv-ink); }
+.cvl-glance dd { margin: 0; color: var(--jv-ink-2); }
+.cvl-outcomes, .cvl-who, .cvl-read { padding-left: 20px; display: grid; gap: 8px; }
+.cvl-steps { padding-left: 22px; display: grid; gap: 8px; }
+.cvl-table-wrap { overflow-x: auto; margin-top: 16px; }
+.cvl-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; min-width: 560px; }
+.cvl-table caption { caption-side: top; text-align: left; padding: 0 0 10px; color: var(--jv-ink-2); font-size: 0.85rem; }
+.cvl-table th, .cvl-table td { text-align: left; vertical-align: top; padding: 12px 14px; border-top: 1px solid var(--jv-line); }
+.cvl-table thead th { border-top: 0; color: var(--jv-ink-2); font-weight: 600; font-size: 0.85rem; }
+.cvl-line { display: inline-block; margin-right: 6px; color: var(--jv-ink-2); font-size: 0.8rem; }
+.cvl-none { color: var(--jv-ink-2); }
+.cvl-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--jv-line-strong); font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.cvl-badge--direct { background: #ecfdf5; border-color: #a7f3d0; color: #064e3b; }
+.cvl-badge--partial { background: #fffbeb; border-color: #fde68a; color: #78350f; }
+.cvl-badge--missing { background: var(--jv-sunken); color: var(--jv-ink-2); }
+.cvl-badge--review { background: var(--jv-brand-tint); border-color: var(--jv-brand-ink); color: var(--jv-brand-ink); }
+@media (max-width: 640px) { .cvl-glance > div { grid-template-columns: 1fr; gap: 4px; } }
