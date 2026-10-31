@@ -45,7 +45,7 @@ export interface EvidenceReport {
   warnings: string[];
 }
 
-const METHOD_VERSION = 'english-literal-evidence-v5';
+const METHOD_VERSION = 'english-literal-evidence-v6';
 const MAX_REQUIREMENTS = 40;
 const SCOPE = 'This is an English wording check of user-provided text. The claims are not verified. Read the job requirements yourself; this check does not decide whether you qualify or predict an interview.';
 type Span = { start: number; end: number };
@@ -53,12 +53,32 @@ type Line = Span & { text: string; line: number; newline: string };
 type Section = 'experience' | 'internships' | 'volunteering' | 'personal_projects' | 'skills' | 'education' | 'credentials' | 'projects' | 'other';
 type Passage = EvidencePassage & { section: Section; matchText: string; terms: string[]; negative: boolean; pending: boolean; weakened: boolean; sourceSpan: Span; sourceLine: number; sourceQuote: string };
 
-const REQUIRED_HEADING_LABEL = /(?:requirements?|qualifications?|essential(?: criteria| requirements)?|desirable(?: criteria| requirements)?|responsibilities|key responsibilities|duties|what (?:you(?:'|’)ll do|you will do|you bring|we need|we(?:'|’)re looking for)|about you|about the role|your (?:role|responsibilities|profile)|skills(?: and experience)?|experience(?: and qualifications)?)/.source;
+const REQUIRED_HEADING_LABEL = /(?:requirements?|qualifications?|(?:minimum|basic|preferred|desired|additional) qualifications|essential(?: criteria| requirements)?|desirable(?: criteria| requirements)?|responsibilities|key responsibilities|duties|what (?:you(?:'|’)ll (?:do|achieve|need|own|learn|work on|be doing)|you will (?:do|achieve|need)|you(?:'|’)ll need to bring|you bring|we need|we(?:'|’)re looking for|excites (?:you|us))|skills you(?:'|’)ll need(?: to bring)?|nice[- ]to[- ]haves?|must[- ]haves?|bonus(?: points| skills)?|ideal candidate|who you are|you (?:will|have|bring)|exceptional candidates will have|about you|about (?:the|this) role|your (?:role|responsibilities|profile)|skills(?: and experience)?|experience(?: and qualifications)?)/.source;
 // Combine only known section labels. Prose such as "Responsibilities include SQL"
 // must remain a requirement, while a colon's following criteria are parsed separately.
 const REQUIRED_HEADING = new RegExp(`^${REQUIRED_HEADING_LABEL}(?:\\s*(?:and|&|/)\\s*${REQUIRED_HEADING_LABEL})*(?:\\s*:|\\s*$)`, 'i');
-const OTHER_HEADING = /^(?:about (?:us|the company|our company)|company (?:overview|description)|who we are|benefits|perks|what we offer|salary|compensation|how to apply|application process|equal opportunit(?:y|ies)|our values)(?:\s*:|\s*$)/i;
+const OTHER_HEADING = /^(?:about (?:us|the company|our company|the team|our team|the business)|company (?:overview|description)|who we are|(?:our )?(?:benefits|perks)(?:\s*(?:and|&)\s*(?:benefits|perks))?|what we offer|why (?:join|work (?:with|at|for)) [^:]{1,40}|life at [^:]{1,40}|(?:\([^)]{1,20}\)\s*)?the good stuff|salary(?: range)?|(?:base )?pay(?: range| transparency)?|compensation(?: and benefits)?|total rewards|how to apply|application process|equal opportunit(?:y|ies)(?:\s*(?:and|&)\s*[\w ]{1,30})?|diversity(?:,? equity)?(?: and inclusion)?|reasonable adjustments|accommodations|a note on [^:]{1,40}|our (?:values|mission|culture))(?:\s*:|\s*$)/i;
 const MANDATORY = /\b(?:must|required|mandatory|essential|need to|minimum|at least)\b/i;
+const DEADLINE = /\b(?:applications? (?:close|deadline)|apply by|closing date|deadline)\b/i;
+const CONDITION = /\b(?:visa|sponsorship|work (?:authorization|authorisation|permit)|right to work|eligible to work|citizenship|nationality|relocat(?:e|ion)|security clearance)\b/i;
+// Listing context: the employer talking about itself, the pay block, legal notices and calls to
+// action. It is shown verbatim among the omitted sections, never scored against a CV, and it is
+// dropped only when the clause carries no requirement signal (see requirementSignal).
+const COMPANY_VOICE = /^(?:(?:our|its|their)\b|we(?:['’](?:re|ve|ll|d)|\s+(?:are|were|have|had|do|work|believe|offer|provide|encourage|strive|celebrate|welcome|build|support|invest|use|run|operate|serve|help|know|love|think))\b|(?:the|this)\s+(?:role|position|opportunity|team|company|business|organi[sz]ation|salary|compensation|base salary|posted range|offered salary|range)\b|(?:it|that)(?:['’]s|\s+is)\b|these\s+(?:include|are)\b|your\s+[a-z-]+(?:\s+[a-z-]+)?\s+(?:will|would|can|could)\b|you(?:['’]ll|\s+will)\s+(?:join|enjoy|get to|be part of|be joining)\b|you(?:['’]ll|\s+will)\s+have\s+(?:limitless|the\s+(?:opportunity|chance|freedom|support)|opportunities|access|daily)\b|(?:read|visit|join)\s+(?:our|us|the)\b|(?:learn|find out) more\b)/i;
+// Case-sensitive on purpose: "At Acme Pay analytics is..." names the employer, "at least" does not.
+const COMPANY_AT = /^At\s+[A-Z][\w&.-]*(?:\s+[A-Z][\w&.-]*){0,2}\s*,?\s+(?![Yy]ou\b)/;
+const LEGAL_BOILERPLATE =/\b(?:equal opportunity employer|committed to (?:diversity|equal|providing|creating|building)|(?:do(?:es)?|will) not discriminate|regardless of (?:race|gender|age|disability)|reasonable (?:accommodations?|adjustments?) (?:are|will|can|for)|if you (?:need|require) (?:an? )?(?:accommodations?|adjustments?)|affiliates and subsidiaries|privacy (?:policy|notice)|by (?:clicking|submitting|applying))\b/i;
+const PAY_TOPIC = /\b(?:salary|salaries|compensation|pay range|base pay|equity)\b|[$€£]\s?\d/i;
+const OFFER_VOICE = /\b(?:is|are|will be|may|can|varies|depends?|dependent|based on|subject to|committed|competitive|estimated|expected|supplemented|offered|determined|range)\b/i;
+// Words like "need to", "essential" and "minimum" also turn up in the employer's own sentences:
+// "if you need to move house", "it's essential that we are humble", "pay between the minimum and the mid-point".
+const NOT_A_CRITERION = /\b(?:(?:if|when|whenever|should|unless)\s+you\s+need to|(?:essential|important|vital|critical) that we|we (?:must|need to|have to)|(?:the )?minimum (?:and|to) (?:the )?(?:mid-?point|maximum)|minimum wage)\b/gi;
+const HASHTAG_ONLY = /^#[\w-]+$/;
+const CURRENCY_RANGE = /^[$€£]\s?\d[\d,.]*(?:\s*[kKmM])?(?:\s*(?:[-–—]|to)\s*[$€£]?\s?\d[\d,.]*(?:\s*[kKmM])?)?(?:\s*(?:USD|EUR|GBP|AED|per (?:year|annum|hour)|a year))?\.?$/i;
+// A bare duty verb opens a task, never the employer's offer ("Process fringe benefits and equity").
+const DUTY_START = /^(?:administer|assist|audit|analy[sz]e|build|calculate|collaborate|complete|conduct|coordinate|create|define|deliver|design|develop|drive|ensure|evaluate|execute|identify|implement|improve|lead|liaise|maintain|manage|monitor|negotiate|own|partner|plan|prepare|process|produce|provide|reconcile|report|review|run|serve|support|track|train|update|work|write)\b/i;
+// An explicit applicant task remains a criterion even when framed with employer/role language.
+const CANDIDATE_TASK = /^(?:(?:your\s+(?:responsibilities|duties|work|role|tasks)|(?:the|this)\s+(?:role|position))\s+(?:(?:will|would|can|could)\s+)?(?:includes?|involves?|entails?|covers?)\b|(?:the|this)\s+(?:role|position)\s+(?:is|will be)\s+(?:responsible|accountable)\s+for\b|our\s+(?:ideal|successful|next|new)\s+(?:candidate|applicant|hire|team member)\b)/i;
 const UNSUPPORTED_SCRIPT = /[\u0400-\u052f]|[\u0600-\u06ff]|[\u0900-\u097f]|[\u3040-\u30ff]|[\u3400-\u9fff]|[\uac00-\ud7af]/u;
 const BULLET = /^(\s*(?:[-*•▪◦‣–—]|\d+[.)])\s+)/;
 const SYMBOL_BULLET = /^\s*[-*•▪◦‣–—]\s+/;
@@ -150,6 +170,48 @@ function headingText(text: string): string {
   return text.trim().replace(/^#{1,6}\s+/, '').replace(/\*\*/g, '').trim();
 }
 
+/** The heading as a label: no leading emoji or symbol, no trailing ellipsis ("About the role..."). */
+function headingKey(text: string): string {
+  return headingText(text).replace(/^[^\p{L}\p{N}(]+/u, '').replace(/\s*(?:\.{2,}|…)\s*(?=:|$)/, '').trim();
+}
+
+/** A short line that only introduces what follows it, e.g. an upper-case "NICE TO HAVES:" or a bare hashtag. */
+function unlabelledHeading(text: string): boolean {
+  const value = headingKey(text);
+  if (HASHTAG_ONLY.test(text.trim())) return true;
+  if (!value.endsWith(':') || value.split(/\s+/).length > 8 || MANDATORY.test(value) || /\d/.test(value)) return false;
+  return !meaningful(value).some(term => TECH.has(term) || CREDENTIAL.has(term));
+}
+
+/** A mandatory-criterion word that is about the applicant, not the employer's own sentence. */
+function mandatory(value: string): boolean {
+  return MANDATORY.test(value.replace(NOT_A_CRITERION, ' '));
+}
+
+/** These applicant clauses still need comparison/manual review, whatever heading precedes them. */
+function retainedInContext(value: string): boolean {
+  return mandatory(value) || CANDIDATE_TASK.test(value) || DEADLINE.test(value) || CONDITION.test(value);
+}
+
+/** True when the clause itself states something a CV could be held against. */
+function requirementSignal(value: string): boolean {
+  const own = value.replace(NOT_A_CRITERION, ' ');
+  if (CANDIDATE_TASK.test(own) || MANDATORY.test(own) || DEADLINE.test(own) || CONDITION.test(own) || duration(own)) return true;
+  if (/\b(?:requires?|expects?|seeking|seeks?|looking for|looking to (?:hire|find)|needs?|wants?|prefer(?:s|red)?)\b/i.test(own)) return true;
+  return meaningful(own).some(term => TECH.has(term) || CREDENTIAL.has(term));
+}
+
+/** The employer describing itself, its pay, legal notices or a call to action: context, not a CV requirement. */
+function listingContext(value: string): boolean {
+  const text = value.trim();
+  if (HASHTAG_ONLY.test(text) || CURRENCY_RANGE.test(text)) return true;
+  if (requirementSignal(text)) return false;
+  // "At Acme, you'll join a team..." is the employer's voice once the name is stripped.
+  const body = text.replace(/^At\s+[A-Z][\w&.-]*(?:\s+[A-Z][\w&.-]*){0,2}\s*,\s+/, '');
+  if (COMPANY_VOICE.test(text) || COMPANY_VOICE.test(body) || COMPANY_AT.test(text) || LEGAL_BOILERPLATE.test(text)) return true;
+  return PAY_TOPIC.test(text) && OFFER_VOICE.test(text) && !DUTY_START.test(text);
+}
+
 /** A role heading is listing context, not an achievement the CV must prove.
  * Keep it verbatim among omitted context; never drop a mandatory criterion. */
 function listingRoleHeading(text: string, index: number, enteredTitle=''): boolean {
@@ -177,9 +239,11 @@ function vacancyClauses(text:string,span:Span):Span[] {
       // Split only a new explicit task or independently stated technical criterion.
       // Lists of objects sharing one verb remain together, e.g. financial, risk reports.
       if(!/^(?:clean|build|prepare|produce|develop|create|support|assist|coordinate|manage|design|deliver|analy[sz]e|work|review|maintain|write|present|communicate|collaborate|query|use)\b/i.test(predicate) && !/^(?:basic\s+)?(?:SQL|Excel|Power\s*BI|Python|JavaScript)\s+(?:(?:is|are)\s+)?(?:required|mandatory|essential)\b/i.test(predicate) && !(explicitList && (declaredTool(left)||declaredTool(next))))continue;
+      // "to extract, clean, and transform data" is one task with three verbs, not three tasks.
+      if(/\bto\s+[a-z]+$/i.test(left)||(/^[A-Za-z]+$/.test(left)&&!declaredTool(left)))continue;
       const part=trimmedSpan(text,sentence.start+cursor,sentence.start+comma.index!);
       if(part)result.push(part);
-      cursor=comma.index!+comma[0].length;
+      cursor=comma.index!+comma[0].length+(/^and\s+/i.exec(following)?.[0].length??0);
     }
     const tail=trimmedSpan(text,sentence.start+cursor,sentence.end);if(tail)result.push(tail);
     return result;
@@ -196,7 +260,7 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
     const line = sourceLines[i];
     const raw = trimmedSpan(text, line.start, line.end);
     if (!raw) continue;
-    const heading = headingText(line.text);
+    const heading = headingKey(line.text);
     if (listingRoleHeading(line.text, i,enteredTitle)) { omitted.push(raw); continue; }
     const required = REQUIRED_HEADING.exec(heading);
     const other = OTHER_HEADING.exec(heading);
@@ -208,8 +272,9 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
         const tail = trimmedSpan(text, line.start + colon + 1, line.end);
         if (tail) {
           for (const part of vacancyClauses(text, tail)) {
-            if(listingRoleHeading(text.slice(part.start,part.end),i,enteredTitle)){omitted.push(part);continue;}
-            if (ignoreSection && !MANDATORY.test(text.slice(part.start, part.end))) omitted.push(part);
+            const value = text.slice(part.start, part.end);
+            if(listingRoleHeading(value,i,enteredTitle)){omitted.push(part);continue;}
+            if ((ignoreSection && !retainedInContext(value)) || listingContext(value)) omitted.push(part);
             else if (requirements.length < MAX_REQUIREMENTS) requirements.push(part);
             else { omitted.push(part); overflow++; }
           }
@@ -217,7 +282,8 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
       } else omitted.push(raw);
       continue;
     }
-    if (ignoreSection && !MANDATORY.test(line.text)) { omitted.push(raw); continue; }
+    // A heading we have no label for still introduces the lines below it; it is not a criterion.
+    if (unlabelledHeading(line.text)) { omitted.push(raw); continue; }
     const bullet = BULLET.exec(line.text);
     let end = line.end;
     if (bullet) {
@@ -231,7 +297,10 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
     const span = trimmedSpan(text, line.start + (bullet?.[0].length ?? 0), end);
     if (!span) continue;
     for (const part of vacancyClauses(text, span)) {
-      if(listingRoleHeading(text.slice(part.start,part.end),i,enteredTitle)){omitted.push(part);continue;}
+      const value = text.slice(part.start, part.end);
+      if(listingRoleHeading(value,i,enteredTitle)){omitted.push(part);continue;}
+      // Keep applicant criteria and manual-review conditions; the surrounding blurb stays context.
+      if ((ignoreSection && !retainedInContext(value)) || listingContext(value)) { omitted.push(part); continue; }
       if (requirements.length < MAX_REQUIREMENTS) requirements.push(part);
       else { omitted.push(part); overflow++; }
     }
@@ -391,8 +460,8 @@ function uncertainFor(passage: Passage, anchors: string[], credential: boolean):
 
 function analyzeRequirement(text: string, span: Span, index: number, passages: Passage[]): EvidenceRequirement {
   const vacancyQuote = text.slice(span.start, span.end);
-  const deadline = /\b(?:applications? (?:close|deadline)|apply by|closing date|deadline)\b/i.test(vacancyQuote);
-  const condition = /\b(?:visa|sponsorship|work (?:authorization|authorisation|permit)|right to work|eligible to work|citizenship|nationality|relocat(?:e|ion)|security clearance)\b/i.test(vacancyQuote);
+  const deadline = DEADLINE.test(vacancyQuote);
+  const condition = CONDITION.test(vacancyQuote);
   if (deadline || condition) return { id: `requirement-${index + 1}`, vacancyQuote, ...span, status: 'review', evidence: [], matchedTerms: [], category: deadline ? 'deadline' : 'condition', explanation: deadline ? 'This is an application deadline, not a CV achievement. Check the original employer listing and its time zone before setting your reminder.' : 'This is an employer or eligibility condition, not evidence of a work achievement. Confirm the current condition with the employer; the CV check cannot establish your eligibility.', question: deadline ? 'What is the exact closing date and time zone on the employer listing?' : 'Does this employer condition apply to you? Confirm it without adding unsupported eligibility claims to your CV.' };
   const requestedDuration = duration(vacancyQuote);
   const terms = meaningful(vacancyQuote).filter(term => !(term in NUMBER_WORDS) || !requestedDuration);

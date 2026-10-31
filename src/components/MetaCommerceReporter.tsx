@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { flushMetaCommerce } from '@/lib/meta-commerce';
+import { useAdsMeasurementChoice } from '@/lib/use-ads-measurement-choice';
 
 /**
  * Lets Meta know about a signed-in owner's first payment. It checks shortly after a visit (at most every
@@ -12,6 +13,7 @@ export default function MetaCommerceReporter() {
   const { search } = useLocation();
   const returned = new URLSearchParams(search).get('loop_checkout') === 'success';
   const owner = user?.id ?? null;
+  const privacyRevision = useAdsMeasurementChoice();
   useEffect(() => {
     if (!owner || loading || authError || configurationError) return;
     let done = false;
@@ -20,6 +22,6 @@ export default function MetaCommerceReporter() {
       if (!done) void flushMetaCommerce(owner, returned).then(sent => { if (sent) done = true; });
     }, delay));
     return () => { done = true; timers.forEach(timer => window.clearTimeout(timer)); };
-  }, [owner, returned, loading, authError, configurationError]);
+  }, [owner, returned, loading, authError, configurationError, privacyRevision]);
   return null;
 }

@@ -13,6 +13,7 @@ import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security'
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
 import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
+import { trackMetaSignupSubmitted } from '@/lib/meta-pixel';
 import { ContactFields } from '@/components/ContactDetails';
 import { blankContact, normalizePhone, validName } from '@/lib/contact-details';
 import './AccountPilot.css';
@@ -25,7 +26,6 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>(searchParams.get('mode') === 'signup' ? 'sign-up' : 'sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [contact, setContact] = useState(() => blankContact());
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -33,8 +33,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ name?: string; phone?: string; email?: string; password?: string; confirm?: string }>({});
-  const clearField = (key: 'name' | 'phone' | 'email' | 'password' | 'confirm') => setFieldErrors(current => current[key] ? { ...current, [key]: undefined } : current);
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; phone?: string; email?: string; password?: string }>({});
+  const clearField = (key: 'name' | 'phone' | 'email' | 'password') => setFieldErrors(current => current[key] ? { ...current, [key]: undefined } : current);
   const socialBrowser = detectInAppBrowser();
   const loopEntry = !embedded && accountDestination(searchParams.get('next')) === '/onboarding';
   // The free CV Check entry (next=/check) opens on its own promise, not the Automated Job Loop setup headline. Copy only.
@@ -72,14 +72,14 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     }
     if (!password) { found.password = mode === 'sign-up' ? 'Choose a password to continue.' : 'Enter your password to continue.'; summary.push(found.password); }
     else if (mode === 'sign-up') {
-      if (password !== confirmPassword) { found.confirm = 'Passwords do not match.'; summary.push(found.confirm); }
+      // One password field with the show-password toggle and the rules beneath it; no second "confirm" box to retype on a phone.
       const validation = validatePassword(password);
       if (!validation.valid) { found.password = validation.errors.join('. '); summary.push(found.password); }
     }
     if (summary.length) {
       const invalid = Object.keys(found).length;
       setFieldErrors(found); setError(invalid > 1 ? `Please fix the ${invalid} highlighted fields below.` : summary[0] ?? Object.values(found)[0] ?? '');
-      const target = found.name ? form.querySelector<HTMLElement>('input:not([type=hidden])') : found.phone ? form.querySelector<HTMLElement>('.ap-phone-field input') : found.email ? document.getElementById(`${fieldId}-email`) : found.password ? document.getElementById(`${fieldId}-password`) : document.getElementById(`${fieldId}-confirm`);
+      const target = found.name ? form.querySelector<HTMLElement>('input:not([type=hidden])') : found.phone ? form.querySelector<HTMLElement>('.ap-phone-field input') : found.email ? document.getElementById(`${fieldId}-email`) : document.getElementById(`${fieldId}-password`);
       target?.focus();
       return;
     }
@@ -88,6 +88,9 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     if (!authRateLimiter.check(email.trim().toLowerCase())) { setError('Too many attempts. Please try again in a minute.'); return; }
     setBusy(true);
     const turn = ++attempt.current, epoch = trackingAuthEpoch();
+    // A valid, real (not rate-limited) sign-up submit: one content-free funnel-intent signal per attempt, before the network call.
+    // It never carries the form's values and does not touch CompleteRegistration, which still fires only for a confirmed new account.
+    if (mode === 'sign-up') trackMetaSignupSubmitted(`${fieldId}:${turn}`);
     try {
       if (!embedded && mode === 'sign-up') rememberLoopReturn(searchParams.get('next'));
       if (mode === 'sign-up') {
@@ -98,7 +101,6 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           pending.current = { email:email.trim(), password, expiresAt:Date.now()+10*60*1000, epoch };
           setConfirmationSent(true);
           setPassword('');
-          setConfirmPassword('');
         }
       } else {
         const result = await signInWithEmail(email, password);
@@ -128,7 +130,6 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     setFieldErrors({});
     setConfirmationSent(false);
     setPassword('');
-    setConfirmPassword('');
   };
 
   async function continueSignup() {
@@ -252,11 +253,6 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
                   {fieldErrors.password && <p id={`${fieldId}-password-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{fieldErrors.password}</p>}
                   {mode === 'sign-up' && <p id={`${fieldId}-password-help`} className="ap-field-help">Use at least 8 characters, uppercase and lowercase letters, and a number.</p>}
                 </div>
-                {mode === 'sign-up' && <div className="ap-field">
-                  <Label htmlFor={`${fieldId}-confirm`}>Confirm password</Label>
-                  <Input id={`${fieldId}-confirm`} type={showPassword ? 'text' : 'password'} autoComplete="new-password" aria-invalid={fieldErrors.confirm ? true : undefined} aria-describedby={fieldErrors.confirm ? `${fieldId}-confirm-error` : undefined} value={confirmPassword} onChange={event => { setConfirmPassword(event.target.value); clearField('confirm'); }} required disabled={busy} />
-                  {fieldErrors.confirm && <p id={`${fieldId}-confirm-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{fieldErrors.confirm}</p>}
-                </div>}
                 <Button type="submit" className="ap-primary ap-auth-submit" disabled={busy || !!configurationError}>
                   {busy ? <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />Please wait...</> : <>{mode === 'sign-up' ? 'Create account' : 'Sign in'}<ArrowRight size={17} aria-hidden="true" /></>}
                 </Button>

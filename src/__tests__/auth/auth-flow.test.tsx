@@ -156,7 +156,6 @@ describe('signup and password recovery screens', () => {
     await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
     await user.type(screen.getByLabelText('Email address'), 'person@example.test');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
-    await user.type(screen.getByLabelText('Confirm password'), 'Password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByText('Check your email')).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -281,14 +280,14 @@ it('continues the same signup on one deliberate click without focus-triggered lo
   sdk.signUp.mockResolvedValue({data:{user:signedIn.user,session:null},error:null});
   sdk.signInWithPassword.mockResolvedValue({data:{user:signedIn.user,session:signedIn},error:null});
   render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Routes><Route path='/auth' element={<Auth />} /><Route path='/onboarding' element={<h1>Choose your roles</h1>} /></Routes></MemoryRouter></AuthProvider>);
-  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'New Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'new-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.type(screen.getByLabelText('Confirm password'),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));
+  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'New Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'new-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));
   await screen.findByText('Check your email');await act(async()=>{window.dispatchEvent(new Event('focus'));document.dispatchEvent(new Event('visibilitychange'));});expect(sdk.signInWithPassword).not.toHaveBeenCalled();
   await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(await screen.findByText('Choose your roles')).toBeInTheDocument();expect(sdk.signInWithPassword).toHaveBeenCalledTimes(1);
 });
 it('does not reuse pending signup credentials after an SDK account change and sign-out', async () => {
   sdk.signUp.mockResolvedValue({data:{user:signedIn.user,session:null},error:null});
   render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth embedded /></MemoryRouter></AuthProvider>);
-  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'Another Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'another-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.type(screen.getByLabelText('Confirm password'),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));await screen.findByText('Check your email');
+  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'Another Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'another-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));await screen.findByText('Check your email');
   act(()=>{sdk.listener!('SIGNED_IN',signedIn);sdk.listener!('SIGNED_OUT',null);});
   await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(sdk.signInWithPassword).not.toHaveBeenCalled();expect(screen.getByLabelText('Password',{exact:true})).toHaveValue('');
 });
@@ -311,18 +310,33 @@ describe('signup validation blocks submission and names each failing field', () 
     expect(name).toHaveFocus();
   });
 
-  it('makes no signUp call when the confirmation does not match', async () => {
+  // Changed on purpose: sign-up no longer asks the visitor to retype the password. The single field keeps the show-password toggle and the rules.
+  it('has one password field with its rules and the show-password toggle, and no confirm-password field', async () => {
+    open();
+    await screen.findByRole('button', { name: 'Create account' });
+    expect(screen.queryByLabelText(/confirm password/i)).not.toBeInTheDocument();
+    expect(document.querySelectorAll('input[autocomplete="new-password"], input[type="password"]')).toHaveLength(1);
+    expect(screen.getByText('Use at least 8 characters, uppercase and lowercase letters, and a number.')).toBeInTheDocument();
+    const password = screen.getByLabelText('Password', { exact: true });
+    expect(password).toHaveAttribute('type', 'password');
+    expect(password).toHaveAttribute('autocomplete', 'new-password');
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Show password' }));
+    expect(password).toHaveAttribute('type', 'text');
+    expect(screen.getByRole('button', { name: 'Hide password' })).toBeInTheDocument();
+  });
+
+  it('makes no signUp call for a password that breaks the rules, and names the password field', async () => {
     open();
     const user = userEvent.setup();
     await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
     await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
     await user.type(screen.getByLabelText('Email address'), 'person@example.test');
-    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
-    await user.type(screen.getByLabelText('Confirm password'), 'Password124');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'password');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(sdk.signUp).not.toHaveBeenCalled();
-    expect(screen.getByLabelText('Confirm password')).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getAllByText('Passwords do not match.').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveFocus();
+    expect(screen.getByRole('alert')).toHaveTextContent(/uppercase|number/i);
   });
 
   it('clears a field message when that field is edited', async () => {
@@ -353,12 +367,10 @@ describe('round 8: free CV Check entry copy and the signup contract', () => {
     await user.type(screen.getByLabelText('Mobile number'), '12');
     await user.type(screen.getByLabelText('Email address'), 'not-an-email');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
-    await user.type(screen.getByLabelText('Confirm password'), 'Password999');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(sdk.signUp).not.toHaveBeenCalled();
     await user.clear(screen.getByLabelText('Mobile number')); await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
     await user.clear(screen.getByLabelText('Email address')); await user.type(screen.getByLabelText('Email address'), 'person@example.test');
-    await user.clear(screen.getByLabelText('Confirm password')); await user.type(screen.getByLabelText('Confirm password'), 'Password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByText('Check your email')).toBeInTheDocument();
     expect(sdk.signUp).toHaveBeenCalledTimes(1);
@@ -377,7 +389,6 @@ describe('round 8: free CV Check entry copy and the signup contract', () => {
     await user.type(screen.getByLabelText('Full name'), 'Casey Person');
     await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
-    await user.type(screen.getByLabelText('Confirm password'), 'Password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByText('Check your email')).toBeInTheDocument();
     expect(sdk.signUp).toHaveBeenCalledTimes(1);
