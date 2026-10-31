@@ -13,10 +13,12 @@ import ProductPage from "@/pages/ProductPage";
 import RouteNavigation from '@/components/RouteNavigation';
 import MetaPixelPages from '@/components/MetaPixelPages';
 import MetaCommerceReporter from '@/components/MetaCommerceReporter';
+import UkAdsConsent from '@/components/UkAdsConsent';
 import AnalyticsPages from '@/components/AnalyticsPages';
 import { ContactGate } from '@/components/ContactDetails';
 import SiteShareMetadata from '@/components/SiteShareMetadata';
 import { accountDestination, workspaceReturnPath } from '@/lib/account-return';
+import { adAttributionQuery } from '@/lib/meta-pixel';
 import { lazyRoute, routeLoaders } from '@/lib/route-modules';
 const Auth = lazy(routeLoaders.auth),
   AuthCallback = lazy(() => import("@/pages/AuthCallback"));
@@ -57,9 +59,11 @@ function ProtectedWorkspace() {
 }
 function ProtectedCvCheck() {
   const { user, loading, authError, retryConnection } = useAuth();
+  const { search } = useLocation();
   if (authError) return <main className="p-8"><p role="alert">Your sign-in could not be restored.</p><button onClick={retryConnection}>Retry sign-in recovery</button><p><Link to="/auth?next=%2Fcheck">Open sign-in</Link></p></main>;
   if (loading) return <p className="p-8" role="status">Opening your CV Check…</p>;
-  return user ? <CvCheck key={user.id} /> : <Navigate to="/auth?mode=signup&next=%2Fcheck" replace />;
+  // Ad campaign tags (and only those) survive the sign-up redirect, as they do from /onboarding, so the visit stays attributed.
+  return user ? <CvCheck key={user.id} /> : <Navigate to={`/auth?mode=signup&next=%2Fcheck${adAttributionQuery(search)}`} replace />;
 }
 function ProtectedApplications() {
   const location = useLocation();
@@ -99,6 +103,7 @@ export default function MvpApp() {
                 <MetaCommerceReporter />
                 <AnalyticsPages />
                 <SiteChrome position="header" />
+                <UkAdsConsent />
                 <div id="main-content" tabIndex={-1} className="outline-none">
                 <Suspense
                   fallback={

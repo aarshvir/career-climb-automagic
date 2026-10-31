@@ -36,11 +36,14 @@ jobs:
       with:
         deno-version: '2.9.6'
 
+    - name: Verify pinned CI authentication module
+      run: node --test scripts/check-cloud-auth.test.mjs
+
     - name: Verify cloud authentication boundaries
-      run: deno test --allow-env --config supabase/functions/job-loop-worker/deno.json supabase/tests/job-loop-edge.deno.ts
+      run: node scripts/check-cloud-auth.mjs
 
     - name: Verify first-party tracking intake
-      run: deno test --allow-env=SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,ALLOWED_ORIGINS,APP_URL --config supabase/functions/jobvance-track/deno.json supabase/tests/jobvance-track-edge.deno.ts
+      run: deno test --frozen --allow-env=SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,ALLOWED_ORIGINS,APP_URL --config supabase/functions/jobvance-track/deno.json supabase/tests/jobvance-track-edge.deno.ts
 
     - name: Run build
       run: npm run build
@@ -48,9 +51,5 @@ jobs:
     - name: Verify hosting responses
       run: node scripts/check-host-worker.mjs
 
-    - name: Security audit (shipped dependencies)
-      run: npm audit --omit=dev --audit-level=moderate
-
-    - name: Security audit (build and lint tools, advisory only)
-      continue-on-error: true
+    - name: Security audit
       run: npm audit --audit-level=moderate

@@ -108,6 +108,19 @@ describe('protected legacy workspace return through real app routes', () => {
     await finishEmail(view);
     expect(await screen.findByTestId('workspace-path')).toHaveTextContent(/^\/check$/);
   });
+  it('keeps only the ad campaign tags when a signed-out ad click on CV Check is sent to sign-up', async () => {
+    open('/check?utm_source=instagram&utm_medium=paid&utm_campaign=free-cv-check&utm_content=c01&fbclid=abc123&savedCheck=afe62064-a331-4ce6-9e51-2849e091ba54&reuseCheck=x&code=private-code');
+    await screen.findByRole('heading', { name: 'Create your Jobvance account' });
+    expect(window.location.pathname).toBe('/auth');
+    const query = new URLSearchParams(window.location.search);
+    expect(Object.fromEntries(query)).toEqual({ mode: 'signup', next: '/check', utm_source: 'instagram', utm_medium: 'paid', utm_campaign: 'free-cv-check', utm_content: 'c01', fbclid: 'abc123' });
+    expect(screen.queryByTestId('workspace-path')).not.toBeInTheDocument();
+  });
+  it('sends a signed-out CV Check visit with no campaign tags to the same sign-up page as before', async () => {
+    open('/check');
+    await screen.findByRole('heading', { name: 'Create your Jobvance account' });
+    expect(window.location.search).toBe('?mode=signup&next=%2Fcheck');
+  });
   it('preserves the account-only CV Check destination through Google sign-in', async () => {
     const view = open('/check');
     await screen.findByRole('heading', { name: 'Create your Jobvance account' });
@@ -126,7 +139,6 @@ describe('protected legacy workspace return through real app routes', () => {
     await user.type(screen.getByLabelText('Mobile number'), '555 555 0100');
     await user.type(screen.getByLabelText('Email address'), owner.email);
     await user.type(screen.getByLabelText('Password'), 'FixturePassword123');
-    await user.type(screen.getByLabelText('Confirm password'), 'FixturePassword123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     await screen.findByRole('heading', { name: 'Check your email' });
     expect(state.signUpWithEmail).toHaveBeenCalledWith(owner.email, 'FixturePassword123', { fullName: 'Fixture Person', phone: '+15555550100' });
