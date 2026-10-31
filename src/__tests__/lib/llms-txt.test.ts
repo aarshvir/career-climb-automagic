@@ -16,6 +16,7 @@ const banned: [string, RegExp][] = [
   ['deterrent: you submit applications', /(you|your)\s+(review and\s+)?(send messages and\s+)?submit (each |your )?applications?/i],
   ['absolute: guaranteed', /guaranteed ats|guaranteed (job|interview)s?\b(?!\.)/i],
   ['absolute: every role you target', /every role you target/i],
+  ['unbounded preparation', /(?:a |one )?tailored CV for (?:each|every) match/i],
   ['bare Job Loop', /(^|[^d] )Job Loop\b/],
   ['score claim: ATS match', /ATS match/i],
   ['account claim: no sign-up', /no sign-?up|without (creating )?an account|no account needed/i],
