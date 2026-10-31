@@ -200,7 +200,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
           {!showBenefits && <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>}
           {/* A visitor from the free CV Check ad is told about the CV Check, never the Job Loop's outcome list. */}
-          {showBenefits && checkEntry && <div className="ap-loop-entry">
+          {showBenefits && checkEntry && <div className="ap-loop-entry ap-check-entry">
             <ul className="ap-benefits" aria-label="What the free CV Check does">
               <li><Check size={18} aria-hidden="true" /><span><strong>Compare your CV with a job ad.</strong><span className="ap-benefit-detail"> See which requirements it shows.</span></span></li>
               <li><Check size={18} aria-hidden="true" /><span><strong>Review every change.</strong><span className="ap-benefit-detail"> With AI, each change sits beside your original.</span></span></li>
