@@ -38,7 +38,7 @@ export default function CvCheckLanding() {
       <header className="jv-page-head product-page-heading">
         <p className="jv-caption">Free CV Check</p>
         <h1 className="jv-page-title jv-enter-h1">Check your CV against a job ad, requirement by requirement</h1>
-        <p className="jv-lead product-page-intro">Add your CV and one job ad. Jobvance lists each requirement in the ad and marks it {evidenceStatusLabels.direct}, {evidenceStatusLabels.partial}, {evidenceStatusLabels.missing} or {evidenceStatusLabels.review}, with the closest line from your CV beside it. There is no fit percentage. You need a free Jobvance account to open the check.</p>
+        <p className="jv-lead product-page-intro">Add your CV and one job ad. Jobvance compares up to the first 40 parsed requirements in English and marks them {evidenceStatusLabels.direct}, {evidenceStatusLabels.partial}, {evidenceStatusLabels.missing} or {evidenceStatusLabels.review}, with the closest line from your CV beside each outcome. There is no fit percentage. You need a free Jobvance account to open the check.</p>
         <div className="jv-page-actions">
           <Link to="/check" className="jv-btn jv-btn--primary jv-btn--lg">Start the free CV check<ArrowRight aria-hidden="true" /></Link>
           <Link to="/privacy" className="jv-link"><span>How your CV is handled</span><ArrowRight aria-hidden="true" /></Link>
@@ -60,7 +60,7 @@ export default function CvCheckLanding() {
 
         <section className="jv-section product-section" aria-labelledby="cvl-see-title">
           <h2 id="cvl-see-title" className="jv-section-title">What you see</h2>
-          <p>Every requirement gets one of four outcomes.</p>
+          <p>Each of the parsed requirements, up to 40, gets one of four outcomes. Additional and omitted passages remain available for review in the check.</p>
           <ul className="cvl-outcomes">
             {(Object.keys(outcomeMeaning) as (keyof typeof outcomeMeaning)[]).map(status => <li key={status}><strong>{evidenceStatusLabels[status]}.</strong> {outcomeMeaning[status]}</li>)}
           </ul>
@@ -83,7 +83,7 @@ export default function CvCheckLanding() {
 
         <section className="jv-section product-section" aria-labelledby="cvl-device-title">
           <h2 id="cvl-device-title" className="jv-section-title">Your CV and your device</h2>
-          <p>Your file stays on your device, and comparing without AI runs entirely on your device. If you choose AI tailoring, the CV text and job description are sent to our AI provider to prepare one version and are not stored unless you save. Saving to your account is optional. See <Link to="/privacy">how your information is handled</Link>.</p>
+          <p>Your file stays on your device, and comparing without AI runs entirely on your device. If you choose AI tailoring, the CV text and job description are sent to our AI provider to prepare one version. Saving a check to your Jobvance account is optional. See <Link to="/privacy">how your information is handled</Link>.</p>
         </section>
 
         <section className="jv-section product-section" aria-labelledby="cvl-ai-title">
@@ -94,7 +94,7 @@ export default function CvCheckLanding() {
 
         <section className="jv-section product-section" aria-labelledby="cvl-limits-title">
           <h2 id="cvl-limits-title" className="jv-section-title">What this check cannot do</h2>
-          <p>This is a wording check on text you give it, in English. It does not verify claims in your CV, decide whether you qualify, or predict what an employer will decide. It reads text-based PDF, DOCX and TXT files up to 5 MB; scanned PDFs and old .doc files need converting first.</p>
+          <p>This is an English wording check covering up to the first 40 parsed requirements, with additional and omitted passages retained for your review. It does not verify claims in your CV, decide whether you qualify, or predict what an employer will decide. It reads text-based PDF, DOCX and TXT files up to 5 MB; scanned PDFs and old .doc files need converting first.</p>
         </section>
 
         <section className="jv-section product-section" aria-labelledby="cvl-steps-title">
@@ -103,7 +103,7 @@ export default function CvCheckLanding() {
         </section>
 
         <section className="jv-section product-section" aria-labelledby="cvl-who-title">
-          <h2 id="cvl-who-title" className="jv-section-title">Who uses it</h2>
+          <h2 id="cvl-who-title" className="jv-section-title">Who it is for</h2>
           <ul className="cvl-who">
             <li><Link to="/for-students">Students and graduates</Link> comparing coursework, projects and internships with a first job ad.</li>
             <li><Link to="/for-mba">MBA candidates</Link> connecting earlier work to a new role.</li>
