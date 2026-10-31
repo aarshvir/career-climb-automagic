@@ -1,0 +1,61 @@
+# Jobvance
+
+> Jobvance (jobvance.io) is an online job-search tool for job seekers. Its CV Check compares your CV with one job ad and shows which requirements your CV covers, with no fit percentage or ATS score. Its Automated Job Loop searches connected sources for the roles and locations you choose and prepares a tailored CV for each match. Jobvance is not a recruitment agency, staffing firm or virtual-assistant service.
+
+Facts last checked 1 November 2026. The pricing page (https://jobvance.io/pricing) is the source of truth for prices and limits.
+
+- An account is free. Comparing a CV with a job ad without AI runs on your device with no limit; the CV file is not uploaded.
+- AI tailoring is optional. If you choose it, the CV text and job description are sent to Jobvance's AI provider to prepare one version. A free account includes 3 AI-tailored CVs a month.
+- The CV Check never gives a fit percentage or ATS score. Each requirement in the job ad is shown as Covered, Partly covered, Not shown in your CV, or Needs your judgment.
+- Accepted files: text-based PDF, DOCX or TXT up to 5 MB. Downloads: PDF, DOCX or TXT.
+- Optional one-time CV passes: Sprint $9 (25 tailored CVs over 7 days), Job Search $19 (100 over 30 days), Career Move $39 (300 over 90 days). Passes are one-time payments and nothing renews. Automated Job Loop monthly plans: Starter $29, Advanced $59, Pro Job Seeker $99.
+- Prepared CVs appear in your dashboard for you to review and download as PDF, DOCX or TXT; you open the employer's vacancy when you are ready. Jobvance cannot promise interviews or job offers; employer decisions are outside its control.
+
+## Products
+
+- [CV Check](https://jobvance.io/check): Compare your CV with one job ad on your device, or choose AI tailoring. Needs a free account.
+- [Automated Job Loop](https://jobvance.io/job-loop): Set roles, locations and a schedule; each run finds matching jobs from connected sources and prepares a tailored CV for review.
+- [How it works](https://jobvance.io/how-it-works): The three stages from adding your experience to reviewing matched jobs and prepared CVs.
+- [Pricing](https://jobvance.io/pricing): Monthly Automated Job Loop plans, one-time CV passes and what stays free.
+
+## Answers
+
+- [FAQ](https://jobvance.io/faq): Supported files, what the AI sees, downloads, saving, cost and guarantees.
+- [Privacy](https://jobvance.io/privacy): What stays on your device, what is sent to the AI provider, optional private saving and payments.
+- [Refunds](https://jobvance.io/refund): The 7-day money-back promise on passes.
+- [Terms](https://jobvance.io/terms): Free access, passes and your review responsibilities.
+- [Help](https://jobvance.io/help): Practical help for CV uploads, source facts, first applications and recovery.
+
+## Guides
+
+- [Compare your CV with a job description using evidence](https://jobvance.io/guides/cv-job-description-evidence): Compare a job description with your CV, choose relevant examples and identify the details to add before applying.
+- [How to describe student projects on your CV](https://jobvance.io/guides/student-projects-on-cv): Choose relevant student projects, describe your contribution and turn coursework, internships and activities into clear CV entries.
+- [How to adapt your CV for an MBA career pivot](https://jobvance.io/guides/mba-career-pivot-cv): Choose a target role, connect your previous work with its responsibilities and show where MBA projects add relevant experience.
+- [Plan a confidential job search alongside your current job](https://jobvance.io/guides/confidential-career-switch): Plan your contact details, application documents and profile visibility for a job search alongside your current role.
+- [Filter roles before spending time on an application](https://jobvance.io/guides/role-filtering-before-applying): Create a manageable job shortlist by checking responsibilities, essential conditions and the time each application needs.
+- [Verify a job listing before sharing your CV](https://jobvance.io/guides/verify-job-listing-source): Find the original vacancy, check the employer and application destination, and save the details you have confirmed.
+- [How to write CV achievements without numbers](https://jobvance.io/guides/achievements-without-numbers): Write specific CV bullets using the task, your actions, the scope of your work and what you produced.
+- [What to include in your first job application](https://jobvance.io/guides/first-application-pack): Use the employer’s instructions to prepare your CV, application answers and any other documents the role requires.
+- [How to reuse your CV for a second application](https://jobvance.io/guides/reuse-second-application): Use your reviewed experience as a starting point, then adapt the examples, documents and message for another vacancy.
+- [Should you send your CV as PDF or DOCX?](https://jobvance.io/guides/cv-pdf-or-docx): Choose a CV format from the employer’s upload instructions, check the exported file and review any fields filled by the portal.
+- [How to review a CV match score](https://jobvance.io/guides/cv-check-no-fit-percentage): Look beyond a CV match percentage to check the examples, missing details and job requirements behind it.
+- [How to track applications and plan follow-ups](https://jobvance.io/guides/application-tracking-follow-up): Record each application, keep its CV version and confirmation, and choose a follow-up date from the employer’s instructions.
+- [Turn your CV into clear interview stories](https://jobvance.io/guides/interview-stories-from-cv): Choose examples from your CV and prepare concise interview answers about the situation, your actions and the outcome.
+- [Make a job-search plan that fits a busy week](https://jobvance.io/guides/job-search-time-plan): Make room for finding roles, preparing applications and following up alongside work, classes and other commitments.
+- [Review resume privacy before you upload or share](https://jobvance.io/guides/resume-privacy-before-upload): Create a minimal shareable CV copy, check visible and hidden information, and understand where documents and connected drafts may remain.
+- [Where to look for jobs in the UAE](https://jobvance.io/guides/uae-job-search-sources): Build a UAE job-source list from employer careers pages, official portals, recruitment agencies and job boards.
+- [How to list qualifications on a UAE CV](https://jobvance.io/guides/academic-qualifications-uae-cv): List completed degrees, expected graduation and short courses clearly, and check any qualification requirements in a UAE vacancy.
+- [What to do when the Automated Job Loop preparation stops](https://jobvance.io/guides/cancelled-partial-job-loop-runs): Find the status of a partial, cancelled or interrupted preparation run and decide whether to review, resume or ask for help.
+- [Fix a CV upload failure one step at a time](https://jobvance.io/guides/cv-upload-failure-checklist): Resolve a CV upload problem by checking the error message, file type, size and readable text.
+- [How to write a recruiter message about a job](https://jobvance.io/guides/truthful-recruiter-drafts): Write a short message with the role, a relevant example from your experience and a clear request for a checked contact.
+
+## Optional
+
+- [All guides](https://jobvance.io/guides): The full index of practical CV and application guides.
+- [For students and graduates](https://jobvance.io/for-students): Preparing internship and graduate applications from coursework, projects and internships.
+- [For MBA candidates](https://jobvance.io/for-mba): Connecting previous work and MBA projects to a new role.
+- [For career switchers](https://jobvance.io/for-career-switchers): Reusing confirmed experience for a career move while keeping confidential details private.
+- [Walkthroughs](https://jobvance.io/walkthroughs): Task-focused walkthroughs for a first CV check, Automated Job Loop setup and document review.
+- [About](https://jobvance.io/about): What Jobvance is and how it approaches application preparation.
+- [Contact](https://jobvance.io/contact): Support for documents, accounts, billing and privacy questions.
+- [Sitemap](https://jobvance.io/sitemap.xml): Every public page.
