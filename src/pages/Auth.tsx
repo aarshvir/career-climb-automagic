@@ -15,7 +15,7 @@ import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { trackMetaSignupSubmitted } from '@/lib/meta-pixel';
 import { ContactFields } from '@/components/ContactDetails';
-import { blankContact, normalizePhone, validName } from '@/lib/contact-details';
+import { blankContact, normalizePhone, PHONE_ERROR, validName } from '@/lib/contact-details';
 import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
@@ -64,11 +64,13 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     const found: typeof fieldErrors = {}, summary: string[] = [];
     if (!isValidEmail(email.trim())) { found.email = 'Please enter a valid email address.'; summary.push(found.email); }
     // One validation source: validName and normalizePhone (the same checks checkContact applies) decide each field, and their results are the details sent.
-    const phone = mode === 'sign-up' ? normalizePhone(contact.phone, contact.countryCode) : null;
-    const details = mode === 'sign-up' && validName(contact.name) && phone ? { fullName: contact.name.trim(), phone } : null;
+    // The mobile number is optional: blank is fine, but a number that is typed must be valid.
+    const phoneTyped = mode === 'sign-up' && contact.phone.trim() !== '';
+    const phone = phoneTyped ? normalizePhone(contact.phone, contact.countryCode) : null;
+    const details = mode === 'sign-up' && validName(contact.name) && (phone || !phoneTyped) ? { fullName: contact.name.trim(), ...(phone && { phone }) } : null;
     if (mode === 'sign-up') {
       if (!validName(contact.name)) { found.name = 'Please enter your full name.'; summary.push(found.name); }
-      if (!phone) { found.phone = 'Please enter a valid mobile number, including the country code.'; if (!found.name) summary.push(found.phone); }
+      if (phoneTyped && !phone) { found.phone = PHONE_ERROR; if (!found.name) summary.push(found.phone); }
     }
     if (!password) { found.password = mode === 'sign-up' ? 'Choose a password to continue.' : 'Enter your password to continue.'; summary.push(found.password); }
     else if (mode === 'sign-up') {
@@ -267,7 +269,11 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
             </>
           )}
         </div>
-        {showBenefits && <div className="ap-loop-more">
+        {showBenefits && checkEntry && <div className="ap-loop-more">
+          <p className="ap-benefits-links"><Link to="/help">Help</Link></p>
+          <details className="ap-steps"><summary>What happens after you sign up</summary><ol aria-label="After creating your free CV Check account"><li>Confirm your email if we ask</li><li>Add your CV and the job ad</li><li>Compare without AI, or choose AI-tailored changes</li><li>Review each change, tick that your CV is accurate, then download</li></ol></details>
+        </div>}
+        {showBenefits && !checkEntry && <div className="ap-loop-more">
           <p className="ap-benefits-price">Automated Job Loop plans from US$29/month.</p>
           <p className="ap-benefits-links"><Link to="/pricing">See plans</Link><Link to="/job-loop">How it works</Link></p>
           <details className="ap-steps"><summary>What happens after you sign up</summary><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol><p className="ap-steps-free">Includes 3 AI-tailored CVs a month, free.</p></details>

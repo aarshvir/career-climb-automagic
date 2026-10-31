@@ -38,29 +38,51 @@ describe('name and mobile number for every account', () => {
     expect(defaultCountryCode('en-AE')).toBe('+971');
     expect(defaultCountryCode('fr')).toBe('+1');
     expect(hasContactDetails({ full_name: 'Casey', phone: '+971501234567' })).toBe(true);
-    expect(hasContactDetails({ name: 'Casey' })).toBe(false);
+    expect(hasContactDetails({ full_name: 'Casey' })).toBe(true);
+    expect(hasContactDetails({ name: 'Casey' })).toBe(true);
+    expect(hasContactDetails({ phone: '+971501234567' })).toBe(false);
+    expect(hasContactDetails({ full_name: 'C' })).toBe(false);
+    expect(hasContactDetails({})).toBe(false);
   });
 
-  it('asks a signed-in person without a phone number before opening their workspace', async () => {
+  it('lets a signed-in person with a name but no phone number straight into their workspace', () => {
     adoptContactUser('google-user', { full_name: 'Casey Google' });
+    render(tree('/loop'));
+    expect(screen.getByText('Destination')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'One last step' })).not.toBeInTheDocument();
+  });
+
+  it('asks a signed-in person without a name before opening their workspace, and saves an optional phone too', async () => {
+    adoptContactUser('google-user', {});
     render(tree('/loop'));
     expect(await screen.findByRole('heading', { name: 'One last step' })).toBeInTheDocument();
     expect(screen.queryByText('Destination')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Full name')).toHaveValue('Casey Google');
     const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Full name'), 'Casey Google');
     await user.selectOptions(screen.getByLabelText('Country code'), '+44');
-    await user.type(screen.getByLabelText('Mobile number'), '07700 900123');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '07700 900123');
     await user.click(screen.getByRole('button', { name: /Continue/ }));
     await waitFor(() => expect(mocks.contactFetch).toHaveBeenCalledWith('https://project.supabase.co/auth/v1/user', expect.objectContaining({ method: 'PUT', headers: expect.objectContaining({ Authorization: `Bearer ${mocks.session!.access_token}` }), body: JSON.stringify({ data: { full_name: 'Casey Google', phone: '+447700900123' } }) })));
     expect(mocks.updateUser).not.toHaveBeenCalled();
     expect(await screen.findByText('Destination')).toBeInTheDocument();
   });
 
+  it('saves just a name when the phone is left blank, without sending a phone', async () => {
+    adoptContactUser('google-user', {});
+    render(tree('/loop'));
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Google');
+    await user.click(screen.getByRole('button', { name: /Continue/ }));
+    await waitFor(() => expect(mocks.contactFetch).toHaveBeenCalledWith('https://project.supabase.co/auth/v1/user', expect.objectContaining({ method: 'PUT', body: JSON.stringify({ data: { full_name: 'Casey Google' } }) })));
+    expect(await screen.findByText('Destination')).toBeInTheDocument();
+  });
+
   it('rejects a number that is too short', async () => {
-    adoptContactUser('google-user', { full_name: 'Casey Google' });
+    adoptContactUser('google-user', {});
     render(tree('/onboarding'));
     const user = userEvent.setup();
-    await user.type(await screen.findByLabelText('Mobile number'), '12');
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Google');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '12');
     await user.click(screen.getByRole('button', { name: /Continue/ }));
     expect(await screen.findByRole('alert')).toHaveTextContent('valid mobile number');
     expect(mocks.updateUser).not.toHaveBeenCalled();

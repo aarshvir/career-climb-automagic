@@ -44,7 +44,7 @@ beforeEach(() => {
   vi.stubGlobal('fetch', mocks.fetch);
   mocks.initialize.mockResolvedValue({ error: null });
   mocks.getSession.mockImplementation(async () => ({ data: { session: mocks.session }, error: null }));
-  mocks.fetch.mockImplementation(async (_url, init) => json(init?.method === 'PUT' ? receiptUser() : receiptUser(ownerA, { full_name: 'Casey Example' })));
+  mocks.fetch.mockImplementation(async (_url, init) => json(init?.method === 'PUT' ? receiptUser() : receiptUser(ownerA, {})));
   adopt(session());
 });
 afterEach(() => { cleanup(); clearTrackingDraftMemory(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
@@ -99,6 +99,17 @@ describe('contact save original account authority', () => {
     await expect(saveContactDetails(scope(), details, () => true)).rejects.toThrow(/confirm/);
   });
 
+  it('a blank phone is never sent, so it cannot clear a number already saved on the account', async () => {
+    const nameOnly = { fullName: details.fullName, phone: '' };
+    mocks.fetch.mockResolvedValueOnce(json(receiptUser(ownerA, { full_name: details.fullName, phone: details.phone })));
+    const saved = await saveContactDetails(scope(), nameOnly, () => true);
+    expect(mocks.fetch.mock.calls[0][1].body).toBe(JSON.stringify({ data: { full_name: details.fullName } }));
+    expect(saved).toMatchObject({ fullName: details.fullName, phone: details.phone });
+    mocks.fetch.mockResolvedValueOnce(json(receiptUser(ownerA, { full_name: 'Someone Else' })));
+    await expect(saveContactDetails(scope(), nameOnly, () => true)).rejects.toThrow(/confirm/);
+    await expect(saveContactDetails(scope(), { fullName: details.fullName, phone: '12345' }, () => true)).rejects.toThrow('valid mobile number');
+  });
+
   it('keeps a failed or ambiguous save retryable using the same original draft and exact current owner', async () => {
     mocks.fetch.mockRejectedValueOnce(new Error('Network interrupted')).mockResolvedValueOnce(json(receiptUser()));
     const original = scope();
@@ -130,10 +141,10 @@ describe('contact form and stable private draft gate', () => {
     render(<ContactForm user={mocks.auth.user!} onSaved={saved} />);
     await user.type(screen.getByLabelText('Full name'), details.fullName);
     await user.selectOptions(screen.getByLabelText('Country code'), '+44');
-    await user.type(screen.getByLabelText('Mobile number'), '07700 900123');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '07700 900123');
     await user.click(screen.getByRole('button', { name: /Continue/ }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Connection lost');
-    expect(screen.getByLabelText('Full name')).toHaveValue(details.fullName); expect(screen.getByLabelText('Mobile number')).toHaveValue('07700 900123');
+    expect(screen.getByLabelText('Full name')).toHaveValue(details.fullName); expect(screen.getByLabelText('Mobile number (optional)')).toHaveValue('07700 900123');
     expect(saved).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: /Continue/ }));
     await waitFor(() => expect(saved).toHaveBeenCalledWith(expect.objectContaining(details)));
@@ -142,7 +153,7 @@ describe('contact form and stable private draft gate', () => {
   it('does not rebind an old rendered form to an A to B to A SDK epoch before React updates', async () => {
     const user = userEvent.setup(), saved = vi.fn();
     render(<ContactForm user={mocks.auth.user!} onSaved={saved} />);
-    await user.type(screen.getByLabelText('Full name'), details.fullName); await user.type(screen.getByLabelText('Mobile number'), '+447700900123');
+    await user.type(screen.getByLabelText('Full name'), details.fullName); await user.type(screen.getByLabelText('Mobile number (optional)'), '+447700900123');
     const previousAuth = mocks.auth;
     adopt(session(ownerB, sessionB)); adopt(session(ownerA, sessionA)); mocks.auth = previousAuth;
     fireEvent.submit(screen.getByRole('button', { name: /Continue/ }).closest('form')!);
@@ -162,13 +173,14 @@ describe('contact form and stable private draft gate', () => {
     const user = userEvent.setup(), view = render(tree(<Draft portal />));
     await user.type(screen.getByLabelText('Unsaved CV'), 'Draft kept exactly');
     const privateButton = screen.getByRole('button', { name: 'Run private action' }), portalledButton = screen.getByRole('button', { name: 'Portalled private action' });
-    adopt(session(ownerA, sessionA, { full_name: details.fullName })); view.rerender(tree(<Draft portal />));
+    adopt(session(ownerA, sessionA, {})); view.rerender(tree(<Draft portal />));
     await screen.findByRole('heading', { name: 'One last step' });
     expect(screen.queryByRole('textbox', { name: 'Unsaved CV' })).not.toBeInTheDocument();
     expect(privateButton.closest('[hidden]')).not.toBeNull(); expect(portalledButton.closest('[hidden]')).not.toBeNull();
     fireEvent.click(privateButton); fireEvent.submit(privateButton.closest('form')!); fireEvent.click(portalledButton);
     expect(mocks.action).not.toHaveBeenCalled(); expect(mocks.mounts).toBe(1);
-    await user.selectOptions(screen.getByLabelText('Country code'), '+44'); await user.type(screen.getByLabelText('Mobile number'), '07700 900123');
+    await user.type(screen.getByLabelText('Full name'), details.fullName);
+    await user.selectOptions(screen.getByLabelText('Country code'), '+44'); await user.type(screen.getByLabelText('Mobile number (optional)'), '07700 900123');
     await user.click(screen.getByRole('button', { name: /Continue/ }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(screen.getByLabelText('Unsaved CV')).toHaveValue('Draft kept exactly'); expect(mocks.mounts).toBe(1);
@@ -192,13 +204,14 @@ describe('contact form and stable private draft gate', () => {
     const user = userEvent.setup(), view = render(tree(<PrivateDialog />));
     await user.type(await screen.findByLabelText('Dialog draft'), 'Unsaved modal text');
     const privateSave = screen.getByRole('button', { name: 'Save private edit' });
-    adopt(session(ownerA, sessionA, { full_name: details.fullName })); view.rerender(tree(<PrivateDialog />));
+    adopt(session(ownerA, sessionA, {})); view.rerender(tree(<PrivateDialog />));
     await screen.findByRole('heading', { name: 'One last step' });
     expect(screen.queryByRole('heading', { name: 'Private edit' })).not.toBeInTheDocument();
     fireEvent.click(privateSave); expect(mocks.action).not.toHaveBeenCalled();
+    await user.type(screen.getByLabelText('Full name'), details.fullName);
     await user.selectOptions(screen.getByLabelText('Country code'), '+44');
-    await user.type(screen.getByLabelText('Mobile number'), '07700 900123');
-    expect(screen.getByLabelText('Mobile number')).toHaveFocus();
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '07700 900123');
+    expect(screen.getByLabelText('Mobile number (optional)')).toHaveFocus();
     await user.click(screen.getByRole('button', { name: /Continue/ }));
     expect(await screen.findByLabelText('Dialog draft')).toHaveValue('Unsaved modal text');
     await user.click(screen.getByRole('button', { name: 'Save private edit' })); expect(mocks.action).toHaveBeenCalledTimes(1);
@@ -224,9 +237,9 @@ describe('contact form and stable private draft gate', () => {
   it('keeps the typed contact draft through same-session token refresh and saves using that current render', async () => {
     const user = userEvent.setup(), view = render(tree(<Draft />));
     await user.type(await screen.findByLabelText('Full name'), details.fullName);
-    await user.selectOptions(screen.getByLabelText('Country code'), '+44'); await user.type(screen.getByLabelText('Mobile number'), '07700 900123');
+    await user.selectOptions(screen.getByLabelText('Country code'), '+44'); await user.type(screen.getByLabelText('Mobile number (optional)'), '07700 900123');
     adopt(session(ownerA, sessionA, {}, 'new-refresh-signature')); view.rerender(tree(<Draft />));
-    expect(screen.getByLabelText('Full name')).toHaveValue(details.fullName); expect(screen.getByLabelText('Mobile number')).toHaveValue('07700 900123');
+    expect(screen.getByLabelText('Full name')).toHaveValue(details.fullName); expect(screen.getByLabelText('Mobile number (optional)')).toHaveValue('07700 900123');
     await user.click(screen.getByRole('button', { name: /Continue/ }));
     await screen.findByLabelText('Unsaved CV');
     const put = mocks.fetch.mock.calls.find(([, init]) => init?.method === 'PUT')!;
@@ -237,7 +250,7 @@ describe('contact form and stable private draft gate', () => {
     mocks.fetch.mockResolvedValueOnce(json(receiptUser()));
     const view = render(tree(<Draft />));
     await screen.findByLabelText('Unsaved CV');
-    adopt(session(ownerA, sessionA, { full_name: details.fullName })); view.rerender(tree(<Draft />));
+    adopt(session(ownerA, sessionA, {})); view.rerender(tree(<Draft />));
     await screen.findByRole('heading', { name: 'One last step' });
     expect(screen.queryByRole('textbox', { name: 'Unsaved CV' })).not.toBeInTheDocument(); expect(mocks.mounts).toBe(1);
   });

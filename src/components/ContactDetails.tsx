@@ -17,12 +17,12 @@ export function ContactFields({ value, onChange, disabled, errors }: { value: Co
       {errors?.name && <p id={`${id}-name-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{errors.name}</p>}
     </div>
     <div className="ap-field">
-      <Label htmlFor={`${id}-phone`}>Mobile number</Label>
+      <Label htmlFor={`${id}-phone`}>Mobile number (optional)</Label>
       <div className="ap-phone-field">
         <select aria-label="Country code" value={value.countryCode} onChange={event => onChange({ ...value, countryCode: event.target.value })} disabled={disabled}>
           {countryCodes.map(([code, dial, name]) => <option key={code} value={dial} aria-label={`${code} ${dial}, ${name}`}>{code} {dial}</option>)}
         </select>
-        <Input id={`${id}-phone`} type="tel" inputMode="tel" autoComplete="tel-national" placeholder="Number" value={value.phone} onChange={event => onChange({ ...value, phone: event.target.value })} required disabled={disabled} maxLength={24} aria-invalid={errors?.phone ? true : undefined} aria-describedby={errors?.phone ? `${id}-phone-error` : undefined} />
+        <Input id={`${id}-phone`} type="tel" inputMode="tel" autoComplete="tel-national" placeholder="Number" value={value.phone} onChange={event => onChange({ ...value, phone: event.target.value })} disabled={disabled} maxLength={24} aria-invalid={errors?.phone ? true : undefined} aria-describedby={errors?.phone ? `${id}-phone-error` : undefined} />
       </div>
       {errors?.phone && <p id={`${id}-phone-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{errors.phone}</p>}
     </div>
@@ -31,7 +31,7 @@ export function ContactFields({ value, onChange, disabled, errors }: { value: Co
 
 const PRIVATE = /^\/(loop|onboarding|dashboard|applications|check)(\/|$)/;
 
-/** Every signed-in account gives a name and mobile number before using the private pages. */
+/** Every signed-in account gives a name before using the private pages. A mobile number is optional. */
 export function ContactGate({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const { user } = auth;

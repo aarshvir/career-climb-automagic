@@ -4,7 +4,7 @@ import { readSupabaseConfiguration } from '@/integrations/supabase/configuration
 import { cvVariantSessionIdentity } from './loop-cv-variant-recovery';
 import { trackingAuthEpoch, trackingDraftAuthority } from './tracking-draft-memory';
 
-/** Name and mobile number collected for every account (stored in the auth user's metadata). */
+/** A name is collected for every account; the mobile number is optional (both stored in the auth user's metadata). */
 export const countryCodes = [
   ['US', '+1', 'United States / Canada'], ['GB', '+44', 'United Kingdom'], ['AE', '+971', 'United Arab Emirates'], ['IN', '+91', 'India'],
   ['SA', '+966', 'Saudi Arabia'], ['QA', '+974', 'Qatar'], ['KW', '+965', 'Kuwait'], ['OM', '+968', 'Oman'], ['BH', '+973', 'Bahrain'],
@@ -32,15 +32,19 @@ type Metadata = Record<string, unknown> | undefined | null;
 /** Google accounts arrive with full_name or name; email accounts with what they typed at sign-up. */
 export const accountName = (metadata: Metadata) => { const value = metadata?.full_name ?? metadata?.name; return typeof value === 'string' ? value.trim() : ''; };
 export const accountPhone = (metadata: Metadata) => typeof metadata?.phone === 'string' ? metadata.phone.trim() : '';
-export const hasContactDetails = (metadata: Metadata) => validName(accountName(metadata)) && /^\+\d{8,15}$/.test(accountPhone(metadata));
+/** An account is ready for the private pages once it has a name; a mobile number is never required. */
+export const hasContactDetails = (metadata: Metadata) => validName(accountName(metadata));
+const validSavedPhone = (phone: string) => phone === '' || /^\+\d{8,15}$/.test(phone);
 
 export interface ContactValue { name: string; countryCode: string; phone: string }
 export const blankContact = (name = ''): ContactValue => ({ name, countryCode: defaultCountryCode(), phone: '' });
-/** Returns the cleaned details, or a message describing what to fix. */
+export const PHONE_ERROR = 'Please enter a valid mobile number with the country code, or leave it blank.';
+/** Returns the cleaned details (phone is '' when left blank), or a message describing what to fix. */
 export function checkContact(value: ContactValue): { fullName: string; phone: string } | string {
   if (!validName(value.name)) return 'Please enter your full name.';
+  if (!value.phone.trim()) return { fullName: value.name.trim(), phone: '' };
   const phone = normalizePhone(value.phone, value.countryCode);
-  return phone ? { fullName: value.name.trim(), phone } : 'Please enter a valid mobile number, including the country code.';
+  return phone ? { fullName: value.name.trim(), phone } : PHONE_ERROR;
 }
 
 /** The token lives only in this mounted operation. Receipts never carry it. */
@@ -75,23 +79,23 @@ function receiptFor(user: unknown, scope: ContactAuthority, expected?: { fullNam
   const value = user as { id?: unknown; user_metadata?: unknown };
   if (value.id !== scope.ownerId || !value.user_metadata || typeof value.user_metadata !== 'object' || Array.isArray(value.user_metadata)) throw new Error('We could not confirm the saved account. Please retry.');
   const metadata = value.user_metadata as Record<string, unknown>;
-  if (expected && (metadata.full_name !== expected.fullName || metadata.phone !== expected.phone)) throw new Error('We could not confirm the exact details you saved. Please retry.');
+  if (expected && (metadata.full_name !== expected.fullName || expected.phone && metadata.phone !== expected.phone)) throw new Error('We could not confirm the exact details you saved. Please retry.');
   return hasContactDetails(metadata) ? { ownerId: scope.ownerId, epoch: scope.epoch, sessionId: scope.sessionId, fullName: accountName(metadata), phone: accountPhone(metadata) } : null;
 }
 
 /** Uses the captured token, never global updateUser selecting a later SDK user. */
 export async function saveContactDetails(scope: ContactAuthority, details: { fullName: string; phone: string }, current: () => boolean): Promise<ContactReceipt> {
   const submitted = Object.freeze({ fullName: details.fullName, phone: details.phone });
-  if (!validName(submitted.fullName) || submitted.fullName !== submitted.fullName.trim() || !/^\+\d{8,15}$/.test(submitted.phone)) throw new Error('Please enter your full name and a valid mobile number.');
+  if (!validName(submitted.fullName) || submitted.fullName !== submitted.fullName.trim() || !validSavedPhone(submitted.phone)) throw new Error('Please enter your full name and, if you add one, a valid mobile number.');
   await verifiedContactSession(scope, current);
   const endpoint = contactEndpoint();
   if (!currentContactAuthority(scope) || !current()) throw new Error(STALE);
-  const response = await fetch(endpoint.url, { method: 'PUT', credentials: 'omit', headers: { apikey: endpoint.publicKey, Authorization: `Bearer ${scope.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ data: { full_name: submitted.fullName, phone: submitted.phone } }) });
+  const response = await fetch(endpoint.url, { method: 'PUT', credentials: 'omit', headers: { apikey: endpoint.publicKey, Authorization: `Bearer ${scope.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ data: { full_name: submitted.fullName, ...(submitted.phone && { phone: submitted.phone }) } }) });
   if (!currentContactAuthority(scope) || !current()) throw new Error(STALE);
   if (!response.ok) throw new Error('We could not save your details. Please retry.');
   const receipt = receiptFor(await response.json(), scope, submitted);
   if (!currentContactAuthority(scope) || !current()) throw new Error(STALE);
-  if (!receipt || receipt.fullName !== submitted.fullName || receipt.phone !== submitted.phone) throw new Error('We could not confirm the exact details you saved. Please retry.');
+  if (!receipt || receipt.fullName !== submitted.fullName || submitted.phone && receipt.phone !== submitted.phone) throw new Error('We could not confirm the exact details you saved. Please retry.');
   return receipt;
 }
 
