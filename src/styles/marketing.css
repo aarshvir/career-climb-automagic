@@ -1465,3 +1465,8 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 }
 :root .product-page .product-main-content .jv-toc a:is(:link, :visited), :root .product-page .product-main-content .jv-toc a:is(:link, :visited):not(:hover), :root .product-page .jv-toc a:is(:link, :visited) { color: var(--jv-ink-2); text-decoration: none; }
 @media (hover: hover) { :root .product-page .product-main-content .jv-toc a:is(:link, :visited):hover { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; } }
+
+/* Five public footer groups need the full rail on wide screens; the existing mobile/tablet grids stay responsive. */
+@media (min-width: 1280px) {
+  :root .jv-footer-links { grid-column: 1 / -1; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 24px; }
+}
