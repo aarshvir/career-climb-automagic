@@ -495,3 +495,6 @@
 .jv-account .ap-auth-heading :is(h1, h2) { overflow: visible; white-space: normal; height: auto; }
 /* The loading placeholder holds the loaded card's phone offset (16px), so the account entry never shifts when the session check resolves. */
 @media (max-width: 760px) { .ap-auth-loading:not(.ap-auth-loading--embedded) { margin-top: 16px; } }
+
+/* CV Check entry keeps its own benefits and free-account terms visible at every width. */
+.jv-account--standalone .ap-loop-entry.ap-check-entry { display: block; }

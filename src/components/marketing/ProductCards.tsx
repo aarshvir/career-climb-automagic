@@ -7,7 +7,7 @@ import "./ProductCards.css";
 const runs = [
   { role: "Product Analyst", company: "Northwind Labs", place: "Remote (US)", tag: "Ready for review" },
   { role: "Data Analyst", company: "Contoso Health", place: "Austin, TX", tag: "Ready for review" },
-  { role: "Junior Product Analyst", company: "Fabrikam", place: "Remote (US)", tag: "CV tailored" },
+  { role: "Junior Product Analyst", company: "Fabrikam", place: "Remote (US)", tag: "Matched" },
 ];
 
 /** A static run result: the jobs a run found and where each one stands. */
@@ -17,9 +17,9 @@ export function RunCard({ className = "" }: { className?: string }) {
     <div className="pc-head"><strong>Automated Job Loop</strong><span className="pc-pill"><Repeat2 />3×/week</span></div>
     <ul className="pc-jobs">{runs.map(run => <li key={run.company}>
       <span className="pc-job"><strong>{run.role}</strong><span>{run.company} · {run.place}</span></span>
-      <span className={`pc-tag${run.tag === "CV tailored" ? " pc-tag--neutral" : ""}`}>{run.tag}</span>
+      <span className={`pc-tag${run.tag !== "Ready for review" ? " pc-tag--neutral" : ""}`}>{run.tag}</span>
     </li>)}</ul>
-    <div className="pc-foot"><span />3 jobs · 3 tailored CVs</div>
+    <div className="pc-foot"><span />Matched jobs · prepared CVs</div>
   </div>;
 }
 
@@ -56,7 +56,7 @@ export function ScheduleCard({ className = "" }: { className?: string }) {
 const steps = [
   ["Find", "Searches your connected sources"],
   ["Match", "Matches openings to your roles"],
-  ["Tailor", "Tailors a CV for each prepared role"],
+  ["Tailor", "Prepares CVs for matching roles"],
   ["Review", "Your dashboard is ready to review"],
 ];
 /** A run, as a timeline. Illustrative. */

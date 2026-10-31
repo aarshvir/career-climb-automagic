@@ -8,7 +8,7 @@ const stops: { when: string; title: string; text: string }[] = [
   { when: "Once · you", title: "Add your experience", text: "Upload a CV, reuse a saved check, or build one from guided questions." },
   { when: "Once · you", title: "Choose roles, places and pace", text: "Pick the roles and locations you want, then weekly, three-times-weekly or daily." },
   { when: "Every run · automatic", title: "Find and match", text: "Searches the sources connected to your account and matches openings to the experience you confirmed." },
-  { when: "Every run · automatic", title: "Tailor and prepare", text: "A tailored CV for each prepared role, with every job and next step kept in your dashboard." },
+  { when: "Every run · automatic", title: "Tailor and prepare", text: "Role-specific CVs for matching roles, with prepared work and next steps kept in your dashboard." },
 ];
 
 /** /how-it-works: one vertical rail from the two things you do to the two things every run does. */
@@ -38,12 +38,12 @@ export function RepeatStack() {
   </div>;
 }
 
-const miniRows: [string, string][] = [["Product Analyst", "CV tailored"], ["Data Analyst", "CV tailored"], ["Operations Analyst", "CV tailored"]];
+const miniRows: [string, string][] = [["Product Analyst", "CV tailored"], ["Data Analyst", "CV tailored"], ["Operations Analyst", "Matched"]];
 /** A three-row example run for dark surfaces (the account entry panel). Decorative; placeholder roles only. */
 export function MiniRun({ className = "" }: { className?: string }) {
   return <div className={`bc-mini ${className}`.trim()} aria-hidden="true">
     <p className="bc-mini-cap">Example run · illustrative</p>
     <ul>{miniRows.map(([role, state]) => <li key={role}><span>{role}</span><em>{state}</em></li>)}</ul>
-    <p className="bc-mini-foot"><i />3 jobs · 3 tailored CVs</p>
+    <p className="bc-mini-foot"><i />Matched jobs · prepared CVs</p>
   </div>;
 }

@@ -66,7 +66,7 @@ for (const path of ['/onboarding?utm_source=meta', '/auth?mode=signup']) {
   assert.ok(paint, 'Account entry carries the static first paint.');
   assert.doesNotMatch(paint[1], /<(script|link|form|img|input|iframe|a)\b/i, 'The static first paint is inert markup.');
   // The description paragraph is the largest text on desktop: it must be in the first paint (same words as Auth.tsx) so it is never a late LCP element.
-  assert.match(paint[1], /<p class="ap-story-description">Choose your roles and locations once\. <span class="jv-nb">Automated Job Loop<\/span> finds the best-matching jobs and prepares a tailored, role-specific CV for each\.<\/p>/, 'The static first paint carries the story description.');
+  assert.match(paint[1], /<p class="ap-story-description">Choose your roles and locations once\. <span class="jv-nb">Automated Job Loop<\/span> finds the best-matching jobs and prepares role-specific CVs from the facts you confirm\.<\/p>/, 'The static first paint carries the story description.');
   const text = raw.replace(paint[0], '<div id="root"></div>');
   const [head, tail] = indexText.split('</head>');
   assert.ok(text.startsWith(head) && text.endsWith('</head>' + tail), 'Account entry must be the built index plus head links only.');

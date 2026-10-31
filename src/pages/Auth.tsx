@@ -182,28 +182,37 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const pageTitle = checkEntry ? 'Start your free CV Check | Jobvance' : loopEntry || mode === 'sign-up' ? 'Set up your Automated Job Loop | Jobvance' : 'Sign in | Jobvance';
   return (
     <Container aria-label={embedded ? 'Save with your account' : undefined} className={`jv-account ${embedded ? 'jv-account--embedded' : 'jv-account--standalone'}`}>
-      {!embedded && <Helmet><title>{pageTitle}</title><meta name="description" content="Create your free Jobvance account, then set up your Automated Job Loop: choose roles and locations once and come back to matched jobs and tailored CVs." /><meta property="og:url" content={`https://jobvance.io${location.pathname}`} /><meta name="robots" content="noindex,nofollow" /></Helmet>}
+      {!embedded && <Helmet><title>{pageTitle}</title><meta name="description" content={checkEntry ? 'Create your free Jobvance account to compare your CV with a job ad, review changes and download after you approve.' : 'Create your free Jobvance account, then set up your Automated Job Loop: choose roles and locations once and come back to matched jobs and tailored CVs.'} /><meta property="og:url" content={`https://jobvance.io${location.pathname}`} /><meta name="robots" content="noindex,nofollow" /></Helmet>}
       {!embedded && <aside className="ap-account-story jv-dark" aria-labelledby={`${fieldId}-story`}>
         <div className="ap-story-inner">
           <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" />{checkEntry ? 'Free CV Check' : 'Automated Job Loop'}</p>
           <h1 id={`${fieldId}-story`}>{checkEntry ? <>Start your free <span>CV Check.</span></> : mode === 'sign-up' || loopEntry ? <>Set up your <span className="jv-nb">Automated Job Loop</span> <span>and let it run.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h1>
-          <p className="ap-story-description">{checkEntry ? 'Bring a CV and a job description, review the suggested changes and download your approved version.' : <>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares a tailored, role-specific CV for each.</>}</p>
-          {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance">{checkEntry ? <><li>Compare your CV with a job</li><li>Review every change</li><li>Download PDF, Word or text</li></> : <><li>Roles matched to your CV</li><li>A tailored CV for each role</li><li>Built for a high ATS match</li></>}</ul>}
+          <p className="ap-story-description">{checkEntry ? 'Bring a CV and a job description, review the suggested changes and download your approved version.' : <>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares role-specific CVs from the facts you confirm.</>}</p>
+          {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance">{checkEntry ? <><li>Compare your CV with a job</li><li>Review every change</li><li>Download PDF, Word or text</li></> : <><li>Roles matched to your CV</li><li>CVs for matching roles</li><li>Review before you download</li></>}</ul>}
           {showBenefits && <p className="ap-story-free">Free account · 3 tailored CVs a month</p>}
-          <MiniRun className="ap-story-run" />
+          {!checkEntry && <MiniRun className="ap-story-run" />}
           <Link to="/job-loop" className="ap-story-link">See how the Automated Job Loop works <ArrowRight size={17} aria-hidden="true" /></Link>
         </div>
       </aside>}
       <div className="ap-auth-panel">
         <div className="ap-auth-heading">
-          {!embedded && <p className="ap-eyebrow ap-eyebrow--form"><span className="ap-dot" aria-hidden="true" />{loopEntry ? 'Your Automated Job Loop' : 'Your Jobvance workspace'}</p>}
+          {!embedded && <p className="ap-eyebrow ap-eyebrow--form"><span className="ap-dot" aria-hidden="true" />{checkEntry ? 'Your free CV Check' : loopEntry ? 'Your Automated Job Loop' : 'Your Jobvance workspace'}</p>}
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
           {!showBenefits && <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>}
-          {showBenefits && <div className="ap-loop-entry">
+          {/* A visitor from the free CV Check ad is told about the CV Check, never the Job Loop's outcome list. */}
+          {showBenefits && checkEntry && <div className="ap-loop-entry ap-check-entry">
+            <ul className="ap-benefits" aria-label="What the free CV Check does">
+              <li><Check size={18} aria-hidden="true" /><span><strong>Compare your CV with a job ad.</strong><span className="ap-benefit-detail"> See which requirements it shows.</span></span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Review every change.</strong><span className="ap-benefit-detail"> With AI, each change sits beside your original.</span></span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Download after you approve.</strong><span className="ap-benefit-detail"> You tick that your CV is accurate first.</span></span></li>
+            </ul>
+            <p className="ap-benefits-free">Your account is free. Unlimited comparisons without AI. 3 free AI-tailored CVs per calendar month.</p>
+          </div>}
+          {showBenefits && !checkEntry && <div className="ap-loop-entry">
             <ul className="ap-benefits" aria-label="What the Automated Job Loop does">
-              <li><Check size={18} aria-hidden="true" /><span><strong>Roles matched to your CV.</strong><span className="ap-benefit-detail"> Each run searches the job boards we cover.</span></span></li>
-              <li><Check size={18} aria-hidden="true" /><span><strong>A tailored CV for each role.</strong><span className="ap-benefit-detail"> Built only from facts you confirm.</span></span></li>
-              <li><Check size={18} aria-hidden="true" /><span><strong>Built for a high ATS match.</strong><span className="ap-benefit-detail"> Written to fit each job’s requirements.</span></span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Roles matched to your CV.</strong><span className="ap-benefit-detail"> Searches connected employer career sites.</span></span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Tailored CVs for matching roles.</strong><span className="ap-benefit-detail"> Based on facts you confirm.</span></span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Review before you download.</strong><span className="ap-benefit-detail"> Read and approve the prepared CV first.</span></span></li>
             </ul>
             <p className="ap-benefits-free">Your account also includes 3 AI-tailored CVs a month, free.</p>
           </div>}

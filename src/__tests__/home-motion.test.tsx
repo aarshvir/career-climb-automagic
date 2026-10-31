@@ -25,11 +25,11 @@ afterEach(() => {
 });
 
 describe('hero mock motion (WCAG 2.2.2)', () => {
-  // The example run is one pass that finishes within 5 seconds, so it needs no pause control.
+  // The example history animation is one pass that finishes within 5 seconds, so it needs no pause control.
   it('plays its short pass once mounted and offers no pause control', () => {
     motion(true, true);
     render(<LoopRunMock />);
-    const figure = screen.getByRole('figure', { name: 'Example of an Automated Job Loop run' });
+    const figure = screen.getByRole('figure', { name: 'Example of Automated Job Loop history' });
     expect(figure).toHaveClass('is-live');
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
@@ -38,12 +38,12 @@ describe('hero mock motion (WCAG 2.2.2)', () => {
     document.documentElement.classList.add('jv-prerendered');
     try {
       render(<LoopRunMock />);
-      expect(screen.getByRole('figure', { name: 'Example of an Automated Job Loop run' })).not.toHaveClass('is-live');
+      expect(screen.getByRole('figure', { name: 'Example of Automated Job Loop history' })).not.toHaveClass('is-live');
     } finally { document.documentElement.classList.remove('jv-prerendered'); }
   });
   it('always labels the example as illustrative', () => {
     render(<LoopRunMock />);
-    expect(screen.getByRole('figure', { name: 'Example of an Automated Job Loop run' })).toHaveTextContent(/illustrative data/i);
+    expect(screen.getByRole('figure', { name: 'Example of Automated Job Loop history' })).toHaveTextContent(/illustrative data/i);
   });
 });
 

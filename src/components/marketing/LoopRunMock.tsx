@@ -13,9 +13,9 @@ const rows = [
   { role: "Product Analyst", company: "Northwind Labs", time: "Fri 7:00 AM" },
 ];
 
-/** Hero product mock: an example Automated Job Loop run, laid out as a run log in HTML and CSS.
+/** Hero product mock: example Automated Job Loop history across separate scheduled runs.
  * Its one short pass (each row: found, CV tailored, ready for review) ends within 5 seconds, so it needs no pause control.
- * The newest row rests on "CV tailored", so the resting state shows the progression, not three identical tags. All three rows show at every width, so the footer count always matches. */
+ * The newest row rests on "CV tailored", so the resting state shows the progression, not three identical tags. All three illustrative history rows show at every width. */
 export default function LoopRunMock() {
   const ref = useRef<HTMLElement>(null);
   useBeforePaint(() => {
@@ -31,10 +31,10 @@ export default function LoopRunMock() {
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  return <figure ref={ref} className="jv-mock" aria-label="Example of an Automated Job Loop run">
+  return <figure ref={ref} className="jv-mock" aria-label="Example of Automated Job Loop history">
     <div className="jv-mock-card">
       <div className="jv-mock-top">
-        <span className="jv-chip jv-chip--caption jv-mock-tag">Example run · illustrative data</span>
+        <span className="jv-chip jv-chip--caption jv-mock-tag">Example history · illustrative data</span>
       </div>
       <div className="jv-mock-head">
         <p className="jv-mock-title">Automated Job Loop</p>
@@ -56,8 +56,8 @@ export default function LoopRunMock() {
           </span>
         </li>)}
       </ul>
-      <p className="jv-sr-only">Each job moves from found, to CV tailored, to ready for your review.</p>
+      <p className="jv-sr-only">Prepared roles move from found, to CV tailored, to ready for your review.</p>
     </div>
-    <p className="jv-mock-foot"><span aria-hidden="true" />3 jobs · 3 tailored CVs</p>
+    <p className="jv-mock-foot"><span aria-hidden="true" />Matched jobs · prepared CVs</p>
   </figure>;
 }

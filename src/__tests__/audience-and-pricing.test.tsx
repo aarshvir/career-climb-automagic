@@ -110,7 +110,7 @@ describe('Automated Job Loop first homepage', () => {
     expect(stages[1]).toHaveTextContent('Choose your search');
     expect(stages[1]).toHaveTextContent('roles and locations');
     expect(stages[2]).toHaveTextContent('Review your dashboard');
-    expect(stages[2]).toHaveTextContent('tailored CV for each');
+    expect(stages[2]).toHaveTextContent('role-specific CVs for review');
     // Short actions sit under headings that name the product; the final call to action keeps the full name.
     expect(screen.getByText('Automated Job Loop', { selector: '.jv-hero-eyebrow' })).toBeInTheDocument();
     expect(screen.getByText('How Automated Job Loop works')).toBeInTheDocument();
@@ -135,10 +135,11 @@ describe('published draft privacy guidance', () => {
     expect(container.textContent).toContain('Meta Pixel from Meta Platforms');
     expect(container.textContent).toContain('Global Privacy Control');
   });
-  it('shows the home hero link to how it works and keeps the ATS line', () => {
+  it('shows how it works with factual CV preparation copy', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
     expect(screen.getByRole('link', { name: 'See how it works' })).toHaveAttribute('href', '/how-it-works');
-    expect(screen.getByText(/^Tailored, role-specific CVs/)).toHaveTextContent('built for a high ATS match');
+    expect(screen.getByText(/^Tailored, role-specific CVs/)).toHaveTextContent('built from the facts you confirm');
+    expect(document.body.textContent).not.toMatch(/high ATS match|a tailored CV for each role/i);
   });
   it('publishes the consented tab-storage exposure and requires renewed approval after restoration', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="privacy" /></MemoryRouter></HelmetProvider>);

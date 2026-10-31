@@ -29,7 +29,7 @@ const titles: Record<Kind, string> = {
 const labels: Record<Kind, string> = { home: "Jobvance", pricing: "Pricing", how: "How it works", faq: "FAQ", about: "About Jobvance", contact: "Contact", privacy: "Your information", terms: "The details", refund: "Refunds", help: "Help with your application", notfound: "Page not found" };
 const intros: Partial<Record<Kind, string>> = {
   pricing: `Choose how often your Automated Job Loop runs. Plans from $${subscriptionPlans[0].priceUsd}/month, with a free account to start.`,
-  how: "Add your experience, choose the roles and locations you want, then come back to matched jobs and a tailored CV for each.",
+  how: "Add your experience, choose the roles and locations you want, then come back to matched jobs and role-specific CVs for review.",
   faq: "How the Automated Job Loop works, what it prepares for you and how your information is handled.",
   about: "Applying for another role shouldn’t mean rebuilding your experience from scratch.",
   contact: "For questions about your documents, your account or service access.",
@@ -193,7 +193,7 @@ export default function ProductPage({ kind }: { kind: Kind }) {
           {related.length > 0 && <nav className="jv-related" aria-label="Related pages"><span>Related</span>{related.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}</nav>}
         </div>}
       </div>
-      {kind === "how" && <CtaBand start={start} visual="trail" heading="Set it up once. Come back to results." body="Add your experience, choose roles and locations, pick a schedule. Then come back to matched jobs and a tailored CV for each." />}
+      {kind === "how" && <CtaBand start={start} visual="trail" heading="Set it up once. Come back to results." body="Add your experience, choose roles and locations, pick a schedule. Then come back to matched jobs and role-specific CVs for review." />}
       {kind === "about" && <CtaBand start={start} visual="line" heading="Start with your own experience." body="Your next CV starts from the experience you add and the facts you confirm." />}
       {kind === "pricing" && <section className="jv-cta-bar jv-cta-bar--plans" aria-labelledby="pricing-close-title">
         <div className="jv-cta-bar-copy"><h2 id="pricing-close-title">Not ready to choose? Start free.</h2><p>Create a free account and set up your roles and schedule. Choose a plan for ongoing automatic runs.</p>
