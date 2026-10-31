@@ -18,7 +18,7 @@ export function BrandLockup() {
   return <span className="jv-brand jv-brand--static" aria-hidden="true">{brandInner}</span>;
 }
 const audienceLinks = [["/for-students","Students and graduates"],["/for-mba","MBA career pivots"],["/for-career-switchers","Busy professionals"]];
-const links = [["/job-loop","Automated Job Loop"],["/check","Free CV Check"],["/pricing","Pricing"],["/guides","Guides"],["/help","Help"]];
+const links = [["/job-loop","Automated Job Loop"],["/cv-check","Free CV Check"],["/pricing","Pricing"],["/guides","Guides"],["/help","Help"]];
 // A stored Supabase session makes "signed in" likely. Only then is the signed-out footprint held invisible while the
 // account check runs; everyone else (and the prerendered page) sees Sign in and Get started from the first paint.
 function storedSessionLikely() {
@@ -34,6 +34,8 @@ export default function MvpHeader() {
   const [error,setError] = useState(""), [busy,setBusy] = useState(false);
   const [openPath,setOpenPath] = useState<string | null>(null);
   const [sessionLikely] = useState(storedSessionLikely);
+  // Account holders go straight to the check; visitors get the public page that explains it (the check itself is not indexed).
+  const navTo = (to: string) => to === "/cv-check" && user ? "/check" : to;
   const toggle = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLElement>(null);
   const open = openPath === location.pathname;
@@ -123,14 +125,14 @@ export default function MvpHeader() {
     <a className="jv-skip" href="#main-content">Skip to content</a>
     <div className="jv-header-inner">
       <Brand />
-      <nav aria-label="Main navigation" className="jv-header-nav">{links.map(([to,label])=><NavLink key={to} to={to}>{label}</NavLink>)}</nav>
+      <nav aria-label="Main navigation" className="jv-header-nav">{links.map(([to,label])=><NavLink key={to} to={navTo(to)}>{label}</NavLink>)}</nav>
       <div className="jv-header-actions">{account}</div>
       {signedOut && !onEntry && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm jv-header-start">Start my search</Link>}
       <button ref={toggle} type="button" className="jv-menu-toggle" aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="mobile-navigation" onClick={()=>setOpenPath(open ? null : location.pathname)}>{open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
     </div>
     <nav ref={panel} id="mobile-navigation" aria-label="Mobile navigation" data-open={open} data-state={closingNow ? "closing" : undefined} className="jv-mobile-panel">
       <div className="jv-mobile-account" onClick={()=>setOpenPath(null)}>{account}</div>
-      {links.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}
+      {links.map(([to,label])=><NavLink key={to} to={navTo(to)} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}
       <div className="jv-mobile-who" role="group" aria-label="Who it's for"><p aria-hidden="true">Who it's for</p>{audienceLinks.map(([to,label])=><NavLink key={to} to={to} onClick={()=>setOpenPath(null)}>{label}</NavLink>)}</div>
     </nav>
     {(open || closingNow) && <div className="jv-menu-scrim" aria-hidden="true" data-state={closingNow ? "closing" : undefined} onClick={()=>setOpenPath(null)} />}

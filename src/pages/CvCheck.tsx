@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { extractCvText, validateCvText } from "@/lib/cv-extraction";
 import { analyzeCvEvidence, prioritizeCvForVacancy, type EvidenceReport, type EvidenceRequirement, type EvidenceStatus } from "@/lib/cv-evidence";
+import { evidenceStatusLabels } from "@/lib/evidence-labels";
 import { checkReviewKey, clearRetainedCheck, retainCheckForGoogle, readRetainedCheck, validateCheckDraft, validateCheckField, CheckDraftValidationError, readCheckRecovery, rememberCheckRecovery, clearCheckRecovery, draftForAnotherVacancy, keepReviewedEditsInSource, checkSourceLines, removeSelectedSourceLines, checkAudience, type CheckAudience, type CheckDraft, type CheckDraftField, type CheckReuseSource, type CheckSaveReference } from "@/lib/check-draft";
 import { deleteFreeCheck, listFreeChecks, saveFreeCheck, type FreeCvCheck } from "@/lib/free-check-api";
 import { createFreeCheckCvBlob, createFreeCheckReportText } from "@/lib/free-check-export";
@@ -41,9 +42,7 @@ const audienceGuidance = {
   mba: { label: "MBA student", example: "e.g. Associate consultant", text: "Bring previous work and MBA projects. Keep classroom projects distinct from client or employer work, and explain your own contribution." },
   professional: { label: "Busy professional", example: "e.g. Transformation manager", text: "Start with the career record you already have. Reuse your experience for your next role, show transferable work without changing your responsibilities, and remove confidential information." },
 };
-const statusLabels: Record<EvidenceStatus, string> = {
-  direct: "Direct wording found", partial: "Related passage — review needed", missing: "No passage found", review: "Needs manual review",
-};
+const statusLabels = evidenceStatusLabels;
 const statusStyles: Record<EvidenceStatus, string> = {
   direct: "border-emerald-200 bg-emerald-50 text-emerald-950", partial: "border-amber-200 bg-amber-50 text-amber-950",
   missing: "border-[var(--jv-line-strong)] bg-[var(--jv-sunken)] text-[var(--jv-ink-2)]", review: "border-[var(--jv-brand-ink)] bg-[var(--jv-brand-tint)] text-[var(--jv-brand-ink)]",

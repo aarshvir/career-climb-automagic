@@ -29,6 +29,7 @@ export function preloadRoute(key: string, load: () => Promise<Loaded>): Promise<
 
 export const routeLoaders = {
   audience: () => import("@/pages/AudienceLanding"),
+  cvCheckLanding: () => import("@/pages/CvCheckLanding"),
   jobLoop: () => import("@/pages/JobLoopOverview"),
   guides: () => import("@/pages/CareerGuides"),
   guideArticle: () => import("@/pages/CareerGuides").then(module => ({ default: module.CareerGuideArticle })),
@@ -48,6 +49,7 @@ export function warmAccountEntry(path: string): void {
 /** The chunk keys a prerendered public path needs on its first client render. */
 export function routeKeysFor(path: string): Array<keyof typeof routeLoaders> {
   if (path === "/job-loop") return ["jobLoop"];
+  if (path === "/cv-check") return ["cvCheckLanding"];
   if (path === "/guides") return ["guides"];
   if (path.startsWith("/guides/")) return ["guides", "guideArticle"];
   if (path === "/help") return ["help"];

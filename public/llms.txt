@@ -13,7 +13,7 @@ Facts last checked 1 November 2026. The pricing page (https://jobvance.io/pricin
 
 ## Products
 
-- [CV Check](https://jobvance.io/check): Compare your CV with one job ad on your device, or choose AI tailoring. Needs a free account.
+- [CV Check](https://jobvance.io/cv-check): Compare your CV with one job ad on your device, or choose AI tailoring. Needs a free account.
 - [Automated Job Loop](https://jobvance.io/job-loop): Set roles, locations and a schedule; each run finds matching jobs from connected sources and prepares a tailored CV for review.
 - [How it works](https://jobvance.io/how-it-works): The three stages from adding your experience to reviewing matched jobs and prepared CVs.
 - [Pricing](https://jobvance.io/pricing): Monthly Automated Job Loop plans, one-time CV passes and what stays free.
