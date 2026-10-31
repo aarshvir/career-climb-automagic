@@ -77,6 +77,8 @@ const HASHTAG_ONLY = /^#[\w-]+$/;
 const CURRENCY_RANGE = /^[$€£]\s?\d[\d,.]*(?:\s*[kKmM])?(?:\s*(?:[-–—]|to)\s*[$€£]?\s?\d[\d,.]*(?:\s*[kKmM])?)?(?:\s*(?:USD|EUR|GBP|AED|per (?:year|annum|hour)|a year))?\.?$/i;
 // A bare duty verb opens a task, never the employer's offer ("Process fringe benefits and equity").
 const DUTY_START = /^(?:administer|assist|audit|analy[sz]e|build|calculate|collaborate|complete|conduct|coordinate|create|define|deliver|design|develop|drive|ensure|evaluate|execute|identify|implement|improve|lead|liaise|maintain|manage|monitor|negotiate|own|partner|plan|prepare|process|produce|provide|reconcile|report|review|run|serve|support|track|train|update|work|write)\b/i;
+// An explicit applicant task remains a criterion even when framed with employer/role language.
+const CANDIDATE_TASK = /^(?:(?:your\s+(?:responsibilities|duties|work|role|tasks)|(?:the|this)\s+(?:role|position))\s+(?:(?:will|would|can|could)\s+)?(?:includes?|involves?|entails?|covers?)\b|(?:the|this)\s+(?:role|position)\s+(?:is|will be)\s+(?:responsible|accountable)\s+for\b|our\s+(?:ideal|successful|next|new)\s+(?:candidate|applicant|hire|team member)\b)/i;
 const UNSUPPORTED_SCRIPT = /[\u0400-\u052f]|[\u0600-\u06ff]|[\u0900-\u097f]|[\u3040-\u30ff]|[\u3400-\u9fff]|[\uac00-\ud7af]/u;
 const BULLET = /^(\s*(?:[-*•▪◦‣–—]|\d+[.)])\s+)/;
 const SYMBOL_BULLET = /^\s*[-*•▪◦‣–—]\s+/;
@@ -186,10 +188,15 @@ function mandatory(value: string): boolean {
   return MANDATORY.test(value.replace(NOT_A_CRITERION, ' '));
 }
 
+/** These applicant clauses still need comparison/manual review, whatever heading precedes them. */
+function retainedInContext(value: string): boolean {
+  return mandatory(value) || CANDIDATE_TASK.test(value) || DEADLINE.test(value) || CONDITION.test(value);
+}
+
 /** True when the clause itself states something a CV could be held against. */
 function requirementSignal(value: string): boolean {
   const own = value.replace(NOT_A_CRITERION, ' ');
-  if (MANDATORY.test(own) || DEADLINE.test(own) || CONDITION.test(own) || duration(own)) return true;
+  if (CANDIDATE_TASK.test(own) || MANDATORY.test(own) || DEADLINE.test(own) || CONDITION.test(own) || duration(own)) return true;
   if (/\b(?:requires?|expects?|seeking|seeks?|looking for|looking to (?:hire|find)|needs?|wants?|prefer(?:s|red)?)\b/i.test(own)) return true;
   return meaningful(own).some(term => TECH.has(term) || CREDENTIAL.has(term));
 }
@@ -267,7 +274,7 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
           for (const part of vacancyClauses(text, tail)) {
             const value = text.slice(part.start, part.end);
             if(listingRoleHeading(value,i,enteredTitle)){omitted.push(part);continue;}
-            if ((ignoreSection && !mandatory(value)) || listingContext(value)) omitted.push(part);
+            if ((ignoreSection && !retainedInContext(value)) || listingContext(value)) omitted.push(part);
             else if (requirements.length < MAX_REQUIREMENTS) requirements.push(part);
             else { omitted.push(part); overflow++; }
           }
@@ -277,7 +284,6 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
     }
     // A heading we have no label for still introduces the lines below it; it is not a criterion.
     if (unlabelledHeading(line.text)) { omitted.push(raw); continue; }
-    if (ignoreSection && !mandatory(line.text)) { omitted.push(raw); continue; }
     const bullet = BULLET.exec(line.text);
     let end = line.end;
     if (bullet) {
@@ -293,8 +299,8 @@ function vacancySpans(text: string,enteredTitle=''): { requirements: Span[]; omi
     for (const part of vacancyClauses(text, span)) {
       const value = text.slice(part.start, part.end);
       if(listingRoleHeading(value,i,enteredTitle)){omitted.push(part);continue;}
-      // Inside a company section only a clause that itself states a mandatory criterion is kept.
-      if ((ignoreSection && !mandatory(value)) || listingContext(value)) { omitted.push(part); continue; }
+      // Keep applicant criteria and manual-review conditions; the surrounding blurb stays context.
+      if ((ignoreSection && !retainedInContext(value)) || listingContext(value)) { omitted.push(part); continue; }
       if (requirements.length < MAX_REQUIREMENTS) requirements.push(part);
       else { omitted.push(part); overflow++; }
     }
