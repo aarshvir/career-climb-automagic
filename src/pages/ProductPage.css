@@ -194,3 +194,5 @@
 
 .jv-section.pricing-start, .jv-section.pricing-teams { padding-block: 40px; }
 @media (min-width: 1024px) { .jv-section.pricing-start, .jv-section.pricing-teams { padding-block: 56px; } }
+
+.product-about-note { max-width: 64ch; margin: 36px 0 0; color: var(--jv-ink-2); font-size: 0.95rem; line-height: 1.6; }
