@@ -124,7 +124,7 @@ for(const page of publicRender.pages){
     assert.ok(!/<textarea\b|<input\b[^>]*type="file"/i.test(html),'Public pre-authentication HTML must not expose CV-source entry controls.');
     assert.ok(!/no account needed|saving to an account is optional|without an account/i.test(html),'Public CV Check must not advertise a guest product.');
   }
-  if(page.kind==='guide'){assert.ok(!html.includes('We could not find that guide.'));assert.ok(html.includes('BlogPosting'));assert.ok(html.includes('Sources and further reading'));}
+  if(page.kind==='guide'){assert.ok(!html.includes('We could not find that guide.'));assert.ok(!html.includes('BlogPosting'),'Guides carry one article entity, not a second BlogPosting.');assert.equal((html.match(/"@type":"Article"/g)??[]).length,1,'Exactly one Article per guide.');assert.equal((html.match(/"@type":"Organization"/g)??[]).length,1,'The Organization node appears once.');assert.equal((html.match(/"@type":"ListItem"/g)??[]).length,3,'Guide breadcrumbs are Jobvance, Guides, the guide.');assert.ok(html.includes('Sources and further reading'));}
   for(const match of html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)){
     JSON.parse(match[1]);
     const {createHash}=await import('node:crypto');
