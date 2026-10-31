@@ -228,6 +228,16 @@ describe('Automated Job Loop account entry and confirmation recovery', () => {
     expect(screen.getByText(/Automated Job Loop plans from US\$29\/month/)).toBeInTheDocument();
     expect(sdk.signUp).not.toHaveBeenCalled();
   });
+  it('gives the free CV Check entry CV Check steps, with no Job Loop price or search steps', async () => {
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fcheck']}><Auth /></MemoryRouter></AuthProvider>);
+    const steps = await screen.findByRole('list', { name: 'After creating your free CV Check account' });
+    expect(steps).toHaveTextContent('Add your CV and the job ad');
+    expect(steps).toHaveTextContent('tick that your CV is accurate, then download');
+    expect(steps).not.toHaveTextContent(/search|schedule/i);
+    expect(screen.queryByText(/Automated Job Loop plans from US\$29\/month/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'After creating your account' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Help' })).toHaveAttribute('href', '/help');
+  });
   it('tells an ad visitor what they get, what it costs and that they stay in control, before the form', async () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding&utm_source=meta']}><Auth /></MemoryRouter></AuthProvider>);
     const benefits = await screen.findByRole('list', { name:'What the Automated Job Loop does' });

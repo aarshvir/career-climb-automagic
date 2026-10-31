@@ -269,7 +269,11 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
             </>
           )}
         </div>
-        {showBenefits && <div className="ap-loop-more">
+        {showBenefits && checkEntry && <div className="ap-loop-more">
+          <p className="ap-benefits-links"><Link to="/help">Help</Link></p>
+          <details className="ap-steps"><summary>What happens after you sign up</summary><ol aria-label="After creating your free CV Check account"><li>Confirm your email if we ask</li><li>Add your CV and the job ad</li><li>Compare without AI, or choose AI-tailored changes</li><li>Review each change, tick that your CV is accurate, then download</li></ol></details>
+        </div>}
+        {showBenefits && !checkEntry && <div className="ap-loop-more">
           <p className="ap-benefits-price">Automated Job Loop plans from US$29/month.</p>
           <p className="ap-benefits-links"><Link to="/pricing">See plans</Link><Link to="/job-loop">How it works</Link></p>
           <details className="ap-steps"><summary>What happens after you sign up</summary><ol aria-label="After creating your account"><li>Add your CV and search preferences</li><li>Review your facts, then run your first search</li><li>Review your results; choose a schedule when ready</li></ol><p className="ap-steps-free">Includes 3 AI-tailored CVs a month, free.</p></details>

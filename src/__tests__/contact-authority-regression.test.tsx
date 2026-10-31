@@ -99,6 +99,17 @@ describe('contact save original account authority', () => {
     await expect(saveContactDetails(scope(), details, () => true)).rejects.toThrow(/confirm/);
   });
 
+  it('a blank phone is never sent, so it cannot clear a number already saved on the account', async () => {
+    const nameOnly = { fullName: details.fullName, phone: '' };
+    mocks.fetch.mockResolvedValueOnce(json(receiptUser(ownerA, { full_name: details.fullName, phone: details.phone })));
+    const saved = await saveContactDetails(scope(), nameOnly, () => true);
+    expect(mocks.fetch.mock.calls[0][1].body).toBe(JSON.stringify({ data: { full_name: details.fullName } }));
+    expect(saved).toMatchObject({ fullName: details.fullName, phone: details.phone });
+    mocks.fetch.mockResolvedValueOnce(json(receiptUser(ownerA, { full_name: 'Someone Else' })));
+    await expect(saveContactDetails(scope(), nameOnly, () => true)).rejects.toThrow(/confirm/);
+    await expect(saveContactDetails(scope(), { fullName: details.fullName, phone: '12345' }, () => true)).rejects.toThrow('valid mobile number');
+  });
+
   it('keeps a failed or ambiguous save retryable using the same original draft and exact current owner', async () => {
     mocks.fetch.mockRejectedValueOnce(new Error('Network interrupted')).mockResolvedValueOnce(json(receiptUser()));
     const original = scope();
