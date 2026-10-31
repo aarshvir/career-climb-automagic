@@ -7,7 +7,7 @@ import { accountName, blankContact, captureContactAuthority, checkContact, conta
 import { ContactFields } from './ContactDetails';
 import '@/pages/AccountPilot.css';
 
-/** "One last step": a signed-in account without a name or mobile number adds them here. */
+/** "One last step": a signed-in account without a name adds it here, with an optional mobile number. */
 export default function ContactForm({ user, onSaved, onEdited }: { user: User; onSaved: (receipt: ContactReceipt) => void; onEdited?: () => void }) {
   const auth = useAuth();
   const authority = useMemo(() => captureContactAuthority(auth.user, auth.session, auth.loading, auth.authError), [auth.user, auth.session, auth.loading, auth.authError]);
@@ -41,7 +41,7 @@ export default function ContactForm({ user, onSaved, onEdited }: { user: User; o
   return <section className="jv-account jv-account-utility min-h-[70vh] flex items-center justify-center p-4">
     <form className="jv-account-utility-card ap-auth-form max-w-md w-full space-y-4 p-8" onSubmit={event => void submit(event)} aria-labelledby="contact-title">
       <h1 id="contact-title" className="text-xl font-semibold">One last step</h1>
-      <p>Add your name and mobile number to continue to your Jobvance workspace.</p>
+      <p>Add your name to continue to your Jobvance workspace. A mobile number is optional.</p>
       {error && <p role="alert" className="ap-field-error">{error}</p>}
       {!ready && <p role="status">Restoring your sign-in before details can be saved…</p>}
       <ContactFields value={value} onChange={next => { onEdited?.(); setValue(next); }} disabled={busy} />

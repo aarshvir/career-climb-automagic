@@ -35,7 +35,7 @@ function open(url = adUrl, embedded = false) {
 }
 async function fill(user: ReturnType<typeof userEvent.setup>, email = 'person@example.test', password = 'Password123') {
   await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
-  await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+  await user.type(screen.getByLabelText('Mobile number (optional)'), '415 555 0100');
   if (email) await user.type(screen.getByLabelText('Email address'), email);
   if (password) await user.type(screen.getByLabelText('Password', { exact: true }), password);
 }

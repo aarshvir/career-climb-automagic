@@ -136,7 +136,7 @@ describe('protected legacy workspace return through real app routes', () => {
     await screen.findByRole('heading', { name: 'Create your Jobvance account' });
     const user = userEvent.setup();
     await user.type(screen.getByLabelText('Full name'), 'Fixture Person');
-    await user.type(screen.getByLabelText('Mobile number'), '555 555 0100');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '555 555 0100');
     await user.type(screen.getByLabelText('Email address'), owner.email);
     await user.type(screen.getByLabelText('Password'), 'FixturePassword123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));

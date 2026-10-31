@@ -15,7 +15,7 @@ import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { trackMetaSignupSubmitted } from '@/lib/meta-pixel';
 import { ContactFields } from '@/components/ContactDetails';
-import { blankContact, normalizePhone, validName } from '@/lib/contact-details';
+import { blankContact, normalizePhone, PHONE_ERROR, validName } from '@/lib/contact-details';
 import './AccountPilot.css';
 
 const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBeforeGoogle?: () => boolean }) => {
@@ -64,11 +64,13 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     const found: typeof fieldErrors = {}, summary: string[] = [];
     if (!isValidEmail(email.trim())) { found.email = 'Please enter a valid email address.'; summary.push(found.email); }
     // One validation source: validName and normalizePhone (the same checks checkContact applies) decide each field, and their results are the details sent.
-    const phone = mode === 'sign-up' ? normalizePhone(contact.phone, contact.countryCode) : null;
-    const details = mode === 'sign-up' && validName(contact.name) && phone ? { fullName: contact.name.trim(), phone } : null;
+    // The mobile number is optional: blank is fine, but a number that is typed must be valid.
+    const phoneTyped = mode === 'sign-up' && contact.phone.trim() !== '';
+    const phone = phoneTyped ? normalizePhone(contact.phone, contact.countryCode) : null;
+    const details = mode === 'sign-up' && validName(contact.name) && (phone || !phoneTyped) ? { fullName: contact.name.trim(), ...(phone && { phone }) } : null;
     if (mode === 'sign-up') {
       if (!validName(contact.name)) { found.name = 'Please enter your full name.'; summary.push(found.name); }
-      if (!phone) { found.phone = 'Please enter a valid mobile number, including the country code.'; if (!found.name) summary.push(found.phone); }
+      if (phoneTyped && !phone) { found.phone = PHONE_ERROR; if (!found.name) summary.push(found.phone); }
     }
     if (!password) { found.password = mode === 'sign-up' ? 'Choose a password to continue.' : 'Enter your password to continue.'; summary.push(found.password); }
     else if (mode === 'sign-up') {

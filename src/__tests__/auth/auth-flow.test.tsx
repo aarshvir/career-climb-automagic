@@ -153,7 +153,7 @@ describe('signup and password recovery screens', () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
     const user = userEvent.setup();
     await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
-    await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '415 555 0100');
     await user.type(screen.getByLabelText('Email address'), 'person@example.test');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
@@ -241,7 +241,7 @@ describe('Automated Job Loop account entry and confirmation recovery', () => {
     const form = screen.getByLabelText('Email address');
     expect(benefits.compareDocumentPosition(form) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByLabelText('Full name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Mobile number')).toBeInTheDocument();
+    expect(screen.getByLabelText('Mobile number (optional)')).toBeInTheDocument();
   });
   it('does not show the product explainer on an ordinary sign-in or after the confirmation email is sent', async () => {
     const { unmount } = render(<AuthProvider><MemoryRouter initialEntries={['/auth']}><Auth /></MemoryRouter></AuthProvider>);
@@ -280,14 +280,14 @@ it('continues the same signup on one deliberate click without focus-triggered lo
   sdk.signUp.mockResolvedValue({data:{user:signedIn.user,session:null},error:null});
   sdk.signInWithPassword.mockResolvedValue({data:{user:signedIn.user,session:signedIn},error:null});
   render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Routes><Route path='/auth' element={<Auth />} /><Route path='/onboarding' element={<h1>Choose your roles</h1>} /></Routes></MemoryRouter></AuthProvider>);
-  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'New Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'new-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));
+  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'New Candidate');await user.type(screen.getByLabelText('Mobile number (optional)'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'new-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));
   await screen.findByText('Check your email');await act(async()=>{window.dispatchEvent(new Event('focus'));document.dispatchEvent(new Event('visibilitychange'));});expect(sdk.signInWithPassword).not.toHaveBeenCalled();
   await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(await screen.findByText('Choose your roles')).toBeInTheDocument();expect(sdk.signInWithPassword).toHaveBeenCalledTimes(1);
 });
 it('does not reuse pending signup credentials after an SDK account change and sign-out', async () => {
   sdk.signUp.mockResolvedValue({data:{user:signedIn.user,session:null},error:null});
   render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth embedded /></MemoryRouter></AuthProvider>);
-  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'Another Candidate');await user.type(screen.getByLabelText('Mobile number'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'another-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));await screen.findByText('Check your email');
+  const user=userEvent.setup();await user.type(await screen.findByLabelText('Full name'),'Another Candidate');await user.type(screen.getByLabelText('Mobile number (optional)'),'415 555 0100');await user.type(screen.getByLabelText('Email address'),'another-candidate@example.test');await user.type(screen.getByLabelText('Password',{exact:true}),'Password123');await user.click(screen.getByRole('button',{name:'Create account'}));await screen.findByText('Check your email');
   act(()=>{sdk.listener!('SIGNED_IN',signedIn);sdk.listener!('SIGNED_OUT',null);});
   await user.click(screen.getByRole('button',{name:'I’ve confirmed my email, continue'}));expect(sdk.signInWithPassword).not.toHaveBeenCalled();expect(screen.getByLabelText('Password',{exact:true})).toHaveValue('');
 });
@@ -295,16 +295,17 @@ it('does not reuse pending signup credentials after an SDK account change and si
 describe('signup validation blocks submission and names each failing field', () => {
   const open = () => render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
 
-  it('makes no signUp call for a blank form and marks every required field invalid with its own message', async () => {
+  it('makes no signUp call for a blank form and marks every required field invalid with its own message (the mobile number is optional)', async () => {
     open();
     const user = userEvent.setup();
     await user.click(await screen.findByRole('button', { name: 'Create account' }));
     expect(sdk.signUp).not.toHaveBeenCalled();
-    const name = screen.getByLabelText('Full name'), phone = screen.getByLabelText('Mobile number'), email = screen.getByLabelText('Email address');
+    const name = screen.getByLabelText('Full name'), phone = screen.getByLabelText('Mobile number (optional)'), email = screen.getByLabelText('Email address');
     const password = screen.getByLabelText('Password', { exact: true });
-    for (const field of [name, phone, email, password]) expect(field).toHaveAttribute('aria-invalid', 'true');
+    for (const field of [name, email, password]) expect(field).toHaveAttribute('aria-invalid', 'true');
+    expect(phone).not.toHaveAttribute('aria-invalid'); expect(phone).not.toBeRequired();
     expect(screen.getByText('Please enter your full name.')).toBeInTheDocument();
-    expect(screen.getByText('Please enter a valid mobile number, including the country code.')).toBeInTheDocument();
+    expect(screen.queryByText(/valid mobile number/i)).not.toBeInTheDocument();
     expect(screen.getAllByText('Please enter a valid email address.').length).toBeGreaterThan(0);
     expect(screen.getByText('Choose a password to continue.')).toBeInTheDocument();
     expect(name).toHaveFocus();
@@ -329,7 +330,7 @@ describe('signup validation blocks submission and names each failing field', () 
     open();
     const user = userEvent.setup();
     await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
-    await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '415 555 0100');
     await user.type(screen.getByLabelText('Email address'), 'person@example.test');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'password');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
@@ -364,18 +365,42 @@ describe('round 8: free CV Check entry copy and the signup contract', () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
     const user = userEvent.setup();
     await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
-    await user.type(screen.getByLabelText('Mobile number'), '12');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '12');
     await user.type(screen.getByLabelText('Email address'), 'not-an-email');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(sdk.signUp).not.toHaveBeenCalled();
-    await user.clear(screen.getByLabelText('Mobile number')); await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.clear(screen.getByLabelText('Mobile number (optional)')); await user.type(screen.getByLabelText('Mobile number (optional)'), '415 555 0100');
     await user.clear(screen.getByLabelText('Email address')); await user.type(screen.getByLabelText('Email address'), 'person@example.test');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByText('Check your email')).toBeInTheDocument();
     expect(sdk.signUp).toHaveBeenCalledTimes(1);
     expect(sdk.signUp.mock.calls[0][0]).toMatchObject({ email: 'person@example.test', password: 'Password123' });
     expect(JSON.stringify(sdk.signUp.mock.calls[0][0])).toContain('Casey Person');
+  });
+  it('signs up with only a name, email and password, sending no phone at all', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Email address'), 'no-phone@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(await screen.findByText('Check your email')).toBeInTheDocument();
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+    expect(sdk.signUp.mock.calls[0][0].options.data).toEqual({ full_name: 'Casey Person' });
+  });
+  it('still rejects a mobile number that is typed but invalid, and names the field', async () => {
+    render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup']}><Auth /></MemoryRouter></AuthProvider>);
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '12');
+    await user.type(screen.getByLabelText('Email address'), 'bad-phone@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Mobile number (optional)')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getAllByText('Please enter a valid mobile number with the country code, or leave it blank.').length).toBeGreaterThan(0);
   });
   it('does not spend rate-limit attempts on blank or invalid submits: three blank submits, then a valid one, still signs up', async () => {
     sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
@@ -387,7 +412,7 @@ describe('round 8: free CV Check entry copy and the signup contract', () => {
     expect(sdk.signUp).not.toHaveBeenCalled();
     expect(screen.queryByText(/Too many attempts/)).not.toBeInTheDocument();
     await user.type(screen.getByLabelText('Full name'), 'Casey Person');
-    await user.type(screen.getByLabelText('Mobile number'), '415 555 0100');
+    await user.type(screen.getByLabelText('Mobile number (optional)'), '415 555 0100');
     await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByText('Check your email')).toBeInTheDocument();
