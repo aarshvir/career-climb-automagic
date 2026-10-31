@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { adAttributionQuery, adsMeasurementAllowed, isMeasuredPath, META_PIXEL_ID, noteAccountForMeta, setAdsOptOut, trackMetaPage, trackMetaSignupSubmitted } from '@/lib/meta-pixel';
+import { adAttributionQuery, adsMeasurementAllowed, isMeasuredPath, META_PIXEL_ID, noteAccountForMeta, setAdsOptOut, setUkAdsConsent, trackMetaPage, trackMetaSignupSubmitted } from '@/lib/meta-pixel';
 import { registrationEventId } from '../../supabase/functions/_shared/meta-conversions';
 
 const invoke = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: { sent: false }, error: null })));
@@ -128,6 +128,20 @@ describe('Meta Pixel measurement boundaries', () => {
     Object.defineProperty(navigator, 'globalPrivacyControl', { value: undefined, configurable: true });
     vi.restoreAllMocks(); zone('Europe/Berlin');
     expect(adsMeasurementAllowed()).toBe(false);
+  });
+
+  it('requires UK consent and still excludes other European zones even with a UK choice saved', () => {
+    for (const uk of ['Europe/London', 'Europe/Belfast']) {
+      vi.restoreAllMocks(); zone(uk);
+      localStorage.clear();
+      expect(adsMeasurementAllowed()).toBe(false);
+      expect(setUkAdsConsent(true)).toBe(true);
+      expect(adsMeasurementAllowed()).toBe(true);
+    }
+    for (const other of ['Europe/Dublin', 'Europe/Paris', 'Europe/Londonderry', 'Atlantic/Canary']) {
+      vi.restoreAllMocks(); zone(other);
+      expect(adsMeasurementAllowed()).toBe(false);
+    }
   });
 
   it('never loads outside production builds', () => {

@@ -9,9 +9,14 @@ import { cvVariantSessionIdentity } from '@/lib/loop-cv-variant-recovery';
 
 export const META_PIXEL_ID = '1912745166266087';
 const OPT_OUT_KEY = 'jobvance_ads_opt_out_v1';
+const UK_CONSENT_KEY = 'jobvance_meta_uk_consent_v1';
+const CONSENT_LIFETIME = 180 * 24 * 60 * 60 * 1000;
+export const ADS_MEASUREMENT_CHANGED = 'jobvance:ads-measurement-changed';
+export const META_CHECKOUT_PENDING_KEY = 'jobvance_meta_checkout_pending_v1';
+let privacyRevision = 0;
 const SENT_KEY = 'jobvance_meta_registrations_v1';
 const NEW_ACCOUNT_WINDOW = 24 * 60 * 60 * 1000;
-type RegistrationScope = { owner: string; sessionId: string | null; epoch: number; key: string };
+type RegistrationScope = { owner: string; sessionId: string | null; epoch: number; key: string; privacy: string };
 let authority = { owner: null as string | null, sessionId: null as string | null, epoch: 0 };
 let pendingRegistration: RegistrationScope | null = null;
 let pageOptOut: boolean | undefined;
@@ -25,10 +30,11 @@ function revokePending(): void {
   // Old deployments stored a pending hash. It grants no authority after refresh.
   try { sessionStorage.removeItem('jobvance_meta_registration_pending_v1'); } catch { /* no recovery */ }
 }
-const current = (scope: RegistrationScope) => authority.owner === scope.owner && authority.sessionId === scope.sessionId && authority.epoch === scope.epoch && adsMeasurementAllowed();
+const current = (scope: RegistrationScope) => authority.owner === scope.owner && authority.sessionId === scope.sessionId && authority.epoch === scope.epoch && scope.privacy === adsMeasurementAuthority() && adsMeasurementAllowed();
 
 const measuredPaths = new Set(['/', '/onboarding', '/auth', '/job-loop', '/pricing', '/how-it-works', '/faq', '/about', '/contact', '/privacy', '/terms', '/refund', '/help', '/guides', '/walkthroughs', '/for-students', '/for-mba', '/for-career-switchers']);
-const europeanZones = /^(Europe\/|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
+// The United Kingdom is an ad market (Europe/London, Europe/Belfast); every other European zone stays excluded.
+const europeanZones = /^(Europe\/(?!(London|Belfast)$)|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
 
 type Fbq = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push: Fbq; loaded: boolean; version: string; disablePushState?: boolean; jobvanceLastPage?: string; jobvanceSignupAttempts?: string[] };
 declare global { interface Window { fbq?: Fbq; _fbq?: Fbq } interface Navigator { globalPrivacyControl?: boolean } }
@@ -76,17 +82,69 @@ export function adsOptedOut(): boolean {
   try { return localStorage.getItem(OPT_OUT_KEY) === '1'; } catch { return pageOptOut !== false; }
 }
 
-/** Visitors in Europe, with a do-not-share browser signal or a saved opt-out are never measured. */
+/** The timezone is a conservative device signal, not verified location. */
+export function isUkAdsVisit(): boolean {
+  try { return ['Europe/London', 'Europe/Belfast'].includes(Intl.DateTimeFormat().resolvedOptions().timeZone); } catch { return false; }
+}
+
+/** A missing, unreadable, expired or malformed choice never grants permission. */
+export function ukAdsChoice(now = Date.now()): 'accepted' | 'rejected' | 'unknown' {
+  try {
+    const raw = localStorage.getItem(UK_CONSENT_KEY);
+    if (!raw || raw.length > 300) return 'unknown';
+    const saved = JSON.parse(raw);
+    return saved?.version === 1 && ['accepted', 'rejected'].includes(saved.choice)
+      && Number.isFinite(saved.at) && saved.at <= now && now - saved.at < CONSENT_LIFETIME
+      && typeof saved.revision === 'string' && /^[a-f\d-]{36}$/i.test(saved.revision) ? saved.choice : 'unknown';
+  } catch { return 'unknown'; }
+}
+
+/** Binds asynchronous notices to this exact choice, including changes in another tab. Never sent or logged. */
+export function adsMeasurementAuthority(): string {
+  try { return `${privacyRevision}:${localStorage.getItem(UK_CONSENT_KEY) ?? ''}:${localStorage.getItem(OPT_OUT_KEY) ?? ''}`; } catch { return `${privacyRevision}:unavailable`; }
+}
+
+/** GPC and opt-out always win; UK devices additionally require prior advertising consent. */
 export function adsMeasurementAllowed(): boolean {
   if (typeof window === 'undefined' || navigator.globalPrivacyControl === true || adsOptedOut()) return false;
-  try { const zone = Intl.DateTimeFormat().resolvedOptions().timeZone; return !!zone && !europeanZones.test(zone); } catch { return false; }
+  try { const zone = Intl.DateTimeFormat().resolvedOptions().timeZone; return !!zone && !europeanZones.test(zone) && (!['Europe/London', 'Europe/Belfast'].includes(zone) || ukAdsChoice() === 'accepted'); } catch { return false; }
+}
+
+/** Revoke old work before notifying UI consumers, including after a cross-tab privacy change. */
+export function refreshAdsMeasurement(): void {
+  privacyRevision += 1;
+  revokePending();
+  if (!adsMeasurementAllowed()) {
+    try { localStorage.removeItem(META_CHECKOUT_PENDING_KEY); } catch { /* no new notices can run */ }
+  }
+  try { window.fbq?.('consent', adsMeasurementAllowed() ? 'grant' : 'revoke'); } catch { /* a third-party error never blocks withdrawal */ }
+  window.dispatchEvent(new Event(ADS_MEASUREMENT_CHANGED));
+}
+
+export function isAdsChoiceStorageKey(key: string | null): boolean {
+  return key === null || key === UK_CONSENT_KEY || key === OPT_OUT_KEY;
 }
 
 export function setAdsOptOut(optOut: boolean): void {
   pageOptOut = optOut;
-  revokePending();
   try { if (optOut) localStorage.setItem(OPT_OUT_KEY, '1'); else localStorage.removeItem(OPT_OUT_KEY); } catch { /* the choice applies to this page only */ }
-  window.fbq?.('consent', adsMeasurementAllowed() ? 'grant' : 'revoke');
+  refreshAdsMeasurement();
+}
+
+/** Only called by the informed UK Allow/Reject controls, never by signup, ad clicks or payment. */
+export function setUkAdsConsent(accepted: boolean): boolean {
+  if (!isUkAdsVisit() || accepted && navigator.globalPrivacyControl === true) return false;
+  try {
+    localStorage.setItem(UK_CONSENT_KEY, JSON.stringify({ version: 1, choice: accepted ? 'accepted' : 'rejected', at: Date.now(), revision: crypto.randomUUID() }));
+    if (accepted) localStorage.removeItem(OPT_OUT_KEY); else localStorage.setItem(OPT_OUT_KEY, '1');
+    pageOptOut = !accepted;
+  } catch {
+    pageOptOut = true;
+    refreshAdsMeasurement();
+    return !accepted;
+  }
+  refreshAdsMeasurement();
+  return !accepted || adsMeasurementAllowed();
 }
 
 function ensurePixel(): Fbq | null {
@@ -153,7 +211,7 @@ function flushRegistration(fbq: Fbq): void {
   sendServerRegistration(scope);
 }
 
-export const metaCookie = (name: '_fbp' | '_fbc') => document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1);
+export const metaCookie = (name: '_fbp' | '_fbc') => adsMeasurementAllowed() ? document.cookie.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1) : undefined;
 
 /** Asks the meta-conversions function for the server copy once Meta has set its cookies. */
 function sendServerRegistration(scope: RegistrationScope, delay = 2000): void {
@@ -183,7 +241,7 @@ export async function noteAccountForMeta(user: { id: string; created_at?: string
   if (!user?.created_at || !adsMeasurementAllowed()) return;
   const created = Date.parse(user.created_at);
   if (!Number.isFinite(created) || now - created > NEW_ACCOUNT_WINDOW || created - now > 5 * 60 * 1000) return;
-  const original = { owner: user.id, sessionId, epoch: authority.epoch, key: '' };
+  const original = { owner: user.id, sessionId, epoch: authority.epoch, key: '', privacy: adsMeasurementAuthority() };
   const key = await accountKey(user.id);
   if (!current(original) || sentKeys().includes(key)) return;
   pendingRegistration = { ...original, key };

@@ -13,6 +13,7 @@ import ProductPage from "@/pages/ProductPage";
 import RouteNavigation from '@/components/RouteNavigation';
 import MetaPixelPages from '@/components/MetaPixelPages';
 import MetaCommerceReporter from '@/components/MetaCommerceReporter';
+import UkAdsConsent from '@/components/UkAdsConsent';
 import AnalyticsPages from '@/components/AnalyticsPages';
 import { ContactGate } from '@/components/ContactDetails';
 import SiteShareMetadata from '@/components/SiteShareMetadata';
@@ -102,6 +103,7 @@ export default function MvpApp() {
                 <MetaCommerceReporter />
                 <AnalyticsPages />
                 <SiteChrome position="header" />
+                <UkAdsConsent />
                 <div id="main-content" tabIndex={-1} className="outline-none">
                 <Suspense
                   fallback={
