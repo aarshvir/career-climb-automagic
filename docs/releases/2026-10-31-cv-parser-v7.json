@@ -1,0 +1,128 @@
+{
+  "date": "2026-10-31",
+  "timezone": "Asia/Dubai",
+  "site": "https://jobvance.io",
+  "status": "succeeded",
+  "runtimeSource": "4f386103bb56825ea78d2eaece7db9d9cd251bcb",
+  "fullMergeTree": "0615c48c3793b7b7db7681d5a95f14273d8094d5",
+  "pullRequest": "https://github.com/aarshvir/career-climb-automagic/pull/45",
+  "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+  "authorization": "Direct PR45 review/release handoff and ongoing bounded functional repair/integration authority.",
+  "source": {
+    "initialHead": "ae5028459b81f6f14944ab02681aff34ab6007fb",
+    "integratedMain": "b85ee658fc66d5f7d0d1296cd61ba8d9abadca53",
+    "changed": [
+      "src/lib/cv-evidence.ts",
+      "src/__tests__/lib/vacancy-real-listing-structure.test.ts",
+      "src/__tests__/lib/vacancy-company-heading-regression.test.ts"
+    ],
+    "productionFiles": 1,
+    "testFiles": 2
+  },
+  "behavior": {
+    "method": "english-literal-evidence-v7",
+    "change": "Named employer and additional pay/perks headings omitted as context, verbatim; explicit applicant criteria, duties, conditions and deadlines retained. Applicant headings are case-insensitive; indented/emoji headings end preceding bullets.",
+    "rootCorrections": "Three classes: criteria omitted inside company sections (including ordinary candidate/duty clauses); uppercase applicant heading classified as employer; indented company headings absorbed into prior bullets.",
+    "scope": "English literal comparison, exact UTF-16 quotes,40-item cap and manual judgment retained. Method changes existing review fingerprint. No save/auth/approval handler change."
+  },
+  "validation": {
+    "ci": {
+      "run": 41234852806,
+      "job": 124636351309,
+      "head": "4f386103bb56825ea78d2eaece7db9d9cd251bcb",
+      "conclusion": "success",
+      "allStepsPassed": true,
+      "tests": 3792,
+      "files": 213,
+      "countEvidence": [
+        "2026-10-31T19:34:37.9630876Z found 0 vulnerabilities",
+        "2026-10-31T19:39:57.9098283Z  Test Files  213 passed (213)",
+        "2026-10-31T19:39:57.9132918Z       Tests  3792 passed (3792)",
+        "2026-10-31T19:40:11.6238953Z found 0 vulnerabilities"
+      ]
+    },
+    "local": {
+      "tests": 3792,
+      "files": 213,
+      "focusedTests": 78,
+      "focusedFiles": 3,
+      "independentMaintainedRegressionCases": 16,
+      "firstRed": "9 failed/3 passed at initial 12 cases; four additional existing-review examples failed before correction",
+      "finalRegressionCases": "16 pass",
+      "typeScript": "passed",
+      "lintErrors": 0,
+      "lintInheritedWarnings": 50,
+      "sourceWhitespace": "passed",
+      "lintScope": "Local lint preceded the final two regex additions; exact final-head CI lint also passes."
+    },
+    "build": {
+      "pages": 37,
+      "guides": 20,
+      "hostingGroups": 12,
+      "social": "37page metadata/two1200x630PNG routes pass; PNG bytes unchanged",
+      "compressedBytes": 2185521,
+      "limitBytes": 3145728,
+      "workerSha256": "6e764f473a03b33ba70c13db9b1776edbac09405864d7671a6468961080f5fc7"
+    },
+    "limits": "No fresh authenticated hosted /check paste, browser/device/customer/AI/provider/email/checkout/payment acceptance. Initial author three-public-ad counts 24/20/24 parsed and11/13/13 manual were not independently repeated on final source; Claude must repeat proof before ledger claims. No general accuracy, ATS/hiring/NPS/conversion outcome claim.",
+    "live": {
+      "at": "2026-10-31T19:42:28.180Z",
+      "source": "4f386103bb56825ea78d2eaece7db9d9cd251bcb",
+      "javascriptExecuted": false,
+      "adTaggedQa": false,
+      "paths": 159,
+      "rawExact": 113,
+      "recognizedCloudflareTail": 46,
+      "passed": 159,
+      "allStatus200": true,
+      "securityHeadersMatch": true,
+      "js": 68,
+      "css": 17,
+      "methodAssets": [
+        {
+          "path": "/assets/CvCheck-NJJQyoxs.js",
+          "sha256": "296a751a04b7970623a621b159acaffe23d66f0be52409e07f135919daf4977d",
+          "liveRawExact": true,
+          "method": "english-literal-evidence-v7"
+        }
+      ],
+      "limits": "113raw exact/46HTML application exact except recognized appended CloudflareJSDtail; not rawHTMLparity or authenticated execution."
+    }
+  },
+  "boundaries": {
+    "protectedSourceObjects": "Whole Supabase/Auth/optional-phone/ContactGate/Pixel/commerce/UKconsent/home/meta/CSP/package/lock/CI and all non-parser production source unchanged versus current main.",
+    "backendTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "commerceMigration": "20261030041314 already applied, never replayed",
+    "metaConversionsVersion": 3,
+    "mutations": "No backend/schema/function/ad/funding/provider/payment/permission/outreach/purchase change."
+  },
+  "rollback": {
+    "savedVersion": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_190ea49da944819190c2960ccf07eefe",
+    "source": "fd546b671c7040468f93b3b91c86f940172e24b9",
+    "limits": "Frontend rollback only; no external/financial/customer-data restoration implied.",
+    "localTag": "jobvance-before-cv-parser-v7-2026-10-31",
+    "tagPushed": false
+  },
+  "measurement": {
+    "lastReadAt": "2026-10-31T19:36:49.84694Z",
+    "day": "2026-10-31",
+    "zones": [
+      "Asia/Dubai",
+      "UTC"
+    ],
+    "metaTaggedSessions": 107,
+    "purchaseTaggedSessions": 68,
+    "classifiedSignups": 0,
+    "liveProviderCheckouts": 0,
+    "livePaidRows": 0,
+    "matchedPurchaseSent": 0,
+    "notes": "No new daily threshold; no shared conversion line; sessions are not verified unique people. Preserve release boundaries and no causal lift claim."
+  },
+  "handoff": "After publication root bounded baton finishes; Claude resumes sole ongoing source writer and owns final proof/live readback/ledger update. Shared/GitHub handoff is not native chat acknowledgement.",
+  "publicVersion": 71,
+  "githubMergeSource": "9e5c6bf3d1ac7e05319b8dce6c8ab342c7706a2c",
+  "mergeTreeEqualsReviewedHead": true,
+  "versionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_8e9135a9496c819197a7a31aac651740",
+  "deploymentId": "appgdep_6ae644721c3c8191ad60164bbdb3f53e",
+  "deployedAt": "2026-10-31T19:42:02.490973+00:00"
+}
