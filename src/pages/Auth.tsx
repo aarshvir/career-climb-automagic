@@ -198,7 +198,16 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           {!embedded && <p className="ap-eyebrow ap-eyebrow--form"><span className="ap-dot" aria-hidden="true" />{loopEntry ? 'Your Automated Job Loop' : 'Your Jobvance workspace'}</p>}
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
           {!showBenefits && <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>}
-          {showBenefits && <div className="ap-loop-entry">
+          {/* A visitor from the free CV Check ad is told about the CV Check, never the Job Loop's outcome list. */}
+          {showBenefits && checkEntry && <div className="ap-loop-entry">
+            <ul className="ap-benefits" aria-label="What the free CV Check does">
+              <li><Check size={18} aria-hidden="true" /><span><strong>Compare your CV with a job ad.</strong><span className="ap-benefit-detail"> See which requirements it shows.</span></span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Review every change.</strong><span className="ap-benefit-detail"> With AI, each change sits beside your original.</span></span></li>
+              <li><Check size={18} aria-hidden="true" /><span><strong>Download after you approve.</strong><span className="ap-benefit-detail"> You tick that your CV is accurate first.</span></span></li>
+            </ul>
+            <p className="ap-benefits-free">Your account is free. Compare without AI has no limit. AI tailoring is 3 CVs a month.</p>
+          </div>}
+          {showBenefits && !checkEntry && <div className="ap-loop-entry">
             <ul className="ap-benefits" aria-label="What the Automated Job Loop does">
               <li><Check size={18} aria-hidden="true" /><span><strong>Roles matched to your CV.</strong><span className="ap-benefit-detail"> Each run searches the job boards we cover.</span></span></li>
               <li><Check size={18} aria-hidden="true" /><span><strong>A tailored CV for each role.</strong><span className="ap-benefit-detail"> Built only from facts you confirm.</span></span></li>
