@@ -1,0 +1,136 @@
+{
+  "release": "signup-navigation",
+  "publicVersion": 74,
+  "publishedAt": "2026-11-01T13:28:27.786322Z",
+  "publicUrl": "https://jobvance.io",
+  "source": "295ed93830bdf7494691b8244f1bc433d920b14b",
+  "pr": 51,
+  "merge": "ab423d430f5d9260ac9bf29c238f08b7eae71851",
+  "mergeTree": "9ce7287dbcdaa4d6ac8fb34dc7f67155c4017d97",
+  "fullMergeTreeMatchesCandidate": true,
+  "site": {
+    "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_2bbdac7055448191aa61ae4b45114ce2",
+    "deploymentId": "appgdep_6ae73e68b6788191a99e312d4a8abddb",
+    "status": "succeeded",
+    "audience": "public",
+    "customDomain": "jobvance.io"
+  },
+  "problem": "Header Sign in changed the route but left Create account mounted and replaced the selected CV Check/onboarding destination with /loop. The in-app external-browser copy link also dropped existing bounded campaign tags.",
+  "changes": [
+    "Synchronize standalone Auth with actual same-route URL navigation; clear prior password, pending confirmation and stale UI continuations. Embedded private-check auth stays mounted.",
+    "Keep the existing allow-listed CV Check/onboarding/selected return path and permitted attribution when switching to sign-in.",
+    "Copy only the existing allowed attribution fields with the safe destination/mode; omit auth codes, arbitrary query values and fragments."
+  ],
+  "changedFiles": [
+    "src/pages/Auth.tsx",
+    "src/components/layout/MvpHeader.tsx",
+    "src/__tests__/auth/auth-flow.test.tsx"
+  ],
+  "validation": {
+    "ci": {
+      "run": 41310742036,
+      "job": 124860388422,
+      "head": "295ed93830bdf7494691b8244f1bc433d920b14b",
+      "allStepsPassed": true,
+      "fullAuditGateRetained": true,
+      "pinnedSdkAndFrozenDenoChecksRetained": true
+    },
+    "tests": {
+      "passed": 3816,
+      "files": 217,
+      "newGuardCases": 8,
+      "authFileCases": 42,
+      "baselineNewCasesReproducedFailing": 4
+    },
+    "typeScriptErrors": 0,
+    "lint": {
+      "errors": 0,
+      "inheritedWarnings": 50
+    },
+    "npmAuditVulnerabilities": 0,
+    "build": {
+      "publicPages": 38,
+      "guideArticles": 20,
+      "structuredDataHashes": 38,
+      "compressedBytes": 2203232,
+      "limitBytes": 3145728,
+      "hostingChecksPassed": true,
+      "socialPreviewPassed": true
+    },
+    "liveHttp": {
+      "at": "2026-11-01T13:30:04.132Z",
+      "paths": 164,
+      "passed": 164,
+      "rawExact": 118,
+      "applicationExactHtmlWithRecognizedCloudflareTail": 46,
+      "securityHeadersMatch": true,
+      "rawHtmlParity": false
+    },
+    "browser": {
+      "localProductionWorker": {
+        "desktopWidth": 1280,
+        "phoneWidths": [
+          390,
+          320
+        ],
+        "sameUrlModeSwitchPassed": true,
+        "noHorizontalOverflow": true,
+        "inputFontPixels": 16
+      },
+      "live": {
+        "width": 390,
+        "cvCheckHeaderSignIn": true,
+        "onboardingHeaderSignIn": true,
+        "selectedDestinationsRetained": true,
+        "noHorizontalOverflow": true,
+        "emptyUserSignupTabRefreshed": true
+      },
+      "limits": "Normal anonymous navigation only. No live form/account/Google/email/AI/provider/checkout/payment submission and no ad-tagged QA. SDK/provider/confirmation cases are mocked; no real device, keyboard, customer, positive Meta or conversion-lift certification."
+    }
+  },
+  "boundaries": {
+    "supabaseTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "allOtherTrackedObjectsEqualBase": "21722ced8ddc9b45231fa8f8235f818a2b70c737",
+    "backendSchemaFunctionDeployment": false,
+    "migrationReplay": false,
+    "metaConversionsVersion": 3,
+    "commerceMigrationRetained": "20261030041314",
+    "privacyPixelCommerceContactBillingCspDependenciesCiUnchanged": true
+  },
+  "measurement": {
+    "readAt": "2026-11-01 13:30:04.941903+00",
+    "bothDubaiAndUtcDay": "2026-11-01",
+    "metaTaggedSessions": 18,
+    "oldExactEntries": 15,
+    "strictPurchaseTaggedSessions": 3,
+    "classifiedSignups": 0,
+    "liveProviderCheckouts": 0,
+    "classifiedLivePaidRows": 0,
+    "eligibleFirstCycles": 0,
+    "matchedPurchaseClaims": 0,
+    "matchedPurchaseSent": 0,
+    "commerceTotals": 0,
+    "newReleaseCutoff": "2026-11-01T13:28:27.786322Z",
+    "postReleaseAdSessionBaseline": 0,
+    "postReleaseBaselineReadAt": "2026-11-01 13:34:05.942821+00",
+    "publicCvCheckEntryBaseline": {
+      "cutoff": "2026-11-01 13:28:27.786322+00",
+      "read_at": "2026-11-01 13:34:07.717524+00",
+      "pooled_cv_check_link_sessions": 0,
+      "cv_check_page_sessions": 0,
+      "same_session_auth_after_landing": 0,
+      "first_touch_linked_new_accounts": 0,
+      "meta_cv_check_page_sessions": 0
+    },
+    "limits": "Captured sessions/tags are not verified people or actual campaign/adset attribution. All18 observed ad sessions precede v74; no causal diagnosis of all dropoff or lift."
+  },
+  "rollback": {
+    "savedVersion": 73,
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_4a5a29d0365481918137cf4ca67441a2",
+    "source": "c4eaebf28ca8a4219d778ec2b859466e98f2de63",
+    "limits": "Frontend rollback only, no restoration of external/customer/financial events or data; retain applied additive schema/receipts."
+  },
+  "privateEvidence": "jobvance-repair-evidence/signup-navigation-2026-11-01",
+  "baton": "Codex bounded repair/review/release FINISHED; Claude resumes sole ongoing writer. Future PRs reconcile current main preserving all local commits."
+}
