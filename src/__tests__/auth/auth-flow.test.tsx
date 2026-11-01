@@ -1,7 +1,7 @@
 import { act, render, renderHook, screen, waitFor, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import Auth from '@/pages/Auth';
@@ -11,9 +11,12 @@ import AuthCallback from '@/pages/AuthCallback';
 import { rememberLoopReturn, peekLoopReturn } from '@/lib/account-return';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { clearUserAuthCache } from '@/utils/authUtils';
+import MvpHeader from '@/components/layout/MvpHeader';
 
 vi.unmock('@/contexts/AuthContext');
 vi.unmock('react-router-dom');
+
+vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ clear: vi.fn() }) }));
 
 const sdk = vi.hoisted(() => ({
   configurationError: null as string | null,
@@ -427,5 +430,95 @@ describe('round 8: free CV Check entry copy and the signup contract', () => {
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByText('Check your email')).toBeInTheDocument();
     expect(sdk.signUp).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('same-route account navigation', () => {
+  function entry(path = '/auth?mode=signup&next=%2Fcheck') {
+    return <AuthProvider><MemoryRouter initialEntries={[path]}><MvpHeader /><Link to="/auth?next=%2Fcheck">Use existing account</Link><Auth /></MemoryRouter></AuthProvider>;
+  }
+  it('changes to the sign-in form when another link navigates within /auth', async () => {
+    render(entry());
+    await screen.findByRole('heading', { name: 'Create your Jobvance account' });
+    await userEvent.setup().click(screen.getByRole('link', { name: 'Use existing account' }));
+    expect(await screen.findByRole('heading', { name: 'Sign in to Jobvance' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Full name')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveValue('');
+    expect(sdk.signInWithPassword).not.toHaveBeenCalled();
+  });
+  it('keeps the CV Check destination and allowed campaign tags in the header sign-in link', async () => {
+    render(entry('/auth?mode=signup&next=%2Fcheck&utm_source=meta&utm_medium=paid_social&utm_campaign=fixture-campaign&code=synthetic-code'));
+    await screen.findByRole('heading', { name: 'Create your Jobvance account' });
+    const link = screen.getAllByRole('link', { name: /^Sign in$/ })[0];
+    const url = new URL(link.getAttribute('href')!, 'https://jobvance.io');
+    expect(url.searchParams.get('next')).toBe('/check');
+    expect(url.searchParams.get('utm_campaign')).toBe('fixture-campaign');
+    expect(url.searchParams.has('code')).toBe(false);
+    await userEvent.setup().click(link);
+    expect(await screen.findByRole('heading', { name: 'Sign in to Jobvance' })).toBeInTheDocument();
+  });
+  it('does not revive a pending signup confirmation after navigating to sign in', async () => {
+    let finish!: (value: unknown) => void;
+    sdk.signUp.mockReturnValue(new Promise(resolve => { finish = resolve; }));
+    render(entry());
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Fixture Person');
+    await user.type(screen.getByLabelText('Email address'), 'navigation-fixture@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'FixturePassword123');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await waitFor(() => expect(sdk.signUp).toHaveBeenCalledOnce());
+    await user.click(screen.getByRole('link', { name: 'Use existing account' }));
+    await act(async () => { finish({ data: { user: signedIn.user, session: null }, error: null }); });
+    expect(await screen.findByRole('heading', { name: 'Sign in to Jobvance' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /confirmed my email/ })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveValue('');
+    expect(sdk.signInWithPassword).not.toHaveBeenCalled();
+  });
+  it('clears an already displayed signup continuation when navigating to sign in', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    render(entry());
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Fixture Person');
+    await user.type(screen.getByLabelText('Email address'), 'confirmed-navigation@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'FixturePassword123');
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await screen.findByRole('button', { name: /confirmed my email/ });
+    await user.click(screen.getByRole('link', { name: 'Use existing account' }));
+    expect(await screen.findByRole('heading', { name: 'Sign in to Jobvance' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /confirmed my email/ })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveValue('');
+    expect(sdk.signInWithPassword).not.toHaveBeenCalled();
+  });
+  it.each([
+    ['/auth?mode=signup&next=https%3A%2F%2Foutside.invalid', '/loop'],
+    ['/auth?mode=signup&next=%2Fcheck%3Fcode%3Dsynthetic-code', '/loop'],
+    ['/auth?mode=signup&next=%2Fpricing%3Fplan%3Dsprint_7d', '/pricing?plan=sprint_7d'],
+  ])('keeps the bounded return contract for %s', async (path, destination) => {
+    render(entry(path));
+    await screen.findByRole('heading', { name: 'Create your Jobvance account' });
+    const url = new URL(screen.getAllByRole('link', { name: /^Sign in$/ })[0].getAttribute('href')!, 'https://jobvance.io');
+    expect(url.searchParams.get('next')).toBe(destination);
+    expect(sdk.signInWithOAuth).not.toHaveBeenCalled();
+  });
+  it('copies the bounded destination and campaign tags for an external browser, without auth tokens', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Instagram 321.0');
+    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
+    try {
+      render(entry('/auth?mode=signup&next=%2Fcheck&utm_source=meta&utm_medium=paid_social&utm_campaign=fixture-campaign&fbclid=fixture-click&code=synthetic-code&access_token=synthetic-token#private-fragment'));
+      await user.click(await screen.findByRole('button', { name: 'Copy sign-in link' }));
+      await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+      const copied = new URL(writeText.mock.calls[0][0]);
+      expect(copied.pathname).toBe('/auth');
+      expect(copied.searchParams.get('mode')).toBe('signup');
+      expect(copied.searchParams.get('next')).toBe('/check');
+      expect(copied.searchParams.get('utm_campaign')).toBe('fixture-campaign');
+      expect(copied.searchParams.get('fbclid')).toBe('fixture-click');
+      expect(copied.searchParams.has('code')).toBe(false);
+      expect(copied.searchParams.has('access_token')).toBe(false);
+      expect(copied.hash).toBe('');
+      expect(sdk.signInWithOAuth).not.toHaveBeenCalled();
+      expect(sdk.signUp).not.toHaveBeenCalled();
+    } finally { vi.restoreAllMocks(); }
   });
 });

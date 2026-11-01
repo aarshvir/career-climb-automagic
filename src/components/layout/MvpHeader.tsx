@@ -5,6 +5,8 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 import { BRAND_MARK } from '@/lib/brand-mark';
+import { accountDestination } from '@/lib/account-return';
+import { adAttributionQuery } from '@/lib/meta-pixel';
 
 const brandInner = <>
   <span className="jv-brand-mark" aria-hidden="true"><svg viewBox={BRAND_MARK.viewBox} fill="none"><g transform={BRAND_MARK.transform} stroke="currentColor" strokeWidth={BRAND_MARK.variants.small.stroke} strokeLinecap="round" strokeLinejoin="round"><path d={BRAND_MARK.hook} /><path d={BRAND_MARK.bar} /><circle cx={BRAND_MARK.dot.cx} cy={BRAND_MARK.dot.cy} r={BRAND_MARK.variants.small.dotRadius + BRAND_MARK.knockoutExtra} fill="var(--mark-tile)" stroke="none" /><circle cx={BRAND_MARK.dot.cx} cy={BRAND_MARK.dot.cy} r={BRAND_MARK.variants.small.dotRadius} fill="var(--jv-signal)" stroke="none" /></g></svg></span>
@@ -104,8 +106,13 @@ export default function MvpHeader() {
   const signedOut = !pending && !user;
   // On the pages that already are the start (the ad landing form and the sign-in screens) the header keeps only Sign in.
   const onEntry = /^\/(onboarding|auth)(\/|$)/.test(location.pathname);
+  // Switching from signup to sign-in keeps the task the visitor chose. Only
+  // allow-listed destinations and the existing bounded campaign tags survive.
+  const signInDestination = location.pathname === '/onboarding' ? '/onboarding'
+    : location.pathname === '/auth' ? accountDestination(new URLSearchParams(location.search).get('next')) : '/loop';
+  const signInPath = `/auth?next=${encodeURIComponent(signInDestination)}${onEntry ? adAttributionQuery(location.search) : ''}`;
   const signedOutActions = (hold: boolean) => <>
-    <Link to="/auth?next=%2Floop" className="jv-btn jv-btn--ghost jv-btn--sm" tabIndex={hold ? -1 : undefined}>Sign in</Link>
+    <Link to={signInPath} className="jv-btn jv-btn--ghost jv-btn--sm" tabIndex={hold ? -1 : undefined}>Sign in</Link>
     {!onEntry && <Link to="/onboarding" className="jv-btn jv-btn--primary jv-btn--sm" tabIndex={hold ? -1 : undefined}>Start my search</Link>}
   </>;
   const account = pending ? <>
