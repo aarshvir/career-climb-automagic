@@ -13,7 +13,7 @@ import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security'
 import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
 import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
-import { trackMetaSignupSubmitted } from '@/lib/meta-pixel';
+import { adAttributionQuery, trackMetaSignupSubmitted } from '@/lib/meta-pixel';
 import { ContactFields } from '@/components/ContactDetails';
 import { blankContact, normalizePhone, PHONE_ERROR, validName } from '@/lib/contact-details';
 import './AccountPilot.css';
@@ -23,7 +23,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, loading: authLoading, authError, configurationError, signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth();
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>(searchParams.get('mode') === 'signup' ? 'sign-up' : 'sign-in');
+  const requestedMode = searchParams.get('mode') === 'signup' ? 'sign-up' : 'sign-in';
+  const [mode, setMode] = useState<'sign-in' | 'sign-up'>(requestedMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [contact, setContact] = useState(() => blankContact());
@@ -46,6 +47,16 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const alive = useRef(true), continuing = useRef(false), attempt = useRef(0);
   useEffect(() => { alive.current = true; return () => { alive.current = false; pending.current = null; attempt.current++; }; }, []);
   useEffect(() => { if (user || authLoading || authError) { pending.current = null; attempt.current++; } }, [user, authLoading, authError]);
+
+  // Router links can change the query without remounting /auth. Honor that new
+  // screen and invalidate the previous form's password/confirmation continuation.
+  // Embedded auth belongs to its mounted private check and does not navigate.
+  useEffect(() => {
+    if (embedded) return;
+    pending.current = null; attempt.current++;
+    setMode(requestedMode); setPassword(''); setConfirmationSent(false);
+    setFieldErrors({}); setError(''); setCopied(false);
+  }, [embedded, location.key, location.search, requestedMode]);
 
   useEffect(() => {
     if (user && !authLoading && !embedded) navigate(accountDestination(searchParams.get('next')), { replace: true });
@@ -156,7 +167,9 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     const target = new URL('/auth', window.location.origin);
     target.searchParams.set('next', accountDestination(searchParams.get('next')));
     if (mode === 'sign-up') target.searchParams.set('mode', 'signup');
-    try { await navigator.clipboard.writeText(target.href); setCopied(true); }
+    // Preserve only the same bounded ad tags already allowed through /check and
+    // /onboarding redirects; never copy auth codes, arbitrary queries or hashes.
+    try { await navigator.clipboard.writeText(`${target.href}${adAttributionQuery(location.search)}`); setCopied(true); }
     catch { setError('Use this app’s menu to open this page in Safari or Chrome.'); }
   }
 
