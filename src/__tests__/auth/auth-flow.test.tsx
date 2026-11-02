@@ -1,7 +1,7 @@
 import { act, render, renderHook, screen, waitFor, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import Auth from '@/pages/Auth';
@@ -520,5 +520,134 @@ describe('same-route account navigation', () => {
       expect(sdk.signInWithOAuth).not.toHaveBeenCalled();
       expect(sdk.signUp).not.toHaveBeenCalled();
     } finally { vi.restoreAllMocks(); }
+  });
+});
+
+describe('password recovery return navigation', () => {
+  function LocationProof() {
+    const location = useLocation();
+    return <output aria-label="Current route">{location.pathname}{location.search}</output>;
+  }
+  function journey(path: string) {
+    return <AuthProvider><MemoryRouter initialEntries={[path]}><MvpHeader /><LocationProof /><Routes>
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+      <Route path="/auth/reset" element={<ResetPassword />} />
+      <Route path="/check" element={<h1>Selected CV Check</h1>} />
+      <Route path="/onboarding" element={<h1>Selected onboarding</h1>} />
+      <Route path="/loop" element={<h1>Default loop</h1>} />
+    </Routes></MemoryRouter></AuthProvider>;
+  }
+  const route = () => new URL(screen.getByLabelText('Current route').textContent!, 'https://jobvance.io');
+
+  it.each(['/check', '/onboarding', '/pricing?plan=sprint_7d'])('keeps %s through forgot-password and Back to sign in without submitting', async destination => {
+    render(journey(`/auth?next=${encodeURIComponent(destination)}`));
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Forgot your password?' }));
+    expect(route().pathname).toBe('/auth/forgot-password');
+    expect(route().searchParams.get('next')).toBe(destination);
+    await user.click(screen.getByRole('button', { name: 'Back to sign in' }));
+    expect(await screen.findByRole('heading', { name: 'Sign in to Jobvance' })).toBeInTheDocument();
+    expect(route().searchParams.get('next')).toBe(destination);
+    expect(sdk.resetPasswordForEmail).not.toHaveBeenCalled();
+    expect(sdk.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it('keeps bounded campaign tags but strips codes, arbitrary queries and hashes on recovery navigation', async () => {
+    render(journey('/auth?next=%2Fcheck&utm_source=meta&utm_campaign=recovery-fixture&code=fixture-code&access_token=fixture-token#fixture-fragment'));
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Forgot your password?' }));
+    expect(route().searchParams.get('next')).toBe('/check');
+    expect(route().searchParams.get('utm_campaign')).toBe('recovery-fixture');
+    expect(route().searchParams.has('code')).toBe(false);
+    expect(route().searchParams.has('access_token')).toBe(false);
+    expect(route().hash).toBe('');
+  });
+
+  it('keeps the recovery destination in the header Sign in link', async () => {
+    render(journey('/auth/forgot-password?next=%2Fcheck&utm_campaign=recovery-fixture&code=fixture-code'));
+    const url = new URL(screen.getAllByRole('link', { name: /^Sign in$/ })[0].getAttribute('href')!, 'https://jobvance.io');
+    expect(url.searchParams.get('next')).toBe('/check');
+    expect(url.searchParams.get('utm_campaign')).toBe('recovery-fixture');
+    expect(url.searchParams.has('code')).toBe(false);
+  });
+
+  it('keeps the selected return after requesting reset instructions without changing the SDK redirect or enumerating accounts', async () => {
+    render(journey('/auth/forgot-password?next=%2Fcheck&utm_campaign=recovery-fixture&code=fixture-code'));
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Email address'), 'recovery-navigation@example.test');
+    await user.click(screen.getByRole('button', { name: 'Send Reset Instructions' }));
+    await screen.findByText(/If a password account exists, reset instructions will be sent to/);
+    expect(peekLoopReturn()).toBe('/check');
+    expect(sdk.resetPasswordForEmail).toHaveBeenCalledWith('recovery-navigation@example.test', { redirectTo: `${window.location.origin}/auth/reset` });
+    expect(sdk.invoke).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Back to sign in' }));
+    expect(route().searchParams.get('next')).toBe('/check');
+    expect(route().searchParams.get('utm_campaign')).toBe('recovery-fixture');
+    expect(route().searchParams.has('code')).toBe(false);
+  });
+
+  it.each(['/check', '/onboarding'])('returns an SDK-established reset session to %s after a successful update', async destination => {
+    rememberLoopReturn(destination);
+    sdk.getSession.mockResolvedValue({ data: { session: signedIn }, error: null });
+    render(journey('/auth/reset'));
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('New password'), 'RecoveryPassword123');
+    await user.type(screen.getByLabelText('Confirm password'), 'RecoveryPassword123');
+    await user.click(screen.getByRole('button', { name: 'Update password' }));
+    await waitFor(() => expect(route().pathname).toBe(destination));
+    expect(peekLoopReturn()).toBeNull();
+    expect(sdk.updateUser).toHaveBeenCalledOnce();
+  });
+
+  it('retains the selected destination after an invalid reset without allowing a password update', async () => {
+    rememberLoopReturn('/check');
+    render(journey('/auth/reset'));
+    expect(await screen.findByRole('alert')).toHaveTextContent('invalid or expired');
+    const url = new URL(screen.getByRole('link', { name: 'Request a new reset link' }).getAttribute('href')!, 'https://jobvance.io');
+    expect(url.searchParams.get('next')).toBe('/check');
+    expect(peekLoopReturn()).toBe('/check');
+    expect(sdk.updateUser).not.toHaveBeenCalled();
+  });
+
+  it('uses the validated same-tab return in the reset header, without reading a return from the reset URL', async () => {
+    rememberLoopReturn('/check');
+    render(journey('/auth/reset?next=https%3A%2F%2Foutside.invalid&code=fixture-code'));
+    await screen.findByRole('alert');
+    const url = new URL(screen.getAllByRole('link', { name: /^Sign in$/ })[0].getAttribute('href')!, 'https://jobvance.io');
+    expect(url.searchParams.get('next')).toBe('/check');
+    expect(url.searchParams.has('code')).toBe(false);
+  });
+
+  it('defaults to the loop when the same-tab return has expired', async () => {
+    rememberLoopReturn('/check', Date.now() - 31 * 60 * 1000);
+    sdk.getSession.mockResolvedValue({ data: { session: signedIn }, error: null });
+    render(journey('/auth/reset'));
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('New password'), 'RecoveryPassword123');
+    await user.type(screen.getByLabelText('Confirm password'), 'RecoveryPassword123');
+    await user.click(screen.getByRole('button', { name: 'Update password' }));
+    expect(await screen.findByRole('heading', { name: 'Default loop' })).toBeInTheDocument();
+    expect(peekLoopReturn()).toBeNull();
+  });
+
+  it('does not consume the return destination when a password update fails', async () => {
+    rememberLoopReturn('/check');
+    sdk.getSession.mockResolvedValue({ data: { session: signedIn }, error: null });
+    sdk.updateUser.mockResolvedValue({ error: new Error('Fixture connection failed') });
+    render(journey('/auth/reset'));
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('New password'), 'RecoveryPassword123');
+    await user.type(screen.getByLabelText('Confirm password'), 'RecoveryPassword123');
+    await user.click(screen.getByRole('button', { name: 'Update password' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Fixture connection failed');
+    expect(route().pathname).toBe('/auth/reset');
+    expect(peekLoopReturn()).toBe('/check');
+  });
+
+  it.each(['https://outside.invalid', '/check?code=fixture-code'])('keeps unsafe return %s out of recovery navigation', async destination => {
+    render(journey(`/auth?next=${encodeURIComponent(destination)}`));
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Forgot your password?' }));
+    expect(route().pathname).toBe('/auth/forgot-password');
+    expect(route().searchParams.get('next')).toBe('/loop');
   });
 });

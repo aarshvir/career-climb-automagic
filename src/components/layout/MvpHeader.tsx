@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { clearLoopWorkingDraft } from '@/lib/loop-draft-memory';
 import { BRAND_MARK } from '@/lib/brand-mark';
-import { accountDestination } from '@/lib/account-return';
+import { accountDestination, peekLoopReturn } from '@/lib/account-return';
 import { adAttributionQuery } from '@/lib/meta-pixel';
 
 const brandInner = <>
@@ -109,7 +109,9 @@ export default function MvpHeader() {
   // Switching from signup to sign-in keeps the task the visitor chose. Only
   // allow-listed destinations and the existing bounded campaign tags survive.
   const signInDestination = location.pathname === '/onboarding' ? '/onboarding'
-    : location.pathname === '/auth' ? accountDestination(new URLSearchParams(location.search).get('next')) : '/loop';
+    : location.pathname === '/auth' || location.pathname === '/auth/forgot-password'
+      ? accountDestination(new URLSearchParams(location.search).get('next'))
+      : location.pathname === '/auth/reset' ? peekLoopReturn() ?? '/loop' : '/loop';
   const signInPath = `/auth?next=${encodeURIComponent(signInDestination)}${onEntry ? adAttributionQuery(location.search) : ''}`;
   const signedOutActions = (hold: boolean) => <>
     <Link to={signInPath} className="jv-btn jv-btn--ghost jv-btn--sm" tabIndex={hold ? -1 : undefined}>Sign in</Link>
