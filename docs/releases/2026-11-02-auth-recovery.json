@@ -1,0 +1,144 @@
+{
+  "release": "auth-recovery",
+  "publicVersion": 75,
+  "publishedAt": "2026-11-02T18:32:59.064600+00:00",
+  "publicUrl": "https://jobvance.io",
+  "source": "f5b3b2c3c40981534fab99f58c646c78d1d594d7",
+  "pr": 52,
+  "merge": "a188bb2df6af84d896619f93face3c62c3bb586f",
+  "mergeTree": "9770a4e874302a2c2520ab556b7ab218983d3aa1",
+  "fullMergeTreeMatchesCandidate": true,
+  "site": {
+    "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_bab3d9b34014819186752590b0c1b3e8",
+    "deploymentId": "appgdep_6ae8d73dc4b88191b9c26c8905957b0b",
+    "status": "succeeded",
+    "audience": "public",
+    "customDomain": "jobvance.io"
+  },
+  "problem": "Forgot-password navigation and both Back to sign in paths discarded the selected CV Check/onboarding destination; the recovery header and successful reset continuation defaulted to the Loop.",
+  "changes": [
+    "Preserve the existing allow-listed next destination and bounded attribution when entering/leaving standalone recovery; no codes, arbitrary query data or fragments are carried.",
+    "Use the existing same-tab30minute account-return selector after a deliberate reset request; consume it only after an SDK-established successful password update. Invalid links preserve retry context; failed updates retain the selector, expired/missing/unavailable storage falls back safely.",
+    "Keep embedded check recovery, SDK reset URL, password validation, session establishment, account enumeration response and protected-route authorization unchanged."
+  ],
+  "changedFiles": [
+    "src/pages/Auth.tsx",
+    "src/pages/ForgotPassword.tsx",
+    "src/pages/ResetPassword.tsx",
+    "src/components/layout/MvpHeader.tsx",
+    "src/__tests__/auth/auth-flow.test.tsx"
+  ],
+  "validation": {
+    "ci": {
+      "run": 41500480014,
+      "job": 125466349808,
+      "head": "f5b3b2c3c40981534fab99f58c646c78d1d594d7",
+      "allStepsPassed": true,
+      "fullAuditGateRetained": true,
+      "pinnedSdkAndFrozenDenoChecksRetained": true
+    },
+    "tests": {
+      "passed": 3830,
+      "files": 217,
+      "newGuardCases": 14,
+      "authFileCases": 56,
+      "initialNewCases": {
+        "failedAtBaseline": 10,
+        "passedAtBaseline": 1
+      },
+      "baselineLimit": "Variants of lost recovery context and guards, not ten distinct observed customer defects."
+    },
+    "typeScriptErrors": 0,
+    "lint": {
+      "errors": 0,
+      "inheritedWarnings": 50
+    },
+    "npmAuditVulnerabilities": 0,
+    "build": {
+      "publicPages": 38,
+      "guideArticles": 20,
+      "structuredDataHashes": 38,
+      "compressedBytes": 2203384,
+      "limitBytes": 3145728,
+      "hostingChecksPassed": true,
+      "socialPreviewPassed": true
+    },
+    "liveHttp": {
+      "at": "2026-11-02T18:33:34.863Z",
+      "paths": 164,
+      "passed": 164,
+      "rawExact": 118,
+      "applicationExactHtmlWithRecognizedCloudflareTail": 46,
+      "securityHeadersMatch": true,
+      "rawHtmlParity": false
+    },
+    "browser": {
+      "localProductionWorker": {
+        "phoneWidths": [
+          390,
+          320
+        ],
+        "cvCheckBackAndOnboardingHeaderReturnPassed": true,
+        "noHorizontalOverflow": true,
+        "inputFontPixels": 16
+      },
+      "live": {
+        "width": 390,
+        "cvCheckBackReturnPassed": true,
+        "onboardingHeaderReturnPassed": true,
+        "selectedDestinationsRetained": true,
+        "noHorizontalOverflow": true,
+        "inputFontPixels": 16
+      },
+      "limits": "Anonymous navigation only. Password/email/session outcomes are SDK-mocked tests; no real email request, password update, account, OAuth, AI/provider, checkout/payment submission, ad-tagged QA, real-device/customer/Meta acceptance or causal conversion-lift certification."
+    }
+  },
+  "boundaries": {
+    "supabaseTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "allOtherTrackedObjectsEqualBase": "e4271bcea6bd007d64f1a3e228fe07613630d67f",
+    "protectedObjectsCompared": 17,
+    "backendSchemaFunctionDeployment": false,
+    "migrationReplay": false,
+    "metaConversionsVersion": 3,
+    "commerceMigrationRetained": "20261030041314",
+    "coreAuthPasswordRulesConsentPixelCommerceContactBillingCspDependenciesCiUnchanged": true
+  },
+  "measurement": {
+    "readAt": "2026-11-02 18:33:35.031321+00",
+    "day": "2026-11-02",
+    "dubaiMetaTaggedSessions": 4,
+    "utcMetaTaggedSessions": 3,
+    "strictPurchaseTaggedSessions": 0,
+    "classifiedSignups": 0,
+    "liveProviderCheckouts": 0,
+    "classifiedLivePaidRows": 0,
+    "eligibleFirstCycles": 0,
+    "matchedPurchaseClaims": 0,
+    "matchedPurchaseSent": 0,
+    "commerceTotals": 0,
+    "newReleaseCutoff": "2026-11-02T18:32:59.064600+00:00",
+    "postReleaseAdSessionBaseline": 0,
+    "postReleaseBaselineReadAt": "2026-11-02 18:36:20.184007+00",
+    "publicCvCheckEntryBaseline": {
+      "cutoff": "2026-11-02 18:32:59.0646+00",
+      "read_at": "2026-11-02 18:36:21.151879+00",
+      "pooled_cv_check_link_sessions": 0,
+      "cv_check_page_sessions": 0,
+      "same_session_auth_after_landing": 0,
+      "first_touch_linked_new_accounts": 0,
+      "meta_cv_check_page_sessions": 0
+    },
+    "limits": "All four captured Dubai-day ad-tagged sessions began beforev75. Their generic events do not establish the cause of short visits, Google/email/field/provider outcomes, actual adset attribution or verified people. The reproduced recovery issue is not proof of their dropoff cause."
+  },
+  "rollback": {
+    "savedVersion": 74,
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_2bbdac7055448191aa61ae4b45114ce2",
+    "source": "295ed93830bdf7494691b8244f1bc433d920b14b",
+    "localTag": "jobvance-before-auth-recovery-2026-11-02",
+    "tagPushed": false,
+    "limits": "Restore saved frontend independently; never replay/remove additive schema/receipts or claim restoration of financial/customer/external events/data."
+  },
+  "privateEvidence": "jobvance-repair-evidence/signup-recovery-2026-11-02/",
+  "baton": "Codex bounded repair/review/release FINISHED; Claude resumes ongoing sole writer. Future PRs reconcile current main and preserve producer local commits."
+}
