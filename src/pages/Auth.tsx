@@ -174,7 +174,10 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   }
 
   const handleForgot = async () => {
-    if (!embedded) { navigate('/auth/forgot-password'); return; }
+    if (!embedded) {
+      navigate(`/auth/forgot-password?next=${encodeURIComponent(accountDestination(searchParams.get('next')))}${adAttributionQuery(location.search)}`);
+      return;
+    }
     if (!isValidEmail(email.trim())) { setError('Enter your email above, then request a reset link. Your CV check stays open.'); return; }
     setBusy(true); setError('');
     try { const result = await resetPassword(email); if (result.error) setError(result.error); else setResetSent(true); }

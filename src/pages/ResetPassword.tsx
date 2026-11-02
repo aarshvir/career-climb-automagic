@@ -9,10 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { validatePassword } from '@/lib/security';
+import { peekLoopReturn, takeLoopReturn } from '@/lib/account-return';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const { updatePassword, configurationError } = useAuth();
+  const [returnPath] = useState(peekLoopReturn);
+  const retryPath = returnPath ? `/auth/forgot-password?next=${encodeURIComponent(returnPath)}` : '/auth/forgot-password';
   const [linkState, setLinkState] = useState<'checking' | 'ready' | 'invalid'>('checking');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -50,7 +53,7 @@ const ResetPassword = () => {
     try {
       const result = await updatePassword(password);
       if (result.error) setError(result.error);
-      else navigate('/loop', { replace: true });
+      else navigate(takeLoopReturn() ?? '/loop', { replace: true });
     } catch { setError('Password update failed. Please try again.'); }
     finally { setBusy(false); }
   };
@@ -63,7 +66,7 @@ const ResetPassword = () => {
           {linkState === 'checking' ? <p role="status" className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Checking reset link...</p> : linkState === 'invalid' ? (
             <div className="space-y-4">
               <Alert variant="destructive" role="alert"><AlertDescription>{configurationError || 'This reset link is invalid or expired. Request a new link and open it in the browser where you requested it.'}</AlertDescription></Alert>
-              <Button asChild><Link to="/auth/forgot-password">Request a new reset link</Link></Button>
+              <Button asChild><Link to={retryPath}>Request a new reset link</Link></Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">

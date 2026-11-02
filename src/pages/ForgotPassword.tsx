@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { isValidEmail, authRateLimiter } from '@/lib/security'
+import { accountDestination, rememberLoopReturn } from '@/lib/account-return'
+import { adAttributionQuery } from '@/lib/meta-pixel'
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof Error && error.message) {
@@ -20,6 +22,9 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const destination = accountDestination(searchParams.get('next'))
+  const signInPath = `/auth?next=${encodeURIComponent(destination)}${adAttributionQuery(searchParams.toString())}`
   const { toast } = useToast()
   const { resetPassword, configurationError } = useAuth()
 
@@ -45,6 +50,9 @@ const ForgotPassword: React.FC = () => {
     setLoading(true)
 
     try {
+      // Same-tab continuation contains only an existing allow-listed selector.
+      // The SDK reset URL stays unchanged; no ad tags or auth data enter it.
+      rememberLoopReturn(destination)
       // The same response is shown regardless of whether an account exists.
       const { error } = await resetPassword(email)
       
@@ -97,7 +105,7 @@ const ForgotPassword: React.FC = () => {
               <div className="text-center">
                 <Button
                   variant="link"
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate(signInPath)}
                   className="text-sm"
                 >
                   <ArrowLeft className="w-4 h-4 mr-1" />
@@ -172,7 +180,7 @@ const ForgotPassword: React.FC = () => {
                 <Button
                   type="button"
                   variant="link"
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate(signInPath)}
                   className="text-sm"
                 >
                   <ArrowLeft className="w-4 h-4 mr-1" />
