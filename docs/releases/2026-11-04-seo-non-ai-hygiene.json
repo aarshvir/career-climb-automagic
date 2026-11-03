@@ -1,0 +1,207 @@
+{
+  "release": "seo-non-ai-guide-and-hygiene",
+  "publicVersion": 77,
+  "publishedAt": "2026-11-03T20:28:24.633287+00:00",
+  "publishedAtDubai": "2026-11-04T00:28:24.633287+04:00",
+  "publicUrl": "https://jobvance.io",
+  "source": "ceaecabe40f6893ca29c0946a7521d4dd64f2e1c",
+  "priorReleaseSource": "27c206db4d81bf9385617613abcfcc3b9d17ef32",
+  "mergeOrder": [
+    {
+      "pr": 53,
+      "head": "348e583a617752e5b1f14c8962cfa11e57615e8b",
+      "merge": "a7fe012be848827867f795622e42dd72172779c3"
+    },
+    {
+      "pr": 54,
+      "head": "ceaecabe40f6893ca29c0946a7521d4dd64f2e1c",
+      "merge": "7dde4f87c7eb991031b423a091e31be3efd356c2"
+    }
+  ],
+  "finalMergeTree": "9c249d442401fc0e7b81a9b75fa65a1826f0245f",
+  "fullFinalMergeTreeMatchesCandidate": true,
+  "site": {
+    "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_b97a29ddf6988191a5eaecd65055db29",
+    "deploymentId": "appgdep_6aea43cf3ecc8191b93271bac51231e6",
+    "status": "succeeded",
+    "audience": "public",
+    "customDomain": "jobvance.io"
+  },
+  "requestScope": "Owner requested review/release of PR55, then PR53 and PR54. This record covers the latter two, merged in order after the v76 recovery release. Codex's bounded review/release work is finished; Claude remains the sole ongoing product/design writer.",
+  "changes": [
+    "Add /guides/cv-check-without-ai, linked from the CV Check landing page, a related guide, llms.txt and the generated sitemap. Explain on-device rules, limitations and optional AI tailoring with a labelled fictional example and no outcome guarantees.",
+    "Set only the new guide's publication/update dates to 2026-11-04. Keep the other twenty guides' dates and titles unchanged; the sole reviewed existing-guide change is its added related link.",
+    "Remove the retired served pilot guide, stale organization JSON and seo copies, and unrouted Blog code containing invented first-person outcome claims. Preserve truthful anonymous organization metadata.",
+    "Redirect /index.html to / through the existing 308 alias policy, which does not carry query data. Name seven additional crawler agents with rules identical to the existing wildcard and named groups; training remains allowed under the existing policy."
+  ],
+  "validation": {
+    "rootTests": {
+      "passed": 3868,
+      "files": 219
+    },
+    "ci": [
+      {
+        "pr": 53,
+        "head": "348e583a617752e5b1f14c8962cfa11e57615e8b",
+        "run": 41711713875,
+        "job": 126181173019,
+        "allStepsPassed": true,
+        "testsPassed": 3851,
+        "testFiles": 218
+      },
+      {
+        "pr": 54,
+        "head": "ceaecabe40f6893ca29c0946a7521d4dd64f2e1c",
+        "run": 41711856858,
+        "job": 126181664379,
+        "allStepsPassed": true
+      }
+    ],
+    "typeScriptErrors": 0,
+    "lint": {
+      "errors": 0,
+      "inheritedWarnings": 50
+    },
+    "fullModerateAuditVulnerabilities": 0,
+    "build": {
+      "publicPages": 39,
+      "guideArticles": 21,
+      "structuredDataHashes": 39,
+      "publicSitemapUrls": 38,
+      "privateCheckNoindexAndExcluded": true,
+      "compressedBytes": 2206458,
+      "compressedLimitBytes": 3145728,
+      "hostingChecksPassed": 12,
+      "socialPreviewPassed": true,
+      "externalPrerenderRequests": 0
+    },
+    "protectedObjects": {
+      "base": "27c206db4d81bf9385617613abcfcc3b9d17ef32",
+      "compared": 98,
+      "differing": 0
+    },
+    "liveHttp": {
+      "at": "2026-11-03T20:28:44.313Z",
+      "paths": 167,
+      "passed": 167,
+      "rawExact": 121,
+      "applicationExactHtmlWithRecognizedCloudflareTail": 46,
+      "rawHtmlParity": false,
+      "securityHeadersMatch": true,
+      "javascriptExecuted": false,
+      "adTaggedQa": false,
+      "deletedPilotGuideStatus": 404,
+      "deletedOrganizationJsonStatus": 404,
+      "indexHtmlStatus": 308,
+      "limits": "Application-body matches accept only the recognized appended Cloudflare tail; not raw HTML or archive-byte parity."
+    },
+    "browser": {
+      "localWidths": [
+        390,
+        1440
+      ],
+      "liveWidths": [
+        390,
+        1440
+      ],
+      "newGuideDate": "2026-11-04",
+      "canonical": "https://jobvance.io/guides/cv-check-without-ai",
+      "singleArticleAndOrganization": true,
+      "noHorizontalOverflow": true,
+      "anonymousOnly": true,
+      "evidence": [
+        "local-390.json",
+        "live-390.json",
+        "live-390.png",
+        "live-1440.png"
+      ]
+    }
+  },
+  "measurement": {
+    "dailyReadAtUtc": "2026-11-03 20:28:44",
+    "dubai": {
+      "day": "2026-11-04",
+      "metaTaggedSessions": 0,
+      "strictPurchaseTaggedSessions": 0,
+      "classifiedSignups": 0,
+      "linkedNewAccounts": 0
+    },
+    "utc": {
+      "day": "2026-11-03",
+      "metaTaggedSessions": 122,
+      "strictPurchaseTaggedSessions": 120,
+      "classifiedSignups": 2,
+      "linkedNewAccounts": 1
+    },
+    "allDailyWindows": {
+      "liveProviderCheckouts": 0,
+      "classifiedLivePaidRows": 0,
+      "matchedPurchaseClaims": 0,
+      "matchedPurchaseSent": 0,
+      "commerceTotals": 0
+    },
+    "v77CvCheckEntryBaseline": {
+      "cutoff": "2026-11-03T20:28:24.633287+00:00",
+      "readAtUtc": "2026-11-03 20:29:31.868634+00",
+      "pooledCvCheckLinkSessions": 0,
+      "cvCheckPageSessions": 0,
+      "sameSessionAuthAfterLanding": 0,
+      "firstTouchLinkedNewAccounts": 0,
+      "metaCvCheckPageSessions": 0
+    },
+    "limits": "Day windows span earlier releases. No search, ranking, crawl, provider acceptance or causal conversion lift is inferred from publication or these counts. Earlier attribution at 19:28 UTC associated activation and settled tailoring with another classified account, while the strict-Purchase first-touch-linked account had zero activation; that attribution was not freshly rerun at 20:28."
+  },
+  "health": {
+    "readAtUtc": "2026-11-03 20:28:45",
+    "operationalChecksAllZero": true,
+    "scheduler": {
+      "enabled": true,
+      "freshHeartbeatUtcMinute": "2026-11-03 20:25"
+    },
+    "places": {
+      "paidUsed": 0,
+      "paidCapacity": 100,
+      "pilotUsed": 5,
+      "pilotCapacity": 10
+    },
+    "todayUtc": {
+      "newClassifiedAccounts": 2,
+      "cvTailorings": 1,
+      "runsFinished": 0,
+      "paidOrders": 0
+    },
+    "sevenDayActivatedAccounts": 1,
+    "activeLiveSubscriptions": 0,
+    "novemberAiUsd": {
+      "actual": 0.030451,
+      "committed": 0.030451,
+      "cap": 50
+    },
+    "octoberLedgerPreserved": true
+  },
+  "boundaries": {
+    "v76RecoveryRetained": true,
+    "ownerAnonymous": true,
+    "allOtherGuideDatesAndProtectedTitlesRetained": true,
+    "backendSchemaFunctionDeployment": false,
+    "migrationReplay": false,
+    "adChangesOrNewAdPull": false,
+    "newIndexingWrites": false,
+    "nativeChatDeliveryOrAck": false,
+    "indexingAndRankClaims": "Claude's 3 November authored readback only; not independently repeated or converted into new indexing requests in this release.",
+    "limits": "No live account/form, email/OAuth/password, AI/provider, checkout/payment, ad/funding, Cloudflare-setting, permission or outreach action. No private authenticated workflow, real-device/customer/Meta or causal acceptance is claimed."
+  },
+  "rollback": {
+    "savedVersion": 76,
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_cbe63182bc38819187e25a731cf26a94",
+    "source": "27c206db4d81bf9385617613abcfcc3b9d17ef32",
+    "localTag": "jobvance-before-seo-non-ai-hygiene-2026-11-04",
+    "tagPushed": false,
+    "limits": "Saved frontend rollback only; never replay/remove additive schema or durable receipts, or claim restoration of external/customer/financial data or events."
+  },
+  "privateEvidence": "jobvance-repair-evidence/growth-audit-2026-11-04/seo-pr53-pr54-review/",
+  "baton": "Bounded PR53/PR54 review, ordered merge and v77 release FINISHED. Claude resumes sole ongoing product/design writer. Future work must reconcile current main after root's documentation commit and preserve producer local work. Shared-file handoff is not native chat delivery or ACK; no identical runtime redeploy for documentation.",
+  "documentationBase": "7dde4f87c7eb991031b423a091e31be3efd356c2",
+  "documentationCommitReceipt": "Containing documentation commit recorded in private canonical state and shared release handoff; not embedded recursively."
+}

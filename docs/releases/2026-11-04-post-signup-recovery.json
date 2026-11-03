@@ -1,0 +1,209 @@
+{
+  "release": "post-signup-recovery",
+  "publicVersion": 76,
+  "publishedAt": "2026-11-03T20:18:56.167265+00:00",
+  "publishedAtDubai": "2026-11-04T00:18:56.167265+04:00",
+  "publicUrl": "https://jobvance.io",
+  "source": "27c206db4d81bf9385617613abcfcc3b9d17ef32",
+  "pr": 55,
+  "merge": "354d44e3636c8a246d98ff4da9061bd4dc93007d",
+  "mergeTree": "03b4f2937a0bf0222ba48925e1f9f08b0a05e694",
+  "fullMergeTreeMatchesCandidate": true,
+  "site": {
+    "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_cbe63182bc38819187e25a731cf26a94",
+    "deploymentId": "appgdep_6aea4198bf20819189c0c4db5f795523",
+    "status": "succeeded",
+    "audience": "public",
+    "customDomain": "jobvance.io"
+  },
+  "requestScope": "Owner's direct continuation and standing authority for independently verified blockers, bounded fixes and publication after checks. Codex temporarily owned only this frontend recovery repair, its fictional tests, review and release; Claude retains ongoing product/design ownership outside that bounded work.",
+  "problem": [
+    "Supabase can cache an initialization error from a failed confirmation callback. The previous helper kept throwing that historical error after a later successful password sign-in established a current session, preventing owned onboarding reads.",
+    "An unsettled passive get_existing setup read kept the first onboarding question behind a spinner without a retry action."
+  ],
+  "changes": [
+    "Read the current SDK session after initialization. Preserve current getSession failures and preserve the historical initialization error when no current session exists; retain downstream verified-user and owner checks.",
+    "Give only LoopOnboarding's passive get_existing load a 20-second UI deadline. Expiry increments the load epoch before showing a connection message and the existing deliberate retry action.",
+    "Clear matching timers on completion/unmount. Late responses cannot rebind snapshot/generation, clear a newer timer/error or restore old owner/session authority. No automatic retry, global API timeout, transport cancellation or backend write is added."
+  ],
+  "changedFiles": [
+    "src/utils/authSession.ts",
+    "src/pages/LoopOnboarding.tsx",
+    "src/__tests__/auth/initialization-recovery.test.tsx",
+    "src/__tests__/loop-onboarding.test.tsx"
+  ],
+  "validation": {
+    "ci": {
+      "run": 41707332521,
+      "job": 126166001392,
+      "head": "27c206db4d81bf9385617613abcfcc3b9d17ef32",
+      "allStepsPassed": true,
+      "fullAuditGateRetained": true,
+      "pinnedSdkAndFrozenDenoChecksRetained": true
+    },
+    "tests": {
+      "passed": 3850,
+      "files": 218,
+      "affectedSuiteCases": 54,
+      "affectedSuiteFiles": 2,
+      "maintainedBaseline": {
+        "failed": 9,
+        "passed": 45,
+        "total": 54
+      },
+      "baselineLimit": "The nine failures are maintained regression variants and guard assertions, not nine observed customer defects. SDK sessions/users and all service transports in these proofs are fictional or mocked."
+    },
+    "independentReadOnlyReviews": {
+      "count": 2,
+      "blockingFindings": 0
+    },
+    "typeScriptErrors": 0,
+    "lint": {
+      "errors": 0,
+      "inheritedWarnings": 50
+    },
+    "npmAuditVulnerabilities": 0,
+    "build": {
+      "publicPages": 38,
+      "guideArticles": 20,
+      "structuredDataHashes": 38,
+      "compressedBytes": 2203498,
+      "limitBytes": 3145728,
+      "hostingChecksPassed": true,
+      "socialPreviewPassed": true,
+      "prerenderExternalRequests": 0
+    },
+    "liveHttp": {
+      "at": "2026-11-03T20:19:17.239Z",
+      "paths": 164,
+      "passed": 164,
+      "rawExact": 118,
+      "applicationExactHtmlWithRecognizedCloudflareTail": 46,
+      "securityHeadersMatch": true,
+      "rawHtmlParity": false,
+      "javascriptExecuted": false,
+      "adTaggedQa": false,
+      "limits": "Application-body equality accepts only the recognized appended Cloudflare tail. It is not raw HTML or archive-byte parity, browser interaction acceptance or private authenticated workflow acceptance."
+    },
+    "browser": {
+      "liveSignup": {
+        "url": "https://jobvance.io/auth?mode=signup&next=%2Fcheck",
+        "width": 390,
+        "scrollWidth": 375,
+        "requiredFieldsEnabled": [
+          "name",
+          "email",
+          "password"
+        ],
+        "phoneOptionalAndEnabled": true,
+        "inputFontPixels": 16,
+        "submitEnabled": true,
+        "noHorizontalOverflow": true,
+        "evidence": [
+          "live-390.json",
+          "live-390.png"
+        ]
+      },
+      "otherLayoutReadback": "Root also reported an earlier live 1280px pass. Local production 320px/390px layout checks are prior proof, not new live private recovery acceptance. The first capture labelled 390px was actually 1280px and was replaced with the corrected final 390px capture; it is not counted as a second mobile proof.",
+      "limits": "Anonymous rendering only; no live account/form, email, password update, OAuth, AI/provider, checkout or payment submission. No real-device, customer, provider, Meta or causal conversion-lift acceptance is claimed."
+    }
+  },
+  "boundaries": {
+    "base": "eb7b4ab244ce4cf741ddd0a036b5049bbdea6593",
+    "supabaseTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "protectedObjectsCompared": 17,
+    "protectedObjectsMatchBase": true,
+    "backendSchemaFunctionDeployment": false,
+    "migrationReplay": false,
+    "metaConversionsVersion": 3,
+    "commerceMigrationRetained": "20261030041314",
+    "coreAuthContextVerifiedOwnerSessionEpochLifecycleConsentApprovalGuardsRetained": true,
+    "pixelCommerceContactBillingCspDependenciesCiAndOwnerApprovedCopyUnchanged": true,
+    "noAdFundingPermissionOutreachIndexingOrPaidProviderAction": true
+  },
+  "measurement": {
+    "status": "read_only_observed",
+    "newReleaseCutoff": "2026-11-03T20:18:56.167265+00:00",
+    "dailyCounts": [
+      {
+        "read_at": "2026-11-03 20:24:51.46187+00",
+        "zone": "Asia/Dubai",
+        "local_day": "2026-11-04",
+        "day_start": "2026-11-03 20:00:00+00",
+        "day_end": "2026-11-03 20:24:51.46187+00",
+        "any_ad_tagged_visits": 0,
+        "meta_ad_visits": 0,
+        "exact_campaign_entry_visits": 0,
+        "purchase_campaign_tagged_visits": 0,
+        "purchase_campaign_first_touch_linked_signups": 0,
+        "classified_signups": 0,
+        "first_touch_meta_linked_signups": 0,
+        "live_provider_checkout_sessions_created": 0,
+        "classified_live_paid_rows_by_retained_date": 0,
+        "eligible_first_paid_cycles": 0,
+        "matching_first_purchase_claims": 0,
+        "matching_first_purchase_sent": 0,
+        "live_commerce_claims_today": 0,
+        "live_commerce_sent_today": 0,
+        "live_commerce_totals": {
+          "sent": 0,
+          "claims": 0,
+          "checkout_sent": 0,
+          "purchase_sent": 0,
+          "checkout_claims": 0,
+          "purchase_claims": 0
+        }
+      },
+      {
+        "read_at": "2026-11-03 20:24:51.46187+00",
+        "zone": "UTC",
+        "local_day": "2026-11-03",
+        "day_start": "2026-11-03 00:00:00+00",
+        "day_end": "2026-11-03 20:24:51.46187+00",
+        "any_ad_tagged_visits": 122,
+        "meta_ad_visits": 122,
+        "exact_campaign_entry_visits": 0,
+        "purchase_campaign_tagged_visits": 120,
+        "purchase_campaign_first_touch_linked_signups": 1,
+        "classified_signups": 2,
+        "first_touch_meta_linked_signups": 1,
+        "live_provider_checkout_sessions_created": 0,
+        "classified_live_paid_rows_by_retained_date": 0,
+        "eligible_first_paid_cycles": 0,
+        "matching_first_purchase_claims": 0,
+        "matching_first_purchase_sent": 0,
+        "live_commerce_claims_today": 0,
+        "live_commerce_sent_today": 0,
+        "live_commerce_totals": {
+          "sent": 0,
+          "claims": 0,
+          "checkout_sent": 0,
+          "purchase_sent": 0,
+          "checkout_claims": 0,
+          "purchase_claims": 0
+        }
+      }
+    ],
+    "publicCvCheckEntryBaseline": {
+      "readAt": "2026-11-03T20:22:57.648552Z",
+      "pooledLink": 0,
+      "landing": 0,
+      "auth": 0,
+      "linkedAccounts": 0,
+      "meta": 0
+    },
+    "postReleaseAdExposureBaseline": 0,
+    "limits": "Dubai4Nov is a zero new-day baseline; UTC3Nov retains122Meta/120strictPurchase/2classifiedsignups/1firsttouchlinked. No checkout/payment/acceptedPurchase. Neither reproduced defect proves the observed departure cause or lift. Anonymous untagged QA is not customer proof."
+  },
+  "rollback": {
+    "savedVersion": 75,
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_bab3d9b34014819186752590b0c1b3e8",
+    "source": "f5b3b2c3c40981534fab99f58c646c78d1d594d7",
+    "localTag": "jobvance-before-post-signup-recovery-2026-11-03",
+    "tagPushed": false,
+    "limits": "Restore the saved frontend independently; never replay/remove additive schema or durable receipts, or claim restoration of financial/customer/external data or events."
+  },
+  "privateEvidence": "jobvance-repair-evidence/growth-audit-2026-11-03/post-signup-recovery/",
+  "baton": "Codex bounded PR55/v76 repair/review/release FINISHED; Claude resumes ongoing sole product/design writer. Reconcile future PRs with current main and preserve producer local commits. PR53/PR54 review/release is separate and is not certified complete by this record. Shared-file coordination is not native chat delivery or ACK."
+}
