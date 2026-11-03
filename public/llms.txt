@@ -48,6 +48,7 @@ Facts last checked 1 November 2026. The pricing page (https://jobvance.io/pricin
 - [What to do when the Automated Job Loop preparation stops](https://jobvance.io/guides/cancelled-partial-job-loop-runs): Find the status of a partial, cancelled or interrupted preparation run and decide whether to review, resume or ask for help.
 - [Fix a CV upload failure one step at a time](https://jobvance.io/guides/cv-upload-failure-checklist): Resolve a CV upload problem by checking the error message, file type, size and readable text.
 - [How to write a recruiter message about a job](https://jobvance.io/guides/truthful-recruiter-drafts): Write a short message with the role, a relevant example from your experience and a clear request for a checked contact.
+- [CV check without AI: what it shows and misses](https://jobvance.io/guides/cv-check-without-ai): See what a CV check without AI compares, where it runs and what it cannot judge, so you know when to review the result yourself or add AI tailoring.
 
 ## Optional
 

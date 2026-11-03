@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { careerGuides, careerGuideWordCount, editorialPolicy, getCareerGuide } from "@/lib/career-guides";
 
 describe("the original career guide library", () => {
-  it("contains 20 distinct, substantive guides with serializable data", () => {
-    expect(careerGuides).toHaveLength(20);
-    expect(new Set(careerGuides.map(guide => guide.slug)).size).toBe(20);
-    expect(new Set(careerGuides.map(guide => guide.title)).size).toBe(20);
+  it("contains 21 distinct, substantive guides with serializable data", () => {
+    expect(careerGuides).toHaveLength(21);
+    expect(new Set(careerGuides.map(guide => guide.slug)).size).toBe(21);
+    expect(new Set(careerGuides.map(guide => guide.title)).size).toBe(21);
     expect(JSON.parse(JSON.stringify(careerGuides))).toEqual(careerGuides);
     for (const guide of careerGuides) {
       expect(guide.slug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
@@ -71,5 +71,13 @@ describe("the original career guide library", () => {
   it("returns no fabricated article for an unknown or missing slug", () => {
     expect(getCareerGuide("not-a-real-guide")).toBeUndefined();
     expect(getCareerGuide(undefined)).toBeUndefined();
+  });
+
+  it("dates the new non-AI guide at its first publication without redating existing guides", () => {
+    expect(getCareerGuide("cv-check-without-ai")).toMatchObject({ publishedAt: "2026-11-04", updatedAt: "2026-11-04" });
+    for (const guide of careerGuides.filter(guide => guide.slug !== "cv-check-without-ai")) {
+      expect(guide.publishedAt).toBe("2026-10-13");
+      expect(guide.updatedAt).toBe("2026-10-14");
+    }
   });
 });
