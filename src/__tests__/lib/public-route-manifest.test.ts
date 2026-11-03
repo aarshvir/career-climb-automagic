@@ -2,8 +2,8 @@ import { describe,it,expect } from 'vitest';
 import { publicPages,publicSitemap,clientOnlyPaths,routeRedirects } from '@/lib/public-route-manifest';
 
 describe('public search routes remain distinct and exclude private state',()=>{
-  it('includes twenty substantive article routes and useful product/help entry points',()=>{
-    expect(publicPages.filter(page=>page.kind==='guide')).toHaveLength(20);
+  it('includes twenty-one substantive article routes and useful product/help entry points',()=>{
+    expect(publicPages.filter(page=>page.kind==='guide')).toHaveLength(21);
     expect(publicPages.map(page=>page.path)).toEqual(expect.arrayContaining(['/check','/job-loop','/help','/walkthroughs','/guides']));
     expect(new Set(publicPages.map(page=>page.path)).size).toBe(publicPages.length);
     expect(new Set(publicPages.map(page=>page.title)).size).toBe(publicPages.length);
