@@ -133,7 +133,7 @@ for(const page of publicRender.pages){
 }
 const pageDecodes=worker.decodedAssets-decodedBeforePages;
 for(const path of ['/guides/no-such-article','/no-such-product','/unknown/deep/route'])assert.equal((await request(path)).status,404,'Unknown routes must not masquerade as successful pages.');
-for(const [path,target] of [['/blog','/guides'],['/jobs','/job-loop'],['/product','/job-loop'],['/guides/','/guides']]){const response=await request(path);assert.equal(response.status,308);assert.equal(response.headers.get('Location'),target);}
+for(const [path,target] of [['/blog','/guides'],['/jobs','/job-loop'],['/product','/job-loop'],['/guides/','/guides'],['/index.html','/']]){const response=await request(path);assert.equal(response.status,308);assert.equal(response.headers.get('Location'),target);}
 for (const path of ['/pilot','/pilot/','/pilot?utm_source=review','/pilot/?utm_source=review']) {
   for (const method of ['GET','HEAD']) {
     const response=await request(path,{method});
