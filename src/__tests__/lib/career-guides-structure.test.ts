@@ -10,6 +10,7 @@ const rewritten = [
   "cv-upload-failure-checklist",
   "mba-career-pivot-cv",
 ];
+const citationUpdates = ["role-filtering-before-applying", "first-application-pack", "reuse-second-application", "cv-pdf-or-docx"];
 const REWRITE_DATE = "2026-11-04";
 // First written on 3 Nov 2026 (after the library's first release), so its published date is its own.
 const NEW_GUIDE = { slug: "cv-check-without-ai", publishedAt: "2026-11-04", updatedAt: "2026-11-04" };
@@ -18,7 +19,7 @@ describe("answer-first guide structure", () => {
   it("dates only the guides whose text changed", () => {
     for (const guide of careerGuides) {
       if (guide.slug === NEW_GUIDE.slug) continue;
-      expect(guide.updatedAt, guide.slug).toBe(rewritten.includes(guide.slug) ? REWRITE_DATE : "2026-10-14");
+      expect(guide.updatedAt, guide.slug).toBe([...rewritten, ...citationUpdates].includes(guide.slug) ? REWRITE_DATE : "2026-10-14");
       expect(guide.publishedAt, guide.slug).toBe("2026-10-13");
     }
   });

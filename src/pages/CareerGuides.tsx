@@ -80,9 +80,14 @@ export function CareerGuideArticle() {
   const guide = getCareerGuide(slug);
   if (!guide) return <main className="career-guides cg-missing"><Helmet><title>Guide not found | Jobvance</title><meta name="robots" content="noindex,follow" /></Helmet><p className="cg-eyebrow">GUIDE NOT FOUND</p><h1>We could not find that guide.</h1><p>Browse the library for CV evidence, application preparation and UAE source checks.</p><Link className="cg-primary" to="/guides">Browse the guide library <ArrowRight size={18} aria-hidden="true" /></Link><Link className="cg-help-link" to="/contact">Get help</Link></main>;
   const canonical = `${SITE}/guides/${guide.slug}`;
+  const faqSchema = guide.faqs?.length ? {
+    '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${canonical}#faq`,
+    isPartOf: { '@id': `${canonical}#page` },
+    mainEntity: guide.faqs.map(faq => ({ '@type': 'Question', name: faq.q, acceptedAnswer: { '@type': 'Answer', text: faq.a } })),
+  } : null;
   const related = guide.relatedSlugs.map(getCareerGuide).filter((item): item is CareerGuide => Boolean(item));
   return <main className="career-guides cg-article-page jv-rails">
-    <Helmet><title>{guideDocumentTitle(guide.title)}</title><meta name="description" content={guide.description} /><link rel="canonical" href={canonical} /><meta property="og:title" content={guide.title} /><meta property="og:description" content={guide.description} /><meta property="og:url" content={canonical} /><meta property="og:type" content="article" /><meta property="article:published_time" content={guide.publishedAt} /><meta property="article:modified_time" content={guide.updatedAt} /></Helmet>
+    <Helmet><title>{guideDocumentTitle(guide.title)}</title><meta name="description" content={guide.description} /><link rel="canonical" href={canonical} /><meta property="og:title" content={guide.title} /><meta property="og:description" content={guide.description} /><meta property="og:url" content={canonical} /><meta property="og:type" content="article" /><meta property="article:published_time" content={guide.publishedAt} /><meta property="article:modified_time" content={guide.updatedAt} />{faqSchema && <script type="application/ld+json">{JSON.stringify(faqSchema).replace(/</g, '\\u003c')}</script>}</Helmet>
     <nav className="cg-breadcrumb" aria-label="Breadcrumb"><Link to="/guides"><ArrowLeft size={16} aria-hidden="true" /> All guides</Link><span aria-hidden="true">/</span><span>{guide.category}</span></nav>
     <article>
       <header className="cg-article-header"><p className="cg-eyebrow">{guide.category} · {guide.audience}</p><h1>{guide.title}</h1><p className="cg-summary">{guide.summary}</p><p className="cg-byline">By <span>{editorialPolicy.publisher}</span> · {guide.readingMinutes} min read<br /><span>Published <time dateTime={guide.publishedAt}>{dateLabel(guide.publishedAt)}</time> · Updated <time dateTime={guide.updatedAt}>{dateLabel(guide.updatedAt)}</time></span></p></header>

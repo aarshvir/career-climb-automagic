@@ -84,7 +84,7 @@ export default function CvCheckLanding() {
 
         <section className="jv-section product-section" aria-labelledby="cvl-device-title">
           <h2 id="cvl-device-title" className="jv-section-title">Your CV and your device</h2>
-          <p>Your file stays on your device, and comparing without AI runs entirely on your device. If you choose AI tailoring, the CV text and job description are sent to our AI provider to prepare one version. Saving a check to your Jobvance account is optional. See <Link to="/privacy">how your information is handled</Link>.</p>
+          <p>Your file stays on your device, and comparing without AI runs entirely on your device. AI tailoring sends your CV text, job description, job title and company name through OpenRouter to the AI model provider. If you choose “Improve my CV with these answers”, your confirmed answers and their CV-line references are sent too. Saving a check to your Jobvance account is optional. See <Link to="/privacy">how your information is handled</Link>.</p>
         </section>
 
         <section className="jv-section product-section" aria-labelledby="cvl-ai-title">

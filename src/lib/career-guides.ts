@@ -41,7 +41,6 @@ const SOURCES = {
   harvard: { id: "harvard-resume", title: "Harvard MCS: Create a strong resume", url: "https://careerservices.fas.harvard.edu/resources/create-a-strong-resume/" },
   mitProjects: { id: "mit-projects", title: "MIT CAPD: Crafting an effective resume", url: "https://capd.mit.edu/resources/career-toolkit-crafting-an-effective-resume/" },
   mitBullets: { id: "mit-bullets", title: "MIT CAPD: Writing about your skills", url: "https://capd.mit.edu/resources/resumes-writing-about-your-skills/" },
-  yale: { id: "yale-transition", title: "Yale OCS: Converting a CV to a professional resume", url: "https://ocs.yale.edu/stem-ppg-module-5-converting-your-cv-to-a-professional-resume/" },
   linkedin: { id: "linkedin-privacy", title: "LinkedIn Help: Let recruiters know you are Open to Work", url: "https://www.linkedin.com/help/linkedin/answer/a507508" },
   fraud: { id: "uae-fraud", title: "UAE Government: Tips to avoid labour and visa fraud", url: "https://u.ae/en/information-and-services/visa-and-emirates-id/Visa-information/tips-to-avoid-labour-and-visa-fraud" },
   jobs: { id: "uae-jobs", title: "UAE Government: Searching for a job", url: "https://u.ae/en/information-and-services/jobs/Find-a-job/searching-for-a-job" },
@@ -236,6 +235,7 @@ export const careerGuides: CareerGuide[] = [
     title: "Filter roles before spending time on an application",
     description: "Create a manageable job shortlist by checking responsibilities, essential conditions and the time each application needs.",
     audience: "All applicants", category: "Career direction",
+    updatedAt: "2026-11-04",
     summary: "Before rewriting your CV, decide which vacancies deserve a closer look. Check the work, the practical conditions and the experience you can offer. A short note explaining why you want to apply, ask a question or move on will help you pick the next application.",
     takeaways: ["Check essential conditions before tailoring.", "Separate unknowns from clear mismatches.", "Choose a next action for each saved role."],
     sections: [
@@ -249,8 +249,8 @@ export const careerGuides: CareerGuide[] = [
       ] },
       { heading: "Identify your strongest and weakest evidence", paragraphs: [
         "Select the three responsibilities most central to the role. For each, note your closest example and the remaining gap. Keep the original context: academic, internship, previous employment or volunteering. This is a quick screening note, not a finished CV. You are deciding whether a deeper review has a useful purpose.",
-        "Yale's resume guidance recommends emphasising experience relevant to a prospective employer. Our shortlist adds an earlier decision: whether that relevant evidence is strong enough to justify preparation time. A transferable action may support a pivot while a required licence remains absent. Do not combine those distinct observations into a percentage."
-      ], sourceIds: ["yale-transition"], example: { label: "Worked example", text: "A working operations coordinator saves two vacancies. Role A asks for reporting and process documentation, both supported by prior work; an unfamiliar tool needs review. Role B requires a professional licence the candidate does not hold. The shortlist records 'review A' and 'exclude B: required licence absent', rather than giving both a fit score." } },
+        "Harvard's resume guidance recommends tailoring your resume to the type of position and the skills an employer would value. Our shortlist adds an earlier decision: whether that relevant evidence is strong enough to justify preparation time. A transferable action may support a pivot while a required licence remains absent. Do not combine those distinct observations into a percentage."
+      ], sourceIds: ["harvard-resume"], example: { label: "Worked example", text: "A working operations coordinator saves two vacancies. Role A asks for reporting and process documentation, both supported by prior work; an unfamiliar tool needs review. Role B requires a professional licence the candidate does not hold. The shortlist records 'review A' and 'exclude B: required licence absent', rather than giving both a fit score." } },
       { heading: "Assign a next action, not a vague bookmark", paragraphs: [
         "Use a few understandable states: review now, verify a condition, revisit later or exclude. Add one reason and one next action. 'Verify work location with employer before Friday' is actionable; 'interesting' is not. If there is no action worth taking, remove the role from the active list so it does not keep competing for attention.",
         "Consider the application cost. A lengthy task, multiple essays or an approaching deadline changes what can realistically fit in your week. This does not mean lengthy applications are poor opportunities. It means you should allocate time deliberately and avoid beginning more packets than you can review responsibly."
@@ -259,7 +259,7 @@ export const careerGuides: CareerGuide[] = [
         "Open the original listing when you begin the packet and again before submission. Confirm it is still available and the requirements have not changed. Save the checked date and role reference. A job-board copy may remain accessible after the employer has closed the vacancy, so use the employer's destination where possible.",
         "Choose one role from the active shortlist and compare the CV evidence in Jobvance's free check. If you use the Automated Job Loop, save confirmed career facts and keep each role's packet separate. You decide which roles to apply for and complete submission yourself. A short, deliberate list is a starting point for action, not a hiring forecast."
       ] }
-    ], sources: [SOURCES.yale], relatedSlugs: ["verify-job-listing-source", "cv-job-description-evidence", "job-search-time-plan"]
+    ], sources: [SOURCES.harvard], relatedSlugs: ["verify-job-listing-source", "cv-job-description-evidence", "job-search-time-plan"]
   }),
   publish({
     slug: "verify-job-listing-source",
@@ -348,6 +348,7 @@ export const careerGuides: CareerGuide[] = [
     title: "What to include in your first job application",
     description: "Use the employer’s instructions to prepare your CV, application answers and any other documents the role requires.",
     audience: "All applicants", category: "Application workflow",
+    updatedAt: "2026-11-04",
     summary: "Start with what the employer asks for: a CV, the application questions and any requested documents. Keep them together for one vacancy, then review the details before submitting. This guide helps you work out what to prepare and what can wait.",
     takeaways: ["Read the employer's requested materials first.", "Prepare one role-specific packet.", "Approve the exact files you will submit."],
     sections: [
@@ -370,14 +371,15 @@ export const careerGuides: CareerGuide[] = [
       { heading: "Submit and record the actual event", paragraphs: [
         "Complete submission through the employer's stated route. Keep any confirmation reference or email, the submitted CV version and the date. Mark the application as submitted only after the employer's system or another reliable record confirms it. A prepared pack is not an application, and a downloaded file is not a receipt.",
         "Jobvance's free check helps with the CV review; the Automated Job Loop can organise role-specific CVs and drafts when configured. You approve the materials and send or submit them yourself. Start with one vacancy, complete its packet and keep its record. If you need help, use the public contact page before adding unnecessary information or beginning another run."
-      ], sourceIds: ["jobvance-workflow"] }
-    ], sources: [SOURCES.harvard, SOURCES.workflow], relatedSlugs: ["reuse-second-application", "cv-pdf-or-docx", "application-tracking-follow-up"]
+      ], sourceIds: ["jobvance-workflow", "jobvance-cv-check"] }
+    ], sources: [SOURCES.harvard, SOURCES.workflow, SOURCES.cvCheck], relatedSlugs: ["reuse-second-application", "cv-pdf-or-docx", "application-tracking-follow-up"]
   }),
   publish({
     slug: "reuse-second-application",
     title: "How to reuse your CV for a second application",
     description: "Use your reviewed experience as a starting point, then adapt the examples, documents and message for another vacancy.",
     audience: "All applicants", category: "Application workflow",
+    updatedAt: "2026-11-04",
     summary: "Keep the dates, qualifications and experience you have already checked. For the next vacancy, choose the examples that matter most and review the employer’s submission instructions. Reusing that work gives you a starting point while keeping each application specific to the role.",
     takeaways: ["Reuse facts rather than employer-specific assumptions.", "Compare what changed between vacancies.", "Keep separate approved versions and receipts."],
     sections: [
@@ -400,14 +402,15 @@ export const careerGuides: CareerGuide[] = [
       { heading: "Keep two applications as two records", paragraphs: [
         "Save the approved second CV under a role-specific filename and keep the submitted version with its application record. Do not overwrite the first employer's packet. When an interview arrives, you need to know what that employer received. Store submission status and follow-up dates separately from preparation status.",
         "Jobvance's Automated Job Loop uses a reusable career record to prepare separate role packets, subject to configured connections. You review and approve each packet. If you are using only the free check, bring the new vacancy and review it independently. Your next action is to approve the second role's exact files, then submit through its required channel yourself."
-      ], sourceIds: ["jobvance-workflow"] }
-    ], sources: [SOURCES.workflow], relatedSlugs: ["first-application-pack", "cv-job-description-evidence", "application-tracking-follow-up"]
+      ], sourceIds: ["jobvance-workflow", "jobvance-cv-check"] }
+    ], sources: [SOURCES.workflow, SOURCES.cvCheck], relatedSlugs: ["first-application-pack", "cv-job-description-evidence", "application-tracking-follow-up"]
   }),
   publish({
     slug: "cv-pdf-or-docx",
     title: "Should you send your CV as PDF or DOCX?",
     description: "Choose a CV format from the employer’s upload instructions, check the exported file and review any fields filled by the portal.",
     audience: "All applicants", category: "Application workflow",
+    updatedAt: "2026-11-04",
     summary: "Check the employer’s upload instructions first. If both PDF and DOCX are accepted, open each exported file and choose the one that presents your CV clearly in that application. Then review any form fields filled from the document before you submit.",
     takeaways: ["Follow the current application instructions.", "Inspect the exported file and selectable text.", "Review auto-filled fields after uploading."],
     sections: [
@@ -430,8 +433,8 @@ export const careerGuides: CareerGuide[] = [
       { heading: "Keep both formats under version control", paragraphs: [
         "You can retain PDF and DOCX copies of the same approved CV for different submission requirements. Give them matching role and version names so you can tell they contain the same reviewed content. When you change a fact, export both again if you need both; otherwise one can silently become stale.",
         "Jobvance's review flow lets you approve your CV before downloading available formats. Open the downloaded file and check it before attaching it. The next step is to satisfy the employer's actual upload instructions and review the form's fields. A successful export is one preparation step, not proof of compatibility with every recruitment system."
-      ], sourceIds: ["jobvance-workflow"] }
-    ], sources: [SOURCES.greenhouseFormats, SOURCES.greenhouseParse, SOURCES.workflow], relatedSlugs: ["cv-upload-failure-checklist", "resume-privacy-before-upload", "first-application-pack"]
+      ], sourceIds: ["jobvance-cv-check"] }
+    ], sources: [SOURCES.greenhouseFormats, SOURCES.greenhouseParse, SOURCES.cvCheck], relatedSlugs: ["cv-upload-failure-checklist", "resume-privacy-before-upload", "first-application-pack"]
   }),
   publish({
   slug: "cv-check-no-fit-percentage",
@@ -656,16 +659,16 @@ export const careerGuides: CareerGuide[] = [
         "How do I delete it, and what is left afterwards? Ask whether deleting also removes records the service keeps for billing or security."
       ] },
       { heading: "How Jobvance answers the five questions", paragraphs: [
-        "These answers describe the free CV Check on jobvance.io. We read the privacy page at jobvance.io/privacy on 3 November 2026 and compared it with the CV Check page. The privacy page has separate sections for the free check, your workspace and the Automated Job Loop, so the table covers the free check, plus the page's general section on deleting information.",
+        "These answers describe the free CV Check on jobvance.io. The descriptions below reflect the CV Check and privacy text updated on 4 November 2026. The privacy page has separate sections for the free check, your workspace and the Automated Job Loop, so the table covers the free check, plus the page's general section on deleting information.",
         "You need a free Jobvance account before you can open the check. Needing an account is not a red flag on its own, but you should know what is kept in it. The privacy page says a check is stored in your account only if you choose to save it, and that a cost record counts your free and pass allowance.",
         "Two details sit outside the table. An unsaved draft can be recovered from your browser tab's memory for up to 30 minutes after your last change, during in-app navigation. Unless you turn on a separate optional setting, refreshing or closing the tab clears it. That setting, Keep my draft in this tab across refresh, stores the CV and vacancy text temporarily in the tab, and the draft can be restored for 30 minutes after your last change. The page warns that anyone using the same browser tab may access that copy. On a shared computer, leave it off."
       ], table: {
-        caption: "How Jobvance answers them, from jobvance.io/privacy as read on 3 November 2026, plus what the CV Check itself shows. The privacy page does not mention the optional improve step.",
+        caption: "How Jobvance answers them, from the privacy and CV Check text updated on 4 November 2026, including the optional confirmed-answer step.",
         head: ["Question", "Answer"],
         rows: [
           ["Do I need an account to see my results?", "Yes. A free Jobvance account is needed to open the check. The privacy page says a check is stored in your account only if you choose to save it, and that a cost record counts your free and pass allowance."],
-          ["Does my file leave my device?", "Your original file does not. The privacy page says the free check reads your file on your device and the original file is never uploaded. Comparing without AI runs entirely on your device. If you choose AI tailoring, the text of your CV and the job description, title and company are sent to Jobvance's AI provider, so that text does leave your device. If you then use the optional improve step, the answers you confirmed are sent too. The next row has the details."],
-          ["Which company's AI reads the text?", "Only if you choose AI tailoring: then the text of your CV and the job description, title and company go to Jobvance's AI provider. If you use the optional 'Improve my CV with these answers' step, the answers you confirmed go too. The privacy page names the provider as OpenRouter, with model providers' data collection declined. For the free check it does not name the model provider behind OpenRouter, and it does not say how long either company keeps the text. In the free check, AI tailoring and its optional improve step are the only steps that send text to the provider. The check tells you, beside the Tailor my CV for this job button, that tailoring sends your CV and the job to the AI provider."],
+          ["Does my file leave my device?", "Your original file does not. The privacy page says the free check reads your file on your device and the original file is never uploaded. Comparing without AI runs entirely on your device. If you choose AI tailoring, the text of your CV and the job description, title and company are sent to Jobvance's AI provider, so that text does leave your device. If you then use the optional improve step, the answers you confirmed and their selected CV-line references are sent too. The next row has the details."],
+          ["Which company's AI reads the text?", "Only if you choose AI tailoring: then the text of your CV and the job description, title and company go to Jobvance's AI provider. If you use the optional 'Improve my CV with these answers' step, the answers you confirmed and their selected CV-line references go too. The privacy page names the provider as OpenRouter, with model providers' data collection declined. For the free check it does not name the model provider behind OpenRouter, and it does not say how long either company keeps the text. In the free check, AI tailoring and its optional improve step are the only steps that send text to the provider. The check names OpenRouter and the transmitted inputs beside the tailoring action."],
           ["Is anything stored unless I choose to save it?", "Not your CV text, but Jobvance does keep small records. The privacy page says the CV and job description text is not stored unless you save. It keeps a cost record that also counts your free and pass allowance, and older network-limit records from earlier guest access. If you save, the role, company, vacancy, reviewed source CV and approved final CV texts are stored privately in your account, and the exact save is shown first."],
           ["How do I delete it?", "Saved free checks can be deleted on the check page. Deleting does not remove files you already downloaded. The privacy page's section on deleting information says that after deletions in your workspace and Automated Job Loop, minimal security and usage records remain, without your CV text or document files, and your sign-in account remains. It does not say whether the same applies to a deleted saved check."]
         ]
@@ -826,7 +829,7 @@ export const careerGuides: CareerGuide[] = [
     ], sourceIds: ["greenhouse-formats", "greenhouse-parsing"] },
     { heading: "Step 3: can you select the text in your PDF?", paragraphs: [
       "A scanned PDF is a picture of a page, unless the scanner or app has added text recognition. You can see the words, but a program that reads the file for text may find none unless text recognition has been run on it. To test your file, open the PDF. Press Ctrl+A, then Ctrl+C (Cmd+A, then Cmd+C on a Mac), and paste into a plain text editor. You should see your name, headings and bullets in the right order.",
-      "If nothing highlights, or the pasted text is empty or jumbled, treat the file as an image. Greenhouse's page on unsuccessful parses lists a resume uploaded as an image, rather than a document, among its formatting problems. It does not name scanned PDFs, so use the select-text test instead of guessing.",
+      "If nothing highlights or pastes, the PDF may be an image; export a text-based copy from your original document. If text pastes in a jumbled order, it can still be a text-based PDF with a layout problem. Greenhouse lists image uploads and complex column layouts separately. Check reading order and try a simpler single-column export rather than diagnosing every jumbled result as a scan.",
       "The fix is to go back to the original document in your word processor or design tool and export a new PDF from there. If you only have a paper copy or a photo, retype the CV into a document. If you use a text-recognition tool instead, read every line against the original afterwards. The bullets below are some of the formatting problems that Greenhouse's page on unsuccessful parses lists, and it says they can lead to a partial parse."
     ], bullets: [
       "A resume uploaded as an image rather than a document.",
@@ -858,7 +861,7 @@ export const careerGuides: CareerGuide[] = [
   faqs: [
     { q: "Why does my CV fail to upload when the file looks fine?", a: "Start with four causes: a file type the portal does not list, a file over the size limit, a scan with no real text, or a password on the file. Check them in that order. If all four are fine, try another browser, then look for the portal's upload later or contact option." },
     { q: "Can I rename my PDF to DOCX to get it to upload?", a: "No. Changing the letters after the dot changes the name, not the file, so the file is not a real DOCX. The file inside is still a PDF, and the portal's own list of file types is what counts. Open your original document and use Save as or Export to make a real DOCX or PDF." },
-    { q: "How do I know if my PDF is a scan?", a: "Open it. Press Ctrl+A, then Ctrl+C (Cmd+A, then Cmd+C on a Mac), and paste into a plain text editor. If your words appear in the right order, the PDF holds real text. If nothing selects, or the paste is empty or jumbled, it is probably a picture of a page, so export a fresh PDF from your original document." },
+    { q: "How do I know if my PDF is a scan?", a: "Open it. Press Ctrl+A, then Ctrl+C (Cmd+A, then Cmd+C on a Mac), and paste into a plain text editor. If your words appear in the right order, the PDF holds real text. If nothing selects or pastes, it may be a picture of a page; export a text-based copy from the original. Jumbled text can instead be a reading-order or layout problem, so check it and try a simpler export." },
     { q: "What file size is too big for a CV upload?", a: "It depends on the portal, so read the limit on your application page. Greenhouse's help pages, read on 3 November 2026, say candidate uploads can be up to 100 MB. They also say Greenhouse Recruiting can't parse resumes larger than 2.5 MB, and that when a parse fails the hiring team fills in the details by hand. The pages are written for hiring teams, so ask the employer if you are unsure how your file will be handled. Removing large images keeps a CV file small." }
   ],
   sources: [SOURCES.greenhouseFormats, SOURCES.greenhouseParse, SOURCES.cvCheck],
@@ -921,7 +924,7 @@ export const careerGuides: CareerGuide[] = [
       ], example: { label: "Worked example", text: "An invented example for illustration, not a customer result. The ad asks you to lead the forecasting process. Your CV says you supported the finance manager by preparing forecast inputs. The check may mark the requirement Partly covered and show that line beside it, because the line says 'supported' where the ad says 'lead'. The check compares wording and does not judge the work. You decide whether to describe your contribution more precisely, or to leave the gap visible. You should not change the verb to match the ad unless it is true." }, sourceIds: ["jobvance-cv-check"] },
       { heading: "What AI tailoring adds, and what it sends", paragraphs: [
         "AI tailoring is a separate, optional choice beside Compare without AI. It rewords and reorders what is already in your CV, can add a short profile built from your own lines, and lists each change beside your original wording. To prepare a version, your CV text and the job description, title and company are sent to Jobvance's AI provider. If you use the optional step that improves your CV with answers you confirm, those answers are sent too, and a line built from an answer is marked 'from your answer'. Compare without AI stays on your device. AI tailoring does not: it sends that text to the provider.",
-        "Each change is checked by rules against the line it came from, and a change that adds a number, a capitalised name or tool, a qualification word or a stronger ownership verb is rejected. That is a rule check on wording, not a fact-check of your CV, so you still read every change before you download."
+        "Each change is checked by rules against its source CV lines and any confirmed answers you attached to those lines. Unsupported additions of numbers, capitalised names or tools, qualification words or stronger ownership verbs are rejected. That is a rule check on wording, not a fact-check of your CV, so you still read every change before you download."
       ], sourceIds: ["jobvance-cv-check"] },
       { heading: "A ten-minute routine", paragraphs: [
         "Open the check with your CV and one job ad, and read the requirements the check found before you read any result. Then take the outcomes in order. For each Not shown in your CV, ask whether you have a true example and add it with enough context for a person to understand it. For each Partly covered, read both lines and decide whether they describe the same work.",
