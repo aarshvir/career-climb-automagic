@@ -3,7 +3,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import LoopOnboarding, { onboardingStepError } from '@/pages/LoopOnboarding';
 import { blankLoopProfile } from '@/lib/job-loop-audiences';
-import { clearTrackingDraftMemory, setTrackingDraftOwner, setTrackingLoopGeneration } from '@/lib/tracking-draft-memory';
+import { clearTrackingDraftMemory, setTrackingDraftOwner, setTrackingLoopGeneration, trackingLoopGeneration } from '@/lib/tracking-draft-memory';
 
 vi.unmock('react-router-dom');
 const state = vi.hoisted(() => ({ user: { id: 'owner-a' } as { id: string; user_metadata?: unknown } | null, loading: false, authError: null as string | null, call: vi.fn(), extract: vi.fn() }));
@@ -28,7 +28,7 @@ async function complete() {
   fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 }
 beforeEach(() => {
-  vi.clearAllMocks(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a', 'session-a');
+  vi.clearAllMocks(); state.call.mockReset(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a', 'session-a');
   state.user = { id: 'owner-a' }; state.loading = false; state.authError = null;
   state.call.mockImplementation(async (_owner, action) => action.action === 'get_existing' ? { existingState: 'absent' } : action.action === 'get' ? { snapshot: snapshot() } : { snapshot: snapshot({ ...action.profile, revision: 1 }, 3, 1) });
 });
@@ -325,3 +325,98 @@ describe('account-first owned onboarding', () => {
 
 });
 async function completeWithRender() { open(); await complete(); }
+
+describe('passive setup loading recovery', () => {
+  function deferred() {
+    let resolve!: (value: unknown) => void, reject!: (error: Error) => void;
+    const promise = new Promise((done, fail) => { resolve = done; reject = fail; });
+    return { promise, resolve, reject };
+  }
+  const advance = (milliseconds: number) => act(async () => { await vi.advanceTimersByTimeAsync(milliseconds); });
+  afterEach(() => { cleanup(); vi.useRealTimers(); });
+
+  it('offers a deliberate retry at the load deadline without initializing or writing a record', async () => {
+    vi.useFakeTimers(); state.call.mockReturnValueOnce(new Promise(() => {})); open();
+    await advance(19_999);
+    expect(screen.getByRole('status')).toHaveTextContent('Loading your saved setup');
+    expect(screen.queryByRole('button', { name: 'Retry loading my setup' })).not.toBeInTheDocument();
+    await advance(1);
+    expect(screen.getByRole('alert')).toHaveTextContent('taking too long');
+    expect(screen.getByRole('button', { name: 'Retry loading my setup' })).toBeEnabled();
+    expect(screen.queryByLabelText('Search or add a role')).not.toBeInTheDocument();
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing']);
+  });
+
+  it('ignores an old high-generation response without cancelling the retry deadline', async () => {
+    vi.useFakeTimers(); const first = deferred(), second = deferred();
+    state.call.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise); open();
+    await advance(20_000); fireEvent.click(screen.getByRole('button', { name: 'Retry loading my setup' }));
+    await act(async () => { first.resolve({ existingState: 'active', snapshot: snapshot(savedProfile, 99, 2) }); });
+    expect(trackingLoopGeneration('owner-a')).toBeUndefined();
+    expect(screen.queryByText('Your Automated Job Loop is ready to continue.')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Loading your saved setup');
+    await advance(20_000);
+    expect(screen.getByRole('alert')).toHaveTextContent('taking too long');
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing', 'get_existing']);
+  });
+
+  it('ignores an old rejection without cancelling the retry deadline', async () => {
+    vi.useFakeTimers(); const first = deferred();
+    state.call.mockReturnValueOnce(first.promise).mockReturnValueOnce(new Promise(() => {})); open();
+    await advance(20_000); fireEvent.click(screen.getByRole('button', { name: 'Retry loading my setup' }));
+    await act(async () => { first.reject(new Error('Fictional old connection failure')); });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    await advance(20_000);
+    expect(screen.getByRole('alert')).toHaveTextContent('taking too long');
+  });
+
+  it('keeps a successful retry open after both old and new deadlines', async () => {
+    vi.useFakeTimers(); const first = deferred(); state.call.mockReturnValueOnce(first.promise); open();
+    await advance(20_000); fireEvent.click(screen.getByRole('button', { name: 'Retry loading my setup' }));
+    await advance(0);
+    expect(screen.getByLabelText('Search or add a role')).toBeEnabled();
+    await act(async () => { first.resolve({ existingState: 'active', snapshot: snapshot(savedProfile, 99, 3) }); });
+    await advance(40_000);
+    expect(screen.getByLabelText('Search or add a role')).toBeEnabled();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(trackingLoopGeneration('owner-a')).toBeUndefined();
+  });
+
+  it('clears a pending deadline on unmount and ignores the late response', async () => {
+    vi.useFakeTimers(); const pending = deferred(); state.call.mockReturnValueOnce(pending.promise);
+    const view = open(); await advance(0); view.unmount();
+    expect(vi.getTimerCount()).toBe(0);
+    await advance(20_000);
+    await act(async () => { pending.resolve({ existingState: 'active', snapshot: snapshot(savedProfile, 99, 3) }); });
+    expect(trackingLoopGeneration('owner-a')).toBeUndefined();
+  });
+
+  it('does not publish a timeout or late data after the original session authority changes', async () => {
+    vi.useFakeTimers(); const pending = deferred(); state.call.mockReturnValueOnce(pending.promise); open();
+    act(() => { setTrackingDraftOwner('owner-a', 'replacement-session'); });
+    await advance(20_000);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    await act(async () => { pending.resolve({ existingState: 'active', snapshot: snapshot(savedProfile, 99, 3) }); });
+    expect(trackingLoopGeneration('owner-a')).toBeUndefined();
+    expect(screen.queryByLabelText('Search or add a role')).not.toBeInTheDocument();
+  });
+
+  it('retains the ordinary rejected-read recovery and clears its deadline', async () => {
+    vi.useFakeTimers(); state.call.mockRejectedValueOnce(new Error('Fictional connection refused')); open();
+    await advance(0);
+    expect(screen.getByRole('alert')).toHaveTextContent('Fictional connection refused');
+    expect(screen.getByRole('button', { name: 'Retry loading my setup' })).toBeEnabled();
+    await advance(20_000);
+    expect(screen.getByRole('alert')).toHaveTextContent('Fictional connection refused');
+  });
+
+  it('recovers same-tab answers after an explicit retry without a cloud write', async () => {
+    const view = open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Fictional research role' } });
+    view.unmount(); vi.useFakeTimers(); state.call.mockReturnValueOnce(new Promise(() => {})); open();
+    await advance(20_000); fireEvent.click(screen.getByRole('button', { name: 'Retry loading my setup' }));
+    await advance(0);
+    expect(screen.getByLabelText('Search or add a role')).toHaveValue('Fictional research role');
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing', 'get_existing', 'get_existing']);
+  });
+});
