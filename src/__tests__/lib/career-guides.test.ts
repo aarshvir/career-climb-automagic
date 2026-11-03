@@ -72,4 +72,12 @@ describe("the original career guide library", () => {
     expect(getCareerGuide("not-a-real-guide")).toBeUndefined();
     expect(getCareerGuide(undefined)).toBeUndefined();
   });
+
+  it("dates the new non-AI guide at its first publication without redating existing guides", () => {
+    expect(getCareerGuide("cv-check-without-ai")).toMatchObject({ publishedAt: "2026-11-04", updatedAt: "2026-11-04" });
+    for (const guide of careerGuides.filter(guide => guide.slug !== "cv-check-without-ai")) {
+      expect(guide.publishedAt).toBe("2026-10-13");
+      expect(guide.updatedAt).toBe("2026-10-14");
+    }
+  });
 });

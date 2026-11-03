@@ -661,7 +661,8 @@ export const careerGuides: CareerGuide[] = [
       ], sourceIds: ["jobvance-workflow"] }
     ], sources: [SOURCES.harvard, SOURCES.workflow], relatedSlugs: ["application-tracking-follow-up", "confidential-career-switch", "achievements-without-numbers"]
   }),
-  publish({
+  {
+    ...publish({
     slug: "cv-check-without-ai",
     title: "CV check without AI: what it shows and misses",
     description: "See what a CV check without AI compares, where it runs and what it cannot judge, so you know when to review the result yourself or add AI tailoring.",
@@ -694,7 +695,10 @@ export const careerGuides: CareerGuide[] = [
         "For each Needs your judgment, check the condition in the original vacancy yourself. When you are done, write down the strongest relevant example, the most important open requirement and your next step. If you want rewording, add AI tailoring last, and keep any gap that remains visible. A free account is needed to open the check, and comparing without AI has no limit."
       ], sourceIds: ["jobvance-workflow"] }
     ], sources: [SOURCES.privacy, SOURCES.workflow], relatedSlugs: ["cv-check-no-fit-percentage", "cv-job-description-evidence", "resume-privacy-before-upload"]
-  }),
+    }),
+    publishedAt: "2026-11-04",
+    updatedAt: "2026-11-04",
+  },
 ];
 
 export const CAREER_GUIDES = careerGuides;
