@@ -18,11 +18,11 @@ describe("public career guides", () => {
   it("shows the full library, labelled filters and a free first action", () => {
     renderPage();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Practical help for your next application.");
-    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(21);
     expect(screen.getByLabelText("Search the guides")).toHaveAttribute("type", "search");
     expect(screen.getByLabelText("Your stage")).toHaveValue("all");
     expect(screen.getByLabelText("Your task")).toHaveValue("all");
-    expect(screen.getByRole("status")).toHaveTextContent("20 guides to explore");
+    expect(screen.getByRole("status")).toHaveTextContent("21 guides to explore");
     expect(screen.getByRole("link", { name: "Try the free CV Check" })).toHaveAttribute("href", "/cv-check");
     expect(screen.queryByRole("link", { name: /sign up/i })).not.toBeInTheDocument();
   });
@@ -50,7 +50,7 @@ describe("public career guides", () => {
     expect(screen.getByRole("link", { name: "ask for workflow help" })).toHaveAttribute("href", "/contact");
     await user.click(screen.getByRole("button", { name: "Show all guides" }));
     expect(screen.getByLabelText("Search the guides")).toHaveValue("");
-    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(21);
   });
 
   it("renders a complete article with working contents, citations and honest attribution", async () => {

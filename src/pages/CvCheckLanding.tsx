@@ -20,6 +20,7 @@ const outcomeMeaning: Record<keyof typeof evidenceStatusLabels, string> = {
 const steps = ['Add your CV and the job', 'Read what the job asks for', 'Read the outcomes and the closest CV lines, or review AI changes', 'Download after you confirm your CV is accurate'];
 const keepReading: [string, string][] = [
   ['/guides/cv-job-description-evidence', 'How to compare a CV with a job description using evidence'],
+  ['/guides/cv-check-without-ai', 'What a CV check without AI shows and misses'],
   ['/guides/cv-check-no-fit-percentage', 'Why a match percentage is not a verdict'],
   ['/guides/resume-privacy-before-upload', 'What to check before you upload a CV anywhere'],
   ['/guides/achievements-without-numbers', 'Describe achievements when you have no numbers'],

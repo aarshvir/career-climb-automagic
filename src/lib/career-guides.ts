@@ -389,7 +389,7 @@ export const careerGuides: CareerGuide[] = [
         "Before applying, write three observations: the strongest relevant example, the most important unresolved requirement and the next action. This produces a decision you can explain. A number alone cannot tell you whether to verify a qualification, add a missing passage, ask a question or leave the role aside.",
         "Use the free CV check as a starting point, review every finding and approve the wording yourself. Keep any remaining gap visible. The useful outcome is a truthful CV and a deliberate application choice. Neither a document check nor a rewrite can guarantee an interview, a job or how an employer will assess your application."
       ] }
-    ], sources: [SOURCES.workflow, SOURCES.greenhouseParse], relatedSlugs: ["cv-job-description-evidence", "role-filtering-before-applying", "cv-pdf-or-docx"]
+    ], sources: [SOURCES.workflow, SOURCES.greenhouseParse], relatedSlugs: ["cv-job-description-evidence", "role-filtering-before-applying", "cv-pdf-or-docx", "cv-check-without-ai"]
   }),
   publish({
     slug: "application-tracking-follow-up",
@@ -661,6 +661,44 @@ export const careerGuides: CareerGuide[] = [
       ], sourceIds: ["jobvance-workflow"] }
     ], sources: [SOURCES.harvard, SOURCES.workflow], relatedSlugs: ["application-tracking-follow-up", "confidential-career-switch", "achievements-without-numbers"]
   }),
+  {
+    ...publish({
+    slug: "cv-check-without-ai",
+    title: "CV check without AI: what it shows and misses",
+    description: "See what a CV check without AI compares, where it runs and what it cannot judge, so you know when to review the result yourself or add AI tailoring.",
+    audience: "All applicants", category: "CV evidence",
+    summary: "A CV check without AI compares the words in your CV with the words in a job ad using fixed rules. In Jobvance it runs on your device, shows the closest line from your CV for each requirement and never gives a percentage. It cannot judge meaning the way a person can, so the useful work is reading each result yourself.",
+    takeaways: ["A check without AI compares wording, not meaning.", "Read the closest CV line beside every requirement.", "Add AI tailoring only if you want rewording, and review each change."],
+    sections: [
+      { heading: "What “without AI” means for this check", paragraphs: [
+        "A CV check without AI follows written rules instead of asking a language model to interpret your documents. In Jobvance, Compare without AI reads your CV file on your device and compares it with the job ad on your device. The original file is not uploaded, and nothing is sent to an AI provider for this step.",
+        "The rules read the requirements in the ad, up to the first 40 parsed requirements in English, and look in your CV for matching wording. Where they find a line, they show it beside the requirement together with its line number, so you can check the match with your own eyes rather than trusting a number."
+      ], sourceIds: ["jobvance-privacy"] },
+      { heading: "What the result shows", paragraphs: [
+        "Each requirement receives one of four outcomes. They describe the documents you supplied. They are not a judgment about you or a prediction of what an employer will decide, and Jobvance does not add them up into a fit percentage or an ATS score.",
+      ], bullets: [
+        "Covered: the ad's wording appears in your CV, with the closest line shown.",
+        "Partly covered: a related line exists, but it may describe different work.",
+        "Not shown in your CV: no line shows it, which may mean a missing example or the experience itself is absent.",
+        "Needs your judgment: a condition such as work rights or a licence that only you can confirm."
+      ] },
+      { heading: "What it cannot see", paragraphs: [
+        "Matching wording is a starting point. A rule can notice that two lines share words, but it cannot tell whether the work behind them is the same. It also does not verify the claims in your CV, and it reads English text only. A scanned PDF has no readable text, so convert it first, and old .doc files need converting too.",
+        "It can miss a synonym, and it cannot know about experience you have not written down. A gap in the result is therefore a question to answer, not a verdict: do you have a truthful example that the CV leaves out, or is the experience genuinely absent?"
+      ], example: { label: "Worked example", text: "An invented example for illustration. The ad asks you to lead the forecasting process. Your CV says you supported the finance manager by preparing forecast inputs. The check marks the requirement Partly covered and shows that line beside it: the words relate, but supporting someone who leads is different from leading. You decide whether to describe your contribution more precisely, or to leave the gap visible. You should not change the verb to match the ad unless it is true." } },
+      { heading: "When AI tailoring is worth adding", paragraphs: [
+        "AI tailoring is a separate, optional step. It rewords and reorders what is already in your CV and lists each change beside your original wording. To prepare a version, your CV text and the job description are sent to Jobvance's AI provider, which is why it is optional and why it sits after the check that stays on your device.",
+        "Each change is checked by rules against the line it came from, and a change that adds a number, a capitalised name or tool, a qualification word or a stronger ownership verb is rejected. That is a rule check on wording, not a fact-check of your CV, so you still read every change before you download."
+      ] },
+      { heading: "A ten-minute routine", paragraphs: [
+        "Open the check with your CV and one job ad, and read the requirements the check found before you read any result. Then take the outcomes in order. For each Not shown in your CV, ask whether you have a true example and add it with enough context for a person to understand it. For each Partly covered, read both lines and decide whether they describe the same work.",
+        "For each Needs your judgment, check the condition in the original vacancy yourself. When you are done, write down the strongest relevant example, the most important open requirement and your next step. If you want rewording, add AI tailoring last, and keep any gap that remains visible. A free account is needed to open the check, and comparing without AI has no limit."
+      ], sourceIds: ["jobvance-workflow"] }
+    ], sources: [SOURCES.privacy, SOURCES.workflow], relatedSlugs: ["cv-check-no-fit-percentage", "cv-job-description-evidence", "resume-privacy-before-upload"]
+    }),
+    publishedAt: "2026-11-04",
+    updatedAt: "2026-11-04",
+  },
 ];
 
 export const CAREER_GUIDES = careerGuides;
