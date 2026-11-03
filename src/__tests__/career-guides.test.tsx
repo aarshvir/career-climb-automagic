@@ -35,7 +35,7 @@ describe("public career guides", () => {
     expect(screen.getByLabelText("Your stage")).toHaveFocus();
     await user.selectOptions(screen.getByLabelText("Your stage"), "Students");
     expect(screen.getByRole("link", { name: "How to describe student projects on your CV" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Compare your CV with a job description using evidence" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Check if your CV matches a job description" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: careerGuides.find(guide => guide.slug === "mba-career-pivot-cv")!.title })).not.toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("Your task"), "UAE job search");
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
@@ -78,6 +78,30 @@ describe("public career guides", () => {
       expect(screen.getByText(guide.sections.at(-1)!.paragraphs.at(-1)!)).toBeInTheDocument();
       view.unmount();
     }
+  });
+
+  it("keeps FAQ data equal to the visible guide while navigating to guides with and without FAQs", async () => {
+    const user = userEvent.setup();
+    const original = careerGuides.find(guide => guide.slug === "cv-job-description-evidence")!;
+    const withoutFaq = careerGuides.find(guide => guide.slug === "first-application-pack")!;
+    const nextFaq = careerGuides.find(guide => guide.slug === "cv-check-no-fit-percentage")!;
+    const faqNodes = () => [...document.querySelectorAll('script[type="application/ld+json"]')]
+      .flatMap(script => { const data = JSON.parse(script.textContent!); return data['@graph'] ?? [data]; })
+      .filter(node => node['@type'] === 'FAQPage');
+    const expectCurrentFaq = async (guide: typeof original) => {
+      await waitFor(() => expect(faqNodes()).toHaveLength(1));
+      expect(faqNodes()[0]['@id']).toBe(`https://jobvance.io/guides/${guide.slug}#faq`);
+      expect(faqNodes()[0].mainEntity.map((item: { name: string; acceptedAnswer: { text: string } }) => ({ q: item.name, a: item.acceptedAnswer.text }))).toEqual(guide.faqs);
+      for (const faq of guide.faqs!) expect(screen.getByRole('heading', { name: faq.q })).toBeInTheDocument();
+    };
+    renderPage(`/guides/${original.slug}`);
+    await expectCurrentFaq(original);
+    await user.click(screen.getByRole('link', { name: withoutFaq.title }));
+    expect(await screen.findByRole('heading', { level: 1, name: withoutFaq.title })).toBeInTheDocument();
+    await waitFor(() => expect(faqNodes()).toHaveLength(0));
+    await user.click(screen.getByRole('link', { name: 'All guides' }));
+    await user.click(screen.getByRole('link', { name: nextFaq.title }));
+    await expectCurrentFaq(nextFaq);
   });
 
   it("gives an unknown guide a recoverable no-index page", async () => {

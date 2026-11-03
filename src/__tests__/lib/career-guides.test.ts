@@ -10,7 +10,8 @@ describe("the original career guide library", () => {
     for (const guide of careerGuides) {
       expect(guide.slug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
       expect(careerGuideWordCount(guide), guide.slug).toBeGreaterThanOrEqual(500);
-      expect(guide.sections, guide.slug).toHaveLength(5);
+      expect(guide.sections.length, guide.slug).toBeGreaterThanOrEqual(5);
+      expect(guide.sections.length, guide.slug).toBeLessThanOrEqual(7);
       expect(guide.summary.length, guide.slug).toBeGreaterThan(150);
       expect(guide.description.length, guide.slug).toBeGreaterThan(80);
       expect(guide.takeaways, guide.slug).toHaveLength(3);
@@ -21,7 +22,7 @@ describe("the original career guide library", () => {
   });
 
   it("identifies worked examples, keeps related links valid and source references traceable", () => {
-    const domains = new Set(["careerservices.fas.harvard.edu", "capd.mit.edu", "ocs.yale.edu", "www.linkedin.com", "u.ae", "www.federalerp.gov.ae", "support.greenhouse.io", "support.microsoft.com", "jobvance.io"]);
+    const domains = new Set(["careerservices.fas.harvard.edu", "capd.mit.edu", "ocs.yale.edu", "www.linkedin.com", "u.ae", "www.federalerp.gov.ae", "support.greenhouse.io", "support.microsoft.com", "jobvance.io", "www.jobscan.co", "skillsyncer.com"]);
     for (const guide of careerGuides) {
       const examples = guide.sections.filter(section => section.example);
       expect(examples.length, guide.slug).toBeGreaterThanOrEqual(1);
@@ -65,7 +66,7 @@ describe("the original career guide library", () => {
     expect(editorialPolicy.approach).toMatch(/separate published source facts from our practical suggestions/i);
     expect(editorialPolicy.approach).toMatch(/worked examples illustrate the advice; they are not customer case studies/i);
     expect(editorialPolicy.approach).toMatch(/connected features depend on setup/i);
-    expect(editorialPolicy.approach).toMatch(/you review documents and submit applications yourself/i);
+    expect(editorialPolicy.approach).toMatch(/in the CV Check you read every change before you download it/i);
   });
 
   it("returns no fabricated article for an unknown or missing slug", () => {
@@ -75,9 +76,11 @@ describe("the original career guide library", () => {
 
   it("dates the new non-AI guide at its first publication without redating existing guides", () => {
     expect(getCareerGuide("cv-check-without-ai")).toMatchObject({ publishedAt: "2026-11-04", updatedAt: "2026-11-04" });
+    // Rewritten guides and guides with corrected citations carry the date of this update.
+    const rewritten = ["cv-job-description-evidence", "cv-check-no-fit-percentage", "resume-privacy-before-upload", "achievements-without-numbers", "cv-upload-failure-checklist", "mba-career-pivot-cv", "role-filtering-before-applying", "first-application-pack", "reuse-second-application", "cv-pdf-or-docx"];
     for (const guide of careerGuides.filter(guide => guide.slug !== "cv-check-without-ai")) {
       expect(guide.publishedAt).toBe("2026-10-13");
-      expect(guide.updatedAt).toBe("2026-10-14");
+      expect(guide.updatedAt).toBe(rewritten.includes(guide.slug) ? "2026-11-04" : "2026-10-14");
     }
   });
 });

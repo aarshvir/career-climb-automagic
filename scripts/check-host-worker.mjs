@@ -124,7 +124,16 @@ for(const page of publicRender.pages){
     assert.ok(!/<textarea\b|<input\b[^>]*type="file"/i.test(html),'Public pre-authentication HTML must not expose CV-source entry controls.');
     assert.ok(!/no account needed|saving to an account is optional|without an account/i.test(html),'Public CV Check must not advertise a guest product.');
   }
-  if(page.kind==='guide'){assert.ok(!html.includes('We could not find that guide.'));assert.ok(!html.includes('BlogPosting'),'Guides carry one article entity, not a second BlogPosting.');assert.equal((html.match(/"@type":"Article"/g)??[]).length,1,'Exactly one Article per guide.');assert.equal((html.match(/"@type":"Organization"/g)??[]).length,1,'The Organization node appears once.');assert.equal((html.match(/"@type":"ListItem"/g)??[]).length,3,'Guide breadcrumbs are Jobvance, Guides, the guide.');assert.ok(html.includes('Sources and further reading'));}
+  if(page.kind==='guide'){assert.ok(!html.includes('We could not find that guide.'));assert.ok(!html.includes('BlogPosting'),'Guides carry one article entity, not a second BlogPosting.');assert.equal((html.match(/"@type":"Article"/g)??[]).length,1,'Exactly one Article per guide.');assert.equal((html.match(/"@type":"Organization"/g)??[]).length,1,'The Organization node appears once.');assert.equal((html.match(/"@type":"ListItem"/g)??[]).length,3,'Guide breadcrumbs are Jobvance, Guides, the guide.');assert.ok(html.includes('Sources and further reading'));
+    const decode=value=>value.replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+    const nodes=[...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].flatMap(match=>{const data=JSON.parse(match[1]);return data['@graph']??[data];});
+    const faqs=nodes.filter(node=>node['@type']==='FAQPage');
+    const visibleSection=/<section id="guide-faq"[^>]*>([\s\S]*?)<\/section>/.exec(html)?.[1];
+    assert.equal(faqs.length,visibleSection?1:0,'FAQPage exists exactly when the visible guide has FAQs.');
+    if(visibleSection){const visible=[...visibleSection.matchAll(/<div class="cg-faq-item"><h3>([\s\S]*?)<\/h3><p>([\s\S]*?)<\/p><\/div>/g)].map(match=>({q:decode(match[1]),a:decode(match[2])}));
+      assert.ok(visible.length>=3,'A guide FAQ has at least three questions.');
+      assert.deepEqual(faqs[0].mainEntity.map(question=>({q:question.name,a:question.acceptedAnswer.text})),visible,'Every FAQ question and answer equals its visible text, in order.');}
+  }
   for(const match of html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)){
     JSON.parse(match[1]);
     const {createHash}=await import('node:crypto');

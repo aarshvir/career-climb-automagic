@@ -2,10 +2,13 @@
 export type GuideAudience = "Students" | "MBA candidates" | "Working professionals" | "All applicants";
 export type GuideCategory = "CV evidence" | "Career direction" | "Application workflow" | "UAE job search" | "Privacy & troubleshooting";
 export type GuideSource = { id: string; title: string; url: string };
+export type GuideFaq = { q: string; a: string };
+export type GuideTable = { caption: string; head: string[]; rows: string[][] };
 export type GuideSection = {
   heading: string;
   paragraphs: string[];
   bullets?: string[];
+  table?: GuideTable;
   example?: { label: string; text: string };
   sourceIds?: string[];
 };
@@ -21,6 +24,8 @@ export type CareerGuide = {
   summary: string;
   takeaways: string[];
   sections: GuideSection[];
+  /** Visible question-and-answer block. The page's FAQPage data repeats exactly this text. */
+  faqs?: GuideFaq[];
   sources: GuideSource[];
   relatedSlugs: string[];
 };
@@ -28,7 +33,7 @@ export type CareerGuide = {
 export const editorialPolicy = {
   publisher: "Jobvance Editorial",
   disclosure: "These Jobvance guides bring together practical checklists, worked examples and published sources. They provide general application guidance, rather than individual career or legal advice.",
-  approach: "We separate published source facts from our practical suggestions. Worked examples illustrate the advice; they are not customer case studies. Product instructions describe the available review workflow, and connected features depend on setup. You review documents and submit applications yourself.",
+  approach: "We separate published source facts from our practical suggestions. Worked examples illustrate the advice; they are not customer case studies. Product instructions describe the available review workflow, and connected features depend on setup. In the CV Check you read every change before you download it.",
   researchedAt: "2026-10-13",
 };
 
@@ -36,7 +41,6 @@ const SOURCES = {
   harvard: { id: "harvard-resume", title: "Harvard MCS: Create a strong resume", url: "https://careerservices.fas.harvard.edu/resources/create-a-strong-resume/" },
   mitProjects: { id: "mit-projects", title: "MIT CAPD: Crafting an effective resume", url: "https://capd.mit.edu/resources/career-toolkit-crafting-an-effective-resume/" },
   mitBullets: { id: "mit-bullets", title: "MIT CAPD: Writing about your skills", url: "https://capd.mit.edu/resources/resumes-writing-about-your-skills/" },
-  yale: { id: "yale-transition", title: "Yale OCS: Converting a CV to a professional resume", url: "https://ocs.yale.edu/stem-ppg-module-5-converting-your-cv-to-a-professional-resume/" },
   linkedin: { id: "linkedin-privacy", title: "LinkedIn Help: Let recruiters know you are Open to Work", url: "https://www.linkedin.com/help/linkedin/answer/a507508" },
   fraud: { id: "uae-fraud", title: "UAE Government: Tips to avoid labour and visa fraud", url: "https://u.ae/en/information-and-services/visa-and-emirates-id/Visa-information/tips-to-avoid-labour-and-visa-fraud" },
   jobs: { id: "uae-jobs", title: "UAE Government: Searching for a job", url: "https://u.ae/en/information-and-services/jobs/Find-a-job/searching-for-a-job" },
@@ -48,48 +52,77 @@ const SOURCES = {
   interview: { id: "harvard-interview", title: "Harvard MCS: Interviewing", url: "https://careerservices.fas.harvard.edu/resources/interviewing/" },
   workflow: { id: "jobvance-workflow", title: "Jobvance: How the application workflow works", url: "https://jobvance.io/how-it-works" },
   privacy: { id: "jobvance-privacy", title: "Jobvance: Privacy information", url: "https://jobvance.io/privacy" },
+  cvCheck: { id: "jobvance-cv-check", title: "Jobvance: Free CV Check", url: "https://jobvance.io/cv-check" },
 } satisfies Record<string, GuideSource>;
 
-type GuideDraft = Omit<CareerGuide, "publishedAt" | "updatedAt" | "readingMinutes">;
-export function careerGuideWordCount(guide: Pick<CareerGuide, "summary" | "sections">): number {
+/** `updatedAt` moves only when a guide's text changes; unchanged guides keep the shared first-release date. */
+type GuideDraft = Omit<CareerGuide, "publishedAt" | "updatedAt" | "readingMinutes"> & { updatedAt?: string };
+export function careerGuideWordCount(guide: Pick<CareerGuide, "summary" | "sections" | "faqs">): number {
   return [guide.summary, ...guide.sections.flatMap(section => [
-    ...section.paragraphs, ...(section.bullets ?? []), section.example?.text ?? "",
-  ])].join(" ").trim().split(/\s+/).filter(Boolean).length;
+    ...section.paragraphs, ...(section.bullets ?? []), ...(section.table ? [section.table.caption, ...section.table.head, ...section.table.rows.flat()] : []), section.example?.text ?? "",
+  ]), ...(guide.faqs ?? []).flatMap(faq => [faq.q, faq.a])].join(" ").trim().split(/\s+/).filter(Boolean).length;
 }
 function publish(guide: GuideDraft): CareerGuide {
-  return { ...guide, publishedAt: "2026-10-13", updatedAt: "2026-10-14", readingMinutes: Math.max(1, Math.ceil(careerGuideWordCount(guide) / 200)) };
+  return { ...guide, publishedAt: "2026-10-13", updatedAt: guide.updatedAt ?? "2026-10-14", readingMinutes: Math.max(1, Math.ceil(careerGuideWordCount(guide) / 200)) };
 }
 
 export const careerGuides: CareerGuide[] = [
   publish({
     slug: "cv-job-description-evidence",
-    title: "Compare your CV with a job description using evidence",
-    description: "Compare a job description with your CV, choose relevant examples and identify the details to add before applying.",
+    title: "Check if your CV matches a job description",
+    description: "Check if your CV matches a job description: split the ad into requirements, find the CV line for each, label the gaps, then decide what to change.",
     audience: "All applicants", category: "CV evidence",
-    summary: "Put the job description beside your CV and work through the requirements one at a time. This guide shows how to find relevant examples, clarify your contribution and decide what to add or change before preparing the application.",
-    takeaways: ["Separate skills, experience and employer conditions.", "Connect each claim to an actual passage.", "Review gaps before rewriting."],
+    updatedAt: "2026-11-04",
+    summary: "To check if your CV matches a job description, split the ad into single requirements and find the closest CV line for each. Label each pair Covered, Partly covered, Not shown in your CV or Needs your judgment. In this guide, your CV matches when each essential requirement has a CV line that shows you did that work, and you check conditions such as work rights yourself. Then decide what to add, change or leave.",
+    takeaways: ["Split the ad into single requirements.", "Find the closest CV line for each one.", "Add true details, drop false ones, decide on real gaps."],
     sections: [
+      { heading: "How to test your CV against one job ad in ten minutes", paragraphs: [
+        "Give yourself ten minutes with the ad on one side and your CV on the other. First mark the must-have requirements, the ones the ad calls required or essential. Then answer the three questions below, in order. The labels are explained in the table further down.",
+        "Once you have answered them, apply one rule. Add true details that are missing from your CV, and drop wording that is not true. If an essential condition is genuinely not met, decide on purpose whether to apply, ask the employer or leave the role. The test shows where your CV stands against one ad, and it makes no promise about an interview or a job."
+      ], bullets: [
+        "Can you point to a CV line for each must-have requirement? Write the line number or copy the line beside the requirement.",
+        "For each Partly covered requirement, is the missing detail true, and could you explain it in an interview? Add it only if both answers are yes.",
+        "For each Not shown in your CV requirement, does the employer call it essential or preferred, and is the gap real? Check your records before you decide that it is."
+      ] },
+      { heading: "Use gaps to make an application choice", paragraphs: [
+        "A gap can mean three things: relevant experience missing from the CV, related experience that needs a clearer explanation, or an essential qualification you genuinely lack. Treat each case separately. Adding an example fixes the first case; it cannot fix the third.",
+        "When a condition is ambiguous, consider a concise question through the employer's stated channel. When the employer clearly requires a credential you do not hold, record that fact and make a deliberate decision. Do not hide it behind repeated keywords. Save your notes so the same uncertainty does not use up time again next week."
+      ], table: {
+        caption: "What to do for each label. These are your own labels, applied by you. Jobvance's CV Check, which needs a free account, uses the same four names for wording matches only; the last section explains the difference.",
+        head: ["Label", "What it means", "What to do"],
+        rows: [
+          ["Covered", "A line in your CV shows the work the ad asks for, in clear words.", "Keep the line. Read it once more against the ad, and be ready to explain it in an interview."],
+          ["Partly covered", "A related line exists, but it shows different or smaller work than the ad asks for, for example \"supported\" where the ad says \"lead\".", "Ask what is true. If you did more, add the true detail to the line. If you did not, leave the line as it is."],
+          ["Not shown in your CV", "No line in your CV shows the requirement.", "Search your records for a true example and add it if you find one. If not, treat it as a real gap and check whether the ad calls it essential or preferred."],
+          ["Needs your judgment", "The requirement is a condition such as work rights or a licence, not a skill that one CV line can show.", "Check it against the ad and your own situation. Decide whether you meet it, and ask the employer if the wording is unclear."]
+        ]
+      } },
       { heading: "Break the vacancy into decisions", paragraphs: [
         "Read the full vacancy once before editing. Then list its requirements: the work to be done, tools used, experience, qualifications, location, schedule and deadline. A sentence such as 'lead weekly reporting and support budget preparation' describes two responsibilities. Separating them makes it easier to choose a specific example for each.",
         "Mark whether the employer describes a requirement as essential, preferred or unclear. Preserve that wording rather than choosing for them. Visa status, work location and deadlines are decisions to verify; they do not need achievement bullets. Keep the source URL and the date you checked it alongside your notes."
       ] },
       { heading: "Find the passage before changing the phrase", paragraphs: [
         "For every work requirement, copy the closest truthful passage from your CV into a second column. Add a short note explaining the connection. If the vacancy names stakeholder reporting, a passage about preparing monthly reports for department heads may be relevant. A skills list containing 'communication' is weaker evidence because it does not show an action, audience or output.",
-        "Use four working labels: clearly supported, related but incomplete, no example found, and needs a human decision. These are editorial notes, not the employer's assessment. Harvard's resume guidance recommends tailoring the emphasis to the position. Our evidence table makes that tailoring traceable without changing what happened."
+        "Give each pair one of the four labels in the table above. These are working notes, not the employer's assessment. Harvard's career services guidance says to tailor your resume to the type of position you are seeking, and to reflect the skills the employer would value. A two-column table makes that tailoring traceable without changing what happened."
       ], sourceIds: ["harvard-resume"] },
       { heading: "Resolve ownership and result status", paragraphs: [
-        "Ask two questions of every strong-looking match: what did I personally do, and what result actually occurred? Preparing a recommendation is different from approving it. A projected saving is different from a measured saving. A university project is different from paid employment. Those boundaries should remain visible even when you shorten the language.",
+        "Ask two questions of every strong-looking match: what did I personally do, and what result actually occurred? Preparing a recommendation is different from approving it, and a projected saving is different from a measured saving. A university project is different from paid employment. Those boundaries should remain visible even when you shorten the language.",
         "If the source passage is vague, return to your own records or memory and add a verified detail. Do not let a rewrite fill uncertainty with a confident verb. If you cannot establish the outcome, describe the deliverable and its purpose. You can still show useful work without claiming a result you cannot defend."
-      ], example: { label: "Worked example", text: "Vacancy: 'Own monthly forecasting.' Original CV: 'Supported the finance manager by preparing forecast inputs.' Review: related forecasting experience, but ownership is unproven. Truthful revision: 'Prepared forecast inputs and reconciled departmental assumptions for the finance manager's monthly review.' The manager's responsibility has not become the applicant's." } },
-      { heading: "Use gaps to make an application choice", paragraphs: [
-        "A gap can mean different things. You may have relevant experience that is missing from the CV. You may have related experience that needs a clear explanation. You may genuinely lack an essential qualification. Deal with those cases separately. Adding an example fixes the first case; it cannot fix the third.",
-        "When a condition is ambiguous, consider a concise question through the employer's stated channel. When the employer clearly requires a credential you do not hold, record that fact and make a deliberate decision. Do not obscure it with repeated keywords. Save your notes so the same uncertainty does not consume time again next week."
-      ] },
+      ], example: { label: "Worked example", text: "Invented example, not a real CV. Ad requirement: 'Lead the monthly forecasting process.' CV line: 'Supported the finance manager by preparing forecast inputs.' Label: Partly covered, because the line shows related forecasting work but not ownership. A rewrite can only use what the line already says, for example: 'Prepared forecast inputs for the finance manager.' That does not close the gap. If the applicant's own records show more work, such as owning part of the forecast, that is a new fact to check and add as its own line, not a rewording. If not, the requirement stays Partly covered." } },
       { heading: "Review one role at a time", paragraphs: [
         "Open the original vacancy beside the final CV. Check names, dates, tools, contribution verbs and qualifications. Read the document as a recruiter would: can a person understand the connection without the comparison table? Then review the actual application form, which may ask separate eligibility questions.",
-        "You can use Jobvance's free CV check to place vacancy wording beside your CV passages, then review the findings yourself. Matching wording does not verify qualifications or predict an interview. Begin with one vacancy, finish the review, and keep the approved version with that role before moving to another application."
-      ], sourceIds: ["jobvance-workflow"] }
-    ], sources: [SOURCES.harvard, SOURCES.workflow], relatedSlugs: ["achievements-without-numbers", "cv-check-no-fit-percentage", "first-application-pack"]
+        "Jobvance's free CV Check can show the closest line in your CV beside each requirement it reads, where it finds one. It reads up to the first 40 parsed requirements, in English. You need a free account to open it, and comparing without AI has no limit. It uses the same four labels, but its Covered means the ad's wording appears in your CV. It compares wording and does not check that the line shows real work, so you read each result yourself before you download anything. Matching wording does not verify qualifications or predict an interview, so begin with one vacancy, finish the review and keep the approved version with that role."
+      ], sourceIds: ["jobvance-cv-check"] }
+    ],
+    faqs: [
+      { q: "How do I check if my CV matches a job description?", a: "Split the ad into single requirements, then find the closest line in your CV for each one. Label each pair Covered, Partly covered, Not shown in your CV or Needs your judgment. Add true details where a line is partial or missing, and decide on purpose where a gap is real. You can do this by hand in a two-column table or with a CV check tool." },
+      { q: "Is a keyword match the same as being qualified?", a: "No. A shared word shows that your CV and the ad use the same term, not that you did the same work. 'Supported a team' and 'led a team' share words but describe different jobs. Read the whole line around each match: what you did, in what setting and with what result. Only then decide whether it counts as evidence." },
+      { q: "What if I meet only some requirements?", a: "Focus on the requirements the employer calls essential, and treat preferred ones as a lower priority. If you can truthfully add a missing detail, add it. If an essential condition is genuinely not met, decide on purpose: ask the employer, apply knowing the gap, or leave the role. Jobvance's check cannot tell you how an employer will decide." },
+      { q: "Should I copy phrases from the ad into my CV?", a: "Only when the phrase truthfully describes work you did. Use the ad's words to find your matching lines, then describe your own work in plain terms. Copying a phrase you cannot back up adds a claim you will have to explain in an interview. If the work was smaller than the phrase says, keep your own wording and let the gap show." },
+      { q: "Can Jobvance run this check for me?", a: "It can do the wording part. Jobvance's free CV Check compares your CV with one job ad and shows the closest CV line beside each requirement it reads, where it finds one, up to the first 40 parsed requirements in English. You need a free account to open it, and comparing without AI has no limit. Each requirement gets one of the four labels, but Covered means only that the ad's wording appears in your CV, so check that the line shows work you did. It gives no match percentage and does not predict what an employer decides." }
+    ],
+    sources: [SOURCES.harvard, SOURCES.cvCheck],
+    relatedSlugs: ["cv-check-no-fit-percentage", "cv-check-without-ai", "achievements-without-numbers", "first-application-pack"]
   }),
   publish({
     slug: "student-projects-on-cv",
@@ -124,9 +157,10 @@ export const careerGuides: CareerGuide[] = [
   publish({
     slug: "mba-career-pivot-cv",
     title: "How to adapt your CV for an MBA career pivot",
-    description: "Choose a target role, connect your previous work with its responsibilities and show where MBA projects add relevant experience.",
+    description: "Choose a target role, connect your previous work with its responsibilities and show where MBA projects add relevant evidence.",
     audience: "MBA candidates", category: "Career direction",
-    summary: "Your previous work and MBA projects can give you several ways to explain a career move. Start with the responsibilities of the role you want, then choose the examples that connect your experience to that work. This guide walks through that choice and how to show it on your CV.",
+    updatedAt: "2026-11-04",
+    summary: "To adapt your CV for an MBA career pivot, start from the work the new role does and pick true examples from your earlier jobs and MBA projects that show it. Keep your old job titles and dates. Label MBA projects as projects. Say whether each result was delivered, tested or only proposed.",
     takeaways: ["Define the next role's actual work.", "Build the bridge from specific past actions.", "Label MBA projects and proposed outcomes."],
     sections: [
       { heading: "Choose a direction before choosing wording", paragraphs: [
@@ -134,22 +168,37 @@ export const careerGuides: CareerGuide[] = [
         "Compare two or three vacancies in that direction. Identify recurring responsibilities, then separate them from company-specific tools and eligibility conditions. Job titles can cover different work, so read the responsibilities of each role. Use the actual vacancy to decide which examples should lead your CV and which can sit further down."
       ] },
       { heading: "Create a bridge from previous employment", paragraphs: [
-        "Map prior actions to the new responsibilities without renaming your old job. A supply-chain coordinator may have evidence of analysis, stakeholder updates and process documentation. Those actions can support an analyst application, while the original title and dates remain accurate. Yale's career guidance describes a professional resume as selectively emphasising relevant experience and transferable skills.",
-        "For each connection, name the experience you can bring and the context you would be learning. Preparing internal reports, for example, can show analysis and communication relevant to consulting. Explain the reports, the audience and your part in the work, then consider what you would need to learn about working with external clients."
-      ], sourceIds: ["yale-transition"] },
+        "Map prior actions to the new responsibilities without renaming your old job. A supply-chain coordinator may have evidence of analysis, stakeholder updates and process documentation. Those actions can support an analyst application, while the original title and dates remain accurate. Yale's career guidance for PhDs describes a resume as selectively emphasising the skills and experiences most relevant to the job, and says transferable skills may be what you highlight.",
+        "For each connection, name the experience you can bring and the context you would be learning. Preparing internal reports, for example, can show analysis and communication relevant to an analyst role. Explain the reports, the audience and your part in the work, then consider what you would still need to learn, such as the tools or the audience in the new role."
+      ], example: { label: "Worked example", text: "Invented illustration, not a real CV or a customer result. An invented procurement coordinator, who uses 'PO' to mean purchase order, applies for an operations analyst role whose ad asks for regular reporting to a team. Before: 'Prepared PO (purchase order) status updates and supplier scorecards for the category team.' After: 'Prepared purchase order status updates and supplier scorecards for the category team.' The After line drops the abbreviation and keeps only words already in the Before line, and it moves to the top of that job's bullets because the ad asks for reporting. No number, tool, qualification, ownership verb or other detail was added, and the job title and dates stay as they were." }, sourceIds: ["yale-transition"] },
       { heading: "Use MBA evidence for the right claim", paragraphs: [
         "An MBA project can show structured research, financial modelling, synthesis or presentation. Give it a clear setting: a case exercise, independent project, student consulting engagement or employer-sponsored assignment. If an external organisation was involved, check how you may describe it. Use an 'MBA projects' heading and explain your role within the team.",
         "Describe the status of recommendations. A modelled return is a forecast, a pilot is a test, and an accepted presentation is not an implemented transformation. Keep prior workplace outcomes and academic outputs in separate entries. Readers should not have to guess which organisation benefited or whether the proposal ever left the classroom."
-      ], example: { label: "Worked example", text: "A former procurement coordinator applies for an operations analyst role. Employment evidence: 'Prepared supplier performance reports for quarterly reviews.' MBA evidence: 'Compared inventory scenarios in a team case project and presented a proposed replenishment policy.' The proposed policy is not described as a delivered cost saving." } },
+      ], table: { caption: "Where each kind of evidence goes on a pivot CV", head: ["Kind of evidence", "Where it goes", "What to state"], rows: [
+        ["Previous employment", "Under that job, with the original title, employer and dates.", "Your own actions and what you produced, in plain words, with the ones closest to the new role first."],
+        ["Paid internship or placement", "Under experience, like any job, with the employer, title and dates.", "What you did and produced, the same as for a job. Do not move it under projects."],
+        ["MBA project", "Under an 'MBA projects' heading, apart from paid jobs.", "The setting, your role in the team and what the team produced."],
+        ["Sponsored or client assignment", "Under 'MBA projects', with the organisation named only if you may name it.", "What you did for the organisation, kept apart from your own employers."],
+        ["Proposed recommendation", "Inside the project entry, never as a job result.", "That it was a forecast, a pilot or a proposal, so nobody reads it as delivered."]
+      ] }, example: { label: "Worked example", text: "Invented illustration, not a real person. A former procurement coordinator applies for an operations analyst role. Employment evidence: 'Prepared purchase order status updates and supplier scorecards for the category team.' MBA evidence: 'Compared inventory scenarios in a team case project and presented a proposed replenishment policy.' The proposed policy is not described as a delivered cost saving." } },
       { heading: "Write a short pivot explanation", paragraphs: [
         "Use three linked ideas in a cover-letter paragraph: your relevant prior action, what the MBA added, and why this vacancy is a sensible next step. Avoid saying the degree makes you ready for every responsibility. Name the work that interests you and one or two examples supporting it. The reader can then judge the connection.",
         "Check for vague ambition words such as 'dynamic', 'strategic' and 'passionate'. Replace them with an action or decision where possible. If the pivot also changes industry, function and seniority, explain those choices separately in your own planning notes. You may discover that an intermediate role offers a clearer bridge than the first title you imagined."
       ] },
       { heading: "Validate the story across documents", paragraphs: [
         "Read your CV, application answers and recruiter draft together. They should tell the same story about dates, seniority, contribution and project status. A cautious CV loses credibility if a message suddenly claims you led transformations. Keep one approved statement of the pivot that you can adapt without expanding its factual claims.",
-        "Prepare one vacancy first. Use Jobvance's MBA workflow to bring prior work and projects into the review, then check every suggested phrase yourself. Keep the unanswered requirements as questions or development needs. Your next action is to complete one defensible packet, not to produce a general CV that promises expertise in every post-MBA direction."
-      ] }
-    ], sources: [SOURCES.yale], relatedSlugs: ["role-filtering-before-applying", "truthful-recruiter-drafts", "student-projects-on-cv"]
+        "Prepare one vacancy first. Keep the requirements you cannot yet meet as questions or development needs. Jobvance's free CV Check compares one CV with one job ad and shows the closest line from your CV beside each requirement it reads. It needs a free account.",
+        "Comparing without AI runs on your device. If you choose AI tailoring, your CV text and the job description, title and company are sent to Jobvance's AI provider. If you then use the optional step that improves your CV with answers you confirm, those answers are sent too. You read every change before you download. Your next action is to complete one defensible packet, not to produce a general CV that promises expertise in every post-MBA direction."
+      ], sourceIds: ["jobvance-cv-check"] }
+    ],
+    faqs: [
+      { q: "How do I explain an MBA career pivot on my CV?", a: "Name the role you want, then show the earlier work and MBA projects that match what that role does. Keep your old job titles and dates as they were. Put the most relevant examples first, say what you did yourself, and describe each result as delivered, tested or proposed. A one-sentence summary at the top can state the direction." },
+      { q: "Should I list MBA projects as work experience?", a: "No. List them under their own heading, such as MBA projects, instead of mixing them with paid jobs. Name the setting, your role and what was produced. A paid internship or placement is different: it is work experience, so list it with your jobs. Project work is not automatically evidence of required professional experience, so keep classroom work and paid work clearly apart, and never present a proposal as a result that was delivered." },
+      { q: "Do I need to change my old job titles for the new role?", a: "No, and you should not. Keep the title, employer and dates exactly as they were. What you can change is which duties come first and which words describe them, as long as every line stays true. If your old company used internal shorthand, replace it with plain words, but only when you know exactly what the shorthand stood for." },
+      { q: "Can Jobvance help me adapt my CV for a career pivot?", a: "Yes, one job ad at a time. Jobvance's free CV Check lists the requirements it reads and shows the closest line from your CV beside each one. You need a free account. Comparing without AI runs on your device. AI tailoring is optional and sends your CV text and the job description, title and company to Jobvance's AI provider, plus any answers you confirm in the optional improve step. It gives no fit percentage and does not tell you what an employer will decide." }
+    ],
+    sources: [{ id: "yale-transition", title: "Yale OCS: Professional resumes for PhDs", url: "https://ocs.yale.edu/blog/2020/06/08/professional-resumes-for-phds/" }, SOURCES.cvCheck],
+    relatedSlugs: ["role-filtering-before-applying", "truthful-recruiter-drafts", "student-projects-on-cv"]
   }),
   publish({
     slug: "confidential-career-switch",
@@ -186,6 +235,7 @@ export const careerGuides: CareerGuide[] = [
     title: "Filter roles before spending time on an application",
     description: "Create a manageable job shortlist by checking responsibilities, essential conditions and the time each application needs.",
     audience: "All applicants", category: "Career direction",
+    updatedAt: "2026-11-04",
     summary: "Before rewriting your CV, decide which vacancies deserve a closer look. Check the work, the practical conditions and the experience you can offer. A short note explaining why you want to apply, ask a question or move on will help you pick the next application.",
     takeaways: ["Check essential conditions before tailoring.", "Separate unknowns from clear mismatches.", "Choose a next action for each saved role."],
     sections: [
@@ -199,8 +249,8 @@ export const careerGuides: CareerGuide[] = [
       ] },
       { heading: "Identify your strongest and weakest evidence", paragraphs: [
         "Select the three responsibilities most central to the role. For each, note your closest example and the remaining gap. Keep the original context: academic, internship, previous employment or volunteering. This is a quick screening note, not a finished CV. You are deciding whether a deeper review has a useful purpose.",
-        "Yale's resume guidance recommends emphasising experience relevant to a prospective employer. Our shortlist adds an earlier decision: whether that relevant evidence is strong enough to justify preparation time. A transferable action may support a pivot while a required licence remains absent. Do not combine those distinct observations into a percentage."
-      ], sourceIds: ["yale-transition"], example: { label: "Worked example", text: "A working operations coordinator saves two vacancies. Role A asks for reporting and process documentation, both supported by prior work; an unfamiliar tool needs review. Role B requires a professional licence the candidate does not hold. The shortlist records 'review A' and 'exclude B: required licence absent', rather than giving both a fit score." } },
+        "Harvard's resume guidance recommends tailoring your resume to the type of position and the skills an employer would value. Our shortlist adds an earlier decision: whether that relevant evidence is strong enough to justify preparation time. A transferable action may support a pivot while a required licence remains absent. Do not combine those distinct observations into a percentage."
+      ], sourceIds: ["harvard-resume"], example: { label: "Worked example", text: "A working operations coordinator saves two vacancies. Role A asks for reporting and process documentation, both supported by prior work; an unfamiliar tool needs review. Role B requires a professional licence the candidate does not hold. The shortlist records 'review A' and 'exclude B: required licence absent', rather than giving both a fit score." } },
       { heading: "Assign a next action, not a vague bookmark", paragraphs: [
         "Use a few understandable states: review now, verify a condition, revisit later or exclude. Add one reason and one next action. 'Verify work location with employer before Friday' is actionable; 'interesting' is not. If there is no action worth taking, remove the role from the active list so it does not keep competing for attention.",
         "Consider the application cost. A lengthy task, multiple essays or an approaching deadline changes what can realistically fit in your week. This does not mean lengthy applications are poor opportunities. It means you should allocate time deliberately and avoid beginning more packets than you can review responsibly."
@@ -209,7 +259,7 @@ export const careerGuides: CareerGuide[] = [
         "Open the original listing when you begin the packet and again before submission. Confirm it is still available and the requirements have not changed. Save the checked date and role reference. A job-board copy may remain accessible after the employer has closed the vacancy, so use the employer's destination where possible.",
         "Choose one role from the active shortlist and compare the CV evidence in Jobvance's free check. If you use the Automated Job Loop, save confirmed career facts and keep each role's packet separate. You decide which roles to apply for and complete submission yourself. A short, deliberate list is a starting point for action, not a hiring forecast."
       ] }
-    ], sources: [SOURCES.yale], relatedSlugs: ["verify-job-listing-source", "cv-job-description-evidence", "job-search-time-plan"]
+    ], sources: [SOURCES.harvard], relatedSlugs: ["verify-job-listing-source", "cv-job-description-evidence", "job-search-time-plan"]
   }),
   publish({
     slug: "verify-job-listing-source",
@@ -242,40 +292,63 @@ export const careerGuides: CareerGuide[] = [
     ], sources: [SOURCES.fraud], relatedSlugs: ["uae-job-search-sources", "role-filtering-before-applying", "resume-privacy-before-upload"]
   }),
   publish({
-    slug: "achievements-without-numbers",
-    title: "How to write CV achievements without numbers",
-    description: "Write specific CV bullets using the task, your actions, the scope of your work and what you produced.",
-    audience: "All applicants", category: "CV evidence",
-    summary: "You can write a useful CV bullet without a percentage. Describe the task, what you did and who used the result. This guide shows how to find those details in everyday work and turn them into examples you can explain in an interview.",
-    takeaways: ["Describe the action, context and output.", "Use numbers only when their basis is clear.", "Keep estimates and forecasts labelled."],
-    sections: [
-      { heading: "Recover the task behind the job title", paragraphs: [
-        "Choose one recurring task or completed piece of work. Ask what triggered it, what you did and who used the output. 'Responsible for reporting' describes an area of work. 'Prepared monthly stock reports for the operations review' describes an action, timing and audience. The latter gives a reader something concrete to evaluate.",
-        "MIT's resume guidance uses project, action and result to structure accomplishment statements. A result can be a completed deliverable or a documented change; it does not have to be a revenue number. Use the framework to recover detail, then decide which detail belongs on a short CV entry."
-      ], sourceIds: ["mit-bullets"] },
-      { heading: "Use scope that you can verify", paragraphs: [
-        "Look for factual dimensions of the task: reporting frequency, type of stakeholders, documents prepared, systems used or stages coordinated. These details can make an entry specific even when the business outcome was not measured. A verified count may help, but do not add one merely to make the sentence look more impressive.",
-        "Be careful with approximations. If you can only remember that an event had several speakers, naming the event and your responsibility may be sufficient. If an estimate is necessary and defensible, label it as approximate and keep the basis in your private notes. Avoid turning a memory into an exact figure through repeated rewriting."
-      ] },
-      { heading: "Separate useful work from causal claims", paragraphs: [
-        "Preparing a guide that colleagues used is a concrete contribution. Claiming that the guide increased productivity requires additional evidence. Ask whether you observed the outcome, whether it was measured and whether your work was responsible for it. If you cannot answer, describe the output and use rather than the unproven business effect.",
-        "The same rule applies to teamwork. You can write that you contributed analysis to a team decision without claiming the entire decision's impact. If a manager confirmed that a process was adopted, describe adoption accurately. Avoid broad phrases such as 'transformed operations' when the evidence is a small but valuable improvement."
-      ], example: { label: "Worked example", text: "Weak: 'Increased efficiency by 30%.' No measurement exists. Truthful: 'Created a handover checklist covering outstanding orders, owners and next actions; the shift team used it during daily handovers.' The revised bullet explains the work and its use without inventing a productivity result." } },
-      { heading: "Choose verbs that preserve your role", paragraphs: [
-        "Ownership verbs deserve particular attention. 'Led', 'owned' and 'delivered' may imply responsibility beyond the task you performed. 'Prepared', 'tested', 'coordinated' and 'supported' can still describe substantial work. Select the verb based on your action, then make the object specific enough that the contribution does not disappear behind modest wording.",
-        "If the work was incomplete, say what stage you reached. A prototype, recommendation or draft is a real output with a defined status. A proposed saving should remain proposed. Do not remove that qualifier to save space. Shorten the surrounding sentence instead, because status changes alter the factual meaning."
-      ] },
-      { heading: "Create a repeatable evidence note", paragraphs: [
-        "For each final bullet, keep a private note with the task, your action, result status and any number's source. This note does not need to contain confidential documents. Its purpose is to help you avoid expanding the claim when a later vacancy asks for more senior responsibilities.",
-        "Read the entry aloud and answer an imagined follow-up: 'How do you know?' If the answer is clear, compare the bullet with the target vacancy. Jobvance's free CV check can help identify where an example is relevant or incomplete. Keep the specific evidence and resist adding metrics to satisfy a template. A truthful, useful sentence is the objective."
-      ] }
-    ], sources: [SOURCES.mitBullets], relatedSlugs: ["cv-job-description-evidence", "interview-stories-from-cv", "truthful-recruiter-drafts"]
+  slug: "achievements-without-numbers",
+  title: "How to write CV achievements without numbers",
+  description: "Write strong CV bullets without numbers: state the task, what you did, the scope and what you produced. Includes seven invented before-and-after examples.",
+  audience: "All applicants", category: "CV evidence",
+  updatedAt: "2026-11-04",
+  summary: "You can write a strong CV bullet without a number by stating the task, what you did, the scope in plain words and what was produced. Name the work, who used it and how often it happened. Add a number only when you can show where it came from, and label any estimate as an estimate.",
+  takeaways: ["Describe the task, your action, the scope and what you produced.", "Use a number only when you can show its basis.", "Label any estimate as an estimate, and use only one you can defend."],
+  sections: [
+    { heading: "Recover the task behind the job title", paragraphs: [
+      "Choose one recurring task or completed piece of work. Ask what triggered it, what you did and who used the output. 'Responsible for reporting' names an area of work, while 'Prepared monthly stock reports for the operations review' gives an action, timing and audience. The second gives a reader something concrete to evaluate.",
+      "MIT's resume guidance asks for an action verb, the project and the result in each bullet, and says numbers help the reader see the impact. Our suggestion, for when you have no number: the result can be what you produced and who used it. Use the framework to recover detail, then decide which detail belongs on a short CV entry."
+    ], sourceIds: ["mit-bullets"] },
+    { heading: "Six before-and-after examples", paragraphs: [
+      "The six pairs below are invented for illustration. They are not from any customer or real CV. In each After line, every fact was already in its Before line, so the rewrite adds no number, tool name, qualification or stronger verb.",
+      "Use them as patterns, not as text to copy. A rewrite helps only when every word of it is true for your own work and you could explain it in an interview. If a better verb or a bigger claim comes to mind, check it against what happened before you write it down."
+    ], table: {
+      caption: "Six invented pairs for illustration. They are not from any customer or real CV.",
+      head: ["Before", "After", "What changed"],
+      rows: [
+        ["Responsible for the monthly stock report. I put it together and sent it to the operations team.", "Put together the monthly stock report and sent it to the operations team.", "'Responsible for' names an area of work. The Before line also says what the person did, so the After line can lead with those actions. Nothing is added."],
+        ["Boosted engagement by posting event updates on the club's social media.", "Posted event updates on the club's social media.", "The effect had no evidence behind it, so it was removed. What you did stays."],
+        ["Helped with induction for new starters: showed them around and explained the shift routine in a talk.", "Helped with new starter induction by showing new starters around and explaining the shift routine.", "The modest verb 'helped' is kept on purpose. Both actions stay, and the detail that one was a talk is dropped."],
+        ["Group project for a marketing module: wrote the survey questions.", "Wrote the survey questions for a group project in a marketing module.", "Your own part comes first, and the group setting stays in the line so it is not read as solo work."],
+        ["Strong communicator: spoke to customers at the front desk every day and noted their requests.", "Spoke to customers at the front desk every day and noted their requests.", "The skill claim was dropped because the two actions already show it."],
+        ["Trained new starters, roughly 10 in total by my count of the rota.", "Trained about 10 new starters.", "'Roughly' becomes 'about', which marks the number as an estimate. The basis, your count of the rota, moves to your private notes. If you cannot explain the basis, leave the number out."]
+      ]
+    } },
+    { heading: "Use scope that you can verify", paragraphs: [
+      "Look for factual dimensions of the task: reporting frequency, type of stakeholders, documents prepared, systems used or stages coordinated. These details can make an entry specific even when the business outcome was not measured. A verified count may help, but do not add one merely to make the sentence look more impressive.",
+      "Be careful with approximations. If you can only remember that an event had several speakers, naming the event and your responsibility may be sufficient. If you do need an estimate, use only one you can defend, label it as an estimate with a word such as 'about', and keep the basis in your private notes. Avoid turning a memory into an exact figure through repeated rewriting."
+    ] },
+    { heading: "Separate useful work from causal claims", paragraphs: [
+      "Preparing a guide that colleagues used is a concrete contribution. Claiming that the guide increased productivity requires additional evidence. Ask whether you observed the outcome, whether it was measured and whether your work was responsible for it. If you cannot answer, describe the output and use rather than the unproven business effect.",
+      "The same rule applies to teamwork. You can write that you contributed analysis to a team decision without claiming the entire decision's impact. If a manager confirmed that a process was adopted, describe adoption accurately. Avoid broad phrases such as 'transformed operations' when the evidence is a small but valuable improvement."
+    ], example: { label: "Worked example", text: "Invented example for illustration, not from any customer. Before: 'Created a handover checklist that the shift team used at daily handovers, which increased efficiency by 30%.' No measurement exists for the 30%. After: 'Created a handover checklist that the shift team used at daily handovers.' The After line keeps the work and its use and drops the productivity result that nobody measured. Nothing is added." } },
+    { heading: "Choose verbs that preserve your role", paragraphs: [
+      "Ownership verbs deserve particular attention. 'Led', 'owned' and 'delivered' may imply responsibility beyond the task you performed. 'Prepared', 'tested', 'coordinated' and 'supported' can still describe substantial work. Select the verb based on your action, then make the object specific enough that the contribution does not disappear behind modest wording.",
+      "If the work was incomplete, say what stage you reached. A prototype, recommendation or draft is a real output with a defined status. A proposed saving should remain proposed, so do not remove that qualifier to save space. Shorten the surrounding sentence instead, because status changes alter the factual meaning."
+    ] },
+    { heading: "Create a repeatable evidence note", paragraphs: [
+      "For each final bullet, keep a private note with the task, your action, result status and any number's source. This note does not need to contain confidential documents. Its purpose is to help you avoid expanding the claim when a later vacancy asks for more senior responsibilities.",
+      "Read the entry aloud and answer an imagined follow-up: 'How do you know?' If the answer is clear, compare the bullet with the target vacancy. Jobvance's CV Check, which needs a free account, shows the closest line in your CV beside each requirement it reads in one job ad, where it finds one. It compares wording, so you decide whether each line really shows the work. Keep the specific evidence and do not add metrics just to fill a template."
+    ], sourceIds: ["jobvance-cv-check"] }
+  ],
+  faqs: [
+    { q: "Do all CV bullets need numbers?", a: "No. A bullet needs to be specific and true, not numeric. Some everyday tasks have no figure you can show, and a clear bullet names the task, what you did, the scope in plain words and what was produced. Add a number when you know exactly where it came from, such as a count in a record you can check." },
+    { q: "What if I do not know the result?", a: "Describe what you produced and who used it, and leave the result out. A delivered report, a checklist or a trained colleague is a real output, and you can say so without guessing at an effect. Do not add a result you cannot show, because an interviewer may ask how you know. If you find the result later, such as in a manager's note, add it then." },
+    { q: "Can I estimate a number on my CV?", a: "Yes, but only if it rests on something you counted or can check, and you label it as an estimate. Write 'about' or 'estimate' next to the figure, and keep in your private notes how you reached it, such as a rota or a list you counted. If you cannot explain the basis in an interview, leave the number out and describe the work in words instead." }
+  ],
+  sources: [SOURCES.mitBullets, SOURCES.cvCheck], relatedSlugs: ["cv-job-description-evidence", "interview-stories-from-cv", "truthful-recruiter-drafts", "student-projects-on-cv"]
   }),
   publish({
     slug: "first-application-pack",
     title: "What to include in your first job application",
     description: "Use the employer’s instructions to prepare your CV, application answers and any other documents the role requires.",
     audience: "All applicants", category: "Application workflow",
+    updatedAt: "2026-11-04",
     summary: "Start with what the employer asks for: a CV, the application questions and any requested documents. Keep them together for one vacancy, then review the details before submitting. This guide helps you work out what to prepare and what can wait.",
     takeaways: ["Read the employer's requested materials first.", "Prepare one role-specific packet.", "Approve the exact files you will submit."],
     sections: [
@@ -298,14 +371,15 @@ export const careerGuides: CareerGuide[] = [
       { heading: "Submit and record the actual event", paragraphs: [
         "Complete submission through the employer's stated route. Keep any confirmation reference or email, the submitted CV version and the date. Mark the application as submitted only after the employer's system or another reliable record confirms it. A prepared pack is not an application, and a downloaded file is not a receipt.",
         "Jobvance's free check helps with the CV review; the Automated Job Loop can organise role-specific CVs and drafts when configured. You approve the materials and send or submit them yourself. Start with one vacancy, complete its packet and keep its record. If you need help, use the public contact page before adding unnecessary information or beginning another run."
-      ], sourceIds: ["jobvance-workflow"] }
-    ], sources: [SOURCES.harvard, SOURCES.workflow], relatedSlugs: ["reuse-second-application", "cv-pdf-or-docx", "application-tracking-follow-up"]
+      ], sourceIds: ["jobvance-workflow", "jobvance-cv-check"] }
+    ], sources: [SOURCES.harvard, SOURCES.workflow, SOURCES.cvCheck], relatedSlugs: ["reuse-second-application", "cv-pdf-or-docx", "application-tracking-follow-up"]
   }),
   publish({
     slug: "reuse-second-application",
     title: "How to reuse your CV for a second application",
     description: "Use your reviewed experience as a starting point, then adapt the examples, documents and message for another vacancy.",
     audience: "All applicants", category: "Application workflow",
+    updatedAt: "2026-11-04",
     summary: "Keep the dates, qualifications and experience you have already checked. For the next vacancy, choose the examples that matter most and review the employer’s submission instructions. Reusing that work gives you a starting point while keeping each application specific to the role.",
     takeaways: ["Reuse facts rather than employer-specific assumptions.", "Compare what changed between vacancies.", "Keep separate approved versions and receipts."],
     sections: [
@@ -328,14 +402,15 @@ export const careerGuides: CareerGuide[] = [
       { heading: "Keep two applications as two records", paragraphs: [
         "Save the approved second CV under a role-specific filename and keep the submitted version with its application record. Do not overwrite the first employer's packet. When an interview arrives, you need to know what that employer received. Store submission status and follow-up dates separately from preparation status.",
         "Jobvance's Automated Job Loop uses a reusable career record to prepare separate role packets, subject to configured connections. You review and approve each packet. If you are using only the free check, bring the new vacancy and review it independently. Your next action is to approve the second role's exact files, then submit through its required channel yourself."
-      ], sourceIds: ["jobvance-workflow"] }
-    ], sources: [SOURCES.workflow], relatedSlugs: ["first-application-pack", "cv-job-description-evidence", "application-tracking-follow-up"]
+      ], sourceIds: ["jobvance-workflow", "jobvance-cv-check"] }
+    ], sources: [SOURCES.workflow, SOURCES.cvCheck], relatedSlugs: ["first-application-pack", "cv-job-description-evidence", "application-tracking-follow-up"]
   }),
   publish({
     slug: "cv-pdf-or-docx",
     title: "Should you send your CV as PDF or DOCX?",
     description: "Choose a CV format from the employer’s upload instructions, check the exported file and review any fields filled by the portal.",
     audience: "All applicants", category: "Application workflow",
+    updatedAt: "2026-11-04",
     summary: "Check the employer’s upload instructions first. If both PDF and DOCX are accepted, open each exported file and choose the one that presents your CV clearly in that application. Then review any form fields filled from the document before you submit.",
     takeaways: ["Follow the current application instructions.", "Inspect the exported file and selectable text.", "Review auto-filled fields after uploading."],
     sections: [
@@ -358,38 +433,122 @@ export const careerGuides: CareerGuide[] = [
       { heading: "Keep both formats under version control", paragraphs: [
         "You can retain PDF and DOCX copies of the same approved CV for different submission requirements. Give them matching role and version names so you can tell they contain the same reviewed content. When you change a fact, export both again if you need both; otherwise one can silently become stale.",
         "Jobvance's review flow lets you approve your CV before downloading available formats. Open the downloaded file and check it before attaching it. The next step is to satisfy the employer's actual upload instructions and review the form's fields. A successful export is one preparation step, not proof of compatibility with every recruitment system."
-      ], sourceIds: ["jobvance-workflow"] }
-    ], sources: [SOURCES.greenhouseFormats, SOURCES.greenhouseParse, SOURCES.workflow], relatedSlugs: ["cv-upload-failure-checklist", "resume-privacy-before-upload", "first-application-pack"]
+      ], sourceIds: ["jobvance-cv-check"] }
+    ], sources: [SOURCES.greenhouseFormats, SOURCES.greenhouseParse, SOURCES.cvCheck], relatedSlugs: ["cv-upload-failure-checklist", "resume-privacy-before-upload", "first-application-pack"]
   }),
   publish({
-    slug: "cv-check-no-fit-percentage",
-    title: "How to review a CV match score",
-    description: "Look beyond a CV match percentage to check the examples, missing details and job requirements behind it.",
-    audience: "All applicants", category: "CV evidence",
-    summary: "If a CV tool gives you a match score, look at the comparison behind the number. Which requirements have a relevant example, and which need more detail? This guide helps you use the underlying text to review your application and understand what a percentage leaves out.",
-    takeaways: ["Ask what a result measures.", "Inspect the passage behind each finding.", "Separate document review from hiring decisions."],
-    sections: [
-      { heading: "Identify the question the check can answer", paragraphs: [
-        "Start with the question you need answered: which requirements in this vacancy can I support with my experience? A text comparison can help you find related passages and missing examples. Read those passages before acting on a score, then check the responsibilities and eligibility conditions in the original vacancy.",
-        "Jobvance's free check shows findings such as Covered, Partly covered, Not shown in your CV and Needs your judgment. These labels describe a document comparison. Read the method explanation and the passages rather than turning the counts into a percentage of qualification. A direct match remains something you need to verify."
-      ], sourceIds: ["jobvance-workflow"] },
-      { heading: "Watch for the same words doing different work", paragraphs: [
-        "A vacancy might ask for leading a team while your CV describes supporting a team lead. Both contain related words, but the responsibilities differ. A listed tool is different from an example of using that tool. An academic project can show skill without proving a stated requirement for professional experience.",
-        "Read the context around every apparent match. Check the verb, setting, time period, result and your contribution. If a tool displays a passage without explaining the connection, supply that explanation yourself. It may be relevant, partial or misleading. Similar wording should begin the review, not end it."
-      ] },
-      { heading: "Separate document gaps from experience gaps", paragraphs: [
-        "A requirement marked Not shown in your CV may mean the CV omitted useful experience. It may also mean the check missed a synonym or that the experience is absent. Start by asking whether you have a truthful example. Add one if you do, with enough context for a person to understand it. Do not insert the vacancy's phrase as an unsupported claim.",
-        "If the experience is absent, decide what that means for this role. A preferred tool may be a development question; an essential professional licence is a different condition. Preserve the employer's wording. The comparison tool does not decide which requirements the employer will relax or what evidence they will accept."
-      ], example: { label: "Worked example", text: "A CV and vacancy both mention 'financial modelling'. The candidate's evidence is a classroom case using teaching data, while the role asks for several years of investment modelling work. The shared phrase is useful to discuss, but it does not establish the required professional background or justify a high hiring-probability score." } },
-      { heading: "Review the employer's process independently", paragraphs: [
-        "Application systems vary. Greenhouse documents that some layouts and file structures can cause incomplete parsing. That is a reason to inspect extracted fields, not evidence for a universal 'ATS pass' percentage. File readability, relevant experience and employer selection are separate parts of an application.",
-        "Do not optimise a document by hiding keywords or repeating requirements without examples. A person still needs to understand your contribution, and form answers may ask for eligibility separately. Keep the document readable and the facts consistent. If a check fails to recognise an accurate passage, consider clearer wording rather than changing the underlying claim."
-      ], sourceIds: ["greenhouse-parsing"] },
-      { heading: "Make a decision from a short evidence note", paragraphs: [
-        "Before applying, write three observations: the strongest relevant example, the most important unresolved requirement and the next action. This produces a decision you can explain. A number alone cannot tell you whether to verify a qualification, add a missing passage, ask a question or leave the role aside.",
-        "Use the free CV check as a starting point, review every finding and approve the wording yourself. Keep any remaining gap visible. The useful outcome is a truthful CV and a deliberate application choice. Neither a document check nor a rewrite can guarantee an interview, a job or how an employer will assess your application."
-      ] }
-    ], sources: [SOURCES.workflow, SOURCES.greenhouseParse], relatedSlugs: ["cv-job-description-evidence", "role-filtering-before-applying", "cv-pdf-or-docx", "cv-check-without-ai"]
+  slug: "cv-check-no-fit-percentage",
+  title: "What is a good CV match score? Read past it",
+  description: "The two CV checkers we read recommend different match scores. See what a percentage leaves out and how to read the requirement behind it.",
+  audience: "All applicants",
+  category: "CV evidence",
+  updatedAt: "2026-11-04",
+  summary: "We found no standard match score. The two tools we read, Jobscan and SkillSyncer, recommend different levels (75% and 80+), each on its own page's terms. Jobvance's free CV Check, which needs a free account, gives no percentage and does not predict an interview. If a tool gives you a score, use it to find gaps: read each requirement and the CV line behind it, and ask whether the experience is true.",
+  takeaways: [
+    "We found no standard match score, so read the requirement behind the number.",
+    "A higher number does not show that you did the work the ad describes.",
+    "Label each requirement, then add true details or decide about the gap."
+  ],
+  sections: [
+    {
+      heading: "What does a CV match score count?",
+      paragraphs: [
+        "A match score is one tool's way of turning a comparison into a single number. Jobscan's page lists five things its match rate is based on, in order. SkillSyncer's page says its score is against the posting you paste in, and that terms are ranked by how often the employer mentions them. The next section shows both.",
+        "So read a number against what the tool that gave it says it counts. A score can point to words your CV lacks. It cannot tell you whether you did the work the ad describes, or what an employer will decide. Four questions help with any score."
+      ],
+      bullets: [
+        "What did the tool count, and what scale is the number on?",
+        "What level does the tool itself call good?",
+        "Which line of your CV sits behind each requirement?",
+        "Is that line true, and could you explain it in an interview?"
+      ]
+    },
+    {
+      heading: "Two tools, two thresholds",
+      paragraphs: [
+        "Two CV checkers show how the numbers differ. We read the home page of each company on 3 November 2026. Each page gives its own recommended level and its own description of the number, so do not assume a figure from one tool carries over to another.",
+        "Side by side, one page recommends 75% and the other recommends 80+. SkillSyncer also states a range of 0-100. Jobscan's page says its match rate is based on top ATS and names five of them. We draw no conclusion about either company. Pages change, so read them again before you rely on these figures."
+      ],
+      table: {
+        caption: "Two tools, two thresholds, as stated on their own pages. Fetched on 3 November 2026 from the home pages of jobscan.co and skillsyncer.com. Quotes are short and exact.",
+        head: ["On its own page", "Jobscan", "SkillSyncer"],
+        rows: [
+          ["Recommended level", "\"We recommend a match rate score of 75%\"", "A \"Recommended score\" of \"80+\", on a \"Match score range\" of \"0-100\""],
+          ["What it says the score is based on", "A match rate \"based on top ATS including iCIMS, Recruiterbox, Lever, Greenhouse and Taleo\", and \"based on these five priorities, in order\": Hard skills, Education level (the page says only when an advanced degree is included in the job description), Job title, Soft skills, Other keywords", "\"Scored against the posting you paste in\", and \"Terms are ranked by how often the employer mentions them\""],
+          ["Page read", "Home page, www.jobscan.co", "Home page, skillsyncer.com"]
+        ]
+      },
+      sourceIds: ["jobscan-home", "skillsyncer-home"]
+    },
+    {
+      heading: "What a percentage leaves out",
+      paragraphs: [
+        "A percentage folds many requirements into one figure. On its own, a number such as 75% does not show which part is missing, or whether the missing part is something the employer calls essential or only preferred. Two CVs with the same number can have very different gaps.",
+        "The same words can also do different work. A vacancy might ask you to lead a team while your CV says you supported a team lead. The words are related, but the responsibilities differ. A tool named in the ad is also different from an example of using that tool.",
+        "Read the verb, the setting, the time period and your own part before you accept an apparent match. If a line is shown without a reason, supply the reason yourself. It may be relevant, partial or misleading."
+      ]
+    },
+    {
+      heading: "How to read Jobvance's result instead",
+      paragraphs: [
+        "Jobvance's free CV Check does not give a percentage. It reads the job ad and lists each requirement it parses, up to the first 40, in English. Each requirement gets one of four states, with the closest line from your CV and its line number beside it when there is one. A free Jobvance account is needed to open the check.",
+        "It also shows how many requirements sit in each state, as four counts. Additional and omitted passages remain available for review. The counts are a guide to what to strengthen, not a score or a hiring prediction."
+      ],
+      table: {
+        caption: "The four states in Jobvance's CV Check, with a suggested next step for each.",
+        head: ["State", "What it means", "What you do next"],
+        rows: [
+          ["Covered", "The ad's wording appears in your CV, with the closest line shown beside it.", "Check that the line is true and says what you want the employer to see."],
+          ["Partly covered", "A related line exists, but it may do different work, for example \"supported\" where the ad says \"lead\".", "Decide whether a true detail is missing. Add it only if you could explain it in an interview."],
+          ["Not shown in your CV", "No line in your CV shows it. You may have a true example to add, or the experience may be absent.", "Add a true example if you have one. If you do not, decide whether the gap matters for this role."],
+          ["Needs your judgment", "A condition such as work rights or a licence. Only you can say, so it is flagged for you to decide.", "Check the condition against the original ad and your own situation."]
+        ]
+      },
+      example: {
+        label: "Worked example",
+        text: "Invented example for illustration, not a customer result. The ad asks: 'Build financial models for investment decisions.' The CV says: 'Completed a financial modelling case in a classroom module using teaching data.' Jobvance's check may mark the requirement Partly covered and show that line beside it, because only part of the ad's wording appears in the line. The check compares wording and does not judge the kind of work. You can see that classroom work is not investment work, and the line shown beside the requirement keeps that difference visible. You decide whether to add a true example from paid work or to leave the gap visible."
+      },
+      sourceIds: ["jobvance-cv-check"]
+    },
+    {
+      heading: "Separate document gaps from experience gaps",
+      paragraphs: [
+        "A requirement marked Not shown in your CV can mean your CV left out useful experience. It can also mean the ad uses a different word for something you did, or that the experience is absent. Start by asking whether you have a true example. If you do, add it with enough context for a reader to understand it, and never paste the ad's phrase in as a claim you cannot support.",
+        "If the experience is absent, decide what that means for this role. A preferred tool is a different matter from an essential licence, so keep the employer's own wording for each. Whether an employer will accept a CV that lacks a requirement is the employer's call, and Jobvance's check does not decide it for you."
+      ]
+    },
+    {
+      heading: "Make a decision from a short evidence note",
+      paragraphs: [
+        "Before you apply, write three lines: your strongest relevant example, the most important requirement still open, and your next action. This gives you a decision you can explain, which a single number cannot. The next action might be to add a true detail, check a qualification, ask the employer a question or leave the role alone.",
+        "Treat any score as a prompt to look, not a verdict. Keep each remaining gap in view and keep your CV true. Jobvance helps you prepare and organise applications, but employer decisions and hiring outcomes are outside its control."
+      ]
+    }
+  ],
+  faqs: [
+    {
+      q: "What is a good resume match score?",
+      a: "We found no standard number. The two tools we read set their own recommended levels. On 3 November 2026, Jobscan's home page recommended a match rate score of 75% and SkillSyncer's home page showed a recommended score of 80+ on a range of 0-100. Treat any score as a prompt to read the requirements behind it, not as a pass mark."
+    },
+    {
+      q: "Is a higher match score better?",
+      a: "Not on its own. A higher number only helps if you know what the tool counted, and it does not show that you did the work the ad describes. Related words can do different work, such as \"supported\" where the ad says \"lead\". Read the CV line behind each requirement, keep every claim true and do not add words to your CV only to raise a number."
+    },
+    {
+      q: "Does a match score predict an interview?",
+      a: "Not by itself: a match score is one tool's comparison of your CV with one ad, and the interview decision is the employer's. Jobvance's free CV Check, which needs a free account, gives no score and does not predict an interview. It compares the words in your CV with the words in one job ad. Use any score to find gaps, then judge each requirement yourself and keep your CV true."
+    },
+    {
+      q: "Why does Jobvance not show a percentage?",
+      a: "A percentage on its own does not show which requirement is missing. Jobvance's free CV Check instead lists each requirement from the job ad, marks it Covered, Partly covered, Not shown in your CV or Needs your judgment, and shows the closest line from your CV. It also shows how many requirements sit in each state. It is a guide to what to strengthen, not a hiring prediction. A free account is needed."
+    }
+  ],
+  sources: [
+    { id: "jobscan-home", title: "Jobscan: home page and FAQ, read 3 November 2026", url: "https://www.jobscan.co/" },
+    { id: "skillsyncer-home", title: "SkillSyncer: home page, read 3 November 2026", url: "https://skillsyncer.com/" },
+    SOURCES.cvCheck
+  ],
+  relatedSlugs: ["cv-job-description-evidence", "resume-privacy-before-upload", "achievements-without-numbers", "cv-pdf-or-docx", "cv-check-without-ai"]
   }),
   publish({
     slug: "application-tracking-follow-up",
@@ -483,33 +642,69 @@ export const careerGuides: CareerGuide[] = [
   }),
   publish({
     slug: "resume-privacy-before-upload",
-    title: "Review resume privacy before you upload or share",
-    description: "Create a minimal shareable CV copy, check visible and hidden information, and understand where documents and connected drafts may remain.",
+    title: "Is it safe to upload your CV to a CV checker?",
+    description: "Before you upload your CV to a checker, ask five questions: account, file leaving your device, which AI reads it, what is stored, and how to delete it.",
     audience: "All applicants", category: "Privacy & troubleshooting",
-    summary: "A CV combines identity, history and contact details in one portable file. Before uploading it, decide what the recipient needs and what you are allowed to share. Review the visible text, the file's hidden information and any portfolio links. Use a clean copy and understand the service's privacy information before sharing.",
-    takeaways: ["Share the minimum information needed for the stage.", "Inspect a copy for comments and hidden details.", "Review each service and external draft separately."],
+    summary: "It can be safe, but the checker's data practices decide. Ask five questions: do I need an account to see results, does my file leave my device, which company's AI reads the text, is anything stored unless I choose to save it, and how do I delete it. Then remove from your CV what the employer does not need.",
+    takeaways: ["Ask five questions before you upload: account, file, AI company, storage and deletion.", "Jobvance's free CV Check needs a free account, and in that check only AI tailoring and its optional improve step send text to its AI provider.", "Upload a clean copy: remove what the employer does not need and check for hidden details."],
     sections: [
-      { heading: "Create a shareable source copy", paragraphs: [
+      { heading: "Five questions to ask any CV checker", paragraphs: [
+        "Whether a CV checker is safe depends on what it does with your file. You can find that out before you upload anything. Open the tool's privacy page and look for a plain answer to each of these five questions.",
+        "Write the answers down for each tool you try. A page that answers all five in plain words is easier to judge than one that answers none. A good answer is still the tool's own statement, so decide whether the trade is worth it for the job in front of you."
+      ], bullets: [
+        "Do I need an account to see my results? An account is not a warning sign by itself, but ask what it is for, such as signing in, saving your work or tracking a free allowance.",
+        "Does my file leave my device? Some tools read the file in your browser. Others send the whole file to a server. The page should say which.",
+        "Which company's AI reads the text? If a tool uses AI, the words of your CV may go to a company that runs the model. The page should name that company and say when this happens.",
+        "Is anything stored unless I choose to save it? Look for a clear line between a check that is gone when you close it and a check that is saved to your account.",
+        "How do I delete it, and what is left afterwards? Ask whether deleting also removes records the service keeps for billing or security."
+      ] },
+      { heading: "How Jobvance answers the five questions", paragraphs: [
+        "These answers describe the free CV Check on jobvance.io. The descriptions below reflect the CV Check and privacy text updated on 4 November 2026. The privacy page has separate sections for the free check, your workspace and the Automated Job Loop, so the table covers the free check, plus the page's general section on deleting information.",
+        "You need a free Jobvance account before you can open the check. Needing an account is not a red flag on its own, but you should know what is kept in it. The privacy page says a check is stored in your account only if you choose to save it, and that a cost record counts your free and pass allowance.",
+        "Two details sit outside the table. An unsaved draft can be recovered from your browser tab's memory for up to 30 minutes after your last change, during in-app navigation. Unless you turn on a separate optional setting, refreshing or closing the tab clears it. That setting, Keep my draft in this tab across refresh, stores the CV and vacancy text temporarily in the tab, and the draft can be restored for 30 minutes after your last change. The page warns that anyone using the same browser tab may access that copy. On a shared computer, leave it off."
+      ], table: {
+        caption: "How Jobvance answers them, from the privacy and CV Check text updated on 4 November 2026, including the optional confirmed-answer step.",
+        head: ["Question", "Answer"],
+        rows: [
+          ["Do I need an account to see my results?", "Yes. A free Jobvance account is needed to open the check. The privacy page says a check is stored in your account only if you choose to save it, and that a cost record counts your free and pass allowance."],
+          ["Does my file leave my device?", "Your original file does not. The privacy page says the free check reads your file on your device and the original file is never uploaded. Comparing without AI runs entirely on your device. If you choose AI tailoring, the text of your CV and the job description, title and company are sent to Jobvance's AI provider, so that text does leave your device. If you then use the optional improve step, the answers you confirmed and their selected CV-line references are sent too. The next row has the details."],
+          ["Which company's AI reads the text?", "Only if you choose AI tailoring: then the text of your CV and the job description, title and company go to Jobvance's AI provider. If you use the optional 'Improve my CV with these answers' step, the answers you confirmed and their selected CV-line references go too. The privacy page names the provider as OpenRouter, with model providers' data collection declined. For the free check it does not name the model provider behind OpenRouter, and it does not say how long either company keeps the text. In the free check, AI tailoring and its optional improve step are the only steps that send text to the provider. The check names OpenRouter and the transmitted inputs beside the tailoring action."],
+          ["Is anything stored unless I choose to save it?", "Not your CV text, but Jobvance does keep small records. The privacy page says the CV and job description text is not stored unless you save. It keeps a cost record that also counts your free and pass allowance, and older network-limit records from earlier guest access. If you save, the role, company, vacancy, reviewed source CV and approved final CV texts are stored privately in your account, and the exact save is shown first."],
+          ["How do I delete it?", "Saved free checks can be deleted on the check page. Deleting does not remove files you already downloaded. The privacy page's section on deleting information says that after deletions in your workspace and Automated Job Loop, minimal security and usage records remain, without your CV text or document files, and your sign-in account remains. It does not say whether the same applies to a deleted saved check."]
+        ]
+      }, sourceIds: ["jobvance-privacy", "jobvance-cv-check"] },
+      { heading: "Prepare a clean copy of your CV first", paragraphs: [
         "Start from a copy of your master CV. Check whether it contains unnecessary identity numbers, a full home address, referees' contact details or personal records. Keep the information the employer actually needs for the current stage. If a later verified process requests additional documents, handle that request separately rather than embedding them in every application.",
         "Remove information you are not authorised to disclose, including client records, internal plans and sensitive employer figures. A general description may be useful only if it is permitted and accurate. Do not upload another person's personal data because it appeared in a project or a team document you used as source material."
       ] },
       { heading: "Inspect more than the visible page", paragraphs: [
         "A document can contain comments, tracked revisions and properties that are not obvious in the final layout. Microsoft documents how its Document Inspector can find several kinds of hidden information, and recommends inspecting a copy because removals may not be reversible. Follow the current instructions for the software and file type you use.",
-        "Review the results rather than clicking removal buttons without reading them. Some information may be useful and some may not be detectable by that feature. Export again after making changes, then inspect the exported file. A clean-looking page is not evidence that every hidden field or embedded item has been removed."
+        "Review the results rather than clicking removal buttons without reading them. Some information may be useful and some may not be needed. Export again after making changes, then inspect the exported file. A clean-looking page is not evidence that every hidden field or embedded item has been removed."
+      ], bullets: [
+        "This test is our own suggestion, not Microsoft's. Open a plain-text editor such as Notepad, or TextEdit set to plain text, then paste in all the text from your CV. If words are missing, run together or come out in a jumbled order, a program that reads your file may struggle too. A scanned page pastes as nothing when it holds only a picture of text."
       ], sourceIds: ["microsoft-inspector"] },
       { heading: "Check links and attachments as separate disclosures", paragraphs: [
         "Open each portfolio link as an external recipient would. Check access permissions, surrounding files and whether the page reveals teammates' details or private work. A shared folder may expose more than the single project you intended. Link to a suitable page or permitted demonstration rather than a broad repository of unrelated personal material.",
         "Look at the attachment name and the selected file before sending. Similar filenames can cause a private master CV to be attached instead of the cleaned copy. Use an understandable version name and keep draft notes outside the shareable folder. The recipient sees the actual attachment, not your intention to choose the safer version."
-      ], example: { label: "Worked example", text: "A student links to a coursework folder containing the presentation, a teammate's phone list and assessment feedback. Before applying, they create a permitted project summary without personal details and link only to that page. They test the link in a signed-out browser to confirm what an external reader can access." } },
+      ], example: { label: "Worked example", text: "Invented example for illustration, not a real case. A student links to a coursework folder containing the presentation, a teammate's phone list and assessment feedback. Before applying, they create a permitted project summary without personal details and link only to that page. They test the link in a signed-out browser to confirm what an external reader can access." } },
       { heading: "Understand the service before sharing", paragraphs: [
         "Read the service's current privacy information and the permissions shown during any connection. Identify what you are uploading, whether it is saved and how to request help or erasure. If the explanation does not answer a material question, use the public support route before supplying more information. Keep product marketing claims separate from the actual privacy terms.",
-        "For Jobvance, review the privacy page before uploading a CV or connecting a mailbox. The free check and account workflows have different saving actions. Connected features depend on setup and consent. Do not assume that reading a guide, downloading a CV or cancelling one connection has erased every record you may have created elsewhere."
+        "For Jobvance, the privacy page covers the free check, your workspace and the Automated Job Loop in separate sections. Outside the free check, the privacy page says your account, uploaded CV, extracted text, application documents and tracker entries are processed to provide the service, with Supabase supplying authentication, database and private file storage. In the Automated Job Loop, connecting a Gmail inbox is optional and needs its own Google permission screen, and disconnecting removes the stored connection credentials but does not delete messages or drafts already in Gmail. Do not assume that reading a guide, downloading a CV or cancelling one connection has erased every record you may have created elsewhere."
       ], sourceIds: ["jobvance-privacy"] },
       { heading: "Plan for copies outside the service", paragraphs: [
         "Once a document is downloaded, emailed or submitted to an employer, it may exist outside the preparation service. Keep track of those copies for your own records. A deletion request to one service cannot recall an attachment from an employer or remove a file already saved on your computer. Contact the relevant recipient or service for its own process where needed.",
-        "Your next action is to make one clean source copy and review it before beginning a CV check. Keep identity documents and restricted information out unless a verified process specifically requires them. If you need help understanding Jobvance's saving or privacy actions, use its public contact page with a description of the issue and no unnecessary sensitive attachments."
+        "Your next action is to make one clean source copy and review it before beginning a CV check. Keep identity documents and restricted information out unless a verified process specifically requires them. If you need help understanding Jobvance's saving or privacy actions, use its public contact page. Describe the issue, and leave out sensitive details you do not need to share."
       ] }
-    ], sources: [SOURCES.microsoft, SOURCES.privacy], relatedSlugs: ["confidential-career-switch", "cv-pdf-or-docx", "verify-job-listing-source"]
+    ],
+    faqs: [
+      { q: "Is needing an account to use a CV checker a red flag?", a: "No, not on its own. An account can be there for signing in, saving your work or counting a free allowance. What matters is what the account is for and what gets stored in it. Jobvance's free CV Check needs a free account, and its privacy page says a check is stored in your account only if you choose to save it." },
+      { q: "Does Jobvance send my CV to an AI company?", a: "In the free CV Check, only if you choose AI tailoring, and that check needs a free account. Comparing without AI runs on your device. If you tailor a CV, your CV text and the job description, title and company go to Jobvance's AI provider, which the privacy page names as OpenRouter, with model providers' data collection declined. If you also use the optional step that improves your CV with confirmed answers, those go too. The Automated Job Loop has separate AI choices, where available: a rules mode, or consent per run to a Claude, OpenAI or Kimi model." },
+      { q: "What should I remove from my CV before I upload it?", a: "Remove what the employer does not need for the current stage, such as identity numbers, a full home address and referees' contact details. Also remove client records, internal plans and other people's personal data you are not allowed to share. Then inspect the copy for comments and hidden details before you upload it." },
+      { q: "If I delete a saved check, is everything gone?", a: "Not everything. Jobvance's privacy page says saved free checks can be deleted on the check page, but deleting does not remove files you already downloaded. In its section on deleting information it also says minimal security and usage records remain after workspace and Automated Job Loop deletions, without your CV text or document files, and that your sign-in account remains. It does not say whether the same records follow a deleted saved check." }
+    ],
+    sources: [SOURCES.microsoft, SOURCES.privacy, SOURCES.cvCheck],
+    relatedSlugs: ["cv-pdf-or-docx", "cv-upload-failure-checklist", "verify-job-listing-source", "confidential-career-switch"],
+    updatedAt: "2026-11-04"
   }),
   publish({
     slug: "uae-job-search-sources",
@@ -602,34 +797,75 @@ export const careerGuides: CareerGuide[] = [
     ], sources: [SOURCES.workflow], relatedSlugs: ["first-application-pack", "application-tracking-follow-up", "cv-upload-failure-checklist"]
   }),
   publish({
-    slug: "cv-upload-failure-checklist",
-    title: "Fix a CV upload failure one step at a time",
-    description: "Resolve a CV upload problem by checking the error message, file type, size and readable text.",
-    audience: "All applicants", category: "Privacy & troubleshooting",
-    summary: "Keep your original CV and read the upload message first. Then check the file type, size and whether its text can be selected or copied. This checklist helps you try a clean copy, paste the text instead, or give support the details needed to investigate.",
-    takeaways: ["Read the exact error before retrying.", "Preserve the original and inspect readable text.", "Ask for help with minimal sensitive information."],
-    sections: [
-      { heading: "Check the limits of the service you are using", paragraphs: [
-        "Jobvance's CV upload accepts PDF, DOCX and TXT files up to 5 MB. Legacy DOC is not supported in this check. These are Jobvance's limits, not a general employer-portal rule. If the file exceeds the stated size, save a smaller copy or remove unnecessary embedded images while keeping the text you need.",
-        "Check that you selected the intended file and that it is not empty. Changing the filename extension does not convert the document. Use the original editor's save or export function to create the supported format. Keep the original file intact so troubleshooting does not destroy your source record."
-      ], sourceIds: ["jobvance-workflow"] },
-      { heading: "Determine whether the document contains readable text", paragraphs: [
-        "Try selecting and copying text from the PDF in a normal viewer. If each page is only an image, the document may need optical character recognition before text extraction. Jobvance's upload does not turn a scan into verified CV text. Use a text-based export or a carefully checked transcription from your original record.",
-        "After extraction, inspect the names, dates and reading order. A file can upload while producing incomplete or scrambled text. Greenhouse also distinguishes accepted files from successful parsing and documents image resumes and complex formatting as possible parsing problems. The exact behaviour varies by service, so diagnose the file in the tool you are actually using."
-      ], sourceIds: ["greenhouse-parsing"] },
-      { heading: "Check access and encoding", paragraphs: [
-        "A damaged or password-protected document may not be readable by the check. If you have permission to use it, open the original and save an unlocked, text-based copy. Do not try to bypass access restrictions on a document you are not authorised to handle. For TXT, use UTF-8 encoding and inspect the text for broken characters.",
-        "If you no longer have an editable source, choose a recovery method that preserves accuracy. A plain-text copy may be sufficient for comparing evidence, but it still needs names, headings and context. Review any converted text against the original. Conversion can remove labels that distinguish academic projects or supporting contributions."
-      ], example: { label: "Worked example", text: "A candidate uploads a scanned CV and gets a no-readable-text message. They return to the original word-processing document, export a text-based PDF and try again. They inspect the extracted education dates and project labels before checking the vacancy. They do not rename the scanned file from PDF to DOCX." } },
-      { heading: "Change one thing and retry deliberately", paragraphs: [
-        "Use the error message to choose the next change: reduce size, export a supported format, unlock a permitted copy or correct text encoding. Retry once after that change and record the result. Repeating the same upload without a new observation rarely helps you understand what is wrong.",
-        "If extraction succeeds, verify the source text before moving on. If the upload succeeds but saving later fails, treat saving as a separate issue. A local review, an account save and an employer submission are different actions. Check the screen's confirmation rather than assuming that the successful first step confirms every later step."
-      ] },
-      { heading: "Prepare a useful help request", paragraphs: [
-        "Include the file type, approximate size, browser, time and exact error text. Describe the step at which the problem occurred. Do not attach a complete CV or identity documents to a general support message unless a suitable secure process needs them. You can often explain a file issue without sharing its private contents.",
-        "Use Jobvance's public contact page for general help, then return to the free check with the cleaned source when ready. If an employer portal is failing instead, use that employer's published support channel and current upload instructions. Your next action is the smallest evidence-based change, followed by a text inspection, rather than another blind retry."
-      ] }
-    ], sources: [SOURCES.workflow, SOURCES.greenhouseParse], relatedSlugs: ["cv-pdf-or-docx", "resume-privacy-before-upload", "cancelled-partial-job-loop-runs"]
+  slug: "cv-upload-failure-checklist",
+  title: "CV won't upload? Fix it one step at a time",
+  description: "Rule out four things first when a CV will not upload or be read: file type, size, a scanned image and a password. Then work through seven checks in order.",
+  audience: "All applicants", category: "Privacy & troubleshooting",
+  updatedAt: "2026-11-04",
+  summary: "Rule out four things first when a CV will not upload or be read: file type, file size, a scanned image and a password. Work through seven checks in order: the portal's file types, file size, whether you can select text, password protection, a fresh export, another browser, then the portal's own alternative route. Stop at the first fix that works.",
+  takeaways: ["Read the portal's own list of file types and its size limit first.", "If you cannot select any text, your PDF is probably a picture of a page.", "Export a fresh file from your original document instead of compressing."],
+  sections: [
+    { heading: "What are the seven checks, in order?", paragraphs: [
+      "Go in this order. Each check is quick, and each one rules out a possible cause. Stop at the first fix that works, then keep a copy of the file that worked.",
+      "Two Greenhouse help pages are used below, both read on 3 November 2026. They are written for hiring teams that use Greenhouse, so they show how one system describes its limits. Other portals can set different file types and limits, so the list on your portal is the one that counts."
+    ], table: { caption: "Seven checks for a CV that will not upload, in order", head: ["Step", "What to check", "How to fix"], rows: [
+      ["1. File type", "Does the portal's own page list your file type, for example PDF or DOCX?", "Save or export a copy in a type the portal lists. Renaming the file does not convert it."],
+      ["2. File size", "Is the file under the limit the portal states?", "Remove large images from the original document, then export again."],
+      ["3. Scanned image", "Can you select the text in the PDF? Press Ctrl+A, then Ctrl+C (Cmd+A, then Cmd+C on a Mac), and paste into a plain text editor.", "If nothing selects, export a text-based PDF from your original document."],
+      ["4. Password", "Does the file ask for a password when you open it?", "Save a copy without a password, if the CV is yours to change."],
+      ["5. Fresh export", "Was the file squeezed by a compressor or converted more than once?", "Export a new file from your original document instead of compressing."],
+      ["6. Another browser", "Does the same file fail every time in this browser?", "Try a different browser, or a private window, with the same file."],
+      ["7. The portal's other route", "Does the application page offer 'upload later' or another way to send your CV?", "Use it, or contact the employer through the route given on the job post."]
+    ] } },
+    { heading: "Steps 1 and 2: does the portal accept your file type and size?", paragraphs: [
+      "Look for the file types and the size limit on the application page, or in the portal's help pages. Do not guess from another site. The Greenhouse pages show what such a list can look like.",
+      "If your file is too big, remove photos and large graphics in the original document, then export again. Greenhouse names high-quality images as an example of what can make a resume large. If your file type is not on the list, export a copy in a type that is. Changing the letters after the dot in the file name only makes the name wrong."
+    ], bullets: [
+      "Greenhouse's page on supported formats says candidates can upload .doc, .docx, .pdf, .rtf and .txt files.",
+      "The same page says candidate uploads can be up to 100 MB.",
+      "Greenhouse's page on unsuccessful resume parses says Greenhouse Recruiting can't parse resumes larger than 2.5 MB.",
+      "That page says that when a parse fails, the resume is only attached to the candidate and the hiring team fills in the details by hand.",
+      "If the portal you use is not Greenhouse, check the portal's own list."
+    ], sourceIds: ["greenhouse-formats", "greenhouse-parsing"] },
+    { heading: "Step 3: can you select the text in your PDF?", paragraphs: [
+      "A scanned PDF is a picture of a page, unless the scanner or app has added text recognition. You can see the words, but a program that reads the file for text may find none unless text recognition has been run on it. To test your file, open the PDF. Press Ctrl+A, then Ctrl+C (Cmd+A, then Cmd+C on a Mac), and paste into a plain text editor. You should see your name, headings and bullets in the right order.",
+      "If nothing highlights or pastes, the PDF may be an image; export a text-based copy from your original document. If text pastes in a jumbled order, it can still be a text-based PDF with a layout problem. Greenhouse lists image uploads and complex column layouts separately. Check reading order and try a simpler single-column export rather than diagnosing every jumbled result as a scan.",
+      "The fix is to go back to the original document in your word processor or design tool and export a new PDF from there. If you only have a paper copy or a photo, retype the CV into a document. If you use a text-recognition tool instead, read every line against the original afterwards. The bullets below are some of the formatting problems that Greenhouse's page on unsuccessful parses lists, and it says they can lead to a partial parse."
+    ], bullets: [
+      "A resume uploaded as an image rather than a document.",
+      "Graphics, photos or word art.",
+      "Complex resumes with tables, headers and footers.",
+      "Name and contact details in a header, footer or text box.",
+      "A columned layout.",
+      "Spaces between the letters of a word."
+    ], example: { label: "Worked example", text: "Invented example, not a real person or case. Sam saves a CV as a PDF from a phone scanning app and the portal says the file has no readable text. Step 1 passes because the portal lists PDF. Step 2 passes because the file is under the limit. At step 3, Sam presses Ctrl+A in the PDF and nothing highlights, so the file is a picture of a page. Sam does not rename it to DOCX. Sam opens the original document, exports a new PDF and pastes the text into a plain text editor to check the dates and headings. The upload then goes through, so Sam skips steps 4 to 7." }, sourceIds: ["greenhouse-parsing"] },
+    { heading: "Steps 4 and 5: password protection and a fresh export", paragraphs: [
+      "Try to open the file in a normal viewer. A file that asks for a password is harder for anyone to open. The Greenhouse pages read for this guide do not mention passwords, so check the portal's own rules. Save a copy without a password, if the CV is yours to change.",
+      "Compressing a finished file can change how it looks and reads, so check the result if you do it. A safer route is to open the original document, remove large images and export a new file in a type the portal lists. Keep the old file as a backup.",
+      "After the export, repeat the select-text test from step 3 on the new file. Check your name, dates and headings in the pasted text. A file can upload and still be read only in part. Greenhouse's page on unsuccessful parses describes a resume that is attached but not read into the fields."
+    ], sourceIds: ["greenhouse-parsing"] },
+    { heading: "Steps 6 and 7: another browser, then the portal's other route", paragraphs: [
+      "If the same file fails every time, the cause may be the browser and not the file. Try a different browser, or a private window, and upload the same file again. If you are on a phone, try a computer.",
+      "Next, read the whole application page for another way in. Look for options such as 'upload later', a box to paste your CV text, or a contact link for problems. The portal decides which of these exist, so use only what it offers.",
+      "Greenhouse's page on supported formats says hiring teams can ask candidates to share a link to a file on a third-party site, such as Google Drive, when a file is larger than 100 MB. That route is for large files such as portfolios. It does not fix a CV in the wrong type."
+    ], sourceIds: ["greenhouse-formats"] },
+    { heading: "What does Jobvance's CV check accept?", paragraphs: [
+      "Jobvance's check reads text-based PDF, DOCX and TXT files up to 5 MB, or pasted CV text, and it needs a free account. Scanned PDFs and old .doc files need converting first. The wording check is for English text.",
+      "These limits belong to Jobvance and are not the rules of any employer portal. A 3 MB file is inside Jobvance's 5 MB limit, but it is over the 2.5 MB size above which Greenhouse says it can't parse a resume. Check 3 matters for Jobvance too: it reads text-based PDF, DOCX and TXT files, so a scan needs converting first. The Greenhouse pages do not say how Greenhouse treats scanned PDFs."
+    ], sourceIds: ["jobvance-cv-check"] },
+    { heading: "What should you tell the employer if nothing works?", paragraphs: [
+      "Write down the file type, the file size, the browser, the time and the exact words of the error message. Say which of the seven checks you tried. Send this through the contact route on the job post or the portal's help page. Do not attach your whole CV or identity documents to a general message unless the employer asks for them through a secure route.",
+      "Keep your original document and every export you tried. A short, exact note saves you repeating the steps, and it lets the person who answers see what has already been ruled out."
+    ] }
+  ],
+  faqs: [
+    { q: "Why does my CV fail to upload when the file looks fine?", a: "Start with four causes: a file type the portal does not list, a file over the size limit, a scan with no real text, or a password on the file. Check them in that order. If all four are fine, try another browser, then look for the portal's upload later or contact option." },
+    { q: "Can I rename my PDF to DOCX to get it to upload?", a: "No. Changing the letters after the dot changes the name, not the file, so the file is not a real DOCX. The file inside is still a PDF, and the portal's own list of file types is what counts. Open your original document and use Save as or Export to make a real DOCX or PDF." },
+    { q: "How do I know if my PDF is a scan?", a: "Open it. Press Ctrl+A, then Ctrl+C (Cmd+A, then Cmd+C on a Mac), and paste into a plain text editor. If your words appear in the right order, the PDF holds real text. If nothing selects or pastes, it may be a picture of a page; export a text-based copy from the original. Jumbled text can instead be a reading-order or layout problem, so check it and try a simpler export." },
+    { q: "What file size is too big for a CV upload?", a: "It depends on the portal, so read the limit on your application page. Greenhouse's help pages, read on 3 November 2026, say candidate uploads can be up to 100 MB. They also say Greenhouse Recruiting can't parse resumes larger than 2.5 MB, and that when a parse fails the hiring team fills in the details by hand. The pages are written for hiring teams, so ask the employer if you are unsure how your file will be handled. Removing large images keeps a CV file small." }
+  ],
+  sources: [SOURCES.greenhouseFormats, SOURCES.greenhouseParse, SOURCES.cvCheck],
+  relatedSlugs: ["cv-pdf-or-docx", "resume-privacy-before-upload", "first-application-pack"]
   }),
   publish({
     slug: "truthful-recruiter-drafts",
@@ -667,34 +903,34 @@ export const careerGuides: CareerGuide[] = [
     title: "CV check without AI: what it shows and misses",
     description: "See what a CV check without AI compares, where it runs and what it cannot judge, so you know when to review the result yourself or add AI tailoring.",
     audience: "All applicants", category: "CV evidence",
-    summary: "A CV check without AI compares the words in your CV with the words in a job ad using fixed rules. In Jobvance it runs on your device, shows the closest line from your CV for each requirement and never gives a percentage. It cannot judge meaning the way a person can, so the useful work is reading each result yourself.",
-    takeaways: ["A check without AI compares wording, not meaning.", "Read the closest CV line beside every requirement.", "Add AI tailoring only if you want rewording, and review each change."],
+    summary: "A CV check without AI compares the words in your CV with the words in a job ad. In Jobvance it needs a free account, runs on your device, shows the closest line from your CV beside each result and gives no fit percentage. Matching words are a starting point, not a verdict, so the useful work is reading each result yourself.",
+    takeaways: ["A check without AI compares wording, not meaning.", "Read the closest CV line beside every requirement.", "Choose AI tailoring only if you want rewording, and review each change."],
     sections: [
       { heading: "What “without AI” means for this check", paragraphs: [
-        "A CV check without AI follows written rules instead of asking a language model to interpret your documents. In Jobvance, Compare without AI reads your CV file on your device and compares it with the job ad on your device. The original file is not uploaded, and nothing is sent to an AI provider for this step.",
-        "The rules read the requirements in the ad, up to the first 40 parsed requirements in English, and look in your CV for matching wording. Where they find a line, they show it beside the requirement together with its line number, so you can check the match with your own eyes rather than trusting a number."
-      ], sourceIds: ["jobvance-privacy"] },
+        "A CV check without AI compares your CV with a job ad and leaves out the AI step. You need a free Jobvance account to open the check. In it, Compare without AI reads your CV file on your device and compares it with the job ad on your device. The original file is not uploaded, and this step sends no text to an AI provider.",
+        "The check reads the requirements in the ad, up to the first 40 parsed requirements in English, and looks in your CV for the ad's wording. Where it finds a line, it shows that line beside the requirement together with its line number, so you can check the match yourself rather than trusting a number."
+      ], sourceIds: ["jobvance-privacy", "jobvance-cv-check"] },
       { heading: "What the result shows", paragraphs: [
-        "Each requirement receives one of four outcomes. They describe the documents you supplied. They are not a judgment about you or a prediction of what an employer will decide, and Jobvance does not add them up into a fit percentage or an ATS score.",
+        "Each requirement receives one of four outcomes. They compare the wording of the two documents you supplied. They do not decide whether you qualify or predict what an employer will decide, and Jobvance gives no fit percentage or ATS score.",
       ], bullets: [
         "Covered: the ad's wording appears in your CV, with the closest line shown.",
         "Partly covered: a related line exists, but it may describe different work.",
         "Not shown in your CV: no line shows it, which may mean a missing example or the experience itself is absent.",
         "Needs your judgment: a condition such as work rights or a licence that only you can confirm."
-      ] },
+      ], sourceIds: ["jobvance-cv-check"] },
       { heading: "What it cannot see", paragraphs: [
-        "Matching wording is a starting point. A rule can notice that two lines share words, but it cannot tell whether the work behind them is the same. It also does not verify the claims in your CV, and it reads English text only. A scanned PDF has no readable text, so convert it first, and old .doc files need converting too.",
-        "It can miss a synonym, and it cannot know about experience you have not written down. A gap in the result is therefore a question to answer, not a verdict: do you have a truthful example that the CV leaves out, or is the experience genuinely absent?"
-      ], example: { label: "Worked example", text: "An invented example for illustration. The ad asks you to lead the forecasting process. Your CV says you supported the finance manager by preparing forecast inputs. The check marks the requirement Partly covered and shows that line beside it: the words relate, but supporting someone who leads is different from leading. You decide whether to describe your contribution more precisely, or to leave the gap visible. You should not change the verb to match the ad unless it is true." } },
-      { heading: "When AI tailoring is worth adding", paragraphs: [
-        "AI tailoring is a separate, optional step. It rewords and reorders what is already in your CV and lists each change beside your original wording. To prepare a version, your CV text and the job description are sent to Jobvance's AI provider, which is why it is optional and why it sits after the check that stays on your device.",
-        "Each change is checked by rules against the line it came from, and a change that adds a number, a capitalised name or tool, a qualification word or a stronger ownership verb is rejected. That is a rule check on wording, not a fact-check of your CV, so you still read every change before you download."
-      ] },
+        "Matching wording is a starting point. The check can notice that two lines share words, but it does not verify that the work behind them is the same, or that the claims in your CV are true. It is an English wording check. Scanned PDFs and old .doc files need converting first.",
+        "The check cannot know about experience you have not written down. A gap in the result can mean that your CV leaves out a true example, or that it describes the work in other words than the ad does. Treat a gap as a question to answer, not a verdict: do you have a truthful example, or is the experience genuinely absent?"
+      ], example: { label: "Worked example", text: "An invented example for illustration, not a customer result. The ad asks you to lead the forecasting process. Your CV says you supported the finance manager by preparing forecast inputs. The check may mark the requirement Partly covered and show that line beside it, because the line says 'supported' where the ad says 'lead'. The check compares wording and does not judge the work. You decide whether to describe your contribution more precisely, or to leave the gap visible. You should not change the verb to match the ad unless it is true." }, sourceIds: ["jobvance-cv-check"] },
+      { heading: "What AI tailoring adds, and what it sends", paragraphs: [
+        "AI tailoring is a separate, optional choice beside Compare without AI. It rewords and reorders what is already in your CV, can add a short profile built from your own lines, and lists each change beside your original wording. To prepare a version, your CV text and the job description, title and company are sent to Jobvance's AI provider. If you use the optional step that improves your CV with answers you confirm, those answers are sent too, and a line built from an answer is marked 'from your answer'. Compare without AI stays on your device. AI tailoring does not: it sends that text to the provider.",
+        "Each change is checked by rules against its source CV lines and any confirmed answers you attached to those lines. Unsupported additions of numbers, capitalised names or tools, qualification words or stronger ownership verbs are rejected. That is a rule check on wording, not a fact-check of your CV, so you still read every change before you download."
+      ], sourceIds: ["jobvance-cv-check"] },
       { heading: "A ten-minute routine", paragraphs: [
         "Open the check with your CV and one job ad, and read the requirements the check found before you read any result. Then take the outcomes in order. For each Not shown in your CV, ask whether you have a true example and add it with enough context for a person to understand it. For each Partly covered, read both lines and decide whether they describe the same work.",
-        "For each Needs your judgment, check the condition in the original vacancy yourself. When you are done, write down the strongest relevant example, the most important open requirement and your next step. If you want rewording, add AI tailoring last, and keep any gap that remains visible. A free account is needed to open the check, and comparing without AI has no limit."
-      ], sourceIds: ["jobvance-workflow"] }
-    ], sources: [SOURCES.privacy, SOURCES.workflow], relatedSlugs: ["cv-check-no-fit-percentage", "cv-job-description-evidence", "resume-privacy-before-upload"]
+        "For each Needs your judgment, check the condition in the original vacancy yourself. When you are done, write down the strongest relevant example, the most important open requirement and your next step. If you want rewording, AI tailoring is the other choice beside Compare without AI, and any gap that remains should stay visible. A free account is needed to open the check, and comparing without AI has no limit."
+      ], sourceIds: ["jobvance-cv-check"] }
+    ], sources: [SOURCES.privacy, SOURCES.cvCheck], relatedSlugs: ["cv-check-no-fit-percentage", "cv-job-description-evidence", "resume-privacy-before-upload"]
     }),
     publishedAt: "2026-11-04",
     updatedAt: "2026-11-04",

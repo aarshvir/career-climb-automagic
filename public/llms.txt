@@ -28,25 +28,25 @@ Facts last checked 1 November 2026. The pricing page (https://jobvance.io/pricin
 
 ## Guides
 
-- [Compare your CV with a job description using evidence](https://jobvance.io/guides/cv-job-description-evidence): Compare a job description with your CV, choose relevant examples and identify the details to add before applying.
+- [Check if your CV matches a job description](https://jobvance.io/guides/cv-job-description-evidence): Check if your CV matches a job description: split the ad into requirements, find the CV line for each, label the gaps, then decide what to change.
 - [How to describe student projects on your CV](https://jobvance.io/guides/student-projects-on-cv): Choose relevant student projects, describe your contribution and turn coursework, internships and activities into clear CV entries.
-- [How to adapt your CV for an MBA career pivot](https://jobvance.io/guides/mba-career-pivot-cv): Choose a target role, connect your previous work with its responsibilities and show where MBA projects add relevant experience.
+- [How to adapt your CV for an MBA career pivot](https://jobvance.io/guides/mba-career-pivot-cv): Choose a target role, connect your previous work with its responsibilities and show where MBA projects add relevant evidence.
 - [Plan a confidential job search alongside your current job](https://jobvance.io/guides/confidential-career-switch): Plan your contact details, application documents and profile visibility for a job search alongside your current role.
 - [Filter roles before spending time on an application](https://jobvance.io/guides/role-filtering-before-applying): Create a manageable job shortlist by checking responsibilities, essential conditions and the time each application needs.
 - [Verify a job listing before sharing your CV](https://jobvance.io/guides/verify-job-listing-source): Find the original vacancy, check the employer and application destination, and save the details you have confirmed.
-- [How to write CV achievements without numbers](https://jobvance.io/guides/achievements-without-numbers): Write specific CV bullets using the task, your actions, the scope of your work and what you produced.
+- [How to write CV achievements without numbers](https://jobvance.io/guides/achievements-without-numbers): Write strong CV bullets without numbers: state the task, what you did, the scope and what you produced. Includes seven invented before-and-after examples.
 - [What to include in your first job application](https://jobvance.io/guides/first-application-pack): Use the employer’s instructions to prepare your CV, application answers and any other documents the role requires.
 - [How to reuse your CV for a second application](https://jobvance.io/guides/reuse-second-application): Use your reviewed experience as a starting point, then adapt the examples, documents and message for another vacancy.
 - [Should you send your CV as PDF or DOCX?](https://jobvance.io/guides/cv-pdf-or-docx): Choose a CV format from the employer’s upload instructions, check the exported file and review any fields filled by the portal.
-- [How to review a CV match score](https://jobvance.io/guides/cv-check-no-fit-percentage): Look beyond a CV match percentage to check the examples, missing details and job requirements behind it.
+- [What is a good CV match score? Read past it](https://jobvance.io/guides/cv-check-no-fit-percentage): The two CV checkers we read recommend different match scores. See what a percentage leaves out and how to read the requirement behind it.
 - [How to track applications and plan follow-ups](https://jobvance.io/guides/application-tracking-follow-up): Record each application, keep its CV version and confirmation, and choose a follow-up date from the employer’s instructions.
 - [Turn your CV into clear interview stories](https://jobvance.io/guides/interview-stories-from-cv): Choose examples from your CV and prepare concise interview answers about the situation, your actions and the outcome.
 - [Make a job-search plan that fits a busy week](https://jobvance.io/guides/job-search-time-plan): Make room for finding roles, preparing applications and following up alongside work, classes and other commitments.
-- [Review resume privacy before you upload or share](https://jobvance.io/guides/resume-privacy-before-upload): Create a minimal shareable CV copy, check visible and hidden information, and understand where documents and connected drafts may remain.
+- [Is it safe to upload your CV to a CV checker?](https://jobvance.io/guides/resume-privacy-before-upload): Before you upload your CV to a checker, ask five questions: account, file leaving your device, which AI reads it, what is stored, and how to delete it.
 - [Where to look for jobs in the UAE](https://jobvance.io/guides/uae-job-search-sources): Build a UAE job-source list from employer careers pages, official portals, recruitment agencies and job boards.
 - [How to list qualifications on a UAE CV](https://jobvance.io/guides/academic-qualifications-uae-cv): List completed degrees, expected graduation and short courses clearly, and check any qualification requirements in a UAE vacancy.
 - [What to do when the Automated Job Loop preparation stops](https://jobvance.io/guides/cancelled-partial-job-loop-runs): Find the status of a partial, cancelled or interrupted preparation run and decide whether to review, resume or ask for help.
-- [Fix a CV upload failure one step at a time](https://jobvance.io/guides/cv-upload-failure-checklist): Resolve a CV upload problem by checking the error message, file type, size and readable text.
+- [CV won't upload? Fix it one step at a time](https://jobvance.io/guides/cv-upload-failure-checklist): Rule out four things first when a CV will not upload or be read: file type, size, a scanned image and a password. Then work through seven checks in order.
 - [How to write a recruiter message about a job](https://jobvance.io/guides/truthful-recruiter-drafts): Write a short message with the role, a relevant example from your experience and a clear request for a checked contact.
 - [CV check without AI: what it shows and misses](https://jobvance.io/guides/cv-check-without-ai): See what a CV check without AI compares, where it runs and what it cannot judge, so you know when to review the result yourself or add AI tailoring.
 

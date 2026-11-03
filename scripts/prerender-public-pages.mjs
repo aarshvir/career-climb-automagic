@@ -26,7 +26,10 @@ try {
   for(const page of publicPages){
     const rendered=renderPublicRoute(page.path);
     if(!rendered.body.includes('<h1'))throw new Error(`Public route has no visible main heading: ${page.path}`);
-    if(page.kind==='guide' && (rendered.body.includes('We could not find that guide.') || !rendered.body.includes(page.title.replace(/\s*\|\s*Jobvance$/,''))))throw new Error(`Article did not render its actual route content: ${page.path}`);
+    // React escapes quotes and ampersands in the markup, so the guide title is compared in its escaped form too.
+    const guideTitle=page.title.replace(/\s*\|\s*Jobvance$/,'');
+    const markupTitle=guideTitle.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+    if(page.kind==='guide' && (rendered.body.includes('We could not find that guide.') || !(rendered.body.includes(guideTitle)||rendered.body.includes(markupTitle))))throw new Error(`Article did not render its actual route content: ${page.path}`);
     const canonical=SITE_ORIGIN+page.path;
     const organization=organizationNode(SITE_ORIGIN);
     const graph={'@context':'https://schema.org','@graph':[organization,{'@type':'WebSite','@id':SITE_ORIGIN+'/#website',name:'Jobvance',url:SITE_ORIGIN,publisher:{'@id':organization['@id']}},{'@type':page.kind==='guides'?'CollectionPage':'WebPage','@id':canonical+'#page',url:canonical,name:page.title,description:page.description,isPartOf:{'@id':SITE_ORIGIN+'/#website'}},...structuredNodesFor(page.path,SITE_ORIGIN),...(page.kind==='guide'?articleNode(page,canonical,organization):[]),...(page.path!=='/'?[{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Jobvance',item:SITE_ORIGIN},...(page.kind==='guide'?[{'@type':'ListItem',position:2,name:'Guides',item:SITE_ORIGIN+'/guides'}]:[]),{'@type':'ListItem',position:page.kind==='guide'?3:2,name:page.title.replace(/\s*\|\s*Jobvance$/,''),item:canonical}]}]:[])]};

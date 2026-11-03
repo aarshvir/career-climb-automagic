@@ -137,3 +137,6 @@
   .cg-more:hover { border-color: var(--jv-brand); color: var(--jv-brand); }
 }
 @media (max-width: 639px) { .cg-card-glyph { display: none; } .career-guides .cg-card, .career-guides .cg-card--feature { border-top: 0; } }
+.cg-table-wrap{overflow-x:auto;margin:25px 0;border:1px solid var(--jv-line-strong);border-radius:10px;-webkit-overflow-scrolling:touch}.cg-table-wrap:focus-visible{outline:3px solid var(--jv-brand);outline-offset:3px}.cg-table{width:100%;border-collapse:collapse;font-size:var(--t-sm);line-height:1.6}.cg-table caption{caption-side:top;text-align:left;font-weight:var(--fw-semi);padding:14px 16px 8px;color:var(--cg-ink)}.cg-table th,.cg-table td{padding:12px 16px;text-align:left;vertical-align:top;border-top:1px solid var(--jv-line)}.cg-table thead th{background:var(--jv-bg-subtle);font-weight:var(--fw-semi);white-space:nowrap}.cg-table tbody th{font-weight:var(--fw-semi);width:26%}.cg-faq .cg-faq-item{margin:0 0 22px}.cg-faq h3{font-size:var(--t-h4);margin:0 0 8px}.cg-faq p{margin:0}
+@media(max-width:740px){.cg-table{min-width:520px}.cg-table th,.cg-table td{padding:10px 12px}}
+@media print{.cg-table-wrap{overflow:visible;border:none}.cg-table{min-width:0}}
