@@ -18,6 +18,7 @@ import './JobLoop.css';
 import './LoopOnboarding.css';
 
 const questions = ['Which roles would you like to find?', 'Where would you like to work?', 'What compensation would you consider?', 'What should stay private?', 'Bring your experience', 'Review your Automated Job Loop setup'];
+const SETUP_READ_DEADLINE_MS = 20_000;
 const list = (value: string) => [...new Set(value.split(/[\n,]/).map(item => item.trim()).filter(Boolean))];
 
 export function onboardingStepError(step: number, profile: LoopProfileInput): string {
@@ -59,6 +60,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   const [loaded, setLoaded] = useState(false), [existing, setExisting] = useState(false), [saved, setSaved] = useState(false), [consent, setConsent] = useState(false);
   const consentEpoch = useRef<number | null>(null);
   const snapshot = useRef<LoopSnapshot | null>(null), alive = useRef(true), epoch = useRef(0), saving = useRef(false), heading = useRef<HTMLHeadingElement>(null);
+  const loadDeadline = useRef<{ turn: number; handle: number } | null>(null);
   const absentGeneration = useRef(trackingLoopGeneration(owner) ?? null);
   const current = () => {
     const observed = trackingLoopGeneration(owner) ?? null;
@@ -66,10 +68,24 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     const sameLifecycle = observed === expected || (expected === null && observed === 0);
     return alive.current && authority >= 0 && trackingDraftAuthority(owner) === authority && sameLifecycle;
   };
-  useEffect(() => { alive.current = true; return () => { alive.current = false; epoch.current++; }; }, []);
+  useEffect(() => { alive.current = true; return () => {
+    alive.current = false; epoch.current++;
+    if (loadDeadline.current) { window.clearTimeout(loadDeadline.current.handle); loadDeadline.current = null; }
+  }; }, []);
   useEffect(() => { heading.current?.focus(); }, [step, saved]);
   async function load() {
     const turn = ++epoch.current; setBusy('Loading your saved setup…'); setError(''); consentEpoch.current = null; setConsent(false);
+    if (loadDeadline.current) window.clearTimeout(loadDeadline.current.handle);
+    loadDeadline.current = { turn, handle: window.setTimeout(() => {
+      if (loadDeadline.current?.turn !== turn) return;
+      loadDeadline.current = null;
+      if (!current() || turn !== epoch.current) return;
+      // Only the passive read is abandoned. Its late result cannot rebind this
+      // page, and another request starts only when the owner chooses Retry.
+      epoch.current++;
+      setError('Your saved setup is taking too long to load. Check your connection, then retry.');
+      setBusy('');
+    }, SETUP_READ_DEADLINE_MS) };
     try {
       const result = await callJobLoop(owner, { action: 'get_existing' }, () => current() && turn === epoch.current);
       if (!current() || turn !== epoch.current) return;
@@ -91,7 +107,10 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       }
       setLoaded(true);
     } catch (failure) { if (current() && turn === epoch.current) setError(failure instanceof Error ? failure.message : 'Your setup could not be loaded.'); }
-    finally { if (current() && turn === epoch.current) setBusy(''); }
+    finally {
+      if (loadDeadline.current?.turn === turn) { window.clearTimeout(loadDeadline.current.handle); loadDeadline.current = null; }
+      if (current() && turn === epoch.current) setBusy('');
+    }
   }
   useEffect(() => { void load(); }, []);
   useEffect(() => {
