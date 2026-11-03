@@ -1,0 +1,400 @@
+{
+  "release": "guide-template-and-ai-input-disclosures",
+  "publicVersion": 78,
+  "publishedAt": "2026-11-03T21:21:12.913536+00:00",
+  "publicUrl": "https://jobvance.io",
+  "source": "6b039552fe9729da796a4024b5f9908a68e7a4bf",
+  "pr": 56,
+  "originalAuthorHead": "90db94bb77468cdfcaefc26f43286e049aa3c7df",
+  "merge": "82d00c45b4515d5a24b138994b36e836c3ace666",
+  "fullMergeTree": "81992a741ba17a3b83fea4255e729ee2d7f33dc4",
+  "fullMergeTreeMatchesReviewedSource": true,
+  "site": {
+    "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ded2b78fadf48191a0f874c88e4b247f",
+    "deploymentId": "appgdep_6aea502ef69481918fe1ac6b00bc6b0b",
+    "status": "succeeded",
+    "audience": "public",
+    "customDomain": "jobvance.io"
+  },
+  "changes": [
+    "Six answer-first guide rewrites, tables and visible FAQs, per-guide update dates, matched home titles/minutes and corrected non-AI guide claims.",
+    "FAQPage is owned by Helmet on direct loading and normal client navigation; old FAQ data is removed/replaced, and build verification compares ordered visible question/answer pairs exactly.",
+    "Public privacy, product/CV Check FAQs, landing, explainer and existing check disclosure name CV text, JD, job title, company, OpenRouter route, confirmed answers and CV-line references. Existing payload/choice/consent unchanged.",
+    "Broken Yale role-filtering citation replaced by verified Harvard guidance; CV Check claims in three guides now cite /cv-check; changed citation dates move to4Nov. Scan-versus-reading-order and source-bound confirmed-answer claims corrected."
+  ],
+  "validation": {
+    "ci": {
+      "run": 41719826420,
+      "job": 126209333473,
+      "head": "6b039552fe9729da796a4024b5f9908a68e7a4bf",
+      "allStepsPassed": true,
+      "fullAuditPinnedSdkFrozenDenoRetained": true
+    },
+    "tests": {
+      "passed": 3889,
+      "files": 220,
+      "navigationRegression": true
+    },
+    "typeScriptErrors": 0,
+    "lint": {
+      "errors": 0,
+      "inheritedWarnings": 50
+    },
+    "fullModerateAuditVulnerabilities": 0,
+    "build": {
+      "publicPages": 39,
+      "guides": 21,
+      "sitemapUrls": 38,
+      "privateCheckNoindexExcluded": true,
+      "structuredDataHashes": 45,
+      "compressedBytes": 2257837,
+      "limitBytes": 3145728,
+      "hostingChecks": 12,
+      "socialPass": true,
+      "externalPrerenderRequests": 0
+    },
+    "liveHttp": {
+      "at": "2026-11-03T21:21:38.494Z",
+      "paths": 167,
+      "passed": 167,
+      "rawExact": 121,
+      "applicationExactHtmlWithOnlyRecognizedCloudflareTail": 46,
+      "securityHeadersMatched": true,
+      "rawHtmlParity": false
+    },
+    "browser": {
+      "localAndLiveWidths": [
+        375,
+        1440
+      ],
+      "noPageOverflow": true,
+      "localTableKeyboardScrollLeft": 27,
+      "faqToFaqReplacement": true,
+      "faqRemoval": true,
+      "libraryToFaqCreation": true,
+      "faqVisibleDataEqual": true,
+      "capturedLiveConsoleErrors": 0,
+      "anonymousUntaggedOnly": true
+    },
+    "independentReviews": [
+      "CONTENT-REVIEW.md",
+      "FINAL-CONTENT-PROOF.md",
+      "TEMPLATE-REVIEW.md",
+      "TEMPLATE-PROTECTED-REVIEW.md"
+    ]
+  },
+  "boundaries": {
+    "base": "ee64b363b7a7e42d87938c10abaca774d4883132",
+    "priorProtectedObjectsIdentical": 94,
+    "priorProtectedObjectsCompared": 98,
+    "intentionalObjectDifferences": [
+      "components ancestor: only CvCheckExplainer copy",
+      "CareerGuides.css: three authored appended lines",
+      "CvCheck.tsx: two copy nodes",
+      "ProductPage.tsx: two privacy nodes"
+    ],
+    "additionalProtectedObjectsIdentical": 9,
+    "copyOnlyExceptionsNonCopySyntaxEqual": true,
+    "supabaseTree": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "ownerHomeMetaAuthSessionConsentPixelCommerceBackendDependenciesCiUnchanged": true,
+    "backendSchemaMigrationFunctionProviderPaymentAdIndexingPermissionOutreachActions": false,
+    "realFormAccountOAuthAiProviderCheckoutPaymentAcceptance": false,
+    "conversionLiftClaim": false
+  },
+  "measurement": {
+    "dailyCounts": [
+      {
+        "read_at": "2026-11-03 21:21:44.306152+00",
+        "zone": "Asia/Dubai",
+        "local_day": "2026-11-04",
+        "day_start": "2026-11-03 20:00:00+00",
+        "day_end": "2026-11-03 21:21:44.306152+00",
+        "any_ad_tagged_visits": 0,
+        "meta_ad_visits": 0,
+        "exact_campaign_entry_visits": 0,
+        "purchase_campaign_tagged_visits": 0,
+        "purchase_campaign_first_touch_linked_signups": 0,
+        "classified_signups": 0,
+        "first_touch_meta_linked_signups": 0,
+        "live_provider_checkout_sessions_created": 0,
+        "classified_live_paid_rows_by_retained_date": 0,
+        "eligible_first_paid_cycles": 0,
+        "matching_first_purchase_claims": 0,
+        "matching_first_purchase_sent": 0,
+        "live_commerce_claims_today": 0,
+        "live_commerce_sent_today": 0,
+        "live_commerce_totals": {
+          "sent": 0,
+          "claims": 0,
+          "checkout_sent": 0,
+          "purchase_sent": 0,
+          "checkout_claims": 0,
+          "purchase_claims": 0
+        }
+      },
+      {
+        "read_at": "2026-11-03 21:21:44.306152+00",
+        "zone": "UTC",
+        "local_day": "2026-11-03",
+        "day_start": "2026-11-03 00:00:00+00",
+        "day_end": "2026-11-03 21:21:44.306152+00",
+        "any_ad_tagged_visits": 122,
+        "meta_ad_visits": 122,
+        "exact_campaign_entry_visits": 0,
+        "purchase_campaign_tagged_visits": 120,
+        "purchase_campaign_first_touch_linked_signups": 1,
+        "classified_signups": 2,
+        "first_touch_meta_linked_signups": 1,
+        "live_provider_checkout_sessions_created": 0,
+        "classified_live_paid_rows_by_retained_date": 0,
+        "eligible_first_paid_cycles": 0,
+        "matching_first_purchase_claims": 0,
+        "matching_first_purchase_sent": 0,
+        "live_commerce_claims_today": 0,
+        "live_commerce_sent_today": 0,
+        "live_commerce_totals": {
+          "sent": 0,
+          "claims": 0,
+          "checkout_sent": 0,
+          "purchase_sent": 0,
+          "checkout_claims": 0,
+          "purchase_claims": 0
+        }
+      }
+    ],
+    "health": {
+      "read_at": "2026-11-03 21:21:45.677617+00",
+      "today_utc": [
+        {
+          "key": "signups",
+          "kind": "count",
+          "label": "New accounts",
+          "today": 2,
+          "yesterday": 0
+        },
+        {
+          "key": "cv_checks",
+          "kind": "count",
+          "label": "CV tailorings",
+          "today": 1,
+          "yesterday": 0
+        },
+        {
+          "key": "runs",
+          "kind": "count",
+          "label": "Job Loop runs finished",
+          "today": 0,
+          "yesterday": 0
+        },
+        {
+          "key": "paid_orders",
+          "kind": "count",
+          "label": "Paid orders",
+          "today": 0,
+          "yesterday": 0
+        },
+        {
+          "key": "revenue",
+          "kind": "usd",
+          "label": "Recorded USD",
+          "today": 0,
+          "yesterday": 0
+        },
+        {
+          "key": "support",
+          "kind": "count",
+          "label": "Support messages",
+          "today": 0,
+          "yesterday": 0
+        }
+      ],
+      "kpis_7_days": [
+        {
+          "key": "signups",
+          "help": "Real people who created an account.",
+          "kind": "count",
+          "label": "New accounts",
+          "current": 2,
+          "previous": 1
+        },
+        {
+          "key": "activated",
+          "help": "50% of new accounts tailored a CV or used Job Loop.",
+          "kind": "count",
+          "label": "Tried Jobvance",
+          "current": 1,
+          "previous": 0
+        },
+        {
+          "key": "cv_checks",
+          "help": "AI-tailored CVs, including visitors without an account.",
+          "kind": "count",
+          "label": "CV tailorings",
+          "current": 1,
+          "previous": 0
+        },
+        {
+          "key": "runs",
+          "help": "Runs that finished, fully or partly.",
+          "kind": "count",
+          "label": "Job Loop runs",
+          "current": 0,
+          "previous": 0
+        },
+        {
+          "key": "paid_orders",
+          "help": "Job Loop subscription payments and CV passes, not counting refunds.",
+          "kind": "count",
+          "label": "Paid orders",
+          "current": 0,
+          "previous": 0
+        },
+        {
+          "key": "revenue",
+          "help": "Known USD subtotal. Missing accounting or refund amounts are excluded, not estimated.",
+          "kind": "usd",
+          "label": "Recorded USD",
+          "current": 0,
+          "previous": 0
+        },
+        {
+          "key": "new_payers",
+          "help": "0.0% of new accounts in this range have paid.",
+          "kind": "count",
+          "label": "New accounts that paid",
+          "current": 0,
+          "previous": 0
+        }
+      ],
+      "funnel": [
+        {
+          "hint": "Real people only; test and staff accounts are left out.",
+          "count": 2,
+          "label": "Created an account"
+        },
+        {
+          "hint": "Tailored a CV or saved a Job Loop profile.",
+          "count": 1,
+          "label": "Tried Jobvance"
+        },
+        {
+          "hint": "Finished the Job Loop set-up with their CV.",
+          "count": 0,
+          "label": "Saved a Job Loop profile"
+        },
+        {
+          "hint": "At least one search finished, fully or partly.",
+          "count": 0,
+          "label": "Got a Job Loop run"
+        },
+        {
+          "hint": "Approved at least one prepared CV and cover note.",
+          "count": 0,
+          "label": "Approved an application pack"
+        }
+      ],
+      "live_subscriptions": {
+        "ended": 0,
+        "active": 0,
+        "pastDue": 0,
+        "cancelling": 0
+      },
+      "places": {
+        "paidUsed": 0,
+        "pilotUsed": 5,
+        "paidCapacity": 100,
+        "pilotCapacity": 10
+      },
+      "operational_summary": {
+        "budget": {
+          "month": "2026-11",
+          "capUsd": 50,
+          "actualUsd": 0.030451,
+          "committedUsd": 0.030451
+        },
+        "checks": [
+          {
+            "key": "failed_runs",
+            "help": "Job Loop runs that stopped with an error.",
+            "count": 0,
+            "label": "Failed runs (7 days)",
+            "danger": true
+          },
+          {
+            "key": "stuck_runs",
+            "help": "Started but not finished after 30 minutes.",
+            "count": 0,
+            "label": "Runs stuck over 30 min",
+            "danger": true
+          },
+          {
+            "key": "overdue_schedules",
+            "help": "Automatic searches more than 20 minutes late. Includes test accounts, which use the same worker.",
+            "count": 0,
+            "label": "Overdue schedules",
+            "danger": true
+          },
+          {
+            "key": "unfulfilled",
+            "help": "Give them a place or refund them in Dodo.",
+            "count": 0,
+            "label": "Paid but given no place",
+            "danger": true
+          },
+          {
+            "key": "billing_unknown",
+            "help": "Check these in the Dodo dashboard.",
+            "count": 0,
+            "label": "Payments in an unknown state",
+            "danger": true
+          },
+          {
+            "key": "support_waiting",
+            "help": "Support messages not closed within 24 hours.",
+            "count": 0,
+            "label": "Messages waiting over a day",
+            "danger": true
+          },
+          {
+            "key": "partial_runs",
+            "help": "Finished, but some job sources did not answer.",
+            "count": 0,
+            "label": "Partial runs (7 days)",
+            "danger": false
+          },
+          {
+            "key": "holding",
+            "help": "Started checkouts keep a paid place for up to 4 days.",
+            "count": 0,
+            "label": "Unpaid checkouts holding a place",
+            "danger": false
+          }
+        ],
+        "lastDispatchAt": "2026-11-03T21:20:00.023212+00:00",
+        "schedulerEnabled": true
+      }
+    },
+    "entryBaseline": {
+      "cutoff": "2026-11-03 21:21:12.913536+00",
+      "read_at": "2026-11-03 21:21:47.039683+00",
+      "pooled_cv_check_link_sessions": 0,
+      "cv_check_page_sessions": 0,
+      "same_session_auth_after_landing": 0,
+      "first_touch_linked_new_accounts": 0,
+      "meta_cv_check_page_sessions": 0
+    },
+    "newPostReleaseAdExposure": 0,
+    "limits": "Sessions and stored classifications are not verified people/adset attribution. Earlier activation belongs to another classified account per dated attribution, not new customer acceptance. No new daily conversion trigger; fourteen existing dedupe keys retained. No funnel rerun without relevant new ad exposure."
+  },
+  "rollback": {
+    "version": 77,
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_b97a29ddf6988191a5eaecd65055db29",
+    "source": "ceaecabe40f6893ca29c0946a7521d4dd64f2e1c",
+    "localTag": "jobvance-before-guide-template-2026-11-04",
+    "tagPushed": false,
+    "limits": "Frontend rollback only; no restoration of external/customer/financial events or replay/removal of schema/receipts."
+  },
+  "privateEvidence": "jobvance-repair-evidence/growth-audit-2026-11-04/pr56-review/",
+  "baton": "Root bounded PR56 correction/review/release FINISHED. Claude resumes sole ongoing writer and promised live/sitemap readback. Future work integrates current main and preserves producer local commits. Shared/GitHub release handoff is not native chat ACK."
+}
