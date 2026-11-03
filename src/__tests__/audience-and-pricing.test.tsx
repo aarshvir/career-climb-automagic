@@ -150,7 +150,8 @@ describe('published draft privacy guidance', () => {
     expect(paragraph).toMatch(/does not save the check to your account/);
     const models = sectionText(screen.getByRole('heading', { name: 'Optional models and search' }));
     expect(models).toContain('comparison without AI runs on your device');
-    expect(models).toContain('AI tailoring sends your CV and vacancy text');
+    expect(models).toContain('AI tailoring sends your CV text, job description, job title and company name through OpenRouter');
+    expect(models).toContain('confirmed answers and their CV-line references after your explicit choice');
     const local = sectionText(screen.getByRole('heading', { name: 'Your free check' }));
     expect(local).toMatch(/Without optional tab-storage permission, refreshing or closing the tab clears the draft/);
   });
