@@ -35,7 +35,7 @@ describe("public career guides", () => {
     expect(screen.getByLabelText("Your stage")).toHaveFocus();
     await user.selectOptions(screen.getByLabelText("Your stage"), "Students");
     expect(screen.getByRole("link", { name: "How to describe student projects on your CV" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Compare your CV with a job description using evidence" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Check if your CV matches a job description" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: careerGuides.find(guide => guide.slug === "mba-career-pivot-cv")!.title })).not.toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("Your task"), "UAE job search");
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
