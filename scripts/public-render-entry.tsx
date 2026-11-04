@@ -14,7 +14,6 @@ import AudienceLanding from '../src/pages/AudienceLanding';
 import CvCheckLanding from '../src/pages/CvCheckLanding';
 import TruthfulTailoring from '../src/pages/TruthfulTailoring';
 import { cvCheckStructuredNodes } from '../src/lib/cv-check-structured-data';
-import { truthfulTailoringStructuredNodes } from '../src/lib/truthful-tailoring';
 import JobLoopOverview from '../src/pages/JobLoopOverview';
 import HelpCenter from '../src/pages/HelpCenter';
 import Walkthroughs from '../src/pages/Walkthroughs';
@@ -37,8 +36,8 @@ function element(page:PublicPage) {
 /** Extra schema.org nodes for pages whose visible content states them: the FAQ's own questions, and the published plan prices. No ratings, reviews or outcomes. */
 export function structuredNodesFor(path:string,siteOrigin:string):object[] {
   if(path==='/faq')return [{'@type':'FAQPage',mainEntity:productFaqs.filter(([,answer])=>typeof answer==='string').map(([question,answer])=>({'@type':'Question',name:question,acceptedAnswer:{'@type':'Answer',text:answer as string}}))}];
-  if(path==='/cv-check')return cvCheckStructuredNodes(siteOrigin);
-  if(path==='/truthful-cv-tailoring')return truthfulTailoringStructuredNodes();
+  // Landing pages own their FAQ through Helmet on both direct load and client navigation.
+  if(path==='/cv-check')return cvCheckStructuredNodes(siteOrigin).filter(node=>(node as { '@type'?:string })['@type']!=='FAQPage');
   if(path==='/'||path==='/pricing')return [{'@type':'SoftwareApplication',name:'Jobvance Automated Job Loop',url:siteOrigin+(path==='/pricing'?'/pricing':'/'),applicationCategory:'BusinessApplication',operatingSystem:'Web',offers:[{'@type':'Offer',name:'Free account',price:'0',priceCurrency:'USD',url:siteOrigin+'/onboarding'},...subscriptionPlans.map(plan=>({'@type':'Offer',name:plan.name+' monthly plan',price:String(plan.priceUsd),priceCurrency:'USD',url:siteOrigin+'/pricing'})),...(path==='/pricing'?passPlans.map(plan=>({'@type':'Offer',name:plan.name+' one-time CV pass',price:String(plan.price),priceCurrency:'USD',url:siteOrigin+'/pricing'})):[])]}];
   return [];
 }

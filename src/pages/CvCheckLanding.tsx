@@ -9,6 +9,7 @@ import { evidenceStatusLabels } from '@/lib/evidence-labels';
 import { cheapestPassPrice, cvCheckCostText, cvCheckFaqs, FACTS_CHECKED, FREE_TAILORED_CVS_PER_MONTH } from '@/lib/cv-check-faqs';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
 import { EXAMPLE_AD, EXAMPLE_CV } from '@/lib/cv-check-example';
+import { cvCheckStructuredNodes } from '@/lib/cv-check-structured-data';
 
 const outcomeMeaning: Record<keyof typeof evidenceStatusLabels, string> = {
   direct: 'The ad’s wording appears in your CV, with the closest line shown beside it.',
@@ -32,10 +33,11 @@ const keepReading: [string, string][] = [
 /** Public, indexable page for the free CV Check. The check itself lives at /check behind a free account and stays out of search. */
 export default function CvCheckLanding() {
   const meta = staticPageMeta('/cv-check');
+  const faqSchema = { '@context': 'https://schema.org', ...cvCheckStructuredNodes(SITE_ORIGIN)[0], '@id': `${SITE_ORIGIN}/cv-check#faq`, isPartOf: { '@id': `${SITE_ORIGIN}/cv-check#page` } };
   const report = analyzeCvEvidence(EXAMPLE_CV, EXAMPLE_AD);
   const cvLines = EXAMPLE_CV.split('\n');
   return <main className="product-page product-page--cvcheck jv-rails">
-    <Helmet><title>{meta?.title}</title><meta name="description" content={meta?.description} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}<meta property="og:title" content={meta?.title} /><meta property="og:description" content={meta?.description} />{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" /></Helmet>
+    <Helmet><title>{meta?.title}</title><meta name="description" content={meta?.description} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}<meta property="og:title" content={meta?.title} /><meta property="og:description" content={meta?.description} />{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" /><script type="application/ld+json">{JSON.stringify(faqSchema).replace(/</g, '\\u003c')}</script></Helmet>
     <div className="jv-page product-inner">
       <header className="jv-page-head product-page-heading">
         <p className="jv-caption">Free CV Check</p>
@@ -45,7 +47,7 @@ export default function CvCheckLanding() {
           <Link to="/check" className="jv-btn jv-btn--primary jv-btn--lg">Start the free CV check<ArrowRight aria-hidden="true" /></Link>
           <Link to="/privacy" className="jv-link"><span>How your CV is handled</span><ArrowRight aria-hidden="true" /></Link>
         </div>
-        <p className="cvl-note">Free account. Comparing without AI has no limit and runs on your device. AI tailoring is optional, and {FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month are free.</p>
+        <p className="cvl-note">Free account. Comparing without AI has no limit and runs on your device. AI tailoring is optional, and {FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month are free when AI tailoring is available.</p>
       </header>
 
       <div className="product-main-content cvl">

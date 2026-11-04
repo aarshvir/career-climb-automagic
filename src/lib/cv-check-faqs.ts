@@ -1,8 +1,8 @@
-import { FREE_TAILORED_CVS_PER_MONTH, passPlans } from './pass-plans';
+import { FAIR_USE_TAILORED_CVS_PER_DAY, FREE_TAILORED_CVS_PER_MONTH, passPlans } from './pass-plans';
 import { subscriptionPlans } from './subscription-plans';
 
 /** Date the facts on the public CV Check page were last compared with the product. Update it whenever the copy or the limits change. */
-export const FACTS_CHECKED = '4 November 2026';
+export const FACTS_CHECKED = '5 November 2026';
 
 export const cheapestPassPrice = Math.min(...passPlans.map(plan => plan.price));
 export { FREE_TAILORED_CVS_PER_MONTH };
@@ -10,7 +10,7 @@ const cheapestMonthlyPlan = Math.min(...subscriptionPlans.map(plan => plan.price
 const passList = passPlans.map(plan => `$${plan.price} (${plan.name}, ${plan.tailoredCvs} CVs over ${plan.days} days)`);
 
 /** The pricing facts, written once from the price files so the page and its FAQ cannot drift from the pricing page. */
-export const cvCheckCostText = `A free account includes unlimited comparisons without AI and ${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month. For more AI tailoring, one-time passes cost ${passList.slice(0, -1).join(', ')} or ${passList[passList.length - 1]}. Passes are one-time payments and nothing renews. Automated Job Loop has separate monthly plans from $${cheapestMonthlyPlan}.`;
+export const cvCheckCostText = `A free account includes unlimited comparisons without AI and ${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month when AI tailoring is available. For more AI tailoring, one-time passes cost ${passList.slice(0, -1).join(', ')} or ${passList[passList.length - 1]}. Passes are one-time payments and nothing renews. Paid passes have a fair-use limit of ${FAIR_USE_TAILORED_CVS_PER_DAY} AI-tailored CVs a day. AI tailoring is subject to availability and the service’s monthly budget; comparing without AI remains available. Automated Job Loop has separate monthly plans from $${cheapestMonthlyPlan}.`;
 
 /** One list feeds the visible FAQ and the page's FAQPage data, so they always say the same thing. */
 export const cvCheckFaqs: [string, string][] = [

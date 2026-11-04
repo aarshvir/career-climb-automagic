@@ -8,6 +8,7 @@ import CvCheckLanding from '@/pages/CvCheckLanding';
 import { cvCheckCostText, cvCheckFaqs } from '@/lib/cv-check-faqs';
 import { AI_SENT_TEXT, checkedExamples, exampleResult, slipThroughExamples, tailoringFaqs, truthfulTailoringStructuredNodes } from '@/lib/truthful-tailoring';
 import { staticPageMeta } from '@/lib/public-site-meta';
+import { FAIR_USE_TAILORED_CVS_PER_DAY } from '@/lib/pass-plans';
 import { assembleTailoredCv, sourceLines, validateRewrite } from '../../supabase/functions/_shared/cv-tailor';
 
 vi.unmock('react-router-dom');
@@ -169,10 +170,19 @@ describe('public AI tailoring page', () => {
     const cv = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Led the weekly pack', 'Intern, Beta', '- Supported the finance team'].join(nl);
     const managed = assembleTailoredCv(cv, { summary: { text: 'Managed the finance team.', sources: [6, 8] } });
     expect(managed.rejected).toEqual([]);
-    // One cautious-wording word in any cited line drops the whole profile.
+    // Cautious wording rejects a changed profile, but exact normalised cited wording can still pass.
     const hedged = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Projected savings from the pilot', 'Intern, Beta', '- Supported the finance team'].join(nl);
     const dropped = assembleTailoredCv(hedged, { summary: { text: 'Supported the finance team.', sources: [6, 8] } });
     expect(dropped.rejected.map(item => item.reason)).toEqual(['Keep the exact wording of negative, uncertain or projected evidence.']);
+    const exactCitedLine = assembleTailoredCv(hedged, { summary: { text: '- Supported the finance team', sources: [6, 8] } });
+    expect(exactCitedLine.rejected).toEqual([]);
+    expect(exactCitedLine.changes.some(change => change.kind === 'summary')).toBe(true);
+    const exactAnswer = assembleTailoredCv(hedged, { summary: { text: 'I prepared quarterly reports', sources: [6, 8], facts: [1] } }, ['I prepared quarterly reports'], [8]);
+    expect(exactAnswer.rejected).toEqual([]);
+    expect(exactAnswer.changes.some(change => change.kind === 'summary')).toBe(true);
+    renderPage();
+    expect(document.body).toHaveTextContent('must match one cited CV line or a confirmed answer tied to it after normalisation');
+    expect(document.body).not.toHaveTextContent('drops the whole profile');
   });
 
   it('describes the profile, reorder and role-line behaviour as the code has it', () => {
@@ -194,6 +204,13 @@ describe('public AI tailoring page', () => {
     const summary = profiled.changes.find(change => change.kind === 'summary');
     expect(summary?.before).toContain('Analyst with experience in monthly reporting.');
     expect(profiled.text).not.toContain('Works closely with finance teams.');
+    // The assembly can list a rewrite inside a replaced profile whose text is no longer present.
+    const collision = assembleTailoredCv(cv, { rewrites: [{ n: 5, text: 'Analyst with monthly reporting experience.' }], summary: { text: 'Analyst with experience in monthly reporting and finance teams.', sources: [5, 6] } });
+    const replacedRewrite = collision.changes.find(change => change.kind === 'rewrite');
+    expect(replacedRewrite).toBeDefined();
+    expect(collision.text).not.toContain(replacedRewrite!.after);
+    renderPage();
+    expect(document.body).toHaveTextContent('keep-original button can fail');
   });
 
   it('keeps the stated limits on profiles, new lines and questions', () => {
@@ -245,6 +262,9 @@ describe('public AI tailoring page', () => {
     renderPage();
     expect(document.body).toHaveTextContent('through OpenRouter to the AI model provider');
     expect(document.body).toHaveTextContent('3 AI-tailored CVs a month');
+    expect(cvCheckCostText).toContain(`fair-use limit of ${FAIR_USE_TAILORED_CVS_PER_DAY} AI-tailored CVs a day`);
+    expect(cvCheckCostText).toContain('subject to availability');
+    expect(document.body).toHaveTextContent(cvCheckCostText);
   });
 
   it('claims no ratings, reviews, user counts, guarantees or outcomes in its text or structured data', () => {

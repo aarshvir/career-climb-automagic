@@ -20,7 +20,7 @@ describe('public search routes remain distinct and exclude private state',()=>{
     const locations=[...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(match=>match[1]);
     expect(locations).toHaveLength(listed.length);
     for(const location of locations){expect(location).not.toContain('?');expect(location).not.toContain('#');}
-    expect(sitemap).toContain('<loc>https://jobvance.io/guides/cv-check-without-ai</loc><lastmod>2026-11-04</lastmod>');
+    expect(sitemap).toContain('<loc>https://jobvance.io/guides/cv-check-without-ai</loc><lastmod>2026-11-05</lastmod>');
   });
   it('lists the public CV Check page for search while the account-gated check stays out',()=>{
     expect(publicPages.find(page=>page.path==='/cv-check')?.kind).toBe('landing');

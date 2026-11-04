@@ -6,7 +6,7 @@ import './JobLoop.css';
 import './CvCheckLanding.css';
 import { FREE_TAILORED_CVS_PER_MONTH, cvCheckCostText } from '@/lib/cv-check-faqs';
 import { staticPageMeta, SITE_ORIGIN } from '@/lib/public-site-meta';
-import { AI_SENT_TEXT, TAILORING_FACTS_CHECKED, checkedExamples, exampleResult, slipThroughExamples, tailoringFaqs, type TailoringExample } from '@/lib/truthful-tailoring';
+import { AI_SENT_TEXT, TAILORING_FACTS_CHECKED, checkedExamples, exampleResult, slipThroughExamples, tailoringFaqs, truthfulTailoringStructuredNodes, type TailoringExample } from '@/lib/truthful-tailoring';
 
 const allowed = [
   'Reword a bullet or a plain text line. The AI is asked to use only that line’s own facts. It is also asked to make each line stronger and to use the job’s own words where the line supports them. That request is where overstatement can come from, and the checks below catch some of it.',
@@ -21,11 +21,11 @@ const checks: [string, string][] = [
   ['Names and tools', 'A capitalised word that is not in that line and is not on a built-in list of ordinary capitalised words, which includes Senior, Executive, Manager and Strategy. Names written in lower case are not checked.'],
   ['Qualifications', 'Listed words such as certified, licensed, chartered, degree, MBA or PMP that are not in that line. Other wording, such as “qualified accountant”, is not checked.'],
   ['Ownership', 'A listed word in its exact form (led, lead, managed, owned, built, launched, delivered and others) when the line contains none of them. A listed word anywhere in the line, in any role, such as “head” or “run rate”, switches the check off for that line. Unlisted verbs such as “developed” or “implemented” are not checked.'],
-  ['Cautious wording', 'If the line contains a word from a fixed list (for example projected, estimated, planned, expected, not, never, would, might or the month May), the suggestion must keep the line’s exact wording. Other hedges, such as “aimed to”, “approximately” or “pilot”, are not on the list.'],
+  ['Cautious wording', 'If any text it is checked against contains a word from a fixed list (for example projected, estimated, planned, expected, not, never, would, might or the month May), the suggestion must match one of those source passages after normalisation. Other hedges, such as “aimed to”, “approximately” or “pilot”, are not on the list.'],
   ['Length and shape', 'One line only. The length is capped at the larger of 260 characters or about 1.8 times the text it is checked against: your original line and any answer used for a rewrite, the answers alone for a new bullet.'],
   ['Reordering', 'Only the same bullets under the same role, in a new order. A list that adds, drops or mixes bullets is dropped.'],
   ['New lines', 'A new bullet is checked against the answers you confirmed, not against your CV lines. An answer is tied to the CV line you chose: a reworded line or a new bullet can use it only there. A profile can use it whenever the profile cites that line, next to lines from other roles.'],
-  ['Profile', 'Up to 420 characters, and the length rule above also applies. It is checked against all the lines it cites taken together, including name, contact and role lines, so a number or verb from one role can sit beside a claim from another. The AI chooses which lines to cite, so one listed ownership verb in any cited line turns that check off for the whole profile, and one cautious-wording word in any cited line drops the whole profile.'],
+  ['Profile', 'Up to 420 characters, and the length rule above also applies. It is checked against all the lines it cites taken together, including name, contact and role lines, so a number or verb from one role can sit beside a claim from another. The AI chooses which lines to cite, so one listed ownership verb in any cited line turns that check off for the whole profile, and a cautious-wording word in any cited line means the suggested profile must match one cited CV line or a confirmed answer tied to it after normalisation; otherwise it is rejected.'],
 ];
 
 const seen = [
@@ -39,6 +39,7 @@ const seen = [
 
 const limits = [
   'They cannot tell whether the claims already in your CV are true.',
+  'If a reworded line is inside a profile that is also replaced, that line’s keep-original button can fail. Review and edit the CV text before confirming it.',
   'They do not decide whether you qualify for a job or predict what an employer will decide.',
   'They miss claims written in words they do not look for: numbers written as words, lower-case names, unlisted verbs, qualifications and hedges, and new outcomes in ordinary words.',
   'They compare numbers as written, so two figures can be swapped between claims, and a profile is checked against all the lines it cites together.',
@@ -74,8 +75,9 @@ function ExampleTable({ caption, label, examples, slip }: { caption: string; lab
 /** Public, indexable page explaining the checks on AI CV tailoring. Every result in its tables is computed by the product's own validator. */
 export default function TruthfulTailoring() {
   const meta = staticPageMeta('/truthful-cv-tailoring');
+  const faqSchema = { '@context': 'https://schema.org', ...truthfulTailoringStructuredNodes()[0], '@id': `${SITE_ORIGIN}/truthful-cv-tailoring#faq`, isPartOf: { '@id': `${SITE_ORIGIN}/truthful-cv-tailoring#page` } };
   return <main className="product-page product-page--cvcheck jv-rails">
-    <Helmet><title>{meta?.title}</title><meta name="description" content={meta?.description} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}<meta property="og:title" content={meta?.title} /><meta property="og:description" content={meta?.description} />{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" /></Helmet>
+    <Helmet><title>{meta?.title}</title><meta name="description" content={meta?.description} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}<meta property="og:title" content={meta?.title} /><meta property="og:description" content={meta?.description} />{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" /><script type="application/ld+json">{JSON.stringify(faqSchema).replace(/</g, '\\u003c')}</script></Helmet>
     <div className="jv-page product-inner">
       <header className="jv-page-head product-page-heading">
         <p className="jv-caption">AI CV tailoring</p>
@@ -85,7 +87,7 @@ export default function TruthfulTailoring() {
           <Link to="/check" className="jv-btn jv-btn--primary jv-btn--lg">Start the free CV check<ArrowRight aria-hidden="true" /></Link>
           <Link to="/privacy" className="jv-link"><span>How your CV is handled</span><ArrowRight aria-hidden="true" /></Link>
         </div>
-        <p className="cvl-note">Free account. AI tailoring is optional, and {FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month are free. Comparing without AI has no limit.</p>
+        <p className="cvl-note">Free account. AI tailoring is optional, and {FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month are free when AI tailoring is available. Comparing without AI has no limit.</p>
       </header>
 
       <div className="product-main-content cvl">
@@ -94,7 +96,7 @@ export default function TruthfulTailoring() {
           <dl className="cvl-glance">
             <div><dt>What the AI may do</dt><dd>Reword a line, reorder bullets under one role, write a short profile and ask up to five questions about gaps. It is asked to use only what is in your CV.</dd></div>
             <div><dt>What the checks look for</dt><dd>Some added numbers in digits, capitalised names, listed qualification words and listed ownership verbs.</dd></div>
-            <div><dt>What you control</dt><dd>You see what changed, can reverse reworded lines, new lines and profiles with a button, and download only after you confirm the CV is accurate.</dd></div>
+            <div><dt>What you control</dt><dd>You review the listed changes and the available keep/remove controls, then download only after you confirm the CV is accurate.</dd></div>
             <div><dt>What the checks are</dt><dd>Rules about wording, a first filter and not a fact-check. They do not verify your CV, read meaning or check lower-case names.</dd></div>
             <div><dt>Facts checked</dt><dd>{TAILORING_FACTS_CHECKED}</dd></div>
           </dl>
