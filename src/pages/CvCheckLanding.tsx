@@ -21,6 +21,7 @@ const steps = ['Add your CV and the job', 'Read what the job asks for', 'Read th
 const keepReading: [string, string][] = [
   ['/guides/cv-job-description-evidence', 'How to compare a CV with a job description using evidence'],
   ['/guides/cv-check-without-ai', 'What a CV check without AI shows and misses'],
+  ['/truthful-cv-tailoring', 'How AI changes to your CV are checked'],
   ['/guides/cv-check-no-fit-percentage', 'Why a match percentage is not a verdict'],
   ['/guides/resume-privacy-before-upload', 'What to check before you upload a CV anywhere'],
   ['/guides/achievements-without-numbers', 'Describe achievements when you have no numbers'],
@@ -89,7 +90,7 @@ export default function CvCheckLanding() {
 
         <section className="jv-section product-section" aria-labelledby="cvl-ai-title">
           <h2 id="cvl-ai-title" className="jv-section-title">If you want tailoring</h2>
-          <p>AI tailoring rewords and reorders what is already in your CV and lists each change beside your original wording. A change is rejected if it adds a number, a capitalised name or tool, a qualification word, or a stronger ownership verb than your CV uses (for example “led” where you wrote “supported”). This is a rule check on wording, not a fact-check of your CV, so read every change before you download.</p>
+          <p>AI tailoring rewords and reorders what is already in your CV, can add a short profile, and lists each change; a reworded line shows your original wording beside the new one. Some suggestions are left out when they add a number in digits, a capitalised name or tool, a listed qualification word or a listed ownership verb (for example “led” where you wrote “supported”). This is a rule check on wording, not a fact-check of your CV, so read every change before you download. See <Link to="/truthful-cv-tailoring">how AI changes to your CV are checked</Link>.</p>
           <p>{cvCheckCostText} See <Link to="/pricing">pricing</Link>.</p>
         </section>
 

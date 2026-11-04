@@ -30,6 +30,7 @@ export function preloadRoute(key: string, load: () => Promise<Loaded>): Promise<
 export const routeLoaders = {
   audience: () => import("@/pages/AudienceLanding"),
   cvCheckLanding: () => import("@/pages/CvCheckLanding"),
+  truthfulTailoring: () => import("@/pages/TruthfulTailoring"),
   jobLoop: () => import("@/pages/JobLoopOverview"),
   guides: () => import("@/pages/CareerGuides"),
   guideArticle: () => import("@/pages/CareerGuides").then(module => ({ default: module.CareerGuideArticle })),
@@ -50,6 +51,7 @@ export function warmAccountEntry(path: string): void {
 export function routeKeysFor(path: string): Array<keyof typeof routeLoaders> {
   if (path === "/job-loop") return ["jobLoop"];
   if (path === "/cv-check") return ["cvCheckLanding"];
+  if (path === "/truthful-cv-tailoring") return ["truthfulTailoring"];
   if (path === "/guides") return ["guides"];
   if (path.startsWith("/guides/")) return ["guides", "guideArticle"];
   if (path === "/help") return ["help"];

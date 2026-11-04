@@ -134,6 +134,15 @@ for(const page of publicRender.pages){
       assert.ok(visible.length>=3,'A guide FAQ has at least three questions.');
       assert.deepEqual(faqs[0].mainEntity.map(question=>({q:question.name,a:question.acceptedAnswer.text})),visible,'Every FAQ question and answer equals its visible text, in order.');}
   }
+  if(page.kind==='landing'){
+    // The FAQ printed on a landing page and its FAQPage data must say exactly the same thing, in the same order.
+    const decode=value=>value.replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+    const faqs=[...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].flatMap(match=>{const data=JSON.parse(match[1]);return data['@graph']??[data];}).filter(node=>node['@type']==='FAQPage');
+    const visible=[...html.matchAll(/<details><summary><span>([\s\S]*?)<\/span><span class="jv-faq-toggle"[\s\S]*?<\/summary><p>([\s\S]*?)<\/p><\/details>/g)].map(match=>({q:decode(match[1]),a:decode(match[2])}));
+    assert.equal(faqs.length,1,`${page.path} has exactly one FAQPage.`);
+    assert.ok(visible.length>=5,`${page.path} prints its FAQ.`);
+    assert.deepEqual(faqs[0].mainEntity.map(question=>({q:question.name,a:question.acceptedAnswer.text})),visible,`${page.path}: every FAQ question and answer equals its visible text, in order.`);
+  }
   for(const match of html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)){
     JSON.parse(match[1]);
     const {createHash}=await import('node:crypto');
