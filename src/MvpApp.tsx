@@ -30,6 +30,7 @@ const JobLoop = lazy(() => import("@/pages/JobLoop"));
 const LoopOnboarding = lazy(routeLoaders.onboarding);
 const AudienceLanding = lazyRoute("audience", routeLoaders.audience);
 const CvCheckLanding = lazyRoute("cvCheckLanding", routeLoaders.cvCheckLanding);
+const TruthfulTailoring = lazyRoute("truthfulTailoring", routeLoaders.truthfulTailoring);
 const CvCheck = lazy(() => import("@/pages/CvCheck"));
 const AdminPortal = lazy(() => import("@/pages/admin/AdminPortal"));
 const AdminHome = lazy(() => import("@/pages/admin/home/AdminHome"));
@@ -117,6 +118,7 @@ export default function MvpApp() {
                     <Route path="/pilot" element={<Navigate to="/job-loop" replace />} />
                     <Route path="/check" element={<ProtectedCvCheck />} />
                     <Route path="/cv-check" element={<CvCheckLanding />} />
+                    <Route path="/truthful-cv-tailoring" element={<TruthfulTailoring />} />
                     <Route path="/onboarding" element={<LoopOnboarding />} />
                     <Route path="/loop" element={<ProtectedJobLoop />} />
                     <Route path="/job-loop" element={<JobLoopOverview />} />

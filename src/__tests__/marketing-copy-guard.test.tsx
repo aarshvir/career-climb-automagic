@@ -9,6 +9,7 @@ import MvpFooter from '@/components/layout/MvpFooter';
 import CareerGuides from '@/pages/CareerGuides';
 import AudienceLanding from '@/pages/AudienceLanding';
 import CvCheckLanding from '@/pages/CvCheckLanding';
+import TruthfulTailoring from '@/pages/TruthfulTailoring';
 import Auth from '@/pages/Auth';
 import Walkthroughs from '@/pages/Walkthroughs';
 import { publicStaticPages } from '@/lib/public-site-meta';
@@ -40,6 +41,7 @@ const surfaces: [string, () => React.ReactElement][] = [
   ['pricing', () => <ProductPage kind="pricing" />],
   ['job-loop', () => <JobLoopOverview />],
   ['cv-check', () => <CvCheckLanding />],
+  ['truthful-cv-tailoring', () => <TruthfulTailoring />],
   ['footer', () => <MvpFooter />],
   ['guides', () => <CareerGuides />],
   ['for-students', () => <AudienceLanding audience="student" />],

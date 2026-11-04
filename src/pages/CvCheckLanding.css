@@ -1,6 +1,6 @@
 /* Public CV Check page: reuses the product page rails; only the example table, glance list and outcome badges are new. */
 .product-page--cvcheck .cvl-note { margin: 14px 0 0; color: var(--jv-ink-2); font-size: var(--t-small, 0.9rem); max-width: 60ch; }
-.product-page--cvcheck .cvl { display: grid; gap: 8px; }
+.product-page--cvcheck .cvl { display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr); }
 .product-page--cvcheck .cvl p, .product-page--cvcheck .cvl li { max-width: 68ch; line-height: 1.6; }
 .product-page--cvcheck .cvl a { color: var(--jv-brand); text-decoration: underline; text-underline-offset: 3px; }
 .cvl-glance { display: grid; gap: 0; margin: 12px 0 0; border: 1px solid var(--jv-line); border-radius: 14px; overflow: hidden; }
@@ -12,6 +12,8 @@
 .cvl-steps { padding-left: 22px; display: grid; gap: 8px; }
 .cvl-table-wrap { overflow-x: auto; margin-top: 16px; }
 .cvl-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; min-width: 560px; }
+.cvl-table--compact { min-width: 0; }
+.cvl-table--compact tbody th { font-weight: 600; width: 28%; }
 .cvl-table caption { caption-side: top; text-align: left; padding: 0 0 10px; color: var(--jv-ink-2); font-size: 0.85rem; }
 .cvl-table th, .cvl-table td { text-align: left; vertical-align: top; padding: 12px 14px; border-top: 1px solid var(--jv-line); }
 .cvl-table thead th { border-top: 0; color: var(--jv-ink-2); font-weight: 600; font-size: 0.85rem; }

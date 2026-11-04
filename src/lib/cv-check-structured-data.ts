@@ -15,11 +15,11 @@ export function cvCheckStructuredNodes(siteOrigin: string): object[] {
         'Requirement-by-requirement comparison of one CV with one job ad',
         'Four outcomes per requirement, with no fit percentage or ATS score',
         'Comparing without AI runs on your device',
-        'Optional AI tailoring with each change shown beside your original wording',
+        'Optional AI tailoring with a change list and original wording for reworded lines',
         'Download as PDF, DOCX or TXT after you confirm your CV is accurate',
       ],
       provider: { '@id': `${siteOrigin}/#organization` },
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: `Unlimited comparisons without AI, plus ${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month. Optional one-time passes from $${cheapestPassPrice}.` },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: `Unlimited comparisons without AI, plus ${FREE_TAILORED_CVS_PER_MONTH} AI-tailored CVs a month when AI tailoring is available. Optional one-time passes from $${cheapestPassPrice}.` },
     },
   ];
 }

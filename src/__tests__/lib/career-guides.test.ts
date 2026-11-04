@@ -75,7 +75,7 @@ describe("the original career guide library", () => {
   });
 
   it("dates the new non-AI guide at its first publication without redating existing guides", () => {
-    expect(getCareerGuide("cv-check-without-ai")).toMatchObject({ publishedAt: "2026-11-04", updatedAt: "2026-11-04" });
+    expect(getCareerGuide("cv-check-without-ai")).toMatchObject({ publishedAt: "2026-11-04", updatedAt: "2026-11-05" });
     // Rewritten guides and guides with corrected citations carry the date of this update.
     const rewritten = ["cv-job-description-evidence", "cv-check-no-fit-percentage", "resume-privacy-before-upload", "achievements-without-numbers", "cv-upload-failure-checklist", "mba-career-pivot-cv", "role-filtering-before-applying", "first-application-pack", "reuse-second-application", "cv-pdf-or-docx"];
     for (const guide of careerGuides.filter(guide => guide.slug !== "cv-check-without-ai")) {

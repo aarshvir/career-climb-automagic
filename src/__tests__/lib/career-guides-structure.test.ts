@@ -13,7 +13,7 @@ const rewritten = [
 const citationUpdates = ["role-filtering-before-applying", "first-application-pack", "reuse-second-application", "cv-pdf-or-docx"];
 const REWRITE_DATE = "2026-11-04";
 // First written on 3 Nov 2026 (after the library's first release), so its published date is its own.
-const NEW_GUIDE = { slug: "cv-check-without-ai", publishedAt: "2026-11-04", updatedAt: "2026-11-04" };
+const NEW_GUIDE = { slug: "cv-check-without-ai", publishedAt: "2026-11-04", updatedAt: "2026-11-05" };
 
 describe("answer-first guide structure", () => {
   it("dates only the guides whose text changed", () => {
