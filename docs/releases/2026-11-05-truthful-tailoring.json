@@ -1,0 +1,227 @@
+{
+  "release": "truthful-cv-tailoring-and-landing-faq-navigation",
+  "publicVersion": 79,
+  "publishedAt": "2026-11-04T20:35:19.903695+00:00",
+  "publicUrl": "https://jobvance.io",
+  "pageUrl": "https://jobvance.io/truthful-cv-tailoring",
+  "pr": 57,
+  "originalAuthorHead": "9c3e4c923782791f98220f355e55a4dfdc0ae7f4",
+  "source": "9847502a707673d9969890bfa2654ff1450e46dd",
+  "merge": "fbabb2af8bc1010d41f4d6b73b9859601bd63210",
+  "fullMergeTree": "dc7b64ff684df879d65f79845e36f3dec39fc9bc",
+  "fullMergeTreeMatchesReviewedSource": true,
+  "site": {
+    "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d3f7b7ac2d3c8191a947b8e729e3bdbc",
+    "deploymentId": "appgdep_6aeb96eb8cdc81919029f879ad11cfc5",
+    "status": "succeeded",
+    "audience": "public",
+    "customDomain": "jobvance.io"
+  },
+  "changes": [
+    "Public truthful-CV-tailoring page with actual validator-computed invented examples and explicit rule limits; new route/links/sitemap/llms record.",
+    "Landing FAQ data managed by Helmet on SSR and ordinary client navigation; prerender graph excludes duplicate FAQ; direct host and maintained navigation checks match visible questions and answers.",
+    "Preserved authored CV Check minmax grid/contained table styles.",
+    "Corrected cautious-source exact-line/answer exception, undo caveat, shared40/day fair-use and AI availability, public FAQ/guide/explainer/structured copy; non-AI guide publication4Nov retained/update5Nov."
+  ],
+  "validation": {
+    "ci": {
+      "run": 41906726468,
+      "job": 126843254493,
+      "head": "9847502a707673d9969890bfa2654ff1450e46dd",
+      "all18StepsPassed": true,
+      "fullModerateAuditPinnedOriginalSdkFrozenDeno": true
+    },
+    "tests": {
+      "passed": 3912,
+      "files": 222,
+      "landingNavigationRegressionCases": 2,
+      "originalAuthorBaselineFailures": 2
+    },
+    "typeScriptErrors": 0,
+    "lint": {
+      "errors": 0,
+      "inheritedWarnings": 50
+    },
+    "fullAuditVulnerabilities": 0,
+    "build": {
+      "pages": 40,
+      "guides": 21,
+      "sitemapUrls": 39,
+      "privateCheckNoindexExcluded": true,
+      "jsonldHashes": 48,
+      "compressedBytes": 2276126,
+      "compressedLimit": 3145728,
+      "hostingGroups": 12,
+      "socialPassed": true,
+      "externalPrerenderRequests": 0
+    },
+    "liveHttp": {
+      "at": "2026-11-04T20:36:00.469Z",
+      "paths": 171,
+      "passed": 171,
+      "rawExact": 124,
+      "htmlApplicationExactWithRecognizedCloudflareTail": 47,
+      "rawHtmlParity": false,
+      "securityHeadersMatched": true
+    },
+    "browser": {
+      "localAndLiveViewports": [
+        375,
+        1440
+      ],
+      "noPageHorizontalOverflow": true,
+      "tableKeyboardScroll26px": true,
+      "faqNavigationMatchedVisibleText": true,
+      "faqRemovedOnPrivacy": true,
+      "capturedConsoleErrors": 0,
+      "ownedTabsClosed": true,
+      "viewportReset": true,
+      "ownedPreviewStopped": true,
+      "userTabsPreserved": true
+    }
+  },
+  "protected": {
+    "priorObjects": 98,
+    "identical": 95,
+    "intendedPriorExceptions": [
+      "components ancestor: CvCheckExplainer public copy/links/display constant only",
+      "public-site-meta new page only; existing metadata identical",
+      "CvCheckLanding.css exact author blob; no other CSS changes"
+    ],
+    "additionalObjects": 13,
+    "additionalIdentical": 12,
+    "intendedAdditionalException": "MvpApp new lazy public page and route only",
+    "wholeSupabase": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "backendAuthConsentCommerceDepsCiPolicyUnchanged": true,
+    "CvCheckRuntimeUnchanged": true
+  },
+  "remainingProductFollowups": [
+    "Ownership per-verb comparison",
+    "Question validation and complete dropped-suggestion counts",
+    "All-rejected reassurance",
+    "Profile/rewrite keep-original collision",
+    "Onboarding unsupported-character late-save validation"
+  ],
+  "conversionObservation": {
+    "at": "2026-11-04 20:36:26.294962+00",
+    "counts": [
+      {
+        "read_at": "2026-11-04 20:36:26.294962+00",
+        "zone": "Asia/Dubai",
+        "local_day": "2026-11-05",
+        "day_start": "2026-11-04 20:00:00+00",
+        "day_end": "2026-11-04 20:36:26.294962+00",
+        "any_ad_tagged_visits": 0,
+        "meta_ad_visits": 0,
+        "exact_campaign_entry_visits": 0,
+        "purchase_campaign_tagged_visits": 0,
+        "purchase_campaign_first_touch_linked_signups": 0,
+        "classified_signups": 0,
+        "first_touch_meta_linked_signups": 0,
+        "live_provider_checkout_sessions_created": 0,
+        "classified_live_paid_rows_by_retained_date": 0,
+        "eligible_first_paid_cycles": 0,
+        "matching_first_purchase_claims": 0,
+        "matching_first_purchase_sent": 0,
+        "live_commerce_claims_today": 0,
+        "live_commerce_sent_today": 0,
+        "live_commerce_totals": {
+          "sent": 0,
+          "claims": 0,
+          "checkout_sent": 0,
+          "purchase_sent": 0,
+          "checkout_claims": 0,
+          "purchase_claims": 0
+        }
+      },
+      {
+        "read_at": "2026-11-04 20:36:26.294962+00",
+        "zone": "UTC",
+        "local_day": "2026-11-04",
+        "day_start": "2026-11-04 00:00:00+00",
+        "day_end": "2026-11-04 20:36:26.294962+00",
+        "any_ad_tagged_visits": 0,
+        "meta_ad_visits": 0,
+        "exact_campaign_entry_visits": 0,
+        "purchase_campaign_tagged_visits": 0,
+        "purchase_campaign_first_touch_linked_signups": 0,
+        "classified_signups": 0,
+        "first_touch_meta_linked_signups": 0,
+        "live_provider_checkout_sessions_created": 0,
+        "classified_live_paid_rows_by_retained_date": 0,
+        "eligible_first_paid_cycles": 0,
+        "matching_first_purchase_claims": 0,
+        "matching_first_purchase_sent": 0,
+        "live_commerce_claims_today": 0,
+        "live_commerce_sent_today": 0,
+        "live_commerce_totals": {
+          "sent": 0,
+          "claims": 0,
+          "checkout_sent": 0,
+          "purchase_sent": 0,
+          "checkout_claims": 0,
+          "purchase_claims": 0
+        }
+      }
+    ],
+    "entryBaseline": {
+      "cutoff": "2026-11-04 20:35:19.903695+00",
+      "read_at": "2026-11-04 20:36:28.651248+00",
+      "pooled_cv_check_link_sessions": 0,
+      "cv_check_page_sessions": 0,
+      "same_session_auth_after_landing": 0,
+      "first_touch_linked_new_accounts": 0,
+      "meta_cv_check_page_sessions": 0
+    },
+    "newRelevantAdExposure": false,
+    "funnelRerun": false,
+    "newThreshold": false,
+    "sharedConversionLineWritten": false,
+    "dedupeKeysRetained": 14,
+    "limits": "Sessions and stored classifications are not verified people/adset attribution or conversion lift. No checkout/payment/accepted Purchase observed. Entry baseline precedes known untagged Codex live QA."
+  },
+  "healthObservation": {
+    "at": "2026-11-04 20:36:27.577901+00",
+    "operationalCheckCount": 0,
+    "lastDispatchAt": "2026-11-04T20:35:00.179179+00:00",
+    "schedulerEnabled": true,
+    "places": {
+      "paidUsed": 0,
+      "pilotUsed": 5,
+      "paidCapacity": 100,
+      "pilotCapacity": 10
+    },
+    "classifiedSignup7Days": 2,
+    "activation7Days": 1,
+    "tailoring7Days": 1,
+    "activeLive": 0,
+    "novemberBudget": {
+      "month": "2026-11",
+      "capUsd": 50,
+      "actualUsd": 0.030451,
+      "committedUsd": 0.030451
+    },
+    "octoberBudget": {
+      "actualUsd": 0.527938,
+      "committedUsd": 0.753914
+    },
+    "limits": "Stored classifications/application accounting only; no new customer acceptance or spending authority."
+  },
+  "rollback": {
+    "version": 78,
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_ded2b78fadf48191a0f874c88e4b247f",
+    "source": "6b039552fe9729da796a4024b5f9908a68e7a4bf",
+    "localTag": "jobvance-before-truthful-tailoring-2026-11-05",
+    "tagPushed": false,
+    "limits": "Frontend rollback cannot restore customer/external/financial data/events; no migration replay."
+  },
+  "privateEvidence": "jobvance-repair-evidence/growth-audit-2026-11-05/pr57-review/",
+  "limits": [
+    "No real form/account/OAuth/AI/provider/checkout/payment/ad-tagged QA, backend/schema/migration/function/ad/funding/indexing/permission/outreach action or paid call.",
+    "Public/local browser QA is not real-device/customer/private/provider/payment acceptance or conversion lift.",
+    "FAQ ownership is verified; other inherited structured-node ownership/parity is not broadly certified.",
+    "Shared/GitHub coordination is not native chat delivery/ACK; Claude owns proposed postrelease readback/single indexing submission."
+  ],
+  "baton": "Root bounded PR57 correction/review/release FINISHED. Claude resumes sole ongoing writer and proposed postrelease readback/single indexing request. Shared/GitHub coordination is not native chat ACK. No identical runtime redeploy for documentation."
+}
