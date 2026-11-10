@@ -6,7 +6,7 @@ import CvCheck from "@/pages/CvCheck";
 import { clearTrackingDraftMemory } from '@/lib/tracking-draft-memory';
 import { clearCheckRecovery } from '@/lib/check-draft';
 import { analyzeCvEvidence } from '@/lib/cv-evidence';
-import { companyFromVacancy, roleFromVacancy, TailorUnavailable } from '@/lib/cv-tailor-api';
+import { companyFromVacancy, roleFromVacancy, TailorUnavailable, withoutReplacedRewrites } from '@/lib/cv-tailor-api';
 
 vi.unmock("react-router-dom");
 const mocks = vi.hoisted(() => ({
@@ -265,5 +265,41 @@ describe('requirement coverage', () => {
     expect(within(coverage).getByText('Partly covered').nextElementSibling).toHaveTextContent(`${before.partial} → ${after.partial}`);
     expect(within(coverage).getByText('Not shown in your CV').nextElementSibling).toHaveTextContent(`${before.missing} → ${after.missing}`);
     expect(coverage.textContent).not.toMatch(/%|score:|pass|fail/iu);
+  });
+});
+
+describe('honest results when little or nothing changed', () => {
+  const unchanged = { text: source, changes: [], questions: [], rejectedCount: 0 };
+  async function runTailoring(result: unknown) {
+    mocks.tailor.mockResolvedValue(result); show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByText('Review changes');
+  }
+  it('does not say the CV reads well when the AI proposed nothing', async () => {
+    await runTailoring(unchanged);
+    expect(screen.getAllByText('No changes were suggested for this job. Check your CV below.').length).toBeGreaterThan(0);
+    expect(screen.getByText('No changes were suggested. Your CV is below.')).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/already reads well|nothing needed rewording|No rewording was needed/);
+  });
+  it('says so plainly when every suggestion failed the source checks', async () => {
+    await runTailoring({ ...unchanged, rejectedCount: 2 });
+    expect(screen.getAllByText('No suggested change passed the source checks, so your CV is unchanged. Check it below.').length).toBeGreaterThan(0);
+    expect(screen.getByText('No change was applied. Your CV is below.')).toBeInTheDocument();
+    expect(screen.getByText(/We left out 2 AI suggestions/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/already reads well|nothing needed rewording/);
+  });
+  it('lists no rewrite of a line inside a profile that the new summary replaced', async () => {
+    const oldProfile = 'Experienced analyst with a record of reporting.';
+    const replaced = {
+      text: tailoredText,
+      changes: [
+        { kind: 'rewrite', n: 5, before: oldProfile, after: 'Analyst with a record of stakeholder reporting.', sources: [5], facts: [] },
+        { kind: 'rewrite', n: 6, before: '- Prepared monthly stakeholder reports using Excel.', after: '- Prepared monthly stakeholder reporting in Excel.', sources: [6], facts: [] },
+        { kind: 'summary', n: 4, before: oldProfile, after: 'Analyst preparing monthly stakeholder reporting in Excel.', sources: [5, 6], facts: [] },
+      ],
+      questions: [], rejectedCount: 0,
+    };
+    expect(withoutReplacedRewrites(replaced as never).changes.map(change => change.n)).toEqual([6, 4]);
+    expect(withoutReplacedRewrites({ ...replaced, changes: replaced.changes.slice(0, 2) } as never).changes).toHaveLength(2);
   });
 });

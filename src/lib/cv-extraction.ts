@@ -16,6 +16,16 @@ export function validateCvFile(file: File): CvFileType {
   return extension as CvFileType;
 }
 
+/**
+ * The saved Job Loop record rejects control characters (other than tab and line breaks) and the
+ * invisible text-direction marks U+202A–U+202E and U+2066–U+2069. Returns the 1-based line of the
+ * first one so the person can fix it; the text is never changed for them.
+ */
+export function unsupportedCharacterLine(text: string): number | null {
+  const match = /[\u0000-\u0008\u000b\u000c\u000e-\u001f‪-‮⁦-⁩]/u.exec(text);
+  return match ? text.slice(0, match.index).split(/\r\n?|\n/u).length : null;
+}
+
 export function normalizeCvText(text: string): string {
   return text.replace(/\r\n?/g, "\n").split("\u0000").join("").replace(/[\t ]+\n/g, "\n").replace(/\n{4,}/g, "\n\n\n").trim();
 }
