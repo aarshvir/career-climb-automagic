@@ -42,7 +42,7 @@ const tabs: { id: Tab; label: string; icon: typeof UserRound }[] = [{ id: 'today
 const blankProfile = blankLoopProfile;
 /** Most CV lines the first-result shortcut confirms at once; more can be confirmed later. */
 const QUICK_FACT_LIMIT = 12;
-type QuickScope = { owner: string; authority: number; generation: number; lifecycle: number | undefined; source: string; version: number };
+type QuickScope = { token: number; phase: 'saving' | 'ready' | 'running'; owner: string; authority: number; generation: number; lifecycle: number | undefined; source: string; profileRevision: number; draftRevision: number; version: number };
 const blankClaim = (): LoopClaimInput => ({ sourceKind: 'user_answer', sourceQuote: '', phrasing: '', context: '', kind: 'academic_project', resultStatus: 'not_measured', confirmed: false, shareable: false });
 const providerNames: Record<LoopProviderId, string> = { anthropic: 'Claude', openai: 'GPT', moonshot: 'Kimi' };
 const kindOptions = ['employment', 'internship', 'academic_project', 'personal_project', 'volunteering', 'education', 'skill'] as const;
@@ -149,6 +149,7 @@ export default function JobLoop() {
   const [excludedFacts, setExcludedFacts] = useState<Set<string>>(() => new Set()), [factConsent, setFactConsent] = useState(false), [quickStart, setQuickStart] = useState<'' | 'saving' | 'pending-run'>(''), [suggestionsEmpty, setSuggestionsEmpty] = useState(false);
   /** The account, sign-in authority, lifecycle, CV source and record version a quick start is bound to. */
   const quickScope = useRef<QuickScope | null>(null);
+  const quickEpoch = useRef(0), quickContext = useRef('');
   const [suggestions, setSuggestions] =useState<{ key: string; value: LoopClaimInput }[]>([]), [newClaimKey, setNewClaimKey] = useState(0), [dirtyClaims, setDirtyClaims] = useState<Set<string>>(new Set());
   const [claimDrafts, setClaimDrafts] = useState<Record<string, LoopClaimDraft>>({});
   const [detailsReady, setDetailsReady] = useState(false);
@@ -172,6 +173,10 @@ export default function JobLoop() {
   const lifecycleGeneration = useRef<number | undefined>(undefined), erasureGeneration = useRef<number | undefined>(undefined), confirmationGeneration = useRef<number | undefined>(undefined);
   const owner = useRef(user?.id ?? null), mounted = useRef(true), generation = useRef(0), serial = useRef(0), busyRef = useRef(''), profileDirtyRef = useRef(false), formRevision = useRef(0), selectedRef = useRef<string | null>(null), packetHashRef = useRef<string | null>(null), snapshotRef = useRef(snapshot), startReference = useRef<{ key: string; id: string } | null>(null), draftReference = useRef<{ key: string; id: string } | null>(null);
   owner.current = user?.id ?? null; busyRef.current = busy; profileDirtyRef.current = profileDirty; selectedRef.current = selectedId; snapshotRef.current = snapshot;
+  // Revoke in render, before an old async continuation can observe a recovered
+  // session as fresh permission. Record versions advance only on our own ACKs.
+  const quickContextKey = JSON.stringify([user?.id ?? null, trackingAuthority, authLoading, authError, snapshot?.lifecycleGeneration, snapshot?.profile?.sourceText, snapshot?.profile?.revision, formRevision.current]);
+  if (quickContext.current !== quickContextKey) { quickContext.current = quickContextKey; quickEpoch.current++; quickScope.current = null; }
   const applySnapshot = useCallback((next: LoopSnapshot, resetProfile = false) => {
     const previous = lifecycleGeneration.current;
     if (previous !== undefined && next.lifecycleGeneration !== undefined && next.lifecycleGeneration < previous) return;
@@ -381,12 +386,15 @@ export default function JobLoop() {
       setSuggestionsEmpty(result.suggestions.length === 0);
     }
   }
-  function quickScopeCurrent(scope: QuickScope) {
+  function quickIdentityCurrent(scope: QuickScope) {
     const now = snapshotRef.current;
-    return mounted.current && importAuthReady.current && authReadyRef.current && owner.current === scope.owner && scope.authority >= 0
+    return quickEpoch.current === scope.token && quickScope.current?.token === scope.token
+      && mounted.current && importAuthReady.current && authReadyRef.current && owner.current === scope.owner && scope.authority >= 0
       && trackingDraftAuthority(scope.owner) === scope.authority && generation.current === scope.generation
-      && now?.lifecycleGeneration === scope.lifecycle && now?.profile?.sourceText === scope.source && now.recordVersion === scope.version;
+      && now?.lifecycleGeneration === scope.lifecycle && now?.profile?.sourceText === scope.source && now.profile.revision === scope.profileRevision
+      && formRevision.current === scope.draftRevision && !profileDirtyRef.current;
   }
+  function quickScopeCurrent(scope: QuickScope) { return quickIdentityCurrent(scope) && snapshotRef.current?.recordVersion === scope.version; }
   /** First-result shortcut: the user confirms the exact CV lines shown and ticked,
    * then the first search starts with the source-based method. Lines are saved
    * unchanged, one at a time, and the batch stops at the first failure or at any
@@ -396,28 +404,32 @@ export default function JobLoop() {
     const chosen = suggestions.slice(0, QUICK_FACT_LIMIT).filter(item => !excludedFacts.has(item.key));
     const begin = snapshotRef.current, id = owner.current;
     if (!factConsent || !chosen.length || busyRef.current || uncommitted || !begin?.profile || !id) return;
-    const scope: QuickScope = { owner: id, authority: trackingDraftAuthority(id), generation: generation.current, lifecycle: begin.lifecycleGeneration, source: begin.profile.sourceText, version: begin.recordVersion };
-    if (!quickScopeCurrent(scope)) return;
-    quickScope.current = null; setQuickStart('saving'); setFactConsent(false);
+    if (quickScope.current?.phase === 'saving' || quickScope.current?.phase === 'running') return;
+    const scope: QuickScope = { token: ++quickEpoch.current, phase: 'saving', owner: id, authority: trackingDraftAuthority(id), generation: generation.current, lifecycle: begin.lifecycleGeneration, source: begin.profile.sourceText, profileRevision: begin.profile.revision, draftRevision: formRevision.current, version: begin.recordVersion };
+    quickScope.current = scope;
+    if (!quickScopeCurrent(scope)) { quickScope.current = null; return; }
+    setQuickStart('saving'); setFactConsent(false);
     let saved = 0;
     for (const item of chosen) {
       if (!quickScopeCurrent(scope)) break;
       const result = await perform({ action: 'save_claim', expectedVersion: scope.version, claim: { ...item.value, confirmed: true, shareable: true } }, undefined, false, () => quickScopeCurrent(scope));
       const after = snapshotRef.current;
-      if (!result || !mounted.current || owner.current !== scope.owner || trackingDraftAuthority(scope.owner) !== scope.authority || generation.current !== scope.generation
-        || !after || after.lifecycleGeneration !== scope.lifecycle || after.profile?.sourceText !== scope.source || after.recordVersion <= scope.version) break;
+      if (!result?.snapshot || !quickIdentityCurrent(scope) || !after
+        || result.snapshot.lifecycleGeneration !== scope.lifecycle || result.snapshot.profile?.sourceText !== scope.source || result.snapshot.profile.revision !== scope.profileRevision
+        || result.snapshot.recordVersion !== scope.version + 1 || after.recordVersion !== scope.version + 1) break;
       scope.version = after.recordVersion; saved++;
       setSuggestions(list => list.filter(entry => entry.key !== item.key));
     }
-    if (!mounted.current || owner.current !== scope.owner) return;
+    if (!quickIdentityCurrent(scope)) return;
     setExcludedFacts(new Set());
     if (saved === chosen.length && quickScopeCurrent(scope)) {
-      quickScope.current = { ...scope }; setMethod('rules'); setModel('grounded-rules-v1');
+      scope.phase = 'ready'; setMethod('rules'); setModel('grounded-rules-v1'); setModelConsent(false); setInboxConsent(false);
       setNotice(`${saved} ${saved === 1 ? 'fact' : 'facts'} confirmed. Starting your first search…`); setQuickStart('pending-run');
       return;
     }
-    setQuickStart('');
+    quickScope.current = null; setQuickStart('');
     if (saved) setNotice(`${saved} of ${chosen.length} facts were confirmed. Your search has not started. Check your facts, then choose Run my first search.`);
+    else setNotice('Your search has not started. Check your saved facts before trying again.');
   }
   function skipSuggestion(key: string) { markDirty(key, false); setSuggestions(current => current.filter(item => item.key !== key)); }
   async function perform(action: LoopAction, success?: string, resetProfile = false, current?: () => boolean): Promise<LoopResponse | null> {
@@ -526,16 +538,18 @@ export default function JobLoop() {
     catch (failure) { if (!controller.signal.aborted && mounted.current && owner.current === id && generation.current === atGeneration) setError(failure instanceof Error ? failure.message : 'Download failed.'); }
     finally { if (mounted.current && owner.current === id && generation.current === atGeneration) { setBusy(''); busyRef.current = ''; } }
   }
-  async function startRun() {
+  async function startRun(quickIntent?: QuickScope) {
     if (!user || !snapshot || !snapshot.profile || searchBlock || busyRef.current) return;
+    if (quickIntent && (quickIntent.phase !== 'running' || !quickScopeCurrent(quickIntent) || method !== 'rules' || model !== 'grounded-rules-v1' || modelConsent || inboxConsent)) return;
     const chosen = method === 'rules' ? null : snapshot.models.find(option => option.provider === method && option.model === model && option.ready);
     if (method !== 'rules' && (!chosen || !modelConsent)) { setError('Choose an available model and allow its processing before starting.'); return; }
     const original = snapshot, id = user.id, authority = trackingAuthority, atGeneration = generation.current, revision = formRevision.current;
-    const current = () => mounted.current && importAuthReady.current && owner.current === id && authority >= 0 && trackingDraftAuthority(id) === authority && generation.current === atGeneration && formRevision.current === revision && snapshotRef.current?.recordVersion === original.recordVersion && snapshotRef.current?.lifecycleGeneration === original.lifecycleGeneration;
+    const current = () => mounted.current && importAuthReady.current && owner.current === id && authority >= 0 && trackingDraftAuthority(id) === authority && generation.current === atGeneration && formRevision.current === revision && snapshotRef.current?.recordVersion === original.recordVersion && snapshotRef.current?.lifecycleGeneration === original.lifecycleGeneration && (!quickIntent || quickScopeCurrent(quickIntent));
     const key = JSON.stringify([snapshot.recordVersion, method, model, inboxConsent,chosen?.transport??'direct']);
     if (startReference.current?.key !== key) startReference.current = { key, id: crypto.randomUUID() };
     const result = await perform({ action: 'start_run', requestId: startReference.current.id, provider: method as LoopProviderId | 'rules', model, modelConsent, inboxConsent: snapshot.gmail.connected && inboxConsent,...(chosen?{processingRoute:chosen.transport??'direct'}:{}) }, 'Run requested. Its actual progress and source coverage appear below.', false, current);
     if (result) { startReference.current = null; setModelConsent(false); setInboxConsent(false); }
+    if (quickIntent && quickIdentityCurrent(quickIntent)) quickScope.current = null;
   }
   async function connectGmail() {
     if (!snapshot?.capabilities.gmailRead || !gmailReadConsent) return;
@@ -561,15 +575,17 @@ export default function JobLoop() {
   const importIntentId = savedCheckIntent && savedImportScope && savedCheckIntent.scope.ownerId === savedImportScope.ownerId && savedCheckIntent.scope.authority === savedImportScope.authority && savedCheckIntent.scope.generation === savedImportScope.generation ? savedCheckIntent.id : null;
   const requestedSavedCheck = readSavedCheckContinuation(route.search);
   const savedCheckSignIn = `/auth?next=${encodeURIComponent(requestedSavedCheck ? savedCheckContinuationPath(requestedSavedCheck)! : '/loop')}`;
-  function openSetupStep(section: Tab, target: string) {
+  function openSetupStep(section: Tab, target: string, focusField = false) {
     if (!savedImportScope || !importAuthReady.current || trackingDraftAuthority(savedImportScope.ownerId) !== savedImportScope.authority || snapshotRef.current?.lifecycleGeneration !== savedImportScope.generation) return;
-    const scope = savedImportScope;
+    const scope = savedImportScope, revision = formRevision.current, atGeneration = generation.current, atQuickEpoch = quickEpoch.current, focusFrom = document.activeElement;
     setTab(section);
     window.requestAnimationFrame(() => {
-      if (!mounted.current || !importAuthReady.current || owner.current !== scope.ownerId || trackingDraftAuthority(scope.ownerId) !== scope.authority || snapshotRef.current?.lifecycleGeneration !== scope.generation) return;
+      if (!mounted.current || !importAuthReady.current || owner.current !== scope.ownerId || trackingDraftAuthority(scope.ownerId) !== scope.authority || snapshotRef.current?.lifecycleGeneration !== scope.generation || generation.current !== atGeneration || formRevision.current !== revision || quickEpoch.current !== atQuickEpoch) return;
+      if (document.activeElement !== focusFrom && document.activeElement !== document.body) return;
       const panel = document.getElementById(target);
       if (panel instanceof HTMLDetailsElement) panel.open = true;
-      panel?.focus({ preventScroll: true }); panel?.scrollIntoView?.({ block: 'start', behavior: smoothBehavior() });
+      const focusTarget = focusField ? panel?.querySelector<HTMLElement>('select,input,textarea,button') ?? panel : panel;
+      focusTarget?.focus({ preventScroll: true }); panel?.scrollIntoView?.({ block: 'start', behavior: smoothBehavior() });
     });
   }
   function reviewSetupFacts() {
@@ -591,16 +607,18 @@ export default function JobLoop() {
   useEffect(() => {
     if (quickStart !== 'pending-run' || busy) return;
     const scope = quickScope.current;
-    if (!scope || !quickScopeCurrent(scope)) { quickScope.current = null; setQuickStart(''); return; }
-    if (!searchBlock) { quickScope.current = null; setQuickStart(''); setTab('today'); void startRun(); }
+    if (!scope) { setQuickStart(''); return; }
+    if (scope.phase !== 'ready') return;
+    if (!quickScopeCurrent(scope)) { quickScope.current = null; setQuickStart(''); return; }
+    if (!searchBlock) { scope.phase = 'running'; setQuickStart(''); setTab('today'); void startRun(scope); }
     else if (searchBlock !== 'Wait for the current action to finish.') { quickScope.current = null; setQuickStart(''); }
-  }, [quickStart, busy, searchBlock]);
+  }); // Recheck the one-use intent after each render; phase prevents repeat dispatch.
   // A confirmation covers one exact displayed set in one account, lifecycle and source.
   useEffect(() => { setFactConsent(false); }, [suggestions]);
   useEffect(() => {
     setFactConsent(false); setExcludedFacts(new Set()); setSuggestionsEmpty(false); quickScope.current = null;
-    setQuickStart(value => value === 'saving' ? value : '');
-  }, [user?.id, trackingAuthority, authLoading, authError, snapshot?.lifecycleGeneration, snapshot?.profile?.sourceText]);
+    setQuickStart('');
+  }, [quickContextKey]);
   const hasConfirmedFact = !!snapshot?.claims.some(claim => claim.status === 'active' && claim.confirmed && claim.shareable);
   const quickFacts = suggestions.slice(0, QUICK_FACT_LIMIT);
   const quickChosen = quickFacts.filter(item => !excludedFacts.has(item.key)).length;
@@ -621,7 +639,7 @@ export default function JobLoop() {
         {!hasConfirmedFact && <div className="jl-quickstart" role="group" aria-label="Quick start">
           <h3>Fastest way: confirm your CV facts and search in one step</h3>
           {quickFacts.length === 0 && suggestionsEmpty
-            ? <><p>We could not find lines in your saved CV to list here. Add a fact in your own words instead, then confirm it is accurate.</p><button type="button" className="jl-button jl-button--primary" disabled={!savedImportScope || !!busy || uncommitted} onClick={() => openSetupStep('record', 'jl-facts')}>Add a fact myself</button></>
+            ? <><p>We could not find lines in your saved CV to list here. Add a fact in your own words instead, then confirm it is accurate.</p><button type="button" className="jl-button jl-button--primary" disabled={!savedImportScope || !!busy || uncommitted} onClick={() => openSetupStep('record', 'jl-manual-fact', true)}>Add a fact myself</button></>
             : quickFacts.length === 0
             ? <><p>We list lines from your saved CV. Nothing is reworded or sent to an AI provider.</p><button type="button" className="jl-button jl-button--primary" disabled={!savedImportScope || !!busy || uncommitted} onClick={() => void requestSuggestions()}>Show the facts from my CV</button></>
             : <><p>These lines come from your CV, word for word. Untick any you do not want used.</p>
@@ -692,7 +710,7 @@ export default function JobLoop() {
           {suggestions.length > 0 && <p className="jl-help">{suggestions.length} {suggestions.length === 1 ? 'passage' : 'passages'} left to review. Start with useful, shareable facts; skip headings or passages you do not need.</p>}
           {suggestions.slice(0, 1).map(item => <ClaimEditor key={item.key} guided restoredDraft={claimDrafts[item.key]} onDraft={draft => retainClaimDraft(item.key, draft)} initial={item.value} busy={!!busy || profileDirty} onDirty={dirty => markDirty(item.key, dirty)} onSave={value => saveClaim(value, item.key)} onSkip={() => skipSuggestion(item.key)} />)}
           {snapshot.profile && snapshot.claims.filter(claim => claim.status === 'active' && claim.confirmed && claim.shareable).length > 0 && <div className="jl-record-context"><p><strong>{snapshot.claims.filter(claim => claim.status === 'active' && claim.confirmed && claim.shareable).length} {snapshot.claims.filter(claim => claim.status === 'active' && claim.confirmed && claim.shareable).length === 1 ? 'fact' : 'facts'} ready for reuse.</strong> Unchanged facts do not need to be entered again for the next vacancy.</p><button type="button" className="jl-text-link" onClick={() => setTab('opportunities')}>Add the vacancy you want to prepare for <ArrowRight size={14} aria-hidden="true" /></button></div>}
-          {snapshot.claims.map(claim => <details key={`${claim.id}-${claim.revision}`} className="jl-claim-details"><summary>{claim.phrasing.slice(0, 100)} <span className="jl-tag">{claim.status === 'withdrawn' ? 'withdrawn' : claim.confirmed && claim.shareable ? 'confirmed by you · shareable' : 'not cleared for output'}</span></summary><ClaimEditor restoredDraft={claimDrafts[claim.id]} onDraft={draft => retainClaimDraft(claim.id, draft)} initial={claim} saved={claim} busy={!!busy} onDirty={dirty => markDirty(claim.id, dirty)} onSave={value => saveClaim(value, claim.id, claim.id)} onWithdraw={() => void perform({ action: 'withdraw_claim', expectedVersion: snapshot.recordVersion, id: claim.id }, 'Claim withdrawn. Affected approvals must be rebuilt.').then(result => { if (result) markDirty(claim.id, false); })} /></details>)}<details className="jl-claim-details"><summary>Add my own specific example</summary><ClaimEditor key={newClaimKey} restoredDraft={claimDrafts.new} onDraft={draft => retainClaimDraft('new', draft)} initial={blankClaim()} busy={!!busy} onDirty={dirty => markDirty('new', dirty)} onSave={value => saveClaim(value, 'new')} /></details></section>
+          {snapshot.claims.map(claim => <details key={`${claim.id}-${claim.revision}`} className="jl-claim-details"><summary>{claim.phrasing.slice(0, 100)} <span className="jl-tag">{claim.status === 'withdrawn' ? 'withdrawn' : claim.confirmed && claim.shareable ? 'confirmed by you · shareable' : 'not cleared for output'}</span></summary><ClaimEditor restoredDraft={claimDrafts[claim.id]} onDraft={draft => retainClaimDraft(claim.id, draft)} initial={claim} saved={claim} busy={!!busy} onDirty={dirty => markDirty(claim.id, dirty)} onSave={value => saveClaim(value, claim.id, claim.id)} onWithdraw={() => void perform({ action: 'withdraw_claim', expectedVersion: snapshot.recordVersion, id: claim.id }, 'Claim withdrawn. Affected approvals must be rebuilt.').then(result => { if (result) markDirty(claim.id, false); })} /></details>)}<details id="jl-manual-fact" className="jl-claim-details"><summary>Add my own specific example</summary><ClaimEditor key={newClaimKey} restoredDraft={claimDrafts.new} onDraft={draft => retainClaimDraft('new', draft)} initial={blankClaim()} busy={!!busy} onDirty={dirty => markDirty('new', dirty)} onSave={value => saveClaim(value, 'new')} /></details></section>
       </div>}
       {snapshot && <div className="jl-tab-panel" hidden={tab !== 'opportunities'}>
         <Link className="jl-text-link" to="/help#job-loop-vacancies">Help adding a real vacancy <ArrowRight size={14} aria-hidden="true" /></Link>

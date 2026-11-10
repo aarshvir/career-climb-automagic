@@ -463,3 +463,32 @@ describe('passive setup loading recovery', () => {
     expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing', 'get_existing', 'get_existing']);
   });
 });
+
+describe('early check for characters the saved record cannot hold', () => {
+  it('names the line of an invisible text-direction or control character before the final save', () => {
+    const withMark = `${source.split('\n')[0]}\n‪Education\n${source.split('\n').slice(2).join('\n')}`;
+    expect(onboardingStepError(4, { ...savedProfile, sourceText: withMark })).toMatch(/^Line 2 of your CV text has an invisible control or text-direction character/);
+    expect(onboardingStepError(4, { ...savedProfile, sourceText: `${source}\n⁦hidden` })).toMatch(/^Line 4 /);
+    expect(onboardingStepError(4, { ...savedProfile, sourceText: `${source}\u0007` })).toMatch(/^Line 3 /);
+    expect(onboardingStepError(4, { ...savedProfile, name: 'Alex‮ Example' })).toMatch(/Your name has an invisible/);
+    expect(onboardingStepError(4, { ...savedProfile, contactLine: 'alex@example.com⁧' })).toMatch(/Your contact line has an invisible/);
+  });
+  it('still accepts tabs, line breaks, accents and right-to-left letters', () => {
+    expect(onboardingStepError(4, { ...savedProfile, name: 'Zoë Müller', sourceText: `${source}\r\n\tرائد في التحليل` })).toBe('');
+  });
+  it('never rewrites the CV text it reports on', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: 'Business analyst' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.change(screen.getByLabelText('Cities or countries'), { target: { value: 'United States' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    const marked = `${source}\n‪Extra line`;
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Example' } });
+    fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: marked } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByRole('alert')).toHaveTextContent(/Line 4 of your CV text has an invisible/);
+    expect(screen.getByLabelText('Your CV text')).toHaveValue(marked);
+  });
+});

@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { callJobLoop, boundLoopAction, type LoopSnapshot } from '@/lib/job-loop-api';
 import { blankLoopProfile } from '@/lib/job-loop-audiences';
-import { extractCvText, validateCvText } from '@/lib/cv-extraction';
+import { extractCvText, unsupportedCharacterLine, validateCvText } from '@/lib/cv-extraction';
 import { blankLoopCvAnswers } from '@/lib/loop-cv-builder';
 import { registerTrackingDraftOwner, setTrackingLoopGeneration, trackingDraftAuthority, trackingLoopGeneration } from '@/lib/tracking-draft-memory';
 import type { LoopProfileInput } from '../../supabase/functions/_shared/job-loop-types';
@@ -24,14 +24,21 @@ const list = (value: string) => [...new Set(value.split(/[\n,]/).map(item => ite
 
 export function onboardingStepError(step: number, profile: LoopProfileInput): string {
   if (step === 0 && (!profile.targetTitles.length || profile.targetTitles.length > 10 || profile.targetTitles.some(value => value.length > 150))) return 'Add between one and ten role titles or seniority preferences, each under 150 characters.';
+  if (step === 0 && profile.targetTitles.some(value => unsupportedCharacterLine(value) !== null)) return 'A target role has an invisible control or text-direction character that cannot be saved. Remove that role and type it again.';
   if (step === 1 && (!profile.locations.length || profile.locations.length > 10 || profile.locations.some(value => value.length > 150))) return 'Add between one and ten cities or countries, each under 150 characters. For remote work, include where you can work.';
+  if (step === 1 && profile.locations.some(value => unsupportedCharacterLine(value) !== null)) return 'A location has an invisible control or text-direction character that cannot be saved. Remove that location and type it again.';
   if (step === 2 && profile.compensation.currency && !/^[A-Z]{3}$/.test(profile.compensation.currency)) return 'Use a three-letter currency, such as USD, or leave it empty when no minimum is set.';
   if (step === 2 && profile.compensation.minimum !== null && (!Number.isFinite(profile.compensation.minimum) || profile.compensation.minimum < 0 || profile.compensation.minimum > 100000000 || !/^[A-Z]{3}$/.test(profile.compensation.currency))) return 'Use a non-negative minimum and a three-letter currency, such as USD. You can leave the minimum empty.';
   if (step === 3 && (profile.excludedTerms.length > 100 || profile.excludedTerms.some(value => value.length > 150))) return 'Keep each private term under 150 characters, with at most 100 terms.';
+  if (step === 3 && profile.excludedTerms.some(value => unsupportedCharacterLine(value) !== null)) return 'A private term has an invisible control or text-direction character that cannot be saved. Remove that term and type it again.';
   if (step === 4) {
     if (!profile.name.trim() || profile.name.trim().length > 120) return 'Add the name you want on your CV, up to 120 characters.';
     if (profile.contactLine.length > 500) return 'Keep your CV contact line under 500 characters.';
     if (profile.experienceYears !== null && (!Number.isFinite(profile.experienceYears) || profile.experienceYears < 0 || profile.experienceYears > 80)) return 'Use a number from 0 to 80 for experience years, or leave it empty.';
+    if (unsupportedCharacterLine(profile.name) !== null) return 'Your name has an invisible control or text-direction character that cannot be saved. Delete the name and type it again.';
+    if (unsupportedCharacterLine(profile.contactLine) !== null) return 'Your contact line has an invisible control or text-direction character that cannot be saved. Delete the line and type it again.';
+    const hidden = unsupportedCharacterLine(profile.sourceText);
+    if (hidden !== null) return `Line ${hidden} of your CV text has an invisible control or text-direction character that cannot be saved. Delete that line and type it again, then continue. Nothing was changed for you.`;
     try { validateCvText(profile.sourceText); } catch (error) { return error instanceof Error ? error.message : 'Review your CV text.'; }
   }
   return '';
