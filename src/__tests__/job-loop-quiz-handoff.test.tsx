@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -92,6 +92,71 @@ describe('saved quiz continuation in the actual Automated Job Loop', () => {
 
 });
 describe('one-step first search from literal CV lines', () => {
+  function passages(count: number) {
+    const lines = Array.from({ length: count }, (_, index) => `Example fact ${index + 1}: recorded local plant species in a supervised academic project.`);
+    current.profile!.sourceText = lines.join('\n');
+    mocks.call.mockImplementation(async (_owner, action) => {
+      if (action.action === 'suggest_claims') return { snapshot: structuredClone(current), suggestions: lines.map(line => ({ sourceKind: 'cv_passage', sourceQuote: line, phrasing: line, context: 'Example College', kind: 'academic_project', resultStatus: 'not_measured', confirmed: false, shareable: false })) };
+      if (action.action === 'save_claim') {
+        current.claims.push({ ...action.claim, id: `fact-${current.claims.length}`, revision: 1, status: 'active', createdAt: '2026-11-11T00:00:00Z' });
+        current.recordVersion++;
+        return { snapshot: structuredClone(current) };
+      }
+      if (action.action === 'start_run') return { snapshot: structuredClone(current), runId: 'first-run' };
+      if (action.action !== 'get') throw new Error('Unexpected setup write');
+      return { snapshot: structuredClone(current) };
+    });
+    return lines;
+  }
+  it('confirms only the displayed and selected facts, without backfilling hidden lines', async () => {
+    const lines = passages(13);
+    render(tree());
+    fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));
+    const quick = within(await screen.findByRole('group', { name: 'Quick start' }));
+    expect(quick.queryByLabelText(lines[12])).not.toBeInTheDocument();
+    fireEvent.click(quick.getByLabelText(lines[0]));
+    fireEvent.click(quick.getByLabelText(/The ticked lines are accurate/));
+    fireEvent.click(quick.getByRole('button', { name: 'Confirm and find my first matches' }));
+    await waitFor(() => expect(mocks.call.mock.calls.some(([, action]) => action.action === 'start_run')).toBe(true));
+    expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'save_claim').map(([, action]) => action.claim.sourceQuote)).toEqual(lines.slice(1, 12));
+  });
+  it('requires a fresh confirmation after changing which displayed lines are selected', async () => {
+    const lines = passages(2);
+    render(tree());
+    fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));
+    const quick = within(await screen.findByRole('group', { name: 'Quick start' }));
+    fireEvent.click(quick.getByLabelText(/The ticked lines are accurate/));
+    expect(quick.getByRole('button', { name: 'Confirm and find my first matches' })).toBeEnabled();
+    fireEvent.click(quick.getByLabelText(lines[1]));
+    expect(quick.getByLabelText(/The ticked lines are accurate/)).not.toBeChecked();
+    expect(quick.getByRole('button', { name: 'Confirm and find my first matches' })).toBeDisabled();
+    expect(mocks.call.mock.calls.some(([, action]) => /save_claim|start_run/.test(action.action))).toBe(false);
+  });
+  it('aborts the remaining old-source batch when the account changes during a pending save', async () => {
+    passages(2);
+    const initial = structuredClone(current);
+    const normal = mocks.call.getMockImplementation()!;
+    let finish!: (response: unknown) => void;
+    let held = false;
+    mocks.call.mockImplementation((owner, action) => {
+      if (action.action === 'save_claim' && !held) { held = true; return new Promise(resolve => { finish = resolve; }); }
+      return normal(owner, action);
+    });
+    const view = render(tree());
+    fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));
+    const quick = within(await screen.findByRole('group', { name: 'Quick start' }));
+    fireEvent.click(quick.getByLabelText(/The ticked lines are accurate/));
+    fireEvent.click(quick.getByRole('button', { name: 'Confirm and find my first matches' }));
+    await waitFor(() => expect(held).toBe(true));
+    const newSource = 'Another owner recorded a different supervised research project with a different source CV.';
+    current = { ...structuredClone(initial), profile: { ...initial.profile!, sourceText: newSource } };
+    mocks.auth.user = { id: 'owner-b' }; setTrackingDraftOwner('owner-b');
+    view.rerender(tree());
+    await waitFor(() => expect(screen.getByLabelText('Reviewed source CV or career record')).toHaveValue(newSource));
+    await act(async () => { finish({ snapshot: initial }); });
+    expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'save_claim')).toHaveLength(1);
+    expect(mocks.call.mock.calls.some(([owner, action]) => owner === 'owner-b' && /save_claim|start_run/.test(action.action))).toBe(false);
+  });
   it('confirms the ticked lines word for word, then starts the first source-based search', async () => {
     render(tree());
     fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));
