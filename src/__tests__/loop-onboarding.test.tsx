@@ -226,8 +226,51 @@ describe('account-first owned onboarding', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('one and ten');
     expect(screen.getByLabelText('Target roles')).toHaveValue(Array.from({ length: 10 }, (_, i) => `Role ${i}`).concat('Custom eleventh role').join('\n'));
   });
-  it('requires an account before reading or entering any private answers', () => {
-    state.user = null; open(); expect(screen.getByTestId('destination')).toHaveTextContent('/auth?mode=signup&next=%2Fonboarding'); expect(state.call).not.toHaveBeenCalled();
+  it('asks signed-out visitors only roles and locations, then sends them to sign-up with ad tags', async () => {
+    state.user = null;
+    render(<MemoryRouter initialEntries={['/onboarding?utm_source=meta&utm_campaign=c1']}><Routes><Route path="/onboarding" element={<LoopOnboarding />} /><Route path="*" element={<Destination />} /></Routes></MemoryRouter>);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Which roles would you like to find?');
+    expect(screen.queryByLabelText('Your CV text')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: 'Business analyst' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.change(screen.getByLabelText('Cities or countries'), { target: { value: 'United States' } });
+    fireEvent.click(screen.getByRole('button', { name: /Create my free account/ }));
+    expect(screen.getByTestId('destination')).toHaveTextContent('/auth?mode=signup&next=%2Fonboarding');
+    expect(screen.getByTestId('destination')).toHaveTextContent('utm_source=meta');
+    expect(state.call).not.toHaveBeenCalled();
+    expect(JSON.parse(localStorage.getItem('jobvance:pre-signup-quiz')!)).toMatchObject({ targetTitles: ['Business analyst'], locations: ['United States'] });
+    localStorage.clear();
+  });
+  it('requires both answers before leaving for sign-up', () => {
+    state.user = null; open();
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('one and ten');
+    expect(screen.queryByTestId('destination')).not.toBeInTheDocument();
+    expect(localStorage.length).toBe(0);
+  });
+  it('shows the answers given before sign-up for review at step 1, once, without saving', async () => {
+    localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Business analyst'], locations: ['United States'], savedAt: Date.now() }));
+    open();
+    expect(await screen.findByText(/We filled in the roles and locations chosen on this device/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Which roles would you like to find?');
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Business analyst');
+    expect(localStorage.length).toBe(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByLabelText('Cities or countries')).toHaveValue('United States');
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing']);
+  });
+  it('does not apply answers from before sign-up when a setup already exists', async () => {
+    localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Someone else'], locations: ['Elsewhere'], savedAt: Date.now() }));
+    state.call.mockImplementation(async (_owner, action) => action.action === 'get_existing' ? { existingState: 'active', snapshot: snapshot(savedProfile, 3, 4) } : { snapshot: snapshot(savedProfile, 3, 4) });
+    open();
+    expect(await screen.findByRole('heading', { name: 'Your Automated Job Loop is ready to continue.' })).toBeInTheDocument();
+    expect(localStorage.length).toBe(0);
+  });
+  it('ignores expired answers from before sign-up', async () => {
+    localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Business analyst'], locations: ['United States'], savedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 }));
+    open();
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Which roles would you like to find?');
+    expect(localStorage.length).toBe(0);
   });
   it('does not initialize a record on opening, navigating or filling the quiz', async () => {
     await completeWithRender(); expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing']);
@@ -418,5 +461,34 @@ describe('passive setup loading recovery', () => {
     await advance(0);
     expect(screen.getByLabelText('Search or add a role')).toHaveValue('Fictional research role');
     expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing', 'get_existing', 'get_existing']);
+  });
+});
+
+describe('early check for characters the saved record cannot hold', () => {
+  it('names the line of an invisible text-direction or control character before the final save', () => {
+    const withMark = `${source.split('\n')[0]}\n‪Education\n${source.split('\n').slice(2).join('\n')}`;
+    expect(onboardingStepError(4, { ...savedProfile, sourceText: withMark })).toMatch(/^Line 2 of your CV text has an invisible control or text-direction character/);
+    expect(onboardingStepError(4, { ...savedProfile, sourceText: `${source}\n⁦hidden` })).toMatch(/^Line 4 /);
+    expect(onboardingStepError(4, { ...savedProfile, sourceText: `${source}\u0007` })).toMatch(/^Line 3 /);
+    expect(onboardingStepError(4, { ...savedProfile, name: 'Alex‮ Example' })).toMatch(/Your name has an invisible/);
+    expect(onboardingStepError(4, { ...savedProfile, contactLine: 'alex@example.com⁧' })).toMatch(/Your contact line has an invisible/);
+  });
+  it('still accepts tabs, line breaks, accents and right-to-left letters', () => {
+    expect(onboardingStepError(4, { ...savedProfile, name: 'Zoë Müller', sourceText: `${source}\r\n\tرائد في التحليل` })).toBe('');
+  });
+  it('never rewrites the CV text it reports on', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: 'Business analyst' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.change(screen.getByLabelText('Cities or countries'), { target: { value: 'United States' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    const marked = `${source}\n‪Extra line`;
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Example' } });
+    fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: marked } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByRole('alert')).toHaveTextContent(/Line 4 of your CV text has an invisible/);
+    expect(screen.getByLabelText('Your CV text')).toHaveValue(marked);
   });
 });
