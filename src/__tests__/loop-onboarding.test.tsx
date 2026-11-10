@@ -226,8 +226,41 @@ describe('account-first owned onboarding', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('one and ten');
     expect(screen.getByLabelText('Target roles')).toHaveValue(Array.from({ length: 10 }, (_, i) => `Role ${i}`).concat('Custom eleventh role').join('\n'));
   });
-  it('requires an account before reading or entering any private answers', () => {
-    state.user = null; open(); expect(screen.getByTestId('destination')).toHaveTextContent('/auth?mode=signup&next=%2Fonboarding'); expect(state.call).not.toHaveBeenCalled();
+  it('asks signed-out visitors only roles and locations, then sends them to sign-up with ad tags', async () => {
+    state.user = null;
+    render(<MemoryRouter initialEntries={['/onboarding?utm_source=meta&utm_campaign=c1']}><Routes><Route path="/onboarding" element={<LoopOnboarding />} /><Route path="*" element={<Destination />} /></Routes></MemoryRouter>);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Which roles would you like to find?');
+    expect(screen.queryByLabelText('Your CV text')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: 'Business analyst' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    fireEvent.change(screen.getByLabelText('Cities or countries'), { target: { value: 'United States' } });
+    fireEvent.click(screen.getByRole('button', { name: /Create my free account/ }));
+    expect(screen.getByTestId('destination')).toHaveTextContent('/auth?mode=signup&next=%2Fonboarding');
+    expect(screen.getByTestId('destination')).toHaveTextContent('utm_source=meta');
+    expect(state.call).not.toHaveBeenCalled();
+    expect(JSON.parse(localStorage.getItem('jobvance:pre-signup-quiz')!)).toMatchObject({ targetTitles: ['Business analyst'], locations: ['United States'] });
+    localStorage.clear();
+  });
+  it('requires both answers before leaving for sign-up', () => {
+    state.user = null; open();
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('one and ten');
+    expect(screen.queryByTestId('destination')).not.toBeInTheDocument();
+    expect(localStorage.length).toBe(0);
+  });
+  it('fills roles and locations from the answers given before sign-up, once', async () => {
+    localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Business analyst'], locations: ['United States'], savedAt: Date.now() }));
+    open();
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('What compensation would you consider?');
+    expect(localStorage.length).toBe(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Back' })); fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Business analyst');
+  });
+  it('ignores expired answers from before sign-up', async () => {
+    localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Business analyst'], locations: ['United States'], savedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 }));
+    open();
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Which roles would you like to find?');
+    expect(localStorage.length).toBe(0);
   });
   it('does not initialize a record on opening, navigating or filling the quiz', async () => {
     await completeWithRender(); expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing']);

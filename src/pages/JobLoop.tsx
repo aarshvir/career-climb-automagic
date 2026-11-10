@@ -40,6 +40,8 @@ import { pruneTrackingApplications, registerTrackingDraftOwner, setTrackingLoopG
 type Tab = 'today' | 'record' | 'opportunities' | 'outputs' | 'settings';
 const tabs: { id: Tab; label: string; icon: typeof UserRound }[] = [{ id: 'today', label: 'Today', icon: CalendarClock }, { id: 'record', label: 'My CV & experience', icon: UserRound }, { id: 'opportunities', label: 'Opportunities', icon: ClipboardList }, { id: 'outputs', label: 'Prepared CVs', icon: FileText }, { id: 'settings', label: 'Help & privacy', icon: Settings2 }];
 const blankProfile = blankLoopProfile;
+/** Most CV lines the first-result shortcut confirms at once; more can be confirmed later. */
+const QUICK_FACT_LIMIT = 12;
 const blankClaim = (): LoopClaimInput => ({ sourceKind: 'user_answer', sourceQuote: '', phrasing: '', context: '', kind: 'academic_project', resultStatus: 'not_measured', confirmed: false, shareable: false });
 const providerNames: Record<LoopProviderId, string> = { anthropic: 'Claude', openai: 'GPT', moonshot: 'Kimi' };
 const kindOptions = ['employment', 'internship', 'academic_project', 'personal_project', 'volunteering', 'education', 'skill'] as const;
@@ -142,7 +144,8 @@ export default function JobLoop() {
   const [erasureOwner, setErasureOwner] = useState<string | null>(null);
   const [profile, setProfile] = useState<LoopProfileInput>(() => blankProfile(initialAudience.current)), [profileDirty, setProfileDirty] = useState(false), [saveConsent, setSaveConsent] = useState(false), [cvs, setCvs] = useState<CvDocument[]>([]), [cvError, setCvError] = useState('');
   const [lists, setLists] = useState(() => listInputs(blankProfile(initialAudience.current)));
-  const [suggestions, setSuggestions] = useState<{ key: string; value: LoopClaimInput }[]>([]), [newClaimKey, setNewClaimKey] = useState(0), [dirtyClaims, setDirtyClaims] = useState<Set<string>>(new Set());
+  const [excludedFacts, setExcludedFacts] = useState<Set<string>>(() => new Set()), [factConsent, setFactConsent] = useState(false), [quickStart, setQuickStart] = useState<'' | 'saving' | 'pending-run'>('');
+  const [suggestions, setSuggestions] =useState<{ key: string; value: LoopClaimInput }[]>([]), [newClaimKey, setNewClaimKey] = useState(0), [dirtyClaims, setDirtyClaims] = useState<Set<string>>(new Set());
   const [claimDrafts, setClaimDrafts] = useState<Record<string, LoopClaimDraft>>({});
   const [detailsReady, setDetailsReady] = useState(false);
   const [builderAnswers, setBuilderAnswers] = useState<LoopCvAnswers>(blankLoopCvAnswers);
@@ -373,6 +376,25 @@ export default function JobLoop() {
       setSuggestions(result.suggestions.map(claim => ({ key: `suggestion-${crypto.randomUUID()}`, value: { ...claim, confirmed: false, shareable: false } })));
     }
   }
+  /** First-result shortcut: the user confirms the literal CV lines shown, then the
+   * first search starts with the source-based method. Lines are saved unchanged. */
+  async function confirmFactsAndSearch() {
+    const chosen = suggestions.filter(item => !excludedFacts.has(item.key)).slice(0, QUICK_FACT_LIMIT);
+    if (!factConsent || !chosen.length || busyRef.current || uncommitted) return;
+    setQuickStart('saving'); setFactConsent(false);
+    let saved = 0;
+    for (const item of chosen) {
+      const current = snapshotRef.current;
+      if (!mounted.current || !current?.profile) break;
+      const result = await perform({ action: 'save_claim', expectedVersion: current.recordVersion, claim: { ...item.value, confirmed: true, shareable: true } });
+      if (!result) continue;
+      saved++; setSuggestions(list => list.filter(entry => entry.key !== item.key));
+    }
+    if (!mounted.current) return;
+    setExcludedFacts(new Set());
+    if (saved) { setMethod('rules'); setModel('grounded-rules-v1'); setNotice(`${saved} ${saved === 1 ? 'fact' : 'facts'} confirmed. Starting your first search…`); }
+    setQuickStart(saved ? 'pending-run' : '');
+  }
   function skipSuggestion(key: string) { markDirty(key, false); setSuggestions(current => current.filter(item => item.key !== key)); }
   async function perform(action: LoopAction, success?: string, resetProfile = false, current?: () => boolean): Promise<LoopResponse | null> {
     const id = owner.current; if (!id || busyRef.current || current && !current()) return null;
@@ -542,6 +564,14 @@ export default function JobLoop() {
     : !snapshot.claims.some(claim => claim.status === 'active' && claim.confirmed && claim.shareable) ? 'Review a useful CV fact and confirm it is accurate and permitted for sharing.'
     : !method || (method === 'rules' ? !snapshot.capabilities.rulesEngine : !snapshot.models.some(option => option.ready && option.provider === method && option.model === model)) ? 'Choose an available preparation method below.'
     : method !== 'rules' && !modelConsent ? 'Confirm the selected AI processing below, or choose source-based preparation.' : '';
+  useEffect(() => {
+    if (quickStart !== 'pending-run' || busy) return;
+    if (!searchBlock) { setQuickStart(''); setTab('today'); void startRun(); }
+    else if (searchBlock !== 'Wait for the current action to finish.') setQuickStart('');
+  }, [quickStart, busy, searchBlock]);
+  const hasConfirmedFact = !!snapshot?.claims.some(claim => claim.status === 'active' && claim.confirmed && claim.shareable);
+  const quickFacts = suggestions.slice(0, QUICK_FACT_LIMIT);
+  const quickChosen = quickFacts.filter(item => !excludedFacts.has(item.key)).length;
   const setupDraft = user && snapshot && !snapshot.profile && !erasurePending && !loading && !error ? recoverOnboardingDraft(user.id, trackingAuthority, snapshot.lifecycleGeneration ?? null) : null;
   const setupSteps = ['Roles', 'Locations', 'Pay preferences', 'Privacy preferences', 'Your CV', 'Review and save'];
   return <main className="job-loop-page"><Helmet><title>Your Automated Job Loop | Jobvance</title><meta name="robots" content="noindex,follow" /></Helmet>
@@ -555,7 +585,19 @@ export default function JobLoop() {
       {!snapshot && !loading && !erasurePending && <section className="jl-panel"><h2>Your Automated Job Loop could not be loaded.</h2><p>Retry to reconnect and load your saved work. You can also open your existing workspace.</p><div className="jl-actions"><button type="button" className="jl-button" disabled={!!busy} onClick={() => void refresh()}>Retry Automated Job Loop</button><Link className="jl-button" to="/dashboard?tab=cv">Open existing workspace</Link></div></section>}
       {hasUnsavedDraft && <p className="jl-unsaved-notice">You have unsaved edits. Career record, claim and new-vacancy drafts remain in this tab’s memory for up to 30 minutes, including when switching pages. Refresh, closing this tab or changing accounts clears them.</p>}
       {snapshot && !snapshot.profile && <section className="jl-panel" aria-label="Automated Job Loop setup"><h2>{setupDraft ? 'Continue setting up your Automated Job Loop' : 'Set up your Automated Job Loop'}</h2><p>{setupDraft ? `Step ${setupDraft.step + 1} of 6 · ${setupSteps[setupDraft.step]}. Your unfinished answers are still in this tab.` : 'Choose your roles and locations, add or build your CV, then set your search schedule.'}</p><div className="jl-actions"><Link className="jl-button jl-button--primary" to="/onboarding">{setupDraft ? 'Resume setup' : 'Start your setup'}</Link>{tab === 'today' && <button className="jl-button" type="button" onClick={() => setTab('record')}>Set up directly without questions</button>}</div>{setupDraft && <p className="jl-help">Your answers are not saved to your account yet. Resume within 30 minutes; refreshing or signing out clears this draft.</p>}</section>}
-      {snapshot?.profile && snapshot.runs.length === 0 && snapshot.packets.length === 0 && <section className="jl-panel" aria-label="Your next setup steps"><h2>Get your first Automated Job Loop result.</h2><p>Your CV and preferences are saved. Review the facts you want to use, then search now. CV variants and a recurring schedule can come afterward.</p><ol>
+      {snapshot?.profile && snapshot.runs.length === 0 && snapshot.packets.length === 0 && <section className="jl-panel" aria-label="Your next setup steps"><h2>Get your first Automated Job Loop result.</h2><p>Your CV and preferences are saved. Review the facts you want to use, then search now. CV variants and a recurring schedule can come afterward.</p>
+        {!hasConfirmedFact && <div className="jl-quickstart" role="group" aria-label="Quick start">
+          <h3>Fastest way: confirm your CV facts and search in one step</h3>
+          {quickFacts.length === 0
+            ? <><p>We list lines from your saved CV. Nothing is reworded or sent to an AI provider.</p><button type="button" className="jl-button jl-button--primary" disabled={!savedImportScope || !!busy || uncommitted} onClick={() => void requestSuggestions()}>Show the facts from my CV</button></>
+            : <><p>These lines come from your CV, word for word. Untick any you do not want used.</p>
+              <ul className="jl-quickstart-facts">{quickFacts.map(item => <li key={item.key}><label><input type="checkbox" checked={!excludedFacts.has(item.key)} disabled={!!busy} onChange={event => { const keep = event.target.checked; setExcludedFacts(current => { const next = new Set(current); if (keep) next.delete(item.key); else next.add(item.key); return next; }); }} /><span>{item.value.phrasing}</span></label></li>)}</ul>
+              {suggestions.length > QUICK_FACT_LIMIT && <p className="jl-help">The first {QUICK_FACT_LIMIT} are shown. You can confirm more later in My CV &amp; experience.</p>}
+              <label className="jl-consent"><input type="checkbox" checked={factConsent} disabled={!!busy || !quickChosen} onChange={event => setFactConsent(event.target.checked)} /><span>The ticked lines are accurate, and Jobvance may use them in CVs it prepares for me.</span></label>
+              <div className="jl-actions"><button type="button" className="jl-button jl-button--primary" disabled={!factConsent || !quickChosen || !!busy || uncommitted || quickStart !== ''} onClick={() => void confirmFactsAndSearch()}><Play size={16} aria-hidden="true" />Confirm and find my first matches</button></div></>}
+          {quickStart === 'saving' && <p role="status">Confirming your facts…</p>}
+        </div>}
+        <ol>
         <li><strong>Review the facts in your CV.</strong> {snapshot.claims.filter(claim => claim.status === 'active' && claim.confirmed && claim.shareable).length} active facts are confirmed and permitted for sharing. <button className="jl-button jl-button--quiet" type="button" disabled={!savedImportScope || !!busy || uncommitted} onClick={reviewSetupFacts}>Review CV facts</button></li>
         <li><strong>Search with your saved CV.</strong> {method === 'rules' ? 'Source-based preparation uses your confirmed facts without sending them to an external AI provider.' : 'Uses the preparation method and AI permission selected in Today.'}<div className="jl-actions"><button type="button" className="jl-button jl-button--primary" disabled={!!searchBlock} onClick={() => { setTab('today'); void startRun(); }} aria-describedby="jl-first-search-help"><Play size={16} aria-hidden="true" />Run my first search</button><button type="button" className="jl-text-link" onClick={() => openSetupStep('today', 'jl-prepare-heading')}>Review search settings</button></div><p id="jl-first-search-help" className="jl-help">{searchBlock || 'Checks the configured employer sources and any vacancies you added. Review the results here before using a prepared CV.'}</p>{loopPlacesFull(snapshot) && <LoopStarterPrompt compact />}</li>
       </ol><p>Prepared CVs is where you review each document before approving and downloading. You can add a vacancy yourself if the connected sources do not have a match.</p></section>}

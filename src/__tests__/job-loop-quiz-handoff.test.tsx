@@ -91,3 +91,30 @@ describe('saved quiz continuation in the actual Automated Job Loop', () => {
   });
 
 });
+describe('one-step first search from literal CV lines', () => {
+  it('confirms the ticked lines word for word, then starts the first source-based search', async () => {
+    render(tree());
+    fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));
+    const quick = within(await screen.findByRole('group', { name: 'Quick start' }));
+    expect(quick.getByLabelText(source)).toBeChecked();
+    const go = quick.getByRole('button', { name: 'Confirm and find my first matches' });
+    expect(go).toBeDisabled();
+    fireEvent.click(quick.getByLabelText(/The ticked lines are accurate/));
+    fireEvent.click(go);
+    await waitFor(() => expect(mocks.call.mock.calls.filter(([, a]) => a.action === 'start_run')).toHaveLength(1));
+    const saved = mocks.call.mock.calls.filter(([, a]) => a.action === 'save_claim');
+    expect(saved).toHaveLength(1);
+    expect(saved[0][1].claim).toMatchObject({ sourceQuote: source, phrasing: source, confirmed: true, shareable: true });
+    expect(mocks.call.mock.calls.find(([, a]) => a.action === 'start_run')![1]).toMatchObject({ provider: 'rules', modelConsent: false, inboxConsent: false });
+    expect(mocks.call.mock.calls.some(([, a]) => /save_schedule|save_cv_variant/.test(a.action))).toBe(false);
+  });
+  it('saves nothing and starts nothing when every line is unticked', async () => {
+    render(tree());
+    fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));
+    const quick = within(await screen.findByRole('group', { name: 'Quick start' }));
+    fireEvent.click(quick.getByLabelText(source));
+    expect(quick.getByLabelText(/The ticked lines are accurate/)).toBeDisabled();
+    expect(quick.getByRole('button', { name: 'Confirm and find my first matches' })).toBeDisabled();
+    expect(mocks.call.mock.calls.some(([, a]) => /save_claim|start_run/.test(a.action))).toBe(false);
+  });
+});
