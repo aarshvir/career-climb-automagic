@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { callJobLoop, boundLoopAction, type LoopSnapshot } from '@/lib/job-loop-api';
 import { blankLoopProfile } from '@/lib/job-loop-audiences';
-import { extractCvText, validateCvText } from '@/lib/cv-extraction';
+import { extractCvText, unsupportedCharacterLine, validateCvText } from '@/lib/cv-extraction';
 import { blankLoopCvAnswers } from '@/lib/loop-cv-builder';
 import { registerTrackingDraftOwner, setTrackingLoopGeneration, trackingDraftAuthority, trackingLoopGeneration } from '@/lib/tracking-draft-memory';
 import type { LoopProfileInput } from '../../supabase/functions/_shared/job-loop-types';
@@ -31,6 +31,10 @@ export function onboardingStepError(step: number, profile: LoopProfileInput): st
     if (!profile.name.trim() || profile.name.trim().length > 120) return 'Add the name you want on your CV, up to 120 characters.';
     if (profile.contactLine.length > 500) return 'Keep your CV contact line under 500 characters.';
     if (profile.experienceYears !== null && (!Number.isFinite(profile.experienceYears) || profile.experienceYears < 0 || profile.experienceYears > 80)) return 'Use a number from 0 to 80 for experience years, or leave it empty.';
+    if (unsupportedCharacterLine(profile.name) !== null) return 'Your name has an invisible control or text-direction character that cannot be saved. Delete the name and type it again.';
+    if (unsupportedCharacterLine(profile.contactLine) !== null) return 'Your contact line has an invisible control or text-direction character that cannot be saved. Delete the line and type it again.';
+    const hidden = unsupportedCharacterLine(profile.sourceText);
+    if (hidden !== null) return `Line ${hidden} of your CV text has an invisible control or text-direction character that cannot be saved. Delete that line and type it again, then continue. Nothing was changed for you.`;
     try { validateCvText(profile.sourceText); } catch (error) { return error instanceof Error ? error.message : 'Review your CV text.'; }
   }
   return '';
