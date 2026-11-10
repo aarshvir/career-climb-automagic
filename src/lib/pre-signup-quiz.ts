@@ -4,12 +4,14 @@ import { cleanPreferences } from '@/lib/loop-role-suggestions';
  * The two answers a signed-out visitor gives before creating an account: target
  * roles and locations. They are not private CV data. They survive the sign-up
  * redirect and email confirmation (which can open a new tab), are read once by
- * the owned setup quiz, and expire after a day.
+ * the owned setup quiz, and expire after two hours. They are shown for review in
+ * the first setup step, never applied silently, because a shared device could
+ * hold another visitor's answers.
  */
 export interface PreSignupAnswers { targetTitles: string[]; locations: string[] }
 
 const KEY = 'jobvance:pre-signup-quiz';
-const TTL_MS = 24 * 60 * 60 * 1000;
+const TTL_MS = 2 * 60 * 60 * 1000;
 
 function valid(values: unknown): values is string[] {
   return Array.isArray(values) && values.length >= 1 && values.length <= 10
@@ -18,8 +20,10 @@ function valid(values: unknown): values is string[] {
 
 export function savePreSignupAnswers(answers: PreSignupAnswers, now = Date.now()): void {
   const targetTitles = cleanPreferences(answers.targetTitles), locations = cleanPreferences(answers.locations);
+  // Remove any earlier answers first, so a failed write can never leave them to be restored.
+  clearPreSignupAnswers();
   if (!valid(targetTitles) || !valid(locations)) return;
-  try { localStorage.setItem(KEY, JSON.stringify({ v: 1, targetTitles, locations, savedAt: now })); } catch { /* storage unavailable: setup asks again */ }
+  try { localStorage.setItem(KEY, JSON.stringify({ v: 1, targetTitles, locations, savedAt: now })); } catch { clearPreSignupAnswers(); }
 }
 
 export function clearPreSignupAnswers(): void {

@@ -56,6 +56,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   const [profile, setProfile] = useState(() => ({ ...blankLoopProfile('professional'), targetTitles: accountRoleSuggestions(metadata) }));
   const rolesEdited = useRef(false);
   const [roleQuery, setRoleQuery] = useState(''), [locationQuery, setLocationQuery] = useState('');
+  const [handoff, setHandoff] = useState(false);
   const [suggestionSource, setSuggestionSource] = useState(accountRoleSuggestions(metadata).length ? 'account profile' : '');
   const [answers, setAnswers] = useState(blankLoopCvAnswers);
   const [step, setStep] = useState(0), [busy, setBusy] = useState('Loading your saved setup…'), [error, setError] = useState('');
@@ -109,8 +110,9 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
         } else {
           const before = takePreSignupAnswers();
           if (before) {
+            // Shown for review at step 1, never applied silently.
             setProfile(value => ({ ...value, targetTitles: before.targetTitles, locations: before.locations }));
-            rolesEdited.current = true; setSuggestionSource(''); setStep(2);
+            rolesEdited.current = true; setSuggestionSource(''); setHandoff(true);
           }
         }
       } else clearPreSignupAnswers();
@@ -193,6 +195,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     {saved && <section className="oq-card"><Check size={32} /><h2>Next: review your facts and run your first search.</h2><p>Review useful facts copied from your CV, then deliberately start a search with your saved preferences. Add CV variants and a recurring schedule when you are ready.</p><p>Saving this setup has not started a search, activated a schedule or sent your CV to an AI provider.</p><Link className="jl-button jl-button--primary" to="/loop" state={{ onboardingSaved: true, owner, generation: snapshot.current?.lifecycleGeneration, authority }}>Continue to my Automated Job Loop <ArrowRight size={16} /></Link></section>}
     {loaded && !existing && !saved && <section className="oq-card"><fieldset disabled={!!busy}>
       {step === 0 && <><LoopPreferencePicker id="oq-roles" label="Target roles" searchLabel="Search or add a role" values={profile.targetTitles} query={roleQuery} choices={roleChoices} onQuery={value => changeQuery('role', value)} onChange={targetTitles => edit({ targetTitles })} description="Choose a specific title, such as Senior data analyst, or a broad level, such as Any director-level role." />
+        {handoff && <p className="oq-suggestion" role="status">We filled in the roles and locations chosen on this device before sign-up. Check them, and change anything that is not yours.</p>}
         {suggestionSource && <p className="oq-suggestion" role="status">Suggested from your {suggestionSource}. These are editable search preferences—remove anything you do not want.</p>}
         <details className="oq-early-cv"><summary>Suggest roles from my CV (optional)</summary><p>Add your CV here to suggest up to three recognized role headings. Your name and email from Google sign-in do not tell us your profession. Once you edit the roles, uploading a CV will keep your choices.</p><div className="jl-field"><label htmlFor="oq-early-file">Upload a CV for role suggestions</label><input id="oq-early-file" type="file" accept=".pdf,.docx,.txt" onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} /><p>PDF, DOCX or TXT, up to 5 MB. Read locally on this device.</p></div><div className="jl-field"><label htmlFor="oq-early-source">Paste your CV for role suggestions</label><textarea id="oq-early-source" rows={5} maxLength={60000} value={profile.sourceText} onChange={event => edit({ sourceText: event.target.value })} /></div><p>Your CV will be here to review in the experience step. Nothing is saved or sent to an AI provider yet.</p></details></>}
       {step === 1 && <LoopPreferencePicker id="oq-locations" label="Cities or countries" searchLabel="Search or add a location" values={profile.locations} query={locationQuery} choices={locationChoices} onQuery={value => changeQuery('location', value)} onChange={locations => edit({ locations })} description="Choose cities or countries. For remote work, add Remote and the countries where you can work; remote does not mean every country. Check each employer’s work-authorisation requirements." />}

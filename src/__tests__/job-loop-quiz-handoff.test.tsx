@@ -157,6 +157,71 @@ describe('one-step first search from literal CV lines', () => {
     expect(mocks.call.mock.calls.filter(([, action]) => action.action === 'save_claim')).toHaveLength(1);
     expect(mocks.call.mock.calls.some(([owner, action]) => owner === 'owner-b' && /save_claim|start_run/.test(action.action))).toBe(false);
   });
+  async function holdFirstSave() {
+    const normal = mocks.call.getMockImplementation()!;
+    let finish!: (response: unknown) => void; let held = false;
+    mocks.call.mockImplementation((owner, action) => {
+      if (action.action === 'save_claim' && !held) { held = true; return new Promise(resolve => { finish = resolve; }); }
+      return normal(owner, action);
+    });
+    return { held: () => held, finish: (response: unknown) => finish(response) };
+  }
+  async function startQuick() {
+    fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));
+    const quick = within(await screen.findByRole('group', { name: 'Quick start' }));
+    fireEvent.click(quick.getByLabelText(/The ticked lines are accurate/));
+    fireEvent.click(quick.getByRole('button', { name: 'Confirm and find my first matches' }));
+    return quick;
+  }
+  it.each(['loading', 'error'] as const)('stops the batch and starts no search when sign-in is %s during a save', async mode => {
+    passages(2); const gate = await holdFirstSave();
+    const view = render(tree()); await startQuick();
+    await waitFor(() => expect(gate.held()).toBe(true));
+    if (mode === 'loading') mocks.auth.loading = true; else mocks.auth.authError = 'Session unavailable';
+    view.rerender(tree());
+    const saved = structuredClone(current); saved.recordVersion++;
+    await act(async () => { gate.finish({ snapshot: saved }); });
+    expect(mocks.call.mock.calls.filter(([, a]) => a.action === 'save_claim')).toHaveLength(1);
+    expect(mocks.call.mock.calls.some(([, a]) => a.action === 'start_run')).toBe(false);
+  });
+  it('stops the batch when the saved CV source changes during a save', async () => {
+    passages(2); const gate = await holdFirstSave();
+    render(tree()); await startQuick();
+    await waitFor(() => expect(gate.held()).toBe(true));
+    const changed = structuredClone(current); changed.recordVersion++; changed.profile!.sourceText = 'A different CV source text that was saved in another tab for this same account.';
+    await act(async () => { gate.finish({ snapshot: changed }); });
+    expect(mocks.call.mock.calls.filter(([, a]) => a.action === 'save_claim')).toHaveLength(1);
+    expect(mocks.call.mock.calls.some(([, a]) => a.action === 'start_run')).toBe(false);
+  });
+  it('starts no search after a partial failure, keeps the saved fact, and lets the user retry the search', async () => {
+    const lines = passages(3);
+    const normal = mocks.call.getMockImplementation()!;
+    let saves = 0;
+    mocks.call.mockImplementation((owner, action) => {
+      if (action.action === 'save_claim' && ++saves === 2) return Promise.reject(new Error('The save could not be confirmed.'));
+      return normal(owner, action);
+    });
+    render(tree()); await startQuick();
+    await screen.findByText(/1 of 3 facts were confirmed. Your search has not started/);
+    expect(mocks.call.mock.calls.filter(([, a]) => a.action === 'save_claim').map(([, a]) => a.claim.sourceQuote)).toEqual(lines.slice(0, 2));
+    expect(mocks.call.mock.calls.some(([, a]) => a.action === 'start_run')).toBe(false);
+    const run = await screen.findByRole('button', { name: 'Run my first search' });
+    await waitFor(() => expect(run).toBeEnabled());
+    fireEvent.click(run);
+    await waitFor(() => expect(mocks.call.mock.calls.filter(([, a]) => a.action === 'start_run')).toHaveLength(1));
+  });
+  it('offers a manual fact route, with confirmations unchecked, when the CV yields no lines', async () => {
+    const normal = mocks.call.getMockImplementation()!;
+    mocks.call.mockImplementation((owner, action) => action.action === 'suggest_claims' ? Promise.resolve({ snapshot: structuredClone(current), suggestions: [] }) : normal(owner, action));
+    render(tree());
+    fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));
+    const quick = within(await screen.findByRole('group', { name: 'Quick start' }));
+    await waitFor(() => expect(quick.getByRole('button', { name: 'Add a fact myself' })).toBeInTheDocument());
+    expect(quick.queryByRole('button', { name: 'Show the facts from my CV' })).not.toBeInTheDocument();
+    fireEvent.click(quick.getByRole('button', { name: 'Add a fact myself' }));
+    expect(screen.getByRole('button', { name: 'My CV & experience' })).toHaveAttribute('aria-pressed', 'true');
+    expect(mocks.call.mock.calls.some(([, a]) => /save_claim|start_run/.test(a.action))).toBe(false);
+  });
   it('confirms the ticked lines word for word, then starts the first source-based search', async () => {
     render(tree());
     fireEvent.click(await screen.findByRole('button', { name: 'Show the facts from my CV' }));

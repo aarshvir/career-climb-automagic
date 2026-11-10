@@ -12,3 +12,16 @@ it('does not restore an older handoff after replacement fails with readable stor
   savePreSignupAnswers({ targetTitles: ['New role'], locations: ['New city'] });
   expect(takePreSignupAnswers()).toBeNull();
 });
+
+it('keeps answers for two hours, reads them once, and rejects malformed or future data', () => {
+  savePreSignupAnswers({ targetTitles: ['Analyst'], locations: ['Boston'] }, 1_000);
+  expect(takePreSignupAnswers(1_000 + 60 * 60 * 1000)).toEqual({ targetTitles: ['Analyst'], locations: ['Boston'] });
+  expect(takePreSignupAnswers(1_000 + 60 * 60 * 1000)).toBeNull();
+  savePreSignupAnswers({ targetTitles: ['Analyst'], locations: ['Boston'] }, 1_000);
+  expect(takePreSignupAnswers(1_000 + 3 * 60 * 60 * 1000)).toBeNull();
+  localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Analyst'], locations: ['Boston'], savedAt: Date.now() + 60_000 }));
+  expect(takePreSignupAnswers()).toBeNull();
+  localStorage.setItem('jobvance:pre-signup-quiz', '{not json');
+  expect(takePreSignupAnswers()).toBeNull();
+  expect(localStorage.length).toBe(0);
+});

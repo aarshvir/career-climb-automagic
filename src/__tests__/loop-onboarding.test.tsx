@@ -248,13 +248,23 @@ describe('account-first owned onboarding', () => {
     expect(screen.queryByTestId('destination')).not.toBeInTheDocument();
     expect(localStorage.length).toBe(0);
   });
-  it('fills roles and locations from the answers given before sign-up, once', async () => {
+  it('shows the answers given before sign-up for review at step 1, once, without saving', async () => {
     localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Business analyst'], locations: ['United States'], savedAt: Date.now() }));
     open();
-    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('What compensation would you consider?');
-    expect(localStorage.length).toBe(0);
-    fireEvent.click(screen.getByRole('button', { name: 'Back' })); fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(await screen.findByText(/We filled in the roles and locations chosen on this device/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Which roles would you like to find?');
     expect(screen.getByLabelText('Target roles')).toHaveValue('Business analyst');
+    expect(localStorage.length).toBe(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByLabelText('Cities or countries')).toHaveValue('United States');
+    expect(state.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing']);
+  });
+  it('does not apply answers from before sign-up when a setup already exists', async () => {
+    localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Someone else'], locations: ['Elsewhere'], savedAt: Date.now() }));
+    state.call.mockImplementation(async (_owner, action) => action.action === 'get_existing' ? { existingState: 'active', snapshot: snapshot(savedProfile, 3, 4) } : { snapshot: snapshot(savedProfile, 3, 4) });
+    open();
+    expect(await screen.findByRole('heading', { name: 'Your Automated Job Loop is ready to continue.' })).toBeInTheDocument();
+    expect(localStorage.length).toBe(0);
   });
   it('ignores expired answers from before sign-up', async () => {
     localStorage.setItem('jobvance:pre-signup-quiz', JSON.stringify({ v: 1, targetTitles: ['Business analyst'], locations: ['United States'], savedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 }));

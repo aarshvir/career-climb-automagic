@@ -42,6 +42,7 @@ const tabs: { id: Tab; label: string; icon: typeof UserRound }[] = [{ id: 'today
 const blankProfile = blankLoopProfile;
 /** Most CV lines the first-result shortcut confirms at once; more can be confirmed later. */
 const QUICK_FACT_LIMIT = 12;
+type QuickScope = { owner: string; authority: number; generation: number; lifecycle: number | undefined; source: string; version: number };
 const blankClaim = (): LoopClaimInput => ({ sourceKind: 'user_answer', sourceQuote: '', phrasing: '', context: '', kind: 'academic_project', resultStatus: 'not_measured', confirmed: false, shareable: false });
 const providerNames: Record<LoopProviderId, string> = { anthropic: 'Claude', openai: 'GPT', moonshot: 'Kimi' };
 const kindOptions = ['employment', 'internship', 'academic_project', 'personal_project', 'volunteering', 'education', 'skill'] as const;
@@ -132,6 +133,7 @@ export default function JobLoop() {
   const { user, retryConnection, loading: authLoading, authError } = useAuth();
   if (!authLoading && !authError) registerTrackingDraftOwner(user?.id ?? null);
   const trackingAuthority = user ? trackingDraftAuthority(user.id) : -1;
+  const authReadyRef = useRef(false); authReadyRef.current = !authLoading && !authError;
   const route = useLocation();
   const navigate = useNavigate();
   const selectedOpportunitySource = readApplicationSource(route.search, 'opportunity');
@@ -144,7 +146,9 @@ export default function JobLoop() {
   const [erasureOwner, setErasureOwner] = useState<string | null>(null);
   const [profile, setProfile] = useState<LoopProfileInput>(() => blankProfile(initialAudience.current)), [profileDirty, setProfileDirty] = useState(false), [saveConsent, setSaveConsent] = useState(false), [cvs, setCvs] = useState<CvDocument[]>([]), [cvError, setCvError] = useState('');
   const [lists, setLists] = useState(() => listInputs(blankProfile(initialAudience.current)));
-  const [excludedFacts, setExcludedFacts] = useState<Set<string>>(() => new Set()), [factConsent, setFactConsent] = useState(false), [quickStart, setQuickStart] = useState<'' | 'saving' | 'pending-run'>('');
+  const [excludedFacts, setExcludedFacts] = useState<Set<string>>(() => new Set()), [factConsent, setFactConsent] = useState(false), [quickStart, setQuickStart] = useState<'' | 'saving' | 'pending-run'>(''), [suggestionsEmpty, setSuggestionsEmpty] = useState(false);
+  /** The account, sign-in authority, lifecycle, CV source and record version a quick start is bound to. */
+  const quickScope = useRef<QuickScope | null>(null);
   const [suggestions, setSuggestions] =useState<{ key: string; value: LoopClaimInput }[]>([]), [newClaimKey, setNewClaimKey] = useState(0), [dirtyClaims, setDirtyClaims] = useState<Set<string>>(new Set());
   const [claimDrafts, setClaimDrafts] = useState<Record<string, LoopClaimDraft>>({});
   const [detailsReady, setDetailsReady] = useState(false);
@@ -374,26 +378,46 @@ export default function JobLoop() {
     const result = await perform({ action: 'suggest_claims' }, undefined, false, current);
     if (current() && result?.suggestions && (!result.snapshot || (result.snapshot.recordVersion === original.recordVersion && result.snapshot.lifecycleGeneration === original.lifecycleGeneration && result.snapshot.profile?.sourceText === original.profile.sourceText))) {
       setSuggestions(result.suggestions.map(claim => ({ key: `suggestion-${crypto.randomUUID()}`, value: { ...claim, confirmed: false, shareable: false } })));
+      setSuggestionsEmpty(result.suggestions.length === 0);
     }
   }
-  /** First-result shortcut: the user confirms the literal CV lines shown, then the
-   * first search starts with the source-based method. Lines are saved unchanged. */
+  function quickScopeCurrent(scope: QuickScope) {
+    const now = snapshotRef.current;
+    return mounted.current && importAuthReady.current && authReadyRef.current && owner.current === scope.owner && scope.authority >= 0
+      && trackingDraftAuthority(scope.owner) === scope.authority && generation.current === scope.generation
+      && now?.lifecycleGeneration === scope.lifecycle && now?.profile?.sourceText === scope.source && now.recordVersion === scope.version;
+  }
+  /** First-result shortcut: the user confirms the exact CV lines shown and ticked,
+   * then the first search starts with the source-based method. Lines are saved
+   * unchanged, one at a time, and the batch stops at the first failure or at any
+   * change of account, sign-in, lifecycle, CV source or record version. A search
+   * starts only when every selected line was saved in this same scope. */
   async function confirmFactsAndSearch() {
-    const chosen = suggestions.filter(item => !excludedFacts.has(item.key)).slice(0, QUICK_FACT_LIMIT);
-    if (!factConsent || !chosen.length || busyRef.current || uncommitted) return;
-    setQuickStart('saving'); setFactConsent(false);
+    const chosen = suggestions.slice(0, QUICK_FACT_LIMIT).filter(item => !excludedFacts.has(item.key));
+    const begin = snapshotRef.current, id = owner.current;
+    if (!factConsent || !chosen.length || busyRef.current || uncommitted || !begin?.profile || !id) return;
+    const scope: QuickScope = { owner: id, authority: trackingDraftAuthority(id), generation: generation.current, lifecycle: begin.lifecycleGeneration, source: begin.profile.sourceText, version: begin.recordVersion };
+    if (!quickScopeCurrent(scope)) return;
+    quickScope.current = null; setQuickStart('saving'); setFactConsent(false);
     let saved = 0;
     for (const item of chosen) {
-      const current = snapshotRef.current;
-      if (!mounted.current || !current?.profile) break;
-      const result = await perform({ action: 'save_claim', expectedVersion: current.recordVersion, claim: { ...item.value, confirmed: true, shareable: true } });
-      if (!result) continue;
-      saved++; setSuggestions(list => list.filter(entry => entry.key !== item.key));
+      if (!quickScopeCurrent(scope)) break;
+      const result = await perform({ action: 'save_claim', expectedVersion: scope.version, claim: { ...item.value, confirmed: true, shareable: true } }, undefined, false, () => quickScopeCurrent(scope));
+      const after = snapshotRef.current;
+      if (!result || !mounted.current || owner.current !== scope.owner || trackingDraftAuthority(scope.owner) !== scope.authority || generation.current !== scope.generation
+        || !after || after.lifecycleGeneration !== scope.lifecycle || after.profile?.sourceText !== scope.source || after.recordVersion <= scope.version) break;
+      scope.version = after.recordVersion; saved++;
+      setSuggestions(list => list.filter(entry => entry.key !== item.key));
     }
-    if (!mounted.current) return;
+    if (!mounted.current || owner.current !== scope.owner) return;
     setExcludedFacts(new Set());
-    if (saved) { setMethod('rules'); setModel('grounded-rules-v1'); setNotice(`${saved} ${saved === 1 ? 'fact' : 'facts'} confirmed. Starting your first search…`); }
-    setQuickStart(saved ? 'pending-run' : '');
+    if (saved === chosen.length && quickScopeCurrent(scope)) {
+      quickScope.current = { ...scope }; setMethod('rules'); setModel('grounded-rules-v1');
+      setNotice(`${saved} ${saved === 1 ? 'fact' : 'facts'} confirmed. Starting your first search…`); setQuickStart('pending-run');
+      return;
+    }
+    setQuickStart('');
+    if (saved) setNotice(`${saved} of ${chosen.length} facts were confirmed. Your search has not started. Check your facts, then choose Run my first search.`);
   }
   function skipSuggestion(key: string) { markDirty(key, false); setSuggestions(current => current.filter(item => item.key !== key)); }
   async function perform(action: LoopAction, success?: string, resetProfile = false, current?: () => boolean): Promise<LoopResponse | null> {
@@ -566,9 +590,17 @@ export default function JobLoop() {
     : method !== 'rules' && !modelConsent ? 'Confirm the selected AI processing below, or choose source-based preparation.' : '';
   useEffect(() => {
     if (quickStart !== 'pending-run' || busy) return;
-    if (!searchBlock) { setQuickStart(''); setTab('today'); void startRun(); }
-    else if (searchBlock !== 'Wait for the current action to finish.') setQuickStart('');
+    const scope = quickScope.current;
+    if (!scope || !quickScopeCurrent(scope)) { quickScope.current = null; setQuickStart(''); return; }
+    if (!searchBlock) { quickScope.current = null; setQuickStart(''); setTab('today'); void startRun(); }
+    else if (searchBlock !== 'Wait for the current action to finish.') { quickScope.current = null; setQuickStart(''); }
   }, [quickStart, busy, searchBlock]);
+  // A confirmation covers one exact displayed set in one account, lifecycle and source.
+  useEffect(() => { setFactConsent(false); }, [suggestions]);
+  useEffect(() => {
+    setFactConsent(false); setExcludedFacts(new Set()); setSuggestionsEmpty(false); quickScope.current = null;
+    setQuickStart(value => value === 'saving' ? value : '');
+  }, [user?.id, trackingAuthority, authLoading, authError, snapshot?.lifecycleGeneration, snapshot?.profile?.sourceText]);
   const hasConfirmedFact = !!snapshot?.claims.some(claim => claim.status === 'active' && claim.confirmed && claim.shareable);
   const quickFacts = suggestions.slice(0, QUICK_FACT_LIMIT);
   const quickChosen = quickFacts.filter(item => !excludedFacts.has(item.key)).length;
@@ -588,10 +620,12 @@ export default function JobLoop() {
       {snapshot?.profile && snapshot.runs.length === 0 && snapshot.packets.length === 0 && <section className="jl-panel" aria-label="Your next setup steps"><h2>Get your first Automated Job Loop result.</h2><p>Your CV and preferences are saved. Review the facts you want to use, then search now. CV variants and a recurring schedule can come afterward.</p>
         {!hasConfirmedFact && <div className="jl-quickstart" role="group" aria-label="Quick start">
           <h3>Fastest way: confirm your CV facts and search in one step</h3>
-          {quickFacts.length === 0
+          {quickFacts.length === 0 && suggestionsEmpty
+            ? <><p>We could not find lines in your saved CV to list here. Add a fact in your own words instead, then confirm it is accurate.</p><button type="button" className="jl-button jl-button--primary" disabled={!savedImportScope || !!busy || uncommitted} onClick={() => openSetupStep('record', 'jl-facts')}>Add a fact myself</button></>
+            : quickFacts.length === 0
             ? <><p>We list lines from your saved CV. Nothing is reworded or sent to an AI provider.</p><button type="button" className="jl-button jl-button--primary" disabled={!savedImportScope || !!busy || uncommitted} onClick={() => void requestSuggestions()}>Show the facts from my CV</button></>
             : <><p>These lines come from your CV, word for word. Untick any you do not want used.</p>
-              <ul className="jl-quickstart-facts">{quickFacts.map(item => <li key={item.key}><label><input type="checkbox" checked={!excludedFacts.has(item.key)} disabled={!!busy} onChange={event => { const keep = event.target.checked; setExcludedFacts(current => { const next = new Set(current); if (keep) next.delete(item.key); else next.add(item.key); return next; }); }} /><span>{item.value.phrasing}</span></label></li>)}</ul>
+              <ul className="jl-quickstart-facts">{quickFacts.map(item => <li key={item.key}><label><input type="checkbox" checked={!excludedFacts.has(item.key)} disabled={!!busy} onChange={event => { const keep = event.target.checked; setFactConsent(false); setExcludedFacts(current => { const next = new Set(current); if (keep) next.delete(item.key); else next.add(item.key); return next; }); }} /><span>{item.value.phrasing}</span></label></li>)}</ul>
               {suggestions.length > QUICK_FACT_LIMIT && <p className="jl-help">The first {QUICK_FACT_LIMIT} are shown. You can confirm more later in My CV &amp; experience.</p>}
               <label className="jl-consent"><input type="checkbox" checked={factConsent} disabled={!!busy || !quickChosen} onChange={event => setFactConsent(event.target.checked)} /><span>The ticked lines are accurate, and Jobvance may use them in CVs it prepares for me.</span></label>
               <div className="jl-actions"><button type="button" className="jl-button jl-button--primary" disabled={!factConsent || !quickChosen || !!busy || uncommitted || quickStart !== ''} onClick={() => void confirmFactsAndSearch()}><Play size={16} aria-hidden="true" />Confirm and find my first matches</button></div></>}
