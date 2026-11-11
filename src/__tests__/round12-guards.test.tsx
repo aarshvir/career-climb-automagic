@@ -77,6 +77,8 @@ describe('round 12 guards', () => {
     const index = css('index.css');
     expect(index).toMatch(/--t-sm: \.875rem;/);
     expect(index).toMatch(/--t-body-sm: 1rem;/);
+    expect(index).not.toContain('"Outfit"');
+    expect(css('pages/Home.css')).toMatch(/\.jv-home--outfit \{\s*--font-sans: "Outfit", "Geist"/);
     expect(index).not.toMatch(/--t-(?:h2|h3|h4|lead): clamp/);
     const marketing = css('styles/marketing.css');
     expect(marketing).toMatch(/--t-page: 3\.75rem;/);

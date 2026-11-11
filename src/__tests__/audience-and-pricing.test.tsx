@@ -113,14 +113,18 @@ describe('Automated Job Loop first homepage', () => {
     expect(stages[2]).toHaveTextContent('role-specific CVs for review');
     // Short actions sit under headings that name the product; the final call to action keeps the full name.
     expect(screen.getByText('Automated Job Loop', { selector: '.jv-hero-eyebrow' })).toBeInTheDocument();
-    expect(screen.getByText('How Automated Job Loop works')).toBeInTheDocument();
+    expect(screen.getByText('How it works', { selector: '.jv-caption' })).toBeInTheDocument();
     const starts = screen.getAllByRole('link', { name: 'Start my search' });
     expect(starts).toHaveLength(4);
     for (const link of starts) expect(link).toHaveAttribute('href', '/onboarding');
     for (const link of screen.getAllByRole('link', { name: /Try the free CV Check/ })) expect(link).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
-    expect(screen.getByText(/runs in the background and finds the best-matching jobs/, { selector: '.jv-hero-lead' })).toHaveTextContent('Choose your roles and locations once');
-    expect(screen.getByText(/Each run looks through connected sources/)).toHaveTextContent('Some runs may find nothing new');
+    const lead = screen.getByText(/runs in the background and finds the best-matching jobs/, { selector: '.jv-hero-lead' });
+    expect(lead).toHaveTextContent('Choose your roles and locations once');
+    expect(lead).toHaveTextContent('built for a high ATS match');
+    expect(lead.textContent).not.toMatch(/each role|every role|guarantee|interviews/i);
+    expect(screen.getByText(/Some runs may find nothing new/)).toBeInTheDocument();
+    expect(screen.getByText('Review CVs built from facts you confirm. Download as PDF, Word or text.')).toBeInTheDocument();
   });
 });
 
