@@ -2,6 +2,22 @@
    Two devices only, both meaningful: hairline frame rails (the grid, header to footer) and the orbit (the scheduled loop).
    Grid: from 1024px every two-column block uses the hero's 12-column grid (24px gaps), so right columns share one edge. */
 .jv-home { position: relative; isolation: isolate; overflow-x: clip; color: var(--jv-ink); background: transparent; overflow-wrap: normal; }
+@font-face{font-family:"Outfit";src:url('/fonts/Outfit-latin-wght.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2190-2193,U+2197,U+2212,U+2215,U+FEFF,U+FFFD;}
+.jv-home--outfit {
+  --font-sans: "Outfit", "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --fw-display: 600;
+  --fw-heading: 600;
+  --fw-heading-on-dark: 580;
+  --t-h4: 1.1875rem;
+  --t-lead: 1.1875rem;
+  --t-small: .9375rem;
+  --t-body-sm: 1.0625rem;
+  --t-body: 1.0625rem;
+  font-family: var(--font-sans);
+}
+@media (min-width: 1024px) {
+  .jv-home--outfit { --t-h4: 1.375rem; --t-lead: 1.375rem; }
+}
 .jv-home h1, .jv-home h2, .jv-home h3 { text-wrap: balance; }
 /* Heading measures are in em, not ch: ch follows the "0" of whichever face is showing, so a fallback would change the box. (1ch of Geist ~ .675em.) */
 .jv-home p, .jv-home li, .jv-home dd { text-wrap: pretty; }
