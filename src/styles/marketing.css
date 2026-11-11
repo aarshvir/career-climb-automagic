@@ -910,6 +910,11 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 .jv-header[data-entry="true"] .jv-header-inner { display: flex; justify-content: space-between; }
 .jv-header[data-entry="true"] .jv-header-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .jv-header[data-entry="true"] :is(.jv-header-nav, .jv-menu-toggle, .jv-mobile-panel, .jv-menu-scrim, .jv-header-start) { display: none; }
+/* Entry pages keep signed-in account actions reachable on narrow screens. */
+@media (max-width: 600px) {
+  .jv-header[data-entry="true"] .jv-header-inner { flex-wrap: wrap; padding-block: 8px; row-gap: 8px; }
+  .jv-header[data-entry="true"] .jv-header-actions { min-width: 0; max-width: 100%; flex-wrap: wrap; justify-content: flex-end; }
+}
 .jv-mobile-who { display: grid; padding: 20px 0 8px; }
 .jv-mobile-who > p { margin: 0 0 4px; color: var(--jv-ink-3); font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 500; letter-spacing: .06em; line-height: 1rem; text-transform: uppercase; }
 .jv-mobile-who > a { display: flex; align-items: center; min-height: 48px; color: var(--jv-ink-2); font-size: 17px; font-weight: 500; letter-spacing: -.01em; text-decoration: none; }

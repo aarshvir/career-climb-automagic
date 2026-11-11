@@ -242,3 +242,11 @@
 @media (prefers-reduced-motion: reduce) {
   .jl-loading svg { animation: jl-breathe 1.6s ease-in-out infinite !important; }
 }
+
+/* First-result shortcut: confirm literal CV lines, then search in one step. */
+.jl-quickstart { margin-block:6px 22px; padding:20px; border:1px solid var(--jl-line); border-radius:10px; background:color-mix(in srgb, var(--jv-brand) 5%, #fff); }
+.jl-quickstart h3 { margin-bottom:8px; }
+.jl-quickstart > p { color:var(--jl-muted); font-size:13px; line-height:1.8; margin-bottom:12px; }
+.jl-quickstart-facts { display:grid; gap:8px; max-height:320px; overflow:auto; margin-bottom:6px; padding:0; list-style:none; }
+.jl-quickstart-facts label { display:flex; align-items:flex-start; gap:10px; font-size:13px; line-height:1.6; color:var(--jl-ink); overflow-wrap:anywhere; }
+.jl-quickstart-facts input { width:17px; height:17px; flex-shrink:0; margin-top:2px; accent-color:var(--jv-brand); }

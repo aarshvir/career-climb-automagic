@@ -1,0 +1,317 @@
+{
+  "release": "onboarding-entry-header-phone",
+  "publicVersion": 81,
+  "publishedAt": "2026-11-10T23:45:05.940262+00:00",
+  "publicUrl": "https://jobvance.io/onboarding",
+  "pr": 60,
+  "source": "a4ae73dd1afff1f1ebd0640fffbaa57e7c5f64ea",
+  "merge": "743bdecd99df1c600463357b272719af47b972c6",
+  "fullMergeTree": "b05de676efea1f5a67e31569d47f9780fe293f4d",
+  "fullMergeTreeMatchesReviewedSource": true,
+  "site": {
+    "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_0607e51aee20819182964b13dee077cf",
+    "deploymentId": "appgdep_6af3ac6c1dec81919a45f96448105cd2",
+    "status": "succeeded",
+    "audience": "public"
+  },
+  "changes": [
+    "Five CSS lines allow only entry-page header/account controls to wrap below600px, correcting measured signed-in header overflow.",
+    "Retains all PR58/v80 onboarding/first-search and validation corrections; no added runtime behavior."
+  ],
+  "validation": {
+    "ciRun": 42924839905,
+    "ciJob": 130208572321,
+    "ci": {
+      "jobs": [
+        {
+          "id": 130208572321,
+          "name": "test",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 42924839905,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Setup Node.js",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run linter",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run type check",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Setup Deno for cloud handler checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Verify pinned CI authentication module",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Verify cloud authentication boundaries",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Verify first-party tracking intake",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Run build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Verify hosting responses",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Security audit",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Setup Deno for cloud handler checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 26
+            },
+            {
+              "name": "Post Setup Node.js",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 27
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 28
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 29
+            }
+          ]
+        }
+      ]
+    },
+    "all18StepsPassed": true,
+    "tests": 3950,
+    "testFiles": 225,
+    "typeScriptErrors": 0,
+    "lintErrors": 0,
+    "lintWarnings": 51,
+    "auditVulnerabilities": 0,
+    "fullModerateAuditPinnedOriginalSdkFrozenDeno": true,
+    "pages": 40,
+    "guides": 21,
+    "sitemapUrls": 39,
+    "jsonldHashes": 48,
+    "compressedBytes": 2279378,
+    "compressedLimit": 3145728,
+    "hostingGroups": 12,
+    "socialPassed": true,
+    "liveHttp": {
+      "at": "2026-11-10T23:45:43.818Z",
+      "paths": 171,
+      "passed": 171,
+      "rawExact": 124,
+      "recognizedCloudflareTail": 47,
+      "rawHtmlParity": false,
+      "securityMatched": true
+    },
+    "browser": {
+      "localHeaderViewports": [
+        320,
+        375,
+        1440
+      ],
+      "localAnonymousViewports": [
+        375,
+        1440
+      ],
+      "liveObservedViewports": [
+        375,
+        1920
+      ],
+      "live320Certified": false,
+      "noHorizontalOverflowAtObservedViewports": true,
+      "existingSessionPreserved": true,
+      "productConsoleErrors": 0,
+      "extensionErrorsExcluded": true,
+      "privateAcceptance": false,
+      "ownedTabsClosed": true,
+      "viewportReset": true,
+      "userTabsPreserved": true,
+      "ownedServersStopped": true
+    }
+  },
+  "protected": {
+    "base": "22157a7aa0f2928ae7e1754d49071530d7467301",
+    "onlyChangedFile": "src/styles/marketing.css",
+    "addedLines": 5,
+    "all2187OtherGitEntriesIdentical": true,
+    "wholeSupabase": "25fb07421709df28cf4914f62e7f1e33dcd53a2c"
+  },
+  "rollback": {
+    "version": 80,
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f40578e84c508191b9bc1352f8f8a9b9",
+    "source": "2d1d419c9feaa242d746f5dd887fe2cb0d760de8",
+    "localTag": "jobvance-before-entry-header-2026-11-11",
+    "tagPushed": false
+  },
+  "conversionObservation": [
+    {
+      "read_at": "2026-11-10 23:45:34.888937+00",
+      "zone": "Asia/Dubai",
+      "local_day": "2026-11-11",
+      "day_start": "2026-11-10 20:00:00+00",
+      "day_end": "2026-11-10 23:45:34.888937+00",
+      "any_ad_tagged_visits": 0,
+      "meta_ad_visits": 0,
+      "exact_campaign_entry_visits": 0,
+      "purchase_campaign_tagged_visits": 0,
+      "purchase_campaign_first_touch_linked_signups": 0,
+      "classified_signups": 0,
+      "first_touch_meta_linked_signups": 0,
+      "live_provider_checkout_sessions_created": 0,
+      "classified_live_paid_rows_by_retained_date": 0,
+      "eligible_first_paid_cycles": 0,
+      "matching_first_purchase_claims": 0,
+      "matching_first_purchase_sent": 0,
+      "live_commerce_claims_today": 0,
+      "live_commerce_sent_today": 0,
+      "live_commerce_totals": {
+        "sent": 0,
+        "claims": 0,
+        "checkout_sent": 0,
+        "purchase_sent": 0,
+        "checkout_claims": 0,
+        "purchase_claims": 0
+      }
+    },
+    {
+      "read_at": "2026-11-10 23:45:34.888937+00",
+      "zone": "UTC",
+      "local_day": "2026-11-10",
+      "day_start": "2026-11-10 00:00:00+00",
+      "day_end": "2026-11-10 23:45:34.888937+00",
+      "any_ad_tagged_visits": 20,
+      "meta_ad_visits": 20,
+      "exact_campaign_entry_visits": 0,
+      "purchase_campaign_tagged_visits": 19,
+      "purchase_campaign_first_touch_linked_signups": 2,
+      "classified_signups": 2,
+      "first_touch_meta_linked_signups": 2,
+      "live_provider_checkout_sessions_created": 0,
+      "classified_live_paid_rows_by_retained_date": 0,
+      "eligible_first_paid_cycles": 0,
+      "matching_first_purchase_claims": 0,
+      "matching_first_purchase_sent": 0,
+      "live_commerce_claims_today": 0,
+      "live_commerce_sent_today": 0,
+      "live_commerce_totals": {
+        "sent": 0,
+        "claims": 0,
+        "checkout_sent": 0,
+        "purchase_sent": 0,
+        "checkout_claims": 0,
+        "purchase_claims": 0
+      }
+    }
+  ],
+  "entryBaseline": [
+    {
+      "cutoff": "2026-11-10 23:45:05.940262+00",
+      "read_at": "2026-11-10 23:45:37.279106+00",
+      "pooled_cv_check_link_sessions": 0,
+      "cv_check_page_sessions": 0,
+      "same_session_auth_after_landing": 0,
+      "first_touch_linked_new_accounts": 0,
+      "meta_cv_check_page_sessions": 0
+    }
+  ],
+  "healthObservation": {
+    "at": "2026-11-10 23:45:36.243138+00",
+    "operationalCheckCount": 0,
+    "lastDispatchAt": "2026-11-10T23:45:00.189728+00:00",
+    "schedulerEnabled": true,
+    "places": {
+      "paidUsed": 0,
+      "pilotUsed": 5,
+      "paidCapacity": 100,
+      "pilotCapacity": 10
+    },
+    "classifiedSignup7Days": 11,
+    "activation7Days": 3,
+    "tailoring7Days": 0,
+    "activeLive": 0,
+    "novemberBudget": {
+      "month": "2026-11",
+      "capUsd": 50,
+      "actualUsd": 0.030451,
+      "committedUsd": 0.030451
+    },
+    "octoberBudget": {
+      "actualUsd": 0.527938,
+      "committedUsd": 0.753914
+    }
+  },
+  "privateEvidence": "jobvance-repair-evidence/growth-audit-2026-11-11/pr58-review/",
+  "limits": [
+    "No real form/account/OAuth/AI/provider/checkout/payment/ad-tagged QA, backend/schema/function/migration/ad/funding/indexing/outreach mutation or paid call.",
+    "Synthetic browser tests use the actual components with network-blocked memory mocks. Live existing session was passively read and preserved.",
+    "The first checkout/payment watch remains active; all histories and19delivered dedupe keys must be preserved.",
+    "Frontend rollback does not restore external/customer/financial data or events; never replay migrations."
+  ],
+  "baton": "Codex bounded PR58/PR60 review/correction/release FINISHED. Claude resumes sole ongoing product writer integrating current main and preserving producer commits. Repository coordination is not native ACK."
+}

@@ -1,0 +1,294 @@
+{
+  "release": "onboarding-and-first-search",
+  "publicVersion": 80,
+  "publishedAt": "2026-11-10T23:31:20.669367+00:00",
+  "publicUrl": "https://jobvance.io/onboarding",
+  "pr": 58,
+  "originalAuthorHead": "eeb73673d3c998d17197041310dcf66c740d04c8",
+  "correctedAuthorHead": "f8700bad02aadefea142638c4408d95232ae4a88",
+  "source": "2d1d419c9feaa242d746f5dd887fe2cb0d760de8",
+  "merge": "22157a7aa0f2928ae7e1754d49071530d7467301",
+  "fullMergeTree": "263faadfc90bac0eaf9b4471e96e9694cf5a3ed5",
+  "fullMergeTreeMatchesReviewedSource": true,
+  "site": {
+    "projectId": "appgprj_6aca1c378fb88191aa656f8a85eee68a",
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_f40578e84c508191b9bc1352f8f8a9b9",
+    "deploymentId": "appgdep_6af3a92f44c481918b80f7f824b2c861",
+    "status": "succeeded",
+    "audience": "public"
+  },
+  "validation": {
+    "ciRun": 42922895002,
+    "ciJob": 130201916619,
+    "all18StepsPassed": true,
+    "tests": 3950,
+    "testFiles": 225,
+    "typeScriptErrors": 0,
+    "lintErrors": 0,
+    "lintWarnings": 51,
+    "auditVulnerabilities": 0,
+    "fullModerateAuditPinnedOriginalSdkFrozenDeno": true,
+    "pages": 40,
+    "guides": 21,
+    "sitemapUrls": 39,
+    "jsonldHashes": 48,
+    "compressedBytes": 2279032,
+    "compressedLimit": 3145728,
+    "hostingGroups": 12,
+    "socialPassed": true,
+    "liveHttp": {
+      "paths": 171,
+      "passed": 171,
+      "rawExact": 124,
+      "recognizedCloudflareTail": 47,
+      "rawHtmlParity": false,
+      "securityMatched": true
+    },
+    "ci": {
+      "jobs": [
+        {
+          "id": 130201916619,
+          "name": "test",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 42922895002,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Setup Node.js",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run linter",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run type check",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Setup Deno for cloud handler checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Verify pinned CI authentication module",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Verify cloud authentication boundaries",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Verify first-party tracking intake",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Run build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Verify hosting responses",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Security audit",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Setup Deno for cloud handler checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 26
+            },
+            {
+              "name": "Post Setup Node.js",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 27
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 28
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 29
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "protected": {
+    "objects": 111,
+    "identical": 109,
+    "intendedExceptions": [
+      "LoopOnboarding frontend",
+      "exact authored eight-line JobLoop CSS"
+    ],
+    "wholeSupabase": "25fb07421709df28cf4914f62e7f1e33dcd53a2c",
+    "otherProtectedBoundariesUnchanged": true
+  },
+  "changes": [
+    "Two role/location preference questions before signup; two-hour read-once device handoff shown for review.",
+    "Exact displayed and selected max12 literal facts, fresh accuracy/sharing confirmation, scoped sequential saves and one-use rules-only first search; partial/uncertain save stops.",
+    "Operation revocation across owner/authority/auth recovery/lifecycle/source/profile/draft changes, exact version+1 acknowledgment, safe manual-fact opening/focus.",
+    "Existing server-disallowed characters caught in onboarding fields/CV early and at recovered final step before initialization or save; exact text retained."
+  ],
+  "remainingLimit": "No conversion lift, real device, private/provider/search-quality/payment acceptance is established. Final live signed-in header overflow was reproduced and fixed separately in PR60/v81; main onboarding content fit.",
+  "rollback": {
+    "version": 79,
+    "savedVersionId": "appgprj_6aca1c378fb88191aa656f8a85eee68a~appgver_d3f7b7ac2d3c8191a947b8e729e3bdbc",
+    "source": "9847502a707673d9969890bfa2654ff1450e46dd",
+    "localTag": "jobvance-before-onboarding-2026-11-11",
+    "tagPushed": false
+  },
+  "conversionObservation": [
+    {
+      "read_at": "2026-11-10 23:32:23.65078+00",
+      "zone": "Asia/Dubai",
+      "local_day": "2026-11-11",
+      "day_start": "2026-11-10 20:00:00+00",
+      "day_end": "2026-11-10 23:32:23.65078+00",
+      "any_ad_tagged_visits": 0,
+      "meta_ad_visits": 0,
+      "exact_campaign_entry_visits": 0,
+      "purchase_campaign_tagged_visits": 0,
+      "purchase_campaign_first_touch_linked_signups": 0,
+      "classified_signups": 0,
+      "first_touch_meta_linked_signups": 0,
+      "live_provider_checkout_sessions_created": 0,
+      "classified_live_paid_rows_by_retained_date": 0,
+      "eligible_first_paid_cycles": 0,
+      "matching_first_purchase_claims": 0,
+      "matching_first_purchase_sent": 0,
+      "live_commerce_claims_today": 0,
+      "live_commerce_sent_today": 0,
+      "live_commerce_totals": {
+        "sent": 0,
+        "claims": 0,
+        "checkout_sent": 0,
+        "purchase_sent": 0,
+        "checkout_claims": 0,
+        "purchase_claims": 0
+      }
+    },
+    {
+      "read_at": "2026-11-10 23:32:23.65078+00",
+      "zone": "UTC",
+      "local_day": "2026-11-10",
+      "day_start": "2026-11-10 00:00:00+00",
+      "day_end": "2026-11-10 23:32:23.65078+00",
+      "any_ad_tagged_visits": 20,
+      "meta_ad_visits": 20,
+      "exact_campaign_entry_visits": 0,
+      "purchase_campaign_tagged_visits": 19,
+      "purchase_campaign_first_touch_linked_signups": 2,
+      "classified_signups": 2,
+      "first_touch_meta_linked_signups": 2,
+      "live_provider_checkout_sessions_created": 0,
+      "classified_live_paid_rows_by_retained_date": 0,
+      "eligible_first_paid_cycles": 0,
+      "matching_first_purchase_claims": 0,
+      "matching_first_purchase_sent": 0,
+      "live_commerce_claims_today": 0,
+      "live_commerce_sent_today": 0,
+      "live_commerce_totals": {
+        "sent": 0,
+        "claims": 0,
+        "checkout_sent": 0,
+        "purchase_sent": 0,
+        "checkout_claims": 0,
+        "purchase_claims": 0
+      }
+    }
+  ],
+  "entryBaseline": [
+    {
+      "cutoff": "2026-11-10 23:31:20.669367+00",
+      "read_at": "2026-11-10 23:31:52.294578+00",
+      "pooled_cv_check_link_sessions": 0,
+      "cv_check_page_sessions": 0,
+      "same_session_auth_after_landing": 0,
+      "first_touch_linked_new_accounts": 0,
+      "meta_cv_check_page_sessions": 0
+    }
+  ],
+  "healthObservation": {
+    "at": "2026-11-10 23:32:24.824453+00",
+    "operationalCheckCount": 0,
+    "lastDispatchAt": "2026-11-10T23:30:00.03911+00:00",
+    "places": {
+      "paidUsed": 0,
+      "pilotUsed": 5,
+      "paidCapacity": 100,
+      "pilotCapacity": 10
+    },
+    "novemberBudget": {
+      "month": "2026-11",
+      "capUsd": 50,
+      "actualUsd": 0.030451,
+      "committedUsd": 0.030451
+    },
+    "octoberBudget": {
+      "actualUsd": 0.527938,
+      "committedUsd": 0.753914
+    },
+    "classificationLimits": "Stored account classification is not verified person/customer proof."
+  },
+  "privateEvidence": "jobvance-repair-evidence/growth-audit-2026-11-11/pr58-review/",
+  "limits": [
+    "No real form/account/OAuth/AI/provider/checkout/payment/ad-tagged QA, backend/schema/function/migration/ad/funding/indexing/outreach mutation or paid call.",
+    "Synthetic browser tests use the actual components with network-blocked memory mocks. Live existing session was passively read and preserved.",
+    "The first checkout/payment watch remains active; all histories and19delivered dedupe keys must be preserved.",
+    "Frontend rollback does not restore external/customer/financial data or events; never replay migrations."
+  ]
+}

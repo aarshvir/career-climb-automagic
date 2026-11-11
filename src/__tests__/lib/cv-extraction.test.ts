@@ -80,3 +80,13 @@ describe("local CV extraction", () => {
     await expect(extractCvText(new File(["damaged"], "CV.pdf"))).rejects.toThrow("could not read");
   });
 });
+
+describe("unsupportedCharacterLine", () => {
+  it("finds the first character the saved record rejects, counting CRLF as one break", async () => {
+    const { unsupportedCharacterLine } = await import("@/lib/cv-extraction");
+    expect(unsupportedCharacterLine("one\r\ntwo\n‪three")).toBe(3);
+    expect(unsupportedCharacterLine("a⁩")).toBe(1);
+    expect(unsupportedCharacterLine("a\u0000b")).toBe(1);
+    expect(unsupportedCharacterLine("tab\there\r\nقلم\nÅ é ü")).toBeNull();
+  });
+});
