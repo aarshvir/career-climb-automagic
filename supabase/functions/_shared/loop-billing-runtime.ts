@@ -1,6 +1,6 @@
 import { ApiError } from './core.ts';
 import { DODO_PAYMENT_ID, DODO_SESSION_ID, DODO_SESSION_LIFETIME_MS, validateDodoCheckoutSession, type DodoEvent } from './dodo.ts';
-import { captureLoopBillingInput, isLoopBillingMetadata, LOOP_BILLING_PLANS, LOOP_SUBSCRIPTION_ID, loopCheckoutBody, loopMetadata, validateLoopBillingProduct, validateLoopPaidPeriod, validateLoopRefund, validateLoopSubscription, validateLoopSubscriptionToStop, type LoopBillingConfig, type LoopSubscription } from './loop-billing.ts';
+import { captureLoopBillingInput, isLoopBillingMetadata, isLoopTrialPayment, LOOP_BILLING_PLANS, LOOP_SUBSCRIPTION_ID, LOOP_TRIAL_DAYS, loopCheckoutBody, loopMetadata, loopOrderTrialDays, validateLoopBillingProduct, validateLoopPaidPeriod, validateLoopRefund, validateLoopSubscription, validateLoopSubscriptionToStop, validateLoopTrialStart, type LoopBillingConfig, type LoopSubscription } from './loop-billing.ts';
 import { loopPricePreviewBody, parseLoopQuote, publicLoopPrice, publicLoopQuote, quoteCheckoutBody, storedLoopPrice, validateLoopPriceCandidate, verifyLoopPricePreview, verifyLoopPriceRule, type LoopPriceQuote, type LoopPriceSnapshot } from './loop-billing-pricing.ts';
 import { accountingBindArgs, currentLoopAccountingPeriod, knownLoopAccounting, knownLoopPaymentAccounting, proveLoopAccounting } from './loop-billing-accounting.ts';
 
@@ -17,7 +17,16 @@ function publicSubscription(value: unknown, version = 1) {
   const sub = record(value);
   return { subscriptionId: sub.subscriptionId, plan: publicPlan(sub.plan), status: sub.status, validUntil: sub.validUntil, periodStart: sub.periodStart,
     cancelAtPeriodEnd: sub.cancelAtPeriodEnd, revoked: sub.revoked, version: sub.revision, graceUntil: sub.graceUntil ?? null,
-    ...(version === 2 ? { pricing: publicLoopPrice(storedLoopPrice({ pricing:sub.pricing }, publicPlan(sub.plan) as never)) } : {}) };
+    ...(version >= 2 ? { pricing: publicLoopPrice(storedLoopPrice({ pricing:sub.pricing }, publicPlan(sub.plan) as never)) } : {}),
+    ...(version === 3 ? { trial: publicTrial(sub.trial) } : {}) };
+}
+const isoDate = (value: unknown) => { if (typeof value !== 'string' || !Number.isFinite(Date.parse(value))) throw unavailable(); return new Date(value).toISOString(); };
+/** Only contract 3 clients receive trial fields; older strict clients never see them. */
+function publicTrial(value: unknown) {
+  if (value === null || value === undefined) return null;
+  const trial = record(value);
+  if (typeof trial.granted !== 'boolean') throw unavailable();
+  return { startsAt: isoDate(trial.startsAt), endsAt: isoDate(trial.endsAt), firstChargeAt: isoDate(trial.firstChargeAt), reminderAt: isoDate(trial.reminderAt), granted: trial.granted };
 }
 function record(value: unknown): Record<string, unknown> { if (!value || typeof value !== 'object' || Array.isArray(value)) throw unavailable(); return value as Record<string, unknown>; }
 async function verifiedPrice(ports: LoopBillingPorts, config: LoopBillingConfig, pricing: LoopPriceSnapshot) {
@@ -36,14 +45,16 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
   const mode = config?.mode ?? fallbackMode;
   const base = { p_user: owner, p_auth_session: authSession };
   if (input.action === 'status') {
-    const status = await ports.rpc(input.contractVersion === 2 ? 'job_loop_billing_status_v2' : 'job_loop_billing_status', { ...base, p_mode: mode });
+    const status = await ports.rpc(input.contractVersion >= 2 ? 'job_loop_billing_status_v2' : 'job_loop_billing_status', { ...base, p_mode: mode });
     const checkout = status.checkout ? record(status.checkout) : null;
     const cancel = status.cancelRequest ? record(status.cancelRequest) : null;
-    if (input.contractVersion !== 2 && [status.subscription,checkout].some(value => value && record(value).pricing && record(record(value).pricing).currency !== 'USD')) throw new ApiError(409,'LOOP_BILLING_CONTRACT_REQUIRED','Refresh this page to manage your subscription in its original currency.');
+    if (input.contractVersion < 2 && [status.subscription,checkout].some(value => value && record(value).pricing && record(record(value).pricing).currency !== 'USD')) throw new ApiError(409,'LOOP_BILLING_CONTRACT_REQUIRED','Refresh this page to manage your subscription in its original currency.');
     return { generation: status.generation, entitlement: status.entitlement, fulfillmentPending: status.fulfillmentPending === true, subscription: publicSubscription(status.subscription,input.contractVersion), checkout: checkout ? { requestId: checkout.requestId, status: checkout.status, checkoutUrl: checkout.checkoutUrl, plan: publicPlan(checkout.plan),
-      ...(input.contractVersion === 2 ? { pricing:publicLoopPrice(storedLoopPrice({pricing:checkout.pricing},publicPlan(checkout.plan) as never)) } : {}) } : null,
+      ...(input.contractVersion >= 2 ? { pricing:publicLoopPrice(storedLoopPrice({pricing:checkout.pricing},publicPlan(checkout.plan) as never)) } : {}),
+      ...(input.contractVersion === 3 ? { trialDays: loopOrderTrialDays({ trial_days: checkout.trialDays }) } : {}) } : null,
       cancelRequest: cancel ? { requestId: cancel.requestId, subscriptionId: cancel.subscriptionId, status: cancel.status, version: cancel.version } : null, billingConfigured: !!config, billingMode: mode,
-      plans: Object.entries(LOOP_BILLING_PLANS).map(([id, plan]) => ({ id, amount: plan.amount, runsPerWeek: plan.runsPerWeek, currency: 'USD', interval: 'month' })) };
+      plans: Object.entries(LOOP_BILLING_PLANS).map(([id, plan]) => ({ id, amount: plan.amount, runsPerWeek: plan.runsPerWeek, currency: 'USD', interval: 'month' })),
+      ...(input.contractVersion === 3 ? { trial: { available: config?.trialEnabled === true, eligible: config?.trialEnabled === true && status.trialEligible === true, days: LOOP_TRIAL_DAYS } } : {}) };
   }
   if (!config) throw unavailable();
   const bound = { ...base, p_generation: input.generation, p_request: input.requestId };
@@ -63,6 +74,10 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
     return publicLoopQuote(quote);
   }
   if (input.action === 'checkout') {
+    // A trial is never inferred: the customer explicitly confirmed trial terms,
+    // and SQL independently binds the trial to the original order once.
+    if (input.trial && !config.trialEnabled) throw new ApiError(409,'LOOP_TRIAL_UNAVAILABLE','The free trial is not available right now. No checkout was opened.');
+    const trialDays = input.trial ? LOOP_TRIAL_DAYS : 0;
     let quote:LoopPriceQuote|null=null;
     let legacyProduct=config.loopProducts[input.plan];
     if(input.quoteId){quote=parseLoopQuote(await ports.rpc('job_loop_billing_quote_read',{...base,p_generation:input.generation,p_mode:mode,p_quote:input.quoteId}));sameQuote(quote,input,mode);}
@@ -73,7 +88,8 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
       const original=await ports.rpc('job_loop_billing_order',{p_user:owner,p_request:input.requestId,p_mode:mode});
       if(original)legacyProduct=storedLoopPrice(original,input.plan).productId;
     }
-    const order = record(await ports.rpc(quote?'job_loop_billing_checkout_claim_v2':'job_loop_billing_checkout_claim', { ...bound, p_mode: mode, p_plan: sqlPlan(input.plan), p_product: quote?.productId??legacyProduct,...(quote?{p_quote:quote.quoteId}:{}) }));
+    const order = record(await ports.rpc(trialDays?'job_loop_billing_checkout_claim_trial':quote?'job_loop_billing_checkout_claim_v2':'job_loop_billing_checkout_claim', { ...bound, p_mode: mode, p_plan: sqlPlan(input.plan), p_product: quote?.productId??legacyProduct,...(quote||trialDays?{p_quote:quote?.quoteId??null}:{}) }));
+    if (loopOrderTrialDays(order) !== trialDays) throw new ApiError(409,'LOOP_BILLING_REQUEST_CONFLICT','This billing request belongs to a different action or sign-in session.');
     if(quote){const original=storedLoopPrice(order,input.plan);if(original.quoteId!==quote.quoteId||original.amountMinor!==quote.amountMinor||original.currency!==quote.currency||original.productId!==quote.productId)throw unavailable();}
     if (!['creating','ready','uncertain','failed'].includes(String(order.state))) throw new ApiError(409, 'LOOP_CHECKOUT_FINISHED', 'This checkout is no longer open. Refresh your subscription.');
     let session: { sessionId: string; url: string };
@@ -91,14 +107,14 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
         }else validateLoopBillingProduct(await ports.provider(`products/${legacyProduct}`),{...config,loopProducts:{...config.loopProducts,[input.plan]:legacyProduct}},input.plan);
       }catch(error){await ports.rpc('job_loop_billing_checkout_fail',{...bound,p_retryable:true});throw error;}
       try {
-        session = validateDodoCheckoutSession(await ports.provider('checkouts', quote?quoteCheckoutBody(config, owner, input.requestId, input.generation, quote):loopCheckoutBody({...config,loopProducts:{...config.loopProducts,[input.plan]:legacyProduct}}, owner, input.requestId, input.generation, input.plan)), mode);
+        session = validateDodoCheckoutSession(await ports.provider('checkouts', quote?quoteCheckoutBody(config, owner, input.requestId, input.generation, quote, trialDays):loopCheckoutBody({...config,loopProducts:{...config.loopProducts,[input.plan]:legacyProduct}}, owner, input.requestId, input.generation, input.plan, trialDays)), mode);
         await ports.rpc('job_loop_billing_checkout_finalize', { ...bound, p_session: session.sessionId, p_url: session.url });
       } catch (error) {
         await ports.rpc('job_loop_billing_checkout_fail', { ...bound, p_retryable: false }).catch(() => undefined);
         throw error;
       }
     }
-    return { provider: 'dodo', billingMode: mode, requestId: input.requestId, generation: input.generation, plan: input.plan, sessionId: session.sessionId, url: session.url,...(quote?{pricing:publicLoopPrice(quote)}:{}) };
+    return { provider: 'dodo', billingMode: mode, requestId: input.requestId, generation: input.generation, plan: input.plan, sessionId: session.sessionId, url: session.url,...(quote?{pricing:publicLoopPrice(quote)}:{}),...(trialDays?{trialDays}:{}) };
   }
   const claim = record(await ports.rpc('job_loop_billing_cancel_claim', { ...bound, p_mode: mode, p_subscription: input.subscriptionId, p_version: input.version }));
   let confirmed = false;
@@ -109,8 +125,8 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
     if(identity.userId!==owner)throw new ApiError(409,'LOOP_BILLING_IDENTITY_CHANGED','This subscription no longer matches your account.');
     const order=record(await ports.rpc('job_loop_billing_order',{p_user:owner,p_request:identity.requestId,p_mode:mode}));
     if(order.user_id!==owner||order.request_id!==identity.requestId||order.plan!==sqlPlan(identity.plan)||Number(order.generation)!==identity.generation)throw new ApiError(409,'LOOP_BILLING_IDENTITY_CHANGED','This subscription no longer matches your account.');
-    const pricing=storedLoopPrice(order,identity.plan);
-    sub = validateLoopSubscriptionToStop(source, config,pricing);
+    const pricing=storedLoopPrice(order,identity.plan),trialDays=loopOrderTrialDays(order);
+    sub = validateLoopSubscriptionToStop(source, config,pricing,trialDays);
     if (sub.userId !== owner || sub.subscriptionId !== input.subscriptionId) throw new ApiError(409, 'LOOP_BILLING_IDENTITY_CHANGED', 'This subscription no longer matches your account.');
     await boundOrder(ports,config,sub,order);
     const originalCustomer=sub.customerId;
@@ -118,7 +134,7 @@ export async function controlLoopBilling(ports: LoopBillingPorts, config: LoopBi
     if (!confirmed && claim.creationClaimAcquired === true) {
       writeAttempted = true;
       await ports.provider(`subscriptions/${input.subscriptionId}`, { cancel_at_next_billing_date: true }, 'PATCH');
-      sub = validateLoopSubscriptionToStop(await ports.provider(`subscriptions/${input.subscriptionId}`), config,pricing);
+      sub = validateLoopSubscriptionToStop(await ports.provider(`subscriptions/${input.subscriptionId}`), config,pricing,trialDays);
       if (sub.userId !== owner || sub.subscriptionId !== input.subscriptionId || sub.customerId!==originalCustomer) throw unavailable();
       confirmed = sub.cancelAtPeriodEnd || ['cancelled','failed','expired'].includes(sub.status);
     }
@@ -211,13 +227,17 @@ export async function applyLoopBillingWebhook(ports: LoopBillingPorts, config: L
   if (!isLoopBillingMetadata(source.metadata)) return null;
   const identity=loopMetadata(source.metadata);
   const originalOrder=record(await ports.rpc('job_loop_billing_order',{p_user:identity.userId,p_request:identity.requestId,p_mode:config.mode}));
-  const pricing=storedLoopPrice(originalOrder,identity.plan);
+  const pricing=storedLoopPrice(originalOrder,identity.plan),trialDays=loopOrderTrialDays(originalOrder);
   if(source.subscription_id!==subscriptionId)throw unavailable();
   const subject={...identity,subscriptionId,productId:source.product_id as string,customerId:record(source.customer).customer_id as string};
   // The original owned order is price authority. Changing today's catalogue or
   // archiving its localized rule must never prevent historical renewal/cancel.
   const order = await boundOrder(ports, config, subject,originalOrder);
   if (!payment && event.type === 'subscription.active' && record(order.originalPayment).status === 'succeeded') payment = record(order.originalPayment);
+  // A free trial's only authority is the original checkout's own $0 payment on
+  // a server-owned trial order. It is recorded apart from paid service periods.
+  const trialStart=trialDays>0&&!forceRevoke&&!!payment&&payment.status==='succeeded'&&isLoopTrialPayment(payment)&&payment.payment_id===record(order.originalPayment).payment_id;
+  if(payment&&payment.status==='succeeded'&&isLoopTrialPayment(payment)&&!trialStart&&!forceRevoke)throw new ApiError(409,'LOOP_BILLING_INVALID','A zero-amount payment does not prove a paid Automated Job Loop month.');
   const negativeStatus=['failed','on_hold','paused','expired','cancelled'].includes(String(source.status));
   const negativeEvent=['payment.failed','subscription.failed','subscription.on_hold','subscription.paused','subscription.expired','subscription.cancelled'].includes(event.type);
   const negativeOnly=negativeStatus&&negativeEvent&&(event.type==='payment.failed'?payment?.status==='failed':event.data.status===source.status);
@@ -228,14 +248,24 @@ export async function applyLoopBillingWebhook(ports: LoopBillingPorts, config: L
     // Only an exact quote-currency succeeded paid cycle can authorize a new
     // immutable tuple. Repeated/older refunds never rebind that payment.
     const proof=payment?.status==='succeeded'?payment:!accounting&&record(order.originalPayment).status==='succeeded'?record(order.originalPayment):null;
-    if(proof&&!historicalPaidAnchor&&currentLoopAccountingPeriod(source,proof)){
+    if(proof&&!isLoopTrialPayment(proof)&&!historicalPaidAnchor&&currentLoopAccountingPeriod(source,proof)){
       const anchor=proveLoopAccounting(source,proof,config,pricing);
       await ports.rpc('job_loop_billing_accounting_bind',{p_user:identity.userId,p_request:identity.requestId,p_mode:config.mode,...accountingBindArgs(anchor)});
       accounting={currency:anchor.accountingCurrency,amountMinor:anchor.accountingAmountMinor};
     }
   }
-  const sub=forceRevoke||negativeOnly||!accounting&&historicalPaidAnchor?validateLoopSubscriptionToStop(source,config,pricing):validateLoopSubscription(source,config,pricing,accounting);
-  const paid = !negativeOnly&&payment?.status === 'succeeded' ? validateLoopPaidPeriod(payment, sub) : null;
+  // Before its first real charge a localized trial has no paid accounting anchor
+  // yet. Status alone then uses the stop validator; money is still proven only by
+  // validateLoopPaidPeriod against the original quote amount.
+  const trialWithoutAnchor=trialDays>0&&!accounting&&!!pricing.quoteId&&pricing.currency!=='USD'&&source.currency==='USD'&&!(payment?.status==='succeeded'&&!isLoopTrialPayment(payment));
+  const sub=forceRevoke||negativeOnly||trialStart||trialWithoutAnchor||!accounting&&historicalPaidAnchor?validateLoopSubscriptionToStop(source,config,pricing,trialDays):validateLoopSubscription(source,config,pricing,accounting,trialDays);
+  if (trialStart && payment && !negativeOnly) {
+    const trial=validateLoopTrialStart(payment,sub,String(order.session_id));
+    const result=await ports.rpc('job_loop_billing_apply_trial',{p_user:sub.userId,p_request:sub.requestId,p_mode:config.mode,p_plan:sqlPlan(sub.plan),p_product:sub.productId,p_session:order.session_id,p_subscription:sub.subscriptionId,p_customer:sub.customerId,
+      p_status:sub.status,p_trial_start:trial.trialStart,p_first_charge:trial.firstChargeAt,p_cancel_at_period_end:sub.cancelAtPeriodEnd,p_event:`dodo_${webhookId}`,p_created:event.created,p_payload_hash:hash,p_payment:trial.paymentId,p_quote:sub.quoteId??null,p_currency:sub.currency});
+    return { received: true, ...result };
+  }
+  const paid = !negativeOnly&&payment?.status === 'succeeded'&&!isLoopTrialPayment(payment) ? validateLoopPaidPeriod(payment, sub) : null;
   if (payment && payment.subscription_id !== subscriptionId) throw unavailable();
   if (paid?.sessionId && paid.sessionId !== order.session_id) throw new ApiError(409, 'LOOP_UNBOUND_SUBSCRIPTION', 'The charge checkout differs from the original subscription checkout.');
   // Billing dates alone never extend paid access. A succeeded payment supplies immutable service_periods.

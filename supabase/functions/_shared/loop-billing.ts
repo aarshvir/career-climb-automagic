@@ -9,7 +9,18 @@ export const LOOP_BILLING_PLANS = {
   daily: { amount: 9900, runsPerWeek: 7, productEnv: 'DODO_PRODUCT_LOOP_DAILY' },
 } as const;
 export type LoopBillingPlan = keyof typeof LOOP_BILLING_PLANS;
-export type LoopBillingConfig = DodoBillingConfig & { loopProducts: Record<LoopBillingPlan, string> };
+export type LoopBillingConfig = DodoBillingConfig & { loopProducts: Record<LoopBillingPlan, string>; trialEnabled?: boolean };
+/** Free trial length for a first monthly subscription. Card required; the
+ * first payment is $0 and the first real charge is at the trial end. */
+export const LOOP_TRIAL_DAYS = 7;
+export type LoopTrialDays = 0 | typeof LOOP_TRIAL_DAYS;
+/** The SQL-owned original order is the only trial authority. */
+export function loopOrderTrialDays(order: unknown): LoopTrialDays {
+  const value = order && typeof order === 'object' && !Array.isArray(order) ? (order as Record<string, unknown>).trial_days : undefined;
+  if (value === undefined || value === null || value === 0) return 0;
+  if (value === LOOP_TRIAL_DAYS) return LOOP_TRIAL_DAYS;
+  throw new ApiError(409, 'LOOP_BILLING_INVALID', 'The subscription could not be verified.');
+}
 export const LOOP_SUBSCRIPTION_ID = /^sub_[A-Za-z0-9_-]{1,100}$/;
 export const LOOP_SUBSCRIPTION_STATUSES = ['pending', 'active', 'on_hold', 'paused', 'cancelled', 'failed', 'expired', 'past_due'] as const;
 const invalid = (message = 'The subscription could not be verified.') => new ApiError(409, 'LOOP_BILLING_INVALID', message);
@@ -34,7 +45,7 @@ export function loopBillingConfiguration(get: (key: string) => string | undefine
   if (ids.some(value => !DODO_PRODUCT_ID.test(value)) || new Set(ids).size !== 3) return null;
   // Reuse all merchant, legal, support, mode, key and origin gates without requiring a CV-pass product.
   const config = billingConfiguration(name => name === 'DODO_PRODUCT_ID' ? loopProducts.weekly : name === 'DODO_PRODUCT_SPRINT' || name === 'DODO_PRODUCT_SEARCH' || name === 'DODO_PRODUCT_MOVE' ? undefined : get(name));
-  return config?.provider === 'dodo' ? { ...config, loopProducts } : null;
+  return config?.provider === 'dodo' ? { ...config, loopProducts, trialEnabled: get('JOBVANCE_LOOP_TRIAL_ENABLED') === 'true' } : null;
 }
 export function validateLoopBillingProduct(value: unknown, config: LoopBillingConfig, plan: LoopBillingPlan): void {
   const product = obj(value), price = obj(product.price);
@@ -42,13 +53,16 @@ export function validateLoopBillingProduct(value: unknown, config: LoopBillingCo
     price.currency !== 'USD' || price.price !== LOOP_BILLING_PLANS[plan].amount || price.payment_frequency_count !== 1 || price.payment_frequency_interval !== 'Month' ||
     price.subscription_period_count !== 20 || price.subscription_period_interval !== 'Year' || !(absent(price.trial_period_days) || price.trial_period_days === 0) ||
     !(absent(price.discount) || price.discount === 0) || !(absent(price.discount_bps) || price.discount_bps === 0) || price.purchasing_power_parity === true || price.pay_what_you_want === true ||
-    !absent(price.trial_amount) || price.trial_payment_method_optional === true || price.tax_inclusive !== true) throw new ApiError(503, 'LOOP_BILLING_PRODUCT_UNAVAILABLE', 'This monthly Automated Job Loop plan is not ready for checkout.');
+    !absent(price.trial_amount) || price.trial_payment_method_optional === true || price.zero_amount_payment_method_optional === true || price.tax_inclusive !== true) throw new ApiError(503, 'LOOP_BILLING_PRODUCT_UNAVAILABLE', 'This monthly Automated Job Loop plan is not ready for checkout.');
 }
-export function loopCheckoutBody(config: LoopBillingConfig, userId: string, requestId: string, generation: number, plan: LoopBillingPlan) {
+/** The product price itself never carries a trial. A first-subscription trial is
+ * requested per checkout session from the server-owned order; Dodo then skips
+ * its own per-customer trial check, so SQL enforces one trial per account. */
+export function loopCheckoutBody(config: LoopBillingConfig, userId: string, requestId: string, generation: number, plan: LoopBillingPlan, trialDays: LoopTrialDays = 0) {
   return { product_cart: [{ product_id: config.loopProducts[plan], quantity: 1 }], billing_currency: 'USD',
     return_url: `${config.appUrl}/pricing?loop_checkout=success`, cancel_url: `${config.appUrl}/pricing?loop_checkout=cancelled`,
     metadata: { product: LOOP_BILLING_PRODUCT, user_id: userId, request_id: requestId, plan, generation: String(generation) },
-    feature_flags: { allow_discount_code: false, allow_currency_selection: false }, subscription_data: { trial_period_days: 0 } };
+    feature_flags: { allow_discount_code: false, allow_currency_selection: false }, subscription_data: { trial_period_days: trialDays } };
 }
 export interface LoopSubscription {
   subscriptionId: string; userId: string; requestId: string; generation: number; plan: LoopBillingPlan; productId: string; customerId: string;
@@ -68,7 +82,7 @@ export function loopMetadata(value: unknown) {
     ...(!absent(fields.quote_id) ? { quoteId: uuid(fields.quote_id, 'Price quote') } : {}) };
 }
 export function isLoopBillingMetadata(value: unknown): boolean { return !!value && typeof value === 'object' && !Array.isArray(value) && (value as Record<string, unknown>).product === LOOP_BILLING_PRODUCT; }
-export function validateLoopSubscription(value: unknown, config: LoopBillingConfig, originalPrice?: LoopBillingPriceAuthority, accounting?: LoopProviderAccountingAuthority): LoopSubscription {
+export function validateLoopSubscription(value: unknown, config: LoopBillingConfig, originalPrice?: LoopBillingPriceAuthority, accounting?: LoopProviderAccountingAuthority, trialDays: LoopTrialDays = 0): LoopSubscription {
   const sub = obj(value), identity = loopMetadata(sub.metadata), customer = obj(sub.customer);
   const currency = originalPrice?.currency ?? 'USD', amountMinor = originalPrice?.amountMinor ?? LOOP_BILLING_PLANS[identity.plan].amount;
   const accountingRepresentation = !!originalPrice?.quoteId && currency !== 'USD' && sub.currency === 'USD' && accounting?.currency === 'USD' &&
@@ -77,7 +91,7 @@ export function validateLoopSubscription(value: unknown, config: LoopBillingConf
     typeof sub.subscription_id !== 'string' || !LOOP_SUBSCRIPTION_ID.test(sub.subscription_id) || sub.product_id !== (originalPrice?.productId ?? config.loopProducts[identity.plan]) ||
     sub.quantity !== 1 || !accountingRepresentation && sub.currency !== currency || !Number.isSafeInteger(sub.recurring_pre_tax_amount) || (sub.recurring_pre_tax_amount as number) < 1 ||
     !accountingRepresentation && (sub.tax_inclusive === true ? (sub.recurring_pre_tax_amount as number) > amountMinor : sub.recurring_pre_tax_amount !== amountMinor) || sub.payment_frequency_count !== 1 ||
-    sub.payment_frequency_interval !== 'Month' || sub.subscription_period_count !== 20 || sub.subscription_period_interval !== 'Year' || sub.trial_period_days !== 0 || sub.on_demand !== false ||
+    sub.payment_frequency_interval !== 'Month' || sub.subscription_period_count !== 20 || sub.subscription_period_interval !== 'Year' || sub.trial_period_days !== trialDays || !absent(sub.trial_amount) && sub.trial_amount !== 0 || sub.on_demand !== false ||
     !noDiscount(sub) || sub.tax_inclusive !== true || typeof sub.cancel_at_next_billing_date !== 'boolean' ||
     !LOOP_SUBSCRIPTION_STATUSES.includes(sub.status as never) || typeof customer.customer_id !== 'string' || !/^cus_[A-Za-z0-9_-]{1,100}$/.test(customer.customer_id)) throw invalid();
   const periodStart = date(sub.previous_billing_date), validUntil = date(sub.next_billing_date);
@@ -88,10 +102,28 @@ export function validateLoopSubscription(value: unknown, config: LoopBillingConf
 /** Stopping an already-owned mandate cannot grant access or change its price.
  * The caller must first prove the exact original checkout/sub/customer binding.
  * A changed accounting snapshot must not prevent that customer stopping charges. */
-export function validateLoopSubscriptionToStop(value: unknown, config: LoopBillingConfig, originalPrice: LoopBillingPriceAuthority): LoopSubscription {
+export function validateLoopSubscriptionToStop(value: unknown, config: LoopBillingConfig, originalPrice: LoopBillingPriceAuthority, trialDays: LoopTrialDays = 0): LoopSubscription {
   const raw=obj(value);
   const accounting=originalPrice.quoteId&&originalPrice.currency!=='USD'&&raw.currency==='USD'&&Number.isSafeInteger(raw.recurring_pre_tax_amount)?{currency:'USD' as const,amountMinor:raw.recurring_pre_tax_amount as number}:undefined;
-  return validateLoopSubscription(raw,config,originalPrice,accounting);
+  return validateLoopSubscription(raw,config,originalPrice,accounting,trialDays);
+}
+/** Whether this provider payment is the $0 initial payment of a free trial. */
+export function isLoopTrialPayment(value: unknown): boolean {
+  return !!value && typeof value === 'object' && !Array.isArray(value) && (value as Record<string, unknown>).total_amount === 0;
+}
+export interface LoopTrialStart { paymentId: string; trialStart: string; firstChargeAt: string }
+/** Proves a free trial started for the exact original checkout. It never
+ * proves a paid month: the amount must be exactly zero, with no tax or
+ * discount, and the provider's first charge must be seven days after start. */
+export function validateLoopTrialStart(value: unknown, sub: LoopSubscription, originalSession: string): LoopTrialStart {
+  const payment = obj(value), customer = obj(payment.customer), ids = payment.subscription_ids;
+  if (typeof payment.payment_id !== 'string' || !DODO_PAYMENT_ID.test(payment.payment_id) || payment.status !== 'succeeded' || payment.total_amount !== 0 || !(absent(payment.tax) || payment.tax === 0) ||
+    payment.currency !== sub.currency || payment.subscription_id !== sub.subscriptionId || (!absent(ids) && (!Array.isArray(ids) || ids.length !== 1 || ids[0] !== sub.subscriptionId)) ||
+    payment.is_multi_subscription === true || payment.is_update_payment_method === true || customer.customer_id !== sub.customerId || !noDiscount(payment) ||
+    payment.checkout_session_id !== originalSession || (typeof payment.refund_status === 'string' && payment.refund_status !== 'none')) throw invalid('This payment does not prove a free trial for this checkout.');
+  const span = Date.parse(sub.validUntil) - Date.parse(sub.periodStart), day = 86400000, hour = 3600000;
+  if (span < LOOP_TRIAL_DAYS * day - hour || span > LOOP_TRIAL_DAYS * day + hour) throw invalid('This subscription does not have a seven-day trial window.');
+  return { paymentId: payment.payment_id, trialStart: sub.periodStart, firstChargeAt: sub.validUntil };
 }
 export interface LoopPaidPeriod { paymentId: string; sessionId: string | null; periodStart: string; validUntil: string; amount: number; revoked: boolean }
 export function validateLoopPaidPeriod(value: unknown, sub: LoopSubscription): LoopPaidPeriod {
@@ -123,11 +155,11 @@ export function validateLoopRefund(value: unknown) {
 }
 export function captureLoopBillingInput(value: unknown) {
   const input = objectInput(value);
-  const allowed = input.action === 'status' ? ['action','contractVersion'] : input.action === 'quote' ? ['action','requestId','plan','expectedGeneration','country','currency'] : input.action === 'checkout' ? ['action','requestId','plan','expectedGeneration','consent','quoteId'] : ['action','requestId','expectedSubscriptionId','expectedVersion','expectedGeneration','consent','contractVersion'];
+  const allowed = input.action === 'status' ? ['action','contractVersion'] : input.action === 'quote' ? ['action','requestId','plan','expectedGeneration','country','currency'] : input.action === 'checkout' ? ['action','requestId','plan','expectedGeneration','consent','quoteId','trial'] : ['action','requestId','expectedSubscriptionId','expectedVersion','expectedGeneration','consent','contractVersion'];
   if (Object.keys(input).some(key => !allowed.includes(key)) || !['status','quote','checkout','cancel'].includes(String(input.action))) throw new ApiError(400, 'INVALID_INPUT', 'Choose an Automated Job Loop billing action.');
   if (input.action === 'status') {
-    if (!absent(input.contractVersion) && input.contractVersion !== 2) throw new ApiError(400,'INVALID_INPUT','Refresh the billing page.');
-    return { action: 'status' as const, contractVersion: input.contractVersion === 2 ? 2 : 1 };
+    if (!absent(input.contractVersion) && input.contractVersion !== 2 && input.contractVersion !== 3) throw new ApiError(400,'INVALID_INPUT','Refresh the billing page.');
+    return { action: 'status' as const, contractVersion: input.contractVersion === 3 ? 3 : input.contractVersion === 2 ? 2 : 1 };
   }
   if (input.action === 'quote') {
     if (!Number.isSafeInteger(input.expectedGeneration) || (input.expectedGeneration as number) < 0 || typeof input.country !== 'string' || !/^[A-Z]{2}$/.test(input.country) || typeof input.currency !== 'string' || !/^[A-Z]{3}$/.test(input.currency)) throw new ApiError(400,'INVALID_INPUT','Choose your billing country and currency.');
@@ -135,7 +167,10 @@ export function captureLoopBillingInput(value: unknown) {
   }
   if (input.consent !== true || !Number.isSafeInteger(input.expectedGeneration) || (input.expectedGeneration as number) < 0) throw new ApiError(400, 'LOOP_BILLING_CONSENT', 'Confirm this billing action for your current Automated Job Loop.');
   const base = { requestId: uuid(input.requestId, 'Request'), generation: input.expectedGeneration as number };
-  if (input.action === 'checkout') return { ...base, action: 'checkout' as const, plan: loopBillingPlan(input.plan), ...(!absent(input.quoteId) ? { quoteId:uuid(input.quoteId,'Price quote') } : {}) };
+  if (input.action === 'checkout') {
+    if (!absent(input.trial) && typeof input.trial !== 'boolean') throw new ApiError(400,'INVALID_INPUT','Confirm whether this checkout starts a free trial.');
+    return { ...base, action: 'checkout' as const, plan: loopBillingPlan(input.plan), trial: input.trial === true, ...(!absent(input.quoteId) ? { quoteId:uuid(input.quoteId,'Price quote') } : {}) };
+  }
   if (typeof input.expectedSubscriptionId !== 'string' || !LOOP_SUBSCRIPTION_ID.test(input.expectedSubscriptionId) || !Number.isSafeInteger(input.expectedVersion) || (input.expectedVersion as number) < 1) throw invalid('Refresh your subscription before cancelling.');
   if (!absent(input.contractVersion) && input.contractVersion !== 2) throw new ApiError(400,'INVALID_INPUT','Refresh the billing page.');
   return { ...base, action: 'cancel' as const, subscriptionId: input.expectedSubscriptionId, version: input.expectedVersion as number, contractVersion:input.contractVersion === 2 ? 2 : 1 };

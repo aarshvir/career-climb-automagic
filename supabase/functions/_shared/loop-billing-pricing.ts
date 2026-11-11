@@ -1,5 +1,5 @@
 import { ApiError, DODO_PRODUCT_ID, uuid } from './core.ts';
-import { loopBillingPlan, loopCheckoutBody, LOOP_BILLING_PLANS, validateLoopBillingProduct, type LoopBillingConfig, type LoopBillingPlan, type LoopBillingPriceAuthority } from './loop-billing.ts';
+import { loopBillingPlan, loopCheckoutBody, LOOP_BILLING_PLANS, validateLoopBillingProduct, type LoopBillingConfig, type LoopBillingPlan, type LoopBillingPriceAuthority, type LoopTrialDays } from './loop-billing.ts';
 import { isLoopLocalCountry, isLoopLocalCurrency, LOOP_LOCAL_CURRENCIES, LOOP_LOCAL_PRICE_CATALOG_VERSION, loopLocalPrice } from './loop-local-prices.ts';
 
 const invalid = () => new ApiError(409, 'LOOP_BILLING_PRICE_CHANGED', 'This price could not be confirmed. Refresh the quote before checkout.');
@@ -48,11 +48,14 @@ export function publicLoopPrice(price: LoopPriceSnapshot) {
 export function publicLoopQuote(quote: LoopPriceQuote) {
   return { ...publicLoopPrice(quote), quoteId: quote.quoteId, requestId: quote.requestId, generation: quote.generation, plan: quote.plan, expiresAt: quote.expiresAt };
 }
-export function quoteCheckoutBody(config: LoopBillingConfig, owner: string, requestId: string, generation: number, quote: LoopPriceQuote) {
-  const body = loopCheckoutBody({ ...config, loopProducts: { ...config.loopProducts, [quote.plan]: quote.productId } }, owner, requestId, generation, quote.plan);
+export function quoteCheckoutBody(config: LoopBillingConfig, owner: string, requestId: string, generation: number, quote: LoopPriceQuote, trialDays: LoopTrialDays = 0) {
+  const body = loopCheckoutBody({ ...config, loopProducts: { ...config.loopProducts, [quote.plan]: quote.productId } }, owner, requestId, generation, quote.plan, trialDays);
   return { ...body, billing_currency: quote.currency, billing_address: { country: quote.country }, metadata: { ...body.metadata, quote_id: quote.quoteId },
     feature_flags: { ...body.feature_flags, allow_customer_editing_country: false } };
 }
+/** The preview deliberately keeps trial_period_days at 0, also for a trial
+ * checkout: it proves today's monthly price and every renewal amount without a
+ * trial changing them. The trial only moves the first charge date. */
 export function loopPricePreviewBody(expected: LoopPriceSnapshot) {
   return { product_cart: [{ product_id: expected.productId, quantity: 1 }], billing_currency: expected.currency, billing_address: { country: expected.country },
     feature_flags: { allow_discount_code: false, allow_currency_selection: false, allow_customer_editing_country: false }, subscription_data: { trial_period_days: 0 } };
