@@ -20,6 +20,7 @@ export function loopBillingTestConfiguration(get: (key: string) => string | unde
     DODO_PRODUCT_LOOP_WEEKLY: get('DODO_TEST_PRODUCT_LOOP_WEEKLY'),
     DODO_PRODUCT_LOOP_ACTIVE: get('DODO_TEST_PRODUCT_LOOP_ACTIVE'),
     DODO_PRODUCT_LOOP_DAILY: get('DODO_TEST_PRODUCT_LOOP_DAILY'),
+    JOBVANCE_LOOP_TRIAL_ENABLED: get('JOBVANCE_LOOP_TEST_TRIAL_ENABLED'),
   };
   const config = loopBillingConfiguration(key => isolated[key]);
   return config?.mode === 'test' && config.apiBaseUrl === 'https://test.dodopayments.com' ? { ...config, testOwnerIds: Object.freeze(owners) } : null;

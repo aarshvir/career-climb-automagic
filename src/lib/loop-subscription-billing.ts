@@ -11,28 +11,36 @@ const mode = z.enum(['test', 'live']);
 const currency=z.string().refine(isLoopLocalCurrency),country=z.string().refine(isLoopLocalCountry);
 const pricing=z.object({quoteId:z.string().uuid().nullable(),country:z.string().regex(/^[A-Z]{2}$/).nullable(),currency,amountMinor:z.number().int().positive().max(1000000000),exponent:z.number().int().min(0).max(3),catalogVersion:z.string().min(1).max(100),taxInclusive:z.literal(true),interval:z.literal('month')}).strict();
 const quoteSchema=pricing.extend({quoteId:z.string().uuid(),country,requestId:z.string().uuid(),generation,plan,expiresAt:z.string().datetime({offset:true})}).strict();
+const instant = z.string().datetime({ offset: true });
+/** A recorded $0 free-trial window; it is never a paid period. */
+const subscriptionTrial = z.object({ startsAt: instant, endsAt: instant, firstChargeAt: instant, reminderAt: instant, granted: z.boolean() }).strict();
+const trialOffer = z.object({ available: z.boolean(), eligible: z.boolean(), days: z.literal(7) }).strict();
 const subscription = z.object({ subscriptionId: z.string().regex(/^sub_[A-Za-z0-9_-]{1,100}$/), plan,
   status: z.enum(['pending','active','on_hold','paused','cancelled','failed','expired','past_due']),
   validUntil: z.string().datetime({ offset: true }), periodStart: z.string().datetime({ offset: true }).nullable(),
-  cancelAtPeriodEnd: z.boolean(), revoked: z.boolean(), graceUntil: z.string().datetime({offset:true}).nullable(), version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),pricing:pricing.nullable() }).strict();
-const checkout = z.object({ requestId: z.string().uuid(), plan, status: z.string().min(1).max(40), checkoutUrl: z.string().max(4000).nullable(),pricing:pricing.nullable() }).strict();
+  cancelAtPeriodEnd: z.boolean(), revoked: z.boolean(), graceUntil: z.string().datetime({offset:true}).nullable(), version: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),pricing:pricing.nullable(),trial:subscriptionTrial.nullable().optional() }).strict();
+const checkout = z.object({ requestId: z.string().uuid(), plan, status: z.string().min(1).max(40), checkoutUrl: z.string().max(4000).nullable(),pricing:pricing.nullable(),trialDays:z.union([z.literal(0),z.literal(7)]).optional() }).strict();
 const entitlement = z.object({active:z.boolean(),plan:z.enum(['weekly','three_weekly','daily','pilot']).nullable(),cadence:z.enum(['weekly','three_weekly','daily']).nullable(),variantLimit:z.literal(3),maxWeeklyRuns:z.union([z.literal(0),z.literal(1),z.literal(3),z.literal(7)]),validUntil:z.string().datetime({offset:true}).nullable()}).strict();
 const cancelRequest = z.object({requestId:z.string().uuid(),subscriptionId:z.string().regex(/^sub_[A-Za-z0-9_-]{1,100}$/),status:z.enum(['creating','uncertain','confirmed']),version:z.number().int().positive().max(Number.MAX_SAFE_INTEGER)}).strict();
 const statusSchema = z.object({ billingConfigured: z.boolean(), billingMode: mode, generation: generation.nullable(),fulfillmentPending:z.boolean(),
   plans: z.array(z.object({ id: plan, amount: z.number().int(), currency: z.literal('USD'), interval: z.literal('month'), runsPerWeek: z.union([z.literal(1),z.literal(3),z.literal(7)]) }).strict()).max(3),
-  entitlement: entitlement.nullable(), subscription: subscription.nullable(), checkout: checkout.nullable(),cancelRequest:cancelRequest.nullable() }).strict();
+  entitlement: entitlement.nullable(), subscription: subscription.nullable(), checkout: checkout.nullable(),cancelRequest:cancelRequest.nullable(),trial:trialOffer.optional() }).strict();
 export type LoopBillingStatus = z.infer<typeof statusSchema>;
 export type LoopSubscription = z.infer<typeof subscription>;
 export type LoopPricing = z.infer<typeof pricing>;
 export type LoopPriceQuote = z.infer<typeof quoteSchema>;
+export type LoopSubscriptionTrial = z.infer<typeof subscriptionTrial>;
 export interface LoopBillingScope { ownerId: string; authority: number; billingMode?: 'test'|'live'; pricing?:LoopPricing }
-export interface LoopCheckoutIntent { action: 'checkout'; plan: LoopSubscriptionPlan; requestId: string; expectedGeneration: number; consent: true;quoteId?:string }
+export interface LoopCheckoutIntent { action: 'checkout'; plan: LoopSubscriptionPlan; requestId: string; expectedGeneration: number; consent: true;quoteId?:string;trial?:true }
 export interface LoopCancelIntent { action: 'cancel'; requestId: string; expectedGeneration: number; expectedSubscriptionId: string; expectedVersion: number; consent: true;contractVersion:2 }
 export interface LoopQuoteIntent {action:'quote';requestId:string;expectedGeneration:number;plan:LoopSubscriptionPlan;country:LoopLocalCountry;currency:LoopLocalCurrency}
 export class LoopBillingError extends Error { constructor(message: string, public readonly code: string | null = null) { super(message); this.name = 'LoopBillingError'; } }
 
-export function captureLoopCheckoutIntent(selectedPlan: LoopSubscriptionPlan, expectedGeneration: number, requestId: string = crypto.randomUUID(),quoteId?:string): Readonly<LoopCheckoutIntent> {
-  return Object.freeze(z.object({ action:z.literal('checkout'),plan,requestId:z.string().uuid(),expectedGeneration:generation,consent:z.literal(true),quoteId:z.string().uuid().optional() }).strict().parse({action:'checkout',plan:selectedPlan,requestId,expectedGeneration,consent:true,...(quoteId?{quoteId}:{})}) as LoopCheckoutIntent);
+const checkoutIntent=z.object({ action:z.literal('checkout'),plan,requestId:z.string().uuid(),expectedGeneration:generation,consent:z.literal(true),quoteId:z.string().uuid().optional(),trial:z.literal(true).optional() }).strict();
+/** A trial is part of the exact checkout intent the customer confirmed. It is
+ * sent only when true, so paid checkouts keep their original request shape. */
+export function captureLoopCheckoutIntent(selectedPlan: LoopSubscriptionPlan, expectedGeneration: number, requestId: string = crypto.randomUUID(),quoteId?:string,trial=false): Readonly<LoopCheckoutIntent> {
+  return Object.freeze(checkoutIntent.parse({action:'checkout',plan:selectedPlan,requestId,expectedGeneration,consent:true,...(quoteId?{quoteId}:{}),...(trial?{trial:true}:{})}) as LoopCheckoutIntent);
 }
 export function captureLoopCancelIntent(current: LoopSubscription, expectedGeneration: number, requestId: string = crypto.randomUUID()): Readonly<LoopCancelIntent> {
   const parsed = subscription.parse(current);
@@ -62,12 +70,17 @@ async function call(scope: LoopBillingScope, body: object, stillCurrent?: () => 
     const payload=response instanceof Response ? await response.clone().json().catch(()=>null) : null;
     await assertOwner();
     const code=payload && !Array.isArray(payload) && typeof payload.code==='string' && /^[A-Z_]{1,80}$/.test(payload.code) ? payload.code : null;
-    throw new LoopBillingError(['BILLING_UNAVAILABLE','LOOP_BILLING_UNAVAILABLE'].includes(code??'')?'Automated Job Loop checkout is not available right now. Your existing access and saved work are unchanged.':code==='LOOP_CHECKOUT_FINISHED'?'This checkout already has a subscription. Refresh billing to manage its current state.':code==='LOOP_SUBSCRIPTION_EXISTS'?'An existing subscription may still renew or have an unresolved payment. Refresh billing and confirm its cancellation, or contact support before another checkout.':code==='LOOP_PILOT_FULL'?'Automated Job Loop is at its current account capacity. A new checkout was not opened. Existing access and saved work are unchanged.':code==='LOOP_CHECKOUT_PENDING'?'A previous checkout needs confirmation. Refresh billing and resume that checkout.':'We could not confirm this billing action. Refresh billing before retrying the original request.',code);
+    throw new LoopBillingError(['BILLING_UNAVAILABLE','LOOP_BILLING_UNAVAILABLE'].includes(code??'')?'Automated Job Loop checkout is not available right now. Your existing access and saved work are unchanged.':code==='LOOP_CHECKOUT_FINISHED'?'This checkout already has a subscription. Refresh billing to manage its current state.':code==='LOOP_SUBSCRIPTION_EXISTS'?'An existing subscription may still renew or have an unresolved payment. Refresh billing and confirm its cancellation, or contact support before another checkout.':code==='LOOP_PILOT_FULL'?'Automated Job Loop is at its current account capacity. A new checkout was not opened. Existing access and saved work are unchanged.':code==='LOOP_CHECKOUT_PENDING'?'A previous checkout needs confirmation. Refresh billing and resume that checkout.':code==='LOOP_TRIAL_USED'?'This account has already had an Automated Job Loop subscription or free trial, so a new free trial is not available. No checkout was opened.':code==='LOOP_TRIAL_UNAVAILABLE'?'The free trial is not available right now. No checkout was opened and no card was requested.':'We could not confirm this billing action. Refresh billing before retrying the original request.',code);
   }
   return result.data;
 }
 export async function readLoopBilling(scope: LoopBillingScope, stillCurrent?:()=>boolean):Promise<LoopBillingStatus> {
-  const result=statusSchema.parse(await call(scope,{action:'status',contractVersion:2},stillCurrent));
+  // Contract 3 adds trial fields. A billing function that predates it rejects
+  // the version itself, so fall back to the unchanged contract 2.
+  let raw:unknown;
+  try{raw=await call(scope,{action:'status',contractVersion:3},stillCurrent);}
+  catch(failure){if(!(failure instanceof LoopBillingError)||failure.code!=='INVALID_INPUT')throw failure;raw=await call(scope,{action:'status',contractVersion:2},stillCurrent);}
+  const result=statusSchema.parse(raw);
   const ids=new Set<string>();
   for(const offered of result.plans){const known=subscriptionPlans.find(item=>item.id===offered.id);if(!known || ids.has(offered.id) || offered.amount!==known.priceUsd*100 || offered.runsPerWeek!==(offered.id==='weekly'?1:offered.id==='active'?3:7))throw new LoopBillingError('The monthly plan could not be confirmed. Please refresh billing.');ids.add(offered.id);}
   if(result.checkout?.checkoutUrl && !validLoopCheckoutUrl(result.checkout.checkoutUrl,result.billingMode))throw new LoopBillingError('The saved checkout address could not be confirmed.');
@@ -82,8 +95,9 @@ export async function requestLoopPriceQuote(scope:LoopBillingScope,intent:Readon
   return Object.freeze(result);
 }
 export async function createLoopSubscriptionCheckout(scope:LoopBillingScope,intent:Readonly<LoopCheckoutIntent>,stillCurrent?:()=>boolean){
-  const original=Object.freeze(z.object({action:z.literal('checkout'),plan,requestId:z.string().uuid(),expectedGeneration:generation,consent:z.literal(true),quoteId:z.string().uuid().optional()}).strict().parse(intent));
-  const parsed=z.object({provider:z.literal('dodo'),billingMode:mode,generation,requestId:z.string().uuid(),plan,sessionId:z.string().regex(/^cks_[A-Za-z0-9_-]{1,100}$/),url:z.string().max(4000),pricing:pricing.optional()}).strict().parse(await call(scope,original,stillCurrent));
+  const original=Object.freeze(checkoutIntent.parse(intent));
+  const parsed=z.object({provider:z.literal('dodo'),billingMode:mode,generation,requestId:z.string().uuid(),plan,sessionId:z.string().regex(/^cks_[A-Za-z0-9_-]{1,100}$/),url:z.string().max(4000),pricing:pricing.optional(),trialDays:z.literal(7).optional()}).strict().parse(await call(scope,original,stillCurrent));
+  if((parsed.trialDays??0)!==(original.trial?7:0))throw new LoopBillingError('The checkout receipt did not match the free-trial terms you confirmed. Refresh billing before continuing.');
   if(parsed.pricing)validateMoney(parsed.pricing);
   const legacyUsd=!original.quoteId&&!parsed.pricing&&scope.pricing?.quoteId===null&&scope.pricing?.currency==='USD'&&scope.pricing?.catalogVersion==='legacy-usd-v1'&&scope.pricing?.amountMinor===loopLocalPrice(original.plan,'USD');
   if(parsed.requestId!==original.requestId||parsed.plan!==original.plan||parsed.generation!==original.expectedGeneration||scope.billingMode!==undefined&&scope.billingMode!==parsed.billingMode||original.quoteId&&parsed.pricing?.quoteId!==original.quoteId||scope.pricing&&!legacyUsd&&!sameLoopPricing(scope.pricing,parsed.pricing)||!validLoopCheckoutUrl(parsed.url,parsed.billingMode))throw new LoopBillingError('The checkout receipt did not match your chosen plan and monthly price. Refresh billing before continuing.');
