@@ -66,7 +66,9 @@ describe('seven-day free trial journey',()=>{
     const trial={startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString(),firstChargeAt:new Date(end).toISOString(),reminderAt:new Date(end-2*DAY).toISOString(),granted:true};
     const sub={subscriptionId:'sub_trial',plan:'weekly',status:'active',validUntil:trial.endsAt,periodStart:trial.startsAt,cancelAtPeriodEnd:false,revoked:false,graceUntil:null,version:2,pricing:price(),trial};
     m.read.mockResolvedValue(status({trial:{available:true,eligible:false,days:7},subscription:sub,entitlement:{active:true,plan:'weekly',cadence:'weekly',variantLimit:3,maxWeeklyRuns:1,validUntil:trial.endsAt}}));
-    m.cancel.mockResolvedValue({requestId:'00000000-0000-4000-8000-000000000009',generation:0,subscriptionId:'sub_trial',status:'confirmed',subscription:{...sub,cancelAtPeriodEnd:true,version:3}});
+    // The actual contract-2 cancellation receipt carries no trial fields.
+    const {trial:_omitted,...receiptSub}={...sub,cancelAtPeriodEnd:true,version:3};
+    m.cancel.mockResolvedValue({requestId:'00000000-0000-4000-8000-000000000009',generation:0,subscriptionId:'sub_trial',status:'confirmed',subscription:receiptSub});
     renderPage('/pricing');
     expect(await screen.findByText('Status: free trial.')).toBeInTheDocument();
     expect(screen.getByLabelText('Free trial')).toHaveTextContent(/First charge: \$29 USD, tax included,/);
@@ -77,5 +79,23 @@ describe('seven-day free trial journey',()=>{
     await waitFor(()=>expect(m.cancel).toHaveBeenCalledTimes(1));
     expect(m.cancel.mock.calls[0][1]).toMatchObject({action:'cancel',expectedSubscriptionId:'sub_trial',expectedVersion:2,consent:true});
     expect(await screen.findByText(/Free trial cancelled\. You will not be charged\. Trial access continues until/)).toBeInTheDocument();
+    // The panel keeps its trial state without a refresh, never paid-period copy.
+    expect(screen.getByText('Status: free trial.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Free trial')).toHaveTextContent(`Trial cancelled. You will not be charged. Trial access ends`);
+    expect(screen.queryByText(/Recorded paid period ends/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Renewal is cancelled/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button',{name:'Cancel free trial'})).not.toBeInTheDocument();
+    expect(m.read).toHaveBeenCalledTimes(1);
+  });
+  it('does not attach a trial from another subscription to a cancellation receipt',async()=>{
+    const start=Date.now()-DAY,end=start+7*DAY;
+    const trial={startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString(),firstChargeAt:new Date(end).toISOString(),reminderAt:new Date(end-2*DAY).toISOString(),granted:true};
+    const sub={subscriptionId:'sub_trial',plan:'weekly',status:'active',validUntil:trial.endsAt,periodStart:trial.startsAt,cancelAtPeriodEnd:false,revoked:false,graceUntil:null,version:2,pricing:price(),trial};
+    m.read.mockResolvedValue(status({trial:{available:true,eligible:false,days:7},subscription:sub}));
+    m.cancel.mockResolvedValue({requestId:'00000000-0000-4000-8000-000000000009',generation:0,subscriptionId:'sub_trial',status:'confirmed',subscription:{subscriptionId:'sub_other',plan:'weekly',status:'active',validUntil:trial.endsAt,periodStart:trial.startsAt,cancelAtPeriodEnd:true,revoked:false,graceUntil:null,version:3,pricing:price()}});
+    renderPage('/pricing');
+    fireEvent.click(await screen.findByRole('checkbox',{name:/Cancel this free trial/}));fireEvent.click(screen.getByRole('button',{name:'Cancel free trial'}));
+    await waitFor(()=>expect(m.cancel).toHaveBeenCalledTimes(1));
+    await waitFor(()=>expect(screen.queryByText('Status: free trial.')).not.toBeInTheDocument());
   });
 });

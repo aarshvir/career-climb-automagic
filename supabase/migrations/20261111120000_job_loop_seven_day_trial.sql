@@ -171,6 +171,99 @@ BEGIN
   RETURN result||jsonb_build_object('trial',jsonb_build_object('granted',t.granted,'endsAt',t.ends_at,'firstChargeAt',t.first_charge_at,'reason',t.ineligible_reason));
 END $$;
 
+-- Unchanged price-bound event function from 20261018095409, except that the
+-- first paid period of a subscription whose free trial was not granted is
+-- admitted through the paid-place capacity check (pending fulfillment if full).
+CREATE OR REPLACE FUNCTION jobvance_private.apply_loop_price_event(p_user uuid,p_request uuid,p_mode text,p_plan text,p_product text,p_session text,p_subscription text,p_customer text,p_status text,
+  p_period_start timestamptz,p_valid_until timestamptz,p_cancel_at_period_end boolean,p_event text,p_created bigint,p_revoked boolean,p_payload_hash text,p_payment text,p_paid_amount bigint,p_grace_until timestamptz,p_quote uuid,p_currency text)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE o jobvance_private.loop_billing_orders; s jobvance_private.loop_subscriptions; e jobvance_private.loop_billing_events;
+  period jobvance_private.loop_subscription_periods; normalized jsonb; is_stale boolean; new_payment boolean:=false; paid_until timestamptz; paid_start timestamptz; pricing jsonb; expected_amount bigint; expected_currency text;
+BEGIN
+  IF p_user IS NULL OR p_request IS NULL OR p_subscription IS NULL OR p_subscription !~ '^sub_[A-Za-z0-9_-]{1,100}$'
+    OR p_customer IS NULL OR p_customer !~ '^cus_[A-Za-z0-9_-]{1,100}$' OR p_status IS NULL OR p_status NOT IN('pending','active','on_hold','paused','cancelled','failed','expired','past_due')
+    OR p_event IS NULL OR p_event !~ '^[A-Za-z0-9_.:-]{1,200}$' OR p_created IS NULL OR p_created<0 OR p_created>extract(epoch FROM now())+300
+    OR p_revoked IS NULL OR p_cancel_at_period_end IS NULL OR p_payload_hash IS NULL OR p_payload_hash !~ '^[a-f0-9]{64}$'
+    OR p_period_start IS NULL OR p_valid_until IS NULL OR NOT isfinite(p_period_start) OR NOT isfinite(p_valid_until) OR p_period_start>=p_valid_until OR p_valid_until>p_period_start+interval '35 days'
+    OR (p_grace_until IS NOT NULL AND (NOT isfinite(p_grace_until) OR p_grace_until>now()+interval '35 days' OR p_status<>'past_due'))
+    OR (p_payment IS NULL)<>(p_paid_amount IS NULL) OR (p_payment IS NOT NULL AND (p_payment !~ '^pay_[A-Za-z0-9_-]{1,100}$' OR p_paid_amount NOT BETWEEN 1 AND 1000000000))
+    THEN RAISE EXCEPTION 'LOOP_BILLING_EVENT_INVALID'; END IF;
+  IF NOT EXISTS(SELECT 1 FROM auth.users WHERE id=p_user) THEN RETURN jsonb_build_object('accountDeleted',true); END IF;
+  PERFORM pg_advisory_xact_lock(hashtextextended('jobvance_loop_owner:'||p_user::text,8190711));
+  PERFORM pg_advisory_xact_lock(hashtextextended('loop-billing:'||p_user::text,0));
+  SELECT * INTO o FROM jobvance_private.loop_billing_orders WHERE user_id=p_user AND request_id=p_request FOR UPDATE;
+  IF NOT FOUND OR o.mode IS DISTINCT FROM p_mode OR o.plan IS DISTINCT FROM p_plan OR o.product_id IS DISTINCT FROM p_product OR o.session_id IS DISTINCT FROM p_session OR p_session IS NULL THEN RAISE EXCEPTION 'LOOP_BILLING_REQUEST_CONFLICT'; END IF;
+  IF o.quote_id IS DISTINCT FROM p_quote THEN RAISE EXCEPTION 'LOOP_BILLING_QUOTE_CONFLICT'; END IF;
+  pricing:=jobvance_private.loop_order_pricing(o);expected_currency:=pricing->>'currency';expected_amount:=(pricing->>'amountMinor')::bigint;
+  IF p_currency IS DISTINCT FROM expected_currency OR (p_payment IS NOT NULL AND p_paid_amount IS DISTINCT FROM expected_amount) THEN RAISE EXCEPTION 'LOOP_BILLING_PAYMENT_CONFLICT'; END IF;
+  normalized:=jsonb_build_object('user',p_user,'request',p_request,'mode',p_mode,'plan',p_plan,'product',p_product,'session',p_session,'subscription',p_subscription,'customer',p_customer,'status',p_status,'periodStart',p_period_start,'validUntil',p_valid_until,'cancelAtPeriodEnd',p_cancel_at_period_end,'created',p_created,'revoked',p_revoked,'payment',p_payment,'amount',p_paid_amount,'graceUntil',p_grace_until);
+  IF p_quote IS NOT NULL THEN normalized:=normalized||jsonb_build_object('quoteId',p_quote,'currency',p_currency); END IF;
+  SELECT * INTO e FROM jobvance_private.loop_billing_events WHERE mode=p_mode AND event_id=p_event;
+  IF FOUND THEN
+    IF e.subscription_id<>p_subscription OR e.event_created<>p_created OR e.authority IS DISTINCT FROM normalized OR e.payload_hash IS DISTINCT FROM p_payload_hash THEN RAISE EXCEPTION 'LOOP_BILLING_EVENT_CONFLICT'; END IF;
+    RETURN jsonb_build_object('duplicate',true);
+  END IF;
+  SELECT * INTO s FROM jobvance_private.loop_subscriptions WHERE subscription_id=p_subscription FOR UPDATE;
+  IF FOUND AND (s.user_id<>p_user OR s.request_id<>p_request OR s.mode<>p_mode OR s.plan<>p_plan OR s.customer_id<>p_customer OR s.quote_id IS DISTINCT FROM p_quote) THEN RAISE EXCEPTION 'LOOP_BILLING_REQUEST_CONFLICT'; END IF;
+  IF NOT FOUND AND p_status='active' AND p_payment IS NULL THEN RAISE EXCEPTION 'LOOP_BILLING_PAID_PERIOD_REQUIRED'; END IF;
+  -- API-verified recurring payment service_periods are the only authority that
+  -- can extend paid access. subscription.next_billing_date alone grants nothing.
+  IF p_payment IS NOT NULL THEN
+    SELECT * INTO period FROM jobvance_private.loop_subscription_periods WHERE mode=p_mode AND payment_id=p_payment FOR UPDATE;
+    new_payment:=NOT FOUND;
+    IF FOUND AND (period.subscription_id<>p_subscription OR period.starts_at<>p_period_start OR period.ends_at<>p_valid_until OR period.amount<>p_paid_amount OR period.currency<>p_currency OR period.quote_id IS DISTINCT FROM p_quote) THEN RAISE EXCEPTION 'LOOP_BILLING_PAYMENT_CONFLICT'; END IF;
+  END IF;
+  is_stale:=s.subscription_id IS NOT NULL AND p_created<s.event_created;
+  INSERT INTO jobvance_private.loop_billing_events(mode,event_id,subscription_id,event_created,authority,payload_hash) VALUES(p_mode,p_event,p_subscription,p_created,normalized,p_payload_hash);
+  -- Occurrence order governs status, not evidence that a customer already paid.
+  -- A late renewal must still record its immutable paid service period after a
+  -- newer status-only event; it cannot undo that newer cancellation/hold.
+  IF is_stale AND p_payment IS NULL AND NOT p_revoked THEN RETURN jsonb_build_object('duplicate',false,'stale',true); END IF;
+  -- Paid-place admission happens when a subscription's first verified paid
+  -- period is admitted. A subscription row created for a trial that was NOT
+  -- granted (trial already used, or no place free) has never been admitted, so
+  -- its first real charge passes the same capacity check as a new subscription.
+  IF s.subscription_id IS NULL OR (new_payment AND NOT p_revoked
+    AND EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_trials t WHERE t.subscription_id=p_subscription AND NOT t.granted)
+    AND NOT EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_periods p WHERE p.mode=p_mode AND p.subscription_id=p_subscription)) THEN
+    IF p_mode='live' AND p_payment IS NOT NULL AND (o.generation IS NULL OR EXISTS(SELECT 1 FROM public.job_loop_lifecycle WHERE user_id=p_user AND generation=o.generation AND state='active')) THEN
+      BEGIN
+        PERFORM public.job_loop_billing_assert_capacity(p_user);
+      EXCEPTION WHEN raise_exception THEN
+        IF SQLERRM<>'LOOP_PILOT_FULL' THEN RAISE; END IF;
+        IF EXISTS(SELECT 1 FROM jobvance_private.loop_billing_pending_fulfillment WHERE mode=p_mode AND event_id=p_event AND
+          (payload_hash<>p_payload_hash OR (authority-ARRAY['status','cancelAtPeriodEnd','graceUntil'])<>(normalized-ARRAY['status','cancelAtPeriodEnd','graceUntil']))) THEN RAISE EXCEPTION 'LOOP_BILLING_EVENT_CONFLICT'; END IF;
+        INSERT INTO jobvance_private.loop_billing_pending_fulfillment(mode,event_id,user_id,subscription_id,payload_hash,authority,reason)
+          VALUES(p_mode,p_event,p_user,p_subscription,p_payload_hash,normalized,'LOOP_PILOT_FULL') ON CONFLICT(mode,event_id) DO NOTHING;
+        DELETE FROM jobvance_private.loop_billing_events WHERE mode=p_mode AND event_id=p_event;
+        RETURN jsonb_build_object('duplicate',false,'pendingFulfillment',true,'reason','LOOP_PILOT_FULL');
+      END;
+    END IF;
+    IF s.subscription_id IS NULL THEN
+      INSERT INTO jobvance_private.loop_subscriptions(subscription_id,user_id,request_id,mode,plan,customer_id,status,valid_until,event_created,revoked,generation,period_start,cancel_at_period_end,quote_id)
+        VALUES(p_subscription,p_user,p_request,p_mode,p_plan,p_customer,'pending',now(),p_created,false,o.generation,NULL,false,p_quote) RETURNING * INTO s;
+    END IF;
+  END IF;
+  IF p_payment IS NOT NULL THEN
+    INSERT INTO jobvance_private.loop_subscription_periods(mode,payment_id,subscription_id,starts_at,ends_at,amount,revoked,quote_id,currency)
+      VALUES(p_mode,p_payment,p_subscription,p_period_start,p_valid_until,p_paid_amount,p_revoked,p_quote,p_currency)
+      ON CONFLICT(mode,payment_id) DO UPDATE SET revoked=loop_subscription_periods.revoked OR EXCLUDED.revoked;
+  ELSIF p_revoked THEN RAISE EXCEPTION 'LOOP_BILLING_PAID_PERIOD_REQUIRED'; END IF;
+  SELECT min(starts_at),max(ends_at) INTO paid_start,paid_until FROM jobvance_private.loop_subscription_periods WHERE mode=p_mode AND subscription_id=p_subscription AND NOT revoked;
+  -- Legacy paid records keep their previous receipt until a verified new cycle
+  -- replaces it. A new subscription without payment never gains paid time.
+  paid_until:=COALESCE(paid_until,s.valid_until); paid_start:=COALESCE(paid_start,s.period_start);
+  UPDATE jobvance_private.loop_subscriptions SET
+    status=CASE WHEN is_stale THEN s.status WHEN p_created=s.event_created AND s.status IN('failed','expired','cancelled','on_hold','paused','past_due') AND p_status='active' AND NOT new_payment THEN s.status ELSE p_status END,
+    period_start=paid_start,valid_until=paid_until,event_created=greatest(s.event_created,p_created),revoked=s.revoked OR p_revoked,
+    cancel_at_period_end=CASE WHEN is_stale THEN s.cancel_at_period_end ELSE p_cancel_at_period_end END,revision=s.revision+1,updated_at=now()
+    ,grace_until=CASE WHEN is_stale THEN s.grace_until WHEN p_status='past_due' THEN COALESCE(p_grace_until,s.grace_until) WHEN p_status='active' AND p_payment IS NOT NULL THEN NULL ELSE s.grace_until END
+    WHERE subscription_id=p_subscription RETURNING * INTO s;
+  UPDATE jobvance_private.loop_billing_pending_fulfillment SET resolved=true WHERE mode=p_mode AND event_id=p_event;
+  RETURN jsonb_build_object('duplicate',false,'stale',is_stale,'revision',s.revision,'lifecycleStale',o.generation IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.job_loop_lifecycle WHERE user_id=p_user AND generation=o.generation AND state='active'));
+END $$;
+
+
 CREATE FUNCTION public.job_loop_billing_apply_trial(p_user uuid,p_request uuid,p_mode text,p_plan text,p_product text,p_session text,p_subscription text,p_customer text,p_status text,
   p_trial_start timestamptz,p_first_charge timestamptz,p_cancel_at_period_end boolean,p_event text,p_created bigint,p_payload_hash text,p_payment text,p_quote uuid DEFAULT NULL,p_currency text DEFAULT 'USD')
 RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$
