@@ -218,6 +218,27 @@ describe('access during and after the trial', () => {
     expect((await query("SELECT revoked FROM jobvance_private.loop_subscriptions WHERE subscription_id='sub_trial'")).rows[0].revoked).toBe(true);
     expect(await entitlement()).toMatchObject({ active: false });
   });
+  it('a trial denied for a full service sends its first charge to pending fulfillment instead of paid access', async () => {
+    provider.trialStart = Date.now() - 8 * DAY;
+    await controlLoopBilling(ports, config, owner, session, checkoutInput());
+    // The checkout reservation lapsed and every one of the 100 paid places is now taken.
+    await query("UPDATE jobvance_private.loop_billing_orders SET capacity_until=now()-interval '1 hour' WHERE request_id=$1", [request]);
+    await query(`WITH u AS (INSERT INTO auth.users(id) SELECT gen_random_uuid() FROM generate_series(1,100) RETURNING id),
+      o AS (INSERT INTO jobvance_private.loop_billing_orders(user_id,request_id,mode,plan,product_id,state) SELECT id,gen_random_uuid(),'live','weekly','pdt_weekly','ready' FROM u RETURNING user_id,request_id)
+      INSERT INTO jobvance_private.loop_subscriptions(subscription_id,user_id,request_id,mode,plan,customer_id,status,valid_until,event_created)
+      SELECT 'sub_full_'||row_number() OVER (),user_id,request_id,'live','weekly','cus_full','active',now()+interval '20 days',1 FROM o`);
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_trial_start')).toMatchObject({ trial: { granted: false, reason: 'capacity_full' } });
+    expect(await entitlement()).toMatchObject({ active: false });
+    await expect(chargeFirst()).rejects.toMatchObject({ code: 'LOOP_BILLING_FULFILLMENT_PENDING' });
+    expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_subscription_periods WHERE subscription_id=$1', ['sub_trial'])).rows[0].n).toBe(0);
+    expect((await query('SELECT reason,resolved FROM jobvance_private.loop_billing_pending_fulfillment WHERE user_id=$1', [owner])).rows).toEqual([{ reason: 'LOOP_PILOT_FULL', resolved: false }]);
+    expect(await entitlement()).toMatchObject({ active: false });
+    expect(await controlLoopBilling(ports, config, owner, session, { action: 'status', contractVersion: 3 })).toMatchObject({ fulfillmentPending: true });
+    // Once a place frees up, the retried delivery admits the paid month normally.
+    await query("DELETE FROM jobvance_private.loop_subscriptions WHERE subscription_id='sub_full_1'");
+    expect(await chargeFirst()).toMatchObject({ received: true });
+    expect(await entitlement()).toMatchObject({ active: true, plan: 'weekly', validUntil: iso(firstCharge() + 30 * DAY) });
+  });
   it('a zero-amount payment on a paid order never grants anything', async () => {
     await controlLoopBilling(ports, config, owner, session, checkoutInput({ trial: false }));
     await expect(applyLoopBillingWebhook(ports, config, activation() as never, 'msg_zero_paid')).rejects.toThrow();

@@ -6,7 +6,7 @@ import { registerTrackingDraftOwner, trackingDraftAuthority } from '@/lib/tracki
 import { openPaymentCheckout } from '@/lib/payment-checkout';
 import { reportMetaCheckout } from '@/lib/meta-commerce';
 import { subscriptionPlans, isLoopSubscriptionPlan, loopSubscriptionPlan, type LoopSubscriptionPlan } from '@/lib/subscription-plans';
-import { cancelLoopSubscription, captureLoopCancelIntent, captureLoopCheckoutIntent, captureLoopQuoteIntent,createLoopSubscriptionCheckout, readLoopBilling,requestLoopPriceQuote,quotePricing, LoopBillingError, type LoopBillingStatus, type LoopCancelIntent, type LoopCheckoutIntent,type LoopPriceQuote,type LoopPricing } from '@/lib/loop-subscription-billing';
+import { cancelLoopSubscription, captureLoopCancelIntent, captureLoopCheckoutIntent, captureLoopQuoteIntent,createLoopSubscriptionCheckout, readLoopBilling,requestLoopPriceQuote,quotePricing, LoopBillingError, type LoopBillingStatus, type LoopCancelIntent, type LoopSubscription, type LoopCheckoutIntent,type LoopPriceQuote,type LoopPricing } from '@/lib/loop-subscription-billing';
 import {LOOP_LOCAL_COUNTRIES,LOOP_LOCAL_CURRENCIES,initialLoopPriceMarket,isLoopLocalCountry,isLoopLocalCurrency,loopPricingReturn,type LoopPriceMarket} from '@/lib/loop-local-prices';
 import {formatLoopPrice} from '@/lib/loop-price-display';
 import {FREE_TAILORED_CVS_PER_MONTH} from '@/lib/pass-plans';
@@ -22,6 +22,12 @@ const cadenceDays: Record<LoopSubscriptionPlan, number[]> = { weekly: [0], activ
 /** Lines every plan shares, shown once above the fold instead of repeated on each card. */
 const sharedFeatures = subscriptionPlans[0].features.filter(feature => subscriptionPlans.every(plan => (plan.features as readonly string[]).includes(feature)) && feature !== DASHBOARD_FEATURE);
 function date(value: string) { return new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}); }
+/** A contract-2 cancellation receipt carries no trial fields. The recorded trial
+ * window of the same subscription is immutable, so keep it until the next refresh. */
+function withKnownTrial(next:LoopSubscription|null,previous:LoopSubscription|null|undefined):LoopSubscription|null{
+  if(!next||next.trial!==undefined||!previous?.trial||previous.subscriptionId!==next.subscriptionId)return next;
+  return {...next,trial:previous.trial};
+}
 function legacyPrice(plan:LoopSubscriptionPlan):LoopPricing{return {quoteId:null,country:null,currency:'USD',amountMinor:LOOP_LOCAL_CURRENCIES.USD.amounts[plan],exponent:2,catalogVersion:'legacy-usd-v1',taxInclusive:true,interval:'month'};}
 export default function LoopSubscriptionBilling({ compact=false }: {compact?:boolean}) {
   const {user,session,loading:authLoading,authError}=useAuth();
@@ -121,7 +127,7 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
     const valid=()=>mounted.current&&current.current.ready&&current.current.owner===scope.ownerId&&current.current.authority===scope.authority&&epoch.current===at;
     const intent=cancelIntent.current??captureLoopCancelIntent(sub,status.generation);
     cancelIntent.current=intent;cancelConsentScope.current=null;lock.current=true;setBusy(true);setCancelConfirm(false);setError('');setMessage('');
-    try{const receipt=await cancelLoopSubscription(scope,intent,valid);if(!valid())return;setStatus(previous=>previous?{...previous,subscription:receipt.subscription}:null);if(receipt.status==='confirmed'&&receipt.subscription?.cancelAtPeriodEnd){cancelIntent.current=null;setMessage(inTrial&&subTrial?`Free trial cancelled. You will not be charged. Trial access continues until ${date(subTrial.endsAt)}.`:`Renewal cancelled. Your recorded billing period ends ${date(receipt.subscription.validUntil)}. Check current access below.`);}else setError('Cancellation is awaiting confirmation. Refresh billing to check it, or retry the same cancellation request.');}
+    try{const receipt=await cancelLoopSubscription(scope,intent,valid);if(!valid())return;setStatus(previous=>previous?{...previous,subscription:withKnownTrial(receipt.subscription,previous.subscription)}:null);if(receipt.status==='confirmed'&&receipt.subscription?.cancelAtPeriodEnd){cancelIntent.current=null;setMessage(inTrial&&subTrial?`Free trial cancelled. You will not be charged. Trial access continues until ${date(subTrial.endsAt)}.`:`Renewal cancelled. Your recorded billing period ends ${date(receipt.subscription.validUntil)}. Check current access below.`);}else setError('Cancellation is awaiting confirmation. Refresh billing to check it, or retry the same cancellation request.');}
     catch{if(valid())setError('Cancellation could not be confirmed. Refresh billing, or confirm again to retry the same request.');}
     finally{if(valid()){lock.current=false;setBusy(false);}}
   }
