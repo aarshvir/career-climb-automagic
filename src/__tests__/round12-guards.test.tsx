@@ -73,10 +73,12 @@ describe('round 12 guards', () => {
     expect(within(actions).getByRole('link', { name: 'Start my search' })).toHaveClass('jv-btn--primary');
   });
 
-  it('the type scale is one rhythm: 14 and 16 replace the 13 and 15 steps, and the page title is whole pixels', () => {
+  it('the type scale is one rhythm: 14 (UI), 15 (meta), 17 (body), and the page title is whole pixels', () => {
     const index = css('index.css');
     expect(index).toMatch(/--t-sm: \.875rem;/);
-    expect(index).toMatch(/--t-body-sm: 1rem;/);
+    expect(index).toMatch(/--t-small: \.9375rem;/);
+    expect(index).toMatch(/--t-body-sm: 1\.0625rem; --t-body: 1\.0625rem;/);
+    expect(index).toMatch(/--font-sans: "Outfit", "Geist"/);
     expect(index).not.toMatch(/--t-(?:h2|h3|h4|lead): clamp/);
     const marketing = css('styles/marketing.css');
     expect(marketing).toMatch(/--t-page: 3\.75rem;/);

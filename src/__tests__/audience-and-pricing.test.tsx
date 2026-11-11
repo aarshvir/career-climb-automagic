@@ -102,7 +102,7 @@ describe('Automated Job Loop access and monthly plans', () => {
 describe('Automated Job Loop first homepage', () => {
   it('explains the ordered search journey and offers a separate neutral CV Check entry', () => {
     render(<HelmetProvider><MemoryRouter><ProductPage kind="home" /></MemoryRouter></HelmetProvider>);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Jobvance automates your job search end to end.');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Your job search, on autopilot.');
     const stages = within(screen.getByRole('list', { name: 'Your Automated Job Loop journey' })).getAllByRole('listitem');
     expect(stages).toHaveLength(3);
     expect(stages[0]).toHaveTextContent('Add your experience');
@@ -113,14 +113,18 @@ describe('Automated Job Loop first homepage', () => {
     expect(stages[2]).toHaveTextContent('role-specific CVs for review');
     // Short actions sit under headings that name the product; the final call to action keeps the full name.
     expect(screen.getByText('Automated Job Loop', { selector: '.jv-hero-eyebrow' })).toBeInTheDocument();
-    expect(screen.getByText('How Automated Job Loop works')).toBeInTheDocument();
-    const starts = screen.getAllByRole('link', { name: 'Start my search' });
+    expect(screen.getByText('How it works', { selector: '.jv-caption' })).toBeInTheDocument();
+    const starts = screen.getAllByRole('link', { name: 'Get started free' });
     expect(starts).toHaveLength(4);
     for (const link of starts) expect(link).toHaveAttribute('href', '/onboarding');
     for (const link of screen.getAllByRole('link', { name: /Try the free CV Check/ })) expect(link).toHaveAttribute('href', '/check');
     for (const link of screen.getAllByRole('link')) expect(link.getAttribute('href')).not.toContain('audience=');
-    expect(screen.getByText(/runs in the background and finds the best-matching jobs/, { selector: '.jv-hero-lead' })).toHaveTextContent('Choose your roles and locations once');
-    expect(screen.getByText(/Each run looks through connected sources/)).toHaveTextContent('Some runs may find nothing new');
+    // Short, outcome-first copy that still promises only what the product does: best matches, not every role.
+    const lead = screen.getByText(/We find the best matches and tailor your CV for them/, { selector: '.jv-hero-lead' });
+    expect(lead).toHaveTextContent('built for a high ATS match');
+    expect(lead.textContent).not.toMatch(/each role|every role|guarantee|interviews/i);
+    expect(screen.getByText('We check job sources for your roles and locations.')).toBeInTheDocument();
+    expect(screen.getByText('Built only from facts you confirm. Download as PDF or Word.')).toBeInTheDocument();
   });
 });
 

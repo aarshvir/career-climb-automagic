@@ -33,10 +33,10 @@ export default function HomePage() {
         <div className="jv-hero-copy">
           {/* The product is named right above the pitch, so the main action can stay short. */}
           <p className="jv-caption jv-hero-eyebrow">Automated Job Loop</p>
-          <h1 id="home-title" className="jv-hero-title jv-enter-h1"><span className="jv-h-bind">Jobvance automates</span> <span className="jv-h-bind">your job search</span> <span className="jv-h-mark">end to end.</span></h1>
-          <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> runs in the background and finds the best-matching jobs for you, with tailored, role-specific CVs built for a high ATS match.</p>
+          <h1 id="home-title" className="jv-hero-title jv-enter-h1"><span className="jv-h-bind">Your job search,</span> <span className="jv-h-mark">on autopilot.</span></h1>
+          <p className="jv-hero-lead jv-enter" style={delay(60)}>Tell us the jobs you want. We find the best matches and tailor your CV for them, built for a high ATS match.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
-            <StartLink size="lg" className="jv-hero-cta">Start my search</StartLink>
+            <StartLink size="lg" className="jv-hero-cta">Get started free</StartLink>
             <TextLink to="/check">Try the free CV Check</TextLink>
           </div>
           <div className="jv-hero-note jv-enter" style={delay(180)}><PriceNote /></div>
@@ -57,8 +57,8 @@ export default function HomePage() {
     <section className="jv-loop-band jv-dark" aria-labelledby="home-loop-journey">
       <div className="jv-loop-grid">
         <div className="jv-loop-head" data-reveal>
-          <p className="jv-caption">How Automated Job Loop works</p>
-          <h2 id="home-loop-journey">Set it up once. Come back to your next applications.</h2>
+          <p className="jv-caption">How it works</p>
+          <h2 id="home-loop-journey">Set it up once. We do the searching.</h2>
         </div>
         <div className="jv-loop-visual">
           <p className="jv-loop-caption">Example run · illustrative</p>
@@ -75,7 +75,7 @@ export default function HomePage() {
           <p className="jv-loop-caption">Set up once · by you</p>
           <LoopJourney variant="ring" />
           <div className="jv-loop-actions">
-            <StartLink className="jv-loop-cta">Start my search</StartLink>
+            <StartLink className="jv-loop-cta">Get started free</StartLink>
           </div>
         </div>
       </div>
@@ -86,26 +86,26 @@ export default function HomePage() {
     <section className="jv-control" aria-labelledby="home-control-title">
       <div className="jv-shell">
         <div className="jv-section-head" data-reveal>
-          <h2 id="home-control-title">Stop starting your job search from scratch.</h2>
-          <p>Set your search once. Come back to matched openings and tailored CVs, ready to use.</p>
+          <h2 id="home-control-title">Stop starting from scratch.</h2>
+          <p>Matched jobs and tailored CVs, ready when you are.</p>
         </div>
         <div className="jv-bento">
           <article className="jv-tile jv-tile--schedule" data-reveal>
-            <div className="jv-tile-copy"><p className="jv-step-index">01 · Schedule</p><h3>Your search comes back on schedule.</h3><p>Weekly, three days a week or daily, the next run starts without you rebuilding the same searches. Pause it whenever your plans change.</p></div>
+            <div className="jv-tile-copy"><p className="jv-step-index">01 · Schedule</p><h3>Runs on your schedule.</h3><p>Weekly, three days a week or daily. Pause any time.</p></div>
             <div className="jv-tile-card" aria-hidden="true"><p className="jv-tile-next"><span className="jv-mock-pulse" />Next run · <b>Wed 7:00 AM</b><i>Example</i></p><ScheduleCard /></div>
           </article>
           <article className="jv-tile jv-tile--openings" data-reveal>
-            <div className="jv-tile-copy"><p className="jv-step-index">02 · Openings</p><h3>Openings for the roles you chose.</h3><p>Each run looks through connected sources for your roles and locations, so you start from a list instead of a blank search box. Some runs may find nothing new.</p></div>
+            <div className="jv-tile-copy"><p className="jv-step-index">02 · Openings</p><h3>Jobs that fit your search.</h3><p>We check job sources for your roles and locations.</p></div>
             <div className="jv-tile-card" aria-hidden="true"><OpeningsCard /></div>
           </article>
           <article className="jv-tile jv-tile--cv jv-dark" data-reveal>
-            <div className="jv-tile-copy"><p className="jv-step-index">03 · Tailored CV</p><h3>Tailored CVs for matching roles.</h3><p>Your prepared CVs use the facts you confirm for the role. Review it, download PDF, DOCX or TXT and open the employer’s vacancy from your dashboard.</p></div>
+            <div className="jv-tile-copy"><p className="jv-step-index">03 · Tailored CV</p><h3>Tailored CVs for your best matches.</h3><p>Built only from facts you confirm. Download as PDF or Word.</p></div>
             <div className="jv-tile-card" aria-hidden="true"><CvDiffCard /></div>
           </article>
         </div>
         <div className="jv-boundary" data-reveal>
           <p>Tailored, role-specific CVs, built for a high ATS match.</p>
-          <div className="jv-boundary-links"><StartLink>Start my search</StartLink><TextLink to="/how-it-works">See how it works</TextLink></div>
+          <div className="jv-boundary-links"><StartLink>Get started free</StartLink><TextLink to="/how-it-works">See how it works</TextLink></div>
         </div>
       </div>
     </section>
@@ -113,8 +113,8 @@ export default function HomePage() {
     {/* 5. Free CV Check: a neutral panel; brand colour appears only in the highlights. */}
     <section className="jv-check" aria-labelledby="home-check-title">
       <div className="jv-check-copy" data-reveal>
-        <h2 id="home-check-title"><span className="jv-h-line">Have one vacancy in mind?</span> <span className="jv-h-line">Try the free CV Check.</span></h2>
-        <p>Bring a CV and a job description, review suggested changes and download your approved version. Save your check to continue into your Automated Job Loop.</p>
+        <h2 id="home-check-title"><span className="jv-h-line">One job in mind?</span> <span className="jv-h-line">Check your CV free.</span></h2>
+        <p>Paste your CV and the job ad. See what to change, then download.</p>
         <StartLink to="/check" variant="secondary">Try the free CV Check</StartLink>
       </div>
       <div className="jv-check-example" aria-hidden="true" data-reveal>
@@ -129,7 +129,7 @@ export default function HomePage() {
     <section className="jv-guides" aria-labelledby="home-guides-title">
       <div className="jv-shell">
         <div className="jv-guides-head" data-reveal>
-          <h2 id="home-guides-title">Practical help for your next application.</h2>
+          <h2 id="home-guides-title">Guides for your next application.</h2>
           <TextLink to="/guides">See all career guides</TextLink>
         </div>
         <ol className="jv-guide-index">{homeGuides.map(([slug, title, meta], index) => <li key={slug}>
@@ -147,9 +147,9 @@ export default function HomePage() {
     <section className="jv-cta jv-cta--visual jv-dark" aria-labelledby="home-final-title">
       <div className="jv-cta-inner">
         <h2 id="home-final-title">Give your job search a routine.</h2>
-        <p>Set your roles and schedule once. Come back to the best-matching jobs and tailored CVs.</p>
+        <p>Set it once. Get matched jobs and tailored CVs.</p>
         <div className="jv-cta-actions">
-          <StartLink size="lg" />
+          <StartLink size="lg">Get started free</StartLink>
           <Link to="/pricing" className="jv-btn jv-btn--secondary jv-btn--lg">See plans</Link>
         </div>
         <div className="jv-cta-note"><PriceNote /></div>
