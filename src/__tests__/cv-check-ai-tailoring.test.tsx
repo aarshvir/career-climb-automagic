@@ -283,7 +283,7 @@ describe('honest results when little or nothing changed', () => {
   });
   it('says so plainly when every suggestion failed the source checks', async () => {
     await runTailoring({ ...unchanged, rejectedCount: 2 });
-    expect(screen.getAllByText('No suggested change passed the source checks, so your CV is unchanged. Check it below.').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('No suggested change could be used, so your CV is unchanged. Check it below.').length).toBeGreaterThan(0);
     expect(screen.getByText('No change was applied. Your CV is below.')).toBeInTheDocument();
     expect(screen.getByText(/We left out 2 AI suggestions/)).toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/already reads well|nothing needed rewording/);
@@ -301,5 +301,42 @@ describe('honest results when little or nothing changed', () => {
     };
     expect(withoutReplacedRewrites(replaced as never).changes.map(change => change.n)).toEqual([6, 4]);
     expect(withoutReplacedRewrites({ ...replaced, changes: replaced.changes.slice(0, 2) } as never).changes).toHaveLength(2);
+  });
+});
+
+describe('restoring an original at its real place', () => {
+  const header = 'Analyst preparing monthly stakeholder reporting in Excel.';
+  const profileSource = ['Alex Example', header, '', 'PROFILE', 'Experienced analyst.', '', 'Second paragraph of the profile.', '', 'EXPERIENCE', 'Analyst - Example Co | 2021 - 2024', '- Prepared monthly stakeholder reports using Excel.', '- Supported a transformation pilot across five units.'].join('\n');
+  const profileTailored = ['Alex Example', header, '', 'PROFILE', header, '', 'EXPERIENCE', 'Analyst - Example Co | 2021 - 2024', '- Prepared monthly stakeholder reports using Excel.', '- Supported a transformation pilot across five units.'].join('\n');
+  const profileResult = { text: profileTailored, changes: [{ kind: 'summary', n: 4, before: 'Experienced analyst.\n\nSecond paragraph of the profile.', after: header, sources: [5, 7], facts: [] }], questions: [], rejectedCount: 0 };
+  async function open(text: string, result: unknown) {
+    mocks.tailor.mockResolvedValue(result); show();
+    fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: text } });
+    fireEvent.change(screen.getByLabelText('The job description'), { target: { value: vacancy } });
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+  }
+  it('restores the profile under its heading, not the same words in the header, and keeps its paragraphs', async () => {
+    await open(profileSource, profileResult);
+    expect(screen.getByText(/Your original:/).parentElement).toHaveClass('whitespace-pre-line');
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe(profileSource);
+  });
+  it('leaves the text alone when the profile heading was changed or the summary appears under two headings', async () => {
+    await open(profileSource, profileResult);
+    const edited = profileTailored.replace('PROFILE', 'ABOUT ME');
+    fireEvent.change(screen.getByLabelText(/Your tailored CV/), { target: { value: edited } });
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe(edited);
+    expect(await screen.findByText(/heading was changed, so it was left as it is/)).toBeInTheDocument();
+  });
+  it('never restores the first of two identical lines', async () => {
+    const twice = `${source}\n- Prepared monthly stakeholder reports using Excel.`;
+    const text = `${tailoredText}\n- Prepared monthly stakeholder reporting in Excel.`;
+    await open(twice, { ...tailored, text: text.replace('- Prepared monthly stakeholder reports using Excel.', '- Prepared monthly stakeholder reporting in Excel.'), changes: [tailored.changes[0]] });
+    const before = reviewed();
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(/appears more than once/)).toBeInTheDocument();
+    expect(reviewed()).toBe(before);
   });
 });

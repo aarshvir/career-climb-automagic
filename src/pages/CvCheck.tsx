@@ -407,7 +407,7 @@ function CvCheckWorkspace() {
       setDraft(current => ({ ...current, reviewedText: text }));
       setReport(analyzeCvEvidence(text, valid.jobDescription, valid.jobTitle)); setReviewStarted(true);
       setTailoring({ changes: tailored.changes.map(change => ({ ...change, facts: change.facts ?? [] })), questions: tailored.questions, rejectedCount: tailored.rejectedCount, ownerId: owner.current, facts: [], factSources: [], sourceText: valid.sourceText, jobDescription: valid.jobDescription, jobTitle: valid.jobTitle, company: valid.company });
-      setNotice(tailored.changes.length ? `${tailored.changes.length} ${tailored.changes.length === 1 ? 'change' : 'changes'} prepared for this job. Each one shows the line it came from in your CV.` : tailored.rejectedCount ? 'No suggested change passed the source checks, so your CV is unchanged. Check it below.' : 'No changes were suggested for this job. Check your CV below.');
+      setNotice(tailored.changes.length ? `${tailored.changes.length} ${tailored.changes.length === 1 ? 'change' : 'changes'} prepared for this job. Each one shows the line it came from in your CV.` : tailored.rejectedCount ? 'No suggested change could be used, so your CV is unchanged. Check it below.' : 'No changes were suggested for this job. Check your CV below.');
       setStep(5);
     } catch (failure) {
       if (!mounted.current || !authorityCurrent() || revision.current !== atRevision || owner.current !== startingOwner) return;
@@ -460,16 +460,26 @@ function CvCheckWorkspace() {
     const change = tailoring.changes[index];
     if (!change || change.reverted || change.kind === 'order') return;
     let text = draft.reviewedText;
-    if (change.kind === 'rewrite') { if (!text.includes(change.after)) { setError('That line has been edited since, so it was left as it is.'); return; } text = text.replace(change.after, change.before); }
+    if (change.kind === 'rewrite') {
+      const lines = text.split('\n'), matches = lines.flatMap((line, at) => line === change.after ? [at] : []);
+      if (matches.length !== 1) { setError(matches.length ? 'That line appears more than once, so it was left as it is. Edit the line you want in your CV below.' : 'That line has been edited since, so it was left as it is.'); return; }
+      lines[matches[0]] = change.before; text = lines.join('\n');
+    }
     else if (change.kind === 'addition') {
       const lines = text.split('\n'), matches = lines.flatMap((line, index) => line === change.after ? [index] : []);
       if (matches.length !== 1) { setError('That line was edited or appears more than once. Remove the intended line in your CV below; no text was changed.'); return; }
       lines.splice(matches[0], 1); text = lines.join('\n');
     }
     else {
-      if (!text.includes(change.after)) { setError('The summary has been edited since, so it was left as it is.'); return; }
-      const insertedHeading = !draft.sourceText.split(/\r?\n/u).some(line => line.trim() === 'PROFILE') && text.includes('\nPROFILE\n' + change.after);
-      text = change.before ? text.replace(change.after, change.before) : insertedHeading ? text.replace('\n\nPROFILE\n' + change.after, '').replace('\nPROFILE\n' + change.after, '') : text.replace(change.after + '\n', '').replace(change.after, '');
+      // The profile sits directly under its heading. Find it there, so the same words elsewhere (a header line, another section) are never touched.
+      const lines = text.split('\n'), profileHeading = /^(professional\s+|career\s+)?(profile|summary|objective)\s*:?$/iu;
+      const matches = lines.flatMap((line, at) => line === change.after && at > 0 && profileHeading.test(lines[at - 1].trim()) ? [at] : []);
+      if (matches.length !== 1) { setError('The summary has been edited since, or its heading was changed, so it was left as it is.'); return; }
+      const at = matches[0], insertedHeading = !change.before && lines[at - 1].trim() === 'PROFILE' && !draft.sourceText.split(/\r?\n/u).some(line => line.trim() === 'PROFILE');
+      if (change.before) lines.splice(at, 1, ...change.before.split('\n'));
+      else if (insertedHeading) { const blank = at >= 2 && lines[at - 2] === '' ? 1 : 0; lines.splice(at - 1 - blank, 2 + blank); }
+      else lines.splice(at, 1);
+      text = lines.join('\n');
     }
     const kept = tailoring; editDraft({ reviewedText: text }); setReport(analyzeCvEvidence(text, draft.jobDescription, draft.jobTitle));
     setTailoring({ ...kept, withdrawnFacts: [...new Set([...(kept.withdrawnFacts ?? []), ...change.facts])], changes: kept.changes.map((item, i) => i === index ? { ...item, reverted: true } : item) });
@@ -636,10 +646,10 @@ function CvCheckWorkspace() {
         {tailoring && tailoring.ownerId === owner.current && <section className="check-changes rounded-xl border p-5" aria-label="What changed"><h3 className="text-lg font-semibold">What changed for this job</h3>
           {tailoring.changes.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{tailoring.rejectedCount ? 'No change was applied. Your CV is below.' : 'No changes were suggested. Your CV is below.'}</p> : <ol className="check-change-list mt-3 space-y-3">{tailoring.changes.map((change, index) => <li key={index} className={`check-change rounded-lg border p-3${change.reverted ? ' opacity-60' : ''}`}>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{change.kind === 'summary' ? 'Profile summary' : change.kind === 'order' ? 'Most relevant first' : change.kind === 'addition' ? 'New line' : `Line ${change.n}`}{change.facts.length ? ' · from your answer' : ''}{change.reverted ? (change.kind === 'addition' ? ' · removed' : ' · kept your original') : ''}</p>
-            {change.kind === 'order' ? <p className="mt-1 text-sm">Bullets under this role now start with the ones closest to the job.</p> : <><p className="mt-1 text-sm"><span className="font-medium">Now:</span> {change.after.replace(/^\s*[-•*–·▪●◦]\s+/u, '')}</p>{change.before && <p className="mt-1 text-sm text-muted-foreground"><span className="font-medium">Your original:</span> {change.before.replace(/^\s*[-•*–·▪●◦]\s+/u, '')}</p>}{!change.before && change.kind === 'summary' && <p className="mt-1 text-xs text-muted-foreground">Written only from lines {change.sources.join(', ')} of your CV{change.facts.length ? ' and your answers' : ''}.</p>}{change.facts.length > 0 && <p className="mt-1 text-xs text-muted-foreground">From your answer: {change.facts.map(number => `“${tailoring.facts[number - 1] ?? ''}”`).join(' ')}</p>}
+            {change.kind === 'order' ? <p className="mt-1 text-sm">Bullets under this role now start with the ones closest to the job.</p> : <><p className="mt-1 text-sm"><span className="font-medium">Now:</span> {change.after.replace(/^\s*[-•*–·▪●◦]\s+/u, '')}</p>{change.before && <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground"><span className="font-medium">Your original:</span> {change.before.replace(/^\s*[-•*–·▪●◦]\s+/u, '')}</p>}{!change.before && change.kind === 'summary' && <p className="mt-1 text-xs text-muted-foreground">Written only from lines {change.sources.join(', ')} of your CV{change.facts.length ? ' and your answers' : ''}.</p>}{change.facts.length > 0 && <p className="mt-1 text-xs text-muted-foreground">From your answer: {change.facts.map(number => `“${tailoring.facts[number - 1] ?? ''}”`).join(' ')}</p>}
             {!change.reverted && <Button type="button" variant="link" className="h-auto px-0 text-sm" disabled={!!busy} onClick={() => revertChange(index)}>{change.kind === 'summary' && !change.before ? 'Remove this summary' : change.kind === 'addition' ? 'Remove this line' : 'Keep my original'}</Button>}</>}
           </li>)}</ol>}
-          {tailoring.rejectedCount > 0 && <p className="mt-3 text-xs text-muted-foreground">We left out {tailoring.rejectedCount} AI {tailoring.rejectedCount === 1 ? 'suggestion' : 'suggestions'} that did not pass the source checks.</p>}
+          {tailoring.rejectedCount > 0 && <p className="mt-3 text-xs text-muted-foreground">We left out {tailoring.rejectedCount} AI {tailoring.rejectedCount === 1 ? 'suggestion' : 'suggestions'}. {tailoring.rejectedCount === 1 ? 'It' : 'Each'} failed a check or could not be used, so your original wording stays.</p>}
           {tailorUndo && tailorUndo.ownerId === owner.current && <Button type="button" variant="outline" className="mt-3" disabled={!!busy} onClick={undoTailoring}>{tailorUndo.tailoring ? 'Undo and restore the previous version' : 'Undo tailoring and restore my edited CV'}</Button>}
         </section>}
         {tailoring && tailoring.ownerId === owner.current && tailoring.questions.length > 0 && <section className="check-questions rounded-xl bg-muted/40 p-5" aria-label="Questions about gaps"><h3 className="font-semibold">Quick questions (answer only if true)</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">Answer any that are true for you and choose where each belongs in your original CV. Check the proposed wording and placement before approving it.</p>

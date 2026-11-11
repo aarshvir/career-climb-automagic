@@ -9,7 +9,7 @@ import { cvCheckCostText, cvCheckFaqs } from '@/lib/cv-check-faqs';
 import { AI_SENT_TEXT, checkedExamples, exampleResult, slipThroughExamples, tailoringFaqs, truthfulTailoringStructuredNodes } from '@/lib/truthful-tailoring';
 import { staticPageMeta } from '@/lib/public-site-meta';
 import { FAIR_USE_TAILORED_CVS_PER_DAY } from '@/lib/pass-plans';
-import { assembleTailoredCv, sourceLines, validateRewrite } from '../../supabase/functions/_shared/cv-tailor';
+import { assembleTailoredCv, checkedQuestions, sourceLines, validateRewrite } from '../../supabase/functions/_shared/cv-tailor';
 
 vi.unmock('react-router-dom');
 afterEach(cleanup);
@@ -293,5 +293,25 @@ describe('public AI tailoring page', () => {
     cleanup();
     render(<HelmetProvider><MemoryRouter initialEntries={['/cv-check']}><CvCheckLanding /></MemoryRouter></HelmetProvider>);
     expect(screen.getAllByRole('link').filter(link => link.getAttribute('href') === '/truthful-cv-tailoring').length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe('the public page matches what the code counts and filters', () => {
+  it('names every kind of left-out suggestion the code counts, and says what is not counted', () => {
+    renderPage();
+    for (const phrase of ['reorders that do not match', 'could not read or place', 'any beyond the number it reads', 'A suggestion that changes nothing is not counted']) expect(document.body, phrase).toHaveTextContent(phrase);
+    // Each of those kinds is really counted by the code, and a no-op is not.
+    const cv = ['Jane Doe', 'Dubai, UAE | jane@example.com', '', 'EXPERIENCE', 'Senior Analyst, Acme', '- Prepared monthly reports', '- Maintained the KPI pack'].join('\n');
+    expect(assembleTailoredCv(cv, { orders: [[7, 6, 99]] }).rejected).toHaveLength(1);
+    expect(assembleTailoredCv(cv, { unreadable: 1 }).rejected).toHaveLength(1);
+    expect(assembleTailoredCv(cv, { rewrites: Array.from({ length: 81 }, () => ({ n: 6, text: 'Prepared monthly reports' })) }).rejected.filter(item => item.reason === 'More suggestions than the check reads.')).toHaveLength(1);
+    expect(assembleTailoredCv(cv, { orders: [[6, 7]], rewrites: [{ n: 6, text: 'Prepared monthly reports' }] }).rejected).toEqual([]);
+  });
+  it('states the question filter exactly as the code applies it', () => {
+    renderPage();
+    expect(document.body).toHaveTextContent('one line of 9 to 300 characters that ends in a question mark, with no link, HTML or Markdown');
+    expect(document.body).toHaveTextContent('At most five are kept, and one that fails is dropped without being counted');
+    expect(checkedQuestions(['Did you write the C# tools?', 'Why do now?', 'Why now?', 'a'.repeat(300) + '?', 'Did you see www.example.com?'])).toEqual(['Did you write the C# tools?', 'Why do now?']);
+    expect(checkedQuestions(Array.from({ length: 8 }, (_, i) => `Did you finish project ${i}?`))).toHaveLength(5);
   });
 });

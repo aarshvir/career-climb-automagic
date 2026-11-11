@@ -279,7 +279,7 @@ describe('ownership is checked for each verb, not once per line', () => {
     expect(reason('Supported the head count review', 'Led the head count review')).toMatch(/led/u);
     expect(reason('Reported on the monthly run rate', 'Ran the monthly run rate report')).toMatch(/ran/u);
     expect(reason('Reported on the monthly run rate', 'Reported on the monthly run-rate')).toBeNull();
-    expect(reason('Supported the team using the built-in tools', 'Supported the team using the built in tools')).toBeNull();
+    expect(reason('Supported the team using the built-in tools', 'Supported the team using the built-in tools')).toBeNull();
   });
   it('still lets a title or noun use of the same family support the verb (a stated limit)', () => {
     expect(reason('Supported the Head of Finance with reports', 'Headed monthly reporting for finance')).toBeNull();
@@ -333,5 +333,56 @@ describe('questions are checked for form only', () => {
     expect(checkedQuestions(['Did you run the workshops yourself?', 'did you run the workshops  yourself?', 'You led the workshops.', 'Did you see https://example.com/x?', 'Is **this** bold?', 'Which tools did you use for the model?', 'x?', 7, 'Did you present the findings to the board?'])).toEqual(['Did you run the workshops yourself?', 'Which tools did you use for the model?', 'Did you present the findings to the board?']);
     expect(checkedQuestions(Array.from({ length: 9 }, (_, i) => `Did you complete project number ${i}?`))).toHaveLength(5);
     expect(checkedQuestions(['a'.repeat(300) + '?'])).toEqual([]);
+  });
+});
+
+describe('ownership regressions found in review', () => {
+  const reason = (source: string, after: string) => validateRewrite(after, [source]);
+  it('rejects "built up" as a claim and treats only the hyphenated "built-up" as an adjective', () => {
+    expect(reason('Supported the monthly reports team', 'Built up the monthly reports team')).toMatch(/stronger ownership.*built/u);
+    expect(reason('Supported the monthly reports team', 'Supported the built-up monthly reports team')).toMatch(/built/u);
+    expect(reason('Supported the built-up area report', 'Supported the built-up area reporting')).toBeNull();
+    expect(reason('Supported the team', 'Built in a spreadsheet the weekly pack for the team')).toMatch(/built/u);
+  });
+  it('ignores a noun phrase in a suggestion only when the source has the same phrase', () => {
+    expect(reason('Reported on the monthly run rate', 'Reported on the monthly run-rate')).toBeNull();
+    expect(reason('Reported on the monthly numbers', 'Reported on the monthly run rate')).toMatch(/run/u);
+    expect(reason('Supported the team using the built-in tools', 'Supported the team using the built-in tools daily')).toBeNull();
+    expect(reason('Supported the team using the built-in tools', 'Supported the team using the built in tools')).toMatch(/built/u);
+  });
+  it('replays saved results under the rule they were accepted under, and holds new ones to the strict rule', () => {
+    const source = 'Led the weekly KPI pack and supported the COO', after = 'Led the weekly KPI pack and ran the COO review';
+    expect(validateRewrite(after, [source])).toMatch(/ran/u);
+    expect(validateRewrite(after, [source], { ownership: 'line' })).toBeNull();
+    expect(validateRewrite('Led the weekly pack', ['Supported the weekly pack'], { ownership: 'line' })).toMatch(/ownership/u);
+  });
+});
+
+describe('the replaced profile keeps its line breaks', () => {
+  const cv = ['Jane Doe', 'Dubai | j@x.com', '', 'PROFILE', 'Line one.', '', 'Line two.', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+  it('returns the original with its blank line and rebuilds the CV exactly from it', () => {
+    const result = assembleTailoredCv(cv, { summary: { text: 'Line one and line two together.', sources: [5, 7] } });
+    const summary = result.changes.find(change => change.kind === 'summary');
+    expect(summary?.before).toBe('Line one.\n\nLine two.');
+    expect(result.rejected).toEqual([]);
+    expect(result.text).toBe(['Jane Doe', 'Dubai | j@x.com', '', 'PROFILE', 'Line one and line two together.', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n'));
+    expect(result.text.replace(summary!.after, summary!.before)).toBe(cv);
+  });
+});
+
+describe('questions match the public explanation', () => {
+  it('keeps C#, snake_case and a single underscore; drops links, HTML and Markdown', () => {
+    expect(checkedQuestions(['Did you write the C# reporting tools?', 'Did you use the sales_data table?', 'See www.example.com for the job?', 'Is <b>this</b> allowed?', 'Is `code` allowed?', '# Did you lead it?', '- Did you lead it?', 'Did you do __this__ part?', 'Did you [see](http://x.y) this?'])).toEqual(['Did you write the C# reporting tools?', 'Did you use the sales_data table?']);
+  });
+  it('keeps a question of 9 to 300 characters that ends in ? and nothing shorter or longer, at most five', () => {
+    expect(checkedQuestions(['Why now?', 'Why do now?'])).toEqual(['Why do now?']);
+    expect(checkedQuestions(['a'.repeat(299) + '?', 'a'.repeat(300) + '?'])).toEqual(['a'.repeat(299) + '?']);
+    expect(checkedQuestions(Array.from({ length: 8 }, (_, i) => `Did you complete project ${i}?`))).toHaveLength(5);
+  });
+  it('does not count a dropped question in the left-out total', () => {
+    const doc = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(doc, { questions: ['A statement.', 'Did you present to the board?'] });
+    expect(result.questions).toEqual(['Did you present to the board?']);
+    expect(result.rejected).toEqual([]);
   });
 });

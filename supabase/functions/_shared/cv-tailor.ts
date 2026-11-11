@@ -87,12 +87,21 @@ const OWNERSHIP_FAMILIES: Record<string, string> = {
   directed: "directed", managed: "manage", manage: "manage", managing: "manage", ran: "run", run: "run", running: "run",
   oversaw: "oversee", oversee: "oversee",
 };
-/** Fixed phrases where a listed word is a noun or adjective, not a claim to have led something. */
-const NON_OWNERSHIP_USES = /\b(?:run[\s-]?rate|run[\s-]?time|run[\s-]?books?|head[\s-]?count|head\s+office|head\s?quarters|own\s+(?:initiative|time|words)|lead\s+(?:time|generation)|built[\s-]in|built[\s-]up)\b/giu;
-/** The distinct ownership claims in a text, each as one verb family. */
-function ownershipVerbs(text: string): Map<string, string> {
+/**
+ * Fixed phrases in which a listed word is a noun or adjective. Such a phrase is not a claim, and in the
+ * source it does not support one. A phrase in a suggestion is ignored only when the same phrase is in the
+ * source, so "Built up the team" (a claim) is never mistaken for "built-up area" (hyphenated).
+ */
+const NON_OWNERSHIP_USES = /\b(?:run[\s-]rate|run-?time|run-?books?|head[\s-]?count|head\s+office|head-?quarters|lead\s+(?:time|generation)|own\s+initiative|built-in|built-up)\b/giu;
+const phraseKey = (phrase: string) => phrase.replace(/[\s-]+/gu, " ");
+function neutralPhrases(text: string): Set<string> {
+  return new Set([...normalise(text).matchAll(NON_OWNERSHIP_USES)].map(match => phraseKey(match[0])));
+}
+/** The distinct ownership claims in a text, each as one verb family. `ignore`: phrases to set aside ("all" for every one). */
+function ownershipVerbs(text: string, ignore: "all" | Set<string>): Map<string, string> {
   const found = new Map<string, string>();
-  for (const match of normalise(text).replace(NON_OWNERSHIP_USES, " ").matchAll(new RegExp(STRONG_OWNERSHIP.source, "giu"))) {
+  const body = normalise(text).replace(NON_OWNERSHIP_USES, phrase => ignore === "all" || ignore.has(phraseKey(phrase)) ? " " : phrase);
+  for (const match of body.matchAll(new RegExp(STRONG_OWNERSHIP.source, "giu"))) {
     const word = match[0].toLocaleLowerCase("en"), key = OWNERSHIP_FAMILIES[word] ?? word;
     if (!found.has(key)) found.set(key, word);
   }
@@ -123,7 +132,8 @@ function properTerms(text: string, sourceWords: Set<string>): string[] {
   return found;
 }
 
-export function validateRewrite(after: string, sources: string[]): string | null {
+/** `ownership: "line"` is the earlier one-check-per-line rule, used only to replay results saved under it. */
+export function validateRewrite(after: string, sources: string[], options: { ownership?: "verb" | "line" } = {}): string | null {
   const source = sources.join("\n");
   const value = after.trim();
   if (!value) return "Empty rewrite.";
@@ -141,7 +151,12 @@ export function validateRewrite(after: string, sources: string[]): string | null
   const credentialAfter = normalise(value).match(new RegExp(CREDENTIAL.source, "giu")) ?? [];
   const missingCredential = credentialAfter.find(term => !normalise(source).includes(term));
   if (missingCredential) return `Adds a qualification not in this part of your CV (${missingCredential}).`;
-  const supported = ownershipVerbs(source), claimed = [...ownershipVerbs(value)].find(([key]) => !supported.has(key));
+  if (options.ownership === "line") {
+    // Saved receipts keep the check they were accepted under: one listed verb anywhere in the source passes the line.
+    if (STRONG_OWNERSHIP.test(value) && !STRONG_OWNERSHIP.test(source)) return "Claims stronger ownership than your CV states (e.g. led or managed).";
+    return null;
+  }
+  const supported = ownershipVerbs(source, "all"), claimed = [...ownershipVerbs(value, neutralPhrases(source))].find(([key]) => !supported.has(key));
   if (claimed) return `Claims stronger ownership than your CV states (“${claimed[1]}”).`;
   return null;
 }
@@ -241,8 +256,10 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
   let summaryPlaced = false, skipping = false;
   const replacedLines = new Set<number>(); // original lines a new profile replaces
   const headerEnd = (() => { let last = 0; for (const line of lines) { if (line.kind === "name" || line.kind === "contact") last = line.n; else if (line.kind !== "blank") break; } return last; })();
-  for (const line of lines) {
+  for (const [index, line] of lines.entries()) {
     if (skipping) {
+      // A blank line between two replaced text lines is part of the original profile, so it is kept in the original, not the result.
+      if (line.kind === "blank" && lines.slice(index + 1).find(item => item.kind !== "blank")?.kind === "text") { changes.push({ kind: "summary", n: line.n, before: "", after: "", sources: summarySources, facts: summaryFacts }); continue; }
       if (line.kind === "heading") skipping = false;
       else if (line.kind === "text") { replacedLines.add(line.n); changes.push({ kind: "summary", n: line.n, before: line.text, after: "", sources: summarySources, facts: summaryFacts }); continue; }
       else if (line.kind !== "blank") skipping = false;
@@ -260,8 +277,8 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
   }
   if (summaryText && !summaryPlaced) rejected.push({ n: null, text: summaryText, reason: "A profile needs a recognised profile heading, or a name and contact lines to sit under." });
   if (summaryText && summaryPlaced) changes.push({ kind: "summary", n: summaryHeading?.n ?? null, before: "", after: summaryText, sources: summarySources, facts: summaryFacts });
-  // Collapse summary bookkeeping: one visible summary change carrying any replaced text.
-  const replaced = changes.filter(change => change.kind === "summary" && change.after === "").map(change => change.before).join(" ");
+  // Collapse summary bookkeeping: one visible summary change carrying the replaced text with its line breaks.
+  const replaced = changes.filter(change => change.kind === "summary" && change.after === "").map(change => change.before).join("\n");
   // A rewrite of a line the profile replaced is not in the result; the profile change already shows that text as its original.
   const visible = changes.filter(change => !(change.kind === "summary" && change.after === "") && !(change.kind === "rewrite" && change.n !== null && replacedLines.has(change.n))).map(change => change.kind === "summary" ? { ...change, before: replaced } : change);
 
@@ -270,16 +287,17 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
 }
 
 /**
- * Questions are checked for form only: a single-line question under 300 characters that ends with a
- * question mark and holds no link or markup, with repeats removed. Whether a question is wise, or
- * hints at an answer, is not checked, so the candidate reads each one.
+ * Questions are checked for form only: one line of 9 to 300 characters that ends with a question mark,
+ * with no link, HTML or Markdown, repeats removed, at most five kept. A question that fails is dropped
+ * without being counted. Whether a question is wise, or hints at an answer, is not checked.
  */
+const QUESTION_MARKUP = /https?:\/\/|www\.|\]\(|\u0060|\*\*|__|^\s*(?:#|[-*•]\s)|<\/?[a-z][^>]*>/iu;
 export function checkedQuestions(raw: unknown[]): string[] {
   const seen = new Set<string>(), kept: string[] = [];
   for (const item of raw) {
     if (typeof item !== "string") continue;
     const question = item.trim().replace(/\s+/gu, " "), key = normalise(question);
-    if (question.length < 9 || question.length > 300 || !/\?["”')]*$/u.test(question) || /https?:\/\/|www\.|\]\(|[<>{}*_#]|`/iu.test(question) || seen.has(key)) continue;
+    if (question.length < 9 || question.length > 300 || !/\?["”')]*$/u.test(question) || QUESTION_MARKUP.test(question) || seen.has(key)) continue;
     seen.add(key); kept.push(question);
     if (kept.length === 5) break;
   }
