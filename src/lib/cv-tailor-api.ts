@@ -56,6 +56,16 @@ export async function requestTailoredCv(input: { cvText: string; jobDescription:
   return parsed.data.tailored;
 }
 
+/**
+ * A rewrite of a line inside a profile that a new summary replaced is not in the final CV, so
+ * "Keep my original" cannot undo it. The summary change already carries the replaced text as its
+ * original; list only changes that are present in the returned CV.
+ */
+export function withoutReplacedRewrites(tailored: TailoredCv): TailoredCv {
+  if (!tailored.changes.some(change => change.kind === 'summary' && change.before)) return tailored;
+  return { ...tailored, changes: tailored.changes.filter(change => change.kind !== 'rewrite' || tailored.text.includes(change.after)) };
+}
+
 /** Best-effort role title from the first meaningful line of a vacancy. */
 export function roleFromVacancy(vacancy: string): string {
   const first = vacancy.split(/\r?\n/u).map(line => line.trim()).find(line => line.length >= 2) ?? '';
