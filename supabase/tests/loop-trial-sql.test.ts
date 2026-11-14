@@ -26,7 +26,7 @@ const entitlement = async (user = owner) => instants(await sql('job_loop_billing
 const reminders = async () => ((await sql('job_loop_billing_trial_reminders_due', { p_mode: 'live' })) as Record<string, unknown>[]).map(instants);
 
 /** Mutable provider state for one trial subscription. */
-interface Provider { trialStart: number; charged: boolean; cancelled: boolean; status: string; refunded: boolean; firstChargeFails: boolean; posts: Record<string, unknown>[]; patches: number }
+interface Provider { trialStart: number; charged: boolean; cancelled: boolean; status: string; refunded: boolean; firstChargeFails: boolean; posts: Record<string, unknown>[]; patches: number; patchFails: boolean }
 let provider: Provider;
 const firstCharge = () => provider.trialStart + 7 * DAY;
 const meta = () => ({ product: LOOP_BILLING_PRODUCT, user_id: owner, request_id: request, generation: '0', plan: 'weekly' });
@@ -35,11 +35,11 @@ function providerSub() {
   return { subscription_id: 'sub_trial', product_id: 'pdt_weekly', quantity: 1, currency: 'USD', recurring_pre_tax_amount: 2900, payment_frequency_count: 1, payment_frequency_interval: 'Month',
     subscription_period_count: 20, subscription_period_interval: 'Year', trial_period_days: 7, on_demand: false, tax_inclusive: true, cancel_at_next_billing_date: provider.cancelled,
     status: provider.status, previous_billing_date: iso(provider.charged ? firstCharge() : provider.trialStart), next_billing_date: iso(provider.charged ? firstCharge() + 30 * DAY : firstCharge()),
-    customer: { customer_id: 'cus_trial' }, metadata: meta() };
+    customer: { customer_id: 'cus_trial' }, metadata: meta(), created_at: iso(provider.trialStart), has_payment_method: true };
 }
 function trialPayment() {
   return { payment_id: 'pay_trial', status: 'succeeded', currency: 'USD', subscription_id: 'sub_trial', subscription_ids: ['sub_trial'], is_multi_subscription: false, is_update_payment_method: false,
-    customer: { customer_id: 'cus_trial' }, total_amount: 0, tax: 0, checkout_session_id: 'cks_trial', service_periods: [] };
+    customer: { customer_id: 'cus_trial' }, total_amount: 0, tax: 0, checkout_session_id: 'cks_trial', service_periods: [], created_at: iso(provider.trialStart - 30000) };
 }
 function firstPayment() {
   return { payment_id: 'pay_first', status: provider.firstChargeFails ? 'failed' : 'succeeded', currency: 'USD', subscription_id: 'sub_trial', subscription_ids: ['sub_trial'], is_multi_subscription: false,
@@ -55,7 +55,7 @@ const ports: LoopBillingPorts = {
     if (path === 'checkouts/cks_trial') return { id: 'cks_trial', payment_id: 'pay_trial' };
     if (path === 'payments/pay_trial') return trialPayment();
     if (path === 'payments/pay_first') return firstPayment();
-    if (path === 'subscriptions/sub_trial') { if (method === 'PATCH') { provider.patches++; expect(body).toEqual({ cancel_at_next_billing_date: true }); provider.cancelled = true; } return providerSub(); }
+    if (path === 'subscriptions/sub_trial') { if (method === 'PATCH') { provider.patches++; if (provider.patchFails) throw Error('Provider timeout'); expect(body).toEqual({ cancel_at_next_billing_date: true }); provider.cancelled = true; } return providerSub(); }
     throw Error('External network forbidden: ' + path);
   },
 };
@@ -65,6 +65,13 @@ async function startTrial(trialStart = Date.now() - 3600000) {
   provider.trialStart = trialStart;
   await controlLoopBilling(ports, config, owner, session, checkoutInput());
   return applyLoopBillingWebhook(ports, config, activation() as never, 'msg_trial_start');
+}
+/** Occupy all 100 paid places with other live owners. */
+async function fillAllPaidPlaces() {
+  await query(`WITH u AS (INSERT INTO auth.users(id) SELECT gen_random_uuid() FROM generate_series(1,100) RETURNING id),
+    o AS (INSERT INTO jobvance_private.loop_billing_orders(user_id,request_id,mode,plan,product_id,state) SELECT id,gen_random_uuid(),'live','weekly','pdt_weekly','ready' FROM u RETURNING user_id,request_id)
+    INSERT INTO jobvance_private.loop_subscriptions(subscription_id,user_id,request_id,mode,plan,customer_id,status,valid_until,event_created)
+    SELECT 'sub_full_'||row_number() OVER (),user_id,request_id,'live','weekly','cus_full','active',now()+interval '20 days',1 FROM o`);
 }
 async function chargeFirst(created = epoch + 20) {
   provider.charged = true; provider.status = provider.firstChargeFails ? 'on_hold' : 'active';
@@ -83,7 +90,7 @@ beforeEach(async () => {
   owner = randomUUID(); session = randomUUID(); request = randomUUID();
   await query('INSERT INTO auth.users(id) VALUES($1)', [owner]); await query('INSERT INTO auth.sessions(id,user_id) VALUES($1,$2)', [session, owner]); await query('SELECT job_loop_open_record($1)', [owner]);
   epoch = Number((await query('SELECT extract(epoch FROM now())::bigint-100 e')).rows[0].e);
-  provider = { trialStart: Date.now() - 3600000, charged: false, cancelled: false, status: 'active', refunded: false, firstChargeFails: false, posts: [], patches: 0 };
+  provider = { trialStart: Date.now() - 3600000, charged: false, cancelled: false, status: 'active', refunded: false, firstChargeFails: false, posts: [], patches: 0, patchFails: false };
 });
 
 describe('seven-day free trial checkout', () => {
@@ -238,6 +245,84 @@ describe('access during and after the trial', () => {
     await query("DELETE FROM jobvance_private.loop_subscriptions WHERE subscription_id='sub_full_1'");
     expect(await chargeFirst()).toMatchObject({ received: true });
     expect(await entitlement()).toMatchObject({ active: true, plan: 'weekly', validUntil: iso(firstCharge() + 30 * DAY) });
+  });
+  it('review 1: a denied trial is stopped at Dodo before its first charge, verified, audited and idempotent', async () => {
+    await controlLoopBilling(ports, config, owner, session, checkoutInput());
+    await query("UPDATE jobvance_private.loop_billing_orders SET capacity_until=now()-interval '1 hour' WHERE request_id=$1", [request]);
+    await fillAllPaidPlaces();
+    const result = await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_trial_start');
+    expect(result).toMatchObject({ trial: { granted: false, reason: 'capacity_full', stopState: 'stopped' } });
+    expect(provider.patches).toBe(1);
+    expect((await query("SELECT stop_state,stop_attempts,stop_updated_at IS NOT NULL audited FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_trial'")).rows).toEqual([{ stop_state: 'stopped', stop_attempts: 1, audited: true }]);
+    expect(await entitlement()).toMatchObject({ active: false });
+    expect(await reminders()).toEqual([]);
+    const status = await controlLoopBilling(ports, config, owner, session, { action: 'status', contractVersion: 3 }) as Record<string, any>;
+    expect(status.subscription.trial).toMatchObject({ granted: false, deniedReason: 'capacity_full', stopState: 'stopped' });
+    // Any later trial-start delivery never repeats the provider write or reverts the terminal state.
+    await applyLoopBillingWebhook(ports, config, activation(epoch + 2) as never, 'msg_trial_again');
+    expect(provider.patches).toBe(1);
+    await expect(query("UPDATE jobvance_private.loop_subscription_trials SET stop_state='required' WHERE subscription_id='sub_trial'")).rejects.toThrow('LOOP_TRIAL_IMMUTABLE');
+  });
+  it('review 1: an unverified stop fails the delivery, releases the occurrence and succeeds on Dodo retry', async () => {
+    await controlLoopBilling(ports, config, owner, session, checkoutInput());
+    await query("UPDATE jobvance_private.loop_billing_orders SET capacity_until=now()-interval '1 hour' WHERE request_id=$1", [request]);
+    await fillAllPaidPlaces();
+    provider.patchFails = true;
+    await expect(applyLoopBillingWebhook(ports, config, activation() as never, 'msg_trial_start')).rejects.toMatchObject({ code: 'LOOP_TRIAL_STOP_PENDING' });
+    expect((await query("SELECT stop_state,stop_attempts FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_trial'")).rows).toEqual([{ stop_state: 'uncertain', stop_attempts: 1 }]);
+    expect((await query("SELECT count(*)::int n FROM jobvance_private.loop_billing_events WHERE event_id='dodo_msg_trial_start'")).rows[0].n).toBe(0);
+    provider.patchFails = false;
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_trial_start')).toMatchObject({ trial: { stopState: 'stopped' } });
+    expect((await query("SELECT stop_state,stop_attempts FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_trial'")).rows).toEqual([{ stop_state: 'stopped', stop_attempts: 2 }]);
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_trial_start')).toEqual({ received: true, duplicate: true });
+  });
+  it('review 1: a denied trial whose first charge already happened is recorded as charged and the paid month needs a place', async () => {
+    provider.trialStart = Date.now() - 9 * DAY;
+    await controlLoopBilling(ports, config, owner, session, checkoutInput());
+    await query("UPDATE jobvance_private.loop_billing_orders SET capacity_until=now()-interval '1 hour' WHERE request_id=$1", [request]);
+    await fillAllPaidPlaces();
+    provider.charged = true; // Dodo already renewed; the original activation is delivered late.
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_trial_start')).toMatchObject({ trial: { granted: false, stopState: 'charged' } });
+    expect(provider.patches).toBe(0);
+    await expect(chargeFirst()).rejects.toMatchObject({ code: 'LOOP_BILLING_FULFILLMENT_PENDING' });
+    expect((await query('SELECT reason FROM jobvance_private.loop_billing_pending_fulfillment WHERE user_id=$1', [owner])).rows).toEqual([{ reason: 'LOOP_PILOT_FULL' }]);
+    expect(await entitlement()).toMatchObject({ active: false });
+  });
+  it('review 2: a granted trial that expired, then lost the last place, sends its first payment to pending fulfillment', async () => {
+    await startTrial(Date.now() - 8 * DAY);
+    expect((await query("SELECT granted FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_trial'")).rows[0].granted).toBe(true);
+    await query("UPDATE jobvance_private.loop_billing_orders SET capacity_until=now()-interval '1 hour' WHERE request_id=$1", [request]);
+    await fillAllPaidPlaces();
+    await expect(chargeFirst()).rejects.toMatchObject({ code: 'LOOP_BILLING_FULFILLMENT_PENDING' });
+    expect((await query("SELECT count(*)::int n FROM jobvance_private.loop_subscription_periods WHERE subscription_id='sub_trial'")).rows[0].n).toBe(0);
+    expect(await entitlement()).toMatchObject({ active: false });
+    await query("DELETE FROM jobvance_private.loop_subscriptions WHERE subscription_id='sub_full_1'");
+    expect(await chargeFirst()).toMatchObject({ received: true });
+    expect(await entitlement()).toMatchObject({ active: true, validUntil: iso(firstCharge() + 30 * DAY) });
+  });
+  it('review 3: a late original $0 activation after a renewal binds the original trial dates from immutable evidence', async () => {
+    provider.trialStart = Date.now() - 10 * DAY;
+    await controlLoopBilling(ports, config, owner, session, checkoutInput());
+    await chargeFirst(); // The first charge is processed before the original activation.
+    expect(await applyLoopBillingWebhook(ports, config, activation(epoch + 30) as never, 'msg_trial_start')).toMatchObject({ received: true, trial: { granted: true } });
+    expect((await query("SELECT starts_at,first_charge_at FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_trial'")).rows)
+      .toEqual([{ starts_at: new Date(provider.trialStart), first_charge_at: new Date(firstCharge()) }]);
+    expect(await entitlement()).toMatchObject({ active: true, validUntil: iso(firstCharge() + 30 * DAY) });
+  });
+  it('review 4: cancelling at the first-charge boundary reports a possibly due charge, not "no charge"', async () => {
+    await startTrial(Date.now() - 7 * DAY + 5 * 60000);
+    const status = await controlLoopBilling(ports, config, owner, session, { action: 'status', contractVersion: 3 }) as Record<string, any>;
+    const receipt = await controlLoopBilling(ports, config, owner, session, { action: 'cancel', requestId: randomUUID(), expectedGeneration: 0, expectedSubscriptionId: 'sub_trial', expectedVersion: status.subscription.version, consent: true, contractVersion: 3 });
+    expect(receipt).toMatchObject({ status: 'confirmed', trialOutcome: 'charge_due', subscription: { trial: { cancelOutcome: 'charge_due' } } });
+  });
+  it('review 4: in a renewal race, cancelling after Dodo already took the first charge reports after_first_charge', async () => {
+    await startTrial();
+    const status = await controlLoopBilling(ports, config, owner, session, { action: 'status', contractVersion: 3 }) as Record<string, any>;
+    // Dodo renewed (a later period) before the renewal webhook reached Jobvance.
+    provider.trialStart = Date.now() - 8 * DAY; provider.charged = true;
+    const receipt = await controlLoopBilling(ports, config, owner, session, { action: 'cancel', requestId: randomUUID(), expectedGeneration: 0, expectedSubscriptionId: 'sub_trial', expectedVersion: status.subscription.version, consent: true, contractVersion: 3 });
+    expect(receipt).toMatchObject({ status: 'confirmed', trialOutcome: 'after_first_charge' });
+    expect(provider.patches).toBe(1);
   });
   it('a zero-amount payment on a paid order never grants anything', async () => {
     await controlLoopBilling(ports, config, owner, session, checkoutInput({ trial: false }));

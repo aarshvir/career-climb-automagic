@@ -2,7 +2,7 @@ import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 const mocks=vi.hoisted(()=>({invoke:vi.fn(),require:vi.fn()}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{functions:{invoke:mocks.invoke}}}));
 vi.mock('@/lib/job-loop-api',()=>({requireLoopOwner:mocks.require}));
-import {captureLoopCheckoutIntent,createLoopSubscriptionCheckout,readLoopBilling} from '@/lib/loop-subscription-billing';
+import {cancelLoopSubscription,captureLoopCancelIntent,captureLoopCheckoutIntent,createLoopSubscriptionCheckout,readLoopBilling} from '@/lib/loop-subscription-billing';
 import {clearTrackingDraftMemory,setTrackingDraftOwner,trackingDraftAuthority} from '@/lib/tracking-draft-memory';
 import {LOOP_TRIAL_DAYS,loopTrialDates,loopTrialTerms} from '@/lib/loop-trial';
 
@@ -48,6 +48,19 @@ describe('seven-day trial billing boundary',()=>{
     expect(mocks.invoke.mock.calls.map(call=>call[1].body)).toEqual([{action:'status',contractVersion:3},{action:'status',contractVersion:2}]);
     mocks.invoke.mockReset();mocks.invoke.mockResolvedValue({data:status({trial:{available:true,eligible:true,days:14}}),error:null});
     await expect(readLoopBilling(scope())).rejects.toThrow();
+  });
+  it('asks for the proven trial cancellation outcome and falls back to contract 2 for an older billing function',async()=>{
+    const sub={subscriptionId:'sub_trial',plan:'weekly' as const,status:'active' as const,validUntil:'2026-11-18T09:00:00Z',periodStart:'2026-11-11T09:00:00Z',cancelAtPeriodEnd:false,revoked:false,graceUntil:null,version:2,pricing:null};
+    const intent=captureLoopCancelIntent(sub,0,requestId);
+    const receipt={requestId,generation:0,subscriptionId:'sub_trial',status:'confirmed',subscription:{...sub,cancelAtPeriodEnd:true,version:3}};
+    mocks.invoke.mockResolvedValue({data:{...receipt,trialOutcome:'no_charge'},error:null});
+    expect(await cancelLoopSubscription(scope(),intent)).toMatchObject({trialOutcome:'no_charge'});
+    expect(mocks.invoke.mock.calls[0][1].body).toMatchObject({action:'cancel',contractVersion:3,expectedSubscriptionId:'sub_trial'});
+    mocks.invoke.mockReset();mocks.invoke.mockResolvedValueOnce(invalidInput()).mockResolvedValueOnce({data:receipt,error:null});
+    expect(await cancelLoopSubscription(scope(),intent)).not.toHaveProperty('trialOutcome');
+    expect(mocks.invoke.mock.calls.map(call=>call[1].body.contractVersion)).toEqual([3,2]);
+    mocks.invoke.mockReset();mocks.invoke.mockResolvedValue({data:{...receipt,trialOutcome:'free'},error:null});
+    await expect(cancelLoopSubscription(scope(),intent)).rejects.toThrow();
   });
   it('explains a used trial without opening checkout',async()=>{
     mocks.invoke.mockResolvedValue({data:null,error:{context:new Response(JSON.stringify({code:'LOOP_TRIAL_USED'}),{status:409})}});
