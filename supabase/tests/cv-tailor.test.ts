@@ -318,12 +318,12 @@ describe('every proposal that is left out is counted', () => {
     expect(assembleTailoredCv(doc, proposal).rejected.filter(item => item.reason === 'A suggestion could not be read.')).toHaveLength(5);
     expect(parseProposal('{"rewrites":[],"orders":[],"additions":[],"summary":{"text":"","sources":[],"facts":[]},"questions":[]}').unreadable).toBe(0);
   });
-  it('does not list a rewrite of a line the new profile replaced, nor count it as left out', () => {
+  it('does not list a rewrite of a line the new profile replaced, and counts it as left out', () => {
     const result = assembleTailoredCv(doc, { rewrites: [{ n: 5, text: 'Analyst with monthly reporting experience.' }, { n: 10, text: 'Prepared monthly reports for the team' }], summary: { text: 'Analyst with experience in monthly reporting and finance teams.', sources: [5, 6] } });
     expect(result.changes.map(change => change.kind)).toEqual(['rewrite', 'summary']);
     expect(result.changes.find(change => change.kind === 'rewrite')?.n).toBe(10);
     expect(result.changes.find(change => change.kind === 'summary')?.before).toContain('Analyst with experience in monthly reporting.');
-    expect(result.rejected).toEqual([]);
+    expect(result.rejected.map(item => item.reason)).toEqual(['The new profile replaces this line.']);
     for (const change of result.changes.filter(item => item.kind === 'rewrite')) expect(result.text).toContain(change.after);
   });
 });
@@ -384,5 +384,75 @@ describe('questions match the public explanation', () => {
     const result = assembleTailoredCv(doc, { questions: ['A statement.', 'Did you present to the board?'] });
     expect(result.questions).toEqual(['Did you present to the board?']);
     expect(result.rejected).toEqual([]);
+  });
+});
+
+describe('the profile change names its exact line', () => {
+  const lineOf = (result: ReturnType<typeof assembleTailoredCv>) => result.changes.find(change => change.kind === 'summary')?.at;
+  it('is the line of the new profile in the returned text, including after blank lines collapse', () => {
+    const cv = ['Jane Doe', 'Dubai | j@x.com', '', '', '', 'PROFILE', 'Line one.', '', '', 'Line two.', '', '', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(cv, { summary: { text: 'Line one and line two together.', sources: [7, 10] } });
+    const lines = result.text.split('\n');
+    expect(lineOf(result)).toBeGreaterThan(0);
+    expect(lines[lineOf(result)!]).toBe('Line one and line two together.');
+    expect(lines[lineOf(result)! - 1]).toBe('PROFILE');
+  });
+  it('is the inserted PROFILE section\u0027s line when the CV had no profile', () => {
+    const cv = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(cv, { summary: { text: 'Prepared monthly reports.', sources: [6] } });
+    expect(result.text.split('\n')[lineOf(result)!]).toBe('Prepared monthly reports.');
+    expect(lineOf(result)).toBe(4);
+  });
+  it('is absent when there is no profile, and the text holds no placeholder', () => {
+    const cv = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(cv, { rewrites: [{ n: 6, text: 'Prepared monthly reports weekly' }] });
+    expect(result.changes.every(change => change.at === undefined)).toBe(true);
+    expect(result.text).not.toContain('summary-slot');
+  });
+});
+
+describe('the left-out count has one contract', () => {
+  const doc = ['Jane Doe', 'Dubai, UAE | jane@example.com', '', 'PROFILE', 'Analyst with experience in monthly reporting.', 'Works closely with finance teams.', '', 'EXPERIENCE', 'Senior Analyst, Acme Retail', '- Prepared monthly reports', '- Maintained the KPI pack'].join('\n');
+  it('counts a rewrite that a replacing profile supersedes, and lists it nowhere else', () => {
+    const result = assembleTailoredCv(doc, { rewrites: [{ n: 5, text: 'Analyst with monthly reporting experience.' }, { n: 10, text: 'Prepared monthly reports for the team' }], summary: { text: 'Analyst with experience in monthly reporting and finance teams.', sources: [5, 6] } });
+    expect(result.rejected.map(item => item.reason)).toEqual(['The new profile replaces this line.']);
+    expect(result.changes.map(change => change.kind)).toEqual(['rewrite', 'summary']);
+  });
+  it('rejects a reply that is not one JSON object, and one that holds no readable proposal', () => {
+    for (const raw of ['[{"rewrites":[]}]', '{"x":1} {"y":2}', 'null', '"text"', '12']) expect(() => parseProposal(raw), raw).toThrow();
+    expect(parseProposal('{}')).toMatchObject({ unreadable: 0, rewrites: [], orders: [], additions: [], summary: null });
+  });
+  it('counts a present field that is not a list as one, and each unreadable element as one', () => {
+    const proposal = parseProposal('{"rewrites":"oops","orders":{"a":1},"additions":5,"summary":null,"questions":"q"}');
+    expect(proposal.unreadable).toBe(3);
+    expect(assembleTailoredCv(doc, proposal).rejected).toHaveLength(3);
+    expect(parseProposal('{"rewrites":["x",7,null,[],{"n":1,"text":"ok"}],"orders":[1,"a",[1,"b"]],"additions":[{"after":"x"}]}').unreadable).toBe(4 + 3 + 1);
+  });
+  it('counts a profile that is not a profile, and treats an empty one as none', () => {
+    expect(parseProposal('{"summary":"A profile"}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":[]}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":{"text":5}}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":{"sources":[5]}}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":{"text":"A profile"}}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":{"text":"   ","sources":[]}}').unreadable).toBe(0);
+    expect(parseProposal('{"summary":{"text":"","sources":[]}}').summary).toBeNull();
+    expect(parseProposal('{"summary":{"text":"A profile","sources":[5,"x"],"facts":[1,"y"]}}').summary).toEqual({ text: 'A profile', sources: [5], facts: [1] });
+  });
+  it('does not count questions, whatever shape they arrive in', () => {
+    expect(parseProposal('{"questions":"just a string"}')).toMatchObject({ unreadable: 0, questions: [] });
+    expect(parseProposal('{"questions":[1,null,"Did you lead the pilot?"]}')).toMatchObject({ unreadable: 0, questions: ['Did you lead the pilot?'] });
+  });
+});
+
+describe('questions: one line, web addresses and emphasis', () => {
+  const separator = String.fromCharCode(0x2028);
+  it('drops any question that holds a line break, including Unicode ones', () => {
+    expect(checkedQuestions(['Did you lead\nthe pilot workstream?', 'Did you lead\r\nthe pilot workstream?', 'Did you lead' + separator + 'the pilot workstream?', 'Did you lead the pilot workstream?\n'])).toEqual(['Did you lead the pilot workstream?']);
+  });
+  it('drops ftp, other scheme and mailto addresses, www and single-star emphasis', () => {
+    for (const bad of ['Did you read ftp://files.example.com/cv?', 'Did you open file:///C:/cv?', 'Did you write to mailto:a@b.co?', 'Did you see HTTPS://example.com?', 'Did you use *bold* wording?', 'Did you lead *the* pilot?', '* Did you lead the pilot?']) expect(checkedQuestions([bad]), bad).toEqual([]);
+  });
+  it('keeps what the page says is not detected, and ordinary stars and colons', () => {
+    for (const ok of ['Did you use example.com for reports?', 'Did you write _tests_ for the model?', 'Did you cut costs by 5 * 3 units?', 'Did you do this: lead the pilot?', 'Did you lead 3*4 sites?']) expect(checkedQuestions([ok]), ok).toEqual([ok]);
   });
 });

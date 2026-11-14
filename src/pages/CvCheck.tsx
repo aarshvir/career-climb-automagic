@@ -26,7 +26,7 @@ import { createFreeCheckCvBlob, createFreeCheckReportText } from "@/lib/free-che
 import { downloadBlob, safeDocumentFilename } from "@/lib/document-download";
 import { trackFreeCheck } from "@/lib/free-check-tracking";
 import { createReviewedPdfPreview, type DocumentFormat } from "@/lib/document-export";
-import { companyFromVacancy, requestTailoredCv, roleFromVacancy, TailorUnavailable, withoutReplacedRewrites, type TailorChange } from "@/lib/cv-tailor-api";
+import { companyFromVacancy, profileLine, requestTailoredCv, roleFromVacancy, TailorUnavailable, withoutReplacedRewrites, type TailorChange } from "@/lib/cv-tailor-api";
 import { staticPageMeta } from "@/lib/public-site-meta";
 import "./CvCheck.css";
 
@@ -447,7 +447,7 @@ function CvCheckWorkspace() {
       const changes = result.changes.map(change => ({ ...change, facts: change.facts ?? [] }));
       setTailoring({ changes, questions: result.questions, rejectedCount: result.rejectedCount, ownerId: owner.current, facts, factSources, sourceText: valid.sourceText, jobDescription: valid.jobDescription, jobTitle: valid.jobTitle, company: valid.company });
       const used = changes.filter(change => change.facts.length).length;
-      setNotice(used ? `${used} ${used === 1 ? 'change uses' : 'changes use'} your answers, marked “from your answer” below. Your previous version is saved if you want to undo.` : 'No new wording used your answers this time. Review any other proposed changes below. Your previous version is saved if you want to undo.');
+      setNotice(used ? `${used} ${used === 1 ? 'change uses' : 'changes use'} your answers, marked “from your answer” below. Your previous version is saved if you want to undo.` : changes.length ? 'No new wording used your answers this time. Review any other proposed changes below. Your previous version is saved if you want to undo.' : result.rejectedCount ? 'No suggested change could be used, so your CV is unchanged. Your previous version is saved if you want to undo.' : 'No changes were suggested this time. Your previous version is saved if you want to undo.');
     } catch (failure) {
       if (!mounted.current || !authorityCurrent() || revision.current !== atRevision || owner.current !== startingOwner) return;
       const text = `${failure instanceof Error ? failure.message : 'AI tailoring is unavailable right now.'} Your current CV is unchanged.`;
@@ -459,7 +459,7 @@ function CvCheckWorkspace() {
     if (busy || !tailoring || tailoring.ownerId !== owner.current) return;
     const change = tailoring.changes[index];
     if (!change || change.reverted || change.kind === 'order') return;
-    let text = draft.reviewedText;
+    let text = draft.reviewedText, removedAt = -1;
     if (change.kind === 'rewrite') {
       const lines = text.split('\n'), matches = lines.flatMap((line, at) => line === change.after ? [at] : []);
       if (matches.length !== 1) { setError(matches.length ? 'That line appears more than once, so it was left as it is. Edit the line you want in your CV below.' : 'That line has been edited since, so it was left as it is.'); return; }
@@ -468,21 +468,20 @@ function CvCheckWorkspace() {
     else if (change.kind === 'addition') {
       const lines = text.split('\n'), matches = lines.flatMap((line, index) => line === change.after ? [index] : []);
       if (matches.length !== 1) { setError('That line was edited or appears more than once. Remove the intended line in your CV below; no text was changed.'); return; }
-      lines.splice(matches[0], 1); text = lines.join('\n');
+      lines.splice(matches[0], 1); text = lines.join('\n'); removedAt = matches[0];
     }
     else {
-      // The profile sits directly under its heading. Find it there, so the same words elsewhere (a header line, another section) are never touched.
-      const lines = text.split('\n'), profileHeading = /^(professional\s+|career\s+)?(profile|summary|objective)\s*:?$/iu;
-      const matches = lines.flatMap((line, at) => line === change.after && at > 0 && profileHeading.test(lines[at - 1].trim()) ? [at] : []);
-      if (matches.length !== 1) { setError('The summary has been edited since, or its heading was changed, so it was left as it is.'); return; }
-      const at = matches[0], insertedHeading = !change.before && lines[at - 1].trim() === 'PROFILE' && !draft.sourceText.split(/\r?\n/u).some(line => line.trim() === 'PROFILE');
+      // Bound to the exact line the profile was placed on: if that line was edited, moved or its heading changed, nothing is touched.
+      const lines = text.split('\n'), at = profileLine(lines, change);
+      if (at === null) { setError('The summary has been edited or moved since, so it was left as it is. Edit it in your CV below.'); return; }
+      const insertedHeading = !change.before && lines[at - 1].trim() === 'PROFILE' && !draft.sourceText.split(/\r?\n/u).some(line => line.trim() === 'PROFILE');
       if (change.before) lines.splice(at, 1, ...change.before.split('\n'));
       else if (insertedHeading) { const blank = at >= 2 && lines[at - 2] === '' ? 1 : 0; lines.splice(at - 1 - blank, 2 + blank); }
       else lines.splice(at, 1);
       text = lines.join('\n');
     }
     const kept = tailoring; editDraft({ reviewedText: text }); setReport(analyzeCvEvidence(text, draft.jobDescription, draft.jobTitle));
-    setTailoring({ ...kept, withdrawnFacts: [...new Set([...(kept.withdrawnFacts ?? []), ...change.facts])], changes: kept.changes.map((item, i) => i === index ? { ...item, reverted: true } : item) });
+    setTailoring({ ...kept, withdrawnFacts: [...new Set([...(kept.withdrawnFacts ?? []), ...change.facts])], changes: kept.changes.map((item, i) => i === index ? { ...item, reverted: true } : removedAt >= 0 && item.kind === 'summary' && typeof item.at === 'number' && removedAt < item.at ? { ...item, at: item.at - 1 } : item) });
     setNotice(change.kind === 'addition' ? 'That new line is removed.' : 'That line is back to your original wording.');
   }
   function undoTailoring() {

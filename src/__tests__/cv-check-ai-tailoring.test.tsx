@@ -328,7 +328,7 @@ describe('restoring an original at its real place', () => {
     fireEvent.change(screen.getByLabelText(/Your tailored CV/), { target: { value: edited } });
     fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
     expect(reviewed()).toBe(edited);
-    expect(await screen.findByText(/heading was changed, so it was left as it is/)).toBeInTheDocument();
+    expect(await screen.findByText(/edited or moved since, so it was left as it is/)).toBeInTheDocument();
   });
   it('never restores the first of two identical lines', async () => {
     const twice = `${source}\n- Prepared monthly stakeholder reports using Excel.`;
@@ -338,5 +338,67 @@ describe('restoring an original at its real place', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
     expect(await screen.findByText(/appears more than once/)).toBeInTheDocument();
     expect(reviewed()).toBe(before);
+  });
+});
+
+describe('undo is bound to the exact place the profile was put', () => {
+  const GEN = 'Analyst preparing monthly stakeholder reporting in Excel.';
+  const role = 'Analyst - Example Co | 2021 - 2024', bullet = '- Prepared monthly stakeholder reports using Excel.';
+  const head = ['Alex Example', 'alex@example.com', ''];
+  async function open(sourceText: string, result: unknown) {
+    mocks.tailor.mockResolvedValue(result); show();
+    fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: sourceText } });
+    fireEvent.change(screen.getByLabelText('The job description'), { target: { value: vacancy } });
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+  }
+  const summary = (before: string, at?: number) => ({ kind: 'summary', n: 4, before, after: GEN, sources: [5], facts: [], ...(at === undefined ? {} : { at }) });
+  const result = (lines: string[], changes: unknown[]) => ({ text: lines.join('\n'), changes, questions: [], rejectedCount: 0 });
+
+  it('does nothing when the generated profile was edited, even if the same words sit under another SUMMARY', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'EXPERIENCE', role, bullet, '', 'SUMMARY', GEN];
+    await open(lines.join('\n').replace(GEN, 'Experienced analyst.'), result(lines, [summary('Experienced analyst.', 4)]));
+    const edited = lines.map((line, i) => i === 4 ? `${GEN} Edited by me.` : line).join('\n');
+    fireEvent.change(screen.getByLabelText(/Your tailored CV/), { target: { value: edited } });
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(/edited or moved since, so it was left as it is/)).toBeInTheDocument();
+    expect(reviewed()).toBe(edited);
+  });
+  it('restores only the line the function named, never an identical pair elsewhere', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'SUMMARY', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Notes kept for later.\n\nSecond paragraph.', 7)]));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe([...head, 'PROFILE', GEN, '', 'SUMMARY', 'Notes kept for later.', '', 'Second paragraph.', '', 'EXPERIENCE', role, bullet].join('\n'));
+  });
+  it('with an older function that gives no line, acts only when exactly one place fits', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'SUMMARY', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Old.')]));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(/edited or moved since/)).toBeInTheDocument();
+    expect(reviewed()).toBe(lines.join('\n'));
+  });
+  it('follows the profile when an earlier new line is removed, then restores the right line', async () => {
+    const added = '- Led the pilot workstream for two of the five units.';
+    const lines = [...head, 'EXPERIENCE', role, bullet, added, '', 'PROFILE', GEN];
+    await open([...head, 'EXPERIENCE', role, bullet, '', 'PROFILE', 'Old profile.'].join('\n'), result(lines, [{ kind: 'addition', n: 5, before: '', after: added, sources: [5], facts: [] }, { ...summary('Old profile.', 9), n: 7 }]));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove this line' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe([...head, 'EXPERIENCE', role, bullet, '', 'PROFILE', 'Old profile.'].join('\n'));
+  });
+});
+
+describe('the all-rejected wording is neutral in both flows', () => {
+  it('after improving with answers, when nothing could be used', async () => {
+    const question = 'Did you lead any part of the transformation pilot, or support it?';
+    mocks.tailor.mockResolvedValueOnce(tailored).mockResolvedValueOnce({ text: tailoredText, changes: [], questions: [], rejectedCount: 2 });
+    show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+    fireEvent.change(screen.getByLabelText(question), { target: { value: 'I led the pilot workstream for two of the five units.' } });
+    fireEvent.change(screen.getByLabelText('Where this answer belongs in your original CV'), { target: { value: '5' } });
+    fireEvent.click(screen.getByLabelText(/This is accurate for the selected CV line/));
+    fireEvent.click(screen.getByRole('button', { name: 'Improve my CV with these answers' }));
+    expect(await screen.findByText(/No suggested change could be used, so your CV is unchanged\. Your previous version is saved/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/Review any other proposed changes/);
   });
 });

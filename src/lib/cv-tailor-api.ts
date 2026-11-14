@@ -9,6 +9,8 @@ const changeSchema = z.object({
   sources: z.array(z.number().int()).max(200),
   /** One-based numbers of the confirmed answers this change used. */
   facts: z.array(z.number().int().min(1).max(5)).max(5).default([]),
+  /** For a summary: the 0-based line of the new profile in the returned text. Older functions omit it. */
+  at: z.number().int().min(0).nullable().optional(),
 });
 const responseSchema = z.object({
   tailored: z.object({
@@ -54,6 +56,20 @@ export async function requestTailoredCv(input: { cvText: string; jobDescription:
   if (!parsed.success) throw new TailorUnavailable('The AI suggestions could not be checked. Your CV comparison still works.', 'TAILOR_UNREADABLE');
   if (parsed.data.tailored.changes.some(change => change.facts.some(n => n > (body.facts?.length ?? 0) || (change.kind === 'summary' ? !change.sources.includes(body.factSources![n - 1]) : change.n !== body.factSources![n - 1])))) throw new TailorUnavailable('The answer references could not be checked. Your current CV is unchanged.', 'TAILOR_UNREADABLE');
   return parsed.data.tailored;
+}
+
+const PROFILE_HEADING = /^(professional\s+|career\s+)?(profile|summary|objective)\s*:?$/iu;
+/**
+ * The line of a new profile that an undo may replace, or null. With the function's exact "at" the answer is that
+ * line only, and only while it still holds the generated text directly under a profile heading: if it was edited
+ * or moved, nothing is searched for elsewhere, so the same words under another heading are never touched.
+ * Without "at" (an older function) the line is used only if exactly one place fits.
+ */
+export function profileLine(lines: readonly string[], change: { after: string; at?: number | null }): number | null {
+  const fits = (at: number) => at > 0 && lines[at] === change.after && PROFILE_HEADING.test((lines[at - 1] ?? '').trim());
+  if (typeof change.at === 'number') return fits(change.at) ? change.at : null;
+  const found = lines.flatMap((_, at) => fits(at) ? [at] : []);
+  return found.length === 1 ? found[0] : null;
 }
 
 /**

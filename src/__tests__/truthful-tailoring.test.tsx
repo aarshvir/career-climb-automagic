@@ -209,13 +209,14 @@ describe('public AI tailoring page', () => {
     const summary = profiled.changes.find(change => change.kind === 'summary');
     expect(summary?.before).toContain('Analyst with experience in monthly reporting.');
     expect(profiled.text).not.toContain('Works closely with finance teams.');
-    // A rewrite inside a replaced profile is not listed, and is not counted as left out.
+    // A rewrite inside a replaced profile is not listed, and is counted as left out.
     const collision = assembleTailoredCv(cv, { rewrites: [{ n: 5, text: 'Analyst with monthly reporting experience.' }], summary: { text: 'Analyst with experience in monthly reporting and finance teams.', sources: [5, 6] } });
     expect(collision.changes.find(change => change.kind === 'rewrite')).toBeUndefined();
     expect(collision.changes.find(change => change.kind === 'summary')?.before).toContain('Analyst with experience in monthly reporting.');
-    expect(collision.rejected).toEqual([]);
+    expect(collision.rejected.map(item => item.reason)).toEqual(['The new profile replaces this line.']);
     renderPage();
     expect(document.body).not.toHaveTextContent('keep-original button can fail');
+    expect(document.body).toHaveTextContent('a reworded line that a new profile replaces');
   });
 
   it('keeps the stated limits on profiles, new lines and questions', () => {
@@ -299,7 +300,7 @@ describe('public AI tailoring page', () => {
 describe('the public page matches what the code counts and filters', () => {
   it('names every kind of left-out suggestion the code counts, and says what is not counted', () => {
     renderPage();
-    for (const phrase of ['reorders that do not match', 'could not read or place', 'any beyond the number it reads', 'A suggestion that changes nothing is not counted']) expect(document.body, phrase).toHaveTextContent(phrase);
+    for (const phrase of ['reorders that do not match', 'suggestions or whole fields it could not read', 'a profile it could not place', 'a reworded line that a new profile replaces', 'any beyond the number it reads', 'A suggestion that changes nothing, and a question that is dropped, are not counted', 'nothing is applied and you see an error instead']) expect(document.body, phrase).toHaveTextContent(phrase);
     // Each of those kinds is really counted by the code, and a no-op is not.
     const cv = ['Jane Doe', 'Dubai, UAE | jane@example.com', '', 'EXPERIENCE', 'Senior Analyst, Acme', '- Prepared monthly reports', '- Maintained the KPI pack'].join('\n');
     expect(assembleTailoredCv(cv, { orders: [[7, 6, 99]] }).rejected).toHaveLength(1);
@@ -309,7 +310,8 @@ describe('the public page matches what the code counts and filters', () => {
   });
   it('states the question filter exactly as the code applies it', () => {
     renderPage();
-    expect(document.body).toHaveTextContent('one line of 9 to 300 characters that ends in a question mark, with no link, HTML or Markdown');
+    expect(document.body).toHaveTextContent('one line (a line break drops it) of 9 to 300 characters that ends in a question mark, with no web address (http://, https://, ftp:// or another scheme://, www. or mailto:), no HTML, Markdown link, bold, star emphasis or backticks');
+    expect(document.body).toHaveTextContent('A bare domain such as example.com, and text in underscores, are not detected.');
     expect(document.body).toHaveTextContent('At most five are kept, and one that fails is dropped without being counted');
     expect(checkedQuestions(['Did you write the C# tools?', 'Why do now?', 'Why now?', 'a'.repeat(300) + '?', 'Did you see www.example.com?'])).toEqual(['Did you write the C# tools?', 'Why do now?']);
     expect(checkedQuestions(Array.from({ length: 8 }, (_, i) => `Did you finish project ${i}?`))).toHaveLength(5);
