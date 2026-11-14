@@ -10,8 +10,8 @@ const config = { mode: 'test', provider: 'dodo', appUrl: 'https://jobvance.io', 
 const sub = (changes: Record<string, unknown> = {}) => ({ subscription_id: 'sub_trial', product_id: 'pdt_weekly', quantity: 1, currency: 'USD', recurring_pre_tax_amount: 2900, payment_frequency_count: 1,
   payment_frequency_interval: 'Month', subscription_period_count: 20, subscription_period_interval: 'Year', trial_period_days: 7, on_demand: false, tax_inclusive: true, cancel_at_next_billing_date: false, status: 'active',
   previous_billing_date: new Date(start).toISOString(), next_billing_date: new Date(start + 7 * DAY).toISOString(), customer: { customer_id: 'cus_trial' },
-  metadata: { product: LOOP_BILLING_PRODUCT, user_id: owner, request_id: request, generation: '0', plan: 'weekly' }, ...changes });
-const zero = (changes: Record<string, unknown> = {}) => ({ payment_id: 'pay_trial', status: 'succeeded', currency: 'USD', subscription_id: 'sub_trial', customer: { customer_id: 'cus_trial' }, total_amount: 0, tax: 0, checkout_session_id: 'cks_trial', ...changes });
+  metadata: { product: LOOP_BILLING_PRODUCT, user_id: owner, request_id: request, generation: '0', plan: 'weekly' }, created_at: new Date(start).toISOString(), has_payment_method: true, ...changes });
+const zero = (changes: Record<string, unknown> = {}) => ({ payment_id: 'pay_trial', status: 'succeeded', currency: 'USD', subscription_id: 'sub_trial', customer: { customer_id: 'cus_trial' }, total_amount: 0, tax: 0, checkout_session_id: 'cks_trial', created_at: new Date(start - 30000).toISOString(), ...changes });
 
 Deno.test('trial checkout requests exactly seven days only for a trial order', () => {
   assert(LOOP_TRIAL_DAYS === 7, 'trial length');
@@ -29,7 +29,7 @@ Deno.test('product price stays strict and card-required', () => {
 Deno.test('a trial start is proven only by the original $0 payment and a seven-day window', () => {
   const verified = validateLoopSubscription(sub(), config, undefined, undefined, 7);
   throws(() => validateLoopSubscription(sub(), config), 'trial subscription rejected on a paid order');
-  const trial = validateLoopTrialStart(zero(), verified, 'cks_trial');
+  const trial = validateLoopTrialStart(zero(), verified, 'cks_trial', sub());
   assert(trial.firstChargeAt === new Date(start + 7 * DAY).toISOString(), 'first charge at trial end');
-  for (const changes of [{ total_amount: 2900 }, { tax: 1 }, { checkout_session_id: 'cks_other' }, { refund_status: 'full' }]) throws(() => validateLoopTrialStart(zero(changes), verified, 'cks_trial'), `rejects ${JSON.stringify(changes)}`);
+  for (const changes of [{ total_amount: 2900 }, { tax: 1 }, { checkout_session_id: 'cks_other' }, { refund_status: 'full' }]) throws(() => validateLoopTrialStart(zero(changes), verified, 'cks_trial', sub()), `rejects ${JSON.stringify(changes)}`);
 });

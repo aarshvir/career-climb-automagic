@@ -13,7 +13,11 @@ const pricing=z.object({quoteId:z.string().uuid().nullable(),country:z.string().
 const quoteSchema=pricing.extend({quoteId:z.string().uuid(),country,requestId:z.string().uuid(),generation,plan,expiresAt:z.string().datetime({offset:true})}).strict();
 const instant = z.string().datetime({ offset: true });
 /** A recorded $0 free-trial window; it is never a paid period. */
-const subscriptionTrial = z.object({ startsAt: instant, endsAt: instant, firstChargeAt: instant, reminderAt: instant, granted: z.boolean() }).strict();
+const trialOutcome = z.enum(['no_charge','charge_due','after_first_charge']);
+const subscriptionTrial = z.object({ startsAt: instant, endsAt: instant, firstChargeAt: instant, reminderAt: instant, granted: z.boolean(),
+  deniedReason: z.enum(['trial_used','capacity_full']).nullable().optional(),
+  stopState: z.enum(['not_needed','required','requested','stopped','charged','uncertain']).nullable().optional(),
+  cancelOutcome: trialOutcome.nullable().optional() }).strict();
 const trialOffer = z.object({ available: z.boolean(), eligible: z.boolean(), days: z.literal(7) }).strict();
 const subscription = z.object({ subscriptionId: z.string().regex(/^sub_[A-Za-z0-9_-]{1,100}$/), plan,
   status: z.enum(['pending','active','on_hold','paused','cancelled','failed','expired','past_due']),
@@ -30,6 +34,7 @@ export type LoopSubscription = z.infer<typeof subscription>;
 export type LoopPricing = z.infer<typeof pricing>;
 export type LoopPriceQuote = z.infer<typeof quoteSchema>;
 export type LoopSubscriptionTrial = z.infer<typeof subscriptionTrial>;
+export type LoopTrialOutcome = z.infer<typeof trialOutcome>;
 export interface LoopBillingScope { ownerId: string; authority: number; billingMode?: 'test'|'live'; pricing?:LoopPricing }
 export interface LoopCheckoutIntent { action: 'checkout'; plan: LoopSubscriptionPlan; requestId: string; expectedGeneration: number; consent: true;quoteId?:string;trial?:true }
 export interface LoopCancelIntent { action: 'cancel'; requestId: string; expectedGeneration: number; expectedSubscriptionId: string; expectedVersion: number; consent: true;contractVersion:2 }
@@ -105,7 +110,13 @@ export async function createLoopSubscriptionCheckout(scope:LoopBillingScope,inte
 }
 export async function cancelLoopSubscription(scope:LoopBillingScope,intent:Readonly<LoopCancelIntent>,stillCurrent?:()=>boolean){
   const original=z.object({action:z.literal('cancel'),requestId:z.string().uuid(),expectedGeneration:generation,expectedSubscriptionId:z.string().regex(/^sub_[A-Za-z0-9_-]{1,100}$/),expectedVersion:z.number().int().positive().max(Number.MAX_SAFE_INTEGER),consent:z.literal(true),contractVersion:z.literal(2)}).strict().parse(intent);
-  const result=z.object({requestId:z.string().uuid(),generation,subscriptionId:z.string(),status:z.enum(['confirmed','uncertain']),subscription:subscription.nullable()}).strict().parse(await call(scope,original,stillCurrent));
+  // Contract 3 returns the server-proven trial cancellation outcome. A billing
+  // function that predates it rejects the version during input validation,
+  // before any cancellation work, so the unchanged contract 2 request follows.
+  let raw:unknown;
+  try{raw=await call(scope,{...original,contractVersion:3},stillCurrent);}
+  catch(failure){if(!(failure instanceof LoopBillingError)||failure.code!=='INVALID_INPUT')throw failure;raw=await call(scope,original,stillCurrent);}
+  const result=z.object({requestId:z.string().uuid(),generation,subscriptionId:z.string(),status:z.enum(['confirmed','uncertain']),subscription:subscription.nullable(),trialOutcome:trialOutcome.nullable().optional()}).strict().parse(raw);
   if(result.subscription?.pricing)validateMoney(result.subscription.pricing);
   if(result.requestId!==original.requestId||result.generation!==original.expectedGeneration||result.subscriptionId!==original.expectedSubscriptionId||result.subscription&&result.subscription.subscriptionId!==original.expectedSubscriptionId)throw new LoopBillingError('The cancellation receipt did not match your subscription. Refresh billing to confirm its current state.');
   return result;

@@ -115,15 +115,33 @@ export interface LoopTrialStart { paymentId: string; trialStart: string; firstCh
 /** Proves a free trial started for the exact original checkout. It never
  * proves a paid month: the amount must be exactly zero, with no tax or
  * discount, and the provider's first charge must be seven days after start. */
-export function validateLoopTrialStart(value: unknown, sub: LoopSubscription, originalSession: string): LoopTrialStart {
-  const payment = obj(value), customer = obj(payment.customer), ids = payment.subscription_ids;
+export function validateLoopTrialStart(value: unknown, sub: LoopSubscription, originalSession: string, source: unknown): LoopTrialStart {
+  const payment = obj(value), customer = obj(payment.customer), ids = payment.subscription_ids, raw = obj(source);
   if (typeof payment.payment_id !== 'string' || !DODO_PAYMENT_ID.test(payment.payment_id) || payment.status !== 'succeeded' || payment.total_amount !== 0 || !(absent(payment.tax) || payment.tax === 0) ||
     payment.currency !== sub.currency || payment.subscription_id !== sub.subscriptionId || (!absent(ids) && (!Array.isArray(ids) || ids.length !== 1 || ids[0] !== sub.subscriptionId)) ||
     payment.is_multi_subscription === true || payment.is_update_payment_method === true || customer.customer_id !== sub.customerId || !noDiscount(payment) ||
     payment.checkout_session_id !== originalSession || (typeof payment.refund_status === 'string' && payment.refund_status !== 'none')) throw invalid('This payment does not prove a free trial for this checkout.');
-  const span = Date.parse(sub.validUntil) - Date.parse(sub.periodStart), day = 86400000, hour = 3600000;
-  if (span < LOOP_TRIAL_DAYS * day - hour || span > LOOP_TRIAL_DAYS * day + hour) throw invalid('This subscription does not have a seven-day trial window.');
-  return { paymentId: payment.payment_id, trialStart: sub.periodStart, firstChargeAt: sub.validUntil };
+  // The trial window is bound to immutable evidence: the subscription's own
+  // creation time, which the original $0 payment must match. The current billing
+  // dates move at every renewal, so a late original activation after a renewal
+  // still proves the same original window. A card is required throughout.
+  if (raw.subscription_id !== sub.subscriptionId || raw.has_payment_method === false) throw invalid('This subscription does not prove a card-required free trial.');
+  const day = 86400000, hour = 3600000, trialMs = LOOP_TRIAL_DAYS * day;
+  const created = Date.parse(date(raw.created_at)), paid = Date.parse(date(payment.created_at));
+  if (Math.abs(paid - created) > 6 * hour) throw invalid('This payment does not belong to the original trial start.');
+  const previous = Date.parse(sub.periodStart), next = Date.parse(sub.validUntil);
+  let firstCharge: number;
+  if (Math.abs(previous - created) <= hour) {
+    // Not yet renewed: the provider's next billing date is the first charge.
+    if (next < created + trialMs - hour || next > created + trialMs + hour) throw invalid('This subscription does not have a seven-day trial window.');
+    firstCharge = next;
+  } else {
+    // Already renewed (out-of-order delivery): the current period must have
+    // started at or after the trial's own seven-day boundary.
+    if (previous < created + trialMs - hour) throw invalid('This subscription does not have a seven-day trial window.');
+    firstCharge = created + trialMs;
+  }
+  return { paymentId: payment.payment_id, trialStart: new Date(created).toISOString(), firstChargeAt: new Date(firstCharge).toISOString() };
 }
 export interface LoopPaidPeriod { paymentId: string; sessionId: string | null; periodStart: string; validUntil: string; amount: number; revoked: boolean }
 export function validateLoopPaidPeriod(value: unknown, sub: LoopSubscription): LoopPaidPeriod {
@@ -172,8 +190,8 @@ export function captureLoopBillingInput(value: unknown) {
     return { ...base, action: 'checkout' as const, plan: loopBillingPlan(input.plan), trial: input.trial === true, ...(!absent(input.quoteId) ? { quoteId:uuid(input.quoteId,'Price quote') } : {}) };
   }
   if (typeof input.expectedSubscriptionId !== 'string' || !LOOP_SUBSCRIPTION_ID.test(input.expectedSubscriptionId) || !Number.isSafeInteger(input.expectedVersion) || (input.expectedVersion as number) < 1) throw invalid('Refresh your subscription before cancelling.');
-  if (!absent(input.contractVersion) && input.contractVersion !== 2) throw new ApiError(400,'INVALID_INPUT','Refresh the billing page.');
-  return { ...base, action: 'cancel' as const, subscriptionId: input.expectedSubscriptionId, version: input.expectedVersion as number, contractVersion:input.contractVersion === 2 ? 2 : 1 };
+  if (!absent(input.contractVersion) && input.contractVersion !== 2 && input.contractVersion !== 3) throw new ApiError(400,'INVALID_INPUT','Refresh the billing page.');
+  return { ...base, action: 'cancel' as const, subscriptionId: input.expectedSubscriptionId, version: input.expectedVersion as number, contractVersion:input.contractVersion === 3 ? 3 : input.contractVersion === 2 ? 2 : 1 };
 }
 /** Decode only after auth.getUser verifies this token; SQL independently checks that session still exists. */
 export function verifiedAuthSession(req: Request): string {

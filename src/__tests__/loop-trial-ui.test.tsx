@@ -68,24 +68,56 @@ describe('seven-day free trial journey',()=>{
     m.read.mockResolvedValue(status({trial:{available:true,eligible:false,days:7},subscription:sub,entitlement:{active:true,plan:'weekly',cadence:'weekly',variantLimit:3,maxWeeklyRuns:1,validUntil:trial.endsAt}}));
     // The actual contract-2 cancellation receipt carries no trial fields.
     const {trial:_omitted,...receiptSub}={...sub,cancelAtPeriodEnd:true,version:3};
-    m.cancel.mockResolvedValue({requestId:'00000000-0000-4000-8000-000000000009',generation:0,subscriptionId:'sub_trial',status:'confirmed',subscription:receiptSub});
+    m.cancel.mockResolvedValue({requestId:'00000000-0000-4000-8000-000000000009',generation:0,subscriptionId:'sub_trial',status:'confirmed',subscription:receiptSub,trialOutcome:'no_charge'});
     renderPage('/pricing');
     expect(await screen.findByText('Status: free trial.')).toBeInTheDocument();
     expect(screen.getByLabelText('Free trial')).toHaveTextContent(/First charge: \$29 USD, tax included,/);
     expect(screen.queryByText(/Paid access through/)).not.toBeInTheDocument();
-    const confirm=screen.getByRole('checkbox',{name:/Cancel this free trial\. You will not be charged \$29 USD/});
+    // Before cancelling, nothing promises an outcome the provider has not confirmed.
+    const confirm=screen.getByRole('checkbox',{name:/Cancel this free trial so the first charge of \$29 USD due on .+ is not taken\..*We confirm the outcome with Dodo Payments after you cancel\./});
+    expect(confirm).not.toHaveAccessibleName(/You will not be charged/);
     const button=screen.getByRole('button',{name:'Cancel free trial'});expect(button).toBeDisabled();
     fireEvent.click(confirm);fireEvent.click(button);
     await waitFor(()=>expect(m.cancel).toHaveBeenCalledTimes(1));
     expect(m.cancel.mock.calls[0][1]).toMatchObject({action:'cancel',expectedSubscriptionId:'sub_trial',expectedVersion:2,consent:true});
-    expect(await screen.findByText(/Free trial cancelled\. You will not be charged\. Trial access continues until/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Free trial cancelled\. You will not be charged\. Trial access continues until/)).length).toBeGreaterThan(0);
     // The panel keeps its trial state without a refresh, never paid-period copy.
     expect(screen.getByText('Status: free trial.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Free trial')).toHaveTextContent(`Trial cancelled. You will not be charged. Trial access ends`);
+    expect(screen.getByLabelText('Free trial')).toHaveTextContent('Free trial cancelled. You will not be charged. Trial access continues until');
     expect(screen.queryByText(/Recorded paid period ends/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Renewal is cancelled/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button',{name:'Cancel free trial'})).not.toBeInTheDocument();
     expect(m.read).toHaveBeenCalledTimes(1);
+  });
+  it.each([
+    ['charge_due',/Renewal cancelled\. Your first charge was due on .+, so it may already be processing\./],
+    ['after_first_charge',/Renewal cancelled\. Your first monthly charge had already started, so paid access continues until/],
+    [undefined,/Renewal cancelled\. Refresh billing to confirm whether the first charge due on .+ was taken\./],
+  ])('shows the proven cancellation outcome %s, never an unproven no-charge assurance',async(outcome,copy)=>{
+    const start=Date.now()-DAY,end=start+7*DAY;
+    const trial={startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString(),firstChargeAt:new Date(end).toISOString(),reminderAt:new Date(end-2*DAY).toISOString(),granted:true};
+    const sub={subscriptionId:'sub_trial',plan:'weekly',status:'active',validUntil:trial.endsAt,periodStart:trial.startsAt,cancelAtPeriodEnd:false,revoked:false,graceUntil:null,version:2,pricing:price(),trial};
+    m.read.mockResolvedValue(status({trial:{available:true,eligible:false,days:7},subscription:sub}));
+    m.cancel.mockResolvedValue({requestId:'00000000-0000-4000-8000-000000000009',generation:0,subscriptionId:'sub_trial',status:'confirmed',subscription:{...sub,cancelAtPeriodEnd:true,version:3,trial:{...trial,cancelOutcome:outcome??null}},...(outcome?{trialOutcome:outcome}:{})});
+    renderPage('/pricing');
+    fireEvent.click(await screen.findByRole('checkbox',{name:/Cancel this free trial/}));fireEvent.click(screen.getByRole('button',{name:'Cancel free trial'}));
+    expect((await screen.findAllByText(copy)).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/You will not be charged/)).not.toBeInTheDocument();
+  });
+  it.each([
+    ['stopped',/We cancelled it with Dodo Payments before the first charge, so you will not be charged\./],
+    ['required',/We are cancelling it with Dodo Payments before the first charge\. Refresh billing to confirm/],
+    ['charged',/The first charge had already been taken before it could be cancelled\./],
+  ])('explains a free trial that could not start (stop state %s)',async(stopState,copy)=>{
+    const start=Date.now()-DAY,end=start+7*DAY;
+    const trial={startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString(),firstChargeAt:new Date(end).toISOString(),reminderAt:new Date(end-2*DAY).toISOString(),granted:false,deniedReason:'capacity_full',stopState,cancelOutcome:null};
+    const sub={subscriptionId:'sub_trial',plan:'weekly',status:'active',validUntil:new Date(start).toISOString(),periodStart:null,cancelAtPeriodEnd:stopState==='stopped',revoked:false,graceUntil:null,version:2,pricing:price(),trial};
+    m.read.mockResolvedValue(status({trial:{available:true,eligible:false,days:7},subscription:sub}));
+    renderPage('/pricing');
+    const panel=await screen.findByRole('status',{name:'Free trial not started'});
+    expect(panel).toHaveTextContent('Your free trial could not start. Every Automated Job Loop service place was taken when your checkout completed.');
+    expect(panel).toHaveTextContent(copy);
+    expect(screen.queryByText('Status: free trial.')).not.toBeInTheDocument();
   });
   it('does not attach a trial from another subscription to a cancellation receipt',async()=>{
     const start=Date.now()-DAY,end=start+7*DAY;

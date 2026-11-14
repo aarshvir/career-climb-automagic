@@ -45,6 +45,21 @@ CREATE TABLE jobvance_private.loop_subscription_trials (
   reminder_sent_at timestamptz,
   granted boolean NOT NULL,
   ineligible_reason text CHECK(ineligible_reason IS NULL OR ineligible_reason IN('trial_used','capacity_full')),
+  -- A trial that is not granted must not leave Dodo's mandate scheduled to
+  -- charge. not_needed: granted trial. required: denied, provider stop not yet
+  -- attempted. requested: a stop is in flight. stopped: Dodo verified the
+  -- first charge is cancelled. charged: the first charge already happened, so
+  -- it goes through paid-place admission (pending fulfillment if full).
+  -- uncertain: the stop could not be verified; webhook delivery is retried.
+  stop_state text NOT NULL CHECK(stop_state IN('not_needed','required','requested','stopped','charged','uncertain')),
+  stop_attempts integer NOT NULL DEFAULT 0 CHECK(stop_attempts BETWEEN 0 AND 20),
+  stop_updated_at timestamptz,
+  -- Outcome of a customer cancellation, from the provider state read back after
+  -- the cancellation: no_charge (stopped before the first charge), charge_due
+  -- (the first charge boundary has arrived, so it may be in progress) or
+  -- after_first_charge (a paid month had already started).
+  cancel_outcome text CHECK(cancel_outcome IS NULL OR cancel_outcome IN('no_charge','charge_due','after_first_charge')),
+  cancel_outcome_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(mode,payment_id),
   FOREIGN KEY(user_id,request_id) REFERENCES jobvance_private.loop_billing_orders(user_id,request_id),
@@ -52,18 +67,26 @@ CREATE TABLE jobvance_private.loop_subscription_trials (
   CHECK(starts_at<ends_at AND ends_at<=starts_at+interval '7 days' AND ends_at<=first_charge_at),
   CHECK(first_charge_at>=starts_at+interval '7 days'-interval '1 hour' AND first_charge_at<=starts_at+interval '7 days'+interval '1 hour'),
   CHECK(reminder_at=first_charge_at-interval '2 days'),
-  CHECK(granted=(ineligible_reason IS NULL))
+  CHECK(granted=(ineligible_reason IS NULL)),
+  CHECK(granted=(stop_state='not_needed'))
 );
 CREATE INDEX loop_subscription_trials_owner ON jobvance_private.loop_subscription_trials(user_id,mode);
 CREATE INDEX loop_subscription_trials_reminder ON jobvance_private.loop_subscription_trials(reminder_at) WHERE reminder_sent_at IS NULL AND granted;
 ALTER TABLE jobvance_private.loop_subscription_trials ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON jobvance_private.loop_subscription_trials FROM PUBLIC,anon,authenticated,service_role;
 
--- Trial evidence is immutable except the one-way reminder delivery marker.
+-- Trial evidence is immutable. Only the one-way reminder marker, the audited
+-- provider-stop state of a denied trial and the cancellation outcome change.
+-- Terminal stop states (stopped, charged) and a recorded outcome never revert.
 CREATE FUNCTION jobvance_private.immutable_loop_trial() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE mutable text[]:=ARRAY['reminder_sent_at','stop_state','stop_attempts','stop_updated_at','cancel_outcome','cancel_outcome_at'];
 BEGIN
-  IF (to_jsonb(NEW)-'reminder_sent_at') IS DISTINCT FROM (to_jsonb(OLD)-'reminder_sent_at') OR (OLD.reminder_sent_at IS NOT NULL AND NEW.reminder_sent_at IS DISTINCT FROM OLD.reminder_sent_at) THEN
+  IF (to_jsonb(NEW)-mutable) IS DISTINCT FROM (to_jsonb(OLD)-mutable)
+    OR (OLD.reminder_sent_at IS NOT NULL AND NEW.reminder_sent_at IS DISTINCT FROM OLD.reminder_sent_at)
+    OR (OLD.stop_state IN('not_needed','stopped','charged') AND NEW.stop_state IS DISTINCT FROM OLD.stop_state)
+    OR NEW.stop_attempts<OLD.stop_attempts
+    OR (OLD.cancel_outcome IS NOT NULL AND NEW.cancel_outcome IS DISTINCT FROM OLD.cancel_outcome AND NOT (OLD.cancel_outcome='charge_due' AND NEW.cancel_outcome='after_first_charge')) THEN
     RAISE EXCEPTION 'LOOP_TRIAL_IMMUTABLE';
   END IF;
   RETURN NEW;
@@ -153,27 +176,30 @@ BEGIN
         is_granted:=false; reason:='capacity_full';
       END;
     END IF;
+    -- A paid cycle recorded first (out-of-order delivery) keeps its own dates.
+    has_paid:=s.subscription_id IS NOT NULL AND EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_periods WHERE mode=p_mode AND subscription_id=p_subscription);
     IF s.subscription_id IS NULL THEN
       INSERT INTO jobvance_private.loop_subscriptions(subscription_id,user_id,request_id,mode,plan,customer_id,status,valid_until,event_created,revoked,generation,period_start,cancel_at_period_end,quote_id)
         VALUES(p_subscription,p_user,p_request,p_mode,p_plan,p_customer,'pending',CASE WHEN is_granted THEN access_end ELSE now() END,p_created,false,o.generation,CASE WHEN is_granted THEN p_trial_start ELSE NULL END,false,p_quote) RETURNING * INTO s;
-    ELSE
-      -- A paid cycle recorded first (out-of-order delivery) keeps its own dates.
-      has_paid:=EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_periods WHERE mode=p_mode AND subscription_id=p_subscription);
-      IF is_granted AND NOT has_paid THEN
-        UPDATE jobvance_private.loop_subscriptions SET valid_until=greatest(valid_until,access_end),period_start=COALESCE(period_start,p_trial_start),updated_at=now() WHERE subscription_id=p_subscription;
-      END IF;
+    ELSIF is_granted AND NOT has_paid THEN
+      UPDATE jobvance_private.loop_subscriptions SET valid_until=greatest(valid_until,access_end),period_start=COALESCE(period_start,p_trial_start),updated_at=now() WHERE subscription_id=p_subscription;
     END IF;
-    INSERT INTO jobvance_private.loop_subscription_trials(mode,subscription_id,user_id,request_id,payment_id,quote_id,currency,starts_at,ends_at,first_charge_at,reminder_at,granted,ineligible_reason)
-      VALUES(p_mode,p_subscription,p_user,p_request,p_payment,p_quote,p_currency,p_trial_start,access_end,p_first_charge,p_first_charge-interval '2 days',is_granted,reason);
+    -- A denied trial needs its provider mandate stopped before the first charge,
+    -- unless that charge was already recorded (then paid admission applies).
+    INSERT INTO jobvance_private.loop_subscription_trials(mode,subscription_id,user_id,request_id,payment_id,quote_id,currency,starts_at,ends_at,first_charge_at,reminder_at,granted,ineligible_reason,stop_state,stop_updated_at)
+      VALUES(p_mode,p_subscription,p_user,p_request,p_payment,p_quote,p_currency,p_trial_start,access_end,p_first_charge,p_first_charge-interval '2 days',is_granted,reason,
+        CASE WHEN is_granted THEN 'not_needed' WHEN has_paid THEN 'charged' ELSE 'required' END,CASE WHEN is_granted THEN NULL ELSE now() END);
   END IF;
   result:=jobvance_private.apply_loop_price_event(p_user,p_request,p_mode,p_plan,p_product,p_session,p_subscription,p_customer,p_status,p_trial_start,p_first_charge,p_cancel_at_period_end,p_event,p_created,false,p_payload_hash,NULL,NULL,NULL,p_quote,p_currency);
   SELECT * INTO t FROM jobvance_private.loop_subscription_trials WHERE subscription_id=p_subscription;
-  RETURN result||jsonb_build_object('trial',jsonb_build_object('granted',t.granted,'endsAt',t.ends_at,'firstChargeAt',t.first_charge_at,'reason',t.ineligible_reason));
+  RETURN result||jsonb_build_object('trial',jsonb_build_object('granted',t.granted,'startsAt',t.starts_at,'endsAt',t.ends_at,'firstChargeAt',t.first_charge_at,'reason',t.ineligible_reason,'stopState',t.stop_state));
 END $$;
 
 -- Unchanged price-bound event function from 20261018095409, except that the
--- first paid period of a subscription whose free trial was not granted is
--- admitted through the paid-place capacity check (pending fulfillment if full).
+-- first paid period of any trial subscription (granted or not) is admitted
+-- through the paid-place capacity check (pending fulfillment if full). A granted
+-- trial held a place only until its trial end; by the first charge that place
+-- may have been taken, so the paid month must be admitted afresh.
 CREATE OR REPLACE FUNCTION jobvance_private.apply_loop_price_event(p_user uuid,p_request uuid,p_mode text,p_plan text,p_product text,p_session text,p_subscription text,p_customer text,p_status text,
   p_period_start timestamptz,p_valid_until timestamptz,p_cancel_at_period_end boolean,p_event text,p_created bigint,p_revoked boolean,p_payload_hash text,p_payment text,p_paid_amount bigint,p_grace_until timestamptz,p_quote uuid,p_currency text)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
@@ -220,11 +246,13 @@ BEGIN
   -- newer status-only event; it cannot undo that newer cancellation/hold.
   IF is_stale AND p_payment IS NULL AND NOT p_revoked THEN RETURN jsonb_build_object('duplicate',false,'stale',true); END IF;
   -- Paid-place admission happens when a subscription's first verified paid
-  -- period is admitted. A subscription row created for a trial that was NOT
-  -- granted (trial already used, or no place free) has never been admitted, so
-  -- its first real charge passes the same capacity check as a new subscription.
+  -- period is admitted. Every trial subscription row was created before any
+  -- paid month: a denied trial was never admitted, and a granted trial's place
+  -- lapsed at its trial end. Its first real charge therefore passes the same
+  -- capacity check as a new subscription (the owner's own unexpired access or
+  -- reservation still counts as held).
   IF s.subscription_id IS NULL OR (new_payment AND NOT p_revoked
-    AND EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_trials t WHERE t.subscription_id=p_subscription AND NOT t.granted)
+    AND EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_trials t WHERE t.subscription_id=p_subscription)
     AND NOT EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_periods p WHERE p.mode=p_mode AND p.subscription_id=p_subscription)) THEN
     IF p_mode='live' AND p_payment IS NOT NULL AND (o.generation IS NULL OR EXISTS(SELECT 1 FROM public.job_loop_lifecycle WHERE user_id=p_user AND generation=o.generation AND state='active')) THEN
       BEGIN
@@ -270,6 +298,73 @@ RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$
  SELECT jobvance_private.apply_loop_trial_event(p_user,p_request,p_mode,p_plan,p_product,p_session,p_subscription,p_customer,p_status,p_trial_start,p_first_charge,p_cancel_at_period_end,p_event,p_created,p_payload_hash,p_payment,p_quote,p_currency)
 $$;
 
+-- Denied-trial provider stop. The edge function claims a stop attempt, cancels
+-- the mandate at Dodo before the first charge, reads the subscription back and
+-- finalizes. Attempts are counted and capped; terminal states never revert.
+-- A concurrent in-flight attempt is honoured for two minutes, then reclaimable.
+CREATE FUNCTION public.job_loop_billing_trial_stop_claim(p_mode text,p_subscription text)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE t jobvance_private.loop_subscription_trials;
+BEGIN
+  IF p_mode IS NULL OR p_mode NOT IN('test','live') OR p_subscription IS NULL OR p_subscription !~ '^sub_[A-Za-z0-9_-]{1,100}$' THEN RAISE EXCEPTION 'LOOP_BILLING_INVALID'; END IF;
+  SELECT * INTO t FROM jobvance_private.loop_subscription_trials WHERE mode=p_mode AND subscription_id=p_subscription FOR UPDATE;
+  IF NOT FOUND THEN RETURN jsonb_build_object('claimed',false,'stopState',NULL); END IF;
+  IF t.stop_state IN('not_needed','stopped','charged') THEN RETURN jsonb_build_object('claimed',false,'stopState',t.stop_state); END IF;
+  IF t.stop_state='requested' AND t.stop_updated_at>now()-interval '2 minutes' THEN RETURN jsonb_build_object('claimed',false,'stopState','requested','inFlight',true); END IF;
+  IF t.stop_attempts>=20 THEN RETURN jsonb_build_object('claimed',false,'stopState',t.stop_state,'exhausted',true); END IF;
+  UPDATE jobvance_private.loop_subscription_trials SET stop_state='requested',stop_attempts=stop_attempts+1,stop_updated_at=now() WHERE subscription_id=p_subscription RETURNING * INTO t;
+  RETURN jsonb_build_object('claimed',true,'stopState',t.stop_state,'attempt',t.stop_attempts,'firstChargeAt',t.first_charge_at,'startsAt',t.starts_at);
+END $$;
+
+-- p_outcome: stopped (Dodo read back shows cancel at the trial's first-charge
+-- boundary, no paid month recorded), charged (a paid month exists or the
+-- boundary passed), uncertain (could not verify). When unresolved, the applied
+-- webhook occurrence is released so Dodo's retry runs the reconciliation again.
+CREATE FUNCTION public.job_loop_billing_trial_stop_finalize(p_mode text,p_subscription text,p_outcome text,p_event text DEFAULT NULL)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE t jobvance_private.loop_subscription_trials; next_state text;
+BEGIN
+  IF p_mode IS NULL OR p_mode NOT IN('test','live') OR p_subscription IS NULL OR p_outcome IS NULL OR p_outcome NOT IN('stopped','charged','uncertain','deferred')
+    OR (p_event IS NOT NULL AND p_event !~ '^[A-Za-z0-9_.:-]{1,200}$') THEN RAISE EXCEPTION 'LOOP_BILLING_INVALID'; END IF;
+  SELECT * INTO t FROM jobvance_private.loop_subscription_trials WHERE mode=p_mode AND subscription_id=p_subscription FOR UPDATE;
+  IF NOT FOUND OR t.granted THEN RAISE EXCEPTION 'LOOP_TRIAL_CONFLICT'; END IF;
+  IF t.stop_state IN('stopped','charged') THEN RETURN jsonb_build_object('stopState',t.stop_state); END IF;
+  -- A recorded paid month always wins over a claimed stop.
+  next_state:=CASE WHEN EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_periods WHERE mode=p_mode AND subscription_id=p_subscription) THEN 'charged'
+    WHEN p_outcome='deferred' THEN t.stop_state ELSE p_outcome END;
+  IF next_state<>t.stop_state THEN
+    UPDATE jobvance_private.loop_subscription_trials SET stop_state=next_state,stop_updated_at=now() WHERE subscription_id=p_subscription RETURNING * INTO t;
+  END IF;
+  IF t.stop_state NOT IN('stopped','charged') AND p_event IS NOT NULL THEN
+    DELETE FROM jobvance_private.loop_billing_events WHERE mode=p_mode AND event_id=p_event AND subscription_id=p_subscription;
+  END IF;
+  RETURN jsonb_build_object('stopState',t.stop_state);
+END $$;
+
+-- Records what a customer's cancellation actually achieved, from the provider
+-- subscription read back after the cancellation. "no_charge" requires Dodo to
+-- show cancellation at the trial's first-charge boundary, that boundary still
+-- in the future, and no paid month recorded.
+CREATE FUNCTION public.job_loop_billing_trial_cancel_outcome(p_user uuid,p_mode text,p_subscription text,p_cancel_at_period_end boolean,p_next_billing timestamptz,p_previous_billing timestamptz)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE t jobvance_private.loop_subscription_trials; outcome text; paid boolean;
+BEGIN
+  IF p_user IS NULL OR p_mode IS NULL OR p_mode NOT IN('test','live') OR p_subscription IS NULL OR p_cancel_at_period_end IS NULL OR p_next_billing IS NULL OR p_previous_billing IS NULL THEN RAISE EXCEPTION 'LOOP_BILLING_INVALID'; END IF;
+  SELECT * INTO t FROM jobvance_private.loop_subscription_trials WHERE mode=p_mode AND subscription_id=p_subscription AND user_id=p_user FOR UPDATE;
+  IF NOT FOUND THEN RETURN jsonb_build_object('trialOutcome',NULL); END IF;
+  IF NOT p_cancel_at_period_end THEN RETURN jsonb_build_object('trialOutcome',t.cancel_outcome); END IF;
+  paid:=EXISTS(SELECT 1 FROM jobvance_private.loop_subscription_periods WHERE mode=p_mode AND subscription_id=p_subscription);
+  outcome:=CASE
+    WHEN paid OR p_next_billing>t.first_charge_at+interval '1 hour' OR p_previous_billing>=t.first_charge_at-interval '1 hour' THEN 'after_first_charge'
+    WHEN abs(extract(epoch FROM p_next_billing-t.first_charge_at))<=3600 AND now()<t.first_charge_at-interval '10 minutes' THEN 'no_charge'
+    ELSE 'charge_due' END;
+  -- A no-charge outcome, once proven, is final; a due charge may later prove paid.
+  IF t.cancel_outcome IS NULL OR (t.cancel_outcome='charge_due' AND outcome='after_first_charge') THEN
+    UPDATE jobvance_private.loop_subscription_trials SET cancel_outcome=outcome,cancel_outcome_at=now() WHERE subscription_id=p_subscription RETURNING * INTO t;
+  END IF;
+  RETURN jsonb_build_object('trialOutcome',t.cancel_outcome,'firstChargeAt',t.first_charge_at);
+END $$;
+
 -- Entitlement keeps its exact JSON shape. A granted trial window gives the
 -- subscribed plan's cadence until the trial ends, and only while the provider
 -- subscription is active or cancelled-at-period-end. It never grants overdue
@@ -303,7 +398,8 @@ END $$;
 
 CREATE FUNCTION jobvance_private.loop_trial_json(t jobvance_private.loop_subscription_trials) RETURNS jsonb
 LANGUAGE sql STABLE SET search_path='' AS $$
-  SELECT CASE WHEN t.subscription_id IS NULL THEN NULL ELSE jsonb_build_object('startsAt',t.starts_at,'endsAt',t.ends_at,'firstChargeAt',t.first_charge_at,'reminderAt',t.reminder_at,'granted',t.granted) END
+  SELECT CASE WHEN t.subscription_id IS NULL THEN NULL ELSE jsonb_build_object('startsAt',t.starts_at,'endsAt',t.ends_at,'firstChargeAt',t.first_charge_at,'reminderAt',t.reminder_at,'granted',t.granted,
+    'deniedReason',t.ineligible_reason,'stopState',t.stop_state,'cancelOutcome',t.cancel_outcome) END
 $$;
 
 -- Additive status fields: v2 clients ignore them (the edge function only exposes
@@ -348,9 +444,13 @@ REVOKE ALL ON FUNCTION jobvance_private.guard_loop_order_trial(),jobvance_privat
 REVOKE ALL ON FUNCTION public.job_loop_billing_checkout_claim_trial(uuid,uuid,bigint,uuid,text,text,text,uuid),
   public.job_loop_billing_apply_trial(uuid,uuid,text,text,text,text,text,text,text,timestamptz,timestamptz,boolean,text,bigint,text,text,uuid,text),
   public.job_loop_billing_entitlement(uuid),public.job_loop_billing_status_v2(uuid,uuid,text),
-  public.job_loop_billing_trial_reminders_due(text,integer),public.job_loop_billing_trial_reminder_sent(text,text) FROM PUBLIC,anon,authenticated;
+  public.job_loop_billing_trial_reminders_due(text,integer),public.job_loop_billing_trial_reminder_sent(text,text),
+  public.job_loop_billing_trial_stop_claim(text,text),public.job_loop_billing_trial_stop_finalize(text,text,text,text),
+  public.job_loop_billing_trial_cancel_outcome(uuid,text,text,boolean,timestamptz,timestamptz) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.job_loop_billing_checkout_claim_trial(uuid,uuid,bigint,uuid,text,text,text,uuid),
   public.job_loop_billing_apply_trial(uuid,uuid,text,text,text,text,text,text,text,timestamptz,timestamptz,boolean,text,bigint,text,text,uuid,text),
   public.job_loop_billing_status_v2(uuid,uuid,text),
-  public.job_loop_billing_trial_reminders_due(text,integer),public.job_loop_billing_trial_reminder_sent(text,text) TO service_role;
+  public.job_loop_billing_trial_reminders_due(text,integer),public.job_loop_billing_trial_reminder_sent(text,text),
+  public.job_loop_billing_trial_stop_claim(text,text),public.job_loop_billing_trial_stop_finalize(text,text,text,text),
+  public.job_loop_billing_trial_cancel_outcome(uuid,text,text,boolean,timestamptz,timestamptz) TO service_role;
 COMMIT;
