@@ -5,6 +5,7 @@ import { loopAudienceContent } from '@/lib/job-loop-audiences';
 import { loopDateLabel, loopFollowUpDue } from '@/lib/loop-calendar';
 import { loopPlacesFull, starterCheckoutPath } from '@/lib/loop-access';
 import { loopSubscriptionPlan } from '@/lib/subscription-plans';
+import { LOOP_TRIAL_PUBLIC_LINE, loopTrialPublic } from '@/lib/loop-trial';
 import type { LoopAction, LoopResponse, LoopSnapshot } from '../../supabase/functions/_shared/job-loop-types';
 
 type Section = 'today' | 'record' | 'opportunities' | 'outputs';
@@ -23,7 +24,7 @@ export function LoopStarterPrompt({ compact = false }: { compact?: boolean }) {
     <p>Every free Automated Job Loop place is in use. Continue with {starter.name} for a weekly search, reusing your saved CV and facts.</p>
     <ul>{starter.features.map(feature => <li key={feature}><Check size={15} aria-hidden="true" />{feature}</li>)}</ul>
     <div className="jl-actions"><Link className="jl-button jl-button--primary" to={starterCheckoutPath}>Start {starter.name}, ${starter.priceUsd}/month <ArrowRight size={16} aria-hidden="true" /></Link><Link className="jl-text-link" to="/pricing">Compare all plans</Link></div>
-    <p className="jl-help">Billed monthly; the price is shown in your currency before you pay. The free CV check stays available.</p>
+    <p className="jl-help">Billed monthly; the price is shown in your currency before you pay.{loopTrialPublic ? ` ${LOOP_TRIAL_PUBLIC_LINE} Checkout shows your trial end and first-charge dates before you enter a card.` : ''} The free CV check stays available.</p>
   </section>;
 }
 

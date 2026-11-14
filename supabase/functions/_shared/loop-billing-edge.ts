@@ -25,6 +25,9 @@ export function loopBillingRpc(admin: ReturnType<typeof adminClient>) {
         ['LOOP_BILLING_QUOTE_EXPIRED',409,'This price quote expired. Request a fresh price before checkout.'],
         ['LOOP_BILLING_QUOTE_CONFLICT',409,'This price quote belongs to a different billing action. Refresh the selected price.'],
         ['LOOP_BILLING_PRICE_CHANGED',409,'This monthly price changed. Refresh the quote before checkout.'],
+        ['LOOP_TRIAL_USED',409,'This account has already had an Automated Job Loop subscription or free trial. No checkout was opened.'],
+        ['LOOP_TRIAL_CONFLICT',409,'This subscription does not match its original free-trial checkout.'],
+        ['LOOP_TRIAL_IMMUTABLE',409,'This checkout already has fixed trial terms. Refresh billing before continuing.'],
       ];
       for (const [code,status,message] of codes) if (error.message.includes(code)) throw new ApiError(status,code,message);
       throw new ApiError(503,'LOOP_BILLING_PERSISTENCE','This billing update could not be confirmed. Retry with the same request.');
