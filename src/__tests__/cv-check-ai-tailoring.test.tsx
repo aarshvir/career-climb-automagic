@@ -6,7 +6,7 @@ import CvCheck from "@/pages/CvCheck";
 import { clearTrackingDraftMemory } from '@/lib/tracking-draft-memory';
 import { clearCheckRecovery } from '@/lib/check-draft';
 import { analyzeCvEvidence } from '@/lib/cv-evidence';
-import { companyFromVacancy, roleFromVacancy, TailorUnavailable } from '@/lib/cv-tailor-api';
+import { companyFromVacancy, roleFromVacancy, TailorUnavailable, withoutReplacedRewrites } from '@/lib/cv-tailor-api';
 
 vi.unmock("react-router-dom");
 const mocks = vi.hoisted(() => ({
@@ -265,5 +265,140 @@ describe('requirement coverage', () => {
     expect(within(coverage).getByText('Partly covered').nextElementSibling).toHaveTextContent(`${before.partial} → ${after.partial}`);
     expect(within(coverage).getByText('Not shown in your CV').nextElementSibling).toHaveTextContent(`${before.missing} → ${after.missing}`);
     expect(coverage.textContent).not.toMatch(/%|score:|pass|fail/iu);
+  });
+});
+
+describe('honest results when little or nothing changed', () => {
+  const unchanged = { text: source, changes: [], questions: [], rejectedCount: 0 };
+  async function runTailoring(result: unknown) {
+    mocks.tailor.mockResolvedValue(result); show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByText('Review changes');
+  }
+  it('does not say the CV reads well when the AI proposed nothing', async () => {
+    await runTailoring(unchanged);
+    expect(screen.getAllByText('No changes were suggested for this job. Check your CV below.').length).toBeGreaterThan(0);
+    expect(screen.getByText('No changes were suggested. Your CV is below.')).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/already reads well|nothing needed rewording|No rewording was needed/);
+  });
+  it('says so plainly when every suggestion failed the source checks', async () => {
+    await runTailoring({ ...unchanged, rejectedCount: 2 });
+    expect(screen.getAllByText('No suggested change could be used, so your CV is unchanged. Check it below.').length).toBeGreaterThan(0);
+    expect(screen.getByText('No change was applied. Your CV is below.')).toBeInTheDocument();
+    expect(screen.getByText(/We left out 2 AI suggestions/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/already reads well|nothing needed rewording/);
+  });
+  it('lists no rewrite of a line inside a profile that the new summary replaced', async () => {
+    const oldProfile = 'Experienced analyst with a record of reporting.';
+    const replaced = {
+      text: tailoredText,
+      changes: [
+        { kind: 'rewrite', n: 5, before: oldProfile, after: 'Analyst with a record of stakeholder reporting.', sources: [5], facts: [] },
+        { kind: 'rewrite', n: 6, before: '- Prepared monthly stakeholder reports using Excel.', after: '- Prepared monthly stakeholder reporting in Excel.', sources: [6], facts: [] },
+        { kind: 'summary', n: 4, before: oldProfile, after: 'Analyst preparing monthly stakeholder reporting in Excel.', sources: [5, 6], facts: [] },
+      ],
+      questions: [], rejectedCount: 0,
+    };
+    expect(withoutReplacedRewrites(replaced as never).changes.map(change => change.n)).toEqual([6, 4]);
+    expect(withoutReplacedRewrites({ ...replaced, changes: replaced.changes.slice(0, 2) } as never).changes).toHaveLength(2);
+  });
+});
+
+describe('restoring an original at its real place', () => {
+  const header = 'Analyst preparing monthly stakeholder reporting in Excel.';
+  const profileSource = ['Alex Example', header, '', 'PROFILE', 'Experienced analyst.', '', 'Second paragraph of the profile.', '', 'EXPERIENCE', 'Analyst - Example Co | 2021 - 2024', '- Prepared monthly stakeholder reports using Excel.', '- Supported a transformation pilot across five units.'].join('\n');
+  const profileTailored = ['Alex Example', header, '', 'PROFILE', header, '', 'EXPERIENCE', 'Analyst - Example Co | 2021 - 2024', '- Prepared monthly stakeholder reports using Excel.', '- Supported a transformation pilot across five units.'].join('\n');
+  const profileResult = { text: profileTailored, changes: [{ kind: 'summary', n: 4, before: 'Experienced analyst.\n\nSecond paragraph of the profile.', after: header, sources: [5, 7], facts: [] }], questions: [], rejectedCount: 0 };
+  async function open(text: string, result: unknown) {
+    mocks.tailor.mockResolvedValue(result); show();
+    fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: text } });
+    fireEvent.change(screen.getByLabelText('The job description'), { target: { value: vacancy } });
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+  }
+  it('restores the profile under its heading, not the same words in the header, and keeps its paragraphs', async () => {
+    await open(profileSource, profileResult);
+    expect(screen.getByText(/Your original:/).parentElement).toHaveClass('whitespace-pre-line');
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe(profileSource);
+  });
+  it('leaves the text alone when the profile heading was changed or the summary appears under two headings', async () => {
+    await open(profileSource, profileResult);
+    const edited = profileTailored.replace('PROFILE', 'ABOUT ME');
+    fireEvent.change(screen.getByLabelText(/Your tailored CV/), { target: { value: edited } });
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe(edited);
+    expect(await screen.findByText(/edited or moved since, so it was left as it is/)).toBeInTheDocument();
+  });
+  it('never restores the first of two identical lines', async () => {
+    const twice = `${source}\n- Prepared monthly stakeholder reports using Excel.`;
+    const text = `${tailoredText}\n- Prepared monthly stakeholder reporting in Excel.`;
+    await open(twice, { ...tailored, text: text.replace('- Prepared monthly stakeholder reports using Excel.', '- Prepared monthly stakeholder reporting in Excel.'), changes: [tailored.changes[0]] });
+    const before = reviewed();
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(/appears more than once/)).toBeInTheDocument();
+    expect(reviewed()).toBe(before);
+  });
+});
+
+describe('undo is bound to the exact place the profile was put', () => {
+  const GEN = 'Analyst preparing monthly stakeholder reporting in Excel.';
+  const role = 'Analyst - Example Co | 2021 - 2024', bullet = '- Prepared monthly stakeholder reports using Excel.';
+  const head = ['Alex Example', 'alex@example.com', ''];
+  async function open(sourceText: string, result: unknown) {
+    mocks.tailor.mockResolvedValue(result); show();
+    fireEvent.change(screen.getByLabelText('Your CV'), { target: { value: sourceText } });
+    fireEvent.change(screen.getByLabelText('The job description'), { target: { value: vacancy } });
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+  }
+  const summary = (before: string, at?: number) => ({ kind: 'summary', n: 4, before, after: GEN, sources: [5], facts: [], ...(at === undefined ? {} : { at }) });
+  const result = (lines: string[], changes: unknown[]) => ({ text: lines.join('\n'), changes, questions: [], rejectedCount: 0 });
+
+  it('does nothing when the generated profile was edited, even if the same words sit under another SUMMARY', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'EXPERIENCE', role, bullet, '', 'SUMMARY', GEN];
+    await open(lines.join('\n').replace(GEN, 'Experienced analyst.'), result(lines, [summary('Experienced analyst.', 4)]));
+    const edited = lines.map((line, i) => i === 4 ? `${GEN} Edited by me.` : line).join('\n');
+    fireEvent.change(screen.getByLabelText(/Your tailored CV/), { target: { value: edited } });
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(/edited or moved since, so it was left as it is/)).toBeInTheDocument();
+    expect(reviewed()).toBe(edited);
+  });
+  it('restores only the line the function named, never an identical pair elsewhere', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'SUMMARY', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Notes kept for later.\n\nSecond paragraph.', 7)]));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe([...head, 'PROFILE', GEN, '', 'SUMMARY', 'Notes kept for later.', '', 'Second paragraph.', '', 'EXPERIENCE', role, bullet].join('\n'));
+  });
+  it('with an older function that gives no line, acts only when exactly one place fits', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'SUMMARY', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Old.')]));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(/edited or moved since/)).toBeInTheDocument();
+    expect(reviewed()).toBe(lines.join('\n'));
+  });
+  it('follows the profile when an earlier new line is removed, then restores the right line', async () => {
+    const added = '- Led the pilot workstream for two of the five units.';
+    const lines = [...head, 'EXPERIENCE', role, bullet, added, '', 'PROFILE', GEN];
+    await open([...head, 'EXPERIENCE', role, bullet, '', 'PROFILE', 'Old profile.'].join('\n'), result(lines, [{ kind: 'addition', n: 5, before: '', after: added, sources: [5], facts: [] }, { ...summary('Old profile.', 9), n: 7 }]));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove this line' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe([...head, 'EXPERIENCE', role, bullet, '', 'PROFILE', 'Old profile.'].join('\n'));
+  });
+});
+
+describe('the all-rejected wording is neutral in both flows', () => {
+  it('after improving with answers, when nothing could be used', async () => {
+    const question = 'Did you lead any part of the transformation pilot, or support it?';
+    mocks.tailor.mockResolvedValueOnce(tailored).mockResolvedValueOnce({ text: tailoredText, changes: [], questions: [], rejectedCount: 2 });
+    show(); fill();
+    fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
+    await screen.findByRole('heading', { name: 'What changed for this job' });
+    fireEvent.change(screen.getByLabelText(question), { target: { value: 'I led the pilot workstream for two of the five units.' } });
+    fireEvent.change(screen.getByLabelText('Where this answer belongs in your original CV'), { target: { value: '5' } });
+    fireEvent.click(screen.getByLabelText(/This is accurate for the selected CV line/));
+    fireEvent.click(screen.getByRole('button', { name: 'Improve my CV with these answers' }));
+    expect(await screen.findByText(/No suggested change could be used, so your CV is unchanged\. Your previous version is saved/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/Review any other proposed changes/);
   });
 });

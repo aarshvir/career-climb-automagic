@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assembleTailoredCv, bulletBlocks, numbers, parseProposal, sourceLines, tailorUserPrompt, validateRewrite, validateTailorRequest, TAILOR_SCHEMA } from '../functions/_shared/cv-tailor.ts';
+import { assembleTailoredCv, bulletBlocks, checkedQuestions, numbers, parseProposal, sourceLines, tailorUserPrompt, validateRewrite, validateTailorRequest, TAILOR_SCHEMA } from '../functions/_shared/cv-tailor.ts';
 
 const cv = `Priya Raman
 Dubai, UAE | priya@example.com | +971 50 000 0000
@@ -85,7 +85,7 @@ describe('rewrite validator rejects invented or inflated facts', () => {
 describe('rewrite validator accepts truthful rewording', () => {
   const good: [string, string][] = [
     ['Built the weekly KPI pack for the COO covering sales, margin and inventory', 'Built the weekly KPI reporting pack for the COO, tracking sales, margin and inventory performance'],
-    ['Ran a vendor consolidation that saved AED 2.1M a year', 'Delivered AED 2.1M in annual cost savings by running a vendor consolidation'],
+    ['Ran a vendor consolidation that saved AED 2.1M a year', 'Cut AED 2.1M in annual costs by running a vendor consolidation'],
     ['Led a 12-store replenishment redesign that cut stock-outs by 18% in 9 months', 'Led a 12-store replenishment process improvement that cut stock-outs by 18% in 9 months'],
     ['Supported the finance team with monthly reporting', 'Supported the finance team with monthly performance reporting'],
     ['Supported market-entry studies for two consumer brands', 'Supported market-entry analysis for two consumer brands'],
@@ -262,5 +262,197 @@ describe('deep tailoring answer placement authority', () => {
     const request = { requestId: '7d2c1a9e-3b4f-4c5d-8e6f-1a2b3c4d5e6f', cvText: cv, jobDescription: 'Lead operational excellence across retail operations, reporting and vendor management for a growing group.', jobTitle: 'Head of Ops', company: 'Example', consent: true, facts };
     for (const factSources of [undefined, [], [8, 14], [1], [7], [999], ['8']]) expect(() => validateTailorRequest({ ...request, ...(factSources === undefined ? {} : { factSources }) })).toThrow();
     expect(validateTailorRequest({ ...request, factSources: [8] }).factSources).toEqual([8]);
+  });
+});
+
+describe('ownership is checked for each verb, not once per line', () => {
+  const reason = (source: string, after: string) => validateRewrite(after, [source]);
+  it('rejects a stronger verb even when the line already holds a different listed verb', () => {
+    expect(reason('Led the weekly KPI pack and supported the COO', 'Led the weekly KPI pack and ran the COO review')).toMatch(/stronger ownership.*ran/u);
+    expect(reason('Led the weekly KPI pack', 'Led and managed the weekly KPI pack')).toMatch(/managed/u);
+    expect(reason('Ran a vendor consolidation that saved AED 2.1M a year', 'Delivered AED 2.1M in annual cost savings by running a vendor consolidation')).toMatch(/delivered/u);
+  });
+  it('accepts the same verb in another form and any verb the line really has', () => {
+    for (const [source, after] of [['Led the weekly KPI pack', 'Led the weekly KPI pack, leading the analysts'], ['Ran the store rota', 'Ran the store rota while running the weekly cycle'], ['Managed vendors and built dashboards', 'Built dashboards and managed vendors'], ['Owned the budget', 'Own the budget']]) expect(reason(source, after), after).toBeNull();
+  });
+  it('does not count a listed word used as a noun or adjective as a claim', () => {
+    expect(reason('Supported the head count review', 'Led the head count review')).toMatch(/led/u);
+    expect(reason('Reported on the monthly run rate', 'Ran the monthly run rate report')).toMatch(/ran/u);
+    expect(reason('Reported on the monthly run rate', 'Reported on the monthly run-rate')).toBeNull();
+    expect(reason('Supported the team using the built-in tools', 'Supported the team using the built-in tools')).toBeNull();
+  });
+  it('still lets a title or noun use of the same family support the verb (a stated limit)', () => {
+    expect(reason('Supported the Head of Finance with reports', 'Headed monthly reporting for finance')).toBeNull();
+    expect(reason('Supported the Head of Finance with reports', 'Led monthly reporting for finance')).toMatch(/led/u);
+  });
+  it('checks a profile verb by verb against all the lines it cites', () => {
+    const lines = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Led the weekly pack', 'Intern, Beta', '- Supported the finance team'].join('\n');
+    expect(assembleTailoredCv(lines, { summary: { text: 'Managed the finance team.', sources: [6, 8] } }).rejected.map(item => item.reason)).toEqual(['Claims stronger ownership than your CV states (“managed”).']);
+    expect(assembleTailoredCv(lines, { summary: { text: 'Led the weekly pack and supported the finance team.', sources: [6, 8] } }).rejected).toEqual([]);
+  });
+});
+
+describe('every proposal that is left out is counted', () => {
+  const doc = ['Jane Doe', 'Dubai, UAE | jane@example.com', '', 'PROFILE', 'Analyst with experience in monthly reporting.', 'Works closely with finance teams.', '', 'EXPERIENCE', 'Senior Analyst, Acme Retail', '- Prepared monthly reports', '- Maintained the KPI pack', '- Supported the finance team'].join('\n');
+  it('counts reorders that do not match a bullet block, are malformed or overlap', () => {
+    const result = assembleTailoredCv(doc, { orders: [[12, 11, 99], [11, 12], [12, 11, 10], [10, 11, 12]] });
+    expect(result.rejected.map(item => item.reason)).toEqual(['A reorder must use the same bullets under one role.', 'A reorder must use the same bullets under one role.', 'A reorder must use the same bullets under one role.']);
+    expect(result.changes.filter(change => change.kind === 'order')).toHaveLength(1);
+  });
+  it('does not count a reorder or rewrite that changes nothing', () => {
+    expect(assembleTailoredCv(doc, { orders: [[10, 11, 12]], rewrites: [{ n: 10, text: 'Prepared monthly reports' }] }).rejected).toEqual([]);
+  });
+  it('counts suggestions beyond the number the check reads', () => {
+    const rewrites = Array.from({ length: 83 }, () => ({ n: 10, text: 'Prepared monthly reports' }));
+    expect(assembleTailoredCv(doc, { rewrites }).rejected.filter(item => item.reason === 'More suggestions than the check reads.')).toHaveLength(3);
+    expect(assembleTailoredCv(doc, { orders: Array.from({ length: 41 }, () => [10, 11, 12]) }).rejected).toHaveLength(1);
+    expect(assembleTailoredCv(doc, { additions: Array.from({ length: 22 }, () => ({ after: 9, text: 'x', facts: [] })) }).rejected.filter(item => item.reason === 'More suggestions than the check reads.')).toHaveLength(2);
+  });
+  it('counts a valid profile that has nowhere to sit, and unreadable items from the model', () => {
+    const noHeader = ['EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(noHeader, { summary: { text: 'Prepared monthly reports.', sources: [3] } });
+    expect(result.changes).toHaveLength(0);
+    expect(result.rejected.map(item => item.reason)).toEqual(['A profile needs a recognised profile heading, or a name and contact lines to sit under.']);
+    const proposal = parseProposal('{"rewrites":[{"n":10,"text":"x"},{"n":"bad"},null],"orders":[[10,11],["a"]],"additions":[{"after":9},{"after":9,"text":"y"}],"summary":{"text":"A profile","sources":"none"},"questions":[]}');
+    expect(proposal.unreadable).toBe(5);
+    expect(assembleTailoredCv(doc, proposal).rejected.filter(item => item.reason === 'A suggestion could not be read.')).toHaveLength(5);
+    expect(parseProposal('{"rewrites":[],"orders":[],"additions":[],"summary":{"text":"","sources":[],"facts":[]},"questions":[]}').unreadable).toBe(0);
+  });
+  it('does not list a rewrite of a line the new profile replaced, and counts it as left out', () => {
+    const result = assembleTailoredCv(doc, { rewrites: [{ n: 5, text: 'Analyst with monthly reporting experience.' }, { n: 10, text: 'Prepared monthly reports for the team' }], summary: { text: 'Analyst with experience in monthly reporting and finance teams.', sources: [5, 6] } });
+    expect(result.changes.map(change => change.kind)).toEqual(['rewrite', 'summary']);
+    expect(result.changes.find(change => change.kind === 'rewrite')?.n).toBe(10);
+    expect(result.changes.find(change => change.kind === 'summary')?.before).toContain('Analyst with experience in monthly reporting.');
+    expect(result.rejected.map(item => item.reason)).toEqual(['The new profile replaces this line.']);
+    for (const change of result.changes.filter(item => item.kind === 'rewrite')) expect(result.text).toContain(change.after);
+  });
+});
+
+describe('questions are checked for form only', () => {
+  it('keeps short single-line questions, removes repeats, links, markup and statements', () => {
+    expect(checkedQuestions(['Did you run the workshops yourself?', 'did you run the workshops  yourself?', 'You led the workshops.', 'Did you see https://example.com/x?', 'Is **this** bold?', 'Which tools did you use for the model?', 'x?', 7, 'Did you present the findings to the board?'])).toEqual(['Did you run the workshops yourself?', 'Which tools did you use for the model?', 'Did you present the findings to the board?']);
+    expect(checkedQuestions(Array.from({ length: 9 }, (_, i) => `Did you complete project number ${i}?`))).toHaveLength(5);
+    expect(checkedQuestions(['a'.repeat(300) + '?'])).toEqual([]);
+  });
+});
+
+describe('ownership regressions found in review', () => {
+  const reason = (source: string, after: string) => validateRewrite(after, [source]);
+  it('rejects "built up" as a claim and treats only the hyphenated "built-up" as an adjective', () => {
+    expect(reason('Supported the monthly reports team', 'Built up the monthly reports team')).toMatch(/stronger ownership.*built/u);
+    expect(reason('Supported the monthly reports team', 'Supported the built-up monthly reports team')).toMatch(/built/u);
+    expect(reason('Supported the built-up area report', 'Supported the built-up area reporting')).toBeNull();
+    expect(reason('Supported the team', 'Built in a spreadsheet the weekly pack for the team')).toMatch(/built/u);
+  });
+  it('ignores a noun phrase in a suggestion only when the source has the same phrase', () => {
+    expect(reason('Reported on the monthly run rate', 'Reported on the monthly run-rate')).toBeNull();
+    expect(reason('Reported on the monthly numbers', 'Reported on the monthly run rate')).toMatch(/run/u);
+    expect(reason('Supported the team using the built-in tools', 'Supported the team using the built-in tools daily')).toBeNull();
+    expect(reason('Supported the team using the built-in tools', 'Supported the team using the built in tools')).toMatch(/built/u);
+  });
+  it('replays saved results under the rule they were accepted under, and holds new ones to the strict rule', () => {
+    const source = 'Led the weekly KPI pack and supported the COO', after = 'Led the weekly KPI pack and ran the COO review';
+    expect(validateRewrite(after, [source])).toMatch(/ran/u);
+    expect(validateRewrite(after, [source], { ownership: 'line' })).toBeNull();
+    expect(validateRewrite('Led the weekly pack', ['Supported the weekly pack'], { ownership: 'line' })).toMatch(/ownership/u);
+  });
+});
+
+describe('the replaced profile keeps its line breaks', () => {
+  const cv = ['Jane Doe', 'Dubai | j@x.com', '', 'PROFILE', 'Line one.', '', 'Line two.', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+  it('returns the original with its blank line and rebuilds the CV exactly from it', () => {
+    const result = assembleTailoredCv(cv, { summary: { text: 'Line one and line two together.', sources: [5, 7] } });
+    const summary = result.changes.find(change => change.kind === 'summary');
+    expect(summary?.before).toBe('Line one.\n\nLine two.');
+    expect(result.rejected).toEqual([]);
+    expect(result.text).toBe(['Jane Doe', 'Dubai | j@x.com', '', 'PROFILE', 'Line one and line two together.', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n'));
+    expect(result.text.replace(summary!.after, summary!.before)).toBe(cv);
+  });
+});
+
+describe('questions match the public explanation', () => {
+  it('keeps C#, snake_case and a single underscore; drops links, HTML and Markdown', () => {
+    expect(checkedQuestions(['Did you write the C# reporting tools?', 'Did you use the sales_data table?', 'See www.example.com for the job?', 'Is <b>this</b> allowed?', 'Is `code` allowed?', '# Did you lead it?', '- Did you lead it?', 'Did you do __this__ part?', 'Did you [see](http://x.y) this?'])).toEqual(['Did you write the C# reporting tools?', 'Did you use the sales_data table?']);
+  });
+  it('keeps a question of 9 to 300 characters that ends in ? and nothing shorter or longer, at most five', () => {
+    expect(checkedQuestions(['Why now?', 'Why do now?'])).toEqual(['Why do now?']);
+    expect(checkedQuestions(['a'.repeat(299) + '?', 'a'.repeat(300) + '?'])).toEqual(['a'.repeat(299) + '?']);
+    expect(checkedQuestions(Array.from({ length: 8 }, (_, i) => `Did you complete project ${i}?`))).toHaveLength(5);
+  });
+  it('does not count a dropped question in the left-out total', () => {
+    const doc = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(doc, { questions: ['A statement.', 'Did you present to the board?'] });
+    expect(result.questions).toEqual(['Did you present to the board?']);
+    expect(result.rejected).toEqual([]);
+  });
+});
+
+describe('the profile change names its exact line', () => {
+  const lineOf = (result: ReturnType<typeof assembleTailoredCv>) => result.changes.find(change => change.kind === 'summary')?.at;
+  it('is the line of the new profile in the returned text, including after blank lines collapse', () => {
+    const cv = ['Jane Doe', 'Dubai | j@x.com', '', '', '', 'PROFILE', 'Line one.', '', '', 'Line two.', '', '', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(cv, { summary: { text: 'Line one and line two together.', sources: [7, 10] } });
+    const lines = result.text.split('\n');
+    expect(lineOf(result)).toBeGreaterThan(0);
+    expect(lines[lineOf(result)!]).toBe('Line one and line two together.');
+    expect(lines[lineOf(result)! - 1]).toBe('PROFILE');
+  });
+  it('is the inserted PROFILE section\u0027s line when the CV had no profile', () => {
+    const cv = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(cv, { summary: { text: 'Prepared monthly reports.', sources: [6] } });
+    expect(result.text.split('\n')[lineOf(result)!]).toBe('Prepared monthly reports.');
+    expect(lineOf(result)).toBe(4);
+  });
+  it('is absent when there is no profile, and the text holds no placeholder', () => {
+    const cv = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join('\n');
+    const result = assembleTailoredCv(cv, { rewrites: [{ n: 6, text: 'Prepared monthly reports weekly' }] });
+    expect(result.changes.every(change => change.at === undefined)).toBe(true);
+    expect(result.text).not.toContain('summary-slot');
+  });
+});
+
+describe('the left-out count has one contract', () => {
+  const doc = ['Jane Doe', 'Dubai, UAE | jane@example.com', '', 'PROFILE', 'Analyst with experience in monthly reporting.', 'Works closely with finance teams.', '', 'EXPERIENCE', 'Senior Analyst, Acme Retail', '- Prepared monthly reports', '- Maintained the KPI pack'].join('\n');
+  it('counts a rewrite that a replacing profile supersedes, and lists it nowhere else', () => {
+    const result = assembleTailoredCv(doc, { rewrites: [{ n: 5, text: 'Analyst with monthly reporting experience.' }, { n: 10, text: 'Prepared monthly reports for the team' }], summary: { text: 'Analyst with experience in monthly reporting and finance teams.', sources: [5, 6] } });
+    expect(result.rejected.map(item => item.reason)).toEqual(['The new profile replaces this line.']);
+    expect(result.changes.map(change => change.kind)).toEqual(['rewrite', 'summary']);
+  });
+  it('rejects a reply that is not one JSON object, and one that holds no readable proposal', () => {
+    for (const raw of ['[{"rewrites":[]}]', '{"x":1} {"y":2}', 'null', '"text"', '12']) expect(() => parseProposal(raw), raw).toThrow();
+    expect(parseProposal('{}')).toMatchObject({ unreadable: 0, rewrites: [], orders: [], additions: [], summary: null });
+  });
+  it('counts a present field that is not a list as one, and each unreadable element as one', () => {
+    const proposal = parseProposal('{"rewrites":"oops","orders":{"a":1},"additions":5,"summary":null,"questions":"q"}');
+    expect(proposal.unreadable).toBe(3);
+    expect(assembleTailoredCv(doc, proposal).rejected).toHaveLength(3);
+    expect(parseProposal('{"rewrites":["x",7,null,[],{"n":1,"text":"ok"}],"orders":[1,"a",[1,"b"]],"additions":[{"after":"x"}]}').unreadable).toBe(4 + 3 + 1);
+  });
+  it('counts a profile that is not a profile, and treats an empty one as none', () => {
+    expect(parseProposal('{"summary":"A profile"}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":[]}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":{"text":5}}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":{"sources":[5]}}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":{"text":"A profile"}}').unreadable).toBe(1);
+    expect(parseProposal('{"summary":{"text":"   ","sources":[]}}').unreadable).toBe(0);
+    expect(parseProposal('{"summary":{"text":"","sources":[]}}').summary).toBeNull();
+    expect(parseProposal('{"summary":{"text":"A profile","sources":[5,"x"],"facts":[1,"y"]}}').summary).toEqual({ text: 'A profile', sources: [5], facts: [1] });
+  });
+  it('does not count questions, whatever shape they arrive in', () => {
+    expect(parseProposal('{"questions":"just a string"}')).toMatchObject({ unreadable: 0, questions: [] });
+    expect(parseProposal('{"questions":[1,null,"Did you lead the pilot?"]}')).toMatchObject({ unreadable: 0, questions: ['Did you lead the pilot?'] });
+  });
+});
+
+describe('questions: one line, web addresses and emphasis', () => {
+  const separator = String.fromCharCode(0x2028);
+  it('drops any question that holds a line break, including Unicode ones', () => {
+    expect(checkedQuestions(['Did you lead\nthe pilot workstream?', 'Did you lead\r\nthe pilot workstream?', 'Did you lead' + separator + 'the pilot workstream?', 'Did you lead the pilot workstream?\n'])).toEqual(['Did you lead the pilot workstream?']);
+  });
+  it('drops ftp, other scheme and mailto addresses, www and single-star emphasis', () => {
+    for (const bad of ['Did you read ftp://files.example.com/cv?', 'Did you open file:///C:/cv?', 'Did you write to mailto:a@b.co?', 'Did you see HTTPS://example.com?', 'Did you use *bold* wording?', 'Did you lead *the* pilot?', '* Did you lead the pilot?']) expect(checkedQuestions([bad]), bad).toEqual([]);
+  });
+  it('keeps what the page says is not detected, and ordinary stars and colons', () => {
+    for (const ok of ['Did you use example.com for reports?', 'Did you write _tests_ for the model?', 'Did you cut costs by 5 * 3 units?', 'Did you do this: lead the pilot?', 'Did you lead 3*4 sites?']) expect(checkedQuestions([ok]), ok).toEqual([ok]);
   });
 });

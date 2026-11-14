@@ -17,9 +17,11 @@ export type SourceLine = { n: number; kind: SourceKind; text: string };
 export type ProposedRewrite = { n: number; text: string; facts?: number[] };
 export type ProposedAddition = { after: number; text: string; facts?: number[] };
 export type ProposedSummary = { text: string; sources: number[]; facts?: number[] };
-export type TailorProposal = { rewrites?: ProposedRewrite[]; orders?: number[][]; additions?: ProposedAddition[]; summary?: ProposedSummary | null; questions?: string[] };
+/** `unreadable` counts proposed rewrites, orders, additions or a summary that could not be read at all. */
+export type TailorProposal = { rewrites?: ProposedRewrite[]; orders?: number[][]; additions?: ProposedAddition[]; summary?: ProposedSummary | null; questions?: string[]; unreadable?: number };
 /** `facts` lists the one-based numbers of the candidate's confirmed answers a change used. */
-export type TailorChange = { kind: "rewrite" | "summary" | "order" | "addition"; n: number | null; before: string; after: string; sources: number[]; facts: number[] };
+/** For a "summary" change, "at" is the 0-based line of the new profile in the result text, so an undo can be bound to that exact place. */
+export type TailorChange = { kind: "rewrite" | "summary" | "order" | "addition"; n: number | null; before: string; after: string; sources: number[]; facts: number[]; at?: number | null };
 export type TailorRejection = { n: number | null; text: string; reason: string };
 export type TailorResult = { text: string; changes: TailorChange[]; rejected: TailorRejection[]; questions: string[] };
 
@@ -79,6 +81,33 @@ const COMMON_CAPS = new Set(["I", "A", "An", "The", "And", "Or", "For", "With", 
 function normalise(text: string): string {
   return text.normalize("NFKC").toLocaleLowerCase("en").replace(/[’']/gu, "'");
 }
+
+/** Forms of one ownership verb count as the same claim ("led" supports "lead", not "managed"). */
+const OWNERSHIP_FAMILIES: Record<string, string> = {
+  led: "lead", lead: "lead", leading: "lead", owned: "own", own: "own", owning: "own", headed: "head", head: "head",
+  directed: "directed", managed: "manage", manage: "manage", managing: "manage", ran: "run", run: "run", running: "run",
+  oversaw: "oversee", oversee: "oversee",
+};
+/**
+ * Fixed phrases in which a listed word is a noun or adjective. Such a phrase is not a claim, and in the
+ * source it does not support one. A phrase in a suggestion is ignored only when the same phrase is in the
+ * source, so "Built up the team" (a claim) is never mistaken for "built-up area" (hyphenated).
+ */
+const NON_OWNERSHIP_USES = /\b(?:run[\s-]rate|run-?time|run-?books?|head[\s-]?count|head\s+office|head-?quarters|lead\s+(?:time|generation)|own\s+initiative|built-in|built-up)\b/giu;
+const phraseKey = (phrase: string) => phrase.replace(/[\s-]+/gu, " ");
+function neutralPhrases(text: string): Set<string> {
+  return new Set([...normalise(text).matchAll(NON_OWNERSHIP_USES)].map(match => phraseKey(match[0])));
+}
+/** The distinct ownership claims in a text, each as one verb family. `ignore`: phrases to set aside ("all" for every one). */
+function ownershipVerbs(text: string, ignore: "all" | Set<string>): Map<string, string> {
+  const found = new Map<string, string>();
+  const body = normalise(text).replace(NON_OWNERSHIP_USES, phrase => ignore === "all" || ignore.has(phraseKey(phrase)) ? " " : phrase);
+  for (const match of body.matchAll(new RegExp(STRONG_OWNERSHIP.source, "giu"))) {
+    const word = match[0].toLocaleLowerCase("en"), key = OWNERSHIP_FAMILIES[word] ?? word;
+    if (!found.has(key)) found.set(key, word);
+  }
+  return found;
+}
 /** Numeric facts: 18%, 2.1M, 300, 2022, AED 2.1M → canonical tokens. */
 export function numbers(text: string): string[] {
   return [...normalise(text).matchAll(/\d+(?:[.,]\d+)*\s*(?:%|k|m|bn|b|x)?/gu)].map(match => match[0].replace(/[\s,]/gu, ""));
@@ -104,7 +133,8 @@ function properTerms(text: string, sourceWords: Set<string>): string[] {
   return found;
 }
 
-export function validateRewrite(after: string, sources: string[]): string | null {
+/** `ownership: "line"` is the earlier one-check-per-line rule, used only to replay results saved under it. */
+export function validateRewrite(after: string, sources: string[], options: { ownership?: "verb" | "line" } = {}): string | null {
   const source = sources.join("\n");
   const value = after.trim();
   if (!value) return "Empty rewrite.";
@@ -122,7 +152,13 @@ export function validateRewrite(after: string, sources: string[]): string | null
   const credentialAfter = normalise(value).match(new RegExp(CREDENTIAL.source, "giu")) ?? [];
   const missingCredential = credentialAfter.find(term => !normalise(source).includes(term));
   if (missingCredential) return `Adds a qualification not in this part of your CV (${missingCredential}).`;
-  if (STRONG_OWNERSHIP.test(value) && !STRONG_OWNERSHIP.test(source)) return "Claims stronger ownership than your CV states (e.g. led or managed).";
+  if (options.ownership === "line") {
+    // Saved receipts keep the check they were accepted under: one listed verb anywhere in the source passes the line.
+    if (STRONG_OWNERSHIP.test(value) && !STRONG_OWNERSHIP.test(source)) return "Claims stronger ownership than your CV states (e.g. led or managed).";
+    return null;
+  }
+  const supported = ownershipVerbs(source, "all"), claimed = [...ownershipVerbs(value, neutralPhrases(source))].find(([key]) => !supported.has(key));
+  if (claimed) return `Claims stronger ownership than your CV states (“${claimed[1]}”).`;
   return null;
 }
 
@@ -148,6 +184,9 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
   // The candidate binds each answer to an exact original source line before the model runs.
   const factsBelongTo = (cited: number[], sources: number[]) => cited.every(number => sources.includes(factSources[number - 1]));
 
+  const tooMany = (count: number, limit: number) => { for (let i = 0; i < Math.max(0, count - limit); i++) rejected.push({ n: null, text: "", reason: "More suggestions than the check reads." }); };
+  for (let i = 0; i < Math.max(0, Math.floor(proposal.unreadable ?? 0)); i++) rejected.push({ n: null, text: "", reason: "A suggestion could not be read." });
+  tooMany((proposal.rewrites ?? []).length, 80);
   const seenRewrite = new Set<number>();
   for (const rewrite of (proposal.rewrites ?? []).slice(0, 80)) {
     const source = byN.get(rewrite.n);
@@ -168,10 +207,11 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
   // Bullet order: only exact permutations of an existing contiguous block are accepted.
   const order = new Map<number, number>(); // position line n -> source line n placed there
   const blocks = bulletBlocks(lines);
+  tooMany((proposal.orders ?? []).length, 40);
   for (const proposed of (proposal.orders ?? []).slice(0, 40)) {
-    if (!Array.isArray(proposed) || !proposed.every(Number.isInteger)) continue;
+    if (!Array.isArray(proposed) || !proposed.every(Number.isInteger)) { rejected.push({ n: null, text: "", reason: "A reorder could not be read." }); continue; }
     const block = blocks.find(candidate => candidate.length === proposed.length && [...candidate].sort((a, b) => a - b).join() === [...proposed].sort((a, b) => a - b).join());
-    if (!block || block.some(n => order.has(n))) continue;
+    if (!block || block.some(n => order.has(n))) { rejected.push({ n: proposed[0] ?? null, text: proposed.join(", "), reason: "A reorder must use the same bullets under one role." }); continue; }
     if (block.join() === proposed.join()) continue;
     block.forEach((position, index) => order.set(position, proposed[index]));
     changes.push({ kind: "order", n: block[0], before: block.map(n => byN.get(n)!.text.replace(BULLET, "").trim()).join(" / "), after: proposed.map(n => (text.get(n) ?? "").replace(BULLET, "").trim()).join(" / "), sources: [...proposed], facts: [] });
@@ -181,6 +221,7 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
   // checked against the cited answers alone. They sit under an existing role or bullet.
   const additions = new Map<number, string[]>(); // source line n -> new bullet lines after it
   let added = 0;
+  tooMany((proposal.additions ?? []).length, 20);
   for (const addition of (proposal.additions ?? []).slice(0, 20)) {
     const anchor = byN.get(addition.after);
     const cited = citedFacts(addition.facts, facts);
@@ -214,11 +255,14 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
   const out: string[] = [];
   const summaryHeading = lines.find(line => line.kind === "heading" && SUMMARY_HEADING.test(line.text.trim()));
   let summaryPlaced = false, skipping = false;
+  const replacedLines = new Set<number>(); // original lines a new profile replaces
   const headerEnd = (() => { let last = 0; for (const line of lines) { if (line.kind === "name" || line.kind === "contact") last = line.n; else if (line.kind !== "blank") break; } return last; })();
-  for (const line of lines) {
+  for (const [index, line] of lines.entries()) {
     if (skipping) {
+      // A blank line between two replaced text lines is part of the original profile, so it is kept in the original, not the result.
+      if (line.kind === "blank" && lines.slice(index + 1).find(item => item.kind !== "blank")?.kind === "text") { changes.push({ kind: "summary", n: line.n, before: "", after: "", sources: summarySources, facts: summaryFacts }); continue; }
       if (line.kind === "heading") skipping = false;
-      else if (line.kind === "text") { changes.push({ kind: "summary", n: line.n, before: line.text, after: "", sources: summarySources, facts: summaryFacts }); continue; }
+      else if (line.kind === "text") { replacedLines.add(line.n); changes.push({ kind: "summary", n: line.n, before: line.text, after: "", sources: summarySources, facts: summaryFacts }); continue; }
       else if (line.kind !== "blank") skipping = false;
     }
     const placed = order.has(line.n) ? order.get(line.n)! : line.n;
@@ -227,18 +271,47 @@ export function assembleTailoredCv(cv: string, proposal: TailorProposal, facts: 
     if (line.kind === "role") out.push(...(additions.get(line.n) ?? []));
     if (line.kind === "bullet") out.push(...(additions.get(placed) ?? []));
     if (summaryText && !summaryPlaced && summaryHeading && line.n === summaryHeading.n) {
-      out.push(summaryText); summaryPlaced = true; skipping = true;
+      out.push(SUMMARY_SLOT); summaryPlaced = true; skipping = true;
     } else if (summaryText && !summaryPlaced && !summaryHeading && headerEnd && line.n === headerEnd) {
-      out.push("", "PROFILE", summaryText); summaryPlaced = true;
+      out.push("", "PROFILE", SUMMARY_SLOT); summaryPlaced = true;
     }
   }
+  if (summaryText && !summaryPlaced) rejected.push({ n: null, text: summaryText, reason: "A profile needs a recognised profile heading, or a name and contact lines to sit under." });
   if (summaryText && summaryPlaced) changes.push({ kind: "summary", n: summaryHeading?.n ?? null, before: "", after: summaryText, sources: summarySources, facts: summaryFacts });
-  // Collapse summary bookkeeping: one visible summary change carrying any replaced text.
-  const replaced = changes.filter(change => change.kind === "summary" && change.after === "").map(change => change.before).join(" ");
-  const visible = changes.filter(change => !(change.kind === "summary" && change.after === "")).map(change => change.kind === "summary" ? { ...change, before: replaced } : change);
+  // Collapse summary bookkeeping: one visible summary change carrying the replaced text with its line breaks.
+  const replaced = changes.filter(change => change.kind === "summary" && change.after === "").map(change => change.before).join("\n");
+  // A rewrite of a line the profile replaced is not in the result, and is counted as left out; the profile change shows that text as its original.
+  const superseded = (change: TailorChange) => change.kind === "rewrite" && change.n !== null && replacedLines.has(change.n);
+  for (const change of changes.filter(superseded)) rejected.push({ n: change.n, text: change.after, reason: "The new profile replaces this line." });
+  // Join with a placeholder first, so the profile's line is known exactly after runs of blank lines are collapsed.
+  const joined = out.join("\n").replace(/\n{3,}/gu, "\n\n").split("\n");
+  const slot = joined.indexOf(SUMMARY_SLOT);
+  if (slot >= 0) joined[slot] = summaryText ?? "";
+  const visible = changes.filter(change => !(change.kind === "summary" && change.after === "") && !superseded(change)).map(change => change.kind === "summary" ? { ...change, before: replaced, at: slot >= 0 ? slot : null } : change);
 
-  const questions = (proposal.questions ?? []).filter(question => typeof question === "string" && question.trim().length > 8).map(question => question.trim().slice(0, 300)).slice(0, 5);
-  return { text: out.join("\n").replace(/\n{3,}/gu, "\n\n"), changes: visible, rejected, questions };
+  const questions = checkedQuestions(proposal.questions ?? []);
+  return { text: joined.join("\n"), changes: visible, rejected, questions };
+}
+const SUMMARY_SLOT = "\u0000summary-slot\u0000"; // a CV request cannot contain NUL, so this never collides with CV text
+
+/**
+ * Questions are checked for form only: one line (any line break drops it) of 9 to 300 characters that ends
+ * with a question mark, with no web address (scheme://, www. or mailto:), HTML, Markdown link, bold, star
+ * emphasis or backticks, no heading or list mark at the start, repeats removed, at most five kept. A bare
+ * domain such as example.com and _underscore_ italics are not detected. A question that fails is dropped
+ * without being counted. Whether a question is wise, or hints at an answer, is not checked.
+ */
+const QUESTION_MARKUP = /\b[a-z][a-z0-9+.-]*:\/\/|mailto:|www\.|\]\(|\u0060|\*\*|(?:^|\s)\*[^\s*][^*]*\*|__|^\s*(?:#|[-*•]\s)|<\/?[a-z][^>]*>/iu;
+export function checkedQuestions(raw: unknown[]): string[] {
+  const seen = new Set<string>(), kept: string[] = [];
+  for (const item of raw) {
+    if (typeof item !== "string" || /[\r\n\u2028\u2029]/u.test(item.trim())) continue;
+    const question = item.trim().replace(/\s+/gu, " "), key = normalise(question);
+    if (question.length < 9 || question.length > 300 || !/\?["”')]*$/u.test(question) || QUESTION_MARKUP.test(question) || seen.has(key)) continue;
+    seen.add(key); kept.push(question);
+    if (kept.length === 5) break;
+  }
+  return kept;
 }
 
 // ---- Prompt -----------------------------------------------------------------------------
@@ -265,14 +338,38 @@ const numberList = (value: unknown): number[] => Array.isArray(value) ? value.fi
 export function parseProposal(raw: string): TailorProposal {
   const start = raw.indexOf("{"), end = raw.lastIndexOf("}");
   if (start < 0 || end <= start) throw new Error("The AI response was not readable.");
-  const value = JSON.parse(raw.slice(start, end + 1)) as Record<string, unknown>;
-  const rewrites = Array.isArray(value.rewrites) ? value.rewrites.filter((item): item is ProposedRewrite => !!item && typeof item === "object" && Number.isInteger((item as ProposedRewrite).n) && typeof (item as ProposedRewrite).text === "string").map(item => ({ n: item.n, text: item.text, facts: numberList(item.facts) })) : [];
-  const orders = Array.isArray(value.orders) ? value.orders.filter((item): item is number[] => Array.isArray(item) && item.every(Number.isInteger)) : [];
-  const additions = Array.isArray(value.additions) ? value.additions.filter((item): item is ProposedAddition => !!item && typeof item === "object" && Number.isInteger((item as ProposedAddition).after) && typeof (item as ProposedAddition).text === "string").map(item => ({ after: item.after, text: item.text, facts: numberList(item.facts) })) : [];
-  const summaryValue = value.summary as ProposedSummary | null | undefined;
-  const summary = summaryValue && typeof summaryValue === "object" && typeof summaryValue.text === "string" && summaryValue.text.trim() && Array.isArray(summaryValue.sources) ? { text: summaryValue.text, sources: summaryValue.sources.filter(Number.isInteger), facts: numberList(summaryValue.facts) } : null;
+  // Text around the object (a code fence, a sentence) is tolerated; a reply wrapped in a list is not one object.
+  if (raw.slice(0, start).includes("[") && raw.slice(end + 1).includes("]")) throw new Error("The AI response was not readable.");
+  const parsed: unknown = JSON.parse(raw.slice(start, end + 1));
+  // The reply must be one JSON object. A list, a string or null is not a proposal, and nothing is applied.
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("The AI response was not readable.");
+  const value = parsed as Record<string, unknown>;
+  // Counting contract: every rewrite, reorder, addition or profile that is present but cannot be read counts as one left-out
+  // suggestion; a field that is present (not null) but is not a list counts as one. Absent or null fields count for nothing.
+  // Questions and non-integer answer numbers inside a readable suggestion are filtered without a count.
+  let unreadable = 0;
+  const list = <T>(field: unknown, valid: (item: unknown) => item is T): T[] => {
+    if (field === undefined || field === null) return [];
+    if (!Array.isArray(field)) { unreadable++; return []; }
+    const kept = field.filter(valid);
+    unreadable += field.length - kept.length;
+    return kept;
+  };
+  const isObject = (item: unknown): item is Record<string, unknown> => !!item && typeof item === "object" && !Array.isArray(item);
+  const rewrites = list(value.rewrites, (item): item is ProposedRewrite => isObject(item) && Number.isInteger(item.n) && typeof item.text === "string").map(item => ({ n: item.n, text: item.text, facts: numberList(item.facts) }));
+  const orders = list(value.orders, (item): item is number[] => Array.isArray(item) && item.every(Number.isInteger));
+  const additions = list(value.additions, (item): item is ProposedAddition => isObject(item) && Number.isInteger(item.after) && typeof item.text === "string").map(item => ({ after: item.after, text: item.text, facts: numberList(item.facts) }));
+  let summary: ProposedSummary | null = null;
+  const summaryValue = value.summary;
+  if (summaryValue !== undefined && summaryValue !== null) {
+    if (!isObject(summaryValue) || typeof summaryValue.text !== "string") unreadable++; // not a profile at all
+    else if (summaryValue.text.trim()) { // an empty text is the documented "no profile" and counts for nothing
+      if (Array.isArray(summaryValue.sources)) summary = { text: summaryValue.text, sources: summaryValue.sources.filter(Number.isInteger), facts: numberList(summaryValue.facts) };
+      else unreadable++;
+    }
+  }
   const questions = Array.isArray(value.questions) ? value.questions.filter((item): item is string => typeof item === "string") : [];
-  return { rewrites, orders, additions, summary, questions };
+  return { rewrites, orders, additions, summary, questions, unreadable };
 }
 
 const integers = { type: "array", items: { type: "integer" } };

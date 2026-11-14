@@ -9,7 +9,7 @@ import { cvCheckCostText, cvCheckFaqs } from '@/lib/cv-check-faqs';
 import { AI_SENT_TEXT, checkedExamples, exampleResult, slipThroughExamples, tailoringFaqs, truthfulTailoringStructuredNodes } from '@/lib/truthful-tailoring';
 import { staticPageMeta } from '@/lib/public-site-meta';
 import { FAIR_USE_TAILORED_CVS_PER_DAY } from '@/lib/pass-plans';
-import { assembleTailoredCv, sourceLines, validateRewrite } from '../../supabase/functions/_shared/cv-tailor';
+import { assembleTailoredCv, checkedQuestions, sourceLines, validateRewrite } from '../../supabase/functions/_shared/cv-tailor';
 
 vi.unmock('react-router-dom');
 afterEach(cleanup);
@@ -44,6 +44,8 @@ describe('public AI tailoring page', () => {
   it('pins the outcome of every example so a change to the checks forces a change to the page', () => {
     expect(checkedExamples.map(exampleResult)).toEqual(['kept', 'left-out', 'left-out', 'left-out', 'left-out', 'left-out']);
     expect(slipThroughExamples.map(exampleResult)).toEqual(['kept', 'kept', 'kept']);
+    // The ownership gap a listed verb used to open is closed: another listed verb on the line is not support.
+    expect(validateRewrite('Led the weekly KPI pack and ran the COO review', ['Led the weekly KPI pack and supported the COO'])).toMatch(/stronger ownership.*ran/);
     expect(validateRewrite(checkedExamples[1].suggestion, [checkedExamples[1].source])).toMatch(/Adds a number .*40/);
     expect(validateRewrite(checkedExamples[2].suggestion, [checkedExamples[2].source])).toMatch(/Tableau/);
     expect(validateRewrite(checkedExamples[3].suggestion, [checkedExamples[3].source])).toMatch(/qualification/);
@@ -76,16 +78,17 @@ describe('public AI tailoring page', () => {
     accepts('Supported the finance team', 'Supported the finance team as a qualified accountant');
     accepts('Supported the store rollout', 'Developed the store rollout');
     accepts('Supported the store rollout', 'Implemented the store rollout');
-    accepts('Led the weekly KPI pack and supported the COO', 'Led the weekly KPI pack and ran the COO review');
     // Digits are caught even when the source wrote the number as a word.
     expect(validateRewrite('Prepared monthly reports for 12 stores', ['Prepared monthly reports for forty stores'])).toMatch(/number/);
   });
 
   it('states the remaining gaps exactly as the code has them', () => {
     const accepts = (source: string, after: string) => expect(validateRewrite(after, [source]), after).toBeNull();
-    // A listed noun switches the ownership check off for the whole line.
-    accepts('Supported the Head of Finance with reports', 'Led monthly reporting for finance');
-    accepts('Supported the team lead with reports', 'Managed reports for the team');
+    // A title that holds a listed word still supports that verb, but not a different one.
+    accepts('Supported the Head of Finance with reports', 'Headed monthly reporting for finance');
+    expect(validateRewrite('Led monthly reporting for finance', ['Supported the Head of Finance with reports'])).toMatch(/stronger ownership/);
+    accepts('Supported the team lead with reports', 'Led reports for the team');
+    expect(validateRewrite('Managed reports for the team', ['Supported the team lead with reports'])).toMatch(/stronger ownership/);
     // Hedges that are not on the list are not caught; the listed ones, including the month May, are.
     accepts('Aimed to cut stock-outs', 'Cut stock-outs');
     accepts('Approximately 200 stores supported', '200 stores supported');
@@ -135,17 +138,18 @@ describe('public AI tailoring page', () => {
     expect(validateRewrite('Cut costs by 18 percent', ['Cut costs by 18%'])).toMatch(/number/);
     // Word lists are English.
     expect(validateRewrite('soutenu les rapports mensuels et dirigi les ateliers', ['soutenu les rapports mensuels'])).toBeNull();
-    // A line with a listed word anywhere switches the ownership check off.
-    expect(validateRewrite('Oversaw reporting run rate', ['Supported reporting run rate'])).toBeNull();
+    // A listed word in a fixed noun phrase such as “run rate” is not a claim and does not support one.
+    expect(validateRewrite('Oversaw reporting run rate', ['Supported reporting run rate'])).toMatch(/stronger ownership/);
+    expect(validateRewrite('Supported the reporting run rate', ['Supported reporting run rate'])).toBeNull();
     // An all-capitals name reads as a heading, so the contact line under it is plain text and can be reworded.
     const caps = ['AARSH GUPTA', 'Dubai | a@b.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join(nl);
     expect(sourceLines(caps).map(line => line.kind).slice(0, 2)).toEqual(['heading', 'text']);
     expect(assembleTailoredCv(caps, { rewrites: [{ n: 2, text: 'Dubai | a@b.com | open to relocation' }] }).changes.map(change => change.kind)).toEqual(['rewrite']);
-    // With no recognised name or contact line and no profile heading, a valid profile is dropped without a note.
+    // With no recognised name or contact line and no profile heading, a valid profile is left out and counted.
     const noName = ['EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join(nl);
     const dropped = assembleTailoredCv(noName, { summary: { text: 'Prepared monthly reports.', sources: [3] } });
     expect(dropped.changes).toHaveLength(0);
-    expect(dropped.rejected).toHaveLength(0);
+    expect(dropped.rejected).toHaveLength(1);
     expect(dropped.text).not.toContain('PROFILE');
     // A profile can use an answer whenever it cites that answer's line, next to lines from another role.
     const roles = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared weekly budgets', 'Intern, Beta', '- Prepared slide decks'].join(nl);
@@ -166,10 +170,11 @@ describe('public AI tailoring page', () => {
     // An unusual mixed-case heading is plain text unless it sits directly above a bullet.
     const odd = ['Jane Doe', 'Dubai | j@x.com', '', 'Work History', 'Analyst, Acme', '- Prepared monthly reports'].join(nl);
     expect(sourceLines(odd)[3].kind).toBe('text');
-    // One listed ownership verb in any cited line turns the ownership check off for the whole profile.
+    // Each ownership verb in a profile must appear in one of the cited lines.
     const cv = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Led the weekly pack', 'Intern, Beta', '- Supported the finance team'].join(nl);
     const managed = assembleTailoredCv(cv, { summary: { text: 'Managed the finance team.', sources: [6, 8] } });
-    expect(managed.rejected).toEqual([]);
+    expect(managed.rejected.map(item => item.reason)).toEqual(['Claims stronger ownership than your CV states (“managed”).']);
+    expect(assembleTailoredCv(cv, { summary: { text: 'Led the weekly pack for the finance team.', sources: [6, 8] } }).rejected).toEqual([]);
     // Cautious wording rejects a changed profile, but exact normalised cited wording can still pass.
     const hedged = ['Jane Doe', 'Dubai | j@x.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Projected savings from the pilot', 'Intern, Beta', '- Supported the finance team'].join(nl);
     const dropped = assembleTailoredCv(hedged, { summary: { text: 'Supported the finance team.', sources: [6, 8] } });
@@ -193,9 +198,9 @@ describe('public AI tailoring page', () => {
     expect(kinds[9]).toBe('text');
     const reworded = assembleTailoredCv(cv, { rewrites: [{ n: 9, text: 'Senior Analyst, Acme Retail group' }] });
     expect(reworded.changes.map(change => change.kind)).toEqual(['rewrite']);
-    // A reorder that does not match is dropped without being counted; a rewrite that fails is counted.
+    // A reorder that does not match is counted, like a rewrite that fails.
     const badOrder = assembleTailoredCv(cv, { orders: [[12, 11, 99], [11, 12]] });
-    expect(badOrder.rejected).toHaveLength(0);
+    expect(badOrder.rejected).toHaveLength(2);
     expect(badOrder.changes).toHaveLength(0);
     const badRewrite = assembleTailoredCv(cv, { rewrites: [{ n: 11, text: 'Prepared monthly reports for 40 stores' }] });
     expect(badRewrite.rejected).toHaveLength(1);
@@ -204,13 +209,14 @@ describe('public AI tailoring page', () => {
     const summary = profiled.changes.find(change => change.kind === 'summary');
     expect(summary?.before).toContain('Analyst with experience in monthly reporting.');
     expect(profiled.text).not.toContain('Works closely with finance teams.');
-    // The assembly can list a rewrite inside a replaced profile whose text is no longer present.
+    // A rewrite inside a replaced profile is not listed, and is counted as left out.
     const collision = assembleTailoredCv(cv, { rewrites: [{ n: 5, text: 'Analyst with monthly reporting experience.' }], summary: { text: 'Analyst with experience in monthly reporting and finance teams.', sources: [5, 6] } });
-    const replacedRewrite = collision.changes.find(change => change.kind === 'rewrite');
-    expect(replacedRewrite).toBeDefined();
-    expect(collision.text).not.toContain(replacedRewrite!.after);
+    expect(collision.changes.find(change => change.kind === 'rewrite')).toBeUndefined();
+    expect(collision.changes.find(change => change.kind === 'summary')?.before).toContain('Analyst with experience in monthly reporting.');
+    expect(collision.rejected.map(item => item.reason)).toEqual(['The new profile replaces this line.']);
     renderPage();
-    expect(document.body).toHaveTextContent('keep-original button can fail');
+    expect(document.body).not.toHaveTextContent('keep-original button can fail');
+    expect(document.body).toHaveTextContent('a reworded line that a new profile replaces');
   });
 
   it('keeps the stated limits on profiles, new lines and questions', () => {
@@ -288,5 +294,26 @@ describe('public AI tailoring page', () => {
     cleanup();
     render(<HelmetProvider><MemoryRouter initialEntries={['/cv-check']}><CvCheckLanding /></MemoryRouter></HelmetProvider>);
     expect(screen.getAllByRole('link').filter(link => link.getAttribute('href') === '/truthful-cv-tailoring').length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe('the public page matches what the code counts and filters', () => {
+  it('names every kind of left-out suggestion the code counts, and says what is not counted', () => {
+    renderPage();
+    for (const phrase of ['reorders that do not match', 'suggestions or whole fields it could not read', 'a profile it could not place', 'a reworded line that a new profile replaces', 'any beyond the number it reads', 'A suggestion that changes nothing, and a question that is dropped, are not counted', 'nothing is applied and you see an error instead']) expect(document.body, phrase).toHaveTextContent(phrase);
+    // Each of those kinds is really counted by the code, and a no-op is not.
+    const cv = ['Jane Doe', 'Dubai, UAE | jane@example.com', '', 'EXPERIENCE', 'Senior Analyst, Acme', '- Prepared monthly reports', '- Maintained the KPI pack'].join('\n');
+    expect(assembleTailoredCv(cv, { orders: [[7, 6, 99]] }).rejected).toHaveLength(1);
+    expect(assembleTailoredCv(cv, { unreadable: 1 }).rejected).toHaveLength(1);
+    expect(assembleTailoredCv(cv, { rewrites: Array.from({ length: 81 }, () => ({ n: 6, text: 'Prepared monthly reports' })) }).rejected.filter(item => item.reason === 'More suggestions than the check reads.')).toHaveLength(1);
+    expect(assembleTailoredCv(cv, { orders: [[6, 7]], rewrites: [{ n: 6, text: 'Prepared monthly reports' }] }).rejected).toEqual([]);
+  });
+  it('states the question filter exactly as the code applies it', () => {
+    renderPage();
+    expect(document.body).toHaveTextContent('one line (a line break drops it) of 9 to 300 characters that ends in a question mark, with no web address (http://, https://, ftp:// or another scheme://, www. or mailto:), no HTML, Markdown link, bold, star emphasis or backticks');
+    expect(document.body).toHaveTextContent('A bare domain such as example.com, and text in underscores, are not detected.');
+    expect(document.body).toHaveTextContent('At most five are kept, and one that fails is dropped without being counted');
+    expect(checkedQuestions(['Did you write the C# tools?', 'Why do now?', 'Why now?', 'a'.repeat(300) + '?', 'Did you see www.example.com?'])).toEqual(['Did you write the C# tools?', 'Why do now?']);
+    expect(checkedQuestions(Array.from({ length: 8 }, (_, i) => `Did you finish project ${i}?`))).toHaveLength(5);
   });
 });

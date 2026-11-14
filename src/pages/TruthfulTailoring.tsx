@@ -11,8 +11,8 @@ import { AI_SENT_TEXT, TAILORING_FACTS_CHECKED, checkedExamples, exampleResult, 
 const allowed = [
   'Reword a bullet or a plain text line. The AI is asked to use only that line’s own facts. It is also asked to make each line stronger and to use the job’s own words where the line supports them. That request is where overstatement can come from, and the checks below catch some of it.',
   'Reorder the bullets under one role, with those closest to the job first. The same bullets must come back, none added and none dropped.',
-  'Write a short profile of up to 420 characters, built from CV lines it cites and any answers you confirmed. If your CV has a recognised Profile, Summary or Objective heading (optionally with a Professional or Career prefix), the new profile replaces the text under it and your original is shown with the change. Otherwise a PROFILE section is added after your name and contact lines when Jobvance recognises them, and old text stays. If it does not recognise them, the profile is dropped without a note.',
-  'Ask up to five plain questions about requirements your CV does not show. The questions themselves are not checked, so read each one and answer only what is true.',
+  'Write a short profile of up to 420 characters, built from CV lines it cites and any answers you confirmed. If your CV has a recognised Profile, Summary or Objective heading (optionally with a Professional or Career prefix), the new profile replaces the text under it and your original is shown with the change. Otherwise a PROFILE section is added after your name and contact lines when Jobvance recognises them, and old text stays. If it does not recognise them, the profile is left out and counted in the note of suggestions left out.',
+  'Ask up to five plain questions about requirements your CV does not show. A question is checked only for form: one line (a line break drops it) of 9 to 300 characters that ends in a question mark, with no web address (http://, https://, ftp:// or another scheme://, www. or mailto:), no HTML, Markdown link, bold, star emphasis or backticks, and no heading or list mark at the start; repeats are removed. A bare domain such as example.com, and text in underscores, are not detected. At most five are kept, and one that fails is dropped without being counted. What a question means is not checked, so read each one and answer only what is true.',
   'Add a new bullet only from an answer you wrote, confirmed and tied to a CV line, up to five in all.',
 ];
 
@@ -20,26 +20,25 @@ const checks: [string, string][] = [
   ['Numbers', 'A number written in digits that is not in that line, compared as written together with any % or unit letter that follows it. So “12 months” and “12 million” count as the same number, “18%” and “18 percent” do not, and two figures can be swapped between claims. Numbers written as words, such as “forty”, are not checked.'],
   ['Names and tools', 'A capitalised word that is not in that line and is not on a built-in list of ordinary capitalised words, which includes Senior, Executive, Manager and Strategy. Names written in lower case are not checked.'],
   ['Qualifications', 'Listed words such as certified, licensed, chartered, degree, MBA or PMP that are not in that line. Other wording, such as “qualified accountant”, is not checked.'],
-  ['Ownership', 'A listed word in its exact form (led, lead, managed, owned, built, launched, delivered and others) when the line contains none of them. A listed word anywhere in the line, in any role, such as “head” or “run rate”, switches the check off for that line. Unlisted verbs such as “developed” or “implemented” are not checked.'],
+  ['Ownership', 'Each listed ownership verb in the suggestion (led, managed, owned, built, launched, delivered and others) must also appear in the text it is checked against. Forms of one verb count together, so “leading” is supported by “led”, but “ran” is not supported by “led”. Fixed phrases where the word is a noun, such as “run rate” or “headcount”, do not count. A title that holds a listed word, such as “Head of Finance”, still supports “headed”. Unlisted verbs such as “developed” or “implemented” are not checked.'],
   ['Cautious wording', 'If any text it is checked against contains a word from a fixed list (for example projected, estimated, planned, expected, not, never, would, might or the month May), the suggestion must match one of those source passages after normalisation. Other hedges, such as “aimed to”, “approximately” or “pilot”, are not on the list.'],
   ['Length and shape', 'One line only. The length is capped at the larger of 260 characters or about 1.8 times the text it is checked against: your original line and any answer used for a rewrite, the answers alone for a new bullet.'],
-  ['Reordering', 'Only the same bullets under the same role, in a new order. A list that adds, drops or mixes bullets is dropped.'],
+  ['Reordering', 'Only the same bullets under the same role, in a new order. A list that adds, drops or mixes bullets is left out and counted.'],
   ['New lines', 'A new bullet is checked against the answers you confirmed, not against your CV lines. An answer is tied to the CV line you chose: a reworded line or a new bullet can use it only there. A profile can use it whenever the profile cites that line, next to lines from other roles.'],
-  ['Profile', 'Up to 420 characters, and the length rule above also applies. It is checked against all the lines it cites taken together, including name, contact and role lines, so a number or verb from one role can sit beside a claim from another. The AI chooses which lines to cite, so one listed ownership verb in any cited line turns that check off for the whole profile, and a cautious-wording word in any cited line means the suggested profile must match one cited CV line or a confirmed answer tied to it after normalisation; otherwise it is rejected.'],
+  ['Profile', 'Up to 420 characters, and the length rule above also applies. It is checked against all the lines it cites taken together, including name, contact and role lines, so a number or verb from one role can sit beside a claim from another. The AI chooses which lines to cite, so a verb from one role can support a claim beside another role. Each ownership verb in the profile must appear in one of the cited lines or confirmed answers. A cautious-wording word in any cited line means the suggested profile must match one cited CV line or a confirmed answer tied to it after normalisation; otherwise it is rejected.'],
 ];
 
 const seen = [
   'A list called “What changed for this job”. A reworded line shows the new wording (Now) and your original wording (Your original), with a button to keep your original. A replaced profile works the same way.',
   'A reorder is described in one sentence, without a before and after, and has no button of its own.',
   'A new line, or a new profile with nothing to replace, has no original. Its button reads “Remove this line” or “Remove this summary”.',
-  'A note, when it applies, saying how many AI suggestions were left out. The count can miss suggestions that were dropped, such as a reorder that does not match.',
+  'A note, when it applies, saying how many AI suggestions were left out. It counts suggestions that fail a check, reorders that do not match, suggestions or whole fields it could not read, a profile it could not place, a reworded line that a new profile replaces, and any beyond the number it reads (80 rewrites, 40 reorders, 20 new lines). A suggestion that changes nothing, and a question that is dropped, are not counted. If the AI’s whole reply is not a readable object, nothing is applied and you see an error instead.',
   'An undo button after you improve the CV with your answers, or when you had edited your CV before tailoring. It lasts while the page stays open.',
   'Downloads as PDF, Word or text once you confirm your CV is accurate. A PDF also needs a preview that fits the page length you chose.',
 ];
 
 const limits = [
   'They cannot tell whether the claims already in your CV are true.',
-  'If a reworded line is inside a profile that is also replaced, that line’s keep-original button can fail. Review and edit the CV text before confirming it.',
   'They do not decide whether you qualify for a job or predict what an employer will decide.',
   'They miss claims written in words they do not look for: numbers written as words, lower-case names, unlisted verbs, qualifications and hedges, and new outcomes in ordinary words.',
   'They compare numbers as written, so two figures can be swapped between claims, and a profile is checked against all the lines it cites together.',
@@ -110,7 +109,7 @@ export default function TruthfulTailoring() {
 
         <section className="jv-section product-section" aria-labelledby="tt-checks-title">
           <h2 id="tt-checks-title" className="jv-section-title">The checks on the AI’s suggestions</h2>
-          <p>Each rewrite is compared with its own line, plus any answer you confirmed for that line. A new bullet is compared with the answers only, and a profile with all the lines it cites taken together. A suggestion that fails a check is left out and your original line stays. The check tells you how many were left out, not what they said, and it can miss some dropped suggestions.</p>
+          <p>Each rewrite is compared with its own line, plus any answer you confirmed for that line. A new bullet is compared with the answers only, and a profile with all the lines it cites taken together. A suggestion that fails a check is left out and your original line stays. The check tells you how many were left out, not what they said.</p>
           <div className="cvl-table-wrap" role="region" aria-label="The checks and what each leaves out" tabIndex={0}>
             <table className="cvl-table cvl-table--compact">
               <caption>What is left out, and what is not checked</caption>
