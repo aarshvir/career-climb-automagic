@@ -226,26 +226,12 @@ describe('account-first owned onboarding', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('one and ten');
     expect(screen.getByLabelText('Target roles')).toHaveValue(Array.from({ length: 10 }, (_, i) => `Role ${i}`).concat('Custom eleventh role').join('\n'));
   });
-  it('asks signed-out visitors only roles and locations, then sends them to sign-up with ad tags', async () => {
+  it('sends signed-out visitors straight to account creation, keeping ad tags, without reading or saving anything', () => {
     state.user = null;
     render(<MemoryRouter initialEntries={['/onboarding?utm_source=meta&utm_campaign=c1']}><Routes><Route path="/onboarding" element={<LoopOnboarding />} /><Route path="*" element={<Destination />} /></Routes></MemoryRouter>);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Which roles would you like to find?');
-    expect(screen.queryByLabelText('Your CV text')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: 'Business analyst' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-    fireEvent.change(screen.getByLabelText('Cities or countries'), { target: { value: 'United States' } });
-    fireEvent.click(screen.getByRole('button', { name: /Create my free account/ }));
     expect(screen.getByTestId('destination')).toHaveTextContent('/auth?mode=signup&next=%2Fonboarding');
     expect(screen.getByTestId('destination')).toHaveTextContent('utm_source=meta');
     expect(state.call).not.toHaveBeenCalled();
-    expect(JSON.parse(localStorage.getItem('jobvance:pre-signup-quiz')!)).toMatchObject({ targetTitles: ['Business analyst'], locations: ['United States'] });
-    localStorage.clear();
-  });
-  it('requires both answers before leaving for sign-up', () => {
-    state.user = null; open();
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-    expect(screen.getByRole('alert')).toHaveTextContent('one and ten');
-    expect(screen.queryByTestId('destination')).not.toBeInTheDocument();
     expect(localStorage.length).toBe(0);
   });
   it('shows the answers given before sign-up for review at step 1, once, without saving', async () => {

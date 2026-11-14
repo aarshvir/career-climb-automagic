@@ -5,3 +5,8 @@ Source: https://github.com/vercel/geist-font
 The website serves these files itself; it does not request fonts from any CDN at runtime.
 
 The approved Jobvance wordmark alone uses Manrope-Bold.woff2, copied unchanged from the current site's local font asset and served as "Jobvance Brand". Its license is Manrope-OFL.txt. It does not change the page's Geist typography.
+
+Outfit by The Outfit Project Authors, distributed under the SIL Open Font License (Outfit-OFL.txt).
+File: Outfit-latin-wght.woff2 is the variable-weight (100-900) latin subset, copied unchanged from @fontsource-variable/outfit@5.3.0 (files/outfit-latin-wght-normal.woff2).
+Source: https://github.com/Outfitio/Outfit-Fonts
+Outfit is used for the homepage content. Geist and system fonts are fallbacks. Other pages keep the existing interface fonts.

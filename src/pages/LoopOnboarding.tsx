@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,7 +14,7 @@ import LoopPreferencePicker from '@/components/LoopPreferencePicker';
 import { accountRoleSuggestions, cvRoleSuggestions, roleChoices, locationChoices, cleanPreferences } from '@/lib/loop-role-suggestions';
 import { retainOnboardingDraft, recoverOnboardingDraft, clearOnboardingDraft } from '@/lib/loop-onboarding-memory';
 import { adAttributionQuery } from '@/lib/meta-pixel';
-import { clearPreSignupAnswers, savePreSignupAnswers, takePreSignupAnswers } from '@/lib/pre-signup-quiz';
+import { clearPreSignupAnswers, takePreSignupAnswers } from '@/lib/pre-signup-quiz';
 import './JobLoop.css';
 import './LoopOnboarding.css';
 
@@ -51,9 +51,10 @@ export default function LoopOnboarding() {
   const { search } = useLocation();
   if (loading) return <main className="loop-onboarding"><p role="status">Opening your account…</p></main>;
   if (authError) return <main className="loop-onboarding"><p role="alert">Your sign-in could not be restored.</p><button onClick={retryConnection}>Retry sign-in recovery</button><Link to="/auth?next=%2Fonboarding">Sign in</Link></main>;
-  // Signed-out visitors (mostly from ads) answer the two non-private questions
-  // first, then create the account; the answers carry into the owned quiz.
-  if (!user) return <PreSignupQuiz search={search} />;
+  // Signed-out visitors (mostly from ads) go straight to account creation, as before v80.
+  // Measured 4-14 Nov: ad B converted 10 of 78 visits with this redirect and 0 of 32 with
+  // two questions shown before sign-up. Ad campaign tags survive the redirect.
+  if (!user) return <Navigate to={`/auth?mode=signup&next=%2Fonboarding${adAttributionQuery(search)}`} replace />;
   registerTrackingDraftOwner(user.id);
   return <OwnedQuiz key={`${user.id}:${trackingDraftAuthority(user.id)}`} owner={user.id} metadata={user.user_metadata} />;
 }
@@ -212,42 +213,5 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       {step === 5 && <><dl className="oq-review"><dt>Roles</dt><dd>{profile.targetTitles.join(', ')}</dd><dt>Locations</dt><dd>{profile.locations.join(', ')}</dd><dt>Compensation</dt><dd>{profile.compensation.minimum === null ? 'No minimum set' : `${profile.compensation.minimum.toLocaleString()} ${profile.compensation.currency} / ${profile.compensation.period}`}</dd><dt>Discreet search</dt><dd>{profile.discreetSearch ? 'On' : 'Off'}</dd><dt>Contact line</dt><dd>{profile.contactLine || 'Not included'}</dd><dt>Experience</dt><dd>{profile.experienceYears === null ? 'Not specified' : `${profile.experienceYears} years`}</dd><dt>CV</dt><dd>{profile.name} · {profile.sourceText.length.toLocaleString()} characters</dd></dl><details><summary>Review the exact CV text to save</summary><pre>{profile.sourceText}</pre></details><p>Next, review your facts and run your first search. AI processing and recurring preparation each need your explicit confirmation.</p><label className="jl-consent"><input type="checkbox" checked={consent} onChange={event => { if (current()) { consentEpoch.current = event.target.checked ? epoch.current : null; setConsent(event.target.checked); } }} /><span>Save this CV text and these preferences privately in my Jobvance account.</span></label></>}
       <div className="oq-actions">{step > 0 && <button type="button" className="jl-button" onClick={() => { setStep(value => value - 1); setError(''); consentEpoch.current = null; setConsent(false); }}>Back</button>}{step < 5 ? <button className="jl-button jl-button--primary" onClick={() => { const clean = { ...profile, targetTitles: cleanPreferences([...profile.targetTitles, ...(step === 0 && roleQuery.trim() ? [roleQuery.trim()] : [])]), locations: cleanPreferences([...profile.locations, ...(step === 1 && locationQuery.trim() ? [locationQuery.trim()] : [])]), excludedTerms: list(profile.excludedTerms.join('\n')) }; if (!current() || busy) return; setProfile(clean); if (step === 0) setRoleQuery(''); if (step === 1) setLocationQuery(''); const issue = onboardingStepError(step, clean); if (issue) setError(issue); else if (current() && !busy) { if (step === 0) rolesEdited.current = true; setError(''); setStep(value => value + 1); } }}>Next <ArrowRight size={16} /></button> : <button className="jl-button jl-button--primary" disabled={!consent || !!busy} onClick={() => void save()}>Save my setup <ArrowRight size={16} /></button>}</div>
     </fieldset><p className="oq-note">You can return to your Automated Job Loop and resume here for up to 30 minutes in this tab. Refreshing, closing the tab or signing out clears unsaved answers. Nothing is saved to your account until you confirm.</p></section>}
-  </main>;
-}
-
-/** The first two setup questions, before an account exists. Nothing is sent to
- * Jobvance here; the answers wait on this device until the owned quiz reads them. */
-function PreSignupQuiz({ search }: { search: string }) {
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState(() => blankLoopProfile('professional'));
-  const [roleQuery, setRoleQuery] = useState(''), [locationQuery, setLocationQuery] = useState('');
-  const [step, setStep] = useState(0), [error, setError] = useState('');
-  const heading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => { heading.current?.focus(); }, [step]);
-  const signupPath = `/auth?mode=signup&next=%2Fonboarding${adAttributionQuery(search)}`;
-  function next() {
-    const clean = { ...profile, targetTitles: cleanPreferences([...profile.targetTitles, ...(step === 0 && roleQuery.trim() ? [roleQuery.trim()] : [])]), locations: cleanPreferences([...profile.locations, ...(step === 1 && locationQuery.trim() ? [locationQuery.trim()] : [])]) };
-    setProfile(clean); if (step === 0) setRoleQuery(''); else setLocationQuery('');
-    const issue = onboardingStepError(step, clean);
-    if (issue) { setError(issue); return; }
-    setError('');
-    if (step === 0) { setStep(1); return; }
-    savePreSignupAnswers({ targetTitles: clean.targetTitles, locations: clean.locations });
-    navigate(signupPath);
-  }
-  return <main className="loop-onboarding">
-    <Helmet><title>Set up your Automated Job Loop | Jobvance</title><meta name="robots" content="noindex,nofollow" /></Helmet>
-    <header><p className="oq-eyebrow">AUTOMATED JOB LOOP SETUP</p>
-      <h1 ref={heading} tabIndex={-1}>{questions[step]}</h1>
-      <p>Two quick questions, then create your free account. We search employer job boards for these roles and prepare CVs for your best matches, using only facts from your own CV.</p>
-      <div className="oq-progress" role="progressbar" aria-label="Setup progress" aria-valuemin={0} aria-valuemax={6} aria-valuenow={step + 1}><span style={{ transform: `scaleX(${(step + 1) / 6})` }} /></div><p className="oq-step">Step {step + 1} of 6</p>
-    </header>
-    {error && <div role="alert" className="oq-error" tabIndex={-1} ref={node => { if (node) { node.focus(); node.scrollIntoView?.({ block: "center", behavior: "auto" }); } }}>{error}</div>}
-    <section className="oq-card">
-      {step === 0 && <LoopPreferencePicker id="oq-roles" label="Target roles" searchLabel="Search or add a role" values={profile.targetTitles} query={roleQuery} choices={roleChoices} onQuery={value => { setRoleQuery(value); setError(''); }} onChange={targetTitles => { setProfile(value => ({ ...value, targetTitles })); setError(''); }} description="Choose a specific title, such as Senior data analyst, or a broad level, such as Any director-level role." />}
-      {step === 1 && <LoopPreferencePicker id="oq-locations" label="Cities or countries" searchLabel="Search or add a location" values={profile.locations} query={locationQuery} choices={locationChoices} onQuery={value => { setLocationQuery(value); setError(''); }} onChange={locations => { setProfile(value => ({ ...value, locations })); setError(''); }} description="Choose cities or countries. For remote work, add Remote and the countries where you can work; remote does not mean every country. Check each employer’s work-authorisation requirements." />}
-      <div className="oq-actions">{step > 0 && <button type="button" className="jl-button" onClick={() => { setStep(0); setError(''); }}>Back</button>}<button type="button" className="jl-button jl-button--primary" onClick={next}>{step === 0 ? 'Next' : 'Create my free account'} <ArrowRight size={16} /></button></div>
-      <p className="oq-note">Already have an account? <Link to={`/auth?next=%2Fonboarding${adAttributionQuery(search)}`}>Sign in</Link>. Your answers stay on this device until you sign up, and are used once to fill in your setup.</p>
-    </section>
   </main>;
 }

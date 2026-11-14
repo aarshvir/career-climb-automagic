@@ -19,9 +19,10 @@ describe('round 11 guards', () => {
   it('pricing shows its currency control on the page and three points in every plan card, with plans and prices unchanged', () => {
     render(<MemoryRouter><SubscriptionPricing /></MemoryRouter>);
     const proposals = screen.getByRole('region', { name: 'Automated Job Loop monthly plans' });
-    const control = within(proposals).getByRole('link', { name: 'Change country or currency' });
-    expect(control).toHaveAttribute('href', '#billing-details');
-    expect(proposals).toHaveTextContent('Prices in USD.');
+    const controls = within(proposals).getByRole('group', { name: 'Monthly price location and currency' });
+    expect(within(controls).getByRole('combobox', { name: 'Billing country or region' })).toHaveValue('US');
+    expect(within(controls).getByRole('combobox', { name: 'Payment currency' })).toHaveValue('USD');
+    expect(controls.closest('details')).toBeNull();
     for (const list of within(proposals).getAllByRole('list', { name: /includes$/ })) expect(within(list).getAllByRole('listitem')).toHaveLength(3);
     for (const price of ['$29', '$59', '$99']) expect(proposals).toHaveTextContent(price);
     expect(document.getElementById('billing-details')).not.toBeNull();
