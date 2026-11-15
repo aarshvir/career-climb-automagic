@@ -7,7 +7,9 @@ interface Props {
   description: string;
 }
 
-/** Native searchable choices support keyboard/mobile use and unrestricted custom text. */
+/** Native searchable choices support keyboard/mobile use and unrestricted custom text.
+ * Enter adds the typed entry, except while an input method is still composing it
+ * (isComposing, or legacy keyCode 229 on mobile keyboards), so a partial word is never saved. */
 export default function LoopPreferencePicker({ id, label, searchLabel, values, query, choices, onQuery, onChange, description }: Props) {
   const [issue, setIssue] = useState('');
   const selected = cleanPreferences(values);
@@ -19,7 +21,7 @@ export default function LoopPreferencePicker({ id, label, searchLabel, values, q
   }
   return <div className="jl-field oq-picker">
     <label htmlFor={`${id}-search`}>{searchLabel}</label>
-    <div className="oq-picker-input"><input id={`${id}-search`} list={`${id}-options`} value={query} maxLength={150} aria-describedby={`${id}-help`} onChange={event => { onQuery(event.target.value); setIssue(''); }} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); add(); } }} placeholder="Search suggestions or type your own" /><button type="button" className="jl-button" onClick={add} disabled={!query.trim()}>Add</button></div>
+    <div className="oq-picker-input"><input id={`${id}-search`} list={`${id}-options`} value={query} maxLength={150} aria-describedby={`${id}-help`} onChange={event => { onQuery(event.target.value); setIssue(''); }} onKeyDown={event => { if (event.key === 'Enter' && !event.nativeEvent.isComposing && event.nativeEvent.keyCode !== 229) { event.preventDefault(); add(); } }} placeholder="Search suggestions or type your own" /><button type="button" className="jl-button" onClick={add} disabled={!query.trim()}>Add</button></div>
     <datalist id={`${id}-options`}>{choices.filter(choice => !selected.some(value => value.toLowerCase() === choice.toLowerCase())).map(choice => <option key={choice} value={choice} />)}</datalist>
     <p id={`${id}-help`}>{description} You can type your own. Next also includes anything left in the search box.</p>
     {issue && <p role="alert">{issue}</p>}
