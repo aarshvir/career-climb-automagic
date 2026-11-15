@@ -28,7 +28,7 @@ function publicTrial(value: unknown) {
   if (typeof trial.granted !== 'boolean') throw unavailable();
   const oneOf = (value: unknown, allowed: string[]) => { if (value === null || value === undefined) return null; if (typeof value !== 'string' || !allowed.includes(value)) throw unavailable(); return value; };
   return { startsAt: isoDate(trial.startsAt), endsAt: isoDate(trial.endsAt), firstChargeAt: isoDate(trial.firstChargeAt), reminderAt: isoDate(trial.reminderAt), granted: trial.granted,
-    deniedReason: oneOf(trial.deniedReason, ['trial_used','capacity_full']), stopState: oneOf(trial.stopState, ['not_needed','required','requested','stopped','charged','uncertain']),
+    deniedReason: oneOf(trial.deniedReason, ['trial_used','capacity_full']), stopState: oneOf(trial.stopState, ['not_needed','required','requested','stopped','charged','uncertain','charge_due']),
     cancelOutcome: oneOf(trial.cancelOutcome, ['no_charge','charge_due','after_first_charge']) };
 }
 function record(value: unknown): Record<string, unknown> { if (!value || typeof value !== 'object' || Array.isArray(value)) throw unavailable(); return value as Record<string, unknown>; }
@@ -184,24 +184,35 @@ async function boundOrder(ports: LoopBillingPorts, config: LoopBillingConfig, su
 }
 /** A trial that SQL did not grant (already used, or no paid place free) must
  * not leave Dodo's mandate scheduled to charge. Claim one audited stop attempt,
- * cancel at the trial's first-charge boundary, read Dodo back and record what is
- * actually proven. An unverified stop releases this webhook occurrence and
- * fails it, so Dodo's retry reconciles again; a charge that already happened is
- * recorded as charged and its paid month goes through paid-place admission. */
-async function stopDeniedTrial(ports: LoopBillingPorts, config: LoopBillingConfig, sub: LoopSubscription, pricing: LoopPriceSnapshot, trialDays: LoopTrialDays, eventId: string): Promise<string> {
-  const finalize = async (outcome: 'stopped'|'charged'|'uncertain'|'deferred') => String(record(await ports.rpc('job_loop_billing_trial_stop_finalize',
+ * cancel at the trial's first-charge boundary, read Dodo back and record only
+ * what is proven. "stopped" needs the cancellation read back at least ten
+ * minutes before the charge (or an ended, uncharged subscription); a
+ * cancellation accepted closer to or after the boundary is charge_due, and
+ * later payment or subscription events reconcile it. An unverified stop,
+ * including one whose fast retries are used up, releases this occurrence and
+ * fails it, so Dodo's retry reconciles again; it is never acknowledged. */
+async function stopDeniedTrial(ports: LoopBillingPorts, config: LoopBillingConfig, sub: LoopSubscription, pricing: LoopPriceSnapshot, trialDays: LoopTrialDays, eventId: string | null): Promise<string> {
+  const finalize = async (outcome: 'stopped'|'charged'|'uncertain'|'charge_due'|'deferred') => String(record(await ports.rpc('job_loop_billing_trial_stop_finalize',
     { p_mode: config.mode, p_subscription: sub.subscriptionId, p_outcome: outcome, p_event: outcome === 'stopped' || outcome === 'charged' ? null : eventId })).stopState);
   const pending = () => new ApiError(503, 'LOOP_TRIAL_STOP_PENDING', 'A free trial that could not start is still being cancelled with the payment provider. Delivery will be retried.');
   const claim = record(await ports.rpc('job_loop_billing_trial_stop_claim', { p_mode: config.mode, p_subscription: sub.subscriptionId }));
-  if (claim.claimed !== true) {
-    if (claim.inFlight === true) { await finalize('deferred'); throw pending(); }
-    return String(claim.stopState);
+  const reconcileOnly = claim.claimed !== true && claim.reconcile === true;
+  if (claim.claimed !== true && !reconcileOnly) {
+    if (claim.inFlight === true || claim.exhausted === true) { await finalize('deferred'); throw pending(); }
+    const state = String(claim.stopState);
+    if (state !== 'stopped' && state !== 'charged' && state !== 'not_needed') throw pending();
+    return state;
   }
-  const boundary = Date.parse(String(claim.firstChargeAt)), hour = 3600000;
+  const boundary = Date.parse(String(claim.firstChargeAt)), hour = 3600000, margin = 10 * 60000;
   if (!Number.isFinite(boundary)) throw unavailable();
+  const atBoundary = (s: LoopSubscription) => Math.abs(Date.parse(s.validUntil) - boundary) <= hour;
   const charged = (s: LoopSubscription) => Date.parse(s.periodStart) >= boundary - hour || Date.parse(s.validUntil) > boundary + hour;
-  const stopped = (s: LoopSubscription) => !charged(s) && (['cancelled','expired','failed'].includes(s.status) || s.cancelAtPeriodEnd && Math.abs(Date.parse(s.validUntil) - boundary) <= hour);
-  let outcome: 'stopped'|'charged'|'uncertain' = 'uncertain';
+  const ended = (s: LoopSubscription) => ['cancelled','expired','failed'].includes(s.status);
+  // The same proof standard as a customer cancellation's no_charge outcome.
+  const inTime = (s: LoopSubscription) => s.cancelAtPeriodEnd && atBoundary(s) && Date.now() < Math.min(boundary, Date.parse(s.validUntil)) - margin;
+  const stopped = (s: LoopSubscription) => !charged(s) && (ended(s) || inTime(s));
+  const due = (s: LoopSubscription) => !charged(s) && !stopped(s) && s.cancelAtPeriodEnd && atBoundary(s);
+  let outcome: 'stopped'|'charged'|'uncertain'|'charge_due' = 'uncertain';
   try {
     const read = async () => {
       const current = validateLoopSubscriptionToStop(await ports.provider(`subscriptions/${sub.subscriptionId}`), config, pricing, trialDays);
@@ -209,15 +220,19 @@ async function stopDeniedTrial(ports: LoopBillingPorts, config: LoopBillingConfi
       return current;
     };
     let current = await read();
-    if (!stopped(current) && !charged(current)) {
+    if (!reconcileOnly && !stopped(current) && !charged(current) && !due(current)) {
       await ports.provider(`subscriptions/${sub.subscriptionId}`, { cancel_at_next_billing_date: true }, 'PATCH');
       current = await read();
     }
-    outcome = stopped(current) ? 'stopped' : charged(current) ? 'charged' : 'uncertain';
+    outcome = stopped(current) ? 'stopped' : charged(current) ? 'charged' : due(current) ? 'charge_due' : 'uncertain';
   } catch { outcome = 'uncertain'; }
   const state = await finalize(outcome);
-  if (state !== 'stopped' && state !== 'charged') throw pending();
+  if (state !== 'stopped' && state !== 'charged' && state !== 'charge_due') throw pending();
   return state;
+}
+/** Outstanding (required/requested/uncertain) or awaiting-charge denied-trial work. */
+async function trialStopPending(ports: LoopBillingPorts, config: LoopBillingConfig, subscriptionId: string) {
+  return record(await ports.rpc('job_loop_billing_trial_stop_pending', { p_mode: config.mode, p_subscription: subscriptionId }));
 }
 async function payloadHash(value: unknown) {
   return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(value))))).map(byte => byte.toString(16).padStart(2,'0')).join('');
@@ -239,7 +254,14 @@ function signedOccurrence(event: DodoEvent) {
 export async function applyLoopBillingWebhook(ports: LoopBillingPorts, config: LoopBillingConfig, event: DodoEvent, webhookId: string, verifiedRawBody?: string): Promise<Record<string, unknown> | null> {
   const hash = await payloadHash(signedOccurrence(event));
   const seen = await ports.rpc('job_loop_billing_event', { p_mode: config.mode, p_event: `dodo_${webhookId}`, p_payload_hash: hash });
-  if (seen.duplicate === true) return { received: true, duplicate: true };
+  // A recorded occurrence alone never proves a denied trial's provider stop
+  // finished (the stop runs after the trial record commits). A duplicate of an
+  // occurrence whose subscription still has outstanding stop work resumes it.
+  let resumeStop = false;
+  if (seen.duplicate === true) {
+    if (seen.trialStopOutstanding !== true) return { received: true, duplicate: true };
+    resumeStop = true;
+  }
   let subscriptionId: string | null = null;
   let payment: Record<string, unknown> | null = null;
   let forceRevoke = false;
@@ -311,12 +333,17 @@ export async function applyLoopBillingWebhook(ports: LoopBillingPorts, config: L
   // validateLoopPaidPeriod against the original quote amount.
   const trialWithoutAnchor=trialDays>0&&!accounting&&!!pricing.quoteId&&pricing.currency!=='USD'&&source.currency==='USD'&&!(payment?.status==='succeeded'&&!isLoopTrialPayment(payment));
   const sub=forceRevoke||negativeOnly||trialStart||trialWithoutAnchor||!accounting&&historicalPaidAnchor?validateLoopSubscriptionToStop(source,config,pricing,trialDays):validateLoopSubscription(source,config,pricing,accounting,trialDays);
+  if (resumeStop) {
+    if (sub.subscriptionId !== subscriptionId) throw unavailable();
+    const stopState = await stopDeniedTrial(ports, config, sub, pricing, trialDays, `dodo_${webhookId}`);
+    return { received: true, duplicate: true, trial: { stopState } };
+  }
   if (trialStart && payment && !negativeOnly) {
     const trial=validateLoopTrialStart(payment,sub,String(order.session_id),source);
     const result=record(await ports.rpc('job_loop_billing_apply_trial',{p_user:sub.userId,p_request:sub.requestId,p_mode:config.mode,p_plan:sqlPlan(sub.plan),p_product:sub.productId,p_session:order.session_id,p_subscription:sub.subscriptionId,p_customer:sub.customerId,
       p_status:sub.status,p_trial_start:trial.trialStart,p_first_charge:trial.firstChargeAt,p_cancel_at_period_end:sub.cancelAtPeriodEnd,p_event:`dodo_${webhookId}`,p_created:event.created,p_payload_hash:hash,p_payment:trial.paymentId,p_quote:sub.quoteId??null,p_currency:sub.currency}));
     const recorded=result.trial&&typeof result.trial==='object'?record(result.trial):null;
-    if(recorded&&recorded.granted===false&&['required','requested','uncertain'].includes(String(recorded.stopState))){
+    if(recorded&&recorded.granted===false&&['required','requested','uncertain','charge_due'].includes(String(recorded.stopState))){
       const stopState=await stopDeniedTrial(ports,config,sub,pricing,trialDays,`dodo_${webhookId}`);
       return { received: true, ...result, trial: { ...recorded, stopState } };
     }
@@ -338,6 +365,13 @@ export async function applyLoopBillingWebhook(ports: LoopBillingPorts, config: L
     p_cancel_at_period_end: sub.cancelAtPeriodEnd, p_event: `dodo_${webhookId}`, p_created: event.created,
     p_revoked: forceRevoke || paid?.revoked === true, p_payment: paid?.paymentId ?? null, p_paid_amount: paid?.amount ?? null, p_grace_until: graceUntil };
   const result = await ports.rpc(sub.quoteId?'job_loop_billing_apply_event_v2':'job_loop_billing_apply_event', { ...authority, p_payload_hash: hash,...(sub.quoteId?{p_quote:sub.quoteId,p_currency:sub.currency}:{}) });
+  // Another event for a denied trial's subscription (its first charge, or the
+  // subscription ending) reconciles the stop. This occurrence's own work is
+  // done; the trial-start occurrence keeps carrying any unresolved stop.
+  if (trialDays > 0) {
+    const stop = await trialStopPending(ports, config, sub.subscriptionId);
+    if (stop.outstanding === true || stop.awaitingCharge === true) await stopDeniedTrial(ports, config, sub, pricing, trialDays, null).catch(() => undefined);
+  }
   if (result.pendingFulfillment === true) throw new ApiError(503, 'LOOP_BILLING_FULFILLMENT_PENDING', 'Payment received; Automated Job Loop access requires support reconciliation.');
   return { received: true, ...result };
 }

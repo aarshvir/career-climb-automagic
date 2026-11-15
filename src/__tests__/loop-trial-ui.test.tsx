@@ -106,8 +106,10 @@ describe('seven-day free trial journey',()=>{
   });
   it.each([
     ['stopped',/We cancelled it with Dodo Payments before the first charge, so you will not be charged\./],
-    ['required',/We are cancelling it with Dodo Payments before the first charge\. Refresh billing to confirm/],
+    ['required',/We are cancelling it with Dodo Payments so the first charge due on .+ is not taken\. This is not confirmed yet\. Refresh billing to check/],
+    ['uncertain',/We are cancelling it with Dodo Payments so the first charge due on .+ is not taken\. This is not confirmed yet\./],
     ['charged',/The first charge had already been taken before it could be cancelled\./],
+    ['charge_due',/We asked Dodo Payments to cancel it, but the request reached them at the first charge date \(.+\), so we cannot yet confirm whether that charge was taken\. Refresh billing to check\. If it was taken, contact support for access or a refund\./],
   ])('explains a free trial that could not start (stop state %s)',async(stopState,copy)=>{
     const start=Date.now()-DAY,end=start+7*DAY;
     const trial={startsAt:new Date(start).toISOString(),endsAt:new Date(end).toISOString(),firstChargeAt:new Date(end).toISOString(),reminderAt:new Date(end-2*DAY).toISOString(),granted:false,deniedReason:'capacity_full',stopState,cancelOutcome:null};
@@ -117,6 +119,8 @@ describe('seven-day free trial journey',()=>{
     const panel=await screen.findByRole('status',{name:'Free trial not started'});
     expect(panel).toHaveTextContent('Your free trial could not start. Every Automated Job Loop service place was taken when your checkout completed.');
     expect(panel).toHaveTextContent(copy);
+    // Only a proven stop may promise that no charge will be taken.
+    if(stopState!=='stopped')expect(panel).not.toHaveTextContent(/will not be charged|before the first charge, so/);
     expect(screen.queryByText('Status: free trial.')).not.toBeInTheDocument();
   });
   it('does not attach a trial from another subscription to a cancellation receipt',async()=>{

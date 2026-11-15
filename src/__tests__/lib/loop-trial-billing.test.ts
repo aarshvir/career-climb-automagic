@@ -62,6 +62,14 @@ describe('seven-day trial billing boundary',()=>{
     mocks.invoke.mockReset();mocks.invoke.mockResolvedValue({data:{...receipt,trialOutcome:'free'},error:null});
     await expect(cancelLoopSubscription(scope(),intent)).rejects.toThrow();
   });
+  it('accepts an unconfirmed charge_due stop for a trial that could not start, and rejects unknown stop states',async()=>{
+    const trial={startsAt:'2026-11-08T09:05:00Z',endsAt:'2026-11-15T09:05:00Z',firstChargeAt:'2026-11-15T09:05:00Z',reminderAt:'2026-11-13T09:05:00Z',granted:false,deniedReason:'capacity_full',stopState:'charge_due',cancelOutcome:null};
+    const sub={subscriptionId:'sub_trial',plan:'weekly',status:'active',validUntil:trial.endsAt,periodStart:trial.startsAt,cancelAtPeriodEnd:true,revoked:false,graceUntil:null,version:2,pricing:null,trial};
+    mocks.invoke.mockResolvedValue({data:status({trial:{available:true,eligible:false,days:7},subscription:sub}),error:null});
+    expect(await readLoopBilling(scope())).toMatchObject({subscription:{trial:{stopState:'charge_due'}}});
+    mocks.invoke.mockResolvedValue({data:status({trial:{available:true,eligible:false,days:7},subscription:{...sub,trial:{...trial,stopState:'cancelled'}}}),error:null});
+    await expect(readLoopBilling(scope())).rejects.toThrow();
+  });
   it('explains a used trial without opening checkout',async()=>{
     mocks.invoke.mockResolvedValue({data:null,error:{context:new Response(JSON.stringify({code:'LOOP_TRIAL_USED'}),{status:409})}});
     await expect(createLoopSubscriptionCheckout(scope(),captureLoopCheckoutIntent('weekly',0,requestId,undefined,true))).rejects.toThrow(/already had an Automated Job Loop subscription or free trial/);

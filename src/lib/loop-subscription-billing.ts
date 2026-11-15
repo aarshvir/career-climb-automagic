@@ -16,7 +16,7 @@ const instant = z.string().datetime({ offset: true });
 const trialOutcome = z.enum(['no_charge','charge_due','after_first_charge']);
 const subscriptionTrial = z.object({ startsAt: instant, endsAt: instant, firstChargeAt: instant, reminderAt: instant, granted: z.boolean(),
   deniedReason: z.enum(['trial_used','capacity_full']).nullable().optional(),
-  stopState: z.enum(['not_needed','required','requested','stopped','charged','uncertain']).nullable().optional(),
+  stopState: z.enum(['not_needed','required','requested','stopped','charged','uncertain','charge_due']).nullable().optional(),
   cancelOutcome: trialOutcome.nullable().optional() }).strict();
 const trialOffer = z.object({ available: z.boolean(), eligible: z.boolean(), days: z.literal(7) }).strict();
 const subscription = z.object({ subscriptionId: z.string().regex(/^sub_[A-Za-z0-9_-]{1,100}$/), plan,

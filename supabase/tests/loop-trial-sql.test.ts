@@ -324,6 +324,130 @@ describe('access during and after the trial', () => {
     expect(receipt).toMatchObject({ status: 'confirmed', trialOutcome: 'after_first_charge' });
     expect(provider.patches).toBe(1);
   });
+  async function denyNextTrial() {
+    await controlLoopBilling(ports, config, owner, session, checkoutInput());
+    await query("UPDATE jobvance_private.loop_billing_orders SET capacity_until=now()-interval '1 hour' WHERE request_id=$1", [request]);
+    await fillAllPaidPlaces();
+  }
+  const trialRow = async () => instants((await query("SELECT stop_state,stop_attempts,stop_escalated_at IS NOT NULL escalated FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_trial'")).rows[0]);
+  const eventKept = async (id: string) => (await query('SELECT count(*)::int n FROM jobvance_private.loop_billing_events WHERE event_id=$1', ['dodo_' + id])).rows[0].n === 1;
+  it('round 4 (1): a duplicate of a delivery interrupted after the trial record committed resumes the provider stop', async () => {
+    await denyNextTrial();
+    const afterCommit: LoopBillingPorts = { ...ports, rpc: async <T>(name: string, args: Record<string, unknown>) => {
+      const result = await sql(name, args);
+      if (name === 'job_loop_billing_apply_trial') throw Error('Process interrupted after the SQL commit');
+      return result as T;
+    } };
+    await expect(applyLoopBillingWebhook(afterCommit, config, activation() as never, 'msg_cut')).rejects.toThrow('Process interrupted');
+    expect(await eventKept('msg_cut')).toBe(true);
+    expect(await trialRow()).toMatchObject({ stop_state: 'required', stop_attempts: 0 });
+    // The same signed occurrence is redelivered: it is a duplicate, yet the stop resumes.
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_cut')).toEqual({ received: true, duplicate: true, trial: { stopState: 'stopped' } });
+    expect(provider).toMatchObject({ cancelled: true, patches: 1 });
+    expect(await trialRow()).toMatchObject({ stop_state: 'stopped', stop_attempts: 1 });
+    // Only once the stop is proven is a further duplicate a plain acknowledgement.
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_cut')).toEqual({ received: true, duplicate: true });
+    expect(provider.patches).toBe(1);
+  });
+  it('round 4 (1): an interruption after Dodo accepted the cancellation stays pending, then reconciles without a second write', async () => {
+    await denyNextTrial();
+    const lostFinalize: LoopBillingPorts = { ...ports, rpc: async <T>(name: string, args: Record<string, unknown>) => {
+      if (name === 'job_loop_billing_trial_stop_finalize') throw Error('Process interrupted before finalize');
+      return await sql(name, args) as T;
+    } };
+    await expect(applyLoopBillingWebhook(lostFinalize, config, activation() as never, 'msg_mid')).rejects.toThrow('Process interrupted');
+    expect(provider).toMatchObject({ cancelled: true, patches: 1 });
+    expect(await trialRow()).toMatchObject({ stop_state: 'requested', stop_attempts: 1 });
+    // A duplicate inside the in-flight window is neither acknowledged nor a second write.
+    await expect(applyLoopBillingWebhook(ports, config, activation() as never, 'msg_mid')).rejects.toMatchObject({ code: 'LOOP_TRIAL_STOP_PENDING' });
+    expect(await eventKept('msg_mid')).toBe(false);
+    await query("UPDATE jobvance_private.loop_subscription_trials SET stop_updated_at=now()-interval '3 minutes' WHERE subscription_id='sub_trial'");
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_mid')).toMatchObject({ received: true, trial: { granted: false, stopState: 'stopped' } });
+    expect(provider.patches).toBe(1);
+    expect(await eventKept('msg_mid')).toBe(true);
+  });
+  it('round 4 (2): used-up fast stop retries stay pending and escalated, never acknowledged, and recover after the backoff', async () => {
+    await denyNextTrial(); provider.patchFails = true;
+    for (let attempt = 0; attempt < 20; attempt++)
+      await expect(applyLoopBillingWebhook(ports, config, activation() as never, 'msg_exhaust')).rejects.toMatchObject({ code: 'LOOP_TRIAL_STOP_PENDING' });
+    expect(provider.patches).toBe(20);
+    for (let attempt = 0; attempt < 3; attempt++)
+      await expect(applyLoopBillingWebhook(ports, config, activation() as never, 'msg_exhaust')).rejects.toMatchObject({ code: 'LOOP_TRIAL_STOP_PENDING' });
+    expect(provider).toMatchObject({ patches: 20, cancelled: false });
+    expect(await eventKept('msg_exhaust')).toBe(false);
+    expect(await trialRow()).toEqual({ stop_state: 'uncertain', stop_attempts: 20, escalated: true });
+    expect(await sql('job_loop_billing_trial_stops_escalated', { p_mode: 'live' })).toMatchObject([{ userId: owner, subscriptionId: 'sub_trial', stopState: 'uncertain', attempts: 20 }]);
+    const status = await controlLoopBilling(ports, config, owner, session, { action: 'status', contractVersion: 3 }) as Record<string, any>;
+    expect(status.subscription.trial).toMatchObject({ granted: false, stopState: 'uncertain' });
+    await expect(query("UPDATE jobvance_private.loop_subscription_trials SET stop_escalated_at=NULL WHERE subscription_id='sub_trial'")).rejects.toThrow('LOOP_TRIAL_IMMUTABLE');
+    // After the six-hour backoff, Dodo's next retry tries the provider again.
+    await query("UPDATE jobvance_private.loop_subscription_trials SET stop_updated_at=now()-interval '7 hours' WHERE subscription_id='sub_trial'");
+    provider.patchFails = false;
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_exhaust')).toMatchObject({ received: true, trial: { stopState: 'stopped' } });
+    expect(await trialRow()).toEqual({ stop_state: 'stopped', stop_attempts: 21, escalated: true });
+    expect(await sql('job_loop_billing_trial_stops_escalated', { p_mode: 'live' })).toEqual([]);
+  });
+  it('round 4 (3): a denied-trial stop near or past the first-charge boundary is charge_due, not stopped, and later reconciles', async () => {
+    for (const [minutes, settle] of [[5, 'charged'], [-5, 'stopped']] as const) {
+      await db.exec('TRUNCATE auth.users CASCADE; TRUNCATE jobvance_private.loop_billing_events');
+      await query('INSERT INTO auth.users(id) VALUES($1)', [owner]); await query('INSERT INTO auth.sessions(id,user_id) VALUES($1,$2)', [session, owner]); await query('SELECT job_loop_open_record($1)', [owner]);
+      provider = { trialStart: Date.now() - 7 * DAY + minutes * 60000, charged: false, cancelled: false, status: 'active', refunded: false, firstChargeFails: false, posts: [], patches: 0, patchFails: false };
+      await denyNextTrial();
+      // Dodo accepted the cancellation, but too close to the charge to prove none was taken.
+      expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_boundary')).toMatchObject({ received: true, trial: { granted: false, stopState: 'charge_due' } });
+      expect(provider).toMatchObject({ cancelled: true, patches: 1 });
+      expect(await eventKept('msg_boundary')).toBe(true);
+      const status = await controlLoopBilling(ports, config, owner, session, { action: 'status', contractVersion: 3 }) as Record<string, any>;
+      expect(status.subscription.trial).toMatchObject({ stopState: 'charge_due' });
+      await expect(query("UPDATE jobvance_private.loop_subscription_trials SET stop_state='uncertain' WHERE subscription_id='sub_trial'")).rejects.toThrow('LOOP_TRIAL_IMMUTABLE');
+      if (settle === 'charged') {
+        // The first charge was taken after all: recorded as charged; no free place means pending fulfillment.
+        await expect(chargeFirst()).rejects.toMatchObject({ code: 'LOOP_BILLING_FULFILLMENT_PENDING' });
+      } else {
+        // Dodo ended the subscription at the boundary without charging.
+        provider.status = 'cancelled';
+        await applyLoopBillingWebhook(ports, config, { type: 'subscription.cancelled', created: epoch + 40, data: { payload_type: 'Subscription', subscription_id: 'sub_trial', status: 'cancelled', metadata: meta() } } as never, 'msg_ended');
+      }
+      expect((await trialRow()).stop_state).toBe(settle);
+      expect(provider.patches).toBe(1);
+    }
+  });
+  it('round 4 (3): a denied-trial stop read back well before the boundary is still proven stopped', async () => {
+    provider.trialStart = Date.now() - 7 * DAY + 30 * 60000;
+    await denyNextTrial();
+    expect(await applyLoopBillingWebhook(ports, config, activation() as never, 'msg_early')).toMatchObject({ trial: { stopState: 'stopped' } });
+  });
+  /** Dodo scheduled the first charge 30 minutes after created_at + 7 days (inside the accepted hour). */
+  const offset = 30 * 60000;
+  const offsetPorts: LoopBillingPorts = { ...ports, provider: async (path, body, method) => {
+    const result = await ports.provider(path, body, method);
+    if (path === 'subscriptions/sub_trial') return { ...result, previous_billing_date: iso(provider.charged ? firstCharge() + offset : provider.trialStart), next_billing_date: iso(firstCharge() + offset + (provider.charged ? 30 * DAY : 0)) };
+    if (path === 'payments/pay_first') return { ...result, service_periods: [{ subscription_id: 'sub_trial', starts_at: iso(firstCharge() + offset), ends_at: iso(firstCharge() + offset + 30 * DAY) }] };
+    return result;
+  } };
+  it('round 4 (4): a later delivery of the original $0 payment after renewal keeps the accepted +30-minute first charge', async () => {
+    provider.trialStart = Date.now() - 9 * DAY;
+    await controlLoopBilling(ports, config, owner, session, checkoutInput());
+    await applyLoopBillingWebhook(offsetPorts, config, activation() as never, 'msg_first_seen');
+    const stored = { starts_at: new Date(provider.trialStart), first_charge_at: new Date(firstCharge() + offset) };
+    expect((await query("SELECT starts_at,first_charge_at FROM jobvance_private.loop_subscription_trials")).rows).toEqual([stored]);
+    provider.charged = true;
+    expect(await applyLoopBillingWebhook(offsetPorts, config, activation(epoch + 30) as never, 'msg_redelivered')).toMatchObject({ received: true, trial: { firstChargeAt: expect.anything() } });
+    expect((await query("SELECT starts_at,first_charge_at FROM jobvance_private.loop_subscription_trials")).rows).toEqual([stored]);
+    // A different payment or trial start is still a conflict.
+    await expect(sql('job_loop_billing_apply_trial', { p_user: owner, p_request: request, p_mode: 'live', p_plan: 'weekly', p_product: 'pdt_weekly', p_session: 'cks_trial', p_subscription: 'sub_trial', p_customer: 'cus_trial', p_status: 'active',
+      p_trial_start: iso(provider.trialStart + 60000), p_first_charge: iso(firstCharge()), p_cancel_at_period_end: false, p_event: 'dodo_msg_forged', p_created: epoch + 50, p_payload_hash: 'a'.repeat(64), p_payment: 'pay_trial' })).rejects.toThrow('LOOP_BILLING_PAYMENT_CONFLICT');
+  });
+  it('round 4 (4): a $0 activation first observed after its +30-minute first charge adopts that recorded charge time', async () => {
+    provider.trialStart = Date.now() - 10 * DAY;
+    await controlLoopBilling(ports, config, owner, session, checkoutInput());
+    provider.charged = true;
+    expect(await applyLoopBillingWebhook(offsetPorts, config, { type: 'payment.succeeded', created: epoch + 20, data: { payload_type: 'Payment', subscription_id: 'sub_trial', payment_id: 'pay_first' } } as never, 'msg_first_charge')).toMatchObject({ received: true });
+    expect(await applyLoopBillingWebhook(offsetPorts, config, activation(epoch + 30) as never, 'msg_trial_late')).toMatchObject({ received: true, trial: { granted: true } });
+    expect((await query("SELECT first_charge_at,reminder_at FROM jobvance_private.loop_subscription_trials")).rows)
+      .toEqual([{ first_charge_at: new Date(firstCharge() + offset), reminder_at: new Date(firstCharge() + offset - 2 * DAY) }]);
+    expect(await entitlement()).toMatchObject({ active: true, validUntil: iso(firstCharge() + offset + 30 * DAY) });
+  });
   it('a zero-amount payment on a paid order never grants anything', async () => {
     await controlLoopBilling(ports, config, owner, session, checkoutInput({ trial: false }));
     await expect(applyLoopBillingWebhook(ports, config, activation() as never, 'msg_zero_paid')).rejects.toThrow();
