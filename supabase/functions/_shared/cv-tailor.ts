@@ -297,11 +297,12 @@ const SUMMARY_SLOT = "\u0000summary-slot\u0000"; // a CV request cannot contain 
 /**
  * Questions are checked for form only: one line (any line break drops it) of 9 to 300 characters that ends
  * with a question mark, with no web address (scheme://, www. or mailto:), HTML, Markdown link, bold, star
- * emphasis or backticks, no heading or list mark at the start, repeats removed, at most five kept. A bare
+ * emphasis (also inside brackets or quotes) or backticks, no heading, bullet or numbered-list mark (1. or 1))
+ * at the start, repeats removed, at most five kept. A bare
  * domain such as example.com and _underscore_ italics are not detected. A question that fails is dropped
  * without being counted. Whether a question is wise, or hints at an answer, is not checked.
  */
-const QUESTION_MARKUP = /\b[a-z][a-z0-9+.-]*:\/\/|mailto:|www\.|\]\(|\u0060|\*\*|(?:^|\s)\*[^\s*][^*]*\*|__|^\s*(?:#|[-*•]\s)|<\/?[a-z][^>]*>/iu;
+const QUESTION_MARKUP = /\b[a-z][a-z0-9+.-]*:\/\/|mailto:|www\.|\]\(|\u0060|\*\*|(?<![\p{L}\p{N}*])\*[^\s*](?:[^*]*[^\s*])?\*(?![\p{L}\p{N}*])|__|^\s*(?:#|[-*•]\s|\(?\d+[.)]\s)|<\/?[a-z][^>]*>/iu;
 export function checkedQuestions(raw: unknown[]): string[] {
   const seen = new Set<string>(), kept: string[] = [];
   for (const item of raw) {

@@ -385,6 +385,70 @@ describe('undo is bound to the exact place the profile was put', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
     expect(reviewed()).toBe([...head, 'EXPERIENCE', role, bullet, '', 'PROFILE', 'Old profile.'].join('\n'));
   });
+  const refused = /edited or moved since, so it was left as it is/;
+  const edit = (text: string) => fireEvent.change(screen.getByLabelText(/Your tailored CV/), { target: { value: text } });
+  it('refuses when a block above was deleted by hand and another section moved onto the recorded line', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'SUMMARY', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Experienced analyst.', 4)]));
+    const edited = [...lines.slice(0, 3), ...lines.slice(6)].join('\n');
+    edit(edited);
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(refused)).toBeInTheDocument();
+    expect(reviewed()).toBe(edited);
+  });
+  it('an older response that fits in two places gives no undo, and the edited text is never searched', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'SUMMARY', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Experienced analyst.')]));
+    const edited = lines.map((line, i) => i === 4 ? 'My manually edited profile.' : line).join('\n');
+    edit(edited);
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(refused)).toBeInTheDocument();
+    expect(reviewed()).toBe(edited);
+  });
+  it('an older response with one fit is resolved once: a copy typed under another SUMMARY later is not a target', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Experienced analyst.')]));
+    const edited = [...head, 'PROFILE', 'My manually edited profile.', '', 'SUMMARY', GEN, '', 'EXPERIENCE', role, bullet].join('\n');
+    edit(edited);
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(refused)).toBeInTheDocument();
+    expect(reviewed()).toBe(edited);
+  });
+  it('an older response with one fit still restores when nothing above it changed', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Experienced analyst.')]));
+    edit(`${lines.join('\n')}\n- A line typed below the profile.`);
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(reviewed()).toBe([...head, 'PROFILE', 'Experienced analyst.', '', 'EXPERIENCE', role, bullet, '- A line typed below the profile.'].join('\n'));
+  });
+  it('refuses when a line above the profile was edited, even though the profile itself is untouched', async () => {
+    const lines = [...head, 'PROFILE', GEN, '', 'EXPERIENCE', role, bullet];
+    await open(lines.join('\n'), result(lines, [summary('Experienced analyst.', 4)]));
+    const edited = lines.map((line, i) => i === 0 ? 'Alex Example Jr' : line).join('\n');
+    edit(edited);
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(refused)).toBeInTheDocument();
+    expect(reviewed()).toBe(edited);
+  });
+  it('still follows the profile through the undo of a rewrite above it', async () => {
+    const lines = [...head, 'EXPERIENCE', role, bullet, '', 'PROFILE', GEN];
+    const rewrite = { kind: 'rewrite', n: 5, before: '- Old bullet.', after: bullet, sources: [5], facts: [] };
+    await open([...head, 'EXPERIENCE', role, '- Old bullet.', '', 'PROFILE', 'Old profile.'].join('\n'), result(lines, [rewrite, { ...summary('Old profile.', 8), n: 7 }]));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Keep my original' })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Keep my original' })[0]);
+    expect(reviewed()).toBe([...head, 'EXPERIENCE', role, '- Old bullet.', '', 'PROFILE', 'Old profile.'].join('\n'));
+  });
+  it('loses the place for good when a block above was deleted before this page undid an earlier line', async () => {
+    const added = '- Led the pilot workstream for two of the five units.';
+    const lines = [...head, 'EXPERIENCE', role, bullet, added, '', 'PROFILE', GEN, '', 'SUMMARY', GEN];
+    await open(lines.join('\n'), result(lines, [{ kind: 'addition', n: 5, before: '', after: added, sources: [5], facts: [] }, { ...summary('Old profile.', 9), n: 7 }]));
+    const edited = [...head, 'EXPERIENCE', role, bullet, added, '', 'SUMMARY', GEN].join('\n');
+    edit(edited);
+    fireEvent.click(screen.getByRole('button', { name: 'Remove this line' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Keep my original' }));
+    expect(await screen.findByText(refused)).toBeInTheDocument();
+    expect(reviewed()).toBe([...head, 'EXPERIENCE', role, bullet, '', 'SUMMARY', GEN].join('\n'));
+  });
 });
 
 describe('the all-rejected wording is neutral in both flows', () => {

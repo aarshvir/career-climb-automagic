@@ -60,16 +60,42 @@ export async function requestTailoredCv(input: { cvText: string; jobDescription:
 
 const PROFILE_HEADING = /^(professional\s+|career\s+)?(profile|summary|objective)\s*:?$/iu;
 /**
- * The line of a new profile that an undo may replace, or null. With the function's exact "at" the answer is that
- * line only, and only while it still holds the generated text directly under a profile heading: if it was edited
- * or moved, nothing is searched for elsewhere, so the same words under another heading are never touched.
- * Without "at" (an older function) the line is used only if exactly one place fits.
+ * Where a new profile sits: its line, and every line above it, as returned. An undo may touch that line only
+ * while everything above it is still exactly as it was (or was changed only by this page's own undo steps), so
+ * a deleted, moved or edited block above can never make another section look like the profile.
  */
-export function profileLine(lines: readonly string[], change: { after: string; at?: number | null }): number | null {
+export type ProfilePlace = { at: number; above: string[] } | null;
+
+/**
+ * Resolves the place once, from the document the function returned. With the function's exact "at" that line is
+ * used if it holds the profile directly under a profile heading. Without "at" (an older function) the place is
+ * used only if exactly one line fits; if several do, there is no place and undo is refused. The edited document
+ * is never searched.
+ */
+export function profilePlace(returnedText: string, change: { after: string; at?: number | null }): ProfilePlace {
+  const lines = returnedText.split('\n');
   const fits = (at: number) => at > 0 && lines[at] === change.after && PROFILE_HEADING.test((lines[at - 1] ?? '').trim());
-  if (typeof change.at === 'number') return fits(change.at) ? change.at : null;
-  const found = lines.flatMap((_, at) => fits(at) ? [at] : []);
-  return found.length === 1 ? found[0] : null;
+  const found = typeof change.at === 'number' ? (fits(change.at) ? [change.at] : []) : lines.flatMap((_, at) => fits(at) ? [at] : []);
+  return found.length === 1 ? { at: found[0], above: lines.slice(0, found[0]) } : null;
+}
+
+const sameLines = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((line, i) => line === b[i]);
+
+/** True only if the profile is still on its recorded line with nothing above it edited, added or removed. */
+export function profilePlaceHolds(lines: readonly string[], place: ProfilePlace, after: string): place is NonNullable<ProfilePlace> {
+  return !!place && lines[place.at] === after && sameLines(lines.slice(0, place.at), place.above);
+}
+
+/**
+ * Follows the profile through one change this page made at line "changedAt" (an undone rewrite or addition).
+ * A change below the profile leaves its place as it is. A change above it is followed only if everything above
+ * was untouched before the change; otherwise the place is lost and undo is refused.
+ */
+export function movedProfilePlace(place: ProfilePlace, before: readonly string[], after: readonly string[], changedAt: number): ProfilePlace {
+  if (!place || changedAt >= place.at) return place;
+  if (!sameLines(before.slice(0, place.at), place.above)) return null;
+  const at = place.at + after.length - before.length;
+  return at > 0 && after[at] !== undefined ? { at, above: after.slice(0, at) } : null;
 }
 
 /**

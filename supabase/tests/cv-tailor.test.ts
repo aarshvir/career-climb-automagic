@@ -453,6 +453,12 @@ describe('questions: one line, web addresses and emphasis', () => {
     for (const bad of ['Did you read ftp://files.example.com/cv?', 'Did you open file:///C:/cv?', 'Did you write to mailto:a@b.co?', 'Did you see HTTPS://example.com?', 'Did you use *bold* wording?', 'Did you lead *the* pilot?', '* Did you lead the pilot?']) expect(checkedQuestions([bad]), bad).toEqual([]);
   });
   it('keeps what the page says is not detected, and ordinary stars and colons', () => {
-    for (const ok of ['Did you use example.com for reports?', 'Did you write _tests_ for the model?', 'Did you cut costs by 5 * 3 units?', 'Did you do this: lead the pilot?', 'Did you lead 3*4 sites?']) expect(checkedQuestions([ok]), ok).toEqual([ok]);
+    for (const ok of ['Did you use example.com for reports?', 'Did you write _tests_ for the model?', 'Did you cut costs by 5 * 3 units?', 'Did you do this: lead the pilot?', 'Did you lead 3*4 sites?', 'Did you use 1. planning tools?', 'Did you cut costs by 3*4*5 units?', 'Did you handle 2024 (1) budgets?']) expect(checkedQuestions([ok]), ok).toEqual([ok]);
+  });
+  it('drops star emphasis after punctuation, quotes or brackets, not only after a space', () => {
+    for (const bad of ['Have you used (*Excel*) for reporting?', 'Did you use "*Excel*" for reporting?', 'Did you use [*Excel*] daily?', 'Did you use “*Excel*” daily?', 'Did you use Excel,*Power BI*, daily?', 'Did you use *a* tool?', '*Did you lead the pilot?*']) expect(checkedQuestions([bad]), bad).toEqual([]);
+  });
+  it('drops a numbered-list mark at the start, in each common form', () => {
+    for (const bad of ['1. Did you lead the reporting work?', '12) Did you lead the reporting work?', '(3) Did you lead the reporting work?', '  2. Did you lead the reporting work?']) expect(checkedQuestions([bad]), bad).toEqual([]);
   });
 });

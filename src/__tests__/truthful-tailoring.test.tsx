@@ -310,8 +310,10 @@ describe('the public page matches what the code counts and filters', () => {
   });
   it('states the question filter exactly as the code applies it', () => {
     renderPage();
-    expect(document.body).toHaveTextContent('one line (a line break drops it) of 9 to 300 characters that ends in a question mark, with no web address (http://, https://, ftp:// or another scheme://, www. or mailto:), no HTML, Markdown link, bold, star emphasis or backticks');
+    expect(document.body).toHaveTextContent('one line (a line break drops it) of 9 to 300 characters that ends in a question mark, with no web address (http://, https://, ftp:// or another scheme://, www. or mailto:), no HTML, Markdown link, bold, star emphasis (also inside brackets or quotes) or backticks, and no heading, bullet or numbered-list mark (1. or 1)) at the start');
     expect(document.body).toHaveTextContent('A bare domain such as example.com, and text in underscores, are not detected.');
+    expect(document.body).toHaveTextContent('nothing above it has been edited, added or removed by you');
+    expect(document.body).toHaveTextContent('The page never looks for the profile somewhere else in your edited text.');
     expect(document.body).toHaveTextContent('At most five are kept, and one that fails is dropped without being counted');
     expect(checkedQuestions(['Did you write the C# tools?', 'Why do now?', 'Why now?', 'a'.repeat(300) + '?', 'Did you see www.example.com?'])).toEqual(['Did you write the C# tools?', 'Why do now?']);
     expect(checkedQuestions(Array.from({ length: 8 }, (_, i) => `Did you finish project ${i}?`))).toHaveLength(5);
