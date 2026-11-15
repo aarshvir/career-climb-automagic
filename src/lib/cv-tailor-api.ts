@@ -9,6 +9,8 @@ const changeSchema = z.object({
   sources: z.array(z.number().int()).max(200),
   /** One-based numbers of the confirmed answers this change used. */
   facts: z.array(z.number().int().min(1).max(5)).max(5).default([]),
+  /** For a summary: the 0-based line of the new profile in the returned text. Older functions omit it. */
+  at: z.number().int().min(0).nullable().optional(),
 });
 const responseSchema = z.object({
   tailored: z.object({
@@ -54,6 +56,56 @@ export async function requestTailoredCv(input: { cvText: string; jobDescription:
   if (!parsed.success) throw new TailorUnavailable('The AI suggestions could not be checked. Your CV comparison still works.', 'TAILOR_UNREADABLE');
   if (parsed.data.tailored.changes.some(change => change.facts.some(n => n > (body.facts?.length ?? 0) || (change.kind === 'summary' ? !change.sources.includes(body.factSources![n - 1]) : change.n !== body.factSources![n - 1])))) throw new TailorUnavailable('The answer references could not be checked. Your current CV is unchanged.', 'TAILOR_UNREADABLE');
   return parsed.data.tailored;
+}
+
+const PROFILE_HEADING = /^(professional\s+|career\s+)?(profile|summary|objective)\s*:?$/iu;
+/**
+ * Where a new profile sits: its line, and every line above it, as returned. An undo may touch that line only
+ * while everything above it is still exactly as it was (or was changed only by this page's own undo steps), so
+ * a deleted, moved or edited block above can never make another section look like the profile.
+ */
+export type ProfilePlace = { at: number; above: string[] } | null;
+
+/**
+ * Resolves the place once, from the document the function returned. With the function's exact "at" that line is
+ * used if it holds the profile directly under a profile heading. Without "at" (an older function) the place is
+ * used only if exactly one line fits; if several do, there is no place and undo is refused. The edited document
+ * is never searched.
+ */
+export function profilePlace(returnedText: string, change: { after: string; at?: number | null }): ProfilePlace {
+  const lines = returnedText.split('\n');
+  const fits = (at: number) => at > 0 && lines[at] === change.after && PROFILE_HEADING.test((lines[at - 1] ?? '').trim());
+  const found = typeof change.at === 'number' ? (fits(change.at) ? [change.at] : []) : lines.flatMap((_, at) => fits(at) ? [at] : []);
+  return found.length === 1 ? { at: found[0], above: lines.slice(0, found[0]) } : null;
+}
+
+const sameLines = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((line, i) => line === b[i]);
+
+/** True only if the profile is still on its recorded line with nothing above it edited, added or removed. */
+export function profilePlaceHolds(lines: readonly string[], place: ProfilePlace, after: string): place is NonNullable<ProfilePlace> {
+  return !!place && lines[place.at] === after && sameLines(lines.slice(0, place.at), place.above);
+}
+
+/**
+ * Follows the profile through one change this page made at line "changedAt" (an undone rewrite or addition).
+ * A change below the profile leaves its place as it is. A change above it is followed only if everything above
+ * was untouched before the change; otherwise the place is lost and undo is refused.
+ */
+export function movedProfilePlace(place: ProfilePlace, before: readonly string[], after: readonly string[], changedAt: number): ProfilePlace {
+  if (!place || changedAt >= place.at) return place;
+  if (!sameLines(before.slice(0, place.at), place.above)) return null;
+  const at = place.at + after.length - before.length;
+  return at > 0 && after[at] !== undefined ? { at, above: after.slice(0, at) } : null;
+}
+
+/**
+ * A rewrite of a line inside a profile that a new summary replaced is not in the final CV, so
+ * "Keep my original" cannot undo it. The summary change already carries the replaced text as its
+ * original; list only changes that are present in the returned CV.
+ */
+export function withoutReplacedRewrites(tailored: TailoredCv): TailoredCv {
+  if (!tailored.changes.some(change => change.kind === 'summary' && change.before)) return tailored;
+  return { ...tailored, changes: tailored.changes.filter(change => change.kind !== 'rewrite' || tailored.text.includes(change.after)) };
 }
 
 /** Best-effort role title from the first meaningful line of a vacancy. */

@@ -25,7 +25,7 @@ const mixedAttribution = /\b(?:supported|assisted|helped|contributed|participate
 const numberKey = (text: string) => numbers(text).sort().join('|');
 
 /** Heuristic safety checks are bounded; the candidate still approves the exact final artifact. */
-export function validateLoopRewrites(value: unknown, claims: readonly Readonly<LoopClaim>[], selectedIds: readonly string[]): LoopClaimRewrite[] {
+export function validateLoopRewrites(value: unknown, claims: readonly Readonly<LoopClaim>[], selectedIds: readonly string[], replaySaved = false): LoopClaimRewrite[] {
   if (value === undefined) return []; // Older workers/provider responses may only select claims.
   if (!Array.isArray(value) || value.length > 16 || new Set(selectedIds).size !== selectedIds.length) throw new Error('Invalid tailoring suggestions.');
   const sources = new Map(claims.map(claim => [claim.id, claim]));
@@ -41,7 +41,7 @@ export function validateLoopRewrites(value: unknown, claims: readonly Readonly<L
     const proposed = text.trim();
     // Only the exact approved phrasing authorizes wording. A quote may contain other people's
     // achievements, so it is deliberately not pooled into the rewrite validation source.
-    if (validateRewrite(proposed, [source.phrasing]) || numberKey(proposed) !== numberKey(source.phrasing)) throw new Error('The suggestion changes a source fact.');
+    if (validateRewrite(proposed, [source.phrasing], { ownership: replaySaved ? 'line' : 'verb' }) || numberKey(proposed) !== numberKey(source.phrasing)) throw new Error('The suggestion changes a source fact.');
     // Negated passages and projected results retain their original wording. A lexical check
     // cannot reliably prove the scope of a negation or turn a forecast into a measured result.
     if ((negated.test(source.phrasing) || qualified.test(source.phrasing) || mixedAttribution.test(source.phrasing) || source.resultStatus === 'projected') && proposed !== source.phrasing) throw new Error('Keep the exact qualified, attributed or negative source wording.');
@@ -61,5 +61,6 @@ export function validateLoopRewriteReceipts(value: readonly LoopClaimRewrite[] |
     const source = claims.find(claim => claim.id === receipt.claimId);
     if (!source || receipt.revision !== source.revision || receipt.sourceQuote !== source.sourceQuote || receipt.sourcePhrasing !== source.phrasing || receipt.context !== source.context || receipt.kind !== source.kind || receipt.resultStatus !== source.resultStatus) throw new Error('The saved tailoring source has changed.');
   }
-  return validateLoopRewrites(value.map(receipt => ({ claimId: receipt.claimId, text: receipt.text })), claims, selectedIds);
+  // A saved receipt was accepted under the check in force when it was issued; replaying it must not fail on a later, stricter ownership rule.
+  return validateLoopRewrites(value.map(receipt => ({ claimId: receipt.claimId, text: receipt.text })), claims, selectedIds, true);
 }

@@ -60,3 +60,23 @@ describe('Loop tailoring preserves exact claim authority', () => {
     expect(() => validateLoopRewriteReceipts(proposal(claim.phrasing) as never, [claim], [claim.id])).toThrow(/receipt/);
   });
 });
+
+describe('Loop tailoring after the per-verb ownership rule', () => {
+  const mixed: LoopClaim = { ...claim, id: 'claim-mixed', phrasing: 'Led the weekly pack and supported monthly reporting for 5 stores' };
+  const text = 'Led the weekly pack and ran monthly reporting for 5 stores';
+  it('holds a new provider suggestion to the per-verb rule', () => {
+    expect(() => validateLoopRewrites(proposal(text, mixed.id), [mixed], [mixed.id])).toThrow(/changes a source fact/);
+    expect(validateLoopRewrites(proposal('Led the weekly pack and supported monthly reporting for 5 stores', mixed.id), [mixed], [mixed.id])).toHaveLength(1);
+  });
+  it('still replays a receipt that was accepted before the rule, so a retry does not fail on a saved result', () => {
+    const receipts = validateLoopRewrites(proposal(text, mixed.id), [mixed], [mixed.id], true);
+    expect(receipts).toHaveLength(1);
+    expect(validateLoopRewriteReceipts(receipts, [mixed], [mixed.id])).toEqual(receipts);
+  });
+  it('replay still enforces the rest: a changed number, an invented name, or an ownership verb with none in the source', () => {
+    for (const bad of ['Led the weekly pack and ran monthly reporting for 6 stores', 'Led the weekly pack and ran monthly reporting for 5 stores in Tableau']) {
+      expect(() => validateLoopRewrites(proposal(bad, mixed.id), [mixed], [mixed.id], true)).toThrow();
+    }
+    expect(() => validateLoopRewrites(proposal('Led reporting for 5 stores', claim.id), [claim], [claim.id], true)).toThrow();
+  });
+});
