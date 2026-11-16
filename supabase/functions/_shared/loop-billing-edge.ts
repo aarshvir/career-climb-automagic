@@ -37,7 +37,7 @@ export function loopBillingRpc(admin: ReturnType<typeof adminClient>) {
 }
 export async function loopBillingProvider(config: DodoBillingConfig, endpoint: string, body?: Record<string, unknown>, method?: 'GET'|'POST'|'PATCH'): Promise<Record<string, unknown>> {
   const invalid = () => new ApiError(503,'PAYMENT_PROVIDER_ERROR','Billing is temporarily unavailable. Keep the same request while its outcome is checked.');
-  if (!/^(?:products\/pdt_[A-Za-z0-9_-]+(?:\/localized-prices)?|payments\/pay_[A-Za-z0-9_-]+|subscriptions\/sub_[A-Za-z0-9_-]+|refunds\/ref_[A-Za-z0-9_-]+|checkouts(?:\/cks_[A-Za-z0-9_-]+|\/preview)?)$/.test(endpoint)) throw invalid();
+  if (!/^(?:products\/pdt_[A-Za-z0-9_-]+(?:\/localized-prices)?|payments\/pay_[A-Za-z0-9_-]+|subscriptions\/sub_[A-Za-z0-9_-]+|refunds\/ref_[A-Za-z0-9_-]+|customers\/cus_[A-Za-z0-9_-]+\/emails\?page_size=100|checkouts(?:\/cks_[A-Za-z0-9_-]+|\/preview)?)$/.test(endpoint)) throw invalid();
   let response: Response;
   try {
     response = await fetch(`${config.apiBaseUrl}/${endpoint}`, { method: method ?? (body ? 'POST' : 'GET'), headers: { Authorization: `Bearer ${config.secretKey}`, Accept:'application/json', ...(body ? {'Content-Type':'application/json'} : {}) },

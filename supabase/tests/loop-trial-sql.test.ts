@@ -8,8 +8,12 @@ import { randomUUID } from 'node:crypto';
 import { paidCapacitySchema } from './fixtures/paid-capacity-schema.mjs';
 import { applyLoopBillingWebhook, controlLoopBilling, type LoopBillingPorts } from '../functions/_shared/loop-billing-runtime.ts';
 import { LOOP_BILLING_PRODUCT, type LoopBillingConfig } from '../functions/_shared/loop-billing.ts';
+import { authorizeTrialReminderDispatch, confirmTrialReminders } from '../functions/_shared/loop-trial-reminders.ts';
 
 const trialMigration = '20261111120000_job_loop_seven_day_trial.sql';
+const reminderMigration = '20261116120000_job_loop_trial_reminder_receipts.sql';
+/** Dodo's customer email log for cus_trial, or a read failure. */
+let emailLog: Record<string, unknown>[] | Error = [];
 const DAY = 86400000;
 let db: PGlite, owner: string, session: string, request: string, epoch: number;
 const query = (q: string, a: unknown[] = []) => db.query<Record<string, any>>(q, a);
@@ -55,6 +59,7 @@ const ports: LoopBillingPorts = {
     if (path === 'checkouts/cks_trial') return { id: 'cks_trial', payment_id: 'pay_trial' };
     if (path === 'payments/pay_trial') return trialPayment();
     if (path === 'payments/pay_first') return firstPayment();
+    if (path === 'customers/cus_trial/emails?page_size=100') { if (emailLog instanceof Error) throw emailLog; return { items: emailLog, total_count: emailLog.length }; }
     if (path === 'subscriptions/sub_trial') { if (method === 'PATCH') { provider.patches++; if (provider.patchFails) throw Error('Provider timeout'); expect(body).toEqual({ cancel_at_next_billing_date: true }); provider.cancelled = true; } return providerSub(); }
     throw Error('External network forbidden: ' + path);
   },
@@ -83,10 +88,20 @@ beforeAll(async () => {
   db = new PGlite();
   await db.exec(await paidCapacitySchema());
   await db.exec(await readFile(new URL('../migrations/' + trialMigration, import.meta.url), 'utf8'));
+  // Local substitutes for pg_cron, pg_net and the scheduler origin (20261011050000).
+  await db.exec(`CREATE SCHEMA IF NOT EXISTS cron; CREATE SCHEMA IF NOT EXISTS net;
+    CREATE TABLE cron.job(jobname text PRIMARY KEY,schedule text,command text);
+    CREATE FUNCTION cron.schedule(job_name text,schedule text,command text) RETURNS bigint LANGUAGE sql AS $$ INSERT INTO cron.job VALUES(job_name,schedule,command) RETURNING 1::bigint $$;
+    CREATE TABLE net.calls(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,url text,headers jsonb,body jsonb);
+    CREATE FUNCTION net.http_post(url text,body jsonb DEFAULT '{}',params jsonb DEFAULT '{}',headers jsonb DEFAULT '{}',timeout_milliseconds integer DEFAULT 2000)
+      RETURNS bigint LANGUAGE sql AS $$ INSERT INTO net.calls(url,headers,body) VALUES(url,headers,body) RETURNING id $$;
+    ALTER TABLE public.job_loop_scheduler_config ADD COLUMN IF NOT EXISTS api_origin text, ADD COLUMN IF NOT EXISTS publishable_key text;`);
+  await db.exec(await readFile(new URL('../migrations/' + reminderMigration, import.meta.url), 'utf8'));
 }, 60000);
 afterAll(async () => db?.close());
 beforeEach(async () => {
-  await db.exec('RESET ROLE; TRUNCATE auth.users CASCADE; TRUNCATE jobvance_private.loop_billing_events; TRUNCATE public.job_loop_pilot_users CASCADE');
+  await db.exec('RESET ROLE; TRUNCATE auth.users CASCADE; TRUNCATE jobvance_private.loop_billing_events; TRUNCATE public.job_loop_pilot_users CASCADE; TRUNCATE jobvance_private.loop_trial_reminder_receipts, public.job_loop_trial_reminder_tickets, net.calls');
+  emailLog = [];
   owner = randomUUID(); session = randomUUID(); request = randomUUID();
   await query('INSERT INTO auth.users(id) VALUES($1)', [owner]); await query('INSERT INTO auth.sessions(id,user_id) VALUES($1,$2)', [session, owner]); await query('SELECT job_loop_open_record($1)', [owner]);
   epoch = Number((await query('SELECT extract(epoch FROM now())::bigint-100 e')).rows[0].e);
@@ -453,5 +468,110 @@ describe('access during and after the trial', () => {
     await expect(applyLoopBillingWebhook(ports, config, activation() as never, 'msg_zero_paid')).rejects.toThrow();
     expect(await entitlement()).toMatchObject({ active: false });
     expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_subscription_trials')).rows[0].n).toBe(0);
+  });
+});
+
+describe('trial reminder confirmation (Dodo sends the trial-ending email)', () => {
+  const sweep = () => confirmTrialReminders(ports, 'live');
+  const trialEnding = (changes: Record<string, unknown> = {}) => ({ email_log_id: 'elog_1', email_type: 'subscription_trial_ending', category: 'subscriptions', status: 'delivered',
+    created_at: iso(firstCharge() - 2 * DAY + 60000), subject: 'Your trial ends soon', recipient: 'x@example.test', has_preview: true, ...changes });
+  const receipt = async () => instants((await query('SELECT * FROM jobvance_private.loop_trial_reminder_receipts')).rows[0] ?? {});
+  const sentAt = async () => { const value = (await query('SELECT reminder_sent_at FROM jobvance_private.loop_subscription_trials')).rows[0].reminder_sent_at; return value === null ? null : new Date(value).toISOString(); };
+  const escalated = async () => (await sql('job_loop_billing_trial_reminders_escalated', { p_mode: 'live' })) as Record<string, unknown>[];
+  const ageCheck = () => query("UPDATE jobvance_private.loop_trial_reminder_receipts SET last_checked_at=now()-interval '21 minutes'");
+  /** Moves every fixed trial date earlier by `hours` (test-only, trigger bypassed as superuser). */
+  async function shiftTrial(hours: number) {
+    await query('ALTER TABLE jobvance_private.loop_subscription_trials DISABLE TRIGGER loop_trial_immutable');
+    await query(`UPDATE jobvance_private.loop_subscription_trials SET starts_at=starts_at-make_interval(hours=>$1),ends_at=ends_at-make_interval(hours=>$1),
+      first_charge_at=first_charge_at-make_interval(hours=>$1),reminder_at=reminder_at-make_interval(hours=>$1)`, [hours]);
+    await query('ALTER TABLE jobvance_private.loop_subscription_trials ENABLE TRIGGER loop_trial_immutable');
+    provider.trialStart -= hours * 3600000;
+  }
+
+  it('confirms a delivered trial-ending email and sets the one-way marker to its send time', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ email_log_id: 'elog_receipt', email_type: 'payment_successful', created_at: iso(provider.trialStart) }), trialEnding()];
+    expect(await sweep()).toEqual({ checked: 1, confirmed: 1, pending: 0, escalated: 0, unavailable: 0 });
+    expect(await sentAt()).toBe(iso(firstCharge() - 2 * DAY + 60000));
+    expect(await receipt()).toMatchObject({ email_log_id: 'elog_1', email_type: 'subscription_trial_ending', email_status: 'delivered', escalated_at: null });
+    // Confirmed rows leave every reminder queue and the marker never moves.
+    expect(await reminders()).toEqual([]);
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    await expect(query('UPDATE jobvance_private.loop_subscription_trials SET reminder_sent_at=now()')).rejects.toThrow('LOOP_TRIAL_IMMUTABLE');
+  });
+  it('waits while Dodo has not sent it, escalates twelve hours after the reminder time, and a late email still confirms', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ email_type: 'payment_successful' })];
+    expect(await sweep()).toMatchObject({ checked: 1, pending: 1, confirmed: 0 });
+    expect(await sentAt()).toBeNull();
+    // A checked row waits 20 minutes before the next read.
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    expect(await escalated()).toEqual([]);
+    await ageCheck(); await shiftTrial(13);
+    expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+    expect(await receipt()).toMatchObject({ escalation_reason: 'not_found', confirmed_at: null });
+    expect(await escalated()).toEqual([expect.objectContaining({ userId: owner, subscriptionId: 'sub_trial', reason: 'not_found' })]);
+    await ageCheck();
+    emailLog = [trialEnding({ created_at: new Date(Date.now() - 60000).toISOString() })];
+    expect(await sweep()).toMatchObject({ confirmed: 1 });
+    expect(await escalated()).toEqual([]);
+  });
+  it('escalates a failed email at once and never confirms it', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ status: 'failed', failure_code: 'mailbox_not_found' })];
+    expect(await sweep()).toMatchObject({ escalated: 1, confirmed: 0 });
+    expect(await sentAt()).toBeNull();
+    expect(await receipt()).toMatchObject({ escalation_reason: 'failed', email_status: 'failed' });
+  });
+  it('ignores trial emails outside the three days before this first charge, in the sweep and in SQL', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ created_at: iso(firstCharge() - 4 * DAY) }), trialEnding({ email_log_id: 'elog_after', created_at: iso(firstCharge() + 1000) })];
+    expect(await sweep()).toMatchObject({ pending: 1, confirmed: 0 });
+    await expect(sql('job_loop_billing_trial_reminder_check', { p_mode: 'live', p_subscription: 'sub_trial', p_email_log_id: 'elog_old', p_email_type: 'subscription_trial_ending',
+      p_email_status: 'delivered', p_email_created_at: iso(firstCharge() - 4 * DAY) })).rejects.toThrow('LOOP_BILLING_UNBOUND');
+    expect(await sentAt()).toBeNull();
+  });
+  it('a provider read failure records nothing and is retried by the next sweep', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = Error('Provider timeout');
+    expect(await sweep()).toMatchObject({ checked: 1, unavailable: 1 });
+    expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_trial_reminder_receipts')).rows[0].n).toBe(0);
+    emailLog = [trialEnding()];
+    expect(await sweep()).toMatchObject({ confirmed: 1 });
+  });
+  it('skips trials that are not yet due or are cancelling', async () => {
+    await startTrial();
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    await shiftTrial(5 * 24);
+    expect((await sweep()).checked).toBe(1);
+    await ageCheck();
+    await query('UPDATE jobvance_private.loop_subscriptions SET cancel_at_period_end=true');
+    expect(await sweep()).toMatchObject({ checked: 0 });
+  });
+  it('dispatches a mode-bound single-use ticket only while a reminder is due', async () => {
+    await query("UPDATE public.job_loop_scheduler_config SET api_origin='https://fixture.supabase.co',publishable_key='fixture-publishable' WHERE singleton");
+    expect((await query('SELECT public.job_loop_trial_reminder_dispatch() n')).rows[0].n).toBe(0);
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    expect((await query('SELECT public.job_loop_trial_reminder_dispatch() n')).rows[0].n).toBe(1);
+    const call = (await query('SELECT url,headers,body FROM net.calls')).rows[0];
+    expect(call.url).toBe('https://fixture.supabase.co/functions/v1/job-loop-billing');
+    expect(call.body).toEqual({ action: 'trial_reminders' });
+    expect(call.headers.apikey).toBe('fixture-publishable');
+    const ticket = call.headers['x-trial-reminder-ticket'];
+    const consume = (t: string, mode: 'test' | 'live') => sql('job_loop_billing_trial_reminder_consume_ticket', { p_ticket: t, p_mode: mode });
+    const req = (t: string) => new Request('https://fixture.supabase.co/functions/v1/job-loop-billing', { method: 'POST', headers: { 'x-trial-reminder-ticket': t } });
+    await expect(authorizeTrialReminderDispatch(req(ticket), { action: 'trial_reminders', limit: 500 }, 'live', consume)).rejects.toMatchObject({ code: 'LOOP_INVALID_INPUT' });
+    await expect(authorizeTrialReminderDispatch(req(ticket), { action: 'trial_reminders' }, 'test', consume)).rejects.toMatchObject({ code: 'LOOP_REMINDER_UNAUTHORIZED' });
+    await expect(authorizeTrialReminderDispatch(req('not-a-ticket'), { action: 'trial_reminders' }, 'live', consume)).rejects.toMatchObject({ code: 'LOOP_REMINDER_UNAUTHORIZED' });
+    await authorizeTrialReminderDispatch(req(ticket), { action: 'trial_reminders' }, 'live', consume);
+    await expect(authorizeTrialReminderDispatch(req(ticket), { action: 'trial_reminders' }, 'live', consume)).rejects.toMatchObject({ code: 'LOOP_REMINDER_UNAUTHORIZED' });
+    expect((await query("SELECT * FROM cron.job WHERE jobname='jobvance-trial-reminder-check'")).rows[0]).toMatchObject({ schedule: '*/30 * * * *', command: 'SELECT public.job_loop_trial_reminder_dispatch();' });
+    // Tickets and receipts are private even to the service role; only the RPCs reach them.
+    await db.exec('SET ROLE service_role');
+    try {
+      await expect(query('SELECT * FROM public.job_loop_trial_reminder_tickets')).rejects.toThrow();
+      await expect(query('SELECT * FROM jobvance_private.loop_trial_reminder_receipts')).rejects.toThrow();
+      await expect(query('SELECT public.job_loop_trial_reminder_dispatch()')).rejects.toThrow();
+    } finally { await db.exec('RESET ROLE'); }
   });
 });
