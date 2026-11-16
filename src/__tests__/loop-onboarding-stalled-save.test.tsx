@@ -5,7 +5,7 @@ import LoopOnboarding from '@/pages/LoopOnboarding';
 import { blankLoopProfile } from '@/lib/job-loop-audiences';
 import { blankLoopCvAnswers } from '@/lib/loop-cv-builder';
 import { retainOnboardingDraft } from '@/lib/loop-onboarding-memory';
-import { clearTrackingDraftMemory, setTrackingDraftOwner, trackingDraftAuthority } from '@/lib/tracking-draft-memory';
+import { clearTrackingDraftMemory, setTrackingDraftOwner, setTrackingLoopGeneration, trackingDraftAuthority } from '@/lib/tracking-draft-memory';
 
 vi.unmock('react-router-dom');
 const mock = vi.hoisted(() => ({ call: vi.fn(), extract: vi.fn() }));
@@ -66,7 +66,10 @@ describe('a save that never answers', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Your answers are still here');
     expect(screen.getByRole('link', { name: 'Check my saved dashboard' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Check whether my setup was saved' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Back' })).toBeEnabled();
+    // The answers are held exactly as submitted (locked) until the check has read the saved setup; the check and the dashboard stay open.
+    expect(document.querySelector('fieldset')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Back' })).toBeDisabled();
+    expect(screen.getByRole('note')).toHaveTextContent('locked while we are unsure');
     expect(screen.getByText((_t, element) => element?.tagName === 'PRE' && element.textContent === SOURCE)).toBeInTheDocument();
     // Ticking the confirmation again must not unlock a second write before the check.
     fireEvent.click(screen.getByRole('checkbox', { name: /Save this CV text/ }));
@@ -150,6 +153,172 @@ describe('a save that never answers', () => {
     expect(screen.getByRole('button', { name: 'Check whether my setup was saved' })).toBeEnabled();
     expect(screen.getByText((_t, element) => element?.tagName === 'PRE' && element.textContent === SOURCE)).toBeInTheDocument();
     expect(names().filter(name => name === 'save_profile')).toHaveLength(1);
+  });
+});
+
+/** A small stand-in for the saved record: the version moves only on a write, and a write against a stale version is refused. */
+function record() {
+  const state = { profile: null as unknown, version: 0, writes: 0 };
+  const snap = () => ({ lifecycleGeneration: 0, recordVersion: state.version, profile: state.profile && { ...(state.profile as object), revision: state.version, updatedAt: '2026-11-16T00:00:00.000Z' } });
+  const commit = (profile: unknown) => { state.profile = profile; state.version += 1; };
+  return { state, snap, commit };
+}
+const checkButton = () => screen.getByRole('button', { name: 'Check whether my setup was saved' });
+const tickAndSave = async () => { fireEvent.click(screen.getByRole('checkbox', { name: /Save this CV text/ })); fireEvent.click(screen.getByRole('button', { name: 'Save my setup' })); await settle(); };
+
+describe('answers stay exactly as submitted while a save is unconfirmed (review finding: a newer edit was lost on readback)', () => {
+  it('locks every control and cannot be edited or navigated until the check has answered', async () => {
+    let submitted: unknown = null;
+    script({ save: action => { submitted = action.profile; return never(); }, existing: async () => ({ snapshot: snapshotWith(submitted, 1) }) });
+    await startSave();
+    await advance(31_000);
+    expect(document.querySelector('fieldset')).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByRole('heading', { level: 1, name: 'Review your Automated Job Loop setup' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Check my saved dashboard' })).toBeInTheDocument();
+    fireEvent.click(checkButton());
+    await settle();
+    expect(screen.getByRole('heading', { name: 'Your setup is saved.' })).toBeInTheDocument();     // what was submitted is what is saved: nothing newer exists to lose
+  });
+
+  it('unlocks the form only when the check reads nothing saved (entirely absent record or an initialized but empty one)', async () => {
+    for (const reading of [{ existingState: 'absent' }, { snapshot: snapshotWith(null, 0) }]) {
+      script({ save: never, existing: async () => reading });
+      mock.call.mockClear();
+      const save = await startSave();
+      await advance(31_000);
+      expect(document.querySelector('fieldset')).toBeDisabled();
+      fireEvent.click(checkButton());
+      await settle();
+      expect(screen.getByRole('alert')).toHaveTextContent('Nothing was saved');
+      expect(document.querySelector('fieldset')).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Back' })).toBeEnabled();
+      expect(save).toBeDisabled();
+      cleanup(); vi.useRealTimers(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a', 'session-a');
+    }
+  });
+
+  it('keeps the form locked and the check available when the check cannot tell (no answer shape, or an error)', async () => {
+    let reads = 0;
+    script({ save: never, existing: async () => { reads += 1; if (reads === 1) return { existingState: 'absent' }; if (reads === 2) return {}; throw new Error('Network down'); } });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    expect(screen.getByRole('alert')).toHaveTextContent('could not be verified');
+    expect(document.querySelector('fieldset')).toBeDisabled();
+    fireEvent.click(checkButton());
+    await settle();
+    expect(screen.getByRole('alert')).toHaveTextContent('Network down');
+    expect(checkButton()).toBeEnabled();
+    expect(document.querySelector('fieldset')).toBeDisabled();
+    expect(names().filter(name => name === 'save_profile')).toHaveLength(1);
+  });
+});
+
+describe('a write that lands after an empty check (review finding: the retry collided with it and could never recover)', () => {
+  it('reads again before the retry and finds the late save instead of writing against a stale version', async () => {
+    const server = record(); let first: unknown = null;
+    script({
+      get: async () => ({ snapshot: server.snap() }),
+      existing: async () => ({ snapshot: server.snap() }),             // an initialized but empty record: profile null, version 0
+      save: action => { server.state.writes += 1; if (server.state.writes === 1) { first = action.profile; return never(); } return Promise.reject(new Error('A second write must not be sent')); },
+    });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    expect(screen.getByRole('alert')).toHaveTextContent('Nothing was saved');
+    server.commit(first);                                               // the original write lands just after the check read
+    await tickAndSave();
+    expect(screen.getByRole('heading', { name: 'Your setup is saved.' })).toBeInTheDocument();
+    expect(server.state.writes).toBe(1);
+    expect(names()).toEqual(['get_existing', 'save_profile', 'get_existing', 'get']);       // the load already held an initialized record; only the retry needed the fresh read
+  });
+
+  it('treats a collision between the fresh read and the write as another readback state, not a dead end', async () => {
+    const server = record(); let first: unknown = null;
+    script({
+      get: async () => ({ snapshot: server.snap() }),
+      existing: async () => ({ snapshot: server.snap() }),
+      save: action => {
+        server.state.writes += 1;
+        if (server.state.writes === 1) { first = action.profile; return never(); }
+        if ((action as { expectedVersion: number }).expectedVersion !== server.state.version) return Promise.reject(new Error('The saved record changed.'));
+        server.commit(action.profile); return Promise.resolve({ snapshot: server.snap() });
+      },
+    });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    // The late write lands between the fresh read of the retry and the retry's own write.
+    const read = mock.call.getMockImplementation()!;
+    let reads = 0;
+    mock.call.mockImplementation(async (owner: string, action: { action: string }, ...rest: unknown[]) => {
+      const result = await read(owner, action, ...rest);
+      if (action.action === 'get' && ++reads === 1) queueMicrotask(() => server.commit(first));
+      return result;
+    });
+    await tickAndSave();
+    expect(screen.getByRole('alert')).toHaveTextContent('The saved record changed');
+    await tickAndSave();                                                // the retry starts with another fresh read and finds the saved setup
+    expect(screen.getByRole('heading', { name: 'Your setup is saved.' })).toBeInTheDocument();
+    expect(server.state.writes).toBe(2);                                // the original and one refused write: never a blind repeat
+    expect(names().slice(-3)).toEqual(['get', 'save_profile', 'get']);
+  });
+
+  it('never overwrites a different setup that arrived in the meantime and says exactly what happened', async () => {
+    const server = record();
+    script({
+      get: async () => ({ snapshot: server.snap() }),
+      existing: async () => ({ snapshot: server.snap() }),
+      save: () => never(),
+    });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    server.commit({ ...baseProfile(), targetTitles: ['Someone else'] });
+    await tickAndSave();
+    expect(screen.getByRole('alert')).toHaveTextContent('A setup was saved in another tab');
+    expect(names().filter(name => name === 'save_profile')).toHaveLength(1);
+  });
+});
+
+describe('a check that outlives its page, its session or its lifecycle', () => {
+  it('writes nothing and shows nothing when the page unmounts during the check', async () => {
+    let submitted: unknown = null; let finish: (value: unknown) => void = () => {};
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    let reads = 0;
+    script({ save: action => { submitted = action.profile; return never(); }, existing: () => (++reads === 1 ? Promise.resolve({ existingState: 'absent' }) : new Promise(resolve => { finish = resolve; })) });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    cleanup();
+    await act(async () => { finish({ snapshot: snapshotWith(submitted, 1) }); await Promise.resolve(); });
+    await advance(60_000);
+    expect(names()).toEqual(['get_existing', 'get', 'save_profile', 'get_existing']);
+    expect(errors).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['a different session', () => setTrackingDraftOwner('owner-a', 'session-b')],
+    ['a different lifecycle generation', () => setTrackingLoopGeneration('owner-a', 9)],
+  ])('ignores the answer of the check after %s', async (_label, change) => {
+    let submitted: unknown = null; let finish: (value: unknown) => void = () => {};
+    let reads = 0;
+    script({ save: action => { submitted = action.profile; return never(); }, existing: () => (++reads === 1 ? Promise.resolve({ existingState: 'absent' }) : new Promise(resolve => { finish = resolve; })) });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    act(() => { change(); });
+    await act(async () => { finish({ snapshot: snapshotWith(submitted, 1) }); await Promise.resolve(); });
+    expect(screen.queryByRole('heading', { name: 'Your setup is saved.' })).not.toBeInTheDocument();
+    expect(names().filter(name => name === 'save_profile')).toHaveLength(1);
+    expect(names()).toEqual(['get_existing', 'get', 'save_profile', 'get_existing']);
   });
 });
 

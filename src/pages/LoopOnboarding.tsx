@@ -86,7 +86,12 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   const checkDeadline = useRef<{ turn: number; handle: number } | null>(null);
   const cvDeadline = useRef<{ turn: number; handle: number } | null>(null);
   // The answers of a save that never confirmed. While set, nothing is written again until a read of the saved setup says what happened.
+  // While it is set the answers are held exactly as submitted (the form is locked), so a readback can never be reconciled against a draft that moved on.
   const [unconfirmed, setUnconfirmed] = useState<LoopProfileInput | null>(null);
+  // Set when a save gave up waiting: that write may still land at any moment, so until a save is confirmed every retry starts with a fresh read (never a cached
+  // version number) and a refused or failed retry leaves this set. An ordinary failed save keeps the original version on retry, as before.
+  const reconciling = useRef(false);
+  const lastWritten = useRef<LoopProfileInput | null>(null);
   const absentGeneration = useRef(trackingLoopGeneration(owner) ?? null);
   const current = () => {
     const observed = trackingLoopGeneration(owner) ?? null;
@@ -153,7 +158,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       { profile, answers, step, roleQuery, locationQuery, rolesEdited: rolesEdited.current, suggestionSource });
   }, [loaded, existing, saved, profile, answers, step, roleQuery, locationQuery, suggestionSource]);
   function edit(patch: Partial<LoopProfileInput>) {
-    if (!current() || saving.current) return;
+    if (!current() || saving.current || unconfirmed) return;
     epoch.current++; consentEpoch.current = null; setConsent(false); setError('');
     if (patch.targetTitles) { rolesEdited.current = true; setSuggestionSource(''); }
     if (patch.sourceText !== undefined && !rolesEdited.current) {
@@ -164,12 +169,12 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     setProfile(value => ({ ...value, ...patch }));
   }
   function changeQuery(kind: 'role' | 'location', value: string) {
-    if (!current() || saving.current || busy) return;
+    if (!current() || saving.current || busy || unconfirmed) return;
     epoch.current++; consentEpoch.current = null; setConsent(false); setError('');
     if (kind === 'role') { rolesEdited.current = true; setRoleQuery(value); } else setLocationQuery(value);
   }
   async function upload(file: File | undefined) {
-    if (!file || !current() || busy) return;
+    if (!file || !current() || busy || unconfirmed) return;
     const turn = ++epoch.current; setBusy('Reading your CV…'); consentEpoch.current = null; setConsent(false); setError('');
     cvDeadline.current = { turn, handle: window.setTimeout(() => {
       if (cvDeadline.current?.turn !== turn) return;
@@ -198,20 +203,31 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       if (!current() || turn !== epoch.current) return;
       // The request is given up on screen only: it may still land. Its late answer is fenced out (the epoch moves on), the answers stay
       // exactly as typed, and no second write is allowed until a read of the saved setup says whether the first one arrived.
-      epoch.current++; saving.current = false; setUnconfirmed(submitted); setBusy('');
-      setError('We could not confirm that your setup was saved. Your answers are still here. Check whether it saved before trying again.');
+      epoch.current++; saving.current = false; reconciling.current = true; setUnconfirmed(submitted); setBusy('');
+      setError('We could not confirm that your setup was saved. Your answers are still here, held exactly as you submitted them (locked) until you check whether it saved. Nothing is written again before that.');
     }, SETUP_SAVE_DEADLINE_MS) };
     try {
       // New records are initialized only after deliberate storage consent.
-      if (!snapshot.current) {
+      // After a save that gave up waiting, the version number this page holds can be stale: read first, every time, until a save is confirmed.
+      if (!snapshot.current || reconciling.current) {
         const initial = await callJobLoop(owner, { action: 'get' }, () => current() && turn === epoch.current);
         if (!current() || turn !== epoch.current) return;
         if (!initial.snapshot || initial.erasureGeneration !== undefined || !Number.isSafeInteger(initial.snapshot.lifecycleGeneration)) throw new Error('Your workspace could not be opened. Your answers are still here.');
-        if (initial.snapshot.profile) { setExisting(true); throw new Error('A setup was saved in another tab. Open your dashboard to review it; this quiz did not overwrite it.'); }
+        if (initial.snapshot.profile) {
+          setTrackingLoopGeneration(owner, initial.snapshot.lifecycleGeneration!); snapshot.current = initial.snapshot; reconciling.current = false;
+          // The earlier write that went unconfirmed arrived after all, with exactly these answers: that is the saved setup, nothing to write again.
+          if (lastWritten.current && profileMatches(initial.snapshot.profile, submitted)) { lastWritten.current = null; clearOnboardingDraft(); setSaved(true); return; }
+          const arrivedLate = !!lastWritten.current && profileMatches(initial.snapshot.profile, lastWritten.current);
+          setExisting(true);
+          throw new Error(arrivedLate
+            ? 'Your earlier save arrived after all, so a setup is saved. Changes you made since are not saved and nothing was overwritten. Open your dashboard to review the saved setup.'
+            : 'A setup was saved in another tab. Open your dashboard to review it; this quiz did not overwrite it.');
+        }
         setTrackingLoopGeneration(owner, initial.snapshot.lifecycleGeneration!); snapshot.current = initial.snapshot;
       }
       if (!current() || turn !== epoch.current) return;
       const original = snapshot.current!;
+      lastWritten.current = submitted;
       const response = await callJobLoop(owner, boundLoopAction({ action: 'save_profile', expectedVersion: original.recordVersion, profile: submitted, saveConsent: true }, original.lifecycleGeneration), () => current() && turn === epoch.current);
       if (!current() || turn !== epoch.current) return;
       if (!response.snapshot?.profile || response.snapshot.lifecycleGeneration !== original.lifecycleGeneration || response.snapshot.recordVersion <= original.recordVersion) throw new Error('The save could not be confirmed. Your answers are still here. Open your dashboard to check before trying again.');
@@ -221,7 +237,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
           : JSON.stringify(response.snapshot.profile[key]) === JSON.stringify(submitted[key]);
         if (!same) throw new Error('The returned setup differs from your answers. Open your dashboard to review it before continuing.');
       }
-      snapshot.current = response.snapshot; clearOnboardingDraft(); setSaved(true);
+      snapshot.current = response.snapshot; reconciling.current = false; lastWritten.current = null; clearOnboardingDraft(); setSaved(true);
     } catch (failure) { if (current() && turn === epoch.current) setError(failure instanceof Error ? failure.message : 'The save could not be confirmed. Check your dashboard before trying again.'); }
     finally {
       if (saveDeadline.current?.turn === turn) { window.clearTimeout(saveDeadline.current.handle); saveDeadline.current = null; }
@@ -251,13 +267,15 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       if (result.snapshot?.profile) {
         if (!Number.isSafeInteger(generation)) throw new Error('Your saved setup could not be verified. Check again.');
         setTrackingLoopGeneration(owner, generation!); snapshot.current = result.snapshot; setUnconfirmed(null);
-        if (profileMatches(result.snapshot.profile, submitted)) { clearOnboardingDraft(); setSaved(true); }
+        if (profileMatches(result.snapshot.profile, submitted)) { reconciling.current = false; lastWritten.current = null; clearOnboardingDraft(); setSaved(true); }
         else { setExisting(true); setError('A different setup is already saved in your account. Open your dashboard to review it; this quiz did not overwrite it.'); }
       } else if (result.existingState === 'absent' || result.snapshot) {
         if (result.snapshot) {
           if (!Number.isSafeInteger(generation)) throw new Error('Your saved setup could not be verified. Check again.');
           setTrackingLoopGeneration(owner, generation!); snapshot.current = result.snapshot;
         } else snapshot.current = null;      // forces a fresh read before the next write
+        // "Nothing yet" is not "nothing ever": the original write may still land, so the next save starts with another fresh read (also for an initialized but empty record).
+        reconciling.current = true;
         setUnconfirmed(null);
         setError('Nothing was saved. Your answers are still here. Review them, tick the confirmation box and save again.');
       } else throw new Error('Your saved setup could not be verified. Your answers are still here. Check again.');
@@ -275,11 +293,11 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     </header>
     {error && <div role="alert" className="oq-error" tabIndex={-1} ref={node => { if (node) { node.focus(); node.scrollIntoView?.({ block: "center", behavior: "auto" }); } }}>{error}<p><Link to="/loop">Check my saved dashboard</Link></p></div>}
     {busy && <p role="status"><Loader2 size={18} className="animate-spin" /> {busy}</p>}
-    {unconfirmed && !busy && !saved && !existing && <button type="button" className="jl-button jl-button--primary" onClick={() => void checkSaved()}>Check whether my setup was saved</button>}
+    {unconfirmed && !busy && !saved && !existing && <><p className="oq-note" role="note">Your answers are locked while we are unsure whether the save arrived, so a check can never be compared with a changed draft. The check unlocks them; your dashboard is always available above.</p><button type="button" className="jl-button jl-button--primary" onClick={() => void checkSaved()}>Check whether my setup was saved</button></>}
     {!busy && !loaded && <button className="jl-button" onClick={() => void load()}>Retry loading my setup</button>}
     {existing && <section className="oq-card"><p>Your saved CV and preferences are already in your account. Continue there to preserve your current drafts, facts and schedule.</p><Link className="jl-button jl-button--primary" to="/loop">Open my Automated Job Loop <ArrowRight size={16} /></Link></section>}
     {saved && <section className="oq-card"><Check size={32} /><h2>Next: review your facts and run your first search.</h2><p>Review useful facts copied from your CV, then deliberately start a search with your saved preferences. Add CV variants and a recurring schedule when you are ready.</p><p>Saving this setup has not started a search, activated a schedule or sent your CV to an AI provider.</p><Link className="jl-button jl-button--primary" to="/loop" state={{ onboardingSaved: true, owner, generation: snapshot.current?.lifecycleGeneration, authority }}>Continue to my Automated Job Loop <ArrowRight size={16} /></Link></section>}
-    {loaded && !existing && !saved && <section className="oq-card"><fieldset disabled={!!busy}>
+    {loaded && !existing && !saved && <section className="oq-card"><fieldset disabled={!!busy || !!unconfirmed}>
       {step === 0 && <><LoopPreferencePicker id="oq-roles" label="Target roles" searchLabel="Search or add a role" values={profile.targetTitles} query={roleQuery} choices={roleChoices} onQuery={value => changeQuery('role', value)} onChange={targetTitles => edit({ targetTitles })} description="Choose a specific title, such as Senior data analyst, or a broad level, such as Any director-level role." />
         {handoff && <p className="oq-suggestion" role="status">We filled in the roles and locations chosen on this device before sign-up. Check them, and change anything that is not yours.</p>}
         {suggestionSource && <p className="oq-suggestion" role="status">Suggested from your {suggestionSource}. These are editable search preferences—remove anything you do not want.</p>}
@@ -287,9 +305,9 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       {step === 1 && <LoopPreferencePicker id="oq-locations" label="Cities or countries" searchLabel="Search or add a location" values={profile.locations} query={locationQuery} choices={locationChoices} onQuery={value => changeQuery('location', value)} onChange={locations => edit({ locations })} description="Choose cities or countries. For remote work, add Remote and the countries where you can work; remote does not mean every country. Check each employer’s work-authorisation requirements." />}
       {step === 2 && <><p>Optional. A listing without pay information is shown as unknown.</p><div className="jl-form-grid"><div className="jl-field"><label htmlFor="oq-minimum">Minimum compensation</label><input id="oq-minimum" type="number" min={0} max={100000000} value={profile.compensation.minimum ?? ''} onChange={event => edit({ compensation: { ...profile.compensation, minimum: event.target.value === '' ? null : Number(event.target.value) } })} /></div><div className="jl-field"><label htmlFor="oq-currency">Currency</label><input id="oq-currency" maxLength={3} placeholder="USD" value={profile.compensation.currency} onChange={event => edit({ compensation: { ...profile.compensation, currency: event.target.value.toUpperCase() } })} /></div></div><div className="jl-field"><label htmlFor="oq-period">Pay period</label><select id="oq-period" value={profile.compensation.period} onChange={event => edit({ compensation: { ...profile.compensation, period: event.target.value as 'annual' | 'monthly' | 'hourly' } })}><option value="annual">Per year</option><option value="monthly">Per month</option><option value="hourly">Per hour</option></select></div></>}
       {step === 3 && <><label className="jl-consent"><input type="checkbox" checked={profile.discreetSearch} onChange={event => edit({ discreetSearch: event.target.checked })} /><span>Keep my job search discreet.</span></label><div className="jl-field"><label htmlFor="oq-private">Terms or details to keep out of generated documents (optional)</label><textarea id="oq-private" rows={3} maxLength={15000} value={profile.excludedTerms.join('\n')} onChange={event => edit({ excludedTerms: event.target.value.split('\n') })} /><p>One per line, such as confidential client names. Remove sensitive details from your CV before saving too. This does not hide your activity from an employer or block all related companies.</p></div></>}
-      {step === 4 && <><div className="jl-field"><label htmlFor="oq-name">Name on your CV</label><input id="oq-name" autoComplete="name" maxLength={120} value={profile.name} onChange={event => edit({ name: event.target.value })} /></div><div className="jl-field"><label htmlFor="oq-contact">Contact line for your CV (optional)</label><input id="oq-contact" maxLength={500} value={profile.contactLine} onChange={event => edit({ contactLine: event.target.value })} /><p>Review and add the email, phone or links you want employers to see. Only include contact details you permit in generated documents.</p></div><div className="jl-field"><label htmlFor="oq-years">Years of relevant experience (optional)</label><input id="oq-years" type="number" min={0} max={80} step={0.5} value={profile.experienceYears ?? ''} onChange={event => edit({ experienceYears: event.target.value === '' ? null : Number(event.target.value) })} /><p>Use the total you can substantiate. Leave unknown years empty; we do not calculate years by adding dates.</p></div><div className="jl-field"><label htmlFor="oq-file">Upload a CV or LinkedIn PDF</label><input id="oq-file" type="file" accept=".pdf,.docx,.txt" onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} /><p>Readable PDF, DOCX or TXT, up to 5 MB. Your file is read on this device; review the extracted text below.</p></div><div className="jl-field"><label htmlFor="oq-source">Your CV text</label><textarea id="oq-source" rows={10} maxLength={60000} value={profile.sourceText} onChange={event => edit({ sourceText: event.target.value })} /></div><LoopCvBuilder answers={answers} onChange={value => { if (current()) { epoch.current++; consentEpoch.current = null; setConsent(false); setAnswers(value); } }} source={profile.sourceText} onUse={sourceText => { if (!current() || busy) return false; edit({ sourceText, ...(!profile.name.trim() && answers.name.trim() ? { name: answers.name.trim().slice(0, 120) } : {}) }); return true; }} disabled={!!busy} /></>}
-      {step === 5 && <><dl className="oq-review"><dt>Roles</dt><dd>{profile.targetTitles.join(', ')}</dd><dt>Locations</dt><dd>{profile.locations.join(', ')}</dd><dt>Compensation</dt><dd>{profile.compensation.minimum === null ? 'No minimum set' : `${profile.compensation.minimum.toLocaleString()} ${profile.compensation.currency} / ${profile.compensation.period}`}</dd><dt>Discreet search</dt><dd>{profile.discreetSearch ? 'On' : 'Off'}</dd><dt>Contact line</dt><dd>{profile.contactLine || 'Not included'}</dd><dt>Experience</dt><dd>{profile.experienceYears === null ? 'Not specified' : `${profile.experienceYears} years`}</dd><dt>CV</dt><dd>{profile.name} · {profile.sourceText.length.toLocaleString()} characters</dd></dl><details><summary>Review the exact CV text to save</summary><pre>{profile.sourceText}</pre></details><p>Next, review your facts and run your first search. AI processing and recurring preparation each need your explicit confirmation.</p><label className="jl-consent"><input type="checkbox" checked={consent} onChange={event => { if (current()) { consentEpoch.current = event.target.checked ? epoch.current : null; setConsent(event.target.checked); } }} /><span>Save this CV text and these preferences privately in my Jobvance account.</span></label></>}
-      <div className="oq-actions">{step > 0 && <button type="button" className="jl-button" onClick={() => { setStep(value => value - 1); setError(''); consentEpoch.current = null; setConsent(false); }}>Back</button>}{step < 5 ? <button className="jl-button jl-button--primary" onClick={() => { const clean = { ...profile, targetTitles: cleanPreferences([...profile.targetTitles, ...(step === 0 && roleQuery.trim() ? [roleQuery.trim()] : [])]), locations: cleanPreferences([...profile.locations, ...(step === 1 && locationQuery.trim() ? [locationQuery.trim()] : [])]), excludedTerms: list(profile.excludedTerms.join('\n')) }; if (!current() || busy) return; setProfile(clean); if (step === 0) setRoleQuery(''); if (step === 1) setLocationQuery(''); const issue = onboardingStepError(step, clean); if (issue) setError(issue); else if (current() && !busy) { if (step === 0) rolesEdited.current = true; setError(''); setStep(value => value + 1); } }}>Next <ArrowRight size={16} /></button> : <button className="jl-button jl-button--primary" disabled={!consent || !!busy || !!unconfirmed} onClick={() => void save()}>Save my setup <ArrowRight size={16} /></button>}</div>
+      {step === 4 && <><div className="jl-field"><label htmlFor="oq-name">Name on your CV</label><input id="oq-name" autoComplete="name" maxLength={120} value={profile.name} onChange={event => edit({ name: event.target.value })} /></div><div className="jl-field"><label htmlFor="oq-contact">Contact line for your CV (optional)</label><input id="oq-contact" maxLength={500} value={profile.contactLine} onChange={event => edit({ contactLine: event.target.value })} /><p>Review and add the email, phone or links you want employers to see. Only include contact details you permit in generated documents.</p></div><div className="jl-field"><label htmlFor="oq-years">Years of relevant experience (optional)</label><input id="oq-years" type="number" min={0} max={80} step={0.5} value={profile.experienceYears ?? ''} onChange={event => edit({ experienceYears: event.target.value === '' ? null : Number(event.target.value) })} /><p>Use the total you can substantiate. Leave unknown years empty; we do not calculate years by adding dates.</p></div><div className="jl-field"><label htmlFor="oq-file">Upload a CV or LinkedIn PDF</label><input id="oq-file" type="file" accept=".pdf,.docx,.txt" onChange={event => { void upload(event.target.files?.[0]); event.target.value = ''; }} /><p>Readable PDF, DOCX or TXT, up to 5 MB. Your file is read on this device; review the extracted text below.</p></div><div className="jl-field"><label htmlFor="oq-source">Your CV text</label><textarea id="oq-source" rows={10} maxLength={60000} value={profile.sourceText} onChange={event => edit({ sourceText: event.target.value })} /></div><LoopCvBuilder answers={answers} onChange={value => { if (current() && !unconfirmed) { epoch.current++; consentEpoch.current = null; setConsent(false); setAnswers(value); } }} source={profile.sourceText} onUse={sourceText => { if (!current() || busy || unconfirmed) return false; edit({ sourceText, ...(!profile.name.trim() && answers.name.trim() ? { name: answers.name.trim().slice(0, 120) } : {}) }); return true; }} disabled={!!busy} /></>}
+      {step === 5 && <><dl className="oq-review"><dt>Roles</dt><dd>{profile.targetTitles.join(', ')}</dd><dt>Locations</dt><dd>{profile.locations.join(', ')}</dd><dt>Compensation</dt><dd>{profile.compensation.minimum === null ? 'No minimum set' : `${profile.compensation.minimum.toLocaleString()} ${profile.compensation.currency} / ${profile.compensation.period}`}</dd><dt>Discreet search</dt><dd>{profile.discreetSearch ? 'On' : 'Off'}</dd><dt>Contact line</dt><dd>{profile.contactLine || 'Not included'}</dd><dt>Experience</dt><dd>{profile.experienceYears === null ? 'Not specified' : `${profile.experienceYears} years`}</dd><dt>CV</dt><dd>{profile.name} · {profile.sourceText.length.toLocaleString()} characters</dd></dl><details><summary>Review the exact CV text to save</summary><pre>{profile.sourceText}</pre></details><p>Next, review your facts and run your first search. AI processing and recurring preparation each need your explicit confirmation.</p><label className="jl-consent"><input type="checkbox" checked={consent} onChange={event => { if (current() && !unconfirmed) { consentEpoch.current = event.target.checked ? epoch.current : null; setConsent(event.target.checked); } }} /><span>Save this CV text and these preferences privately in my Jobvance account.</span></label></>}
+      <div className="oq-actions">{step > 0 && <button type="button" className="jl-button" onClick={() => { if (unconfirmed) return; setStep(value => value - 1); setError(''); consentEpoch.current = null; setConsent(false); }}>Back</button>}{step < 5 ? <button className="jl-button jl-button--primary" onClick={() => { const clean = { ...profile, targetTitles: cleanPreferences([...profile.targetTitles, ...(step === 0 && roleQuery.trim() ? [roleQuery.trim()] : [])]), locations: cleanPreferences([...profile.locations, ...(step === 1 && locationQuery.trim() ? [locationQuery.trim()] : [])]), excludedTerms: list(profile.excludedTerms.join('\n')) }; if (!current() || busy || unconfirmed) return; setProfile(clean); if (step === 0) setRoleQuery(''); if (step === 1) setLocationQuery(''); const issue = onboardingStepError(step, clean); if (issue) setError(issue); else if (current() && !busy) { if (step === 0) rolesEdited.current = true; setError(''); setStep(value => value + 1); } }}>Next <ArrowRight size={16} /></button> : <button className="jl-button jl-button--primary" disabled={!consent || !!busy || !!unconfirmed} onClick={() => void save()}>Save my setup <ArrowRight size={16} /></button>}</div>
     </fieldset><p className="oq-note">You can return to your Automated Job Loop and resume here for up to 30 minutes in this tab. Refreshing, closing the tab or signing out clears unsaved answers. Nothing is saved to your account until you confirm.</p></section>}
   </main>;
 }
