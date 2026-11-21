@@ -8,8 +8,17 @@ import { randomUUID } from 'node:crypto';
 import { paidCapacitySchema } from './fixtures/paid-capacity-schema.mjs';
 import { applyLoopBillingWebhook, controlLoopBilling, type LoopBillingPorts } from '../functions/_shared/loop-billing-runtime.ts';
 import { LOOP_BILLING_PRODUCT, type LoopBillingConfig } from '../functions/_shared/loop-billing.ts';
+import { authorizeTrialReminderDispatch, confirmTrialReminders } from '../functions/_shared/loop-trial-reminders.ts';
 
 const trialMigration = '20261111120000_job_loop_seven_day_trial.sql';
+const reminderMigration = '20261116120000_job_loop_trial_reminder_receipts.sql';
+/** Dodo's customer email log for every fixture customer, or a read failure. `emailLogRaw` replaces the whole
+ * response body (malformed or truncated pages); `emailLogTotal` overrides the reported total_count. */
+let emailLog: Record<string, unknown>[] | Error = [];
+let emailLogRaw: unknown;
+let emailLogTotal: number | undefined;
+/** The customers whose email log was read, in order. */
+let emailReads: string[] = [];
 const DAY = 86400000;
 let db: PGlite, owner: string, session: string, request: string, epoch: number;
 const query = (q: string, a: unknown[] = []) => db.query<Record<string, any>>(q, a);
@@ -55,6 +64,12 @@ const ports: LoopBillingPorts = {
     if (path === 'checkouts/cks_trial') return { id: 'cks_trial', payment_id: 'pay_trial' };
     if (path === 'payments/pay_trial') return trialPayment();
     if (path === 'payments/pay_first') return firstPayment();
+    const emails = /^customers\/(cus_trial|cus_fair\d+)\/emails\?page_size=100$/.exec(path);
+    if (emails) {
+      emailReads.push(emails[1]);
+      if (emailLog instanceof Error) throw emailLog;
+      return (emailLogRaw ?? { items: emailLog, total_count: emailLogTotal ?? emailLog.length }) as Record<string, unknown>;
+    }
     if (path === 'subscriptions/sub_trial') { if (method === 'PATCH') { provider.patches++; if (provider.patchFails) throw Error('Provider timeout'); expect(body).toEqual({ cancel_at_next_billing_date: true }); provider.cancelled = true; } return providerSub(); }
     throw Error('External network forbidden: ' + path);
   },
@@ -83,10 +98,20 @@ beforeAll(async () => {
   db = new PGlite();
   await db.exec(await paidCapacitySchema());
   await db.exec(await readFile(new URL('../migrations/' + trialMigration, import.meta.url), 'utf8'));
+  // Local substitutes for pg_cron, pg_net and the scheduler origin (20261011050000).
+  await db.exec(`CREATE SCHEMA IF NOT EXISTS cron; CREATE SCHEMA IF NOT EXISTS net;
+    CREATE TABLE cron.job(jobname text PRIMARY KEY,schedule text,command text);
+    CREATE FUNCTION cron.schedule(job_name text,schedule text,command text) RETURNS bigint LANGUAGE sql AS $$ INSERT INTO cron.job VALUES(job_name,schedule,command) RETURNING 1::bigint $$;
+    CREATE TABLE net.calls(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,url text,headers jsonb,body jsonb);
+    CREATE FUNCTION net.http_post(url text,body jsonb DEFAULT '{}',params jsonb DEFAULT '{}',headers jsonb DEFAULT '{}',timeout_milliseconds integer DEFAULT 2000)
+      RETURNS bigint LANGUAGE sql AS $$ INSERT INTO net.calls(url,headers,body) VALUES(url,headers,body) RETURNING id $$;
+    ALTER TABLE public.job_loop_scheduler_config ADD COLUMN IF NOT EXISTS api_origin text, ADD COLUMN IF NOT EXISTS publishable_key text;`);
+  await db.exec(await readFile(new URL('../migrations/' + reminderMigration, import.meta.url), 'utf8'));
 }, 60000);
 afterAll(async () => db?.close());
 beforeEach(async () => {
-  await db.exec('RESET ROLE; TRUNCATE auth.users CASCADE; TRUNCATE jobvance_private.loop_billing_events; TRUNCATE public.job_loop_pilot_users CASCADE');
+  await db.exec('RESET ROLE; TRUNCATE auth.users CASCADE; TRUNCATE jobvance_private.loop_billing_events; TRUNCATE public.job_loop_pilot_users CASCADE; TRUNCATE jobvance_private.loop_trial_reminder_receipts, public.job_loop_trial_reminder_tickets, net.calls');
+  emailLog = []; emailLogRaw = undefined; emailLogTotal = undefined; emailReads = [];
   owner = randomUUID(); session = randomUUID(); request = randomUUID();
   await query('INSERT INTO auth.users(id) VALUES($1)', [owner]); await query('INSERT INTO auth.sessions(id,user_id) VALUES($1,$2)', [session, owner]); await query('SELECT job_loop_open_record($1)', [owner]);
   epoch = Number((await query('SELECT extract(epoch FROM now())::bigint-100 e')).rows[0].e);
@@ -453,5 +478,360 @@ describe('access during and after the trial', () => {
     await expect(applyLoopBillingWebhook(ports, config, activation() as never, 'msg_zero_paid')).rejects.toThrow();
     expect(await entitlement()).toMatchObject({ active: false });
     expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_subscription_trials')).rows[0].n).toBe(0);
+  });
+});
+
+describe('trial reminder evidence (Dodo sends the trial-ending email; its log cannot be bound to a subscription)', () => {
+  const sweep = (limit?: number) => confirmTrialReminders(ports, 'live', limit);
+  const trialEnding = (changes: Record<string, unknown> = {}) => ({ email_log_id: 'elog_1', email_type: 'subscription_trial_ending', category: 'subscriptions', status: 'delivered',
+    created_at: iso(firstCharge() - 2 * DAY + 60000), subject: 'Your trial ends soon', recipient: 'x@example.test', has_preview: true, ...changes });
+  /** The same type and time as the real one, but on the log because ANOTHER product's trial is ending: Dodo's entry does not say so. */
+  const otherProduct = (status = 'delivered', changes: Record<string, unknown> = {}) =>
+    trialEnding({ email_log_id: 'elog_other_subscription', status, subject: 'Another product trial is ending', ...changes });
+  const receipt = async () => instants((await query('SELECT * FROM jobvance_private.loop_trial_reminder_receipts')).rows[0] ?? {});
+  const sentAt = async () => { const value = (await query('SELECT reminder_sent_at FROM jobvance_private.loop_subscription_trials')).rows[0].reminder_sent_at; return value === null ? null : new Date(value).toISOString(); };
+  const escalated = async () => ((await sql('job_loop_billing_trial_reminders_escalated', { p_mode: 'live' })) as Record<string, unknown>[]).map(instants);
+  const ageCheck = (minutes = 21) => query('UPDATE jobvance_private.loop_trial_reminder_receipts SET last_checked_at=now()-make_interval(mins=>$1)', [minutes]);
+  const dispatch = async () => (await query('SELECT public.job_loop_trial_reminder_dispatch() n')).rows[0].n as number;
+  const useScheduler = () => query("UPDATE public.job_loop_scheduler_config SET api_origin='https://fixture.supabase.co',publishable_key='fixture-publishable' WHERE singleton");
+  /** Moves every fixed trial date earlier by `hours` (test-only, trigger bypassed as superuser). */
+  async function shiftTrial(hours: number) {
+    await query('ALTER TABLE jobvance_private.loop_subscription_trials DISABLE TRIGGER loop_trial_immutable');
+    await query(`UPDATE jobvance_private.loop_subscription_trials SET starts_at=starts_at-make_interval(hours=>$1),ends_at=ends_at-make_interval(hours=>$1),
+      first_charge_at=first_charge_at-make_interval(hours=>$1),reminder_at=reminder_at-make_interval(hours=>$1)`, [hours]);
+    await query('ALTER TABLE jobvance_private.loop_subscription_trials ENABLE TRIGGER loop_trial_immutable');
+    provider.trialStart -= hours * 3600000;
+  }
+  /** Copies of the started live trial for other owners (same dates), each with its own provider customer cus_fair<n>. */
+  async function cloneTrials(count: number) {
+    for (let i = 1; i <= count; i++) {
+      const user = randomUUID(), clonedRequest = randomUUID();
+      await query('INSERT INTO auth.users(id) VALUES($1)', [user]);
+      await query(`INSERT INTO jobvance_private.loop_billing_orders SELECT (jsonb_populate_record(NULL::jobvance_private.loop_billing_orders,
+        to_jsonb(o)||jsonb_build_object('user_id',$1::uuid,'request_id',$2::uuid,'session_id',NULL))).* FROM jobvance_private.loop_billing_orders o WHERE o.user_id=$3 AND o.request_id=$4`, [user, clonedRequest, owner, request]);
+      await query(`INSERT INTO jobvance_private.loop_subscriptions SELECT (jsonb_populate_record(NULL::jobvance_private.loop_subscriptions,
+        to_jsonb(s)||jsonb_build_object('subscription_id',$1::text,'user_id',$2::uuid,'request_id',$3::uuid,'customer_id',$4::text))).* FROM jobvance_private.loop_subscriptions s WHERE s.subscription_id='sub_trial'`,
+        ['sub_fair' + i, user, clonedRequest, 'cus_fair' + i]);
+      await query(`INSERT INTO jobvance_private.loop_subscription_trials SELECT (jsonb_populate_record(NULL::jobvance_private.loop_subscription_trials,
+        to_jsonb(t)||jsonb_build_object('subscription_id',$1::text,'user_id',$2::uuid,'request_id',$3::uuid,'payment_id',$4::text))).* FROM jobvance_private.loop_subscription_trials t WHERE t.subscription_id='sub_trial'`,
+        ['sub_fair' + i, user, clonedRequest, 'pay_fair' + i]);
+    }
+  }
+  const selected = async (limit = 50) => ((await sql('job_loop_billing_trial_reminders_unconfirmed', { p_mode: 'live', p_limit: limit })) as { subscriptionId: string }[]).map(row => row.subscriptionId);
+
+  // Finding 1: Dodo's EmailLogItem carries no subscription, product or payment reference.
+  it('records a delivered trial-ending email as unbound evidence and never marks the reminder sent', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ email_log_id: 'elog_receipt', email_type: 'payment_successful', created_at: iso(provider.trialStart) }), trialEnding()];
+    expect(await sweep()).toEqual({ checked: 1, confirmed: 0, pending: 0, escalated: 1, unavailable: 0, deferred: 0 });
+    expect(await sentAt()).toBeNull();
+    expect(await receipt()).toMatchObject({ email_log_id: 'elog_1', email_type: 'subscription_trial_ending', first_email_status: 'delivered', delivery_status: 'delivered', candidate_count: 1,
+      email_created_at: new Date(iso(firstCharge() - 2 * DAY + 60000)), escalation_reasons: ['unbound'] });
+    expect(await escalated()).toEqual([expect.objectContaining({ userId: owner, subscriptionId: 'sub_trial', reason: 'unbound', reasons: ['unbound'], emailStatus: 'delivered',
+      emailSentAt: iso(firstCharge() - 2 * DAY + 60000), candidates: 1, charged: false })]);
+    // The marker stays unset, so the legacy due list still shows the trial; a delivered answer ends the rechecks.
+    expect(await reminders()).toHaveLength(1);
+    await ageCheck(300);
+    expect(await sweep()).toMatchObject({ checked: 0 });
+  });
+  it('does not certify a subscription from an unbound customer-wide email, however well its type and time fit', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [otherProduct('delivered')];
+    const result = await sweep();
+    expect(result.confirmed).toBe(0);
+    expect(await sentAt()).toBeNull();
+    expect(await receipt()).toMatchObject({ email_log_id: 'elog_other_subscription', escalation_reasons: ['unbound'] });
+    expect(await escalated()).toEqual([expect.objectContaining({ subscriptionId: 'sub_trial', reason: 'unbound' })]);
+  });
+  it('an ambiguous log with several trial-ending emails stays unbound and says how many overlapped', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding(), otherProduct('delivered', { created_at: iso(firstCharge() - 2 * DAY + 3600000) })];
+    expect(await sweep()).toMatchObject({ escalated: 1, confirmed: 0 });
+    expect(await receipt()).toMatchObject({ candidate_count: 2, escalation_reasons: ['unbound'] });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'unbound', candidates: 2 })]);
+    expect(await sentAt()).toBeNull();
+  });
+  it('waits while Dodo has not sent it, records not_found twelve hours after the reminder time, and a late email is still only unbound evidence', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ email_type: 'payment_successful' })];
+    expect(await sweep()).toMatchObject({ checked: 1, pending: 1, escalated: 0, confirmed: 0 });
+    expect(await receipt()).toMatchObject({ escalation_reasons: [], unavailable_checks: 0, not_found_at: null, last_read_at: expect.any(Date) });
+    expect(await sentAt()).toBeNull();
+    // A checked row waits 20 minutes before the next read.
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    expect(await escalated()).toEqual([]);
+    await ageCheck(); await shiftTrial(13);
+    expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+    expect(await receipt()).toMatchObject({ escalation_reasons: ['not_found'], not_found_at: expect.any(Date), email_log_id: null });
+    expect(await escalated()).toEqual([expect.objectContaining({ userId: owner, subscriptionId: 'sub_trial', reason: 'not_found' })]);
+    await ageCheck(300);
+    emailLog = [trialEnding({ created_at: new Date(Date.now() - 60000).toISOString() })];
+    expect(await sweep()).toMatchObject({ escalated: 1, confirmed: 0 });
+    expect(await receipt()).toMatchObject({ escalation_reasons: ['unbound'], not_found_at: expect.any(Date) });
+    expect(await sentAt()).toBeNull();
+  });
+  it('escalates a failed email at once as unbound plus delivery_failed and never marks the reminder sent', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ status: 'failed', failure_code: 'mailbox_not_found' })];
+    expect(await sweep()).toMatchObject({ escalated: 1, confirmed: 0 });
+    expect(await sentAt()).toBeNull();
+    expect(await receipt()).toMatchObject({ delivery_status: 'failed', first_email_status: 'failed', escalation_reasons: ['unbound', 'delivery_failed'] });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'delivery_failed', reasons: ['unbound', 'delivery_failed'] })]);
+  });
+  it('ignores trial emails outside the three days before this first charge, in the sweep and in SQL', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ created_at: iso(firstCharge() - 4 * DAY) }), trialEnding({ email_log_id: 'elog_after', created_at: iso(firstCharge() + 1000) })];
+    expect(await sweep()).toMatchObject({ pending: 1, escalated: 0, confirmed: 0 });
+    await expect(sql('job_loop_billing_trial_reminder_check', { p_mode: 'live', p_subscription: 'sub_trial', p_email_log_id: 'elog_old', p_email_type: 'subscription_trial_ending',
+      p_email_status: 'delivered', p_email_created_at: iso(firstCharge() - 4 * DAY) })).rejects.toThrow('LOOP_BILLING_UNBOUND');
+    expect(await sentAt()).toBeNull();
+  });
+
+  // Finding 2: an unreadable log is a recorded attempt, never a silent skip.
+  it('records a provider read failure as unavailable, apart from not_found, and retries it with back-off', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = Error('Provider timeout');
+    expect(await sweep()).toMatchObject({ checked: 1, unavailable: 1, pending: 0, escalated: 0 });
+    expect(await receipt()).toMatchObject({ checks: 1, unavailable_checks: 1, unavailable_streak: 1, last_unavailable_cause: 'read_failed', last_read_at: null, not_found_at: null,
+      email_log_id: null, escalation_reasons: [] });
+    // Not overdue yet, so no incident. The retry waits 40 minutes (20, doubling).
+    expect(await escalated()).toEqual([]);
+    await ageCheck(21);
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    await ageCheck(41);
+    emailLog = [trialEnding()];
+    expect(await sweep()).toMatchObject({ checked: 1, escalated: 1, unavailable: 0 });
+    expect(await receipt()).toMatchObject({ checks: 2, unavailable_checks: 1, unavailable_streak: 0, last_read_at: expect.any(Date) });
+  });
+  it('records an invalid response and a page that does not reach the window as unavailable with their own causes, never as not_found', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLogRaw = { items: 'none' };
+    expect(await sweep()).toMatchObject({ checked: 1, unavailable: 1 });
+    expect(await receipt()).toMatchObject({ last_unavailable_cause: 'invalid_response', unavailable_checks: 1 });
+    await ageCheck(300);
+    emailLogRaw = undefined; emailLog = []; emailLogTotal = 150; // 150 emails exist, none of them on this page
+    expect(await sweep()).toMatchObject({ checked: 1, unavailable: 1 });
+    expect(await receipt()).toMatchObject({ last_unavailable_cause: 'incomplete', unavailable_checks: 2, not_found_at: null, escalation_reasons: [] });
+  });
+  it('escalates a prolonged provider outage after the twelve-hour reminder deadline', async () => {
+    await startTrial(Date.now() - 6 * DAY);
+    emailLog = Error('Provider unavailable');
+    await sweep();
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    expect(await receipt()).toMatchObject({ escalation_reasons: ['unavailable_overdue'], unavailable_overdue_at: expect.any(Date), not_found_at: null, email_log_id: null });
+    expect(await escalated()).toEqual([expect.objectContaining({ subscriptionId: 'sub_trial', reason: 'unavailable_overdue', lastUnavailableCause: 'read_failed', unavailableStreak: 1, lastReadAt: null })]);
+    // A later readable log ends the unavailable incident; the time it was first recorded stays.
+    await ageCheck(300);
+    emailLog = [];
+    expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+    expect(await receipt()).toMatchObject({ escalation_reasons: ['not_found'], unavailable_overdue_at: expect.any(Date), unavailable_streak: 0 });
+  });
+  it('keeps reading an unverified trial after its first charge and keeps the incident', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    await shiftTrial(2 * 24 + 1); // the first charge was an hour ago
+    expect(Date.parse((await query('SELECT first_charge_at FROM jobvance_private.loop_subscription_trials')).rows[0].first_charge_at)).toBeLessThan(Date.now());
+    emailLog = Error('Provider unavailable');
+    expect(await sweep()).toMatchObject({ checked: 1, unavailable: 1 });
+    expect(await escalated()).toEqual([expect.objectContaining({ subscriptionId: 'sub_trial', reason: 'unavailable_overdue', charged: true })]);
+    await ageCheck(300);
+    emailLog = [];
+    expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'not_found', charged: true })]);
+    // The observation window closes three days after the charge; the incident stays on the support list for thirty.
+    await ageCheck(300); await shiftTrial(3 * 24);
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'not_found' })]);
+    await shiftTrial(28 * 24);
+    expect(await escalated()).toEqual([]);
+    expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_trial_reminder_receipts')).rows[0].n).toBe(1);
+  });
+  it('the database flags an overdue unverified reminder on its own, before and after the first charge, and not a cancelled trial', async () => {
+    await useScheduler();
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    expect(await dispatch()).toBe(1);
+    expect(await escalated()).toEqual([]); // reminder due, but not yet overdue
+    await shiftTrial(2 * 24 + 1); // overdue, and the first charge has passed
+    expect(await dispatch()).toBe(1); // the billing function is still woken for it
+    const flagged = await receipt();
+    expect(flagged).toMatchObject({ checks: 0, last_read_at: null, escalation_reasons: ['unavailable_overdue'], unavailable_overdue_at: expect.any(Date) });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'unavailable_overdue', charged: true, lastReadAt: null })]);
+    await dispatch();
+    expect((await receipt()).escalated_at).toEqual(flagged.escalated_at); // flagged once, not rewritten
+    emailLog = [];
+    expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+    expect(await receipt()).toMatchObject({ escalation_reasons: ['not_found'], unavailable_overdue_at: flagged.unavailable_overdue_at });
+    await query('TRUNCATE jobvance_private.loop_trial_reminder_receipts');
+    await query('UPDATE jobvance_private.loop_subscriptions SET cancel_at_period_end=true');
+    expect(await dispatch()).toBe(0);
+    expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_trial_reminder_receipts')).rows[0].n).toBe(0);
+  });
+  it('reads the least recently attempted rows first, so an outage cannot keep the same rows at the front of the batch', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000); await cloneTrials(4); // sub_fair1..4 and sub_trial, all due with the same dates
+    emailLog = Error('Provider unavailable');
+    expect(await sweep(2)).toMatchObject({ checked: 2, unavailable: 2 });
+    expect(await sweep(2)).toMatchObject({ checked: 2, unavailable: 2 });
+    expect(await sweep(2)).toMatchObject({ checked: 1, unavailable: 1 });
+    expect(await sweep(2)).toMatchObject({ checked: 0 });
+    expect(emailReads).toEqual(['cus_fair1', 'cus_fair2', 'cus_fair3', 'cus_fair4', 'cus_trial']);
+  });
+  it('orders never-attempted rows first, then by the oldest attempt, and applies the batch limit after that order', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000); await cloneTrials(3);
+    await query(`INSERT INTO jobvance_private.loop_trial_reminder_receipts(mode,subscription_id,last_checked_at) VALUES
+      ('live','sub_trial',now()-interval '3 hours'),('live','sub_fair1',now()-interval '1 hour'),('live','sub_fair2',now()-interval '2 hours')`);
+    expect(await selected(10)).toEqual(['sub_fair3', 'sub_trial', 'sub_fair2', 'sub_fair1']);
+    expect(await selected(2)).toEqual(['sub_fair3', 'sub_trial']);
+  });
+  it('stops a sweep after five provider failures in a row and reaches the remaining rows on the next sweep', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000); await cloneTrials(6); // seven rows
+    emailLog = Error('Provider unavailable');
+    expect(await sweep()).toMatchObject({ checked: 5, unavailable: 5, deferred: 2 });
+    expect(emailReads).toHaveLength(5);
+    expect(await sweep()).toMatchObject({ checked: 2, unavailable: 2, deferred: 0 });
+    expect(new Set(emailReads).size).toBe(7);
+  });
+
+  // Finding 3: Dodo documents "sent" as still in transit; the delivery outcome is tracked apart from the send time.
+  it('rechecks an in-flight sent email and surfaces its later bounce without rewriting the send evidence', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [otherProduct('sent')];
+    expect(await sweep()).toMatchObject({ escalated: 1, confirmed: 0 });
+    const first = await receipt();
+    expect(first).toMatchObject({ delivery_status: 'sent', first_email_status: 'sent', delivery_checks: 0, escalation_reasons: ['unbound'] });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'unbound', emailStatus: 'sent' })]);
+    await ageCheck();
+    emailLog = [otherProduct('failed')];
+    expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+    expect(await receipt()).toMatchObject({ delivery_status: 'failed', first_email_status: 'sent', delivery_checks: 1, email_log_id: 'elog_other_subscription',
+      email_created_at: first.email_created_at, unbound_at: first.unbound_at, escalation_reasons: ['unbound', 'delivery_failed'] });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'delivery_failed', reasons: ['unbound', 'delivery_failed'], emailStatus: 'failed', firstEmailStatus: 'sent',
+      emailSentAt: iso(firstCharge() - 2 * DAY + 60000) })]);
+    // A failed answer is terminal: no more rechecks. The marker was never set.
+    await ageCheck(300);
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    expect(await sentAt()).toBeNull();
+  });
+  for (const [status, reason] of [['complained', 'delivery_complained'], ['blocked', 'delivery_blocked']] as const) {
+    it(`surfaces a sent email that later turns out ${status}`, async () => {
+      await startTrial(Date.now() - 5 * DAY - 60000);
+      emailLog = [trialEnding({ status: 'sent' })];
+      await sweep(); await ageCheck();
+      emailLog = [trialEnding({ status })];
+      expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+      expect(await receipt()).toMatchObject({ delivery_status: status, first_email_status: 'sent', escalation_reasons: ['unbound', reason] });
+      expect(await escalated()).toEqual([expect.objectContaining({ reason, emailStatus: status })]);
+    });
+  }
+  it('a delivered answer ends the rechecks and leaves only the unbound incident', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ status: 'sent' })];
+    await sweep(); await ageCheck();
+    emailLog = [trialEnding({ status: 'delivered' })];
+    expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+    expect(await receipt()).toMatchObject({ delivery_status: 'delivered', first_email_status: 'sent', delivery_checks: 1, escalation_reasons: ['unbound'] });
+    await ageCheck(300);
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'unbound', emailStatus: 'delivered', firstEmailStatus: 'sent' })]);
+  });
+  it('rechecks a still-in-flight email with back-off and at most 24 times', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ status: 'sent' })];
+    await sweep();
+    await ageCheck(21);
+    expect(await sweep()).toMatchObject({ checked: 1 }); // first recheck, 20 minutes after the first sight
+    await ageCheck(21);
+    expect(await sweep()).toMatchObject({ checked: 0 }); // the next one waits 40 minutes
+    let rechecks = 1;
+    for (let i = 0; i < 60; i++) { await ageCheck(300); if ((await sweep()).checked === 0) break; rechecks++; }
+    expect(rechecks).toBe(24);
+    expect(await receipt()).toMatchObject({ delivery_status: 'sent', delivery_checks: 24, escalation_reasons: ['unbound'] });
+  });
+  it('keeps the evidence and treats a recorded email that vanishes from the log as unavailable', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ status: 'sent' })];
+    await sweep(); await ageCheck();
+    emailLog = [trialEnding({ email_log_id: 'elog_new_one', status: 'delivered' })]; // a different email must not take its place
+    expect(await sweep()).toMatchObject({ checked: 1, unavailable: 1, escalated: 0 });
+    expect(await receipt()).toMatchObject({ email_log_id: 'elog_1', delivery_status: 'sent', last_unavailable_cause: 'incomplete', escalation_reasons: ['unbound'] });
+  });
+  it('never rewrites the send evidence, swaps the candidate email or lets a delivery outcome move backward', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ status: 'sent' })];
+    await sweep(); await ageCheck();
+    emailLog = [trialEnding({ status: 'failed' })];
+    await sweep();
+    const recorded = await receipt();
+    const table = 'UPDATE jobvance_private.loop_trial_reminder_receipts SET ';
+    for (const change of ["email_created_at=email_created_at+interval '1 minute'", "email_log_id='elog_other'", "email_type='trial_ending'", "first_email_status='delivered'",
+      "delivery_status='sent'", "delivery_status='delivered'", 'delivery_status=NULL', "unbound_at=now()", 'escalated_at=NULL'])
+      await expect(query(table + change)).rejects.toThrow('LOOP_TRIAL_REMINDER_IMMUTABLE');
+    const call = (id: string, status: string) => sql('job_loop_billing_trial_reminder_check', { p_mode: 'live', p_subscription: 'sub_trial', p_email_log_id: id, p_email_type: 'subscription_trial_ending',
+      p_email_status: status, p_email_created_at: iso(firstCharge() - 2 * DAY + 60000), p_candidates: 1 });
+    await expect(call('elog_other', 'delivered')).rejects.toThrow('LOOP_BILLING_UNBOUND'); // evidence is followed, never swapped
+    expect(await call('elog_1', 'sent')).toBe('escalated'); // a stale answer cannot hide the bounce
+    expect(await receipt()).toMatchObject({ delivery_status: 'failed', email_created_at: recorded.email_created_at, email_log_id: 'elog_1', escalation_reasons: ['unbound', 'delivery_failed'] });
+    await expect(sql('job_loop_billing_trial_reminder_unavailable', { p_mode: 'live', p_subscription: 'sub_trial', p_cause: 'timeout' })).rejects.toThrow('LOOP_BILLING_UNBOUND');
+    expect(await sentAt()).toBeNull();
+  });
+
+  it('lets a person who has checked the email close the incident with the existing marker, leaving the send evidence alone', async () => {
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    emailLog = [trialEnding({ status: 'sent' })]; // still in flight, so the sweep would keep rechecking it
+    await sweep();
+    const evidence = await receipt();
+    expect(await escalated()).toHaveLength(1);
+    expect(await sql('job_loop_billing_trial_reminder_sent', { p_mode: 'live', p_subscription: 'sub_trial' })).toBe(true);
+    expect(await sentAt()).not.toBeNull();
+    expect(await escalated()).toEqual([]);
+    expect(await receipt()).toMatchObject({ email_log_id: 'elog_1', email_created_at: evidence.email_created_at, escalation_reasons: ['unbound'] });
+    await ageCheck(300);
+    expect(await sweep()).toMatchObject({ checked: 0 });
+  });
+  it('skips trials that are not yet due or are cancelling', async () => {
+    await startTrial();
+    expect(await sweep()).toMatchObject({ checked: 0 });
+    await shiftTrial(5 * 24);
+    expect((await sweep()).checked).toBe(1);
+    await ageCheck();
+    await query('UPDATE jobvance_private.loop_subscriptions SET cancel_at_period_end=true');
+    expect(await sweep()).toMatchObject({ checked: 0 });
+  });
+  it('keeps waking the billing function for an in-flight email, then goes quiet once its outcome is final', async () => {
+    await useScheduler();
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    expect(await dispatch()).toBe(1);
+    emailLog = [trialEnding({ status: 'sent' })];
+    await sweep();
+    expect(await dispatch()).toBe(0); // read a moment ago
+    await ageCheck(21);
+    expect(await dispatch()).toBe(1); // still in flight
+    emailLog = [trialEnding({ status: 'delivered' })];
+    await sweep(); await ageCheck(300);
+    expect(await dispatch()).toBe(0); // delivered: nothing left to watch
+  });
+  it('dispatches a mode-bound single-use ticket only while a reminder is due', async () => {
+    await query("UPDATE public.job_loop_scheduler_config SET api_origin='https://fixture.supabase.co',publishable_key='fixture-publishable' WHERE singleton");
+    expect((await query('SELECT public.job_loop_trial_reminder_dispatch() n')).rows[0].n).toBe(0);
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    expect((await query('SELECT public.job_loop_trial_reminder_dispatch() n')).rows[0].n).toBe(1);
+    const call = (await query('SELECT url,headers,body FROM net.calls')).rows[0];
+    expect(call.url).toBe('https://fixture.supabase.co/functions/v1/job-loop-billing');
+    expect(call.body).toEqual({ action: 'trial_reminders' });
+    expect(call.headers.apikey).toBe('fixture-publishable');
+    const ticket = call.headers['x-trial-reminder-ticket'];
+    const consume = (t: string, mode: 'test' | 'live') => sql('job_loop_billing_trial_reminder_consume_ticket', { p_ticket: t, p_mode: mode });
+    const req = (t: string) => new Request('https://fixture.supabase.co/functions/v1/job-loop-billing', { method: 'POST', headers: { 'x-trial-reminder-ticket': t } });
+    await expect(authorizeTrialReminderDispatch(req(ticket), { action: 'trial_reminders', limit: 500 }, 'live', consume)).rejects.toMatchObject({ code: 'LOOP_INVALID_INPUT' });
+    await expect(authorizeTrialReminderDispatch(req(ticket), { action: 'trial_reminders' }, 'test', consume)).rejects.toMatchObject({ code: 'LOOP_REMINDER_UNAUTHORIZED' });
+    await expect(authorizeTrialReminderDispatch(req('not-a-ticket'), { action: 'trial_reminders' }, 'live', consume)).rejects.toMatchObject({ code: 'LOOP_REMINDER_UNAUTHORIZED' });
+    await authorizeTrialReminderDispatch(req(ticket), { action: 'trial_reminders' }, 'live', consume);
+    await expect(authorizeTrialReminderDispatch(req(ticket), { action: 'trial_reminders' }, 'live', consume)).rejects.toMatchObject({ code: 'LOOP_REMINDER_UNAUTHORIZED' });
+    expect((await query("SELECT * FROM cron.job WHERE jobname='jobvance-trial-reminder-check'")).rows[0]).toMatchObject({ schedule: '*/30 * * * *', command: 'SELECT public.job_loop_trial_reminder_dispatch();' });
+    // Tickets and receipts are private even to the service role; only the RPCs reach them.
+    await db.exec('SET ROLE service_role');
+    try {
+      await expect(query('SELECT * FROM public.job_loop_trial_reminder_tickets')).rejects.toThrow();
+      await expect(query('SELECT * FROM jobvance_private.loop_trial_reminder_receipts')).rejects.toThrow();
+      await expect(query('SELECT public.job_loop_trial_reminder_dispatch()')).rejects.toThrow();
+    } finally { await db.exec('RESET ROLE'); }
   });
 });

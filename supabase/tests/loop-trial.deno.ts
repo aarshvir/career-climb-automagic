@@ -1,6 +1,7 @@
 // Deno runtime check of the seven-day trial validators used by the edge
 // functions. Hermetic: no network, provider, card or database.
 import { captureLoopBillingInput, LOOP_BILLING_PRODUCT, LOOP_TRIAL_DAYS, loopCheckoutBody, loopOrderTrialDays, validateLoopBillingProduct, validateLoopSubscription, validateLoopTrialStart, type LoopBillingConfig } from '../functions/_shared/loop-billing.ts';
+import { confirmTrialReminders, trialEndingLog } from '../functions/_shared/loop-trial-reminders.ts';
 
 function assert(value: unknown, message: string): asserts value { if (!value) throw new Error(message); }
 function throws(run: () => unknown, message: string) { try { run(); } catch { return; } throw new Error(message); }
@@ -32,4 +33,14 @@ Deno.test('a trial start is proven only by the original $0 payment and a seven-d
   const trial = validateLoopTrialStart(zero(), verified, 'cks_trial', sub());
   assert(trial.firstChargeAt === new Date(start + 7 * DAY).toISOString(), 'first charge at trial end');
   for (const changes of [{ total_amount: 2900 }, { tax: 1 }, { checkout_session_id: 'cks_other' }, { refund_status: 'full' }]) throws(() => validateLoopTrialStart(zero(changes), verified, 'cks_trial', sub()), `rejects ${JSON.stringify(changes)}`);
+});
+Deno.test('an unreadable email log is unavailable, never "no email", and a sweep never reports a confirmation', async () => {
+  const charge = new Date(start + 7 * DAY).toISOString();
+  throws(() => trialEndingLog({ items: 'none' }, charge), 'a malformed log is unavailable');
+  throws(() => trialEndingLog({ items: [], total_count: 150 }, charge), 'a page that stops short of the window is unavailable');
+  assert(trialEndingLog({ items: [], total_count: 0 }, charge).email === null, 'a complete empty log is "no email"');
+  const called: string[] = [];
+  const rpc = (async (name: string) => { called.push(name); return name === 'job_loop_billing_trial_reminders_unconfirmed' ? [{ subscriptionId: 'sub_trial', customerId: 'cus_trial', firstChargeAt: charge }] : 'escalated'; }) as never;
+  const sweep = await confirmTrialReminders({ rpc, provider: () => Promise.reject(new Error('Provider down')) }, 'test');
+  assert(sweep.unavailable === 1 && sweep.confirmed === 0 && called.includes('job_loop_billing_trial_reminder_unavailable'), 'an outage is recorded as unavailable');
 });
