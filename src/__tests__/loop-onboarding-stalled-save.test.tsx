@@ -20,8 +20,8 @@ vi.mock('@/lib/cv-extraction', async importOriginal => ({ ...(await importOrigin
  */
 const SOURCE = 'Alex Example\nEducation\nRecorded local plant species in a supervised university fieldwork project with documented observations.';
 const baseProfile = () => ({ ...blankLoopProfile('professional'), name: 'Alex Example', targetTitles: ['Research assistant'], locations: ['Boston'], sourceText: SOURCE });
-const seed = (step: number) => retainOnboardingDraft({ owner: 'owner-a', authority: trackingDraftAuthority('owner-a'), generation: null },
-  { profile: baseProfile(), answers: blankLoopCvAnswers(), step, roleQuery: '', locationQuery: '', rolesEdited: true, suggestionSource: '' });
+const seed = (step: number, answers = blankLoopCvAnswers()) => retainOnboardingDraft({ owner: 'owner-a', authority: trackingDraftAuthority('owner-a'), generation: null },
+  { profile: baseProfile(), answers, step, roleQuery: '', locationQuery: '', rolesEdited: true, suggestionSource: '' });
 const never = () => new Promise<never>(() => {});
 const snapshotWith = (profile: unknown, recordVersion = 1) => ({ lifecycleGeneration: 0, recordVersion, profile: profile && { ...(profile as object), revision: 1, updatedAt: '2026-11-15T00:00:00.000Z' } });
 const names = () => mock.call.mock.calls.map(([, action]) => action.action);
@@ -37,8 +37,8 @@ function script(behaviour: Script) {
 }
 async function settle() { await act(async () => { await Promise.resolve(); await Promise.resolve(); }); }
 async function advance(ms: number) { await act(async () => { await vi.advanceTimersByTimeAsync(ms); }); }
-async function startSave() {
-  seed(5);
+async function startSave(answers = blankLoopCvAnswers()) {
+  seed(5, answers);
   render(<MemoryRouter initialEntries={['/onboarding']}><LoopOnboarding /></MemoryRouter>);
   const save = await screen.findByRole('button', { name: 'Save my setup' });
   vi.useFakeTimers();
@@ -138,6 +138,9 @@ describe('a save that never answers', () => {
     await settle();
     expect(screen.getByRole('alert')).toHaveTextContent('A different setup is already saved');
     expect(screen.queryByRole('heading', { name: 'Your setup is saved.' })).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'A setup is already saved in your account.' })).toHaveTextContent('Someone else');      // the saved one is shown
+    expect(screen.getByRole('button', { name: 'Back' })).toBeEnabled();                                                                // and the page still holds the draft
+    expect((screen.getByLabelText(/Read them here/) as HTMLTextAreaElement).value).toContain('Research assistant');
     expect(names().filter(name => name === 'save_profile')).toHaveLength(1);
   });
 
@@ -282,7 +285,81 @@ describe('a write that lands after an empty check (review finding: the retry col
     server.commit({ ...baseProfile(), targetTitles: ['Someone else'] });
     await tickAndSave();
     expect(screen.getByRole('alert')).toHaveTextContent('A setup was saved in another tab');
+    expect(screen.getByRole('region', { name: 'A setup is already saved in your account.' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save my setup' })).toBeDisabled();
     expect(names().filter(name => name === 'save_profile')).toHaveLength(1);
+  });
+});
+
+describe('the original save lands after an empty check unlocked editing (round 2: the newer draft must stay reachable)', () => {
+  it('keeps every newer answer readable and copyable, never writes again and never switches to the saved-dashboard-only view', async () => {
+    const server = record(); let first: unknown = null;
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    script({
+      get: async () => ({ snapshot: server.snap() }),
+      existing: async () => ({ snapshot: server.snap() }),             // an initialized but empty record, version 0
+      save: action => { server.state.writes += 1; if (server.state.writes === 1) { first = action.profile; return never(); } return Promise.reject(new Error('A second write must not be sent')); },
+    });
+    await startSave({ ...blankLoopCvAnswers(), name: 'Alex Builder', summary: 'Notes typed in the CV builder' });
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    expect(screen.getByRole('alert')).toHaveTextContent('Nothing was saved');
+    expect(document.querySelector('fieldset')).toBeEnabled();
+    // Editing is allowed again after an empty check: a newer name.
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Revised' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+    server.commit(first);                                               // the original write lands with the older name
+    await tickAndSave();
+    // The saved setup and the newer draft are both in view; nothing was written again or overwritten.
+    const panel = screen.getByRole('region', { name: 'Your earlier setup was saved after all.' });
+    expect(panel).toHaveTextContent('Alex Example');
+    expect(panel).toHaveTextContent('Still here and NOT saved');
+    expect(panel).toHaveTextContent('Name on your CV');
+    expect(panel).toHaveTextContent('CV builder answers');
+    expect(screen.queryByRole('heading', { name: 'Your Automated Job Loop is ready to continue.' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Your setup is saved.' })).not.toBeInTheDocument();
+    const copy = (screen.getByLabelText(/Read them here/) as HTMLTextAreaElement).value;
+    expect(copy).toContain('Name on your CV: Alex Revised');
+    expect(copy).toContain('name: Alex Builder');
+    expect(copy).toContain('summary: Notes typed in the CV builder');
+    expect(copy).toContain('Recorded local plant species');           // the CV text
+    expect(screen.getByRole('button', { name: 'Save my setup' })).toBeDisabled();
+    expect(screen.getByRole('checkbox', { name: /Save this CV text/ })).toBeDisabled();
+    // The form itself still holds the newer answer, and a pending role typed later is part of the copy too.
+    for (let index = 0; index < 5; index += 1) fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Data analyst' } });
+    expect((screen.getByLabelText(/Read them here/) as HTMLTextAreaElement).value).toContain('Role text typed but not added: Data analyst');
+    expect(screen.getByRole('region', { name: 'Your earlier setup was saved after all.' })).toHaveTextContent('Role text typed but not added');
+    fireEvent.click(screen.getByRole('button', { name: 'Copy my newer answers' }));
+    await settle();
+    expect(writeText).toHaveBeenCalledOnce();
+    expect(writeText.mock.calls[0][0]).toContain('Name on your CV: Alex Revised');
+    expect(screen.getByText('Copied.')).toBeInTheDocument();
+    expect(server.state.writes).toBe(1);
+    expect(names().filter(name => name === 'save_profile')).toHaveLength(1);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('says when copying is blocked and keeps the text selectable', async () => {
+    const server = record(); let first: unknown = null;
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockRejectedValue(new Error('blocked')) } });
+    script({ get: async () => ({ snapshot: server.snap() }), existing: async () => ({ snapshot: server.snap() }), save: action => { first = action.profile; return never(); } });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Revised' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+    server.commit(first);
+    await tickAndSave();
+    fireEvent.click(screen.getByRole('button', { name: 'Copy my newer answers' }));
+    await settle();
+    expect(screen.getByText(/Copying was blocked/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Read them here/)).toHaveAttribute('readonly');
   });
 });
 
