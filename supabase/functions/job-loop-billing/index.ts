@@ -6,7 +6,7 @@ import { loopBillingProvider, loopBillingRpc } from '../_shared/loop-billing-edg
 import { authorizeTrialReminderDispatch, confirmTrialReminders, TRIAL_REMINDER_TICKET_HEADER } from '../_shared/loop-trial-reminders.ts';
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
 serve(async req => {
-  // Scheduled confirmation of Dodo's trial-ending emails (cron ticket, no user).
+  // Scheduled read of Dodo's trial-ending emails: records evidence, unreadable reads and delivery outcomes, never a confirmation (cron ticket, no user).
   if (req.headers.has(TRIAL_REMINDER_TICKET_HEADER)) {
     const config = loopBillingConfiguration(name => Deno.env.get(name));
     if (!config) throw new ApiError(503, 'LOOP_BILLING_UNAVAILABLE', 'Automated Job Loop subscriptions are unavailable.');

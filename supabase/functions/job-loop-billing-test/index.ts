@@ -8,7 +8,7 @@ import { authorizeTrialReminderDispatch, confirmTrialReminders, TRIAL_REMINDER_T
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
 serve(async req => {
-  // Scheduled confirmation of Dodo's test-mode trial-ending emails (cron ticket, no user).
+  // Scheduled read of Dodo's test-mode trial-ending emails: records evidence, unreadable reads and delivery outcomes, never a confirmation (cron ticket, no user).
   if (req.headers.has(TRIAL_REMINDER_TICKET_HEADER)) {
     const config = loopBillingTestConfiguration(name => Deno.env.get(name));
     if (!config) throw new ApiError(503, 'LOOP_TEST_BILLING_DISABLED', 'Isolated test payments are disabled.');
