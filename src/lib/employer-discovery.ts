@@ -180,13 +180,17 @@ const REGION_NAMES = REGION_NAME_GROUPS.flatMap(([country, names]) => names.spli
  * comma-separated part ("Dallas, TX, Mexico", "Dallas, TX, Houston") is context this table cannot resolve, whatever
  * country it names, so nothing is inferred and the place stays unresolved. */
 const PLACE_BREAK = /\s*[|;/\n]\s*|\s+or\s+/i;
-const WORKPLACE_WORD = /^(?:hybrid|on-?site|in[- ]office|office)$/i;
+// The only qualifiers set aside when deciding whether a region closes its place: a workplace annotation made of these words
+// alone (optionally joined by a comma, "&", "+" or "and"). Nothing else is ever set aside, however it is bracketed or
+// dashed: "(Mexico)", " - Brazil", " – Senior Role" are unresolved context and block the region.
+const WORKPLACE_WORDS = 'hybrid|remote|on[- ]?site|in[- ]office|office';
+const WORKPLACE_ANNOTATION = new RegExp(String.raw`^(?:${WORKPLACE_WORDS})(?:\s*(?:[,&+]|\band\b)?\s*(?:${WORKPLACE_WORDS}))*$`, 'i');
 function offeredAlternatives(offered: string): string[] {
   return offered.split(PLACE_BREAK).map(place => place.trim()).filter(Boolean);
 }
 function regionCountriesOfPlace(place: string): string[] {
   const countries = new Set<string>();
-  for (const match of place.matchAll(/,\s*([A-Z]{2,3})(?=\s*(?:$|[,;|/()–—-])|\s\d)/g)) {
+  for (const match of place.matchAll(/,\s*([A-Z]{2,3})(?=\s*(?:$|[,;|/()[–—-])|\s\d)/g)) {
     const country = REGION_CODES.get(match[1]);
     if (country) countries.add(country);
   }
@@ -199,9 +203,13 @@ function regionCountriesOfPlace(place: string): string[] {
   return [...countries];
 }
 function regionClosesPlace(place: string): boolean {
-  const core = place.replace(/\([^)]*\)|\[[^\]]*\]/g, ' ').split(/\s[-–—]\s/)[0];
+  // Bracketed groups are set aside only when they are workplace annotations; a dash (spaced on at least one side, so a hyphen
+  // inside a name is not one) may only introduce workplace annotations.
+  const unbracketed = place.replace(/\(([^)]*)\)|\[([^\]]*)\]/g, (group, round: string | undefined, square: string | undefined) => WORKPLACE_ANNOTATION.test((round ?? square ?? '').trim()) ? ' ' : group);
+  const [core, ...suffixes] = unbracketed.split(/\s+[-–—]\s*|\s*[-–—]\s+/);
+  if (suffixes.some(suffix => !WORKPLACE_ANNOTATION.test(suffix.trim()))) return false;
   const parts = core.split(',').map(part => part.trim()).filter(Boolean);
-  while (parts.length > 1 && WORKPLACE_WORD.test(parts[parts.length - 1])) parts.pop();
+  while (parts.length > 1 && WORKPLACE_ANNOTATION.test(parts[parts.length - 1])) parts.pop();
   const last = parts[parts.length - 1] ?? '';
   if (parts.length > 1 && /^[A-Z]{2,3}(?:\s+\d[\d -]*)?$/.test(last)) return REGION_CODES.has(last.split(/\s/)[0]);
   const tail = placeText(last).replace(/\s\d[\d ]*$/, '');
