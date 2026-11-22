@@ -15,7 +15,7 @@
                                             "path":  "src/lib/marketing-types.ts"
                                         },
                                         {
-                                            "sha256":  "dc2d22834f2552e448bf170e727b183aaa0d0a84a7598ab66557c61a68e68113",
+                                            "sha256":  "294d4c671576505f349de5175cd603fcfc221e6b5a834fc4bf04799759bb279b",
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
@@ -282,9 +282,9 @@
                     },
                     {
                         "function":  "job-loop-worker",
-                        "sha256":  "f9ebc444384864f013d2feb4bf765ee7ad2631e1fa57ae217eb732c3b85517d3",
+                        "sha256":  "d3507229c156a41ec072b16ae3d52a958f1045a9930e8ae3515f5ca36a5d5ec5",
                         "artifact":  "docs/supabase-loop-ui/job-loop-worker.js",
-                        "bytes":  2086142,
+                        "bytes":  2086697,
                         "sources":  [
                                         {
                                             "sha256":  "ac61281e0d40714780b494ae681de2f27c66d43973c51beba8fa70beef8973c3",
@@ -295,7 +295,7 @@
                                             "path":  "src/lib/marketing-types.ts"
                                         },
                                         {
-                                            "sha256":  "dc2d22834f2552e448bf170e727b183aaa0d0a84a7598ab66557c61a68e68113",
+                                            "sha256":  "294d4c671576505f349de5175cd603fcfc221e6b5a834fc4bf04799759bb279b",
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
@@ -575,7 +575,7 @@
                                             "path":  "src/lib/marketing-types.ts"
                                         },
                                         {
-                                            "sha256":  "dc2d22834f2552e448bf170e727b183aaa0d0a84a7598ab66557c61a68e68113",
+                                            "sha256":  "294d4c671576505f349de5175cd603fcfc221e6b5a834fc4bf04799759bb279b",
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
@@ -855,7 +855,7 @@
                                             "path":  "src/lib/marketing-types.ts"
                                         },
                                         {
-                                            "sha256":  "dc2d22834f2552e448bf170e727b183aaa0d0a84a7598ab66557c61a68e68113",
+                                            "sha256":  "294d4c671576505f349de5175cd603fcfc221e6b5a834fc4bf04799759bb279b",
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
@@ -1135,7 +1135,7 @@
                                             "path":  "src/lib/marketing-types.ts"
                                         },
                                         {
-                                            "sha256":  "dc2d22834f2552e448bf170e727b183aaa0d0a84a7598ab66557c61a68e68113",
+                                            "sha256":  "294d4c671576505f349de5175cd603fcfc221e6b5a834fc4bf04799759bb279b",
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
@@ -1415,7 +1415,7 @@
                                             "path":  "src/lib/marketing-types.ts"
                                         },
                                         {
-                                            "sha256":  "dc2d22834f2552e448bf170e727b183aaa0d0a84a7598ab66557c61a68e68113",
+                                            "sha256":  "294d4c671576505f349de5175cd603fcfc221e6b5a834fc4bf04799759bb279b",
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
@@ -1695,7 +1695,7 @@
                                             "path":  "src/lib/marketing-types.ts"
                                         },
                                         {
-                                            "sha256":  "dc2d22834f2552e448bf170e727b183aaa0d0a84a7598ab66557c61a68e68113",
+                                            "sha256":  "294d4c671576505f349de5175cd603fcfc221e6b5a834fc4bf04799759bb279b",
                                             "path":  "src/lib/employer-discovery.ts"
                                         },
                                         {
