@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -26,8 +26,23 @@ vi.mock('@/lib/job-loop-api', () => ({
 type Pilot = LoopSnapshot['pilot'];
 let current: LoopSnapshot;
 function setPilot(pilot: Pilot) { current = { ...current, pilot }; }
+function withOneRun() {
+  current = { ...current, runs: [{ id: 'plan-note-run', requestId: 'plan-note-request', status: 'completed', phase: 'completed', startedAt: '2026-11-11T00:00:00Z', finishedAt: '2026-11-11T00:01:00Z', inputHash: 'plan-note-hash', provider: 'rules', model: 'grounded-rules-v1', lanes: [{ name: 'Manual opportunities', status: 'completed', count: 0, checkedAt: '2026-11-11T00:01:00Z', message: 'No opportunities were added.' }], opportunityIds: [], packetIds: [], messages: [], nextAction: 'Review source coverage.', reservedUsd: 0, usageUsd: 0 }] };
+}
 function tree() {
   return <HelmetProvider><MemoryRouter initialEntries={[{ pathname: '/loop', state: { onboardingSaved: true, owner: 'plan-note-owner', generation: 0, authority: trackingDraftAuthority('plan-note-owner') } }]}><JobLoop /></MemoryRouter></HelmetProvider>;
+}
+const tabButton = (name: string) => screen.getByRole('button', { name });
+/** Onboarding hands the person to My CV & experience in an effect after the snapshot loads; wait for that intended state, not just for the first control to appear. */
+async function landAfterOnboarding(firstRun: boolean) {
+  render(tree());
+  if (firstRun) await screen.findByRole('button', { name: 'Show the facts from my CV' });
+  else await screen.findByRole('button', { name: 'Today' });
+  await waitFor(() => expect(tabButton('My CV & experience')).toHaveAttribute('aria-pressed', 'true'));
+}
+async function openToday() {
+  fireEvent.click(tabButton('Today'));
+  await waitFor(() => expect(tabButton('Today')).toHaveAttribute('aria-pressed', 'true'));
 }
 
 beforeEach(() => {
@@ -56,6 +71,8 @@ describe('LoopPlanNote', () => {
     expect(note).toHaveTextContent('A free account lets you set up your roles and schedule. Ongoing automatic runs need a paid plan, from US$29/month.');
     expect(screen.getByRole('link', { name: 'See plans and what is included' })).toHaveAttribute('href', '/pricing');
     expect(note.textContent).not.toMatch(/trial|guarantee|discount|every|each/i);
+    // The 16px body size lives on the scoped class (jsdom does not load the stylesheet); other compact upgrade prompts keep their own size.
+    expect(note).toHaveClass('jl-plan-note');
   });
 
   it.each([
@@ -69,35 +86,49 @@ describe('LoopPlanNote', () => {
 });
 
 describe('plan note on the signed-in Automated Job Loop screens', () => {
-  it('appears in the first-run panel a person lands on after saving their setup, without changing the first-run controls', async () => {
+  it('appears once, inside the first-run panel a person lands on after saving their setup, without changing the first-run controls', async () => {
     setPilot({ enrolled: false, activeUsers: 7, maxUsers: 10 });
-    render(tree());
-    expect(await screen.findByRole('button', { name: 'Show the facts from my CV' })).toBeEnabled();
+    await landAfterOnboarding(true);
+    const panel = screen.getByRole('region', { name: 'Your next setup steps' });
+    expect(within(panel).getAllByTestId('loop-plan-note')).toHaveLength(1);
     expect(screen.getAllByTestId('loop-plan-note')).toHaveLength(1);
+    expect(within(panel).getByRole('button', { name: 'Show the facts from my CV' })).toBeEnabled();
     expect(mocks.call.mock.calls.every(([, action]) => action.action === 'get')).toBe(true);
   });
 
-  it('appears on Today (overview) and in the recurring-search status, so the schedule step is no longer a price-free dead end', async () => {
+  it('is not repeated on Today while the first-run panel already shows it; the recurring-search status keeps its own', async () => {
     setPilot({ enrolled: false, activeUsers: 7, maxUsers: 10 });
-    render(tree());
-    await screen.findByRole('button', { name: 'Show the facts from my CV' });
-    fireEvent.click(screen.getAllByRole('button', { name: /^Today$/ })[0]);
-    const notes = await screen.findAllByTestId('loop-plan-note');
-    expect(notes.length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByRole('region', { name: 'Recurring search status' })).toContainElement(notes[notes.length - 1]);
+    await landAfterOnboarding(true);
+    await openToday();
+    const notes = screen.getAllByTestId('loop-plan-note');
+    expect(notes).toHaveLength(2);
+    expect(within(screen.getByRole('region', { name: 'Your next setup steps' })).getAllByTestId('loop-plan-note')).toHaveLength(1);
+    expect(within(screen.getByRole('region', { name: 'Recurring search status' })).getAllByTestId('loop-plan-note')).toHaveLength(1);
+    expect(document.querySelector('.jl-overview')!.querySelector('[data-testid="loop-plan-note"]')).toBeNull();
+  });
+
+  it('appears in the Today overview and in the recurring-search status once a run exists (no first-run panel), so the schedule step is not a price-free dead end', async () => {
+    setPilot({ enrolled: false, activeUsers: 7, maxUsers: 10 });
+    withOneRun();
+    await landAfterOnboarding(false);
+    expect(screen.queryByRole('region', { name: 'Your next setup steps' })).toBeNull();
+    await openToday();
+    expect(screen.getAllByTestId('loop-plan-note')).toHaveLength(2);
+    expect(document.querySelector('.jl-overview')!.querySelectorAll('[data-testid="loop-plan-note"]')).toHaveLength(1);
+    expect(within(screen.getByRole('region', { name: 'Recurring search status' })).getAllByTestId('loop-plan-note')).toHaveLength(1);
   });
 
   it('is absent for an account with an active plan', async () => {
     setPilot({ enrolled: true, activeUsers: 7, maxUsers: 10 });
-    render(tree());
-    await screen.findByRole('button', { name: 'Show the facts from my CV' });
+    await landAfterOnboarding(true);
+    await openToday();
     expect(screen.queryByTestId('loop-plan-note')).toBeNull();
   });
 
   it('is absent while every free place is taken, where the existing prompt already shows the plan', async () => {
     setPilot({ enrolled: false, activeUsers: 10, maxUsers: 10 });
-    render(tree());
-    await screen.findByRole('button', { name: 'Show the facts from my CV' });
+    await landAfterOnboarding(true);
+    await openToday();
     expect(screen.queryByTestId('loop-plan-note')).toBeNull();
   });
 });

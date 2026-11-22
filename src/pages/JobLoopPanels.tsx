@@ -22,7 +22,7 @@ const starter = loopSubscriptionPlan('weekly');
  */
 export function LoopPlanNote({ snapshot }: { snapshot: Pick<LoopSnapshot, 'pilot'> }) {
   if (snapshot.pilot?.enrolled !== false || loopPlacesFull(snapshot)) return null;
-  return <p className="jl-upgrade-note" data-testid="loop-plan-note">A free account lets you set up your roles and schedule. Ongoing automatic runs need a paid plan, from US${starter.priceUsd}/month. <Link to="/pricing">See plans and what is included</Link>.</p>;
+  return <p className="jl-upgrade-note jl-plan-note" data-testid="loop-plan-note">A free account lets you set up your roles and schedule. Ongoing automatic runs need a paid plan, from US${starter.priceUsd}/month. <Link to="/pricing">See plans and what is included</Link>.</p>;
 }
 
 /** Shown instead of a dead end when every free place is taken. */
@@ -38,7 +38,7 @@ export function LoopStarterPrompt({ compact = false }: { compact?: boolean }) {
   </section>;
 }
 
-export function LoopWorkspaceOverview({ snapshot, readyPacketCount, onOpen, onSchedule }: { snapshot: LoopSnapshot; readyPacketCount: number; onOpen: (section: Section, packetId?: string) => void; onSchedule?: () => void }) {
+export function LoopWorkspaceOverview({ snapshot, readyPacketCount, onOpen, onSchedule, planNote = true }: { snapshot: LoopSnapshot; readyPacketCount: number; onOpen: (section: Section, packetId?: string) => void; onSchedule?: () => void; planNote?: boolean }) {
   const cleared = snapshot.claims.filter(claim => claim.status === 'active' && claim.confirmed && claim.shareable);
   const review = snapshot.packets.filter(packet => packet.status === 'review_required');
   const due = snapshot.opportunities.filter(opportunity => loopFollowUpDue(opportunity.followUpAt) && !['offer', 'rejected', 'withdrawn'].includes(opportunity.status));
@@ -67,7 +67,7 @@ export function LoopWorkspaceOverview({ snapshot, readyPacketCount, onOpen, onSc
     <div className="jl-context-help"><Link to="/help#job-loop-start">First-step help</Link><Link to="/walkthroughs">Step-by-step walkthroughs</Link><Link to="/job-loop">How the Automated Job Loop works</Link></div>
     <p className="jl-help">Cloud preparation: {snapshot.capabilities.cloudWorker ? 'reported as configured; each run has its own result' : 'not currently configured'}. Available employer sources and web search are shown below. Private saving does not activate AI processing or mailbox access.</p>
     {snapshot.budget && <div className="jl-budget" aria-label="Optional AI and search availability"><strong>{snapshot.budget.remainingUsd <= 0 ? 'Optional AI and search are paused' : 'Optional AI and search availability'}</strong><p>{snapshot.budget.remainingUsd <= 0 ? 'The shared monthly allowance has been used. You can still use the free CV check; rules-based preparation has its own availability and run limits.' : 'Availability is checked before each request. Your account allowance and service capacity are checked before preparation begins.'}</p><Link to="/check">Open the free CV check</Link></div>}
-    <LoopPlanNote snapshot={snapshot} />
+    {planNote && <LoopPlanNote snapshot={snapshot} />}
     {placesFull && <LoopStarterPrompt />}
   </section>;
 }
