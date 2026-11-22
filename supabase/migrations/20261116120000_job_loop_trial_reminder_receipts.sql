@@ -34,6 +34,27 @@ BEGIN;
 -- An incident is durable: it lives on the receipt row, survives the first
 -- charge, and the support list keeps it for 30 days after that charge. Nothing
 -- here charges, cancels or emails anyone.
+--
+-- Lifecycle and erasure. A receipt holds identifiers (the subscription, the
+-- customer's email-log id) and a delivery history, so it must not outlive the
+-- person it is about. It belongs to exactly one trial and is deleted with it:
+-- a foreign key to loop_subscription_trials with ON DELETE CASCADE. Deleting
+-- the account (auth.users) removes the subscription and the trial (existing
+-- cascades) and through them the receipt; deleting a trial or a subscription
+-- directly removes it too. Nothing else this migration creates keeps a
+-- per-person identifier: the dispatch tickets hold a random id, a billing mode
+-- and two timestamps; the support list and the sweep selectors only read rows
+-- through the trial; and the sweep's function logs carry no identifier.
+
+-- The receipt references its trial by (subscription_id, mode), so a receipt can
+-- never carry a mode its trial does not have (a live receipt for a test trial
+-- is refused by the database, not by application code). subscription_id is
+-- already the trial's primary key, so this unique key only makes the pair
+-- referenceable: it is a second index over an already-unique column and changes
+-- no row, no rule and no existing function. This is the only change to the
+-- deployed 20261111120000 table, and it lives here; that migration is untouched.
+ALTER TABLE jobvance_private.loop_subscription_trials
+  ADD CONSTRAINT loop_subscription_trials_subscription_mode_key UNIQUE(subscription_id,mode);
 
 CREATE TABLE jobvance_private.loop_trial_reminder_receipts (
   mode text NOT NULL CHECK(mode IN('test','live')),
@@ -74,6 +95,10 @@ CREATE TABLE jobvance_private.loop_trial_reminder_receipts (
   escalation_reasons text[] NOT NULL DEFAULT '{}'
     CHECK(escalation_reasons <@ ARRAY['unbound','not_found','unavailable_overdue','delivery_failed','delivery_complained','delivery_blocked']::text[]),
   PRIMARY KEY(mode,subscription_id),
+  -- The receipt's whole lifecycle: created for an existing trial, of the same
+  -- mode, and deleted with it (owner erasure, trial or subscription deletion).
+  CONSTRAINT loop_trial_reminder_receipts_trial_fkey FOREIGN KEY(subscription_id,mode)
+    REFERENCES jobvance_private.loop_subscription_trials(subscription_id,mode) ON DELETE CASCADE,
   CHECK((email_log_id IS NULL)=(email_type IS NULL) AND (email_log_id IS NULL)=(email_created_at IS NULL) AND (email_log_id IS NULL)=(first_email_status IS NULL)
     AND (email_log_id IS NULL)=(candidate_count IS NULL) AND (email_log_id IS NULL)=(delivery_status IS NULL) AND (email_log_id IS NULL)=(delivery_status_at IS NULL)
     AND (email_log_id IS NULL)=(unbound_at IS NULL)),
@@ -269,6 +294,11 @@ BEGIN
     LEFT JOIN jobvance_private.loop_trial_reminder_receipts r ON r.mode=t.mode AND r.subscription_id=t.subscription_id
     WHERE t.granted AND t.reminder_sent_at IS NULL AND now()>=t.reminder_at+interval '13 hours' AND now()<t.first_charge_at+interval '30 days'
       AND r.email_log_id IS NULL AND (r.last_read_at IS NULL OR r.last_read_at<t.reminder_at+interval '12 hours')
+    -- Hold each trial while its receipt is written. A trial being deleted at the
+    -- same moment (owner erasure) is skipped instead of failing the receipt's
+    -- foreign key and aborting the whole dispatch; it has nothing left to flag.
+    -- A trial a sweep holds is skipped too and is picked up 30 minutes later.
+    FOR KEY SHARE OF t SKIP LOCKED
   ), changed AS (
     INSERT INTO jobvance_private.loop_trial_reminder_receipts AS rc(mode,subscription_id,escalated_at,escalation_reasons,unavailable_overdue_at)
     SELECT mode,subscription_id,now(),ARRAY['unavailable_overdue'],now() FROM overdue
@@ -283,7 +313,9 @@ END $$;
 
 -- Support view: every trial with an open incident, until 30 days after its
 -- first charge. 'reason' is the most serious open one (a delivery problem, then
--- not_found, unavailable_overdue, unbound); 'reasons' lists them all.
+-- not_found, unavailable_overdue, unbound); 'reasons' lists them all. It reads
+-- every receipt through its trial, so an erased trial cannot be listed (and the
+-- receipt's foreign key means there is no receipt left to list in the first place).
 CREATE FUNCTION public.job_loop_billing_trial_reminders_escalated(p_mode text,p_limit integer DEFAULT 50)
 RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
   SELECT COALESCE(jsonb_agg(jsonb_build_object('userId',e.user_id,'subscriptionId',e.subscription_id,'firstChargeAt',e.first_charge_at,'charged',e.first_charge_at<=now(),

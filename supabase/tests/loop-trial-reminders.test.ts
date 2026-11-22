@@ -103,6 +103,17 @@ describe('trial reminder sweep, with the database and Dodo replaced by stubs', (
     const mixed = ports(rows, async () => { n++; if (n === 3) return { items: [], total_count: 0 }; throw new Error('down'); }, 'pending');
     expect(await confirmTrialReminders(mixed.ports, 'live')).toMatchObject({ checked: 8, unavailable: 7, pending: 1, deferred: 0 });
   });
+  it('writes no subscription, customer or email id to the function logs, which an account deletion cannot erase', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const ids = { subscriptionId: 'sub_private_id', customerId: 'cus_private_id' };
+    const log = { items: [email({ email_log_id: 'elog_private_id', status: 'failed' })], total_count: 1 };
+    expect(await confirmTrialReminders(ports([row(ids)], async () => log).ports, 'live')).toMatchObject({ escalated: 1 }); // an incident is logged
+    expect(await confirmTrialReminders(ports([row(ids)], async () => { throw new Error('Provider timeout for cus_private_id'); }).ports, 'live')).toMatchObject({ unavailable: 1 }); // an unreadable log is logged
+    expect(logged.mock.calls.map(call => call[0])).toEqual(['job_loop_trial_reminder_unconfirmed', 'job_loop_trial_reminder_unavailable']);
+    const written = JSON.stringify(logged.mock.calls);
+    for (const id of ['sub_private_id', 'cus_private_id', 'elog_private_id']) expect(written).not.toContain(id);
+    expect(logged.mock.calls[0][1]).toEqual({ mode: 'live', emailStatus: 'failed', candidates: 1 });
+  });
   it('refuses a malformed selection from the database', async () => {
     const bad = [{}, row({ subscriptionId: 'x' }), row({ customerId: 'y' }), row({ firstChargeAt: 'soon' }), row({ emailLogId: 'bad id' }), row({ emailLogId: 7 })];
     for (const rowValue of bad) await expect(confirmTrialReminders(ports([rowValue], async () => ({ items: [] })).ports, 'live')).rejects.toMatchObject({ code: 'LOOP_BILLING_UNAVAILABLE' });

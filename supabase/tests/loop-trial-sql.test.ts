@@ -22,6 +22,10 @@ let emailReads: string[] = [];
 const DAY = 86400000;
 let db: PGlite, owner: string, session: string, request: string, epoch: number;
 const query = (q: string, a: unknown[] = []) => db.query<Record<string, any>>(q, a);
+/** Every ordinary table in the two application schemas, so the tables the reminder migration adds can be listed. */
+const tableNames = async () => (await query(`SELECT n.nspname||'.'||c.relname name FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+  WHERE c.relkind IN('r','p') AND n.nspname IN('jobvance_private','public')`)).rows.map(row => row.name as string);
+let tablesCreatedByReminderMigration: string[] = [];
 async function sql(name: string, args: Record<string, unknown>) {
   if (!/^job_loop_billing_[a-z_0-9]+$/.test(name)) throw Error('Unexpected SQL ' + name);
   await db.exec('SET ROLE service_role');
@@ -106,7 +110,9 @@ beforeAll(async () => {
     CREATE FUNCTION net.http_post(url text,body jsonb DEFAULT '{}',params jsonb DEFAULT '{}',headers jsonb DEFAULT '{}',timeout_milliseconds integer DEFAULT 2000)
       RETURNS bigint LANGUAGE sql AS $$ INSERT INTO net.calls(url,headers,body) VALUES(url,headers,body) RETURNING id $$;
     ALTER TABLE public.job_loop_scheduler_config ADD COLUMN IF NOT EXISTS api_origin text, ADD COLUMN IF NOT EXISTS publishable_key text;`);
+  const tablesBefore = await tableNames();
   await db.exec(await readFile(new URL('../migrations/' + reminderMigration, import.meta.url), 'utf8'));
+  tablesCreatedByReminderMigration = (await tableNames()).filter(name => !tablesBefore.includes(name)).sort();
 }, 60000);
 afterAll(async () => db?.close());
 beforeEach(async () => {
@@ -894,5 +900,189 @@ describe('trial reminder evidence (Dodo sends the trial-ending email; its log ca
       await expect(query('SELECT * FROM jobvance_private.loop_trial_reminder_receipts')).rejects.toThrow();
       await expect(query('SELECT public.job_loop_trial_reminder_dispatch()')).rejects.toThrow();
     } finally { await db.exec('RESET ROLE'); }
+  });
+
+  // Round 3 (privacy): a receipt holds the subscription id, the customer's email-log id and the delivery history of one trial,
+  // so it must be erased with that trial and can only exist in its trial's own billing mode.
+  describe('a receipt lives and dies with its trial', () => {
+    const TRIALS = 'jobvance_private.loop_subscription_trials', SUBSCRIPTIONS = 'jobvance_private.loop_subscriptions', RECEIPTS = 'jobvance_private.loop_trial_reminder_receipts';
+    const rows = async (table: string) => (await query(`SELECT count(*)::int n FROM ${table}`)).rows[0].n as number;
+    /** Rows, in every table the reminder migration created, that still mention any of these identifiers. */
+    async function residue(...needles: string[]) {
+      let found = 0;
+      for (const table of tablesCreatedByReminderMigration) found += (await query(`SELECT count(*)::int n FROM ${table} x WHERE x::text LIKE ANY($1::text[])`, [needles.map(needle => '%' + needle + '%')])).rows[0].n;
+      return found;
+    }
+    const supportList = async (mode: 'live' | 'test') => ((await sql('job_loop_billing_trial_reminders_escalated', { p_mode: mode })) as Record<string, unknown>[]).map(instants);
+    /** A trial in the test billing mode for another owner, with its own provider customer (the live fixture trial is sub_trial). */
+    async function cloneTestModeTrial() {
+      const user = randomUUID(), clonedRequest = randomUUID();
+      await query('INSERT INTO auth.users(id) VALUES($1)', [user]);
+      await query(`INSERT INTO jobvance_private.loop_billing_orders SELECT (jsonb_populate_record(NULL::jobvance_private.loop_billing_orders,
+        to_jsonb(o)||jsonb_build_object('user_id',$1::uuid,'request_id',$2::uuid,'session_id',NULL,'mode','test'::text))).* FROM jobvance_private.loop_billing_orders o WHERE o.user_id=$3 AND o.request_id=$4`, [user, clonedRequest, owner, request]);
+      await query(`INSERT INTO jobvance_private.loop_subscriptions SELECT (jsonb_populate_record(NULL::jobvance_private.loop_subscriptions,
+        to_jsonb(s)||jsonb_build_object('subscription_id','sub_test_trial'::text,'user_id',$1::uuid,'request_id',$2::uuid,'customer_id','cus_fair99'::text,'mode','test'::text))).* FROM jobvance_private.loop_subscriptions s WHERE s.subscription_id='sub_trial'`, [user, clonedRequest]);
+      await query(`INSERT INTO jobvance_private.loop_subscription_trials SELECT (jsonb_populate_record(NULL::jobvance_private.loop_subscription_trials,
+        to_jsonb(t)||jsonb_build_object('subscription_id','sub_test_trial'::text,'user_id',$1::uuid,'request_id',$2::uuid,'payment_id','pay_test_trial'::text,'mode','test'::text))).* FROM jobvance_private.loop_subscription_trials t WHERE t.subscription_id='sub_trial'`, [user, clonedRequest]);
+      return user;
+    }
+
+    it('erasing the account removes the trial, its receipt, the incident and every identifier, and leaves nothing to list, sweep or dispatch', async () => {
+      await useScheduler();
+      await startTrial(Date.now() - 5 * DAY - 60000);
+      emailLog = [trialEnding({ status: 'failed' })];
+      // The evidence semantics are unchanged: unbound candidate evidence, an open incident, the marker never set, nothing confirmed.
+      expect(await sweep()).toEqual({ checked: 1, confirmed: 0, pending: 0, escalated: 1, unavailable: 0, deferred: 0 });
+      expect(await receipt()).toMatchObject({ email_log_id: 'elog_1', delivery_status: 'failed', escalation_reasons: ['unbound', 'delivery_failed'] });
+      expect(await sentAt()).toBeNull();
+      expect(await escalated()).toEqual([expect.objectContaining({ userId: owner, subscriptionId: 'sub_trial', reason: 'delivery_failed', emailLogId: 'elog_1' })]);
+      expect(await residue('sub_trial', 'elog_1')).toBe(1);
+      // Erasing the owner: auth.users -> subscription and trial (existing cascades) -> receipt (the new foreign key).
+      await query('DELETE FROM auth.users WHERE id=$1', [owner]);
+      for (const table of [TRIALS, SUBSCRIPTIONS, RECEIPTS]) expect(await rows(table), table).toBe(0);
+      expect(await residue('sub_trial', 'elog_1', 'cus_trial', owner)).toBe(0);
+      expect(await escalated()).toEqual([]);
+      expect(await selected()).toEqual([]);
+      expect(await reminders()).toEqual([]);
+      expect(await sweep()).toEqual({ checked: 0, confirmed: 0, pending: 0, escalated: 0, unavailable: 0, deferred: 0 });
+      expect(await dispatch()).toBe(0);
+      expect(await rows(RECEIPTS)).toBe(0);
+    });
+    for (const [kind, table] of [['trial', TRIALS], ['subscription (and with it the trial)', SUBSCRIPTIONS]] as const) {
+      it(`deleting only the ${kind} removes its receipt`, async () => {
+        await startTrial(Date.now() - 5 * DAY - 60000);
+        emailLog = [trialEnding({ status: 'sent' })];
+        await sweep();
+        expect(await rows(RECEIPTS)).toBe(1);
+        await query(`DELETE FROM ${table} WHERE subscription_id='sub_trial'`);
+        expect(await rows(TRIALS)).toBe(0);
+        expect(await rows(RECEIPTS)).toBe(0);
+        expect(await residue('sub_trial', 'elog_1')).toBe(0);
+        expect(await escalated()).toEqual([]);
+        expect(await selected()).toEqual([]);
+      });
+    }
+    it('erases only the erased owner\'s receipt: another owner\'s evidence and incident stay and keep being swept', async () => {
+      await startTrial(Date.now() - 5 * DAY - 60000); await cloneTrials(1); // sub_trial (owner) and sub_fair1 (another owner)
+      emailLog = [trialEnding({ status: 'sent' })];
+      expect(await sweep()).toMatchObject({ checked: 2, escalated: 2, confirmed: 0 });
+      expect(await rows(RECEIPTS)).toBe(2);
+      const other = (await query("SELECT user_id FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_fair1'")).rows[0].user_id;
+      await query('DELETE FROM auth.users WHERE id=$1', [other]);
+      expect((await query('SELECT subscription_id FROM ' + RECEIPTS)).rows).toEqual([{ subscription_id: 'sub_trial' }]);
+      expect(await escalated()).toEqual([expect.objectContaining({ userId: owner, subscriptionId: 'sub_trial', reason: 'unbound' })]);
+      // The in-flight email of the remaining trial is still rechecked, and its evidence is still immutable.
+      await ageCheck();
+      emailLog = [trialEnding({ status: 'failed' })];
+      expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+      expect(await receipt()).toMatchObject({ subscription_id: 'sub_trial', first_email_status: 'sent', delivery_status: 'failed' });
+      await expect(query("UPDATE jobvance_private.loop_trial_reminder_receipts SET email_log_id='elog_swapped'")).rejects.toThrow('LOOP_TRIAL_REMINDER_IMMUTABLE');
+    });
+    it('a trial erased while a sweep is reading Dodo does not error the sweep and no receipt is created for it', async () => {
+      await startTrial(Date.now() - 5 * DAY - 60000);
+      emailLog = [trialEnding()];
+      const erasedMidSweep: LoopBillingPorts = { ...ports, provider: async (path, body, method) => {
+        const answer = await ports.provider(path, body, method);
+        if (path.includes('/emails')) await query('DELETE FROM auth.users WHERE id=$1', [owner]); // the owner is erased after the read, before the check is recorded
+        return answer;
+      } };
+      expect(await confirmTrialReminders(erasedMidSweep, 'live')).toEqual({ checked: 1, confirmed: 0, pending: 0, escalated: 0, unavailable: 1, deferred: 0 });
+      expect(emailReads).toEqual(['cus_trial']);
+      expect(await rows(TRIALS)).toBe(0);
+      expect(await rows(RECEIPTS)).toBe(0);
+    });
+    it('a trial erased while Dodo is unreachable does not error the sweep and no unavailable record is created for it', async () => {
+      await startTrial(Date.now() - 5 * DAY - 60000);
+      emailLog = Error('Provider unavailable');
+      const erasedMidSweep: LoopBillingPorts = { ...ports, provider: async (path, body, method) => {
+        try { return await ports.provider(path, body, method); } finally { if (path.includes('/emails')) await query('DELETE FROM auth.users WHERE id=$1', [owner]); }
+      } };
+      expect(await confirmTrialReminders(erasedMidSweep, 'live')).toEqual({ checked: 1, confirmed: 0, pending: 0, escalated: 0, unavailable: 1, deferred: 0 });
+      expect(await rows(TRIALS)).toBe(0);
+      expect(await rows(RECEIPTS)).toBe(0);
+    });
+    it('the backstop and the dispatcher flag nothing for an erased trial and never bring its receipt back', async () => {
+      await useScheduler();
+      await startTrial(Date.now() - 5 * DAY - 60000);
+      await shiftTrial(2 * 24 + 1); // reminder overdue, first charge passed
+      expect(await dispatch()).toBe(1);
+      expect(await escalated()).toEqual([expect.objectContaining({ subscriptionId: 'sub_trial', reason: 'unavailable_overdue' })]);
+      await query("DELETE FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_trial'"); // the trial alone, the subscription stays
+      expect(await rows(RECEIPTS)).toBe(0);
+      expect(await rows(SUBSCRIPTIONS)).toBe(1);
+      expect((await query('SELECT jobvance_private.loop_trial_reminder_flag_overdue() n')).rows[0].n).toBe(0);
+      expect(await dispatch()).toBe(0);
+      expect(await escalated()).toEqual([]);
+      expect(await rows(RECEIPTS)).toBe(0);
+    });
+    it('the backstop does not recreate a receipt for a trial whose owner was erased before it ran', async () => {
+      await useScheduler();
+      await startTrial(Date.now() - 5 * DAY - 60000);
+      await shiftTrial(2 * 24 + 1);
+      await query('DELETE FROM auth.users WHERE id=$1', [owner]);
+      expect((await query('SELECT jobvance_private.loop_trial_reminder_flag_overdue() n')).rows[0].n).toBe(0);
+      expect(await dispatch()).toBe(0);
+      expect(await rows(RECEIPTS)).toBe(0);
+      expect(await escalated()).toEqual([]);
+    });
+    it('the backstop still flags every live overdue trial next to one that is being erased', async () => {
+      await useScheduler();
+      await startTrial(Date.now() - 5 * DAY - 60000); await cloneTrials(2);
+      await shiftTrial(2 * 24 + 1);
+      const erased = (await query("SELECT user_id FROM jobvance_private.loop_subscription_trials WHERE subscription_id='sub_fair1'")).rows[0].user_id;
+      await query('DELETE FROM auth.users WHERE id=$1', [erased]);
+      expect(await dispatch()).toBe(1);
+      expect((await query('SELECT subscription_id FROM ' + RECEIPTS + ' ORDER BY subscription_id')).rows).toEqual([{ subscription_id: 'sub_fair2' }, { subscription_id: 'sub_trial' }]);
+      expect((await escalated()).map(entry => entry.subscriptionId)).toEqual(['sub_fair2', 'sub_trial']);
+    });
+
+    it('refuses a receipt for a trial that does not exist, or in a billing mode other than its trial\'s', async () => {
+      await startTrial(Date.now() - 5 * DAY - 60000); // a live trial, sub_trial
+      const insert = (mode: string, subscription: string) => query('INSERT INTO ' + RECEIPTS + '(mode,subscription_id) VALUES($1,$2)', [mode, subscription]);
+      await expect(insert('test', 'sub_trial')).rejects.toThrow('loop_trial_reminder_receipts_trial_fkey'); // the right trial, the wrong mode
+      await expect(insert('live', 'sub_missing')).rejects.toThrow('loop_trial_reminder_receipts_trial_fkey'); // no such trial
+      expect(await rows(RECEIPTS)).toBe(0);
+      await insert('live', 'sub_trial');
+      // A receipt cannot be moved to another mode or to another trial either.
+      await expect(query("UPDATE jobvance_private.loop_trial_reminder_receipts SET mode='test'")).rejects.toThrow('loop_trial_reminder_receipts_trial_fkey');
+      await expect(query("UPDATE jobvance_private.loop_trial_reminder_receipts SET subscription_id='sub_missing'")).rejects.toThrow('loop_trial_reminder_receipts_trial_fkey');
+      expect((await query('SELECT mode,subscription_id FROM ' + RECEIPTS)).rows).toEqual([{ mode: 'live', subscription_id: 'sub_trial' }]);
+    });
+    it('the recording functions cannot create a receipt for a trial in the other mode', async () => {
+      await startTrial(Date.now() - 5 * DAY - 60000);
+      const none = { p_email_log_id: null, p_email_type: null, p_email_status: null, p_email_created_at: null };
+      await expect(sql('job_loop_billing_trial_reminder_check', { p_mode: 'test', p_subscription: 'sub_trial', ...none })).rejects.toThrow('LOOP_BILLING_UNBOUND');
+      await expect(sql('job_loop_billing_trial_reminder_unavailable', { p_mode: 'test', p_subscription: 'sub_trial', p_cause: 'read_failed' })).rejects.toThrow('LOOP_BILLING_UNBOUND');
+      expect(await rows(RECEIPTS)).toBe(0);
+    });
+    it('keeps live and test evidence apart: each mode lists and erases only its own trials', async () => {
+      await startTrial(Date.now() - 5 * DAY - 60000);
+      const testOwner = await cloneTestModeTrial(); // sub_test_trial, mode test
+      emailLog = [trialEnding({ status: 'sent' })];
+      expect(await sweep()).toMatchObject({ checked: 1, escalated: 1 });
+      expect(await confirmTrialReminders(ports, 'test')).toMatchObject({ checked: 1, escalated: 1, confirmed: 0 });
+      expect((await query('SELECT mode,subscription_id FROM ' + RECEIPTS + ' ORDER BY mode')).rows).toEqual([{ mode: 'live', subscription_id: 'sub_trial' }, { mode: 'test', subscription_id: 'sub_test_trial' }]);
+      expect((await supportList('live')).map(entry => entry.subscriptionId)).toEqual(['sub_trial']);
+      expect((await supportList('test')).map(entry => entry.subscriptionId)).toEqual(['sub_test_trial']);
+      // A live receipt for the test trial (and the reverse) is refused.
+      await expect(query("INSERT INTO jobvance_private.loop_trial_reminder_receipts(mode,subscription_id) VALUES('live','sub_test_trial')")).rejects.toThrow('loop_trial_reminder_receipts_trial_fkey');
+      await expect(query("UPDATE jobvance_private.loop_trial_reminder_receipts SET mode='live' WHERE subscription_id='sub_test_trial'")).rejects.toThrow();
+      // Erasing the test-mode owner removes only the test-mode receipt.
+      await query('DELETE FROM auth.users WHERE id=$1', [testOwner]);
+      expect((await query('SELECT mode,subscription_id FROM ' + RECEIPTS)).rows).toEqual([{ mode: 'live', subscription_id: 'sub_trial' }]);
+      expect(await supportList('test')).toEqual([]);
+      expect((await supportList('live')).map(entry => entry.subscriptionId)).toEqual(['sub_trial']);
+    });
+    it('every table the reminder migration creates is either tied to its trial by a cascading key or holds nothing about a person', async () => {
+      expect(tablesCreatedByReminderMigration).toEqual(['jobvance_private.loop_trial_reminder_receipts', 'public.job_loop_trial_reminder_tickets']);
+      const keys = (await query(`SELECT c.confdeltype,c.confrelid::regclass::text parent,
+        (SELECT array_agg(a.attname::text ORDER BY k.ord) FROM unnest(c.conkey) WITH ORDINALITY k(attnum,ord) JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=k.attnum) child_columns,
+        (SELECT array_agg(a.attname::text ORDER BY k.ord) FROM unnest(c.confkey) WITH ORDINALITY k(attnum,ord) JOIN pg_attribute a ON a.attrelid=c.confrelid AND a.attnum=k.attnum) parent_columns
+        FROM pg_constraint c WHERE c.conrelid='jobvance_private.loop_trial_reminder_receipts'::regclass AND c.contype='f'`)).rows;
+      expect(keys).toEqual([{ confdeltype: 'c', parent: TRIALS, child_columns: ['subscription_id', 'mode'], parent_columns: ['subscription_id', 'mode'] }]);
+      // The dispatch tickets are random ids with a billing mode and two timestamps: no user, subscription, customer or email.
+      const columns = (await query("SELECT column_name::text c FROM information_schema.columns WHERE table_schema='public' AND table_name='job_loop_trial_reminder_tickets' ORDER BY 1")).rows.map(row => row.c);
+      expect(columns).toEqual(['consumed_at', 'expires_at', 'mode', 'ticket']);
+    });
   });
 });

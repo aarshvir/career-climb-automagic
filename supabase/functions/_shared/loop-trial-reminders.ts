@@ -120,7 +120,8 @@ export async function confirmTrialReminders(ports: Pick<LoopBillingPorts, 'rpc' 
       let incident = false;
       try { incident = await ports.rpc<unknown>('job_loop_billing_trial_reminder_unavailable', { p_mode: mode, p_subscription: subscriptionId, p_cause: cause }) === 'escalated'; }
       catch { /* Nothing more can be recorded; the database flags an overdue row on its own. */ }
-      console.error('job_loop_trial_reminder_unavailable', { mode, subscription: subscriptionId, cause, incident });
+      // Logs carry no subscription, customer or email id: they are not erased with the account. The support list names the trial.
+      console.error('job_loop_trial_reminder_unavailable', { mode, cause, incident });
       continue;
     }
     streak = 0;
@@ -133,7 +134,7 @@ export async function confirmTrialReminders(ports: Pick<LoopBillingPorts, 'rpc' 
     } catch { sweep.unavailable++; continue; }
     if (outcome !== 'pending' && outcome !== 'escalated') { sweep.unavailable++; continue; }
     sweep[outcome]++;
-    if (outcome === 'escalated') console.error('job_loop_trial_reminder_unconfirmed', { mode, subscription: subscriptionId, emailStatus: email?.status ?? 'not_found', candidates });
+    if (outcome === 'escalated') console.error('job_loop_trial_reminder_unconfirmed', { mode, emailStatus: email?.status ?? 'not_found', candidates });
   }
   return sweep;
 }

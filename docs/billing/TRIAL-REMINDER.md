@@ -63,9 +63,37 @@ The reasons:
 - `unavailable_overdue`: more than twelve hours after the reminder time, Dodo's list still could not be read. Nothing is known.
 - `delivery_failed`, `delivery_complained`, `delivery_blocked`: the candidate email later failed, was marked as spam, or was not sent (Test Mode's weekly email limit).
 
-Function logs also print `job_loop_trial_reminder_unconfirmed` and `job_loop_trial_reminder_unavailable`. Nothing here charges, cancels or emails anyone.
+Function logs also print `job_loop_trial_reminder_unconfirmed` and `job_loop_trial_reminder_unavailable`, with the billing mode and counts only. They carry no subscription, customer or email id: the support list names the trial. Nothing here charges, cancels or emails anyone.
 
 **Closing an incident.** Once a person has checked the email in Dodo, the existing function `job_loop_billing_trial_reminder_sent` (mode, subscription) sets the trial's one-way `reminder_sent_at` marker. That marker then means "a person checked", set to the time it is called, not the email's send time. The trial leaves the support list and the sweep. The email's real send time stays unchanged in the receipt.
+
+## What is stored, and when it is erased
+
+A receipt (`loop_trial_reminder_receipts`) holds the subscription id, the id, type, send time and delivery history of the candidate email, and the incident. It holds no email address, no name and no message text. It belongs to **one trial**, is tied to it by a foreign key on the subscription id **and the billing mode**, and is deleted with it:
+
+| What happens | What is erased |
+|---|---|
+| The account is deleted (`auth.users`) | The subscription and the trial (existing cascades), and through them the receipt. |
+| Only the trial is deleted | Its receipt. |
+| Only the subscription is deleted | The trial (existing cascade), and its receipt. |
+
+The mode is part of that key, so the database refuses a live receipt for a test trial (and the reverse), and a receipt can only be created for a trial that exists. Evidence is immutable while it lives (a trigger refuses to rewrite it), but a cascade delete is not an update, so erasure is never blocked by that rule.
+
+Everything else this change adds, checked one by one:
+
+- **Dispatch tickets** (`job_loop_trial_reminder_tickets`): a random id, a billing mode and two timestamps. They name no user, subscription, customer or email. The 30-minute job deletes them a day after they expire.
+- **The support list and the sweep's list** read a receipt only through its trial, and the legacy due list reads trials only, so an erased trial cannot appear on any of them.
+- **The overdue backstop** only writes a receipt for a trial that exists. It holds the trial row while it does, and skips one that is being deleted at that moment, so an erasure cannot make the 30-minute job fail.
+- **A trial erased while a sweep is running:** the sweep carries on. Recording a result for it is refused (the trial is gone), which counts as one unavailable read, and nothing is created for it.
+- **Function logs** carry no identifier (above).
+- **The scheduled job and its HTTP call** carry only the fixed action `trial_reminders`, a ticket and the billing mode. The reply is `{"accepted":true}`.
+
+What this does **not** cover:
+
+- **Dodo's own copy.** The customer, the email and its delivery record are Dodo's data. Erasing them at Dodo is a separate request.
+- **Erasing Job Loop data is not account deletion.** That existing path (`job_loop_finish_erase`) removes the person's documents and runs but deliberately keeps billing records. The trial, and so its receipt, is kept until the account itself is deleted.
+- **Backups and Supabase platform logs** follow Supabase's own retention.
+- **An older, separate item, not changed here:** the deployed billing-event ledger (`loop_billing_events`, from the October billing migrations) has no link to the account. Its rows record the event's user, customer and subscription ids and survive an account deletion. It is not part of the reminder tables and needs its own decision.
 
 ## Where this can still be wrong
 
@@ -73,6 +101,7 @@ Function logs also print `job_loop_trial_reminder_unconfirmed` and `job_loop_tri
 - **`not_found` can be a false alarm** if Dodo's trial-ending email has a different type name than the matcher expects, or is created outside the three days before the charge. Dodo's pages disagree about when it is created (about two days before, seven days before, or at the start of a short trial). Test-mode evidence is needed. A mismatch causes `not_found`, never a false confirmation.
 - **Only the first 100 emails are read.** If the page does not reach back past the three-day window, the read is `incomplete`, not `not_found`.
 - **A complaint after `delivered` is not seen.**
+- **Erasure and concurrency are tested only on the local fixture.** It is a single-connection PGlite database. The cascade, the cross-mode key and the backstop's row lock have not been run against a real, concurrent Postgres, and the migration has not been applied anywhere.
 
 ## Owner steps (in the Dodo dashboard)
 
