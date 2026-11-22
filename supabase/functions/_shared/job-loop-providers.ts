@@ -162,17 +162,42 @@ function htmlText(value: unknown): string {
   return result.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<\/(?:p|div|li|h[1-6])\s*>|<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/[^\S\n]+/g,' ').replace(/\n\s*\n+/g,'\n').trim();
 }
 export interface EmployerFeed { provider: 'greenhouse' | 'lever' | 'ashby'; board: string; company?: string }
-export const EMPLOYER_FEED_LIMITS = Object.freeze({ feeds: 8, bytes: 5000000, scanned: 1000, retained: 100, leverPages: 3 });
-export function employerFeeds(env: LoopEnv): EmployerFeed[] {
-  try {
-    // Documented public GET feeds, verified 2026-10-17. Coverage is deliberately
-    // limited and does not imply an employer partnership or market-wide search.
-    const values: unknown = JSON.parse(env('JOB_LOOP_EMPLOYER_FEEDS') ?? '[{"provider":"greenhouse","board":"careem","company":"Careem"},{"provider":"greenhouse","board":"gocardless","company":"GoCardless"},{"provider":"greenhouse","board":"duolingo","company":"Duolingo"},{"provider":"greenhouse","board":"toast","company":"Toast"},{"provider":"ashby","board":"notion","company":"Notion"},{"provider":"ashby","board":"zapier","company":"Zapier"}]');
-    if (!Array.isArray(values) || values.length > EMPLOYER_FEED_LIMITS.feeds) return [];
-    const seen = new Set<string>();
-    return values.flatMap(value => { const row = record(value); const key = `${row.provider}:${row.board}`; if (!['greenhouse', 'lever', 'ashby'].includes(String(row.provider)) || typeof row.board !== 'string' || !/^[a-z0-9_-]{1,80}$/i.test(row.board) || seen.has(key)) return []; seen.add(key); return [{ provider: row.provider as EmployerFeed['provider'], board: row.board, company: text(row.company,200) }]; });
-  } catch { return []; }
+// `feeds` is the most boards one run may read (the supported capacity, unchanged). `concurrency` bounds how many boards are
+// in flight at once (two: in a local Node measurement over the real responses the peak resident memory was about 215 MB at one or
+// two at a time and 255-280 MB at four, against a hosted 256 MB limit; the heaviest responses, Toast 4.0 MB and Notion 3.1 MB, dominate). Retained results are bounded per board (`retained` listings of at most `descriptionChars`) and so, across
+// boards, by EMPLOYER_RETAINED_CHARACTER_BOUND below; the workspace itself keeps at most 100 opportunities.
+export const EMPLOYER_FEED_LIMITS = Object.freeze({ feeds: 8, bytes: 5000000, scanned: 1000, retained: 100, leverPages: 3, descriptionChars: 20000, concurrency: 2 });
+/** Largest total of retained listing description characters one run can hold across all supported boards: 8 x 100 x 20,000. */
+export const EMPLOYER_RETAINED_CHARACTER_BOUND = EMPLOYER_FEED_LIMITS.feeds * EMPLOYER_FEED_LIMITS.retained * EMPLOYER_FEED_LIMITS.descriptionChars;
+// Documented public GET feeds that returned postings when read-checked on 23 Nov 2026 (receipt:
+// jobvance-marketing-coordination/2026-11-23-discovery-feeds-verified.json). Listing a board here does not imply a
+// partnership with, or endorsement by, the employer, and coverage is not the whole job market. Capacity stays eight boards.
+export const DEFAULT_EMPLOYER_FEEDS: readonly EmployerFeed[] = Object.freeze([
+  // The six boards used before 23 Nov 2026 stay first and unchanged.
+  { provider: 'greenhouse', board: 'careem', company: 'Careem' },
+  { provider: 'greenhouse', board: 'gocardless', company: 'GoCardless' },
+  { provider: 'greenhouse', board: 'duolingo', company: 'Duolingo' },
+  { provider: 'greenhouse', board: 'toast', company: 'Toast' },
+  { provider: 'ashby', board: 'notion', company: 'Notion' },
+  { provider: 'ashby', board: 'zapier', company: 'Zapier' },
+  // Staged additions chosen by actual role/location matches per cost over 32 synthetic profiles (see the PR and result file):
+  // Oyster (Ashby, 445 KB) matched the Dubai and remote marketing/customer-success profiles; Tamara (Greenhouse, 232 KB) was the
+  // only verified board with a Dubai accountant match.
+  { provider: 'ashby', board: 'oyster', company: 'Oyster' },
+  { provider: 'greenhouse', board: 'tamara', company: 'Tamara' },
+]);
+export type EmployerFeedConfig = { feeds: EmployerFeed[]; problem: null | 'unreadable' | 'not_a_list' | 'too_many' };
+/** The configured boards and, when the override cannot be used, why. A rejected override reads no board and is never an empty market. */
+export function employerFeedsConfig(env: LoopEnv): EmployerFeedConfig {
+  let values: unknown;
+  try { values = JSON.parse(env('JOB_LOOP_EMPLOYER_FEEDS') ?? JSON.stringify(DEFAULT_EMPLOYER_FEEDS)); } catch { return { feeds: [], problem: 'unreadable' }; }
+  if (!Array.isArray(values)) return { feeds: [], problem: 'not_a_list' };
+  if (values.length > EMPLOYER_FEED_LIMITS.feeds) return { feeds: [], problem: 'too_many' };
+  const seen = new Set<string>();
+  const feeds = values.flatMap(value => { const row = record(value); const key = `${row.provider}:${row.board}`; if (!['greenhouse', 'lever', 'ashby'].includes(String(row.provider)) || typeof row.board !== 'string' || !/^[a-z0-9_-]{1,80}$/i.test(row.board) || seen.has(key)) return []; seen.add(key); return [{ provider: row.provider as EmployerFeed['provider'], board: row.board, company: text(row.company,200) }]; });
+  return { feeds, problem: null };
 }
+export function employerFeeds(env: LoopEnv): EmployerFeed[] { return employerFeedsConfig(env).feeds; }
 export async function readEmployerFeed(feed: EmployerFeed, fetcher: LoopFetch = fetch, profile?: LoopProfileInput): Promise<{ opportunities: LoopOpportunity[]; total: number; truncated: boolean }> {
   if (!['greenhouse','lever','ashby'].includes(feed.provider) || !/^[a-z0-9_-]{1,80}$/i.test(feed.board)) throw new ApiError(400, 'LOOP_UNSAFE_SOURCE', 'Invalid employer source configuration.');
   const entries: unknown[] = []; let cappedPage = false; let total = 0; const budget = { remaining: EMPLOYER_FEED_LIMITS.bytes };
@@ -197,7 +222,7 @@ export async function readEmployerFeed(feed: EmployerFeed, fetcher: LoopFetch = 
     if (!title || !url || (typeof id !== 'string' && typeof id !== 'number')) continue;
     const description = htmlText(feed.provider === 'greenhouse' ? row.content : feed.provider === 'ashby' ? row.descriptionPlain ?? row.descriptionHtml : [row.descriptionPlain, ...(Array.isArray(row.lists) ? row.lists.map(item => `${text(record(item).text,200)}\n${htmlText(record(item).content)}`) : []),row.additionalPlain].join('\n'));
     // Never certify a cropped description as the full employer vacancy.
-    if (description.length < 80 || description.length>20000) continue;
+    if (description.length < 80 || description.length>EMPLOYER_FEED_LIMITS.descriptionChars) continue;
     const sourceKey = `${feed.provider}:${feed.board}:${id}`;
     const ashbyAddress = record(record(row.address).postalAddress);
     // Ashby can return isRemote=true for Hybrid roles. The explicit workplace
@@ -211,4 +236,26 @@ export async function readEmployerFeed(feed: EmployerFeed, fetcher: LoopFetch = 
     opportunities.push({ ...input, id: await stableUuid(sourceKey), source: 'employer_api', sourceKey, checkedAt, verification: 'listed_on_source', status: 'saved', notes: feed.company||row.company?'':'Employer display uses the configured board identifier; confirm the official employer name.', followUpAt: null });
   }
   return { opportunities, total, truncated: cappedPage || total > EMPLOYER_FEED_LIMITS.scanned || retainedOverflow };
+}
+export type EmployerFeedResult =
+  | { status: 'fulfilled'; value: { opportunities: LoopOpportunity[]; total: number; truncated: boolean } }
+  | { status: 'rejected' };
+/**
+ * Reads the configured boards with at most `concurrency` in flight (one bounded body each) instead of all at once. A board that
+ * fails is `rejected` on its own and never fails the others. Results keep the order of `feeds`. Per-request limits (12 s timeout,
+ * byte budget) are those of readEmployerFeed. Retained results are bounded by EMPLOYER_RETAINED_CHARACTER_BOUND.
+ */
+export async function readEmployerFeeds(feeds: readonly EmployerFeed[], fetcher: LoopFetch = fetch, profile?: LoopProfileInput, concurrency = EMPLOYER_FEED_LIMITS.concurrency): Promise<EmployerFeedResult[]> {
+  const results: EmployerFeedResult[] = feeds.map(() => ({ status: 'rejected' }));
+  let next = 0;
+  const worker = async () => {
+    for (;;) {
+      const index = next++;
+      if (index >= feeds.length) return;
+      try { results[index] = { status: 'fulfilled', value: await readEmployerFeed(feeds[index], fetcher, profile) }; }
+      catch { results[index] = { status: 'rejected' }; }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(concurrency, EMPLOYER_FEED_LIMITS.concurrency, feeds.length)) }, worker));
+  return results;
 }

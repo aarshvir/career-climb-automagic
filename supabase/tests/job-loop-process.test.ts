@@ -90,6 +90,31 @@ describe('first-result outcome guidance from actual worker phases', () => {
     expect(h.mock.reserve).not.toHaveBeenCalled(); expect(h.mock.upload).not.toHaveBeenCalled();
     expect(h.run.data.lanes?.some(l=>l.name.includes('LinkedIn'))).toBe(false);
   });
+  it('reads the supported maximum of eight boards, one lane each, and reports the failed one on its own', async () => {
+    const many = JSON.stringify(Array.from({length:8},(_,i)=>({provider:'greenhouse',board:`b${i}`,company:`Example employer ${i}`})));
+    const manyEnv = (name:string) => name==='JOB_LOOP_EMPLOYER_FEEDS' ? many : undefined;
+    const h=harness(); h.record.data.opportunities=[]; h.run.snapshot=structuredClone(h.record.data);
+    const fetcher=vi.fn(async(url:unknown)=>String(url).includes('/boards/b3/')?new Response('',{status:503}):Response.json({jobs:[]}));
+    for(let n=0;n<12;n++) if(!await processLoopPhase(h.repo,id,manyEnv,fetcher)) break;
+    expect(fetcher).toHaveBeenCalledTimes(8);
+    const lanes=h.run.data.lanes??[];
+    expect(lanes.filter(l=>/^greenhouse:b\d$/.test(l.name))).toHaveLength(8);
+    expect(lanes.find(l=>l.name==='greenhouse:b3')).toMatchObject({status:'blocked',count:0});
+    expect(lanes.find(l=>l.name==='greenhouse:b0')).toMatchObject({status:'completed',count:0});
+    expect(h.run.status).toBe('partial');
+    expect(h.mock.reserve).not.toHaveBeenCalled(); expect(h.mock.upload).not.toHaveBeenCalled();
+  });
+  it.each([9,60])('rejects a %i-board override with an explicit blocked lane instead of an empty market', async count => {
+    const feed = JSON.stringify(Array.from({length:count},(_,i)=>({provider:'greenhouse',board:`b${i}`,company:`Example employer ${i}`})));
+    const tooMany = (name:string) => name==='JOB_LOOP_EMPLOYER_FEEDS' ? feed : undefined;
+    const h=harness(); h.record.data.opportunities=[]; h.run.snapshot=structuredClone(h.record.data);
+    const fetcher=vi.fn(async()=>Response.json({jobs:[]}));
+    for(let n=0;n<12;n++) if(!await processLoopPhase(h.repo,id,tooMany,fetcher)) break;
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(h.run.data.lanes?.find(l=>l.name==='Employer API sources')).toMatchObject({status:'blocked',count:0,message:expect.stringMatching(/more than 8 boards.*rejected.*no board was read/)});
+    expect(h.run.status).toBe('partial');
+    expect(h.run.data.nextAction).toMatch(/source checks could not finish/);
+  });
   it.each(['held','missing'] as const)('does not call %s output ready', async state => {
     const h=selectedHarness();h.run.phase=7;h.run.data={packetIds:['p'],lanes:[],messages:[]};
     if(state==='held')h.packets.push({id:'p',status:'held'} as LoopPacket);

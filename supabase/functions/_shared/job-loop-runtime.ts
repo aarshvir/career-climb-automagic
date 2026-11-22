@@ -5,7 +5,7 @@ import { renderPacket } from './job-loop-render.ts';
 import { LoopRepository, loopDatabaseError, publicRun, type RunRow, type RunState, type ScheduleRow, type CareerRecord, type RecordRow } from './job-loop-repository.ts';
 import { configuredUsageCap, nextScheduledInstant } from './job-loop-schedule.ts';
 import { buildInterviewBrief } from './job-loop-preparation.ts';
-import { LIMITS, RULES_MODEL, digest, stableUuid, modelOptions, modelConfiguration, prepareModelRequest, callModel, searchReady, searchTavily, TAVILY_CREDIT_MICROS, employerFeeds, readEmployerFeed, safePublicUrl, type LoopEnv, type LoopFetch } from './job-loop-providers.ts';
+import { LIMITS, RULES_MODEL, digest, stableUuid, modelOptions, modelConfiguration, prepareModelRequest, callModel, searchReady, searchTavily, TAVILY_CREDIT_MICROS, employerFeeds, employerFeedsConfig, EMPLOYER_FEED_LIMITS, readEmployerFeeds, safePublicUrl, type LoopEnv, type LoopFetch } from './job-loop-providers.ts';
 import { beginGmail, createGmailDraft, gmailConfigured, readRecruitmentInbox,previewGmailTicket,finalizeGmailTicket } from '../job-loop-oauth/gmail.ts';
 import type { LoopCvSelection, LoopAction, LoopClaim, LoopLane, LoopOpportunity, LoopResponse, LoopSnapshot } from './job-loop-types.ts';
 import { matchesDiscoveryTarget } from '../../../src/lib/employer-discovery.ts';
@@ -394,9 +394,12 @@ export async function processLoopPhase(repo:LoopRepository,runId:string,env:Loop
     }
     if(run.phase===1){
       const found:LoopOpportunity[]=[];
-      const feeds=employerFeeds(env);
-      if(!feeds.length)state.lanes!.push(lane('Employer API sources','not_connected',0,'No tested employer boards have been configured.'));
-      const feedsRead=await Promise.allSettled(feeds.map(feed=>readEmployerFeed(feed,fetcher,profile)));
+      const config=employerFeedsConfig(env);const feeds=config.feeds;
+      // A rejected override (unreadable, not a list, or more boards than the supported capacity) reads no board and says so; it is never shown as an empty market.
+      if(config.problem)state.lanes!.push(lane('Employer API sources','blocked',0,config.problem==='too_many'?`The configured employer board list has more than ${EMPLOYER_FEED_LIMITS.feeds} boards, so it was rejected and no board was read. This was not treated as an empty market.`:'The configured employer board list could not be read, so no board was read. This was not treated as an empty market.'));
+      else if(!feeds.length)state.lanes!.push(lane('Employer API sources','not_connected',0,'No tested employer boards have been configured.'));
+      // Boards are read with at most two in flight; one failed board never fails the others.
+      const feedsRead=await readEmployerFeeds(feeds,fetcher,profile);
       feedsRead.forEach((result,index)=>{if(result.status==='fulfilled'){found.push(...result.value.opportunities);state.lanes!.push(lane(`${feeds[index].provider}:${feeds[index].board}`,result.value.truncated?'partial':'completed',result.value.opportunities.length,`Published-list records read: ${result.value.total}. Listing evidence does not certify eligibility or guarantee the posting remains open.${result.value.truncated?' Source response was capped.':''}`));}else state.lanes!.push(lane(`${feeds[index].provider}:${feeds[index].board}`,'blocked',0,'Source read failed or was blocked; it was not treated as an empty market.'));});
       if(searchReady(env)){
         const queries=profile.targetTitles.slice(0,LIMITS.queries).map(title=>`${title} jobs ${profile.locations.join(' ')}`.slice(0,250));let count=0;let errors=0;

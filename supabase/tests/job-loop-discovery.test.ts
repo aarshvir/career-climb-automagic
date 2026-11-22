@@ -59,7 +59,7 @@ describe('bounded published discovery', () => {
   it('keeps exact board allowlists, rejects unknown providers and deduplicates configured boards',async()=>{
     const feeds=employerFeeds(()=>JSON.stringify([{provider:'ashby',board:'created'},{provider:'ashby',board:'created'},{provider:'ashby',board:'../private'},{provider:'unknown',board:'created'}]));
     expect(feeds).toEqual([{provider:'ashby',board:'created',company:''}]);
-    expect(employerFeeds(()=>undefined)).toHaveLength(6);
+    expect(employerFeeds(()=>undefined)).toHaveLength(8);
     const fetcher=vi.fn();await expect(readEmployerFeed({provider:'unknown' as 'ashby',board:'created'},fetcher)).rejects.toThrow(/Invalid employer/);expect(fetcher).not.toHaveBeenCalled();
     await expect(readEmployerFeed({provider:'ashby',board:'created'},async()=>new Response(' '.repeat(EMPLOYER_FEED_LIMITS.bytes+1)))).rejects.toBeInstanceOf(UncertainProviderCall);
   });
