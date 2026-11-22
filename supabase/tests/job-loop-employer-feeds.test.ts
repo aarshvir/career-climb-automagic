@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi } from 'vitest';
-import { DEFAULT_EMPLOYER_FEEDS, EMPLOYER_FEED_LIMITS, EMPLOYER_RETAINED_CHARACTER_BOUND, employerFeeds, employerFeedsConfig, readEmployerFeeds, type EmployerFeed } from '../functions/_shared/job-loop-providers.ts';
+import { DEFAULT_EMPLOYER_FEEDS, DISCOVERY_BUDGET, EMPLOYER_FEED_LIMITS, EMPLOYER_REQUEST_TIMEOUT_MS, EMPLOYER_RETAINED_CHARACTER_BOUND, SEARCH_REQUEST_TIMEOUT_MS, employerFeeds, employerFeedsConfig, readEmployerFeed, readEmployerFeeds, startDiscoveryBudget, type EmployerFeed } from '../functions/_shared/job-loop-providers.ts';
 import type { LoopProfileInput } from '../functions/_shared/job-loop-types.ts';
 
 const profile: LoopProfileInput = { audience:'professional', name:'Created candidate', contactLine:'', targetTitles:['Software Developer'],locations:['US'],experienceYears:4,languages:[],pageTarget:1,discreetSearch:false,sourceText:'Created test experience only. Implemented software and reviewed product changes with a team.',excludedTerms:[],compensation:{currency:'USD',period:'annual',minimum:80000} };
@@ -113,5 +113,88 @@ describe('reading the configured boards in one run', () => {
     const fetcher = vi.fn();
     expect(await readEmployerFeeds([], fetcher, profile)).toEqual([]);
     expect(fetcher).not.toHaveBeenCalled();
+  });
+});
+
+describe('the overall discovery time budget (deterministic virtual time; a cap by design, not a hosted measurement)', () => {
+  const realNow = Date.now.bind(Date); // the real clock, kept before any fake timers
+  const wait = (ms: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => { const timer = setTimeout(resolve, ms); signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('aborted', 'AbortError')); }); });
+  const leverPage = () => Response.json(Array.from({ length: 100 }, (_, i) => ({ id: `p-${i}`, text: 'Warehouse Operator', hostedUrl: `https://jobs.example.com/${i}`, descriptionPlain: 'Pick and pack orders at a fictional depot.', categories: { location: 'Austin, TX' } })));
+  const lever = (slug: string): EmployerFeed => ({ provider: 'lever', board: slug, company: `Created ${slug}` });
+  async function virtually<T>(work: Promise<T>): Promise<T> { let done = false; const tracked = work.finally(() => { done = true; }); for (let guard = 0; !done && guard < 6000; guard++) await vi.advanceTimersByTimeAsync(100); return tracked; }
+
+  it('states the numbers and the margin: 110 s of phase time inside a 150 s Free worker lifetime and the unchanged 180 s lease', () => {
+    expect(DISCOVERY_BUDGET).toEqual({ workerLifetimeMs: 150000, reserveMs: 40000, totalMs: 110000 });
+    expect(DISCOVERY_BUDGET.totalMs).toBe(DISCOVERY_BUDGET.workerLifetimeMs - DISCOVERY_BUDGET.reserveMs);
+    expect(DISCOVERY_BUDGET.workerLifetimeMs).toBeLessThan(180000);
+    expect(EMPLOYER_REQUEST_TIMEOUT_MS).toBe(12000);
+    expect(SEARCH_REQUEST_TIMEOUT_MS).toBe(15000);
+    // Without the budget the supported worst case (eight Lever boards x three pages, two workers, each page at its 12 s timeout) is 144 s of board reads alone.
+    expect((EMPLOYER_FEED_LIMITS.feeds * EMPLOYER_FEED_LIMITS.leverPages * EMPLOYER_REQUEST_TIMEOUT_MS) / EMPLOYER_FEED_LIMITS.concurrency).toBeGreaterThan(DISCOVERY_BUDGET.totalMs);
+  });
+  it('lets a request start only if its own timeout fits in the remaining time, and aborts at the end as a backstop', async () => {
+    vi.useFakeTimers();
+    try {
+      const budget = startDiscoveryBudget(30000);
+      expect(budget.canStart(12000)).toBe(true);
+      await vi.advanceTimersByTimeAsync(18000);
+      expect(budget.remaining()).toBe(12000);
+      expect(budget.canStart(12000)).toBe(true);
+      expect(budget.canStart(15000)).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(budget.canStart(12000)).toBe(false);
+      expect(budget.signal.aborted).toBe(false);
+      await vi.advanceTimersByTimeAsync(12000);
+      expect(budget.signal.aborted).toBe(true);
+      expect(budget.remaining()).toBe(0);
+      const disposed = startDiscoveryBudget(1000); disposed.dispose();
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(disposed.signal.aborted).toBe(false);
+    } finally { vi.useRealTimers(); }
+  });
+  it('a late page: a Lever board stops before the page it cannot finish, keeps the pages it read, and says so', async () => {
+    vi.useFakeTimers();
+    try {
+      const budget = startDiscoveryBudget(30000);
+      const fetcher = vi.fn(async () => { await wait(11900); return leverPage(); });
+      const result = await virtually(readEmployerFeed(lever('late'), fetcher, profile, budget));
+      expect(fetcher).toHaveBeenCalledTimes(2); // starts at 0 s and 11.9 s; at 23.8 s only 6.2 s remain, less than the 12 s page timeout
+      expect(result).toMatchObject({ total: 200, truncated: true, timeLimited: true });
+      budget.dispose();
+    } finally { vi.useRealTimers(); }
+  });
+  it('a board whose first request cannot finish is skipped (not read, not empty), and what was read before it is kept', async () => {
+    vi.useFakeTimers();
+    try {
+      const budget = startDiscoveryBudget(25000);
+      const fetcher = vi.fn(async () => { await wait(9000); return leverPage(); });
+      const results = await virtually(readEmployerFeeds([lever('a'), lever('b'), lever('c')], fetcher, profile, 1, budget));
+      // One worker: board a reads pages at 0 s and 9 s (the third would start at 18 s with 7 s left, under the 12 s page timeout); board b cannot start with 7 s left.
+      expect(results.map(result => result.status)).toEqual(['fulfilled', 'skipped', 'skipped']);
+      expect(results[0]).toMatchObject({ status: 'fulfilled', value: { timeLimited: true, total: 200 } });
+      expect(fetcher).toHaveBeenCalledTimes(2);
+      budget.dispose();
+    } finally { vi.useRealTimers(); }
+  });
+  it('the budget abort cancels a request that outlives it as skipped, without disturbing the other boards', async () => {
+    const realStart = realNow();
+    vi.useFakeTimers();
+    try {
+      const budget = startDiscoveryBudget(20000);
+      const fetcher = vi.fn(async (url: unknown, init?: RequestInit) => {
+        if (slugOf(url) === 'hangs') { await new Promise<void>((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))); }
+        await wait(1000); return json({ jobs: [row(1)] });
+      });
+      const feeds = [board('a'), board('hangs'), board('c')];
+      const results = await virtually(readEmployerFeeds(feeds, fetcher, profile, 2, budget));
+      expect(results.map(result => result.status)).toEqual(['fulfilled', 'skipped', 'fulfilled']);
+      // Released by the budget's own abort in virtual time, not by the request's real 12 s timeout (which would take 12 real seconds).
+      expect(realNow() - realStart).toBeLessThan(3000);
+      budget.dispose();
+    } finally { vi.useRealTimers(); }
+  });
+  it('without a budget the earlier behavior is unchanged', async () => {
+    const fetcher = vi.fn(async () => json({ jobs: [row(1)] }));
+    expect((await readEmployerFeeds([board('x')], fetcher, profile)).map(result => result.status)).toEqual(['fulfilled']);
   });
 });
