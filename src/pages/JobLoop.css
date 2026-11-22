@@ -226,6 +226,7 @@
 .jl-upgrade .jl-help { font-size:12px !important; margin:0 !important; }
 .jl-upgrade-note { margin:10px 0 0; padding:10px 14px; background:var(--jv-brand-tint); border:1px solid var(--jv-line-strong); border-radius:7px; font-size:13px; line-height:1.7; color:var(--jl-ink); }
 .jl-upgrade-note a { color:var(--jv-brand); font-weight:700; }
+.jl-upgrade-note.jl-plan-note { font-size:16px; line-height:1.6; }
 
 /* Carry the public design system into the private workspace without changing state styling. */
 .job-loop-page { --jl-ink: var(--jv-ink); --jl-muted: var(--jv-ink-2); --jl-line: var(--jv-line); }
