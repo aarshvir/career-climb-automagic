@@ -36,6 +36,11 @@ describe('round 12 guards', () => {
     expect(auth).toContain(sentence);
     expect(shell).toContain(`<p class="ap-story-description">${sentence.replace('className', 'class')}</p>`);
     expect(shell).toContain('Free account · 3 tailored CVs a month');
+    const planBoundary = 'Set up your roles and schedule with a free account. Choose a paid plan for ongoing automatic runs.';
+    expect(auth).toContain(`<p className="ap-story-plan">${planBoundary}</p>`);
+    expect(shell).toContain(`<p class="ap-story-plan">${planBoundary}</p>`);
+    expect(auth).not.toContain('and let it run.');
+    expect(shell).not.toContain('and let it run.');
     expect(auth).not.toContain('ap-story-steps');
     expect(auth).not.toContain('ap-story-footnote');
     expect(auth).not.toContain('ap-next-line');

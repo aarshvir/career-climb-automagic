@@ -204,7 +204,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       {!embedded && <aside className="ap-account-story jv-dark" aria-labelledby={`${fieldId}-story`}>
         <div className="ap-story-inner">
           <p className="ap-eyebrow"><span className="ap-dot" aria-hidden="true" />{checkEntry ? 'Free CV Check' : 'Automated Job Loop'}</p>
-          <h1 id={`${fieldId}-story`}>{checkEntry ? <>Start your free <span>CV Check.</span></> : mode === 'sign-up' || loopEntry ? <>Set up your <span className="jv-nb">Automated Job Loop</span> <span>and let it run.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h1>
+          <h1 id={`${fieldId}-story`}>{checkEntry ? <>Start your free <span>CV Check.</span></> : mode === 'sign-up' || loopEntry ? <>Set up your <span className="jv-nb">Automated Job Loop.</span></> : <>Keep your CVs and applications <span>together.</span></>}</h1>
+          {!checkEntry && (mode === 'sign-up' || loopEntry) && <p className="ap-story-plan">Set up your roles and schedule with a free account. Choose a paid plan for ongoing automatic runs.</p>}
           <p className="ap-story-description">{checkEntry ? 'Bring a CV and a job description, review the suggested changes and download your approved version.' : <>Choose your roles and locations once. <span className="jv-nb">Automated Job Loop</span> finds the best-matching jobs and prepares role-specific CVs from the facts you confirm.</>}</p>
           {showBenefits && <ul className="ap-story-ticks" aria-label="At a glance">{checkEntry ? <><li>Compare your CV with a job</li><li>Review every change</li><li>Download PDF, Word or text</li></> : <><li>Roles matched to your CV</li><li>CVs for matching roles</li><li>Review before you download</li></>}</ul>}
           {showBenefits && <p className="ap-story-free">Free account · 3 tailored CVs a month</p>}
