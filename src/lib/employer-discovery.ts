@@ -172,13 +172,18 @@ const REGION_NAME_GROUPS: [string, string][] = [
   ['', 'baja california,new england'],
 ];
 const REGION_NAMES = REGION_NAME_GROUPS.flatMap(([country, names]) => names.split(',').map((name): [string, string] => [name, country])).sort((a, b) => b[0].length - a[0].length);
-/** The countries a stated state, province or nation resolves to. A region is only a hint, so it yields to anything
- * stronger, one place at a time (places are cut at "|", ";", "/", a line break and " or "; commas join one place to its
- * state and country): (1) a place that spells out a country keeps only that spelling ("New York, United Kingdom" is the
- * United Kingdom, "Scotland, Connecticut, United States" is the United States); (2) a place whose regions point at more
- * than one country contradicts itself and resolves to none ("Scotland, Connecticut"). Several places that each resolve
- * on their own ("Dallas, TX | Calgary, AB") still resolve to each of their countries. */
+/** The country a stated state, province or nation resolves to, for ONE offered place. A region is only a hint, so it
+ * yields to anything stronger: (1) a place that spells out a country keeps only that spelling ("New York, United
+ * Kingdom" is the United Kingdom, "Scotland, Connecticut, United States" is the United States); (2) a place whose regions
+ * point at more than one country contradicts itself and resolves to none ("Scotland, Connecticut"); (3) the region must
+ * CLOSE the place ("Dallas, TX", "Salt Lake City, UT 84101", "Columbus, OH (Hybrid)", "Dallas, TX - Hybrid"). Any further
+ * comma-separated part ("Dallas, TX, Mexico", "Dallas, TX, Houston") is context this table cannot resolve, whatever
+ * country it names, so nothing is inferred and the place stays unresolved. */
 const PLACE_BREAK = /\s*[|;/\n]\s*|\s+or\s+/i;
+const WORKPLACE_WORD = /^(?:hybrid|on-?site|in[- ]office|office)$/i;
+function offeredAlternatives(offered: string): string[] {
+  return offered.split(PLACE_BREAK).map(place => place.trim()).filter(Boolean);
+}
 function regionCountriesOfPlace(place: string): string[] {
   const countries = new Set<string>();
   for (const match of place.matchAll(/,\s*([A-Z]{2,3})(?=\s*(?:$|[,;|/()–—-])|\s\d)/g)) {
@@ -193,17 +198,21 @@ function regionCountriesOfPlace(place: string): string[] {
   }
   return [...countries];
 }
-function statedRegionCountries(offered: string): string[] {
-  const countries = new Set<string>();
-  for (const place of offered.split(PLACE_BREAK)) {
-    const written = ` ${placeText(place)} `;
-    if (COUNTRY_NAMES.some(country => written.includes(` ${country} `))) continue;
-    const regional = regionCountriesOfPlace(place);
-    if (regional.length === 1) countries.add(regional[0]);
-  }
-  return [...countries];
+function regionClosesPlace(place: string): boolean {
+  const core = place.replace(/\([^)]*\)|\[[^\]]*\]/g, ' ').split(/\s[-–—]\s/)[0];
+  const parts = core.split(',').map(part => part.trim()).filter(Boolean);
+  while (parts.length > 1 && WORKPLACE_WORD.test(parts[parts.length - 1])) parts.pop();
+  const last = parts[parts.length - 1] ?? '';
+  if (parts.length > 1 && /^[A-Z]{2,3}(?:\s+\d[\d -]*)?$/.test(last)) return REGION_CODES.has(last.split(/\s/)[0]);
+  const tail = placeText(last).replace(/\s\d[\d ]*$/, '');
+  return REGION_NAMES.some(([name]) => tail === name || tail.endsWith(` ${name}`));
 }
-const COUNTRY_NAMES =['united arab emirates', 'united kingdom', 'united states', 'south africa', 'canada', 'australia', 'india', 'singapore', 'france', 'germany', 'saudi arabia', 'qatar', 'bahrain', 'oman', 'kuwait', 'pakistan', 'bangladesh', 'jordan', 'new zealand'];
+function statedRegionCountries(place: string): string[] {
+  if (COUNTRY_NAMES.some(country => hasPlace(placeText(place), country))) return [];
+  const regional = regionCountriesOfPlace(place);
+  return regional.length === 1 && regionClosesPlace(place) ? regional : [];
+}
+const COUNTRY_NAMES = ['united arab emirates', 'united kingdom', 'united states', 'south africa', 'canada', 'australia', 'india', 'singapore', 'france', 'germany', 'saudi arabia', 'qatar', 'bahrain', 'oman', 'kuwait', 'pakistan', 'bangladesh', 'jordan', 'new zealand'];
 function placeText(value: string): string {
   return normalText(value).replace(/\bu\.?a\.?e\.?\b/g, 'united arab emirates')
     .replace(/\bu\.?k\.?\b/g, 'united kingdom').replace(/\b(?:u\.?s\.?a?\.?)\b/g, 'united states')
@@ -211,20 +220,24 @@ function placeText(value: string): string {
     .replace(/\bbangalore\b/g, 'bengaluru').replace(/\bthe\b/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 }
 function hasPlace(value: string, place: string): boolean { return ` ${value} `.includes(` ${place} `); }
-function placeTerms(value: string): Set<string> {
+function placeTerms(value: string, fence?: string[]): Set<string> {
   const normalized = placeText(value); const words = new Set(tokens(normalized));
+  // Given by the caller when the place is one alternative of a longer offer: the country evidence of the WHOLE offer. It can
+  // only remove a bare city's country alias (the alias is kept only when that offer names no other country), never add a
+  // word to this alternative, so evidence is never borrowed from another alternative.
   const explicitCountries = COUNTRY_NAMES.filter(country => hasPlace(normalized, country));
+  const aliasAllowed = (country: string) => fence ? fence.every(other => other === country) : !explicitCountries.length || explicitCountries.includes(country);
   for (const [city, country] of CITY_COUNTRIES) {
-    if (hasPlace(normalized, city) && (!explicitCountries.length || explicitCountries.includes(country))) tokens(country).forEach(word => words.add(word));
+    if (hasPlace(normalized, city) && aliasAllowed(country)) tokens(country).forEach(word => words.add(word));
   }
   return words;
 }
-function samePlace(wanted: string, offered: string, statedCountries: string[] = []): boolean {
+function samePlace(wanted: string, offered: string, statedCountries: string[] = [], fence?: string[]): boolean {
   // A stated state or province is explicit country context, so it is read like country text typed in the posting.
   const target = placeText(wanted); const actual = placeText(`${offered} ${statedCountries.join(' ')}`);
   // York and New York are distinct places, despite sharing a complete word.
   if (target === 'york' && hasPlace(actual, 'new york')) return false;
-  const desiredWords = tokens(target); const actualWords = placeTerms(actual);
+  const desiredWords = tokens(target); const actualWords = placeTerms(actual, fence);
   return desiredWords.length > 0 && desiredWords.every(word => actualWords.has(word));
 }
 function withinRemoteScope(wanted: string, offered: string): boolean {
@@ -254,8 +267,11 @@ function matchLocation(preferences: string[], opportunity: DiscoveryOpportunity)
   const places = preferences.filter(place => !REMOTE.test(place));
   const isRemote = !NEGATED_REMOTE.test(location) && REMOTE.test(location);
   if (!isRemote) {
-    const stated = statedRegionCountries(location);
-    if (places.some(place => samePlace(place, location, stated))) return 'matched';
+    // One offered alternative at a time: the whole requested place must be satisfied by a single alternative's own words,
+    // its own city-table country and its own stated region, never by words and countries borrowed from different alternatives.
+    const alternatives = offeredAlternatives(location); const stated = alternatives.map(statedRegionCountries);
+    const fence = [...new Set([...alternatives.flatMap(alternative => COUNTRY_NAMES.filter(country => hasPlace(placeText(alternative), country))), ...stated.flat()])];
+    if (alternatives.some((alternative, index) => places.some(place => samePlace(place, alternative, stated[index], fence)))) return 'matched';
     return location.trim() ? 'mismatch' : 'unknown';
   }
   if (NEGATED_REMOTE.test(opportunity.description)) return 'mismatch';
