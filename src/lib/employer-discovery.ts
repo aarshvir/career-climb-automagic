@@ -37,8 +37,18 @@ function roleTerms(value: string): string[] {
     .replace(/\blead\b(?!\s+generation)/g, ' ');
   return [...new Set(tokens(normalized).filter(word => !ROLE_STOP.has(word) && !LEVEL_WORDS.has(word)).map(word => ROLE_NORMALIZATIONS[word] ?? word))];
 }
+/** Plural forms of the filler words above (job, role, position). They are dropped only from the END of a typed
+ * role, so "Data analyst jobs" means "Data analyst" as "Data analyst job" already does. Words inside the role and
+ * every word of a posting title are untouched, and `opportunities` is deliberately not filler ("Equal Opportunities
+ * Officer" is a functional title). A typed role made only of filler words has no role term and never matches. */
+const TRAILING_ROLE_FILLER = new Set(['jobs', 'roles', 'positions']);
+function typedRoleTerms(value: string): string[] {
+  const terms = roleTerms(value);
+  while (terms.length && TRAILING_ROLE_FILLER.has(terms[terms.length - 1])) terms.pop();
+  return terms;
+}
 
-type BroadRoleLevel = 'director' | 'vp' | 'entry' | 'senior' | 'manager' | 'head' | 'lead';
+type BroadRoleLevel = 'director' | 'vp' | 'entry' | 'senior' | 'manager' | 'head' | 'lead' | 'intern' | 'graduate trainee';
 /** Only an entire, explicit level request can search across functions. Extra
  * functional words must retain the normal complete-role matching contract. */
 function broadRoleLevel(target: string): BroadRoleLevel | null {
@@ -54,12 +64,37 @@ function broadRoleLevel(target: string): BroadRoleLevel | null {
   if (/^managers?$/.test(request)) return 'manager';
   if (/^head$/.test(request)) return 'head';
   if (/^lead$/.test(request)) return 'lead';
+  // The onboarding picker offers exactly "Intern" and "Graduate trainee". Their words are level words, so as role
+  // phrases they would be left with no role term and could never match. Only these two whole requests are handled
+  // here; "Management trainee", a bare "Trainee", "Internship" and any request that carries a function word
+  // ("Marketing intern") keep the normal complete-role rules.
+  if (/^interns?$/.test(request)) return 'intern';
+  if (/^graduate trainees?$/.test(request)) return 'graduate trainee';
   return null;
+}
+/** The posting must BE the intern or trainee role, not a job that runs, supervises or recruits for the programme.
+ * Rejected: a senior title; the word followed by a programme noun and anything else ("Internship Programme
+ * Manager", "Trainee Programme Supervisor"); the word followed by a manager, supervisor, coordinator,
+ * administrator, mentor, recruiter, trainer or leader. Parenthesised text and text after a separator
+ * ("Intern, Finance", "Intern - Finance") are qualifiers and never change what the role is. */
+const PROGRAMME_NOUN = /^\s*(?:programmes?|programs?|schemes?)\b/;
+const PROGRAMME_RUNNER = /\b(?:managers?|supervisors?|co-?ordinators?|administrators?|mentors?|recruiters?|trainers?|leaders?)\b/;
+function isEarlyCareerRole(title: string, word: RegExp): boolean {
+  if (SENIOR.test(title)) return false;
+  const segment = title.replace(/\([^)]*\)|\[[^\]]*\]/g, ' ').split(/\s[-–—|]\s|[,;:|/]/).find(part => word.test(part));
+  const found = segment === undefined ? null : word.exec(segment);
+  if (!segment || !found) return false;
+  const after = segment.slice(found.index + found[0].length);
+  const programme = PROGRAMME_NOUN.exec(after);
+  if (programme) return !/\p{L}/u.test(after.slice(programme[0].length).replace(/\b(?:19|20)\d{2}\b/g, ' '));
+  return !PROGRAMME_RUNNER.test(after);
 }
 function matchesBroadRoleLevel(level: BroadRoleLevel, title: string): boolean {
   // A reporting line or assistant role does not confer the supported person's
   // level. In particular, descriptions mentioning a director are never used.
   const actual = normalText(title).split(/\b(?:reports?|reporting) to\b|\b(?:supports?|supporting) (?:the |a )?/)[0];
+  if (level === 'intern') return isEarlyCareerRole(actual, /\b(?:interns?|internships?)\b/);
+  if (level === 'graduate trainee') return /\bgraduates?\b/.test(actual) && isEarlyCareerRole(actual, /\btrainees?\b/);
   if (/\b(?:assistant|coordinator|administrator|secretary|analyst|intern|chief of staff)\s+(?:to|for)\b|\b(?:executive|personal|administrative) assistant\b|\bassistant\s*[,;:]\s*(?:director|vp|vice president|manager|head)\b|\boffice of\b|\b(?:director|vp|vice president|manager|head)(?:'s)?\s+(?:assistant|office|coordinator|support)\b/.test(actual)) return false;
   switch (level) {
     case 'director': return /\bdirector\b/.test(actual) && !EARLY.test(actual);
@@ -80,7 +115,7 @@ function matchRole(targets: string[], title: string): Pick<DiscoveryMatchEvidenc
       if (matchesBroadRoleLevel(broadLevel, title)) return { role: 'matched', seniority: 'compatible' };
       continue;
     }
-    const terms = roleTerms(target);
+    const terms = typedRoleTerms(target);
     if (!terms.length || !terms.every(term => titleTerms.has(term))) continue;
     if (EARLY.test(target) && SENIOR.test(title) || SENIOR.test(target) && EARLY.test(title)) { roleMatched = true; continue; }
     // "Engineering Manager, Product" is not a Product Manager, nor is
@@ -106,6 +141,41 @@ const CITY_COUNTRIES: [string, string][] = [
   ['sharjah', 'united arab emirates'], ['riyadh', 'saudi arabia'], ['jeddah', 'saudi arabia'],
   ['doha', 'qatar'], ['manama', 'bahrain'], ['muscat', 'oman'], ['kuwait city', 'kuwait'],
 ];
+// Explicit state, province and constituent-nation context ("Dallas, TX", "Sydney, New South Wales"). This is NOT a city
+// table: a bare city name such as Sydney, Melbourne or Vancouver exists in more than one country, so it stays unresolved.
+// A two-letter code is read only in the capitalised form "City, ST", and only when it cannot also be read as an ISO 3166-1
+// country code (CA, DE, IN, IL, PA, NC and others stay unresolved) or as a region of a second country (WA, NT, SA).
+// A name is listed only when no listed country has a well-known place of the same name (Ontario, New Brunswick, Victoria,
+// Yukon, Georgia and Washington are left out); "Baja California" and "New England" are listed with no country so that the
+// longer name is consumed before the shorter one.
+const REGION_CODE_GROUPS: [string, string][] = [
+  ['united states', 'AK CT DC FL HI IA KS MI NV NH NJ NM NY ND OH OK OR RI TX UT VT WV WI WY'],
+  ['canada', 'AB BC MB NB NS ON QC'],
+  ['australia', 'NSW VIC QLD TAS ACT'],
+];
+const REGION_CODES = new Map(REGION_CODE_GROUPS.flatMap(([country, codes]) => codes.split(' ').map((code): [string, string] => [code, country])));
+const REGION_NAME_GROUPS: [string, string][] = [
+  ['united states', 'alabama,alaska,arizona,arkansas,california,colorado,connecticut,delaware,florida,hawaii,idaho,illinois,indiana,iowa,kansas,kentucky,louisiana,maine,maryland,massachusetts,michigan,minnesota,mississippi,missouri,montana,nebraska,nevada,new hampshire,new jersey,new mexico,new york,north carolina,north dakota,ohio,oklahoma,oregon,pennsylvania,rhode island,south carolina,south dakota,tennessee,texas,utah,vermont,virginia,west virginia,wisconsin,wyoming,district of columbia'],
+  ['canada', 'alberta,british columbia,manitoba,newfoundland and labrador,nova scotia,prince edward island,quebec,québec,saskatchewan,northwest territories,nunavut'],
+  ['australia', 'new south wales,queensland,tasmania,northern territory,australian capital territory'],
+  ['united kingdom', 'england,scotland,wales,northern ireland'],
+  ['', 'baja california,new england'],
+];
+const REGION_NAMES = REGION_NAME_GROUPS.flatMap(([country, names]) => names.split(',').map((name): [string, string] => [name, country])).sort((a, b) => b[0].length - a[0].length);
+function statedRegionCountries(offered: string): string[] {
+  const countries = new Set<string>();
+  for (const match of offered.matchAll(/,\s*([A-Z]{2,3})(?=\s*(?:$|[,;|/()–—-])|\s\d)/g)) {
+    const country = REGION_CODES.get(match[1]);
+    if (country) countries.add(country);
+  }
+  let rest = ` ${placeText(offered)} `;
+  for (const [name, country] of REGION_NAMES) {
+    if (!rest.includes(` ${name} `)) continue;
+    if (country) countries.add(country);
+    rest = rest.split(` ${name} `).join(' ');
+  }
+  return [...countries];
+}
 const COUNTRY_NAMES = ['united arab emirates', 'united kingdom', 'united states', 'south africa', 'canada', 'australia', 'india', 'singapore', 'france', 'germany', 'saudi arabia', 'qatar', 'bahrain', 'oman', 'kuwait', 'pakistan', 'bangladesh', 'jordan', 'new zealand'];
 function placeText(value: string): string {
   return normalText(value).replace(/\bu\.?a\.?e\.?\b/g, 'united arab emirates')
@@ -122,8 +192,9 @@ function placeTerms(value: string): Set<string> {
   }
   return words;
 }
-function samePlace(wanted: string, offered: string): boolean {
-  const target = placeText(wanted); const actual = placeText(offered);
+function samePlace(wanted: string, offered: string, statedCountries: string[] = []): boolean {
+  // A stated state or province is explicit country context, so it is read like country text typed in the posting.
+  const target = placeText(wanted); const actual = placeText(`${offered} ${statedCountries.join(' ')}`);
   // York and New York are distinct places, despite sharing a complete word.
   if (target === 'york' && hasPlace(actual, 'new york')) return false;
   const desiredWords = tokens(target); const actualWords = placeTerms(actual);
@@ -156,7 +227,8 @@ function matchLocation(preferences: string[], opportunity: DiscoveryOpportunity)
   const places = preferences.filter(place => !REMOTE.test(place));
   const isRemote = !NEGATED_REMOTE.test(location) && REMOTE.test(location);
   if (!isRemote) {
-    if (places.some(place => samePlace(place, location))) return 'matched';
+    const stated = statedRegionCountries(location);
+    if (places.some(place => samePlace(place, location, stated))) return 'matched';
     return location.trim() ? 'mismatch' : 'unknown';
   }
   if (NEGATED_REMOTE.test(opportunity.description)) return 'mismatch';
@@ -176,6 +248,11 @@ function matchLocation(preferences: string[], opportunity: DiscoveryOpportunity)
 
 const NUMBER_WORDS: Record<string, number> = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, fifteen: 15, twenty: 20 };
 const EXPERIENCE_NUMBER = `(?:\\d{1,2}(?:\\.\\d+)?|${Object.keys(NUMBER_WORDS).join('|')})`;
+/** A number attributed to the company itself ("Our 25+ years of ...", "a company with 20+ years of ...") is history,
+ * not a candidate minimum. It is skipped only when no requirement or candidate wording appears ANYWHERE in the same
+ * sentence, before or after the number ("Our 5+ years of experience requirement is mandatory" stays a minimum). */
+const COMPANY_HISTORY_LEAD = /\b(?:our|the (?:company|firm)['’]s)\s*$|\b(?:company|firm|organi[sz]ation)\s+(?:with|boasting|spanning)\s*$/i;
+const REQUIREMENT_WORDING = /\b(?:you|your|candidates?|applicants?|must|should|requires?|required|requirements?|requisite|prerequisite|mandatory|essential|necessary|needs?|needed|minimum|at least|expected|expects?|non-negotiable|seeks?|seeking|looking|hiring|hire|wanted|want|ideal)\b/i;
 /** A minimum is evidence only when stated as mandatory, a range, or N+ years.
  * Optional, negated, alternative and unrecognised wording stays unknown. */
 export function readDiscoveryMinimumExperience(description: string): number | null {
@@ -187,6 +264,7 @@ export function readDiscoveryMinimumExperience(description: string): number | nu
     for (const match of clause.matchAll(pattern)) {
       const before = clause.slice(0, match.index); const after = clause.slice((match.index ?? 0) + match[0].length);
       if (/\b(?:company|business|team|firm|we)\b.*\b(?:has|have|brings?|combined|collective)\b/i.test(before)) continue;
+      if (COMPANY_HISTORY_LEAD.test(before) && !REQUIREMENT_WORDING.test(clause)) continue;
       const mandatory = !!match[2] || !!match[3] || /\b(?:minimum(?: of)?|at least|requires?|must have|needs?(?: to have)?|essential)\s*$/i.test(before) || /\b(?:required|essential|mandatory|minimum)\b/i.test(after);
       if (!mandatory) continue;
       const value = NUMBER_WORDS[match[1].toLowerCase()] ?? Number(match[1]);
