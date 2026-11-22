@@ -42,7 +42,7 @@ export default function JobLoopOverview() {
         <div className="jv-hero-copy">
           <p className="jv-caption jv-hero-eyebrow">Automated Job Loop</p>
           <h1 id="lo-title" className="jv-hero-title jv-enter-h1"><span className="jv-nb">Automated Job Loop</span> finds the jobs and <span className="jv-h-signal">tailors the CV.</span></h1>
-          <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. Automated Job Loop runs on your schedule, finds jobs from connected sources and prepares a separate CV for each shortlisted role, ready to review in your dashboard.</p>
+          <p className="jv-hero-lead jv-enter" style={delay(60)}>Choose your roles and locations once. Automated Job Loop runs on your schedule, searches connected employer sources and, for matching roles it finds, prepares a CV for your review in the dashboard (up to two per run). Some runs find no matches.</p>
           <div className="jv-hero-actions jv-enter" style={delay(140)}>
             <StartLink className="jv-hero-cta" />
             <TextLink to="/walkthroughs">Walk through an application</TextLink>
@@ -72,7 +72,7 @@ export default function JobLoopOverview() {
           <ul className="jv-ticks">
             <li>Find jobs from the employer feeds available in your account.</li>
             <li>Match roles to your target titles, locations and confirmed experience.</li>
-            <li>Prepare a separate CV for each vacancy, ready to review and download.</li>
+            <li>For matching roles it finds, prepare a CV for your review, up to two per run. You approve a CV before you can download it.</li>
             <li>See each run’s progress and any unfinished step.</li>
             <li>Keep vacancies, prepared CVs and next actions together.</li>
           </ul>

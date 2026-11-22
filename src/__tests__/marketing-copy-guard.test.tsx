@@ -60,6 +60,18 @@ describe('public marketing copy rules', () => {
   });
 });
 
+describe('Automated Job Loop overview keeps the per-run CV boundary', () => {
+  it('does not promise a CV for every shortlisted role or vacancy, and states the per-run limit', () => {
+    const content = text(<JobLoopOverview />);
+    expect(content).not.toMatch(/separate CV for each/i);
+    expect(content).not.toMatch(/CV for each (shortlisted )?(role|vacancy)/i);
+    expect(content).not.toMatch(/ready to review and download/i);
+    expect(content).toMatch(/up to two per run/i);
+    expect(content).toMatch(/Some runs find no matches/i);
+    expect(content).toMatch(/approve a CV before you can download it/i);
+  });
+});
+
 describe('public page titles and descriptions', () => {
   it.each(publicStaticPages.map(page => [page.path, page] as const))('%s metadata keeps to the owner copy rules and the 60-character title cap', (_path, page) => {
     const content = `${page.title} ${page.description}`.replace(/Automated Job Loop/g, 'AUTOMATED');
