@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { blankLoopProfile } from '@/lib/job-loop-audiences';
 import { blankLoopCvAnswers } from '@/lib/loop-cv-builder';
-import { draftState, lateSaveOutcome, profileMatches, submittedForm } from '@/lib/loop-onboarding-readback';
+import { draftState, holdsUnsavedAnswers, lateSaveOutcome, profileMatches, submittedForm } from '@/lib/loop-onboarding-readback';
 
 /**
  * The one rule behind every read of the saved setup on the Automated Job Loop setup page (PR 68, review round 4). A saved setup settles the page (clear the draft, say
@@ -50,5 +50,55 @@ describe('lateSaveOutcome', () => {
     const different = { ...profile(), targetTitles: ['Someone else'] };
     expect(lateSaveOutcome(savedFrom(different), draft(), draft())).toBe('other');
     expect(profileMatches(savedFrom(different), submittedForm(profile()))).toBe(false);
+  });
+});
+
+/**
+ * Opening setup again while a setup is already saved (22 Nov, the boundary PR 68 left): a draft this tab still remembers is kept beside the saved setup only when it holds
+ * something the saved setup does not. Whatever equals the saved setup, or was never filled in, is cleared as before. Fictional data only.
+ */
+describe('holdsUnsavedAnswers', () => {
+  const held = (patch: Partial<{ profile: ReturnType<typeof profile>; answers: ReturnType<typeof answers>; roleQuery: string; locationQuery: string; rolesEdited: boolean }> = {}) =>
+    ({ profile: profile(), answers: answers(), roleQuery: '', locationQuery: '', rolesEdited: true, ...patch });
+  const saved = () => savedFrom(profile());
+
+  it('holds nothing newer when the draft equals the saved setup (unchanged-draft control)', () => {
+    expect(holdsUnsavedAnswers(saved(), held())).toBe(false);
+  });
+
+  it('holds nothing newer when only surrounding whitespace differs, because a save trims it', () => {
+    expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), name: '  Alex Example  ', sourceText: `\n${profile().sourceText}\n\n` } }))).toBe(false);
+  });
+
+  it('holds nothing when the draft was never filled in, however different the saved setup is from the blank page', () => {
+    expect(holdsUnsavedAnswers(saved(), held({ profile: blankLoopProfile('professional'), rolesEdited: false }))).toBe(false);
+  });
+
+  it('does not count roles that were only suggested and never confirmed, but counts them once the person has confirmed or edited them', () => {
+    const suggested = { ...blankLoopProfile('professional'), targetTitles: ['Suggested role'] };
+    expect(holdsUnsavedAnswers(saved(), held({ profile: suggested, rolesEdited: false }))).toBe(false);
+    expect(holdsUnsavedAnswers(saved(), held({ profile: suggested, rolesEdited: true }))).toBe(true);
+  });
+
+  it('does not count a field the person blanked, or fields the page never lets a person type', () => {
+    expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), name: '' } }))).toBe(false);
+    expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), audience: 'student', pageTarget: 2, languages: ['Portuguese'] } }))).toBe(false);
+  });
+
+  it.each([
+    ['a CV-builder answer', { answers: { ...answers(), summary: 'Builder notes' } }],
+    ['role text typed but not added', { roleQuery: 'Data analyst' }],
+    ['location text typed but not added', { locationQuery: 'Lisbon' }],
+    ['a different name', { profile: { ...profile(), name: 'Alex Revised' } }],
+    ['a different CV text', { profile: { ...profile(), sourceText: `${profile().sourceText}\nAdded line.` } }],
+    ['different roles the person confirmed', { profile: { ...profile(), targetTitles: ['Data analyst'] } }],
+    ['different locations', { profile: { ...profile(), locations: ['Lisbon'] } }],
+    ['a minimum pay', { profile: { ...profile(), compensation: { ...profile().compensation, minimum: 50000, currency: 'USD' } } }],
+    ['private terms', { profile: { ...profile(), excludedTerms: ['Confidential client'] } }],
+    ['a contact line', { profile: { ...profile(), contactLine: 'alex@example.test' } }],
+    ['years of experience', { profile: { ...profile(), experienceYears: 4 } }],
+    ['a changed discreet-search choice', { profile: { ...profile(), discreetSearch: !profile().discreetSearch } }],
+  ])('holds something newer when the draft has %s', (_label, patch) => {
+    expect(holdsUnsavedAnswers(saved(), held(patch))).toBe(true);
   });
 });

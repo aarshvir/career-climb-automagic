@@ -1,4 +1,6 @@
 import type { LoopProfileInput } from '../../supabase/functions/_shared/job-loop-types';
+import { blankLoopProfile } from './job-loop-audiences';
+import type { OnboardingDraft } from './loop-onboarding-memory';
 
 /** True when a saved profile carries exactly the submitted answers (the comparison the save itself makes). */
 export function profileMatches(saved: LoopProfileInput, submitted: LoopProfileInput): boolean {
@@ -31,4 +33,24 @@ const sameDraft = (a: DraftState, b: DraftState) => a.answers === b.answers && a
 export function lateSaveOutcome(saved: LoopProfileInput, sent: DraftState | null, now: DraftState): 'settled' | 'earlier' | 'other' {
   if (!sent || !profileMatches(saved, sent.profile)) return 'other';
   return sameDraft(sent, now) ? 'settled' : 'earlier';
+}
+
+/** The profile fields a person fills in on the setup page (audience, page target and languages are never typed there). */
+const TYPED_FIELDS = ['targetTitles', 'locations', 'compensation', 'discreetSearch', 'excludedTerms', 'name', 'contactLine', 'experienceYears', 'sourceText'] as const;
+const sameField = (a: LoopProfileInput, b: LoopProfileInput, key: keyof LoopProfileInput) => key === 'compensation'
+  ? (['currency', 'period', 'minimum'] as const).every(field => a.compensation[field] === b.compensation[field])
+  : JSON.stringify(a[key]) === JSON.stringify(b[key]);
+
+/**
+ * Whether a draft this tab remembered holds anything the saved setup does not, so that opening setup again must not drop it. Only what a person put in counts:
+ *  - any CV-builder answer, and role or location text typed but not added (none of it is ever part of a saved setup);
+ *  - any typed profile field that differs from the saved setup AND from the blank page (a blank field is nothing to lose, and the page's own defaults are not answers).
+ * Roles suggested from the account or the CV and never confirmed (`rolesEdited` false) are not answers. Surrounding whitespace is nothing, as in a save.
+ * A draft that equals the saved setup, or was never filled in, holds nothing newer.
+ */
+export function holdsUnsavedAnswers(saved: LoopProfileInput, draft: Pick<OnboardingDraft, 'profile' | 'answers' | 'roleQuery' | 'locationQuery' | 'rolesEdited'>): boolean {
+  if (draft.roleQuery.trim() || draft.locationQuery.trim()) return true;
+  if (Object.values(draft.answers).some(value => typeof value === 'string' && value.trim())) return true;
+  const typed = submittedForm(draft.profile), blank = blankLoopProfile('professional');
+  return TYPED_FIELDS.some(key => (key !== 'targetTitles' || draft.rolesEdited) && !sameField(typed, blank, key) && !sameField(typed, saved, key));
 }
