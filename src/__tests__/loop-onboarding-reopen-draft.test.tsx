@@ -50,13 +50,13 @@ async function reopen() { render(view()); await flush(); }
 const checkButton = () => screen.getByRole('button', { name: 'Check whether my setup was saved' });
 const memory = (generation: number | null = 0) => recoverOnboardingDraft('owner-a', trackingDraftAuthority('owner-a'), generation);
 
-type Newer = { answers?: Partial<ReturnType<typeof blankLoopCvAnswers>>; roleQuery?: string; locationQuery?: string; profile?: Partial<LoopProfileInput>; step?: number; rolesEdited?: boolean; suggestionSource?: string };
+type Newer = { answers?: Partial<ReturnType<typeof blankLoopCvAnswers>>; roleQuery?: string; locationQuery?: string; profile?: Partial<LoopProfileInput>; step?: number; rolesEdited?: boolean; suggestionSource?: string; touched?: string[] };
 /** A draft this tab already remembered for the lifecycle it had seen (the tab had read generation 0, as every page that has talked to the record has). */
 function remember(patch: Newer = {}, generation: number | null = 0) {
   if (generation !== null) setTrackingLoopGeneration('owner-a', generation);
   retainOnboardingDraft({ owner: 'owner-a', authority: trackingDraftAuthority('owner-a'), generation }, {
     profile: { ...baseProfile(), ...patch.profile }, answers: { ...blankLoopCvAnswers(), ...patch.answers }, step: patch.step ?? 5,
-    roleQuery: patch.roleQuery ?? '', locationQuery: patch.locationQuery ?? '', rolesEdited: patch.rolesEdited ?? true, suggestionSource: patch.suggestionSource ?? '',
+    roleQuery: patch.roleQuery ?? '', locationQuery: patch.locationQuery ?? '', rolesEdited: patch.rolesEdited ?? true, suggestionSource: patch.suggestionSource ?? '', touched: patch.touched,
   });
 }
 const panel = () => screen.queryByRole('region', { name: 'A setup is already saved in your account.' });
@@ -76,11 +76,17 @@ afterEach(() => { cleanup(); vi.useRealTimers(); clearTrackingDraftMemory(); vi.
  * The reported sequence, end to end: the save is given up on, an empty check unlocks the form, a newer answer is added, the person leaves setup, the original
  * write lands, and setup is opened again. (The first page is driven exactly as in loop-onboarding-stalled-save.test.tsx.)
  */
-type Kind = 'builder' | 'name' | 'role' | 'location';
-const NEWER_TEXT: Record<Kind, string> = { builder: NOTE, name: 'Name on your CV: Alex Revised', role: 'Role text typed but not added: Data analyst', location: 'Location text typed but not added: Lisbon' };
+type Kind = 'builder' | 'name' | 'role' | 'location' | 'clearContact';
+const CONTACT = 'alex.example@example.invalid';
+const NEWER_TEXT: Record<Kind, string> = { builder: NOTE, name: 'Name on your CV: Alex Revised', role: 'Role text typed but not added: Data analyst', location: 'Location text typed but not added: Lisbon', clearContact: 'Contact line: (empty)' };
 function addNewer(kind: Kind) {
   if (kind === 'role') { for (let index = 0; index < 5; index += 1) fireEvent.click(screen.getByRole('button', { name: 'Back' })); fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Data analyst' } }); return; }
   if (kind === 'location') { for (let index = 0; index < 4; index += 1) fireEvent.click(screen.getByRole('button', { name: 'Back' })); fireEvent.change(screen.getByLabelText('Search or add a location'), { target: { value: 'Lisbon' } }); return; }
+  if (kind === 'clearContact') {                                  // the contact line is on the Your CV step: emptied on purpose, and the form is left like that
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    fireEvent.change(screen.getByLabelText('Contact line for your CV (optional)'), { target: { value: '' } });
+    return;
+  }
   fireEvent.click(screen.getByRole('button', { name: 'Back' }));
   if (kind === 'builder') {
     fireEvent.click(screen.getByText('No CV yet? Build one with guided questions'));
@@ -88,12 +94,12 @@ function addNewer(kind: Kind) {
   } else fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Revised' } });
   fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
 }
-async function leaveAfterGivenUpSave(newer: Kind | null) {
+async function leaveAfterGivenUpSave(newer: Kind | null, contactLine = '') {
   const server = record(); let first: unknown = null;
   script({ get: async () => ({ snapshot: server.snap() }), existing: async () => ({ snapshot: server.snap() }), save: action => { server.state.writes += 1; first = action.profile; return never(); } });
   // The first page: setup at the review step, consent ticked, Save pressed, the write never answers.
   retainOnboardingDraft({ owner: 'owner-a', authority: trackingDraftAuthority('owner-a'), generation: null },
-    { profile: baseProfile(), answers: blankLoopCvAnswers(), step: 5, roleQuery: '', locationQuery: '', rolesEdited: true, suggestionSource: '' });
+    { profile: { ...baseProfile(), contactLine }, answers: blankLoopCvAnswers(), step: 5, roleQuery: '', locationQuery: '', rolesEdited: true, suggestionSource: '' });
   render(view());
   const save = await screen.findByRole('button', { name: 'Save my setup' });
   vi.useFakeTimers();
@@ -118,10 +124,11 @@ describe('REPRODUCER: leave setup with newer answers, let the late save land, op
     await reopen();
     expect(panel()).toBeInTheDocument();                             // the existing reconcile panel
     expect(panel()).toHaveTextContent('Alex Example');               // the saved setup
-    expect(panel()).toHaveTextContent('Still here and NOT saved');
+    expect(panel()).toHaveTextContent('Retained in this tab and not part of the saved setup');
+    expect(panel()).not.toHaveTextContent('newer');                 // reopening cannot show that the answers are newer, so it does not say so
     expect(copyText()).toContain(NEWER_TEXT[kind]);                  // the newer answer, readable and copyable
     expect(screen.getByLabelText(/Read them here/)).toHaveAttribute('readonly');
-    expect(screen.getByRole('button', { name: 'Copy my newer answers' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Copy retained answers' })).toBeEnabled();
     expect(screen.getByRole('link', { name: 'Open my saved dashboard' })).toBeInTheDocument();
     expect(readyHeading()).not.toBeInTheDocument();
     expect(savedHeading()).not.toBeInTheDocument();
@@ -347,10 +354,237 @@ describe('control (c): the existing 30-minute memory, never longer', () => {
     remember({ answers: { summary: NOTE } });
     await advance(20 * MINUTE);
     await reopen();
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));   // navigation only: not a change to an answer (see round 2 below)
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Revised' } });   // a real answer edit
     await advance(15 * MINUTE);                                      // 35 minutes after the original draft, 15 after the change
     expect(JSON.stringify(memory())).toContain(NOTE);
     await advance(15 * MINUTE);
     expect(memory()).toBeNull();
   });
 });
+
+/**
+ * Round 2 (23 Nov), finding 2: pressing Back or Next on a reopened draft is navigation, not an answer. The draft keeps the 30 minutes it had; the step is remembered,
+ * the expiry does not move. A real edit of an answer still starts a new 30 minutes.
+ */
+describe('round 2: Back and Next do not renew the 30 minutes of a reopened draft', () => {
+  const saved = () => { const value = record(); value.commit(baseProfile()); return value; };
+  const withSaved = () => script({ existing: async () => ({ snapshot: saved().snap() }) });
+  const stepLine = () => screen.getByText(/^Step \d of 6$/).textContent;
+
+  it('Back at minute 29 does not move the end of the draft: it is gone at minute 30', async () => {
+    vi.useFakeTimers();
+    remember({ answers: { summary: NOTE } });                        // remembered at minute 0, at the review step
+    await advance(29 * MINUTE);
+    withSaved();
+    await reopen();
+    expect(panel()).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    await flush();
+    expect(stepLine()).toBe('Step 5 of 6');
+    expect(JSON.stringify(memory())).toContain(NOTE);                // still inside the 30 minutes
+    await advance(MINUTE);                                           // minute 30: the original expiry
+    expect(memory()).toBeNull();
+    expect(names().every(name => name === 'get_existing')).toBe(true);
+  });
+
+  it('Next at minute 29 does not move it either', async () => {
+    vi.useFakeTimers();
+    remember({ answers: { summary: NOTE }, step: 3 });
+    await advance(29 * MINUTE);
+    withSaved();
+    await reopen();
+    expect(panel()).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+    await flush();
+    expect(stepLine()).toBe('Step 5 of 6');
+    expect(JSON.stringify(memory())).toContain(NOTE);
+    await advance(MINUTE);
+    expect(memory()).toBeNull();
+  });
+
+  it('any number of Back and Next presses spread over the window still end at the original minute 30', async () => {
+    vi.useFakeTimers();
+    remember({ answers: { summary: NOTE } });
+    await advance(5 * MINUTE);
+    withSaved();
+    await reopen();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    await advance(10 * MINUTE);                                      // minute 15
+    fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+    await advance(10 * MINUTE);                                      // minute 25
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    await advance(4 * MINUTE + 59_000);                              // minute 29:59
+    expect(JSON.stringify(memory())).toContain(NOTE);
+    await advance(1_000);                                            // minute 30:00, not 55
+    expect(memory()).toBeNull();
+  });
+
+  it('the step is remembered: opening setup again inside the window comes back to the step the person moved to', async () => {
+    vi.useFakeTimers();
+    remember({ answers: { summary: NOTE } });
+    await advance(10 * MINUTE);
+    withSaved();
+    await reopen();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    await flush();
+    expect(memory()?.step).toBe(4);
+    cleanup();
+    await reopen();
+    expect(panel()).toBeInTheDocument();
+    expect(stepLine()).toBe('Step 5 of 6');
+    expect(copyText()).toContain(NOTE);
+  });
+
+  it('a page left open past the 30 minutes does not bring the draft back by pressing Back or Next', async () => {
+    vi.useFakeTimers();
+    remember({ answers: { summary: NOTE } });
+    await advance(29 * MINUTE);
+    withSaved();
+    await reopen();
+    await advance(2 * MINUTE);                                       // minute 31: expired while the page stayed open
+    expect(memory()).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    await flush();
+    expect(memory()).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+    await flush();
+    expect(memory()).toBeNull();
+  });
+
+  it('a real edit of an answer is still remembered and starts a new 30 minutes', async () => {
+    vi.useFakeTimers();
+    remember({ answers: { summary: NOTE } });
+    await advance(25 * MINUTE);
+    withSaved();
+    await reopen();
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Revised' } });
+    await advance(10 * MINUTE);                                      // minute 35: past the original expiry, 10 minutes after the edit
+    expect(memory()?.profile.name).toBe('Alex Revised');
+    await advance(20 * MINUTE);                                      // 30 minutes after the edit
+    expect(memory()).toBeNull();
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Again' } });   // an edit on the open page starts a new 30
+    expect(memory()?.profile.name).toBe('Alex Again');
+  });
+
+  it('the same navigation on a page that is not a reopened draft behaves as before (unchanged from main): it is remembered', async () => {
+    vi.useFakeTimers();
+    script({ existing: async () => ({ snapshot: { lifecycleGeneration: 0, recordVersion: 0, profile: null } }) });
+    remember({ answers: { summary: NOTE } });
+    await reopen();                                                  // an empty record, no saved setup: the ordinary recovered draft
+    expect(panel()).not.toBeInTheDocument();
+    await advance(20 * MINUTE);
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    await advance(15 * MINUTE);                                      // 35 minutes after the draft, 15 after Back
+    expect(JSON.stringify(memory())).toContain(NOTE);
+  });
+});
+
+/**
+ * Round 2 (23 Nov), finding 1: a field the person emptied or reset on purpose equals the blank page, so the blank-page rule alone dropped it on reopening. The page now
+ * remembers which fields the person edited; an edited field that differs from the saved setup is kept, a blank field nobody edited is still the page's own default.
+ */
+describe('round 2: an intentional clear or reset survives reopening', () => {
+  it('REPRODUCER (Codex): save with a contact line, give up, empty the contact line, leave, let the late write land, open setup again', async () => {
+    const { server, first, calls } = await leaveAfterGivenUpSave('clearContact', CONTACT);
+    expect((first as LoopProfileInput).contactLine).toBe(CONTACT);   // the write that is about to land holds the contact line
+    expect(server.state.profile).toBe(first);                        // it has now landed: the saved setup holds the contact line
+    expect(memory()?.profile.contactLine).toBe('');                  // the deliberate empty contact is what this tab remembers just before reopening
+    expect(memory()?.touched).toEqual(['contactLine']);              // ... and that it was the person who emptied it
+    await reopen();
+    expect(panel()).toBeInTheDocument();                             // kept, shown beside the saved setup
+    expect(panel()).toHaveTextContent('Contact line');
+    expect(copyText()).toContain(NEWER_TEXT.clearContact);
+    expect(readyHeading()).not.toBeInTheDocument();
+    expect(memory()).not.toBeNull();
+    expect((server.state.profile as LoopProfileInput).contactLine).toBe(CONTACT);   // the saved setup is untouched
+    expect(server.state.writes).toBe(1);
+    expect(names().slice(calls)).toEqual(['get_existing']);
+    cleanup();
+    await reopen();                                                  // the provenance travels with the memory: leaving and reopening again inside the window keeps it
+    expect(panel()).toBeInTheDocument();
+    expect(copyText()).toContain(NEWER_TEXT.clearContact);
+  });
+
+  it('control: the same sequence without emptying anything is cleared, as before', async () => {
+    const { calls } = await leaveAfterGivenUpSave(null, CONTACT);
+    await reopen();
+    expect(readyHeading()).toBeInTheDocument();
+    expect(panel()).not.toBeInTheDocument();
+    expect(memory()).toBeNull();
+    expect(names().slice(calls)).toEqual(['get_existing']);
+  });
+
+  it('what is edited after reopening is added to what was remembered (the provenance survives the reopen)', async () => {
+    await leaveAfterGivenUpSave('clearContact', CONTACT);
+    await reopen();
+    expect(panel()).toBeInTheDocument();                             // the page comes back on the Your CV step, where the person left it
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Revised' } });
+    expect(memory()?.touched).toEqual(['contactLine', 'name']);
+    expect(memory()?.profile.contactLine).toBe('');
+  });
+
+  // The simpler retained-state fixture, one per field a person can empty or reset.
+  const EXTRAS = { contactLine: CONTACT, experienceYears: 4, excludedTerms: ['Confidential client'], compensation: { currency: 'USD', period: 'annual' as const, minimum: 50000 }, discreetSearch: !blankLoopProfile('professional').discreetSearch };
+  const savedProfile = (): LoopProfileInput => ({ ...baseProfile(), ...EXTRAS });
+  const serverWith = () => { const value = record(); value.commit(savedProfile()); return value; };
+  const emptied: [string, string, Partial<LoopProfileInput>][] = [
+    ['contactLine', 'Contact line', { contactLine: '' }],
+    ['name', 'Name on your CV', { name: '' }],
+    ['sourceText', 'CV text', { sourceText: '' }],
+    ['locations', 'Cities or countries', { locations: [] }],
+    ['targetTitles', 'Target roles', { targetTitles: [] }],
+    ['excludedTerms', 'Private terms', { excludedTerms: [] }],
+    ['experienceYears', 'Years of experience', { experienceYears: null }],
+    ['compensation', 'Compensation', { compensation: { currency: '', period: 'annual', minimum: null } }],
+    ['discreetSearch', 'Discreet search', { discreetSearch: blankLoopProfile('professional').discreetSearch }],
+  ];
+  it.each(emptied)('keeps an emptied or reset %s that the person edited', async (field, label, change) => {
+    const server = serverWith();
+    script({ existing: async () => ({ snapshot: server.snap() }) });
+    remember({ profile: { ...EXTRAS, ...change }, touched: [field] });
+    await reopen();
+    expect(panel()).toBeInTheDocument();
+    expect(panel()).toHaveTextContent(label);
+    expect(readyHeading()).not.toBeInTheDocument();
+    expect(memory()).not.toBeNull();
+    expect(server.state.writes).toBe(0);
+    expect(names()).toEqual(['get_existing']);
+  });
+  it.each(emptied)('still clears a blank %s that nobody edited (the page default, not an answer)', async (_field, _label, change) => {
+    const server = serverWith();
+    script({ existing: async () => ({ snapshot: server.snap() }) });
+    remember({ profile: { ...EXTRAS, ...change }, touched: [] });
+    await reopen();
+    expect(readyHeading()).toBeInTheDocument();
+    expect(panel()).not.toBeInTheDocument();
+    expect(memory()).toBeNull();
+    expect(names()).toEqual(['get_existing']);
+  });
+  it('a draft remembered without any provenance (as before this change) behaves as it did', async () => {
+    const server = serverWith();
+    script({ existing: async () => ({ snapshot: server.snap() }) });
+    remember({ profile: { ...EXTRAS, contactLine: '' } });
+    await reopen();
+    expect(readyHeading()).toBeInTheDocument();
+    expect(memory()).toBeNull();
+  });
+  it('a field edited and then put back to the saved value holds nothing', async () => {
+    const server = serverWith();
+    script({ existing: async () => ({ snapshot: server.snap() }) });
+    remember({ profile: { ...EXTRAS }, touched: ['contactLine', 'name', 'locations'] });
+    await reopen();
+    expect(readyHeading()).toBeInTheDocument();
+    expect(memory()).toBeNull();
+  });
+  it('a private-terms box emptied beside a setup that has no private terms holds nothing', async () => {
+    const server = record(); server.commit(baseProfile());
+    script({ existing: async () => ({ snapshot: server.snap() }) });
+    remember({ profile: { excludedTerms: [''] }, touched: ['excludedTerms'] });
+    await reopen();
+    expect(readyHeading()).toBeInTheDocument();
+    expect(memory()).toBeNull();
+  });
+});
+

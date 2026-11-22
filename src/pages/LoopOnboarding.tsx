@@ -12,7 +12,7 @@ import type { LoopProfileInput } from '../../supabase/functions/_shared/job-loop
 import LoopCvBuilder from './LoopCvBuilder';
 import LoopPreferencePicker from '@/components/LoopPreferencePicker';
 import { accountRoleSuggestions, cvRoleSuggestions, roleChoices, locationChoices, cleanPreferences } from '@/lib/loop-role-suggestions';
-import { retainOnboardingDraft, recoverOnboardingDraft, clearOnboardingDraft, type OnboardingDraft } from '@/lib/loop-onboarding-memory';
+import { retainOnboardingDraft, moveRetainedOnboardingStep, recoverOnboardingDraft, clearOnboardingDraft, type OnboardingDraft } from '@/lib/loop-onboarding-memory';
 import { draftState, holdsUnsavedAnswers, lateSaveOutcome, submittedForm, type DraftState } from '@/lib/loop-onboarding-readback';
 import { adAttributionQuery } from '@/lib/meta-pixel';
 import { clearPreSignupAnswers, takePreSignupAnswers } from '@/lib/pre-signup-quiz';
@@ -27,9 +27,12 @@ const CV_READ_DEADLINE_MS = 30_000;
 const list = (value: string) => [...new Set(value.split(/[\n,]/).map(item => item.trim()).filter(Boolean))];
 
 const EARLIER_SAVE_MESSAGE = 'Your earlier save arrived after all, so a setup is saved. Changes you made since are not saved and nothing was overwritten. Your newer answers are still below, unchanged.';
-const REOPENED_MESSAGE = 'A saved setup was found that this page had not seen. Your newer answers from this tab are still below, unchanged. Nothing was overwritten and this page will not write.';
-/** The remembered draft as one comparable value (the order is fixed), so a draft that was only reopened can be told from one the person has since changed. */
-const draftKey = (draft: OnboardingDraft) => JSON.stringify([draft.profile, draft.answers, draft.step, draft.roleQuery, draft.locationQuery, draft.rolesEdited, draft.suggestionSource]);
+const REOPENED_MESSAGE = 'A saved setup was found that this page had not seen. The answers this tab still held are retained below, unchanged. Nothing was overwritten and this page will not write.';
+/**
+ * The remembered answers as one comparable value (the order is fixed), WITHOUT the step: a draft that was only reopened, or only moved with Back or Next, can be told from one
+ * the person has since changed. Pressing Back or Next is navigation, not an answer, so it does not start another 30 minutes.
+ */
+const draftKey = (draft: OnboardingDraft) => JSON.stringify([draft.profile, draft.answers, draft.roleQuery, draft.locationQuery, draft.rolesEdited, draft.suggestionSource, [...(draft.touched ?? [])].sort()]);
 const PROFILE_PARTS: [keyof LoopProfileInput, string][] = [['targetTitles', 'Target roles'], ['locations', 'Cities or countries'], ['compensation', 'Compensation'], ['discreetSearch', 'Discreet search'], ['excludedTerms', 'Private terms'],
   ['name', 'Name on your CV'], ['contactLine', 'Contact line'], ['experienceYears', 'Years of experience'], ['sourceText', 'CV text']];
 function partText(profile: LoopProfileInput, key: keyof LoopProfileInput): string {
@@ -40,7 +43,7 @@ function partText(profile: LoopProfileInput, key: keyof LoopProfileInput): strin
   return value === null || value === undefined || value === '' ? '(empty)' : String(value);
 }
 /** What the page holds that the saved setup does not: the labels that differ, and the whole current draft as plain text a person can read and copy. */
-function unsavedDraft(saved: NonNullable<LoopSnapshot['profile']>, profile: LoopProfileInput, answers: Record<string, string>, roleQuery: string, locationQuery: string) {
+function unsavedDraft(saved: NonNullable<LoopSnapshot['profile']>, profile: LoopProfileInput, answers: Record<string, string>, roleQuery: string, locationQuery: string, retained = false) {
   const draft = submittedForm(profile), changed: string[] = [];
   for (const [key, label] of PROFILE_PARTS) {
     const same = key === 'compensation' ? (['currency', 'period', 'minimum'] as const).every(field => saved.compensation[field] === draft.compensation[field]) : JSON.stringify(saved[key]) === JSON.stringify(draft[key]);
@@ -50,7 +53,7 @@ function unsavedDraft(saved: NonNullable<LoopSnapshot['profile']>, profile: Loop
   if (builder.length) changed.push('CV builder answers');
   if (roleQuery.trim()) changed.push('Role text typed but not added');
   if (locationQuery.trim()) changed.push('Location text typed but not added');
-  const lines = ['My Jobvance setup answers that are NOT saved (still in this tab):', ...PROFILE_PARTS.filter(([key]) => key !== 'sourceText').map(([key, label]) => `${label}: ${partText(draft, key)}`)];
+  const lines = [retained ? 'My Jobvance setup answers retained in this tab (they are not saved from this page):' : 'My Jobvance setup answers that are NOT saved (still in this tab):', ...PROFILE_PARTS.filter(([key]) => key !== 'sourceText').map(([key, label]) => `${label}: ${partText(draft, key)}`)];
   if (builder.length) lines.push('CV builder answers:', ...builder.map(([key, value]) => `  ${key}: ${value.trim()}`));
   if (roleQuery.trim()) lines.push(`Role text typed but not added: ${roleQuery.trim()}`);
   if (locationQuery.trim()) lines.push(`Location text typed but not added: ${locationQuery.trim()}`);
@@ -123,6 +126,8 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   const [copied, setCopied] = useState('');
   // The draft as it was when it was reopened beside a saved setup. Showing it does not renew its 30 minutes: only a change the person makes afterwards does.
   const reopenedDraft = useRef<string | null>(null);
+  // The profile fields this person has edited on this page (an edit they made: not a default, not a suggestion). Travels with the remembered draft, so a field they emptied on purpose is not mistaken for one nobody touched.
+  const touched = useRef<Set<string>>(new Set());
   // The whole draft of the most recent write that was actually SENT: the profile plus what the page held besides it (CV builder answers, role/location text typed but not added).
   // A save attempt that gave up before it sent a write (its fresh read never answered) is not recorded here, so a newer answer added since is never taken for part of that write.
   const sentWrite = useRef<DraftState | null>(null);
@@ -157,7 +162,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   function restore(recovered: OnboardingDraft) {
     setProfile(recovered.profile); setAnswers(recovered.answers); setStep(recovered.step);
     setRoleQuery(recovered.roleQuery); setLocationQuery(recovered.locationQuery);
-    rolesEdited.current = recovered.rolesEdited; setSuggestionSource(recovered.suggestionSource);
+    rolesEdited.current = recovered.rolesEdited; setSuggestionSource(recovered.suggestionSource); touched.current = new Set(recovered.touched ?? []);
   }
   async function load() {
     const turn = ++epoch.current; setBusy('Loading your saved setup…'); setError(''); consentEpoch.current = null; setConsent(false);
@@ -218,14 +223,17 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   useEffect(() => { void load(); }, []);
   useEffect(() => {
     if (!loaded || existing || saved || !current()) return;
-    const held: OnboardingDraft = { profile, answers, step, roleQuery, locationQuery, rolesEdited: rolesEdited.current, suggestionSource };
-    // A draft that was only reopened beside a saved setup is not renewed by being shown: it keeps the 30 minutes it had, and the first change the person makes starts a new 30.
-    if (reopenedDraft.current !== null) { if (draftKey(held) === reopenedDraft.current) return; reopenedDraft.current = null; }
-    retainOnboardingDraft({ owner, authority, generation: snapshot.current?.lifecycleGeneration ?? (absentGeneration.current === null && trackingLoopGeneration(owner) === 0 ? 0 : absentGeneration.current) }, held);
+    const held: OnboardingDraft = { profile, answers, step, roleQuery, locationQuery, rolesEdited: rolesEdited.current, suggestionSource, touched: [...touched.current].sort() };
+    const scope = { owner, authority, generation: snapshot.current?.lifecycleGeneration ?? (absentGeneration.current === null && trackingLoopGeneration(owner) === 0 ? 0 : absentGeneration.current) };
+    // A draft that was only reopened beside a saved setup is not renewed by being shown, nor by Back or Next: it keeps the 30 minutes it had (the step is remembered, the expiry is not moved),
+    // and the first change to an answer the person makes starts a new 30.
+    if (reopenedDraft.current !== null) { if (draftKey(held) === reopenedDraft.current) { moveRetainedOnboardingStep(scope, step); return; } reopenedDraft.current = null; }
+    retainOnboardingDraft(scope, held);
   }, [loaded, existing, saved, profile, answers, step, roleQuery, locationQuery, suggestionSource]);
   function edit(patch: Partial<LoopProfileInput>) {
     if (!current() || saving.current || unconfirmed) return;
     epoch.current++; consentEpoch.current = null; setConsent(false); setError('');
+    for (const key of Object.keys(patch)) touched.current.add(key);
     if (patch.targetTitles) { rolesEdited.current = true; setSuggestionSource(''); }
     if (patch.sourceText !== undefined && !rolesEdited.current) {
       const fromCv = cvRoleSuggestions(patch.sourceText), fromAccount = accountRoleSuggestions(metadata);
@@ -365,16 +373,16 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     {existing && <section className="oq-card"><p>Your saved CV and preferences are already in your account. Continue there to preserve your current drafts, facts and schedule.</p><Link className="jl-button jl-button--primary" to="/loop">Open my Automated Job Loop <ArrowRight size={16} /></Link></section>}
     {saved && <section className="oq-card"><Check size={32} /><h2>Next: review your facts and run your first search.</h2><p>Review useful facts copied from your CV, then deliberately start a search with your saved preferences. Add CV variants and a recurring schedule when you are ready.</p><p>Saving this setup has not started a search, activated a schedule or sent your CV to an AI provider.</p><Link className="jl-button jl-button--primary" to="/loop" state={{ onboardingSaved: true, owner, generation: snapshot.current?.lifecycleGeneration, authority }}>Continue to my Automated Job Loop <ArrowRight size={16} /></Link></section>}
     {conflict && !saved && !existing && (() => {
-      const draft = unsavedDraft(conflict.saved, profile, answers as unknown as Record<string, string>, roleQuery, locationQuery);
+      const retained = conflict.kind === 'reopened', draft = unsavedDraft(conflict.saved, profile, answers as unknown as Record<string, string>, roleQuery, locationQuery, retained);
       return <section className="oq-card oq-conflict" aria-labelledby="oq-conflict-title">
         <h2 id="oq-conflict-title">{conflict.kind === 'earlier' ? 'Your earlier setup was saved after all.' : 'A setup is already saved in your account.'}</h2>
         <p>{conflict.kind === 'earlier' ? 'The save that looked stuck did arrive, with the answers you submitted then.' : conflict.kind === 'reopened' ? 'It is a setup this page had not seen: an earlier save that arrived late, or one made in another tab or on another device.' : 'It was saved before this page could write.'} Nothing was overwritten, and this page will not write again.</p>
         <dl className="oq-review"><dt>Saved roles</dt><dd>{conflict.saved.targetTitles.join(', ') || '(none)'}</dd><dt>Saved locations</dt><dd>{conflict.saved.locations.join(', ') || '(none)'}</dd><dt>Saved name</dt><dd>{conflict.saved.name || '(empty)'}</dd></dl>
-        <p>{draft.changed.length ? `Still here and NOT saved: ${draft.changed.join(', ')}.` : 'Everything on this page matches the saved setup.'}</p>
-        <details open><summary>Your newer answers (not saved)</summary>
+        <p>{draft.changed.length ? `${retained ? 'Retained in this tab and not part of the saved setup' : 'Still here and NOT saved'}: ${draft.changed.join(', ')}.` : 'Everything on this page matches the saved setup.'}</p>
+        <details open><summary>{retained ? 'Answers retained in this tab (not saved)' : 'Your newer answers (not saved)'}</summary>
           <label htmlFor="oq-unsaved-copy">Read them here, or copy them before you leave. This tab keeps them for up to 30 minutes; refreshing, closing the tab or signing out clears them.</label>
           <textarea id="oq-unsaved-copy" readOnly rows={10} value={draft.text} />
-          <button type="button" className="jl-button" onClick={() => { const done = () => setCopied('Copied.'); const fail = () => setCopied('Copying was blocked. Select the text above and copy it yourself.'); try { void navigator.clipboard.writeText(draft.text).then(done, fail); } catch { fail(); } }}>Copy my newer answers</button>
+          <button type="button" className="jl-button" onClick={() => { const done = () => setCopied('Copied.'); const fail = () => setCopied('Copying was blocked. Select the text above and copy it yourself.'); try { void navigator.clipboard.writeText(draft.text).then(done, fail); } catch { fail(); } }}>{retained ? 'Copy retained answers' : 'Copy my newer answers'}</button>
           {copied && <p role="status">{copied}</p>}
         </details>
         <Link className="jl-button jl-button--primary" to="/loop">Open my saved dashboard <ArrowRight size={16} /></Link>

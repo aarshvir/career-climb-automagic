@@ -58,7 +58,7 @@ describe('lateSaveOutcome', () => {
  * something the saved setup does not. Whatever equals the saved setup, or was never filled in, is cleared as before. Fictional data only.
  */
 describe('holdsUnsavedAnswers', () => {
-  const held = (patch: Partial<{ profile: ReturnType<typeof profile>; answers: ReturnType<typeof answers>; roleQuery: string; locationQuery: string; rolesEdited: boolean }> = {}) =>
+  const held = (patch: Partial<{ profile: ReturnType<typeof profile>; answers: ReturnType<typeof answers>; roleQuery: string; locationQuery: string; rolesEdited: boolean; touched: string[] }> = {}) =>
     ({ profile: profile(), answers: answers(), roleQuery: '', locationQuery: '', rolesEdited: true, ...patch });
   const saved = () => savedFrom(profile());
 
@@ -80,9 +80,50 @@ describe('holdsUnsavedAnswers', () => {
     expect(holdsUnsavedAnswers(saved(), held({ profile: suggested, rolesEdited: true }))).toBe(true);
   });
 
-  it('does not count a field the person blanked, or fields the page never lets a person type', () => {
+  it('does not count a blank field nobody edited, or fields the page never lets a person type', () => {
     expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), name: '' } }))).toBe(false);
     expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), audience: 'student', pageTarget: 2, languages: ['Portuguese'] } }))).toBe(false);
+    expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), name: '' }, touched: ['locations'] }))).toBe(false);      // another field was edited, not this one
+    expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), audience: 'student', pageTarget: 2, languages: ['Portuguese'] }, touched: ['audience', 'languages'] }))).toBe(false);
+  });
+
+  // Round 2 (23 Nov): an intentional clear or reset equals the blank page, so the blank-page rule alone dropped it. Edit provenance keeps it, and only it.
+  describe('a field the person emptied or reset on purpose (edit provenance)', () => {
+    const withContact = () => ({ ...profile(), contactLine: 'alex@example.test', experienceYears: 4, excludedTerms: ['Confidential client'], compensation: { currency: 'USD', period: 'annual' as const, minimum: 50000 }, discreetSearch: !blankLoopProfile('professional').discreetSearch });
+    const savedWith = () => savedFrom(withContact());
+    it.each([
+      ['contactLine', { contactLine: '' }],
+      ['name', { name: '' }],
+      ['sourceText', { sourceText: '' }],
+      ['locations', { locations: [] }],
+      ['excludedTerms', { excludedTerms: [] }],
+      ['experienceYears', { experienceYears: null }],
+      ['compensation', { compensation: { currency: '', period: 'annual' as const, minimum: null } }],
+      ['discreetSearch', { discreetSearch: blankLoopProfile('professional').discreetSearch }],
+    ])('keeps an edited %s that now equals the blank page but differs from the saved setup, and drops it when nobody edited it', (field, change) => {
+      const emptied = { ...withContact(), ...change };
+      expect(holdsUnsavedAnswers(savedWith(), held({ profile: emptied, touched: [field] }))).toBe(true);
+      expect(holdsUnsavedAnswers(savedWith(), held({ profile: emptied }))).toBe(false);
+      expect(holdsUnsavedAnswers(savedWith(), held({ profile: emptied, touched: [] }))).toBe(false);
+    });
+    it('keeps emptied roles only when the person confirmed or edited them, never suggested ones', () => {
+      const emptied = { ...profile(), targetTitles: [] };
+      expect(holdsUnsavedAnswers(saved(), held({ profile: emptied, touched: ['targetTitles'], rolesEdited: true }))).toBe(true);
+      expect(holdsUnsavedAnswers(saved(), held({ profile: emptied, touched: ['targetTitles'], rolesEdited: false }))).toBe(false);
+      expect(holdsUnsavedAnswers(saved(), held({ profile: emptied, rolesEdited: true }))).toBe(false);
+    });
+    it('holds nothing when an edited field ended up equal to the saved setup (edited, then put back)', () => {
+      expect(holdsUnsavedAnswers(saved(), held({ touched: ['name', 'locations', 'targetTitles', 'sourceText'] }))).toBe(false);
+    });
+    it('treats an empty private-terms box as no terms, so clearing it beside a setup that has none is nothing', () => {
+      expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), excludedTerms: [''] }, touched: ['excludedTerms'] }))).toBe(false);
+      expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), excludedTerms: ['  ', '	'] }, touched: ['excludedTerms'] }))).toBe(false);
+      expect(holdsUnsavedAnswers(savedWith(), held({ profile: { ...withContact(), excludedTerms: [''] }, touched: ['excludedTerms'] }))).toBe(true);
+    });
+    it('does not let provenance replace the other rules: whitespace is nothing, and a draft equal to the saved setup stays nothing', () => {
+      expect(holdsUnsavedAnswers(saved(), held({ profile: { ...profile(), name: '  Alex Example  ' }, touched: ['name'] }))).toBe(false);
+      expect(holdsUnsavedAnswers(saved(), held({ touched: ['contactLine'] }))).toBe(false);
+    });
   });
 
   it.each([

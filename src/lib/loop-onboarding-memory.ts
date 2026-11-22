@@ -9,6 +9,8 @@ export interface OnboardingDraft {
   locationQuery: string;
   rolesEdited: boolean;
   suggestionSource: string;
+  /** The profile fields the person has edited on the page (set only by an edit they made, never by a default or a suggestion). Lets a deliberately emptied field be told from a field nobody touched. */
+  touched?: string[];
 }
 type Scope = { owner: string; authority: number; generation: number | null };
 const TTL = 30 * 60 * 1000;
@@ -34,6 +36,16 @@ export function retainOnboardingDraft(scope: Scope, draft: OnboardingDraft, now 
   if (!matches(scope) || !Number.isInteger(draft.step) || draft.step < 0 || draft.step > 5) return;
   clearOnboardingDraft(); retained = { scope: { ...scope }, draft: structuredClone(draft), expires: now + TTL };
   timer = setTimeout(clearOnboardingDraft, TTL);
+}
+/**
+ * A navigation-only change (the step) on a draft that is already remembered: the step moves, nothing else does, and the 30 minutes it had are NOT renewed.
+ * It does nothing when no draft is remembered for this scope or the draft has expired, so it can never bring an expired draft back.
+ */
+export function moveRetainedOnboardingStep(scope: Scope, step: number, now = Date.now()) {
+  if (!matches(scope) || !Number.isInteger(step) || step < 0 || step > 5 || !retained) return;
+  if (retained.expires <= now || retained.expires > now + TTL) { clearOnboardingDraft(); return; }
+  if (retained.scope.owner !== scope.owner || retained.scope.authority !== scope.authority || retained.scope.generation !== scope.generation) return;
+  retained.draft = { ...retained.draft, step };
 }
 export function recoverOnboardingDraft(owner: string, authority: number, generation: number | null, now = Date.now()): OnboardingDraft | null {
   if (retained && (retained.expires <= now || retained.expires > now + TTL)) clearOnboardingDraft();
