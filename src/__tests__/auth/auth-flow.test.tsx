@@ -368,10 +368,12 @@ describe('round 8: free CV Check entry copy and the signup contract', () => {
     expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Start your free CV Check.');
     expect(screen.getByText('Download PDF, Word or text')).toBeInTheDocument();
     expect(screen.queryByText(/Set up your Automated Job Loop/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Choose a paid plan for ongoing automatic runs/)).not.toBeInTheDocument();
   });
   it('keeps the Automated Job Loop headline for the onboarding entry', async () => {
     render(<AuthProvider><MemoryRouter initialEntries={['/auth?mode=signup&next=%2Fonboarding']}><Auth /></MemoryRouter></AuthProvider>);
-    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Set up your Automated Job Loop and let it run.');
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Set up your Automated Job Loop.');
+    expect(screen.getByText('Set up your roles and schedule with a free account. Choose a paid plan for ongoing automatic runs.')).toBeInTheDocument();
   });
   it('blocks an invalid signup per field, then sends the same contact details on a valid one', async () => {
     sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
