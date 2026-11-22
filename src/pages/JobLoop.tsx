@@ -19,7 +19,7 @@ import { downloadBlob } from '@/lib/document-download';
 import type { CvDocument } from '@/lib/cv-database';
 import { blankLoopProfile, loopAudienceContent, validLoopAudience } from '@/lib/job-loop-audiences';
 import { copyLoopSourceDetails } from '@/lib/loop-source-intake';
-import { LoopActivity, LoopDiscoverySources, LoopSchedule, LoopStarterPrompt, LoopWorkspaceOverview } from './JobLoopPanels';
+import { LoopActivity, LoopDiscoverySources, LoopPlanNote, LoopSchedule, LoopStarterPrompt, LoopWorkspaceOverview } from './JobLoopPanels';
 import LoopSelectedPreparation from './LoopSelectedPreparation';
 import LoopCvBuilder from './LoopCvBuilder';
 import LoopCvVariants from './LoopCvVariants';
@@ -636,6 +636,7 @@ export default function JobLoop() {
       {hasUnsavedDraft && <p className="jl-unsaved-notice">You have unsaved edits. Career record, claim and new-vacancy drafts remain in this tab’s memory for up to 30 minutes, including when switching pages. Refresh, closing this tab or changing accounts clears them.</p>}
       {snapshot && !snapshot.profile && <section className="jl-panel" aria-label="Automated Job Loop setup"><h2>{setupDraft ? 'Continue setting up your Automated Job Loop' : 'Set up your Automated Job Loop'}</h2><p>{setupDraft ? `Step ${setupDraft.step + 1} of 6 · ${setupSteps[setupDraft.step]}. Your unfinished answers are still in this tab.` : 'Choose your roles and locations, add or build your CV, then set your search schedule.'}</p><div className="jl-actions"><Link className="jl-button jl-button--primary" to="/onboarding">{setupDraft ? 'Resume setup' : 'Start your setup'}</Link>{tab === 'today' && <button className="jl-button" type="button" onClick={() => setTab('record')}>Set up directly without questions</button>}</div>{setupDraft && <p className="jl-help">Your answers are not saved to your account yet. Resume within 30 minutes; refreshing or signing out clears this draft.</p>}</section>}
       {snapshot?.profile && snapshot.runs.length === 0 && snapshot.packets.length === 0 && <section className="jl-panel" aria-label="Your next setup steps"><h2>Get your first Automated Job Loop result.</h2><p>Your CV and preferences are saved. Review the facts you want to use, then search now. CV variants and a recurring schedule can come afterward.</p>
+        <LoopPlanNote snapshot={snapshot} />
         {!hasConfirmedFact && <div className="jl-quickstart" role="group" aria-label="Quick start">
           <h3>Fastest way: confirm your CV facts and search in one step</h3>
           {quickFacts.length === 0 && suggestionsEmpty
