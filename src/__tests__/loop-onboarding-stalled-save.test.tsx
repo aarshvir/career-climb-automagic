@@ -363,6 +363,52 @@ describe('the original save lands after an empty check unlocked editing (round 2
   });
 });
 
+describe('round 3: only a CV-builder answer is newer when the original save lands and matches the unchanged profile', () => {
+  it('keeps the builder answer readable and copyable instead of clearing the draft and saying saved', async () => {
+    const server = record(); let first: unknown = null;
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    script({ get: async () => ({ snapshot: server.snap() }), existing: async () => ({ snapshot: server.snap() }), save: action => { server.state.writes += 1; first = action.profile; return never(); } });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    // Only the CV builder changes after the unlock; the profile that was submitted stays exactly the same.
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    fireEvent.click(screen.getByText('No CV yet? Build one with guided questions'));
+    fireEvent.change(screen.getByLabelText('How would you introduce your experience? (optional)'), { target: { value: 'Newer builder notes not incorporated into my source CV' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+    server.commit(first);                                               // the original save lands with the unchanged profile
+    await tickAndSave();
+    expect(server.state.writes).toBe(1);                                // no second write
+    expect(screen.queryByRole('heading', { name: 'Your setup is saved.' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Your Automated Job Loop is ready to continue.' })).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('Changes you made since are not saved');
+    expect(screen.getByRole('region', { name: 'Your earlier setup was saved after all.' })).toHaveTextContent('CV builder answers');
+    expect(screen.getByRole('button', { name: 'Back' })).toBeEnabled();
+    expect(screen.getAllByDisplayValue(/Newer builder notes not incorporated/).length).toBeGreaterThan(0);
+    expect((screen.getByLabelText(/Read them here/) as HTMLTextAreaElement).value).toContain('Newer builder notes not incorporated into my source CV');
+    expect(screen.getByRole('button', { name: 'Save my setup' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Copy my newer answers' }));
+    await settle();
+    expect(writeText.mock.calls[0][0]).toContain('Newer builder notes not incorporated into my source CV');
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('still says saved, and clears the draft, when nothing newer exists than what the original save held', async () => {
+    const server = record(); let first: unknown = null;
+    script({ get: async () => ({ snapshot: server.snap() }), existing: async () => ({ snapshot: server.snap() }), save: action => { server.state.writes += 1; first = action.profile; return never(); } });
+    await startSave({ ...blankLoopCvAnswers(), summary: 'Builder notes that were already there when the first save was sent' });
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    server.commit(first);
+    await tickAndSave();
+    expect(screen.getByRole('heading', { name: 'Your setup is saved.' })).toBeInTheDocument();
+    expect(server.state.writes).toBe(1);
+  });
+});
+
 describe('a check that outlives its page, its session or its lifecycle', () => {
   it('writes nothing and shows nothing when the page unmounts during the check', async () => {
     let submitted: unknown = null; let finish: (value: unknown) => void = () => {};

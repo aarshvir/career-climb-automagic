@@ -124,6 +124,8 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   const [conflict, setConflict] = useState<{ kind: 'earlier' | 'other'; saved: NonNullable<LoopSnapshot['profile']> } | null>(null);
   const [copied, setCopied] = useState('');
   const lastWritten = useRef<LoopProfileInput | null>(null);
+  // What the page held, besides the profile, when that write was sent (CV builder answers and role/location text typed but not added): anything newer is kept, never cleared by a matching late save.
+  const lastWrittenDraft = useRef<{ answers: string; roleQuery: string; locationQuery: string } | null>(null);
   const absentGeneration = useRef(trackingLoopGeneration(owner) ?? null);
   const current = () => {
     const observed = trackingLoopGeneration(owner) ?? null;
@@ -248,7 +250,8 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
         if (initial.snapshot.profile) {
           setTrackingLoopGeneration(owner, initial.snapshot.lifecycleGeneration!); snapshot.current = initial.snapshot; reconciling.current = false;
           // The earlier write that went unconfirmed arrived after all, with exactly these answers: that is the saved setup, nothing to write again.
-          if (lastWritten.current && profileMatches(initial.snapshot.profile, submitted)) { lastWritten.current = null; clearOnboardingDraft(); setSaved(true); return; }
+          const sameDraft = !!lastWrittenDraft.current && lastWrittenDraft.current.answers === JSON.stringify(answers) && lastWrittenDraft.current.roleQuery === roleQuery && lastWrittenDraft.current.locationQuery === locationQuery;
+          if (lastWritten.current && sameDraft && profileMatches(initial.snapshot.profile, submitted)) { lastWritten.current = null; lastWrittenDraft.current = null; clearOnboardingDraft(); setSaved(true); return; }
           const arrivedLate = !!lastWritten.current && profileMatches(initial.snapshot.profile, lastWritten.current);
           setConflict({ kind: arrivedLate ? 'earlier' : 'other', saved: initial.snapshot.profile });
           throw new Error(arrivedLate
@@ -259,7 +262,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       }
       if (!current() || turn !== epoch.current) return;
       const original = snapshot.current!;
-      lastWritten.current = submitted;
+      lastWritten.current = submitted; lastWrittenDraft.current = { answers: JSON.stringify(answers), roleQuery, locationQuery };
       const response = await callJobLoop(owner, boundLoopAction({ action: 'save_profile', expectedVersion: original.recordVersion, profile: submitted, saveConsent: true }, original.lifecycleGeneration), () => current() && turn === epoch.current);
       if (!current() || turn !== epoch.current) return;
       if (!response.snapshot?.profile || response.snapshot.lifecycleGeneration !== original.lifecycleGeneration || response.snapshot.recordVersion <= original.recordVersion) throw new Error('The save could not be confirmed. Your answers are still here. Open your dashboard to check before trying again.');
@@ -269,7 +272,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
           : JSON.stringify(response.snapshot.profile[key]) === JSON.stringify(submitted[key]);
         if (!same) throw new Error('The returned setup differs from your answers. Open your dashboard to review it before continuing.');
       }
-      snapshot.current = response.snapshot; reconciling.current = false; lastWritten.current = null; clearOnboardingDraft(); setSaved(true);
+      snapshot.current = response.snapshot; reconciling.current = false; lastWritten.current = null; lastWrittenDraft.current = null; clearOnboardingDraft(); setSaved(true);
     } catch (failure) { if (current() && turn === epoch.current) setError(failure instanceof Error ? failure.message : 'The save could not be confirmed. Check your dashboard before trying again.'); }
     finally {
       if (saveDeadline.current?.turn === turn) { window.clearTimeout(saveDeadline.current.handle); saveDeadline.current = null; }
@@ -299,7 +302,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       if (result.snapshot?.profile) {
         if (!Number.isSafeInteger(generation)) throw new Error('Your saved setup could not be verified. Check again.');
         setTrackingLoopGeneration(owner, generation!); snapshot.current = result.snapshot; setUnconfirmed(null);
-        if (profileMatches(result.snapshot.profile, submitted)) { reconciling.current = false; lastWritten.current = null; clearOnboardingDraft(); setSaved(true); }
+        if (profileMatches(result.snapshot.profile, submitted)) { reconciling.current = false; lastWritten.current = null; lastWrittenDraft.current = null; clearOnboardingDraft(); setSaved(true); }
         else { setConflict({ kind: 'other', saved: result.snapshot.profile }); setError('A different setup is already saved in your account. Open your dashboard to review it; this quiz did not overwrite it. Your answers are still below, unchanged.'); }
       } else if (result.existingState === 'absent' || result.snapshot) {
         if (result.snapshot) {
