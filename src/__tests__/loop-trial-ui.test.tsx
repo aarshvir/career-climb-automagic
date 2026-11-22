@@ -12,15 +12,18 @@ import LoopSubscriptionBilling from '@/components/LoopSubscriptionBilling';
 import {clearTrackingDraftMemory,setTrackingDraftOwner} from '@/lib/tracking-draft-memory';
 import {LOOP_LOCAL_CURRENCIES} from '@/lib/loop-local-prices';
 import {loopTrialDay} from '@/lib/loop-trial';
+import {giveConsent} from '@/test-utils/billing-consent';
 
 const DAY=86400000;
 const price=()=>({quoteId:null,country:null,currency:'USD',amountMinor:LOOP_LOCAL_CURRENCIES.USD.amounts.weekly,exponent:2,catalogVersion:'legacy-usd-v1',taxInclusive:true,interval:'month'});
 const plans=[{id:'weekly',amount:2900,currency:'USD',interval:'month',runsPerWeek:1},{id:'active',amount:5900,currency:'USD',interval:'month',runsPerWeek:3},{id:'daily',amount:9900,currency:'USD',interval:'month',runsPerWeek:7}];
 const status=(changes:Record<string,unknown>={})=>({billingConfigured:true,fulfillmentPending:false,billingMode:'live',generation:0,plans,entitlement:null,subscription:null,checkout:null,cancelRequest:null,trial:{available:true,eligible:true,days:7},...changes});
 const renderPage=(path='/pricing?loopPlan=weekly&country=other')=>render(<MemoryRouter initialEntries={[path]}><LoopSubscriptionBilling/></MemoryRouter>);
-beforeEach(()=>{clearTrackingDraftMemory();setTrackingDraftOwner('owner','session');m.auth={user:{id:'owner'},session:{user:{id:'owner'}},loading:false,authError:null};
+// A fixed test clock (only Date is faked, so timers and Testing Library still run): the trial dates the page shows
+// and the dates computed here come from the same instant, whatever day or minute the suite runs.
+beforeEach(()=>{vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(Date.parse('2026-11-10T12:00:00Z'));clearTrackingDraftMemory();setTrackingDraftOwner('owner','session');m.auth={user:{id:'owner'},session:{user:{id:'owner'}},loading:false,authError:null};
   for(const fn of [m.read,m.quote,m.checkout,m.cancel,m.open,m.report])fn.mockReset();m.report.mockResolvedValue(undefined);m.read.mockResolvedValue(status());});
-afterEach(()=>{cleanup();clearTrackingDraftMemory();});
+afterEach(()=>{cleanup();clearTrackingDraftMemory();vi.useRealTimers();});
 
 describe('seven-day free trial journey',()=>{
   it('shows the price, trial end and first-charge date before any card is entered, with nothing pre-ticked',async()=>{
@@ -41,8 +44,12 @@ describe('seven-day free trial journey',()=>{
   it('sends the explicit trial intent after consent',async()=>{
     m.checkout.mockImplementation(async (_scope,intent)=>({provider:'dodo',billingMode:'live',generation:0,requestId:intent.requestId,plan:'weekly',sessionId:'cks_trial',url:'https://checkout.dodopayments.com/s',trialDays:7}));
     renderPage();
-    fireEvent.click(await screen.findByRole('checkbox',{name:/I start a 7-day free trial/}));
-    fireEvent.click(screen.getByRole('button',{name:/Start 7-day free trial/}));
+    // The consent must be held (not just clicked) before the button is pressed: the page revokes consent when its
+    // status/price effects re-run, which on a busy runner can land just after a first click.
+    await giveConsent(await screen.findByRole('checkbox',{name:/I start a 7-day free trial/}));
+    const start=screen.getByRole('button',{name:/Start 7-day free trial/});
+    await waitFor(()=>expect(start).toBeEnabled());
+    fireEvent.click(start);
     await waitFor(()=>expect(m.checkout).toHaveBeenCalledTimes(1));
     expect(m.checkout.mock.calls[0][1]).toMatchObject({action:'checkout',plan:'weekly',trial:true,consent:true});
     expect(await screen.findByText(/free trial starts only after Dodo Payments confirms your card/)).toBeInTheDocument();
