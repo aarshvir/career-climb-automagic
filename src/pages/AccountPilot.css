@@ -461,6 +461,7 @@
 
 /* ---------- Round 7: the free allowance and next step are visible on the ad landing ---------- */
 .ap-story-free, .ap-next-line { display: none; }
+.jv-account--standalone .ap-story-plan { display: block; max-width: 360px; margin: 0 0 12px; color: var(--jv-on-dark-body); font-size: 1rem; line-height: 1.5; }
 .jv-account .ap-auth-switch { font-size: var(--t-small); }
 @media (max-width: 760px) {
   .jv-account--standalone .ap-story-free { display: block; margin: 10px 0 0; color: var(--jv-on-dark-1); font-size: var(--t-sm); font-weight: var(--fw-medium); line-height: 1.4; white-space: nowrap; }
