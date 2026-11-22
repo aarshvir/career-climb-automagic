@@ -665,6 +665,67 @@ describe('trial reminder evidence (Dodo sends the trial-ending email; its log ca
     expect(await dispatch()).toBe(0);
     expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_trial_reminder_receipts')).rows[0].n).toBe(0);
   });
+  // Round 2: the database backstop must agree with the sweep selector once the first charge has passed.
+  it('the database backstop keeps the missed-reminder incident when a failed first charge moves the subscription to on_hold during an edge outage', async () => {
+    await useScheduler();
+    await startTrial(Date.now() - 7 * DAY - 3600000);
+    provider.firstChargeFails = true;
+    await chargeFirst();
+    expect((await query("SELECT status FROM jobvance_private.loop_subscriptions WHERE subscription_id='sub_trial'")).rows[0].status).toBe('on_hold');
+    expect((await query('SELECT granted FROM jobvance_private.loop_subscription_trials')).rows[0].granted).toBe(true);
+    // The edge sweep never runs: only the database acts.
+    expect(await dispatch()).toBe(1); // the billing function is still woken for it
+    const flagged = await receipt();
+    expect(flagged).toMatchObject({ checks: 0, last_read_at: null, escalation_reasons: ['unavailable_overdue'], unavailable_overdue_at: expect.any(Date) });
+    expect(await escalated()).toEqual([expect.objectContaining({ subscriptionId: 'sub_trial', reason: 'unavailable_overdue', subscriptionStatus: 'on_hold', charged: true, lastReadAt: null })]);
+    await dispatch();
+    expect((await receipt()).escalated_at).toEqual(flagged.escalated_at); // flagged once, not rewritten
+    // When the edge comes back with Dodo still down, it reads the on_hold trial and the incident stays.
+    emailLog = Error('Provider unavailable');
+    expect(await sweep()).toMatchObject({ checked: 1, unavailable: 1 });
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'unavailable_overdue', subscriptionStatus: 'on_hold', unavailableStreak: 1 })]);
+  });
+  it('after the first charge the backstop, the dispatcher and the sweep keep an overdue trial whatever status the payment failure left it in', async () => {
+    await useScheduler();
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    await shiftTrial(2 * 24 + 1); // overdue, and the first charge has passed
+    for (const status of ['active', 'on_hold', 'past_due', 'paused', 'failed', 'expired']) {
+      await query('TRUNCATE jobvance_private.loop_trial_reminder_receipts');
+      await query('UPDATE jobvance_private.loop_subscriptions SET status=$1', [status]);
+      expect(await selected(), status).toEqual(['sub_trial']);
+      expect(await dispatch(), status).toBe(1);
+      expect(await escalated(), status).toEqual([expect.objectContaining({ reason: 'unavailable_overdue', subscriptionStatus: status, charged: true })]);
+    }
+  });
+  for (const [kind, change] of [['cancelled at period end', "status='cancelled',cancel_at_period_end=true"], ['revoked', 'revoked=true']] as const) {
+    for (const when of ['before', 'after'] as const) {
+      it(`a trial ${kind} is left alone ${when} its first charge by the backstop, the dispatcher and the sweep`, async () => {
+        await useScheduler();
+        await startTrial(Date.now() - 5 * DAY - 60000);
+        await shiftTrial(when === 'before' ? 14 : 2 * 24 + 1); // overdue; the first charge is still ahead / has passed
+        await query('UPDATE jobvance_private.loop_subscriptions SET ' + change);
+        expect(await dispatch()).toBe(0);
+        expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_trial_reminder_receipts')).rows[0].n).toBe(0);
+        expect(await selected()).toEqual([]);
+        expect(await sweep()).toMatchObject({ checked: 0 });
+        expect(await escalated()).toEqual([]);
+      });
+    }
+  }
+  it('before the first charge only an active subscription owes the reminder', async () => {
+    await useScheduler();
+    await startTrial(Date.now() - 5 * DAY - 60000);
+    await shiftTrial(14); // overdue, first charge still ahead
+    for (const status of ['pending', 'on_hold', 'past_due', 'paused', 'failed', 'expired', 'cancelled']) {
+      await query('UPDATE jobvance_private.loop_subscriptions SET status=$1', [status]);
+      expect(await dispatch(), status).toBe(0);
+      expect(await selected(), status).toEqual([]);
+      expect((await query('SELECT count(*)::int n FROM jobvance_private.loop_trial_reminder_receipts')).rows[0].n, status).toBe(0);
+    }
+    await query("UPDATE jobvance_private.loop_subscriptions SET status='active'");
+    expect(await dispatch()).toBe(1);
+    expect(await escalated()).toEqual([expect.objectContaining({ reason: 'unavailable_overdue', subscriptionStatus: 'active', charged: false })]);
+  });
   it('reads the least recently attempted rows first, so an outage cannot keep the same rows at the front of the batch', async () => {
     await startTrial(Date.now() - 5 * DAY - 60000); await cloneTrials(4); // sub_fair1..4 and sub_trial, all due with the same dates
     emailLog = Error('Provider unavailable');

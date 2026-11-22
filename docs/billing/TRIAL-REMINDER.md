@@ -30,7 +30,7 @@ A scheduled job runs every 30 minutes. It does three things:
 2. **It wakes the billing function** if any trial still needs a look.
 3. **The billing function reads Dodo's list** for the trials that need it, at most 50 per run, **least recently tried first** (never tried first of all). A failed try pushes its trial behind the others, so one stuck group cannot starve the rest. After five failed reads in a row the run stops and leaves the rest for the next run. Each trial is tried at most once per run, then waits 20 minutes, doubling to at most 4 hours after repeated failures.
 
-A trial is watched from its reminder time until three days **after** its first charge. The charge does not end the watch: an outage that spans the charge still produces a lasting record. A trial that was cancelled or revoked owes no reminder and is dropped.
+A trial is watched from its reminder time until three days **after** its first charge. The charge does not end the watch: an outage that spans the charge still produces a lasting record. A trial that was cancelled at the end of its period, or revoked, owes no reminder and is dropped. Before the first charge the subscription must still be active. After it, its status no longer matters: if the first charge fails, Dodo puts the subscription on hold (or it becomes failed, past due, paused or expired), and the missed-reminder incident is still recorded and kept. The sweep and the database backstop share one rule for this, so they cannot disagree.
 
 ## The delivery outcome
 

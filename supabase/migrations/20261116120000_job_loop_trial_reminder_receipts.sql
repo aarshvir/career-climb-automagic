@@ -120,11 +120,25 @@ CREATE TRIGGER loop_trial_reminder_receipt_immutable BEFORE UPDATE ON jobvance_p
 --   * a granted trial whose reminder time has come and whose marker is unset;
 --   * the first charge is NOT a stop: rows are watched until three days after
 --     it, so an outage that spans the charge still produces an incident;
---   * a cancelled or revoked trial owes no reminder and is dropped; before the
---     charge the subscription must still be active;
+--   * a trial cancelled at period end or revoked owes no reminder and is
+--     dropped; before the charge the subscription must still be active, after
+--     it any status counts (loop_trial_reminder_owed, below);
 --   * a row with no email yet keeps being read; a row whose email is still
 --     'sent' is rechecked at most 24 times; a delivered, failed, complained or
 --     blocked answer ends the rechecks.
+
+-- Whether a trial still owes (or has missed) a reminder, from its subscription.
+-- ONE definition, used by the sweep selector and by the database backstop so
+-- they cannot drift apart. A subscription cancelled at period end or revoked
+-- owes nothing, at any time. Before the first charge the subscription must still
+-- be active. After the first charge its status no longer matters: a failed
+-- first charge moves it to on_hold (and failed, past_due, paused or expired are
+-- possible), and the missed-reminder incident must survive that.
+CREATE FUNCTION jobvance_private.loop_trial_reminder_owed(p_first_charge_at timestamptz,p_status text,p_cancel_at_period_end boolean,p_revoked boolean)
+RETURNS boolean LANGUAGE sql STABLE SET search_path='' AS $$
+  SELECT NOT p_cancel_at_period_end AND NOT p_revoked AND (p_first_charge_at<=now() OR p_status='active')
+$$;
+
 CREATE FUNCTION jobvance_private.loop_trial_reminder_targets(p_mode text,p_limit integer)
 RETURNS TABLE(subscription_id text,customer_id text,reminder_at timestamptz,first_charge_at timestamptz,checks integer,email_log_id text,delivery_status text)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
@@ -133,8 +147,7 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
   JOIN jobvance_private.loop_subscriptions s ON s.subscription_id=t.subscription_id AND s.mode=t.mode
   LEFT JOIN jobvance_private.loop_trial_reminder_receipts r ON r.mode=t.mode AND r.subscription_id=t.subscription_id
   WHERE t.mode=p_mode AND t.granted AND t.reminder_sent_at IS NULL AND t.reminder_at<=now() AND now()<t.first_charge_at+interval '3 days'
-    AND NOT s.cancel_at_period_end AND NOT s.revoked
-    AND (t.first_charge_at<=now() OR s.status='active')
+    AND jobvance_private.loop_trial_reminder_owed(t.first_charge_at,s.status,s.cancel_at_period_end,s.revoked)
     AND (r.email_log_id IS NULL OR (r.delivery_status='sent' AND r.delivery_checks<24))
     AND (r.last_checked_at IS NULL OR r.last_checked_at+LEAST(interval '20 minutes'*power(2,r.backoff_step),interval '4 hours')<=now())
   ORDER BY r.last_checked_at NULLS FIRST,t.reminder_at,t.subscription_id
@@ -242,7 +255,8 @@ END $$;
 -- reminder still owed whose email log has not been read since its 12-hour
 -- deadline (plus an hour for the next sweep) gets an 'unavailable_overdue'
 -- incident, so a dead scheduler or a long provider outage cannot make an
--- overdue trial vanish. It also covers a first charge that has already passed.
+-- overdue trial vanish. It also covers a first charge that has already passed,
+-- including one whose failure moved the subscription out of 'active'.
 CREATE FUNCTION jobvance_private.loop_trial_reminder_flag_overdue() RETURNS integer
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE flagged integer;
@@ -250,7 +264,8 @@ BEGIN
   WITH overdue AS (
     SELECT t.mode,t.subscription_id
     FROM jobvance_private.loop_subscription_trials t
-    JOIN jobvance_private.loop_subscriptions s ON s.subscription_id=t.subscription_id AND s.mode=t.mode AND s.status='active' AND NOT s.cancel_at_period_end AND NOT s.revoked
+    JOIN jobvance_private.loop_subscriptions s ON s.subscription_id=t.subscription_id AND s.mode=t.mode
+      AND jobvance_private.loop_trial_reminder_owed(t.first_charge_at,s.status,s.cancel_at_period_end,s.revoked)
     LEFT JOIN jobvance_private.loop_trial_reminder_receipts r ON r.mode=t.mode AND r.subscription_id=t.subscription_id
     WHERE t.granted AND t.reminder_sent_at IS NULL AND now()>=t.reminder_at+interval '13 hours' AND now()<t.first_charge_at+interval '30 days'
       AND r.email_log_id IS NULL AND (r.last_read_at IS NULL OR r.last_read_at<t.reminder_at+interval '12 hours')
@@ -335,8 +350,8 @@ BEGIN
 END $$;
 
 REVOKE ALL ON FUNCTION jobvance_private.loop_email_delivery_rank(text),jobvance_private.loop_trial_reminder_reason(text[],text),
-  jobvance_private.immutable_loop_trial_reminder_receipt(),jobvance_private.loop_trial_reminder_targets(text,integer),
-  jobvance_private.loop_trial_reminder_flag_overdue() FROM PUBLIC,anon,authenticated,service_role;
+  jobvance_private.immutable_loop_trial_reminder_receipt(),jobvance_private.loop_trial_reminder_owed(timestamptz,text,boolean,boolean),
+  jobvance_private.loop_trial_reminder_targets(text,integer),jobvance_private.loop_trial_reminder_flag_overdue() FROM PUBLIC,anon,authenticated,service_role;
 REVOKE ALL ON FUNCTION public.job_loop_billing_trial_reminders_unconfirmed(text,integer),
   public.job_loop_billing_trial_reminder_check(text,text,text,text,text,timestamptz,integer),
   public.job_loop_billing_trial_reminder_unavailable(text,text,text),
