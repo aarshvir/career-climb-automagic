@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import LoopOnboarding from '@/pages/LoopOnboarding';
 import { blankLoopProfile } from '@/lib/job-loop-audiences';
 import { blankLoopCvAnswers } from '@/lib/loop-cv-builder';
-import { retainOnboardingDraft } from '@/lib/loop-onboarding-memory';
+import { recoverOnboardingDraft, retainOnboardingDraft } from '@/lib/loop-onboarding-memory';
 import { clearTrackingDraftMemory, setTrackingDraftOwner, setTrackingLoopGeneration, trackingDraftAuthority } from '@/lib/tracking-draft-memory';
 
 vi.unmock('react-router-dom');
@@ -465,5 +465,164 @@ describe('a CV file that never finishes reading', () => {
     await act(async () => { finish('Replaced Late\nA late parser result that must not appear.'); await Promise.resolve(); });
     expect(screen.queryByDisplayValue(/A late parser result/)).not.toBeInTheDocument();
     expect(screen.getByDisplayValue(/Recorded local plant species/)).toBeInTheDocument();
+  });
+});
+
+/**
+ * Round 4 (independent review, 22 Nov): the original save was given up on, an empty read unlocked editing, a CV-builder answer was added, the deliberate retry's
+ * fresh read also timed out before any second write, and then the original write landed. The check ("Check whether my setup was saved") matched the saved profile
+ * alone, cleared the draft and said "Your setup is saved." although the newer answer was never sent. Every read of the saved setup now goes through ONE rule: the draft
+ * is cleared, and "saved" is said, only when the page still holds exactly the draft of the write that was sent. These tests run each path with a newer answer (kept,
+ * readable, copyable, never a second write, no "saved") and with nothing newer (still says saved and clears the draft).
+ */
+describe('round 4: every read of the saved setup keeps a newer answer, and says saved only when nothing newer exists', () => {
+  const NOTE = 'Newer builder notes never sent';
+  type Newer = 'builder' | 'name';
+  const newerText = (newer: Newer) => (newer === 'builder' ? NOTE : 'Name on your CV: Alex Revised');
+  const savedHeading = () => screen.queryByRole('heading', { name: 'Your setup is saved.' });
+  const retained = () => recoverOnboardingDraft('owner-a', trackingDraftAuthority('owner-a'), 0);
+  const writeText = vi.fn();
+  beforeEach(() => { writeText.mockReset(); writeText.mockResolvedValue(undefined); Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } }); });
+
+  /** After an empty check the form is open again; a newer answer is added without ever being applied to the CV text (builder) or as a visible edit (name). */
+  function addNewer(newer: Newer) {
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    if (newer === 'builder') {
+      fireEvent.click(screen.getByText('No CV yet? Build one with guided questions'));
+      fireEvent.change(screen.getByLabelText('How would you introduce your experience? (optional)'), { target: { value: NOTE } });
+    } else fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Revised' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+  }
+  async function expectNewerKept(server: ReturnType<typeof record>, newer: Newer, writes = 1) {
+    expect(savedHeading()).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Your Automated Job Loop is ready to continue.' })).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Your earlier setup was saved after all.' })).toHaveTextContent('Still here and NOT saved');
+    expect(screen.getByRole('alert')).toHaveTextContent('Changes you made since are not saved');
+    expect(screen.getByRole('button', { name: 'Back' })).toBeEnabled();                       // the newer answer is reachable in the form too
+    expect(screen.getByRole('button', { name: 'Save my setup' })).toBeDisabled();
+    expect(screen.getByRole('checkbox', { name: /Save this CV text/ })).toBeDisabled();
+    expect((screen.getByLabelText(/Read them here/) as HTMLTextAreaElement).value).toContain(newerText(newer));
+    fireEvent.click(screen.getByRole('button', { name: 'Copy my newer answers' }));
+    await settle();
+    expect(writeText.mock.calls[0][0]).toContain(newerText(newer));
+    expect(JSON.stringify(retained())).toContain(newer === 'builder' ? NOTE : 'Alex Revised');   // the draft was not cleared
+    expect(server.state.writes).toBe(writes);                                                   // never an automatic extra write
+    expect(names().filter(name => name === 'save_profile')).toHaveLength(writes);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  }
+  function expectSavedAndCleared(server: ReturnType<typeof record>, writes = 1) {
+    expect(savedHeading()).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Your earlier setup was saved after all.' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
+    expect(retained()).toBeNull();                                                              // nothing newer existed, so the draft is cleared
+    expect(server.state.writes).toBe(writes);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  }
+
+  /** The exact review sequence: the retry's fresh read hangs (no second write is ever sent), times out, and only then does the original write land. */
+  async function retryReadTimesOut(newer: Newer | null) {
+    const server = record(); let first: unknown = null;
+    script({ get: () => never(), existing: async () => ({ snapshot: server.snap() }), save: action => { first = action.profile; server.state.writes += 1; return never(); } });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    expect(document.querySelector('fieldset')).toBeEnabled();
+    if (newer) addNewer(newer);
+    await tickAndSave();
+    await advance(31_000);
+    expect(screen.getByRole('alert')).toHaveTextContent('could not confirm');
+    expect(names().filter(name => name === 'save_profile')).toHaveLength(1);
+    server.commit(first);
+    return server;
+  }
+
+  it.each(['builder', 'name'] as const)('check after the retry\'s read also timed out: a newer %s answer stays readable and copyable, and the page does not say saved', async newer => {
+    const server = await retryReadTimesOut(newer);
+    fireEvent.click(checkButton());
+    await settle();
+    await expectNewerKept(server, newer);
+  });
+
+  it('check after the retry\'s read also timed out, nothing newer: still says saved and clears the draft', async () => {
+    const server = await retryReadTimesOut(null);
+    fireEvent.click(checkButton());
+    await settle();
+    expectSavedAndCleared(server);
+  });
+
+  /** A third, deliberate attempt after two timeouts and an empty check: its fresh read finds the original write. */
+  async function thirdAttempt(newer: Newer | null) {
+    const server = record(); let first: unknown = null; let gets = 0;
+    script({ get: () => (++gets === 1 ? never() : Promise.resolve({ snapshot: server.snap() })), existing: async () => ({ snapshot: server.snap() }), save: action => { first = action.profile; server.state.writes += 1; return never(); } });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    if (newer) addNewer(newer);
+    await tickAndSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    expect(screen.getByRole('alert')).toHaveTextContent('Nothing was saved');
+    server.commit(first);
+    await tickAndSave();
+    return server;
+  }
+
+  it.each(['builder', 'name'] as const)('retry read after two timeouts: a newer %s answer stays readable and copyable, and the page does not say saved', async newer => {
+    const server = await thirdAttempt(newer);
+    await expectNewerKept(server, newer);
+  });
+
+  it('retry read after two timeouts, nothing newer: still says saved and clears the draft', async () => {
+    const server = await thirdAttempt(null);
+    expectSavedAndCleared(server);
+  });
+
+  /** The retry's fresh read answers (empty), its own write is sent and never answers; then the original write lands and the check reads it. */
+  async function secondWriteTimesOut(newer: Newer) {
+    const server = record(); let first: unknown = null;
+    script({ get: async () => ({ snapshot: server.snap() }), existing: async () => ({ snapshot: server.snap() }), save: action => { server.state.writes += 1; if (server.state.writes === 1) first = action.profile; return never(); } });
+    await startSave();
+    await advance(31_000);
+    fireEvent.click(checkButton());
+    await settle();
+    addNewer(newer);
+    await tickAndSave();
+    await advance(31_000);
+    server.commit(first);
+    fireEvent.click(checkButton());
+    await settle();
+    return server;
+  }
+
+  it('check after the retry\'s own write was sent: the draft the user submitted last is exactly what was sent, so a matching saved setup is saved', async () => {
+    const server = await secondWriteTimesOut('builder');
+    expectSavedAndCleared(server, 2);                                                           // the original and the one deliberate retry; the check wrote nothing
+    expect(names().filter(name => name === 'save_profile')).toHaveLength(2);
+  });
+
+  it('check after the retry\'s own write was sent with a changed name: the saved older setup is kept apart from the newer name, which stays readable and copyable', async () => {
+    const server = await secondWriteTimesOut('name');
+    expect(savedHeading()).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'A setup is already saved in your account.' })).toHaveTextContent('Still here and NOT saved');
+    expect(screen.getByRole('alert')).toHaveTextContent('A different setup is already saved');
+    expect((screen.getByLabelText(/Read them here/) as HTMLTextAreaElement).value).toContain('Name on your CV: Alex Revised');
+    expect(JSON.stringify(retained())).toContain('Alex Revised');
+    expect(server.state.writes).toBe(2);
+    expect(names().filter(name => name === 'save_profile')).toHaveLength(2);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('check after the first save timed out, with builder answers that were already on the page when it was sent: says saved and clears the draft', async () => {
+    const server = record(); let first: unknown = null;
+    script({ get: async () => ({ snapshot: server.snap() }), existing: async () => ({ snapshot: server.snap() }), save: action => { server.state.writes += 1; first = action.profile; return never(); } });
+    await startSave({ ...blankLoopCvAnswers(), summary: 'Builder notes that were already there when the first save was sent' });
+    await advance(31_000);
+    server.commit(first);
+    fireEvent.click(checkButton());
+    await settle();
+    expectSavedAndCleared(server);
   });
 });

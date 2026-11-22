@@ -13,6 +13,7 @@ import LoopCvBuilder from './LoopCvBuilder';
 import LoopPreferencePicker from '@/components/LoopPreferencePicker';
 import { accountRoleSuggestions, cvRoleSuggestions, roleChoices, locationChoices, cleanPreferences } from '@/lib/loop-role-suggestions';
 import { retainOnboardingDraft, recoverOnboardingDraft, clearOnboardingDraft } from '@/lib/loop-onboarding-memory';
+import { draftState, lateSaveOutcome, submittedForm, type DraftState } from '@/lib/loop-onboarding-readback';
 import { adAttributionQuery } from '@/lib/meta-pixel';
 import { clearPreSignupAnswers, takePreSignupAnswers } from '@/lib/pre-signup-quiz';
 import './JobLoop.css';
@@ -25,14 +26,7 @@ const SETUP_SAVE_DEADLINE_MS = 30_000;
 const CV_READ_DEADLINE_MS = 30_000;
 const list = (value: string) => [...new Set(value.split(/[\n,]/).map(item => item.trim()).filter(Boolean))];
 
-/** True when a saved profile carries exactly the submitted answers (the comparison the save itself makes). */
-function profileMatches(saved: NonNullable<LoopSnapshot['profile']>, submitted: LoopProfileInput): boolean {
-  return (Object.keys(submitted) as (keyof LoopProfileInput)[]).every(key => key === 'compensation'
-    ? (['currency', 'period', 'minimum'] as const).every(field => saved.compensation[field] === submitted.compensation[field])
-    : JSON.stringify(saved[key]) === JSON.stringify(submitted[key]));
-}
-
-const submittedForm = (profile: LoopProfileInput): LoopProfileInput => structuredClone({ ...profile, name: profile.name.trim(), contactLine: profile.contactLine.trim(), sourceText: profile.sourceText.trim() });
+const EARLIER_SAVE_MESSAGE = 'Your earlier save arrived after all, so a setup is saved. Changes you made since are not saved and nothing was overwritten. Your newer answers are still below, unchanged.';
 const PROFILE_PARTS: [keyof LoopProfileInput, string][] = [['targetTitles', 'Target roles'], ['locations', 'Cities or countries'], ['compensation', 'Compensation'], ['discreetSearch', 'Discreet search'], ['excludedTerms', 'Private terms'],
   ['name', 'Name on your CV'], ['contactLine', 'Contact line'], ['experienceYears', 'Years of experience'], ['sourceText', 'CV text']];
 function partText(profile: LoopProfileInput, key: keyof LoopProfileInput): string {
@@ -123,9 +117,12 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   // A setup that is already saved (an earlier save that arrived late, or one made in another tab). The page keeps the whole newer draft in view, readable and copyable, and never writes again.
   const [conflict, setConflict] = useState<{ kind: 'earlier' | 'other'; saved: NonNullable<LoopSnapshot['profile']> } | null>(null);
   const [copied, setCopied] = useState('');
-  const lastWritten = useRef<LoopProfileInput | null>(null);
-  // What the page held, besides the profile, when that write was sent (CV builder answers and role/location text typed but not added): anything newer is kept, never cleared by a matching late save.
-  const lastWrittenDraft = useRef<{ answers: string; roleQuery: string; locationQuery: string } | null>(null);
+  // The whole draft of the most recent write that was actually SENT: the profile plus what the page held besides it (CV builder answers, role/location text typed but not added).
+  // A save attempt that gave up before it sent a write (its fresh read never answered) is not recorded here, so a newer answer added since is never taken for part of that write.
+  const sentWrite = useRef<DraftState | null>(null);
+  // The draft on screen right now, refreshed on every render, so a readback is always judged against the page as it is when the answer arrives.
+  const liveDraft = useRef({ profile, answers, roleQuery, locationQuery });
+  liveDraft.current = { profile, answers, roleQuery, locationQuery };
   const absentGeneration = useRef(trackingLoopGeneration(owner) ?? null);
   const current = () => {
     const observed = trackingLoopGeneration(owner) ?? null;
@@ -138,6 +135,19 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     for (const timer of [loadDeadline, saveDeadline, checkDeadline, cvDeadline]) if (timer.current) { window.clearTimeout(timer.current.handle); timer.current = null; }
   }; }, []);
   useEffect(() => { heading.current?.focus(); }, [step, saved]);
+  /**
+   * The ONE place that decides what a read of the saved setup means for this page: the fresh read before a retry, the check after an unconfirmed save and a confirmed save all end here,
+   * and nothing else may clear the draft or say "saved". Only when the page still holds exactly the draft of the write that was sent (profile, CV builder answers, role and location text)
+   * is the draft cleared and the saved heading shown. Otherwise the saved setup and the newer answers stay side by side, readable and copyable, and nothing is written again.
+   * Returns null when settled, or the message to show when the page holds something the saved setup does not.
+   */
+  function readBack(savedProfile: NonNullable<LoopSnapshot['profile']>, otherMessage: string): string | null {
+    const now = liveDraft.current;
+    const outcome = lateSaveOutcome(savedProfile, sentWrite.current, draftState(now.profile, now.answers, now.roleQuery, now.locationQuery));
+    if (outcome === 'settled') { reconciling.current = false; sentWrite.current = null; clearOnboardingDraft(); setSaved(true); return null; }
+    setConflict({ kind: outcome, saved: savedProfile });
+    return outcome === 'earlier' ? EARLIER_SAVE_MESSAGE : otherMessage;
+  }
   async function load() {
     const turn = ++epoch.current; setBusy('Loading your saved setup…'); setError(''); consentEpoch.current = null; setConsent(false);
     if (loadDeadline.current) window.clearTimeout(loadDeadline.current.handle);
@@ -249,20 +259,17 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
         if (!initial.snapshot || initial.erasureGeneration !== undefined || !Number.isSafeInteger(initial.snapshot.lifecycleGeneration)) throw new Error('Your workspace could not be opened. Your answers are still here.');
         if (initial.snapshot.profile) {
           setTrackingLoopGeneration(owner, initial.snapshot.lifecycleGeneration!); snapshot.current = initial.snapshot; reconciling.current = false;
-          // The earlier write that went unconfirmed arrived after all, with exactly these answers: that is the saved setup, nothing to write again.
-          const sameDraft = !!lastWrittenDraft.current && lastWrittenDraft.current.answers === JSON.stringify(answers) && lastWrittenDraft.current.roleQuery === roleQuery && lastWrittenDraft.current.locationQuery === locationQuery;
-          if (lastWritten.current && sameDraft && profileMatches(initial.snapshot.profile, submitted)) { lastWritten.current = null; lastWrittenDraft.current = null; clearOnboardingDraft(); setSaved(true); return; }
-          const arrivedLate = !!lastWritten.current && profileMatches(initial.snapshot.profile, lastWritten.current);
-          setConflict({ kind: arrivedLate ? 'earlier' : 'other', saved: initial.snapshot.profile });
-          throw new Error(arrivedLate
-            ? 'Your earlier save arrived after all, so a setup is saved. Changes you made since are not saved and nothing was overwritten. Your newer answers are still below, unchanged.'
-            : 'A setup was saved in another tab. Open your dashboard to review it; this quiz did not overwrite it. Your answers are still below, unchanged.');
+          // A setup is already saved. If it is exactly the write this page sent and nothing newer is on the page, that is the saved setup and there is nothing to write again;
+          // otherwise the saved setup and the newer answers are kept side by side (one rule, shared with every other readback).
+          const unsettled = readBack(initial.snapshot.profile, 'A setup was saved in another tab. Open your dashboard to review it; this quiz did not overwrite it. Your answers are still below, unchanged.');
+          if (unsettled === null) return;
+          throw new Error(unsettled);
         }
         setTrackingLoopGeneration(owner, initial.snapshot.lifecycleGeneration!); snapshot.current = initial.snapshot;
       }
       if (!current() || turn !== epoch.current) return;
       const original = snapshot.current!;
-      lastWritten.current = submitted; lastWrittenDraft.current = { answers: JSON.stringify(answers), roleQuery, locationQuery };
+      sentWrite.current = draftState(profile, answers, roleQuery, locationQuery);
       const response = await callJobLoop(owner, boundLoopAction({ action: 'save_profile', expectedVersion: original.recordVersion, profile: submitted, saveConsent: true }, original.lifecycleGeneration), () => current() && turn === epoch.current);
       if (!current() || turn !== epoch.current) return;
       if (!response.snapshot?.profile || response.snapshot.lifecycleGeneration !== original.lifecycleGeneration || response.snapshot.recordVersion <= original.recordVersion) throw new Error('The save could not be confirmed. Your answers are still here. Open your dashboard to check before trying again.');
@@ -272,7 +279,9 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
           : JSON.stringify(response.snapshot.profile[key]) === JSON.stringify(submitted[key]);
         if (!same) throw new Error('The returned setup differs from your answers. Open your dashboard to review it before continuing.');
       }
-      snapshot.current = response.snapshot; reconciling.current = false; lastWritten.current = null; lastWrittenDraft.current = null; clearOnboardingDraft(); setSaved(true);
+      snapshot.current = response.snapshot;
+      const unsettled = readBack(response.snapshot.profile, 'The returned setup differs from your answers. Open your dashboard to review it before continuing.');
+      if (unsettled !== null) throw new Error(unsettled);
     } catch (failure) { if (current() && turn === epoch.current) setError(failure instanceof Error ? failure.message : 'The save could not be confirmed. Check your dashboard before trying again.'); }
     finally {
       if (saveDeadline.current?.turn === turn) { window.clearTimeout(saveDeadline.current.handle); saveDeadline.current = null; }
@@ -283,8 +292,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   }
   /** Read-only check after an unconfirmed save: says whether the write arrived before anything is written again. */
   async function checkSaved() {
-    const submitted = unconfirmed;
-    if (!submitted || !current() || busy) return;
+    if (!unconfirmed || !current() || busy) return;
     const turn = ++epoch.current; setBusy('Checking your saved setup…'); setError(''); consentEpoch.current = null; setConsent(false);
     if (checkDeadline.current) window.clearTimeout(checkDeadline.current.handle);
     checkDeadline.current = { turn, handle: window.setTimeout(() => {
@@ -302,8 +310,10 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
       if (result.snapshot?.profile) {
         if (!Number.isSafeInteger(generation)) throw new Error('Your saved setup could not be verified. Check again.');
         setTrackingLoopGeneration(owner, generation!); snapshot.current = result.snapshot; setUnconfirmed(null);
-        if (profileMatches(result.snapshot.profile, submitted)) { reconciling.current = false; lastWritten.current = null; lastWrittenDraft.current = null; clearOnboardingDraft(); setSaved(true); }
-        else { setConflict({ kind: 'other', saved: result.snapshot.profile }); setError('A different setup is already saved in your account. Open your dashboard to review it; this quiz did not overwrite it. Your answers are still below, unchanged.'); }
+        // Not "does the saved profile match the last attempt" (an attempt can give up before it sends a write, and a newer answer may have been added since): the shared rule asks whether
+        // the page still holds exactly the draft of the write that was sent.
+        const unsettled = readBack(result.snapshot.profile, 'A different setup is already saved in your account. Open your dashboard to review it; this quiz did not overwrite it. Your answers are still below, unchanged.');
+        if (unsettled !== null) setError(unsettled);
       } else if (result.existingState === 'absent' || result.snapshot) {
         if (result.snapshot) {
           if (!Number.isSafeInteger(generation)) throw new Error('Your saved setup could not be verified. Check again.');
