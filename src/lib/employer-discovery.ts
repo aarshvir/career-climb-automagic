@@ -75,15 +75,25 @@ function broadRoleLevel(target: string): BroadRoleLevel | null {
 /** The posting must BE the intern or trainee role, not a job that runs, supervises or recruits for the programme.
  * Rejected: a senior title; the word followed by a programme noun and anything else ("Internship Programme
  * Manager", "Trainee Programme Supervisor"); the word followed by a manager, supervisor, coordinator,
- * administrator, mentor, recruiter, trainer or leader. Parenthesised text and text after a separator
- * ("Intern, Finance", "Intern - Finance") are qualifiers and never change what the role is. */
+ * administrator, mentor, recruiter, trainer or leader. The whole title is read: a manager, supervisor,
+ * coordinator and the like named in ANY other piece of the title, before or after the level word and whatever
+ * separates them ("Coordinator, Internship Programme", "Internship Programme - Coordinator", "Supervisor -
+ * Graduate Trainee Programme", "Intern - Product Manager"), makes the posting that job, not the intern role.
+ * A function word inside the same piece that precedes the level word ("Product Manager Intern") is a field, not
+ * the job, and a piece with no such word ("Intern, Finance", "Intern - Finance", "Intern (Summer 2027)") is only a
+ * qualifier. Pieces are cut at any dash (spaced or not), a bar, ">", a bullet, commas, semicolons, colons, slashes,
+ * brackets, " & ", " + " and " and "; the hyphen of "co-ordinator" is the one hyphen that is part of a word. */
 const PROGRAMME_NOUN = /^\s*(?:programmes?|programs?|schemes?)\b/;
 const PROGRAMME_RUNNER = /\b(?:managers?|supervisors?|co-?ordinators?|administrators?|mentors?|recruiters?|trainers?|leaders?)\b/;
+const TITLE_PIECE_BREAK = /[-–—|>•·]|\s(?:&|\+|and)\s|[,;:/()[\]]/;
 function isEarlyCareerRole(title: string, word: RegExp): boolean {
   if (SENIOR.test(title)) return false;
-  const segment = title.replace(/\([^)]*\)|\[[^\]]*\]/g, ' ').split(/\s[-–—|]\s|[,;:|/]/).find(part => word.test(part));
+  const pieces = title.replace(/\bco-(?=ordinators?\b)/gi, 'co').split(TITLE_PIECE_BREAK);
+  const index = pieces.findIndex(part => word.test(part));
+  const segment = pieces[index];
   const found = segment === undefined ? null : word.exec(segment);
   if (!segment || !found) return false;
+  if (pieces.some((part, position) => position !== index && PROGRAMME_RUNNER.test(part))) return false;
   const after = segment.slice(found.index + found[0].length);
   const programme = PROGRAMME_NOUN.exec(after);
   if (programme) return !/\p{L}/u.test(after.slice(programme[0].length).replace(/\b(?:19|20)\d{2}\b/g, ' '));
@@ -162,13 +172,20 @@ const REGION_NAME_GROUPS: [string, string][] = [
   ['', 'baja california,new england'],
 ];
 const REGION_NAMES = REGION_NAME_GROUPS.flatMap(([country, names]) => names.split(',').map((name): [string, string] => [name, country])).sort((a, b) => b[0].length - a[0].length);
-function statedRegionCountries(offered: string): string[] {
+/** The countries a stated state, province or nation resolves to. A region is only a hint, so it yields to anything
+ * stronger, one place at a time (places are cut at "|", ";", "/", a line break and " or "; commas join one place to its
+ * state and country): (1) a place that spells out a country keeps only that spelling ("New York, United Kingdom" is the
+ * United Kingdom, "Scotland, Connecticut, United States" is the United States); (2) a place whose regions point at more
+ * than one country contradicts itself and resolves to none ("Scotland, Connecticut"). Several places that each resolve
+ * on their own ("Dallas, TX | Calgary, AB") still resolve to each of their countries. */
+const PLACE_BREAK = /\s*[|;/\n]\s*|\s+or\s+/i;
+function regionCountriesOfPlace(place: string): string[] {
   const countries = new Set<string>();
-  for (const match of offered.matchAll(/,\s*([A-Z]{2,3})(?=\s*(?:$|[,;|/()–—-])|\s\d)/g)) {
+  for (const match of place.matchAll(/,\s*([A-Z]{2,3})(?=\s*(?:$|[,;|/()–—-])|\s\d)/g)) {
     const country = REGION_CODES.get(match[1]);
     if (country) countries.add(country);
   }
-  let rest = ` ${placeText(offered)} `;
+  let rest = ` ${placeText(place)} `;
   for (const [name, country] of REGION_NAMES) {
     if (!rest.includes(` ${name} `)) continue;
     if (country) countries.add(country);
@@ -176,7 +193,17 @@ function statedRegionCountries(offered: string): string[] {
   }
   return [...countries];
 }
-const COUNTRY_NAMES = ['united arab emirates', 'united kingdom', 'united states', 'south africa', 'canada', 'australia', 'india', 'singapore', 'france', 'germany', 'saudi arabia', 'qatar', 'bahrain', 'oman', 'kuwait', 'pakistan', 'bangladesh', 'jordan', 'new zealand'];
+function statedRegionCountries(offered: string): string[] {
+  const countries = new Set<string>();
+  for (const place of offered.split(PLACE_BREAK)) {
+    const written = ` ${placeText(place)} `;
+    if (COUNTRY_NAMES.some(country => written.includes(` ${country} `))) continue;
+    const regional = regionCountriesOfPlace(place);
+    if (regional.length === 1) countries.add(regional[0]);
+  }
+  return [...countries];
+}
+const COUNTRY_NAMES =['united arab emirates', 'united kingdom', 'united states', 'south africa', 'canada', 'australia', 'india', 'singapore', 'france', 'germany', 'saudi arabia', 'qatar', 'bahrain', 'oman', 'kuwait', 'pakistan', 'bangladesh', 'jordan', 'new zealand'];
 function placeText(value: string): string {
   return normalText(value).replace(/\bu\.?a\.?e\.?\b/g, 'united arab emirates')
     .replace(/\bu\.?k\.?\b/g, 'united kingdom').replace(/\b(?:u\.?s\.?a?\.?)\b/g, 'united states')
