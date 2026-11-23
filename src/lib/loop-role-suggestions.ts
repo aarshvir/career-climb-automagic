@@ -1,12 +1,16 @@
-/** Local, editable search preferences. These are never evidence of qualifications. */
+/**
+ * Local, editable search preferences. These are never evidence of qualifications.
+ * The order matters: the first few unselected entries are offered as one-tap choices, so specific job titles come first and the broad seniority picks ("Any ... level")
+ * come last (they stay in the search list and can be typed).
+ */
 export const roleChoices = [
-  'Any director-level role', 'Any manager-level role', 'Any vice president-level role',
   'Business analyst', 'Data analyst', 'Data scientist', 'Software engineer', 'Product manager',
   'Project manager', 'Program manager', 'Operations manager', 'Marketing manager', 'Sales manager',
   'Customer success manager', 'Financial analyst', 'Accountant', 'UX designer', 'Product designer',
   'HR manager', 'Recruiter', 'Business development manager', 'Operations analyst', 'Research analyst',
   'Administrative assistant', 'Graduate trainee', 'Intern', 'Director of operations',
   'Marketing director', 'Engineering director', 'Finance director', 'Sales director',
+  'Any director-level role', 'Any manager-level role', 'Any vice president-level role',
 ];
 export const locationChoices = ['Remote', 'United States', 'United Kingdom', 'Canada', 'United Arab Emirates', 'India', 'Australia', 'Germany', 'Singapore', 'New York', 'San Francisco', 'Austin', 'Boston', 'Chicago', 'Seattle', 'Los Angeles', 'London', 'Toronto', 'Dubai', 'Abu Dhabi', 'Bengaluru', 'Mumbai'];
 

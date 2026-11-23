@@ -35,3 +35,8 @@
 /* Optional contact line and years of experience, closed on the CV step. Same look as the other closed sections of this page. */
 .loop-onboarding .oq-optional { border-top: 1px solid var(--jv-line); margin: 12px 0; padding-top: 4px; }
 .loop-onboarding .oq-optional summary { cursor: pointer; color: var(--jv-brand); padding: 10px 0; }
+/* A CV file that could not be read: the way on (paste the text, or choose another file) sits inside the message, with full-size touch targets. */
+.loop-onboarding .oq-recovery { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.loop-onboarding .oq-recovery .jl-button { min-height: 44px; }
+/* Where focus lands after the last quick pick is gone (the tenth entry was chosen): the list of what was chosen. */
+.loop-onboarding .oq-choice-list:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 4px; border-radius: 8px; }

@@ -145,7 +145,10 @@ describe('the CV step starts with the sign-up name', () => {
     expect(memory()?.profile.name).toBe('');
   });
 
-  it.each([['no sign-up details', undefined], ['a name with a control character', { full_name: 'Alex\u0007E.' }], ['a name over 120 characters', { full_name: 'x'.repeat(121) }]])('with %s the name starts empty and is asked for, as before', async (_label, metadata) => {
+  it.each([
+    ['no sign-up details', undefined], ['a name with a control character', { full_name: 'Alex\u0007E.' }], ['a name over 120 characters', { full_name: 'x'.repeat(121) }],
+    ['only a Google-style "name" field and no full_name (this release reads full_name only)', { name: 'Alex Example', email: 'alex@example.invalid' }],
+  ])('with %s the name starts empty and is asked for, as before', async (_label, metadata) => {
     mock.metadata = metadata;
     await toCvStep();
     expect(nameField()).toHaveValue('');
@@ -204,6 +207,21 @@ describe('the contact line and years of experience are in a closed "Optional det
     fireEvent.click(screen.getByRole('checkbox', { name: /Save this CV text/ })); fireEvent.click(screen.getByRole('button', { name: 'Save my setup' }));
     await screen.findByRole('heading', { name: 'Your setup is saved.' });
     expect(mock.call.mock.calls.at(-1)![1].profile).toMatchObject({ contactLine: '', experienceYears: null });
+  });
+
+  it('opens by itself when only the years of experience are filled in, and stays closed when both are empty', async () => {
+    await toCvStep();
+    expect(optional()).not.toHaveAttribute('open');
+    fireEvent.click(screen.getByText('Optional details'));
+    fireEvent.change(screen.getByLabelText('Years of relevant experience (optional)'), { target: { value: '4' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Back' })); fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+    expect(optional()).toHaveAttribute('open');
+    expect(screen.getByLabelText('Years of relevant experience (optional)')).toBeVisible();
+    expect(screen.getByLabelText('Years of relevant experience (optional)')).toHaveValue(4);
+    fireEvent.change(screen.getByLabelText('Years of relevant experience (optional)'), { target: { value: '' } });
+    expect(optional()).toHaveAttribute('open');                                       // emptying it while typing does not close the box under the cursor
+    fireEvent.click(screen.getByRole('button', { name: 'Back' })); fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+    expect(optional()).not.toHaveAttribute('open');                                   // both empty again on the next visit: closed
   });
 
   it('opens by itself when a value is already there, so a person is never shown a closed box that holds their own entry', async () => {

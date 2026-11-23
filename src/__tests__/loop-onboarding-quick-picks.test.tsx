@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { useState } from 'react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import LoopOnboarding from '@/pages/LoopOnboarding';
 import LoopPreferencePicker from '@/components/LoopPreferencePicker';
@@ -43,13 +44,27 @@ describe('Roles step: one-tap choices', () => {
     expect(document.querySelectorAll('#oq-roles-options option').length).toBe(roleChoices.length);   // the datalist is kept
   });
 
+  it('puts specific job titles first: none of the first six is a broad "Any ... level" pick, and those stay in the list, last', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    expect(quickNames().every(name => !/^Add Any /.test(name ?? ''))).toBe(true);
+    expect(quickNames()).toEqual(['Add Business analyst', 'Add Data analyst', 'Add Data scientist', 'Add Software engineer', 'Add Product manager', 'Add Project manager']);
+    const broad = roleChoices.filter(role => role.startsWith('Any '));
+    expect(broad).toEqual(['Any director-level role', 'Any manager-level role', 'Any vice president-level role']);
+    expect(roleChoices.slice(-3)).toEqual(broad);
+    const options = [...document.querySelectorAll('#oq-roles-options option')].map(option => option.getAttribute('value'));
+    expect(options).toEqual(roleChoices);
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Any manager-level role' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    expect(screen.getByRole('button', { name: 'Remove Any manager-level role' })).toBeInTheDocument();   // a broad pick can still be typed
+  });
+
   it('tapping one adds it to the list and the editable list, removes it from the choices and brings the next unselected one in', async () => {
     open(); await screen.findByLabelText('Target roles');
     fireEvent.click(screen.getByRole('button', { name: 'Add Business analyst' }));
     expect(screen.getByRole('button', { name: 'Remove Business analyst' })).toBeInTheDocument();
     expect(screen.getByLabelText('Target roles')).toHaveValue('Business analyst');
     expect(screen.queryByRole('button', { name: 'Add Business analyst' })).not.toBeInTheDocument();
-    expect(quickNames()).toEqual([...roleChoices.slice(0, 3), ...roleChoices.slice(4, 7)].map(role => `Add ${role}`));
+    expect(quickNames()).toEqual(roleChoices.slice(1, 7).map(role => `Add ${role}`));
     expect(document.querySelector('#oq-roles-options option[value="Business analyst"]')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Add Data analyst' }));
     expect(screen.getByLabelText('Target roles')).toHaveValue('Business analyst\nData analyst');
@@ -93,7 +108,7 @@ describe('Roles step: one-tap choices', () => {
 
   it('moves focus to the next quick pick after a tap instead of dropping it on the page', async () => {
     open(); await screen.findByLabelText('Target roles');
-    fireEvent.click(screen.getByRole('button', { name: 'Add Any manager-level role' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add Data analyst' }));
     expect(screen.getByRole('group', { name: 'Quick picks' }).querySelector('button')).toHaveFocus();
   });
 
@@ -119,6 +134,88 @@ describe('Locations step: one-tap choices', () => {
     next();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('What compensation would you consider?');
+  });
+});
+
+/**
+ * Keyboard use (a real Tab, then Enter or Space) and the boundary where the last quick pick is gone: choosing the TENTH entry removes the whole group, so there is no chip left for
+ * the focus effect to move to. Focus must land on a stable control (the list of selected entries), never on the page body. Roles and Locations are the same component.
+ */
+describe('keyboard selection and the ten-entry boundary', () => {
+  const nine = (prefix: string) => Array.from({ length: 9 }, (_, index) => `${prefix} ${index}`).join('\n');
+  const selectedList = (label: RegExp) => screen.getByRole('list', { name: label });
+  async function tabToFirstQuickPick(user: ReturnType<typeof userEvent.setup>, searchLabel: string) {
+    await user.click(screen.getByLabelText(searchLabel));      // the search box; the typed-text "Add" button is disabled while it is empty, so the next Tab stop is the first quick pick
+    await user.tab();
+    return document.activeElement as HTMLElement;
+  }
+
+  it.each([['Enter', '{Enter}'], ['Space', ' ']])('Tab to a quick pick and press %s: it is added, and focus moves to the next quick pick', async (_name, key) => {
+    const user = userEvent.setup();
+    open(); await screen.findByLabelText('Target roles');
+    const first = await tabToFirstQuickPick(user, 'Search or add a role');
+    expect(first).toHaveAccessibleName('Add Business analyst');
+    await user.keyboard(key);
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Business analyst');
+    expect(document.activeElement).not.toBe(document.body);
+    expect(document.activeElement).toHaveAccessibleName('Add Data analyst');
+    expect(screen.getByRole('group', { name: 'Quick picks' })).toContainElement(document.activeElement as HTMLElement);
+    await user.keyboard(key);
+    expect(screen.getByLabelText('Target roles')).toHaveValue('Business analyst\nData analyst');
+    expect(document.activeElement).toHaveAccessibleName('Add Data scientist');
+  });
+
+  it.each([['Enter', '{Enter}'], ['Space', ' ']])('Roles: choosing the tenth role with %s removes the group and focus lands on the list of selected roles, not the page', async (_name, key) => {
+    const user = userEvent.setup();
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: nine('Role') } });
+    expect(quickPicks()).toHaveLength(6);
+    const first = await tabToFirstQuickPick(user, 'Search or add a role');
+    expect(first).toHaveAccessibleName('Add Business analyst');
+    await user.keyboard(key);
+    expect(screen.getByRole('button', { name: 'Remove Business analyst' })).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Quick picks' })).not.toBeInTheDocument();     // the group is gone ...
+    expect(document.activeElement).not.toBe(document.body);
+    expect(document.activeElement).toBe(selectedList(/^Selected target roles$/));              // ... and focus is on a stable control
+    await user.tab();                                                                           // the next Tab stop is inside the list: the Remove buttons
+    expect(document.activeElement).toHaveAccessibleName('Remove Role 0');
+  });
+
+  it.each([['Enter', '{Enter}'], ['Space', ' ']])('Locations: choosing the tenth place with %s removes the group and focus lands on the list of selected places, not the page', async (_name, key) => {
+    const user = userEvent.setup();
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.click(screen.getByRole('button', { name: 'Add Business analyst' })); next();
+    await screen.findByLabelText('Cities or countries');
+    fireEvent.change(screen.getByLabelText('Cities or countries'), { target: { value: nine('Place') } });
+    expect(quickPicks()).toHaveLength(6);
+    const first = await tabToFirstQuickPick(user, 'Search or add a location');
+    expect(first).toHaveAccessibleName('Add Remote');
+    await user.keyboard(key);
+    expect(screen.getByRole('button', { name: 'Remove Remote' })).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Quick picks' })).not.toBeInTheDocument();
+    expect(document.activeElement).not.toBe(document.body);
+    expect(document.activeElement).toBe(selectedList(/^Selected cities or countries$/));
+    await user.tab();
+    expect(document.activeElement).toHaveAccessibleName('Remove Place 0');
+  });
+
+  it('a click on the tenth quick pick lands focus in the same place', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    fireEvent.change(screen.getByLabelText('Target roles'), { target: { value: nine('Role') } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add Data scientist' }));
+    expect(quickPicks()).toHaveLength(0);
+    expect(document.activeElement).toBe(selectedList(/^Selected target roles$/));
+  });
+
+  it('does not move focus anywhere when nothing was tapped (typing, Add and Remove behave as before)', async () => {
+    open(); await screen.findByLabelText('Target roles');
+    const search = screen.getByLabelText('Search or add a role');
+    search.focus();
+    fireEvent.change(search, { target: { value: 'Climate policy adviser' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    expect(screen.getByRole('button', { name: 'Remove Climate policy adviser' })).toBeInTheDocument();
+    expect(document.activeElement).not.toBe(selectedList(/^Selected target roles$/));
+    expect(document.activeElement).not.toHaveAccessibleName(/^Add \S/);
   });
 });
 

@@ -158,12 +158,92 @@ describe('the "Check my saved dashboard" link is for load and save problems', ()
     expect(dashboardLink()).not.toBeInTheDocument();
     expect(mock.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing']);
   });
-  it('is not shown beside a CV file that could not be read', async () => {
+  it('is not shown beside a CV file that could not be read: a local way on is, and it is not a dead end', async () => {
     seed(4); mock.extract.mockRejectedValue(new Error('Fictional unreadable file. Paste your CV text instead.'));
     open(); await screen.findByLabelText('Upload a CV or LinkedIn PDF');
     fireEvent.change(screen.getByLabelText('Upload a CV or LinkedIn PDF'), { target: { files: [new File(['cv'], 'cv.pdf')] } });
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Fictional unreadable file'));
     expect(dashboardLink()).not.toBeInTheDocument();
+    const alert = screen.getByRole('alert');
+    expect(within(alert).getByRole('button', { name: 'Paste my CV text instead' })).toBeEnabled();
+    expect(within(alert).getByRole('button', { name: 'Choose another file' })).toBeEnabled();
+    expect(screen.getByLabelText('Your CV text')).toBeEnabled();                    // the answers on the page are all still there
+    expect(screen.getByRole('button', { name: 'Back' })).toBeEnabled();
+  });
+  it('"Paste my CV text instead" puts the cursor in the CV text box, and typing there clears the message', async () => {
+    seed(4); mock.extract.mockRejectedValue(new Error('Fictional unreadable file. Paste your CV text instead.'));
+    open(); await screen.findByLabelText('Upload a CV or LinkedIn PDF');
+    fireEvent.change(screen.getByLabelText('Upload a CV or LinkedIn PDF'), { target: { files: [new File(['cv'], 'cv.pdf')] } });
+    await screen.findByRole('button', { name: 'Paste my CV text instead' });
+    fireEvent.click(screen.getByRole('button', { name: 'Paste my CV text instead' }));
+    expect(screen.getByLabelText('Your CV text')).toHaveFocus();
+    fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: `${SOURCE} Pasted again by hand.` } });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(mock.call.mock.calls.map(call => call[1].action)).toEqual(['get_existing']);     // nothing was written or read for this
+  });
+  it('"Choose another file" opens the file chooser of the CV step', async () => {
+    seed(4); mock.extract.mockRejectedValue(new Error('Fictional unreadable file. Paste your CV text instead.'));
+    open(); const input = await screen.findByLabelText('Upload a CV or LinkedIn PDF');
+    const opened = vi.fn(); input.addEventListener('click', opened);
+    fireEvent.change(input, { target: { files: [new File(['cv'], 'cv.pdf')] } });
+    await screen.findByRole('button', { name: 'Choose another file' });
+    expect(opened).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Choose another file' }));
+    expect(opened).toHaveBeenCalledTimes(1);
+  });
+  it('the same way on exists beside the early CV box on the first step, and points at that step\'s own boxes', async () => {
+    mock.extract.mockRejectedValue(new Error('Fictional unreadable file. Paste your CV text instead.'));
+    open(); const input = await screen.findByLabelText('Upload a CV for role suggestions');
+    const opened = vi.fn(); input.addEventListener('click', opened);
+    fireEvent.change(input, { target: { files: [new File(['cv'], 'cv.pdf')] } });
+    await screen.findByRole('button', { name: 'Paste my CV text instead' });
+    expect(dashboardLink()).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Paste my CV text instead' }));
+    expect(screen.getByLabelText('Paste your CV for role suggestions')).toHaveFocus();
+    fireEvent.click(screen.getByRole('button', { name: 'Choose another file' }));
+    expect(opened).toHaveBeenCalledTimes(1);
+  });
+  it('opens the early CV section again if it was closed, so the way on never points at a hidden box', async () => {
+    mock.extract.mockRejectedValue(new Error('Fictional unreadable file. Paste your CV text instead.'));
+    open(); const input = await screen.findByLabelText('Upload a CV for role suggestions');
+    const section = document.querySelector('details.oq-early-cv') as HTMLDetailsElement;
+    section.open = true;
+    fireEvent.change(input, { target: { files: [new File(['cv'], 'cv.pdf')] } });
+    await screen.findByRole('button', { name: 'Paste my CV text instead' });
+    section.open = false;
+    expect(screen.getByLabelText('Paste your CV for role suggestions')).not.toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Paste my CV text instead' }));
+    expect(section.open).toBe(true);
+    expect(screen.getByLabelText('Paste your CV for role suggestions')).toBeVisible();
+  });
+  it('a CV read that never answers gets the same local way on, not the dashboard link', async () => {
+    mock.extract.mockReturnValue(new Promise(() => {}));
+    seed(4); open(); await screen.findByLabelText('Upload a CV or LinkedIn PDF');
+    vi.useFakeTimers();
+    fireEvent.change(screen.getByLabelText('Upload a CV or LinkedIn PDF'), { target: { files: [new File(['cv'], 'cv.pdf')] } });
+    await act(async () => { await vi.advanceTimersByTimeAsync(30_001); });
+    expect(screen.getByRole('alert')).toHaveTextContent('Reading your CV is taking too long');
+    expect(screen.getByRole('button', { name: 'Paste my CV text instead' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Choose another file' })).toBeEnabled();
+    expect(dashboardLink()).not.toBeInTheDocument();
+  });
+  it('the local recovery buttons are only for a file that could not be read: a step that needs an answer, a load error and a save error show none', async () => {
+    open(); await screen.findByLabelText('Search or add a role');
+    next();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Paste my CV text instead' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Choose another file' })).not.toBeInTheDocument();
+    cleanup(); mock.call.mockReset(); mock.call.mockRejectedValue(new Error('Fictional connection refused'));
+    open(); await screen.findByText(/Fictional connection refused/);
+    expect(screen.queryByRole('button', { name: 'Paste my CV text instead' })).not.toBeInTheDocument();
+    expect(dashboardLink()).toBeInTheDocument();
+    cleanup(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a', 'session-a'); mock.call.mockReset();
+    script(async () => { throw new Error('Fictional write failure. Check your dashboard before trying again.'); });
+    seed(5); open(); await screen.findByRole('button', { name: 'Save my setup' });
+    fireEvent.click(tick()); fireEvent.click(saveButton());
+    await screen.findByText(/Fictional write failure/);
+    expect(screen.queryByRole('button', { name: 'Paste my CV text instead' })).not.toBeInTheDocument();
+    expect(dashboardLink()).toBeInTheDocument();
   });
   it('is shown, as before, when the saved setup cannot be loaded', async () => {
     mock.call.mockRejectedValue(new Error('Fictional connection refused'));
