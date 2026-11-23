@@ -32,3 +32,6 @@
 /* Why Save is not available yet: a line of its own just above the Back and Save buttons in the fixed bar, so it never squeezes them on a narrow phone. */
 .loop-onboarding .oq-actions { flex-wrap: wrap; }
 .loop-onboarding .oq-save-reason { order: -1; flex: 1 0 100%; margin: 0; text-align: right; font-size: .85rem; line-height: 1.4; color: var(--jl-muted); }
+/* Optional contact line and years of experience, closed on the CV step. Same look as the other closed sections of this page. */
+.loop-onboarding .oq-optional { border-top: 1px solid var(--jv-line); margin: 12px 0; padding-top: 4px; }
+.loop-onboarding .oq-optional summary { cursor: pointer; color: var(--jv-brand); padding: 10px 0; }

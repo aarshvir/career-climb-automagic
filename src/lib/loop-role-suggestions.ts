@@ -29,6 +29,19 @@ export function accountRoleSuggestions(metadata: unknown): string[] {
     .slice(0, 3);
 }
 
+/**
+ * The name given at sign-up (`full_name`), used as the starting value of the "Name on your CV" question so it is not asked again from nothing.
+ * It is only a starting value, never an answer the person gave on the setup page. Nothing is filled in when it is missing, not text, over 120 characters
+ * (the limit of the field), or holds a control or text-direction character (which cannot be saved).
+ */
+export function accountFullName(metadata: unknown): string {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return '';
+  const value = (metadata as Record<string, unknown>).full_name;
+  if (typeof value !== 'string') return '';
+  const name = value.trim();
+  return name.length > 0 && name.length <= 120 && !/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/u.test(name) ? name : '';
+}
+
 /** Recognize exact role headings, not skills, aspirations, or titles mentioned in prose. */
 export function cvRoleSuggestions(source: string): string[] {
   const titles = roleChoices.filter(role => !role.startsWith('Any ') && role !== 'Intern');

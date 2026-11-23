@@ -51,10 +51,12 @@ const sameField = (a: LoopProfileInput, b: LoopProfileInput, key: keyof LoopProf
  *    equals the blank page is the page's own default, not an answer, so a page that was never filled in still holds nothing.
  * Roles suggested from the account or the CV and never confirmed (`rolesEdited` false) are not answers, whatever was touched. Surrounding whitespace is nothing, as in a save.
  * A draft that equals the saved setup, or was never filled in, holds nothing newer. Builder answers are kept even when they cannot be shown to be newer: they are never saved.
+ * `prefilledName` is the name the page itself starts with, taken from the sign-up details (empty when there is none): the blank page the name is compared with. A name that is still exactly
+ * that and was never edited is the page's own starting value, not an answer; a name the person changed (or emptied on purpose, which `touched` records) is.
  */
-export function holdsUnsavedAnswers(saved: LoopProfileInput, draft: Pick<OnboardingDraft, 'profile' | 'answers' | 'roleQuery' | 'locationQuery' | 'rolesEdited' | 'touched'>): boolean {
+export function holdsUnsavedAnswers(saved: LoopProfileInput, draft: Pick<OnboardingDraft, 'profile' | 'answers' | 'roleQuery' | 'locationQuery' | 'rolesEdited' | 'touched'>, prefilledName = ''): boolean {
   if (draft.roleQuery.trim() || draft.locationQuery.trim()) return true;
   if (Object.values(draft.answers).some(value => typeof value === 'string' && value.trim())) return true;
-  const typed = submittedForm(draft.profile), blank = blankLoopProfile('professional'), edited = new Set(draft.touched ?? []);
+  const typed = submittedForm(draft.profile), blank = { ...blankLoopProfile('professional'), name: prefilledName.trim() }, edited = new Set(draft.touched ?? []);
   return TYPED_FIELDS.some(key => (key !== 'targetTitles' || draft.rolesEdited) && !sameField(typed, saved, key) && (edited.has(key) || !sameField(typed, blank, key)));
 }
