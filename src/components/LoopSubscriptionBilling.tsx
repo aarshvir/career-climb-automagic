@@ -11,6 +11,7 @@ import {LOOP_LOCAL_COUNTRIES,LOOP_LOCAL_CURRENCIES,initialLoopPriceMarket,isLoop
 import {formatLoopPrice} from '@/lib/loop-price-display';
 import {FREE_TAILORED_CVS_PER_MONTH} from '@/lib/pass-plans';
 import {LOOP_TRIAL_DAYS,LOOP_TRIAL_PUBLIC_LINE,loopTrialDates,loopTrialDay,loopTrialPublic,loopTrialTerms} from '@/lib/loop-trial';
+import {smoothBehavior} from '@/lib/motion';
 import './LoopSubscriptionBilling.css';
 
 const cadence: Record<LoopSubscriptionPlan, [string, string]> = { weekly: ['1 run', 'a week'], active: ['3 runs', 'a week'], daily: ['1 run', 'a day'] };
@@ -48,6 +49,10 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
   const requested=params.get('loopPlan');
   const [market,setMarket]=useState<LoopPriceMarket>(()=>initialLoopPriceMarket(params.toString(),typeof navigator==='undefined'?undefined:navigator.language));
   const [chosen,setChosen]=useState<LoopSubscriptionPlan|null>(isLoopSubscriptionPlan(requested)?requested:null);
+  // The confirmation (consent and Continue) sits well below the plan cards. A plan chosen by a tap, or restored from a valid sign-in return URL, brings it into view and moves focus to its heading once.
+  // The same one-shot reveal goes to "Continue my setup" when the server says the Job Loop setup must be saved first (generation null): that is the only action then, and no quote or checkout exists.
+  // An ordinary visit, a quote refresh and a country change never do: only choose() and a valid loopPlan on first render arm it.
+  const panelRef=useRef<HTMLDivElement>(null),panelHeadingRef=useRef<HTMLHeadingElement>(null),setupRef=useRef<HTMLParagraphElement>(null),revealPending=useRef(!compact&&isLoopSubscriptionPlan(requested));
   const [storedStatus,setStatus]=useState<LoopBillingStatus|null>(null),[loadedScope,setLoadedScope]=useState(''),[loading,setLoading]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[error,setError]=useState('');
   const status=authReady&&loadedScope===`${user.id}:${authority}`?storedStatus:null;
   const [consent,setConsent]=useState(false),[cancelConfirm,setCancelConfirm]=useState(false);
@@ -97,6 +102,17 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
   const originalRecovery=checkoutPending||hasLocalAttempt;
   const quoteCurrent=market.country==='other'||!!freshQuote&&!quoteExpired&&Date.parse(freshQuote.expiresAt)>Date.now();
   const available=!!status?.billingConfigured&&!status.fulfillmentPending&&status.generation!==null&&status.plans.some(item=>item.id===chosen)&&!!payablePrice&&(originalRecovery||quoteCurrent);
+  const panelShown=!subscriptionOpen&&!!selected&&available;
+  const setupShown=status?.generation===null;
+  useEffect(()=>{
+    if(subscriptionOpen||!authLoading&&!user)revealPending.current=false;
+    if(!revealPending.current)return;
+    const target=panelShown?panelRef.current:setupShown?setupRef.current:null;
+    if(!target)return;
+    revealPending.current=false;
+    target.scrollIntoView?.({block:'start',behavior:smoothBehavior()});
+    (panelShown?panelHeadingRef.current:target.querySelector('a'))?.focus({preventScroll:true});
+  },[panelShown,setupShown,chosen,subscriptionOpen,authLoading,user]);
   useEffect(()=>{
     const ticket=++quoteSequence.current,at=epoch.current,key=quoteKey;
     purchaseConsentScope.current=null;setConsent(false);setQuoteExpired(false);setQuoteError('');
@@ -112,7 +128,7 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
   const purchaseFingerprint=()=>JSON.stringify([user?.id,authority,status?.billingMode,status?.generation,chosen,status?.checkout?.requestId,payablePrice,offerTrial]);
   const cancelFingerprint=()=>JSON.stringify([user?.id,authority,status?.billingMode,status?.generation,sub?.subscriptionId,sub?.version]);
   function changeMarket(next:LoopPriceMarket){if(lock.current||originalRecovery||next.country===market.country&&next.currency===market.currency)return;quoteSequence.current++;purchaseConsentScope.current=null;setConsent(false);setQuoteState(null);setQuoteExpired(false);setMarket(next);setError('');setMessage('');}
-  const choose=(id:LoopSubscriptionPlan)=>{if(lock.current||id===chosen||originalRecovery&&id!==chosen)return;quoteSequence.current++;purchaseConsentScope.current=null;cancelConsentScope.current=null;setChosen(id);setConsent(false);setCancelConfirm(false);setError('');setMessage('');};
+  const choose=(id:LoopSubscriptionPlan)=>{if(lock.current||id===chosen||originalRecovery&&id!==chosen)return;revealPending.current=!compact;quoteSequence.current++;purchaseConsentScope.current=null;cancelConsentScope.current=null;setChosen(id);setConsent(false);setCancelConfirm(false);setError('');setMessage('');};
   async function checkout(){
     if(lock.current||loading||!user||!authReady||!status||status.generation===null||!selected||!available||!consent||purchaseConsentScope.current!==purchaseFingerprint()||subscriptionOpen)return;
     const scope={ownerId:user.id,authority,billingMode:status.billingMode,pricing:payablePrice},at=epoch.current;
@@ -189,7 +205,7 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
       {loading&&<p role="status">Checking your subscription and payment confirmations…</p>}
       {status&&!status.billingConfigured&&<p role="status">Automated Job Loop checkout is not available right now. Existing access and saved work are unchanged.</p>}
       {status?.fulfillmentPending&&<p role="alert" className="jl-warning">Payment was received, but Automated Job Loop access is awaiting service-capacity reconciliation. Do not purchase again. <Link to="/contact">Contact support with your Dodo receipt</Link> so we can resolve access or the payment.</p>}
-      {status?.generation===null&&<p>Save your Automated Job Loop setup before choosing a subscription. <Link to="/onboarding">Continue my setup</Link>.</p>}
+      {status?.generation===null&&<p ref={setupRef}>Save your Automated Job Loop setup before choosing a subscription. <Link className="loop-setup-link" to="/onboarding">Continue my setup</Link>.</p>}
       {sub&&<div aria-label="Current Automated Job Loop subscription"><h3>{loopSubscriptionPlan(sub.plan).name} · {sub.pricing?`${formatLoopPrice(sub.pricing)} ${sub.pricing.currency}/month`:'monthly subscription'}</h3>{!sub.pricing&&<p>Your Dodo Payments invoice confirms the original billed amount and currency.</p>}{sub.trial&&!sub.trial.granted&&<div className="loop-trial-state" role="status" aria-label="Free trial not started"><p><strong>Your free trial could not start.</strong> {sub.trial.deniedReason==='capacity_full'?'Every Automated Job Loop service place was taken when your checkout completed.':'This account has already had an Automated Job Loop subscription or free trial.'}</p><p>{sub.trial.stopState==='stopped'?'We cancelled it with Dodo Payments before the first charge, so you will not be charged.':sub.trial.stopState==='charged'?<>The first charge had already been taken before it could be cancelled. <Link to="/contact">Contact support</Link> for access or a refund.</>:sub.trial.stopState==='charge_due'?<>We asked Dodo Payments to cancel it, but the request reached them at the first charge date ({date(sub.trial.firstChargeAt)}), so we cannot yet confirm whether that charge was taken. Refresh billing to check. If it was taken, <Link to="/contact">contact support</Link> for access or a refund.</>:<>We are cancelling it with Dodo Payments so the first charge due on {date(sub.trial.firstChargeAt)} is not taken. This is not confirmed yet. Refresh billing to check, or <Link to="/contact">contact support</Link>.</>}</p></div>}<p>Status: {sub.revoked?'Access revoked':inTrial?'free trial':sub.status.replace(/_/g,' ')}.</p>{inTrial&&subTrial?<div className="loop-trial-state" aria-label="Free trial"><p><strong>Free trial until {date(subTrial.endsAt)}.</strong> Your {loopSubscriptionPlan(sub.plan).name} runs are included during the trial.</p>{sub.cancelAtPeriodEnd?<p>{trialCancelCopy(subTrial.cancelOutcome,subTrial.endsAt,subTrial.firstChargeAt,sub.validUntil)}</p>:<p>{loopTrialTerms(subTrial.firstChargeAt)} First charge: {sub.pricing?`${formatLoopPrice(sub.pricing)} ${sub.pricing.currency}, tax included,`:'the monthly price shown at checkout'} on {date(subTrial.firstChargeAt)}, then every month until you cancel.</p>}</div>:<><p>Recorded paid period ends {date(sub.validUntil)}.</p>{currentPaid&&!graceAccess&&<p>Paid access through {date(status.entitlement.validUntil)}.</p>}</>}{graceAccess&&<p>Payment is overdue. Access temporarily continues until {date(sub.graceUntil)} under the confirmed payment grace period. Contact support if you need help resolving payment.</p>}{inTrial?null:sub.cancelAtPeriodEnd?<p>Renewal is cancelled. There is no further scheduled renewal. {currentPaid ? `Your confirmed access ends ${date(status.entitlement.validUntil)}.` : "Saved records are retained; current payment and access status are shown above."}</p>:sub.revoked&&providerMayRenew?<p>Your access is revoked, but monthly renewal has not been cancelled. Cancel renewal below before starting another subscription.</p>:sub.status==='active'?<p>Renews monthly until you cancel. Your Dodo Payments invoice confirms your charge dates.</p>:!graceAccess&&<p>Payment or subscription access needs confirmation. Saved records are retained.</p>}
         {sub.cancelAtPeriodEnd&&providerPaymentUnresolved&&<p>The provider may still be resolving an earlier payment. <Link to="/contact">Contact support</Link> before starting another subscription.</p>}
         {providerMayRenew&&<><label className="jl-consent"><input type="checkbox" checked={cancelConfirm} disabled={busy||loading} onChange={event=>{cancelConsentScope.current=event.target.checked?cancelFingerprint():null;setCancelConfirm(event.target.checked);}}/><span>{inTrial&&subTrial?`Cancel this free trial so the first charge${sub.pricing?` of ${formatLoopPrice(sub.pricing)} ${sub.pricing.currency}`:''} due on ${date(subTrial.firstChargeAt)} is not taken. Trial access continues until ${date(subTrial.endsAt)}. We confirm the outcome with Dodo Payments after you cancel.`:<>Cancel future monthly renewal for this Automated Job Loop subscription. {sub.revoked?'This stops future renewal without restoring revoked access.':'Any already-confirmed paid access keeps its current end date.'} This does not request a refund.</>}</span></label><button type="button" className="jl-button" disabled={busy||loading||!cancelConfirm} onClick={()=>void cancel()}>{busy?'Confirming…':cancelIntent.current?'Retry original cancellation':inTrial?'Cancel free trial':'Cancel monthly renewal'}</button></>}
@@ -200,8 +216,8 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
       {quoteLoading&&!originalRecovery&&<p role="status">Confirming your monthly price…</p>}
       {(quoteError||quoteExpired)&&!originalRecovery&&<p role="alert">{quoteExpired?'This price quote expired. Refresh the price and review it again before purchasing.':quoteError}</p>}
       {selected&&!originalRecovery&&!subscriptionOpen&&market.country!=='other'&&status?.billingConfigured&&<button type="button" className="jl-button" disabled={busy||loading||quoteLoading} onClick={()=>{quoteSequence.current++;purchaseConsentScope.current=null;setConsent(false);setQuoteState(null);setQuoteRefresh(value=>value+1);}}>Refresh monthly price</button>}
-      {!subscriptionOpen&&selected&&available&&<div aria-label={offerTrial?'Confirm Automated Job Loop free trial':'Confirm Automated Job Loop purchase'}>
-        <h3>{selected.name} · {offerTrial?`${LOOP_TRIAL_DAYS}-day free trial, then ${formatLoopPrice(payablePrice)} ${payablePrice.currency} / month`:`${formatLoopPrice(payablePrice)} ${payablePrice.currency} / month`}</h3>
+      {!subscriptionOpen&&selected&&available&&<div ref={panelRef} aria-label={offerTrial?'Confirm Automated Job Loop free trial':'Confirm Automated Job Loop purchase'}>
+        <h3 ref={panelHeadingRef} tabIndex={-1}>{selected.name} · {offerTrial?`${LOOP_TRIAL_DAYS}-day free trial, then ${formatLoopPrice(payablePrice)} ${payablePrice.currency} / month`:`${formatLoopPrice(payablePrice)} ${payablePrice.currency} / month`}</h3>
         {checkoutCountry&&<p>
           Billing country <strong>{checkoutCountry}</strong>.
           {originalRecovery?' This checkout keeps its original country.':compact?<>{' '}<Link to={loopPricingReturn(selected.id,market)}>Change on Pricing</Link></>:<>{' '}<a href="#billing-market" className="pricing-market-link" onClick={event=>{
@@ -226,7 +242,8 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
             ?<span>I start a {LOOP_TRIAL_DAYS}-day free trial of {selected.name}. A card is required and is not charged today. Unless I cancel before {loopTrialDay(trialDates.trialEndsAt)}, I will be charged {formatLoopPrice(payablePrice)} {payablePrice.currency}, with tax included, on {loopTrialDay(trialDates.firstChargeAt)} and then every month until I cancel. I have read the <Link to="/terms">terms</Link> and <Link to="/refund">refund policy</Link>.</span>
             :<span>I choose {selected.name} at {formatLoopPrice(payablePrice)} {payablePrice.currency} each month, with tax included, and automatic monthly renewal until I cancel. I have read the <Link to="/terms">terms</Link> and <Link to="/refund">refund policy</Link>.</span>}
         </label>
-        <button type="button" className="product-button" disabled={busy||loading||!consent||checkoutPending&&status.checkout.plan!==selected.id} onClick={()=>void(checkoutPending?resumeCheckout():checkout())}>{busy?'Confirming checkout…':offerTrial?(originalRecovery?'Resume original secure trial checkout':`Start ${LOOP_TRIAL_DAYS}-day free trial · card required`):originalRecovery?'Resume original secure checkout':`Continue to secure checkout · ${formatLoopPrice(payablePrice)}/month`}</button>
+        <button type="button" className="product-button" aria-describedby={!consent&&!busy&&!loading?'loop-checkout-reason':undefined} disabled={busy||loading||!consent||checkoutPending&&status.checkout.plan!==selected.id} onClick={()=>void(checkoutPending?resumeCheckout():checkout())}>{busy?'Confirming checkout…':offerTrial?(originalRecovery?'Resume original secure trial checkout':`Start ${LOOP_TRIAL_DAYS}-day free trial · card required`):originalRecovery?'Resume original secure checkout':`Continue to secure checkout · ${formatLoopPrice(payablePrice)}/month`}</button>
+        {!consent&&!busy&&!loading&&<p id="loop-checkout-reason" className="loop-checkout-reason">Tick the box above to continue.</p>}
       </div>}
       {!subscriptionOpen&&selected&&available&&!offerTrial&&status?.trial?.available&&!status.trial.eligible&&!originalRecovery&&<p className="jl-help">This account has already had an Automated Job Loop subscription, free trial or free place, so this checkout is charged today.</p>}
       {compact&&<Link className="jl-button" to="/pricing">View monthly Automated Job Loop plans</Link>}

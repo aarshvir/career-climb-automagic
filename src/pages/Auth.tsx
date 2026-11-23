@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowRight, Check, CircleAlert, Loader2, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { isValidEmail, validatePassword, authRateLimiter } from '@/lib/security';
-import { accountDestination, rememberLoopReturn } from '@/lib/account-return';
+import { accountDestination, pricingChoiceFromReturn, rememberLoopReturn } from '@/lib/account-return';
 import { trackingAuthEpoch } from '@/lib/tracking-draft-memory';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { adAttributionQuery, trackMetaSignupSubmitted } from '@/lib/meta-pixel';
@@ -40,6 +40,8 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const loopEntry = !embedded && accountDestination(searchParams.get('next')) === '/onboarding';
   // The free CV Check entry (next=/check) opens on its own promise, not the Automated Job Loop setup headline. Copy only.
   const checkEntry = !embedded && accountDestination(searchParams.get('next')) === '/check';
+  // A plan or pass chosen on Pricing before signing in is named above the form (from the validated return path only, never a price).
+  const chosen = embedded ? null : pricingChoiceFromReturn(searchParams.get('next'));
   const fieldId = useId();
   // Only the newly submitted signup is retained, in this mounted tab for ten minutes.
   // Continuation is deliberate; focus/visibility never starts a password login.
@@ -218,6 +220,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
           {!embedded && <p className="ap-eyebrow ap-eyebrow--form"><span className="ap-dot" aria-hidden="true" />{checkEntry ? 'Your free CV Check' : loopEntry ? 'Your Automated Job Loop' : 'Your Jobvance workspace'}</p>}
           <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
           {!showBenefits && <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>}
+          {chosen && !confirmationSent && <p className="ap-chosen">{mode === 'sign-up' ? 'Create your account to continue with' : 'Sign in to continue with'} the <strong>{chosen.name}</strong> {chosen.product === 'pass' ? 'pass' : 'plan'}.</p>}
           {/* A visitor from the free CV Check ad is told about the CV Check, never the Job Loop's outcome list. */}
           {showBenefits && checkEntry && <div className="ap-loop-entry ap-check-entry">
             <ul className="ap-benefits" aria-label="What the free CV Check does">

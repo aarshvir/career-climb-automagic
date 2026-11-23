@@ -499,3 +499,5 @@
 
 /* CV Check entry keeps its own benefits and free-account terms visible at every width. */
 .jv-account--standalone .ap-loop-entry.ap-check-entry { display: block; }
+/* Names the plan or pass chosen on Pricing, above the form. */
+.jv-account .ap-auth-heading > p.ap-chosen { padding: 10px 14px; border-radius: 10px; background: var(--jv-brand-tint); color: var(--ap-ink); font-weight: 500; }

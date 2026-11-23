@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Check, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { currentOffer } from '@/lib/current-offer';
 import { openPaymentCheckout } from '@/lib/payment-checkout';
+import { smoothBehavior } from '@/lib/motion';
 import { startPassCheckout } from '@/lib/pass-checkout';
 import { FAIR_USE_TAILORED_CVS_PER_DAY, FREE_TAILORED_CVS_PER_MONTH, isPassPlanKey, passPlan, passPlans, type PassPlanKey } from '@/lib/pass-plans';
 import LoopSubscriptionBilling from '@/components/LoopSubscriptionBilling';
@@ -38,17 +39,27 @@ export default function SubscriptionPricing() {
   const requested = params.get('plan');
   const picked = isPassPlanKey(requested) ? requested : null;
   const [busy, setBusy] = useState<PassPlanKey | null>(null);
-  const [message, setMessage] = useState<{ kind: 'soon' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{ kind: 'soon' | 'error'; text: string; plan: PassPlanKey } | null>(null);
+  const messageRef = useRef<HTMLParagraphElement>(null);
+  const scrolledFor = useRef<PassPlanKey | null>(null);
+  // A pass picked before sign-in comes back here: bring that card into view once. An ordinary visit has no ?plan= and never scrolls.
+  useEffect(() => {
+    if (!picked || scrolledFor.current === picked) return;
+    scrolledFor.current = picked;
+    document.getElementById(`pricing-${picked}`)?.closest('section')?.scrollIntoView?.({ block: 'start', behavior: smoothBehavior() });
+  }, [picked]);
+  // The refusal or error is shown inside the tapped card, under its button; keep it on screen on a phone.
+  useEffect(() => { if (message) messageRef.current?.scrollIntoView?.({ block: 'nearest', behavior: smoothBehavior() }); }, [message]);
 
   async function buy(plan: PassPlanKey) {
     if (busy) return;
     setBusy(plan); setMessage(null);
     try {
       const result = await startPassCheckout(plan);
-      if (result.status === 'unavailable') { setMessage({ kind: 'soon', text: 'Payments open soon. Nothing was charged, and your free tailored CVs still work.' }); return; }
+      if (result.status === 'unavailable') { setMessage({ kind: 'soon', text: 'Payments open soon. Nothing was charged, and your free tailored CVs still work.', plan }); return; }
       await openPaymentCheckout(result.checkout, () => undefined);
     } catch (failure) {
-      setMessage({ kind: 'error', text: failure instanceof Error ? failure.message : 'Checkout could not be opened. Please try again.' });
+      setMessage({ kind: 'error', text: failure instanceof Error ? failure.message : 'Checkout could not be opened. Please try again.', plan });
     } finally { setBusy(null); }
   }
 
@@ -83,9 +94,9 @@ export default function SubscriptionPricing() {
           {user
             ? <button type="button" className={`jv-btn jv-btn--block ${plan.badge === 'Best value' ? 'jv-btn--primary' : 'jv-btn--secondary'}`} disabled={!!busy} onClick={() => void buy(plan.key)}>{busy === plan.key ? 'Opening secure checkout…' : `Buy ${plan.name}`}</button>
             : <Link className={`jv-btn jv-btn--block ${plan.badge === 'Best value' ? 'jv-btn--primary' : 'jv-btn--secondary'}`} to={`/auth?next=${encodeURIComponent(`/pricing?plan=${plan.key}`)}`}aria-label={`Sign in to buy ${plan.name}`}>Sign in to buy</Link>}
+          {message?.plan === plan.key && <p ref={messageRef} className={`pricing-message pricing-message--${message.kind}`} role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</p>}
         </section>)}
       </div>
-      {message && <p className={`pricing-message pricing-message--${message.kind}`} role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</p>}
       <ul className="pricing-trust" aria-label="About payment">{trustLines.map(line => <li key={line}><Check size={15} aria-hidden="true" />{line}</li>)}</ul>
       </div>
       </details>
