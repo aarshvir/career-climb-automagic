@@ -35,8 +35,8 @@ describe('recurring schedule and grounded preparation boundaries',()=>{
     expect(normalizeFollowUp('2026-10-15')).toBe('2026-10-15');expect(normalizeFollowUp('2026-10-15T12:00:00+04:00')).toBe('2026-10-15T08:00:00.000Z');
     for(const value of ['2026-02-30','2026-10-15T12:00:00','2026-10-15T24:00:00Z','2026-02-30T12:00:00Z'])expect(()=>normalizeFollowUp(value)).toThrow();
   });
-  it('uses six verified bounded feed defaults and preserves encoded employer conditions in full text',async()=>{
-    expect(employerFeeds(()=>undefined).map(item=>item.board)).toEqual(['careem','gocardless','duolingo','toast','notion','zapier']);
+  it('uses verified bounded feed defaults (the original six first, then two staged boards) and preserves encoded employer conditions in full text',async()=>{
+    expect(employerFeeds(()=>undefined).map(item=>item.board)).toEqual(['careem','gocardless','duolingo','toast','notion','zapier','oyster','tamara']);
     const fetcher=vi.fn(async()=>new Response(JSON.stringify({jobs:[{id:1,title:'Business Analyst',absolute_url:opportunity.url,location:{name:opportunity.location},content:'&lt;p&gt;Prepare business analysis and document assumptions.&lt;/p&gt;&lt;p&gt;We do not provide sponsorship. Applicants need at least five years of experience.&lt;/p&gt;'}]})));
     const result=await readEmployerFeed({provider:'greenhouse',board:'fictional',company:'Fictional employer'},fetcher);expect(result.opportunities[0].description).toContain('We do not provide sponsorship.');expect(result.opportunities[0].description).not.toContain('&lt;');expect(result.opportunities[0].description).not.toContain('<p>');expect(fetcher).toHaveBeenCalledTimes(1);
     expect(matchesDiscoveryTarget(profile,result.opportunities[0])).toBe(true);expect(matchesDiscoveryTarget(profile,{...result.opportunities[0],location:'London'})).toBe(false);

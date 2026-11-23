@@ -144,7 +144,7 @@ export interface SearchResult { title: string; url: string; content: string }
 export async function searchTavily(query: string, env: LoopEnv, fetcher: LoopFetch = fetch): Promise<{ results: SearchResult[]; actualMicros: number; error: string | null }> {
   if (!searchReady(env)) throw new ApiError(503, 'LOOP_SEARCH_NOT_CONFIGURED', 'Broad web search is not configured.');
   let response: Response;
-  try { response = await fetcher('https://api.tavily.com/search', { method: 'POST', headers: { 'Content-Type': 'application/json',Authorization:`Bearer ${env('JOB_LOOP_TAVILY_API_KEY')}` }, body: JSON.stringify({ query: query.slice(0, 250), search_depth: 'basic', max_results: 5, include_raw_content: 'text', include_usage: true, auto_parameters: false }), redirect: 'error', signal: AbortSignal.timeout(15000) }); } catch { throw new UncertainProviderCall(); }
+  try { response = await fetcher('https://api.tavily.com/search', { method: 'POST', headers: { 'Content-Type': 'application/json',Authorization:`Bearer ${env('JOB_LOOP_TAVILY_API_KEY')}` }, body: JSON.stringify({ query: query.slice(0, 250), search_depth: 'basic', max_results: 5, include_raw_content: 'text', include_usage: true, auto_parameters: false }), redirect: 'error', signal: AbortSignal.timeout(SEARCH_REQUEST_TIMEOUT_MS) }); } catch { throw new UncertainProviderCall(); }
   const data = await readBoundedResponseJson(response); const credits = integer(record(data.usage).credits);
   if (credits === null || credits > 1) throw new UncertainProviderCall();
   const results = Array.isArray(data.results) ? data.results.flatMap(item => {
@@ -162,23 +162,82 @@ function htmlText(value: unknown): string {
   return result.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<\/(?:p|div|li|h[1-6])\s*>|<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/[^\S\n]+/g,' ').replace(/\n\s*\n+/g,'\n').trim();
 }
 export interface EmployerFeed { provider: 'greenhouse' | 'lever' | 'ashby'; board: string; company?: string }
-export const EMPLOYER_FEED_LIMITS = Object.freeze({ feeds: 8, bytes: 5000000, scanned: 1000, retained: 100, leverPages: 3 });
-export function employerFeeds(env: LoopEnv): EmployerFeed[] {
-  try {
-    // Documented public GET feeds, verified 2026-10-17. Coverage is deliberately
-    // limited and does not imply an employer partnership or market-wide search.
-    const values: unknown = JSON.parse(env('JOB_LOOP_EMPLOYER_FEEDS') ?? '[{"provider":"greenhouse","board":"careem","company":"Careem"},{"provider":"greenhouse","board":"gocardless","company":"GoCardless"},{"provider":"greenhouse","board":"duolingo","company":"Duolingo"},{"provider":"greenhouse","board":"toast","company":"Toast"},{"provider":"ashby","board":"notion","company":"Notion"},{"provider":"ashby","board":"zapier","company":"Zapier"}]');
-    if (!Array.isArray(values) || values.length > EMPLOYER_FEED_LIMITS.feeds) return [];
-    const seen = new Set<string>();
-    return values.flatMap(value => { const row = record(value); const key = `${row.provider}:${row.board}`; if (!['greenhouse', 'lever', 'ashby'].includes(String(row.provider)) || typeof row.board !== 'string' || !/^[a-z0-9_-]{1,80}$/i.test(row.board) || seen.has(key)) return []; seen.add(key); return [{ provider: row.provider as EmployerFeed['provider'], board: row.board, company: text(row.company,200) }]; });
-  } catch { return []; }
+// `feeds` is the most boards one run may read (the supported capacity, unchanged). `concurrency` bounds how many boards are
+// in flight at once (two: in a local Node measurement over the real responses the peak resident memory was about 215 MB at one or
+// two at a time and 255-280 MB at four, against a hosted 256 MB limit; the heaviest responses, Toast 4.0 MB and Notion 3.1 MB, dominate). Retained results are bounded per board (`retained` listings of at most `descriptionChars`) and so, across
+// boards, by EMPLOYER_RETAINED_CHARACTER_BOUND below; the workspace itself keeps at most 100 opportunities.
+export const EMPLOYER_FEED_LIMITS = Object.freeze({ feeds: 8, bytes: 5000000, scanned: 1000, retained: 100, leverPages: 3, descriptionChars: 20000, concurrency: 2 });
+/** Largest total of retained listing description characters one run can hold across all supported boards: 8 x 100 x 20,000. */
+export const EMPLOYER_RETAINED_CHARACTER_BOUND = EMPLOYER_FEED_LIMITS.feeds * EMPLOYER_FEED_LIMITS.retained * EMPLOYER_FEED_LIMITS.descriptionChars;
+/** Request timeouts: the single source of truth for the request code and for the discovery budget's start rule below. */
+export const EMPLOYER_REQUEST_TIMEOUT_MS = 12000;
+export const SEARCH_REQUEST_TIMEOUT_MS = 15000;
+/**
+ * ONE overall time budget for the discovery phase, employer board pages AND the optional paid searches, measured from the start
+ * of the phase. A CAP BY DESIGN, not a hosted measurement and not a prediction of typical time (typical reads take 1-3 s a board).
+ * The worker runs one phase per invocation, so the phase has to end inside the hosted worker lifetime (150 s on Free, 400 s on
+ * paid; the deployed run lease is 180 s and is not changed). 40 s are held back for everything the budget does not cover: the
+ * claim and record reads before the phase, parsing (limit 2 s of CPU), reconciliation, the database commit and the dispatch of the
+ * next phase. So no request may START unless it can finish, at its own timeout, inside `totalMs` (110 s) of phase time.
+ * With eight Lever boards of three 11.9 s pages and two workers the unbudgeted phase needed 142.8 s of board reads plus 29.8 s
+ * of searches (172.6 s); with the budget it ends by 107.1 s, the last two boards are reported "not read: time budget" and the
+ * searches are not started (no reservation is made).
+ */
+export const DISCOVERY_BUDGET = Object.freeze({ workerLifetimeMs: 150000, reserveMs: 40000, totalMs: 110000 });
+/** Thrown when a board cannot start because the discovery budget cannot cover its first request. */
+export class BudgetExhausted extends Error { constructor() { super('The discovery time budget was reached.'); this.name = 'BudgetExhausted'; } }
+export interface DiscoveryBudget {
+  /** Milliseconds left of the overall budget. */
+  remaining(): number;
+  /** True when a request with this own timeout could start now and still finish inside the budget. */
+  canStart(requestTimeoutMs: number): boolean;
+  /** Aborts when the budget ends: a backstop only, a request that started legally ends at its own timeout first. */
+  readonly signal: AbortSignal;
+  dispose(): void;
 }
-export async function readEmployerFeed(feed: EmployerFeed, fetcher: LoopFetch = fetch, profile?: LoopProfileInput): Promise<{ opportunities: LoopOpportunity[]; total: number; truncated: boolean }> {
+export function startDiscoveryBudget(totalMs: number = DISCOVERY_BUDGET.totalMs, now: () => number = Date.now): DiscoveryBudget {
+  const started = now(), controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), totalMs);
+  const remaining = () => Math.max(0, totalMs - (now() - started));
+  return { remaining, canStart: requestTimeoutMs => remaining() >= requestTimeoutMs, signal: controller.signal, dispose: () => clearTimeout(timer) };
+}
+// Documented public GET feeds that returned postings when read-checked on 23 Nov 2026 (receipt:
+// jobvance-marketing-coordination/2026-11-23-discovery-feeds-verified.json). Listing a board here does not imply a
+// partnership with, or endorsement by, the employer, and coverage is not the whole job market. Capacity stays eight boards.
+export const DEFAULT_EMPLOYER_FEEDS: readonly EmployerFeed[] = Object.freeze([
+  // The six boards used before 23 Nov 2026 stay first and unchanged.
+  { provider: 'greenhouse', board: 'careem', company: 'Careem' },
+  { provider: 'greenhouse', board: 'gocardless', company: 'GoCardless' },
+  { provider: 'greenhouse', board: 'duolingo', company: 'Duolingo' },
+  { provider: 'greenhouse', board: 'toast', company: 'Toast' },
+  { provider: 'ashby', board: 'notion', company: 'Notion' },
+  { provider: 'ashby', board: 'zapier', company: 'Zapier' },
+  // Staged additions chosen by actual role/location matches per cost over 32 synthetic profiles (see the PR and result file):
+  // Oyster (Ashby, 445 KB) matched the Dubai and remote marketing/customer-success profiles; Tamara (Greenhouse, 232 KB) was the
+  // only verified board with a Dubai accountant match.
+  { provider: 'ashby', board: 'oyster', company: 'Oyster' },
+  { provider: 'greenhouse', board: 'tamara', company: 'Tamara' },
+]);
+export type EmployerFeedConfig = { feeds: EmployerFeed[]; problem: null | 'unreadable' | 'not_a_list' | 'too_many' };
+/** The configured boards and, when the override cannot be used, why. A rejected override reads no board and is never an empty market. */
+export function employerFeedsConfig(env: LoopEnv): EmployerFeedConfig {
+  let values: unknown;
+  try { values = JSON.parse(env('JOB_LOOP_EMPLOYER_FEEDS') ?? JSON.stringify(DEFAULT_EMPLOYER_FEEDS)); } catch { return { feeds: [], problem: 'unreadable' }; }
+  if (!Array.isArray(values)) return { feeds: [], problem: 'not_a_list' };
+  if (values.length > EMPLOYER_FEED_LIMITS.feeds) return { feeds: [], problem: 'too_many' };
+  const seen = new Set<string>();
+  const feeds = values.flatMap(value => { const row = record(value); const key = `${row.provider}:${row.board}`; if (!['greenhouse', 'lever', 'ashby'].includes(String(row.provider)) || typeof row.board !== 'string' || !/^[a-z0-9_-]{1,80}$/i.test(row.board) || seen.has(key)) return []; seen.add(key); return [{ provider: row.provider as EmployerFeed['provider'], board: row.board, company: text(row.company,200) }]; });
+  return { feeds, problem: null };
+}
+export function employerFeeds(env: LoopEnv): EmployerFeed[] { return employerFeedsConfig(env).feeds; }
+export async function readEmployerFeed(feed: EmployerFeed, fetcher: LoopFetch = fetch, profile?: LoopProfileInput, discovery?: DiscoveryBudget): Promise<{ opportunities: LoopOpportunity[]; total: number; truncated: boolean; timeLimited?: boolean }> {
   if (!['greenhouse','lever','ashby'].includes(feed.provider) || !/^[a-z0-9_-]{1,80}$/i.test(feed.board)) throw new ApiError(400, 'LOOP_UNSAFE_SOURCE', 'Invalid employer source configuration.');
-  const entries: unknown[] = []; let cappedPage = false; let total = 0; const budget = { remaining: EMPLOYER_FEED_LIMITS.bytes };
+  const entries: unknown[] = []; let cappedPage = false; let total = 0; let timeLimited = false; const budget = { remaining: EMPLOYER_FEED_LIMITS.bytes };
   for (let page = 0; page < (feed.provider === 'lever' ? EMPLOYER_FEED_LIMITS.leverPages : 1); page++) {
+    // No page starts unless it can finish, at its own timeout, inside the discovery budget. Pages already read are kept.
+    if (discovery && !discovery.canStart(EMPLOYER_REQUEST_TIMEOUT_MS)) { if (page === 0) throw new BudgetExhausted(); timeLimited = true; break; }
     const endpoint = feed.provider === 'greenhouse' ? `https://boards-api.greenhouse.io/v1/boards/${feed.board}/jobs?content=true` : feed.provider === 'ashby' ? `https://api.ashbyhq.com/posting-api/job-board/${feed.board}` : `https://api.lever.co/v0/postings/${feed.board}?mode=json&limit=100${page ? `&skip=${page * 100}` : ''}`;
-    const response = await fetcher(endpoint, { redirect: 'error', signal: AbortSignal.timeout(12000) });
+    const response = await fetcher(endpoint, { redirect: 'error', signal: discovery ? AbortSignal.any([AbortSignal.timeout(EMPLOYER_REQUEST_TIMEOUT_MS), discovery.signal]) : AbortSignal.timeout(EMPLOYER_REQUEST_TIMEOUT_MS) });
     if (!response.ok) throw new ApiError(503, 'LOOP_SOURCE_UNAVAILABLE', 'An employer source could not be read.');
     // Every body and the complete multi-page source read are bounded.
     const data = await boundedValue(response, budget.remaining, budget);
@@ -197,7 +256,7 @@ export async function readEmployerFeed(feed: EmployerFeed, fetcher: LoopFetch = 
     if (!title || !url || (typeof id !== 'string' && typeof id !== 'number')) continue;
     const description = htmlText(feed.provider === 'greenhouse' ? row.content : feed.provider === 'ashby' ? row.descriptionPlain ?? row.descriptionHtml : [row.descriptionPlain, ...(Array.isArray(row.lists) ? row.lists.map(item => `${text(record(item).text,200)}\n${htmlText(record(item).content)}`) : []),row.additionalPlain].join('\n'));
     // Never certify a cropped description as the full employer vacancy.
-    if (description.length < 80 || description.length>20000) continue;
+    if (description.length < 80 || description.length>EMPLOYER_FEED_LIMITS.descriptionChars) continue;
     const sourceKey = `${feed.provider}:${feed.board}:${id}`;
     const ashbyAddress = record(record(row.address).postalAddress);
     // Ashby can return isRemote=true for Hybrid roles. The explicit workplace
@@ -210,5 +269,31 @@ export async function readEmployerFeed(feed: EmployerFeed, fetcher: LoopFetch = 
     if (opportunities.length >= EMPLOYER_FEED_LIMITS.retained) { retainedOverflow = true; continue; }
     opportunities.push({ ...input, id: await stableUuid(sourceKey), source: 'employer_api', sourceKey, checkedAt, verification: 'listed_on_source', status: 'saved', notes: feed.company||row.company?'':'Employer display uses the configured board identifier; confirm the official employer name.', followUpAt: null });
   }
-  return { opportunities, total, truncated: cappedPage || total > EMPLOYER_FEED_LIMITS.scanned || retainedOverflow };
+  return { opportunities, total, truncated: cappedPage || total > EMPLOYER_FEED_LIMITS.scanned || retainedOverflow || timeLimited, ...(timeLimited ? { timeLimited: true } : {}) };
+}
+export type EmployerFeedResult =
+  | { status: 'fulfilled'; value: { opportunities: LoopOpportunity[]; total: number; truncated: boolean; timeLimited?: boolean } }
+  | { status: 'rejected' }
+  /** Not read because the discovery budget could not cover it. Never an empty market. */
+  | { status: 'skipped' };
+/**
+ * Reads the configured boards with at most `concurrency` in flight (one bounded body each) instead of all at once. A board that
+ * fails is `rejected` on its own and never fails the others. Results keep the order of `feeds`. With a discovery budget, a board
+ * whose first request cannot finish inside it is `skipped`, a Lever board stops before a page that cannot finish (what it already
+ * read is kept and flagged `timeLimited`), and the budget's abort cancels anything still running as `skipped`. Per-request limits
+ * (12 s timeout, byte budget) are those of readEmployerFeed. Retained results are bounded by EMPLOYER_RETAINED_CHARACTER_BOUND.
+ */
+export async function readEmployerFeeds(feeds: readonly EmployerFeed[], fetcher: LoopFetch = fetch, profile?: LoopProfileInput, concurrency = EMPLOYER_FEED_LIMITS.concurrency, discovery?: DiscoveryBudget): Promise<EmployerFeedResult[]> {
+  const results: EmployerFeedResult[] = feeds.map(() => ({ status: 'rejected' }));
+  let next = 0;
+  const worker = async () => {
+    for (;;) {
+      const index = next++;
+      if (index >= feeds.length) return;
+      try { results[index] = { status: 'fulfilled', value: await readEmployerFeed(feeds[index], fetcher, profile, discovery) }; }
+      catch (error) { results[index] = error instanceof BudgetExhausted || discovery?.signal.aborted ? { status: 'skipped' } : { status: 'rejected' }; }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(concurrency, EMPLOYER_FEED_LIMITS.concurrency, feeds.length)) }, worker));
+  return results;
 }

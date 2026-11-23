@@ -2,9 +2,9 @@
     "bundles":  [
                     {
                         "function":  "job-loop-control",
-                        "sha256":  "5cc1f31c3112a77bc2bbd6aa668204ee93c0cb5664b5666e95115733250c971c",
+                        "sha256":  "28bd3409a323f4e9592d72f2d69e07dc9b973a78f2fd811170eb6ab14ffe9ce8",
                         "artifact":  "docs/supabase-loop-ui/job-loop-control.js",
-                        "bytes":  100806,
+                        "bytes":  101218,
                         "sources":  [
                                         {
                                             "sha256":  "ac61281e0d40714780b494ae681de2f27c66d43973c51beba8fa70beef8973c3",
@@ -95,7 +95,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-preparation.ts"
                                         },
                                         {
-                                            "sha256":  "e8a680ac72027cf5f2e01b0384d2d1c7a9ae5833849bcb34ff0dc84a6b2595ff",
+                                            "sha256":  "ef08fc0aa55075ef8ec738a89b3effb0c242ccf389ea0d1592d4048657124de3",
                                             "path":  "supabase/functions/_shared/job-loop-providers.ts"
                                         },
                                         {
@@ -111,7 +111,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
+                                            "sha256":  "de031f1589cbab4aefb8a01250d9e1ea22a87215c147c1acb44e5e2a32915c97",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -282,9 +282,9 @@
                     },
                     {
                         "function":  "job-loop-worker",
-                        "sha256":  "a0bfd2982afae481fb434d5d14862222b78acc639b23b6348dac10e9ab18d372",
+                        "sha256":  "c4e2a996782965de9d00367d5f6da4420082ffccd12a9cc1bcd772cadefd37cb",
                         "artifact":  "docs/supabase-loop-ui/job-loop-worker.js",
-                        "bytes":  2086900,
+                        "bytes":  2089236,
                         "sources":  [
                                         {
                                             "sha256":  "ac61281e0d40714780b494ae681de2f27c66d43973c51beba8fa70beef8973c3",
@@ -375,7 +375,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-preparation.ts"
                                         },
                                         {
-                                            "sha256":  "e8a680ac72027cf5f2e01b0384d2d1c7a9ae5833849bcb34ff0dc84a6b2595ff",
+                                            "sha256":  "ef08fc0aa55075ef8ec738a89b3effb0c242ccf389ea0d1592d4048657124de3",
                                             "path":  "supabase/functions/_shared/job-loop-providers.ts"
                                         },
                                         {
@@ -391,7 +391,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
+                                            "sha256":  "de031f1589cbab4aefb8a01250d9e1ea22a87215c147c1acb44e5e2a32915c97",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -562,9 +562,9 @@
                     },
                     {
                         "function":  "job-loop-oauth",
-                        "sha256":  "9ac290e290cdf0bfae64d5adc9021197edaf1db76286044032726669f43d36b4",
+                        "sha256":  "04b43f7feb142fe9386a207c20366615b1f778c7c61a927a0e7b19eaada13451",
                         "artifact":  "docs/supabase-loop-ui/job-loop-oauth.js",
-                        "bytes":  43867,
+                        "bytes":  44484,
                         "sources":  [
                                         {
                                             "sha256":  "ac61281e0d40714780b494ae681de2f27c66d43973c51beba8fa70beef8973c3",
@@ -655,7 +655,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-preparation.ts"
                                         },
                                         {
-                                            "sha256":  "e8a680ac72027cf5f2e01b0384d2d1c7a9ae5833849bcb34ff0dc84a6b2595ff",
+                                            "sha256":  "ef08fc0aa55075ef8ec738a89b3effb0c242ccf389ea0d1592d4048657124de3",
                                             "path":  "supabase/functions/_shared/job-loop-providers.ts"
                                         },
                                         {
@@ -671,7 +671,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
+                                            "sha256":  "de031f1589cbab4aefb8a01250d9e1ea22a87215c147c1acb44e5e2a32915c97",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -935,7 +935,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-preparation.ts"
                                         },
                                         {
-                                            "sha256":  "e8a680ac72027cf5f2e01b0384d2d1c7a9ae5833849bcb34ff0dc84a6b2595ff",
+                                            "sha256":  "ef08fc0aa55075ef8ec738a89b3effb0c242ccf389ea0d1592d4048657124de3",
                                             "path":  "supabase/functions/_shared/job-loop-providers.ts"
                                         },
                                         {
@@ -951,7 +951,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
+                                            "sha256":  "de031f1589cbab4aefb8a01250d9e1ea22a87215c147c1acb44e5e2a32915c97",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -1215,7 +1215,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-preparation.ts"
                                         },
                                         {
-                                            "sha256":  "e8a680ac72027cf5f2e01b0384d2d1c7a9ae5833849bcb34ff0dc84a6b2595ff",
+                                            "sha256":  "ef08fc0aa55075ef8ec738a89b3effb0c242ccf389ea0d1592d4048657124de3",
                                             "path":  "supabase/functions/_shared/job-loop-providers.ts"
                                         },
                                         {
@@ -1231,7 +1231,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
+                                            "sha256":  "de031f1589cbab4aefb8a01250d9e1ea22a87215c147c1acb44e5e2a32915c97",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -1495,7 +1495,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-preparation.ts"
                                         },
                                         {
-                                            "sha256":  "e8a680ac72027cf5f2e01b0384d2d1c7a9ae5833849bcb34ff0dc84a6b2595ff",
+                                            "sha256":  "ef08fc0aa55075ef8ec738a89b3effb0c242ccf389ea0d1592d4048657124de3",
                                             "path":  "supabase/functions/_shared/job-loop-providers.ts"
                                         },
                                         {
@@ -1511,7 +1511,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
+                                            "sha256":  "de031f1589cbab4aefb8a01250d9e1ea22a87215c147c1acb44e5e2a32915c97",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
@@ -1775,7 +1775,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-preparation.ts"
                                         },
                                         {
-                                            "sha256":  "e8a680ac72027cf5f2e01b0384d2d1c7a9ae5833849bcb34ff0dc84a6b2595ff",
+                                            "sha256":  "ef08fc0aa55075ef8ec738a89b3effb0c242ccf389ea0d1592d4048657124de3",
                                             "path":  "supabase/functions/_shared/job-loop-providers.ts"
                                         },
                                         {
@@ -1791,7 +1791,7 @@
                                             "path":  "supabase/functions/_shared/job-loop-request.ts"
                                         },
                                         {
-                                            "sha256":  "162750335a6f5078dc9ec1ea6d9c6d70ce97395165bddd3c1c8f51475d31b1ce",
+                                            "sha256":  "de031f1589cbab4aefb8a01250d9e1ea22a87215c147c1acb44e5e2a32915c97",
                                             "path":  "supabase/functions/_shared/job-loop-runtime.ts"
                                         },
                                         {
