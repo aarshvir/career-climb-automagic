@@ -144,11 +144,14 @@ describe('one overall discovery time budget, in deterministic virtual time, thro
   const page = () => Response.json(Array.from({ length: 100 }, (_, i) => ({ id: `p-${i}`, text: 'Warehouse Operator', hostedUrl: `https://jobs.example.com/${i}`, descriptionPlain: 'Pick and pack orders at a fictional depot.', categories: { location: 'Austin, TX' } })));
   const tavily = () => Response.json({ results: [], usage: { credits: 1 } });
   const wait = (ms: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => { const timer = setTimeout(resolve, ms); signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('aborted', 'AbortError')); }); });
-  /** Runs the actual phases with fake timers so every wait is virtual and exact; returns the virtual end time of the last request. */
+  /** The one virtual epoch: the fake clock is installed AT this instant and every measurement is taken against this same constant, never against a sampled real clock. */
+  const VIRTUAL_EPOCH = Date.UTC(2026, 10, 23, 0, 0, 0);
+  /** Runs the actual phases with fake timers so every wait is virtual and exact; returns the virtual end time (ms after VIRTUAL_EPOCH) of the last request. */
   async function drainVirtual(h: ReturnType<typeof harness>, env: (name: string) => string | undefined, fetcher: (url: unknown, init?: RequestInit) => Promise<Response>) {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ now: VIRTUAL_EPOCH });
     try {
-      const started = Date.now(); let lastEnd = 0, done = false;
+      if (Date.now() !== VIRTUAL_EPOCH) throw new Error('The virtual clock is not frozen at the epoch.');
+      const started = VIRTUAL_EPOCH; let lastEnd = 0, done = false;
       const timed = async (url: unknown, init?: RequestInit) => { const response = await fetcher(url, init); lastEnd = Date.now() - started; return response; };
       const work = (async () => { for (let n = 0; n < 14; n++) if (!await processLoopPhase(h.repo, id, env, timed as never)) break; })().finally(() => { done = true; });
       for (let guard = 0; !done && guard < 6000; guard++) await vi.advanceTimersByTimeAsync(100);
@@ -239,8 +242,10 @@ describe('one overall discovery time budget, in deterministic virtual time, thro
   it('boundary: a reservation that returns with exactly the search timeout left (15.000 s) still starts the search, and the clock never cancels it', async () => {
     const { h, reserve, settle } = searchHarness();
     delayedReserve(reserve, 5000); // boards end at 90.000 s, the reservation returns at 95.000 s: exactly 15.000 s left
-    let searchStart = -1; const origin = Date.now();
-    const fetcher = vi.fn(async (url: unknown) => { if (String(url).includes('api.tavily.com')) { searchStart = Date.now() - origin; await wait(15000); return tavily(); } await wait(7500); return page(); });
+    let searchStart = -1;
+    const fetcher = vi.fn(async (url: unknown) => { if (String(url).includes('api.tavily.com')) { searchStart = Date.now() - VIRTUAL_EPOCH; await wait(15000); return tavily(); } await wait(7500); return page(); });
+    // Real milliseconds that pass before the fake clock is installed must never leak into a virtual measurement (the CI failure was 95001 for this reason).
+    await new Promise<void>(resolve => setTimeout(resolve, 25));
     await drainVirtual(h, searchEnv(leverBoards(8)), fetcher);
     expect(searchStart).toBe(95000);
     expect(tavilyCalls(fetcher)).toHaveLength(1); // it ends at 110.000 s, the same instant the budget aborts; the search is not attached to that abort

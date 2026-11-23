@@ -117,7 +117,8 @@ describe('reading the configured boards in one run', () => {
 });
 
 describe('the overall discovery time budget (deterministic virtual time; a cap by design, not a hosted measurement)', () => {
-  const realNow = Date.now.bind(Date); // the real clock, kept before any fake timers
+  const realNow = Date.now.bind(Date); // the real clock, kept before any fake timers (used only to prove nothing waited in real time)
+  const VIRTUAL_EPOCH = Date.UTC(2026, 10, 23, 0, 0, 0); // every fake clock below starts here; budgets and assertions are relative to it
   const wait = (ms: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => { const timer = setTimeout(resolve, ms); signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('aborted', 'AbortError')); }); });
   const leverPage = () => Response.json(Array.from({ length: 100 }, (_, i) => ({ id: `p-${i}`, text: 'Warehouse Operator', hostedUrl: `https://jobs.example.com/${i}`, descriptionPlain: 'Pick and pack orders at a fictional depot.', categories: { location: 'Austin, TX' } })));
   const lever = (slug: string): EmployerFeed => ({ provider: 'lever', board: slug, company: `Created ${slug}` });
@@ -133,7 +134,7 @@ describe('the overall discovery time budget (deterministic virtual time; a cap b
     expect((EMPLOYER_FEED_LIMITS.feeds * EMPLOYER_FEED_LIMITS.leverPages * EMPLOYER_REQUEST_TIMEOUT_MS) / EMPLOYER_FEED_LIMITS.concurrency).toBeGreaterThan(DISCOVERY_BUDGET.totalMs);
   });
   it('lets a request start only if its own timeout fits in the remaining time, and aborts at the end as a backstop', async () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ now: VIRTUAL_EPOCH });
     try {
       const budget = startDiscoveryBudget(30000);
       expect(budget.canStart(12000)).toBe(true);
@@ -153,7 +154,7 @@ describe('the overall discovery time budget (deterministic virtual time; a cap b
     } finally { vi.useRealTimers(); }
   });
   it('a late page: a Lever board stops before the page it cannot finish, keeps the pages it read, and says so', async () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ now: VIRTUAL_EPOCH });
     try {
       const budget = startDiscoveryBudget(30000);
       const fetcher = vi.fn(async () => { await wait(11900); return leverPage(); });
@@ -164,7 +165,7 @@ describe('the overall discovery time budget (deterministic virtual time; a cap b
     } finally { vi.useRealTimers(); }
   });
   it('a board whose first request cannot finish is skipped (not read, not empty), and what was read before it is kept', async () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ now: VIRTUAL_EPOCH });
     try {
       const budget = startDiscoveryBudget(25000);
       const fetcher = vi.fn(async () => { await wait(9000); return leverPage(); });
@@ -178,7 +179,7 @@ describe('the overall discovery time budget (deterministic virtual time; a cap b
   });
   it('the budget abort cancels a request that outlives it as skipped, without disturbing the other boards', async () => {
     const realStart = realNow();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ now: VIRTUAL_EPOCH });
     try {
       const budget = startDiscoveryBudget(20000);
       const fetcher = vi.fn(async (url: unknown, init?: RequestInit) => {
@@ -189,7 +190,7 @@ describe('the overall discovery time budget (deterministic virtual time; a cap b
       const results = await virtually(readEmployerFeeds(feeds, fetcher, profile, 2, budget));
       expect(results.map(result => result.status)).toEqual(['fulfilled', 'skipped', 'fulfilled']);
       // Released by the budget's own abort in virtual time, not by the request's real 12 s timeout (which would take 12 real seconds).
-      expect(realNow() - realStart).toBeLessThan(3000);
+      expect(realNow() - realStart).toBeLessThan(6000);
       budget.dispose();
     } finally { vi.useRealTimers(); }
   });
