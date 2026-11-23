@@ -23,3 +23,20 @@
 /* Progress fills with transform (compositor-only), on the shared easing and the brand token. */
 .loop-onboarding .oq-progress span { width: 100%; background: var(--jv-brand); transform-origin: left center; transition: transform var(--dur-3) var(--ease-out); will-change: transform; }
 @media (prefers-reduced-motion: reduce) { .loop-onboarding .oq-progress span { transition: none; } }
+/* One-tap choices under the search box: the first few suggestions that are not selected yet. Large touch targets, wrapping, brand colour. */
+.loop-onboarding .oq-quick-picks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 4px; }
+.loop-onboarding .oq-quick-label { flex-basis: 100%; font-size: .8rem; font-weight: 600; color: var(--jv-ink-3); }
+.loop-onboarding .oq-quick-pick { min-height: 44px; max-width: 100%; padding: 8px 14px; border: 1px solid var(--jv-line-input); border-radius: 22px; background: #fff; color: var(--jv-brand); font: inherit; font-size: 14px; line-height: 1.3; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+.loop-onboarding .oq-quick-pick:hover { background: var(--jv-bg-subtle); }
+.loop-onboarding .oq-quick-pick:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; }
+/* Why Save is not available yet: a line of its own just above the Back and Save buttons in the fixed bar, so it never squeezes them on a narrow phone. */
+.loop-onboarding .oq-actions { flex-wrap: wrap; }
+.loop-onboarding .oq-save-reason { order: -1; flex: 1 0 100%; margin: 0; text-align: right; font-size: .85rem; line-height: 1.4; color: var(--jl-muted); }
+/* Optional contact line and years of experience, closed on the CV step. Same look as the other closed sections of this page. */
+.loop-onboarding .oq-optional { border-top: 1px solid var(--jv-line); margin: 12px 0; padding-top: 4px; }
+.loop-onboarding .oq-optional summary { cursor: pointer; color: var(--jv-brand); padding: 10px 0; }
+/* A CV file that could not be read: the way on (paste the text, or choose another file) sits inside the message, with full-size touch targets. */
+.loop-onboarding .oq-recovery { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.loop-onboarding .oq-recovery .jl-button { min-height: 44px; }
+/* Where focus lands after the last quick pick is gone (the tenth entry was chosen): the list of what was chosen. */
+.loop-onboarding .oq-choice-list:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 4px; border-radius: 8px; }
