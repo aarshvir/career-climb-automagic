@@ -15,3 +15,5 @@
 /* The consent wording is the renewal terms the customer agrees to, so it is body-size text. (Scrolling to the panel already clears the sticky header through html { scroll-padding-top } in index.css.) */
 .loop-subscription-billing label.jl-consent { font-size:16px; line-height:1.6; }
 .loop-subscription-billing .loop-checkout-reason { margin:10px 0 0; font-size:14px; line-height:1.5; color:var(--jv-ink-2); }
+/* "Continue my setup" is the only action when the Job Loop setup must be saved first: make it read as a link in its normal state. Scoped to that one link; the keyboard focus outline is the site's and is not touched here. */
+.loop-subscription-billing .loop-setup-link { text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; }

@@ -357,3 +357,27 @@ describe('Setup required (billing generation null): the same one-time reveal goe
     expect(m.quote).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('"Continue my setup" reads as a link in its normal state', () => {
+  const css = readFileSync('src/components/LoopSubscriptionBilling.css', 'utf8');
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(match => ({ selector: match[1].replace(/\/\*[\s\S]*?\*\//g, '').trim(), body: match[2] }));
+  const rule = rules.find(item => /text-decoration:\s*underline/.test(item.body));
+
+  it('puts a class on that one link and leaves its destination alone', async () => {
+    m.read.mockResolvedValue(status({ generation: null }));
+    billing('/pricing');
+    const setup = await screen.findByRole('link', { name: 'Continue my setup' });
+    expect(setup).toHaveClass('loop-setup-link');
+    expect(setup).toHaveAttribute('href', '/onboarding');
+    expect(document.querySelectorAll('.loop-setup-link')).toHaveLength(1);
+    // The other links in the billing section (country, terms, refund policy, contact) do not carry it.
+    for (const other of Array.from(document.querySelectorAll('.loop-subscription-billing a')).filter(node => node !== setup)) expect(other).not.toHaveClass('loop-setup-link');
+  });
+
+  it('underlines it through a rule scoped to that class, with no global anchor rule and no outline override', () => {
+    expect(rule, 'a rule that underlines').toBeDefined();
+    expect(rule!.selector).toBe('.loop-subscription-billing .loop-setup-link');
+    expect(rule!.body).not.toMatch(/outline|border|display|color|font-weight/);
+    for (const item of rules) expect(item.selector, 'no bare anchor selector in this stylesheet').not.toMatch(/(^|,)\s*a(\s*$|[:.#[\s>+~,])/);
+  });
+});
