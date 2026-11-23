@@ -250,6 +250,128 @@ describe('the contact line and years of experience are in a closed "Optional det
 });
 
 /**
+ * Round 3 (Codex, review of a8d3bcd): enter 81 for years, CLOSE Optional details, press Next. The page said to use 0 to 80 but the input stayed hidden, because the box
+ * had already been told "invalid" while the value was typed, so nothing ran again when Next rejected it. A Next that rejects a concealed optional field must reopen it,
+ * keep what was typed, and let the person correct it and go on; a valid value must still be collapsible, and nothing else reopens it.
+ */
+describe('Next that rejects a concealed optional field reopens Optional details', () => {
+  const YEARS = 'Years of relevant experience (optional)', CONTACT = 'Contact line for your CV (optional)';
+  const hidden = `alex${String.fromCharCode(0x202e)}@example.invalid`;
+  const toggle = async () => { fireEvent.click(screen.getByText('Optional details')); await act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); }); };
+  const heading = () => screen.getByRole('heading', { level: 1 });
+  /** The CV step with a good CV text; the section opened, the value typed, and the section closed again by the person. */
+  async function concealed(field: string, value: string) {
+    await toCvStep();
+    fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: SOURCE } });
+    await toggle();
+    expect(optional()).toHaveAttribute('open');
+    fireEvent.change(screen.getByLabelText(field), { target: { value } });
+    await toggle();
+    expect(optional()).not.toHaveAttribute('open');
+    expect(screen.getByLabelText(field)).not.toBeVisible();
+  }
+  const kept = (field: string, value: string) => (field === YEARS ? Number(value) : value);
+
+  it.each([
+    ['years 81 (the reported case)', YEARS, '81', /number from 0 to 80/, '5'],
+    ['years below 0', YEARS, '-1', /number from 0 to 80/, '0'],
+    ['years just over 80', YEARS, '80.5', /number from 0 to 80/, '80'],
+    ['a contact line over 500 characters', CONTACT, 'x'.repeat(501), /contact line under 500/, 'alex@example.invalid'],
+    ['a contact line with a hidden text-direction character', CONTACT, hidden, /contact line has an invisible/, 'alex@example.invalid'],
+  ])('%s: closed, then Next, reopens it with the value kept, and correcting it lets the person go on', async (_label, field, bad, message, good) => {
+    await concealed(field, bad);
+    next();
+    expect(screen.getByRole('alert')).toHaveTextContent(message);
+    expect(heading()).toHaveTextContent('Bring your experience');
+    expect(optional()).toHaveAttribute('open');                                       // the section is open again ...
+    expect(screen.getByLabelText(field)).toBeVisible();                               // ... so the field the message is about is in view ...
+    expect(screen.getByLabelText(field)).toHaveValue(kept(field, bad));               // ... with exactly what was typed
+    expect(memory()?.profile[field === YEARS ? 'experienceYears' : 'contactLine']).toBe(field === YEARS ? Number(bad) : bad);
+    fireEvent.change(screen.getByLabelText(field), { target: { value: good } });
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(optional()).toHaveAttribute('open');                                       // correcting it does not close the box under the cursor
+    next();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(heading()).toHaveTextContent('Review your Automated Job Loop setup');
+    expect(names()).toEqual(['get_existing']);                                        // nothing was written
+  });
+
+  it('the person can close it again and press Next again: it reopens every time it rejects, and not otherwise', async () => {
+    await concealed(YEARS, '81');
+    for (let round = 0; round < 3; round += 1) {
+      next();
+      expect(screen.getByRole('alert')).toHaveTextContent('number from 0 to 80');
+      expect(optional()).toHaveAttribute('open');
+      expect(screen.getByLabelText(YEARS)).toBeVisible();
+      await toggle();                                                                 // the person closes it again, still invalid
+      expect(optional()).not.toHaveAttribute('open');                                 // closing is allowed; nothing reopens it until Next rejects again
+    }
+    next();
+    expect(optional()).toHaveAttribute('open');
+    expect(screen.getByLabelText(YEARS)).toHaveValue(81);
+  });
+
+  it('when both optional fields are invalid, both are in view after Next', async () => {
+    await concealed(YEARS, '99');
+    await toggle(); fireEvent.change(screen.getByLabelText(CONTACT), { target: { value: 'x'.repeat(501) } }); await toggle();
+    expect(optional()).not.toHaveAttribute('open');
+    next();
+    expect(optional()).toHaveAttribute('open');
+    expect(screen.getByLabelText(YEARS)).toBeVisible(); expect(screen.getByLabelText(CONTACT)).toBeVisible();
+  });
+
+  it('an error about the name or the CV reopens it too when an optional field is also wrong, but not when the optional fields are fine', async () => {
+    await concealed(YEARS, '99');
+    fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: '' } });
+    next();
+    expect(screen.getByRole('alert')).toHaveTextContent('Add the name you want on your CV');
+    expect(optional()).toHaveAttribute('open');                                       // a concealed optional field is wrong as well, so it is shown
+    cleanup(); clearTrackingDraftMemory(); setTrackingDraftOwner('owner-a', 'session-a'); mock.call.mockClear();
+    await concealed(YEARS, '5');
+    fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: 'Too short.' } });
+    next();
+    expect(screen.getByRole('alert')).toHaveTextContent(/Too little readable CV text/);
+    expect(optional()).not.toHaveAttribute('open');                                   // nothing about it is wrong, so it is left as the person closed it
+  });
+
+  it('a VALID value stays collapsible: closed it stays closed through other edits and through Next, which goes on', async () => {
+    await concealed(YEARS, '5');
+    fireEvent.change(screen.getByLabelText('Your CV text'), { target: { value: `${SOURCE} A little more detail.` } });
+    expect(optional()).not.toHaveAttribute('open');
+    await toggle(); expect(optional()).toHaveAttribute('open');                       // it can be opened again by hand
+    await toggle(); expect(optional()).not.toHaveAttribute('open');
+    next();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(heading()).toHaveTextContent('Review your Automated Job Loop setup');
+    expect(screen.getByText('5 years')).toBeInTheDocument();                          // and the value it held is part of the review
+  });
+
+  it('a valid contact line behaves the same: collapsible, kept, and Next goes on', async () => {
+    await concealed(CONTACT, 'alex@example.invalid');
+    next();
+    expect(heading()).toHaveTextContent('Review your Automated Job Loop setup');
+    expect(screen.getByText('alex@example.invalid')).toBeInTheDocument();
+  });
+
+  it('a draft saved at the review step with a bad optional value: Save says so, and Back shows the field already open', async () => {
+    setTrackingLoopGeneration('owner-a', 7);
+    retainOnboardingDraft({ owner: 'owner-a', authority: trackingDraftAuthority('owner-a'), generation: 7 }, {
+      profile: { ...baseProfile(), name: SIGN_UP_NAME, contactLine: 'x'.repeat(501) }, answers: blankLoopCvAnswers(), step: 5, roleQuery: '', locationQuery: '', rolesEdited: true, suggestionSource: '', touched: ['contactLine'],
+    });
+    render(view());
+    fireEvent.click(await screen.findByRole('checkbox', { name: /Save this CV text/ })); fireEvent.click(screen.getByRole('button', { name: 'Save my setup' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('contact line under 500');
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(optional()).toHaveAttribute('open');
+    expect(screen.getByLabelText(CONTACT)).toBeVisible();
+    fireEvent.change(screen.getByLabelText(CONTACT), { target: { value: 'alex@example.invalid' } });
+    next();
+    expect(heading()).toHaveTextContent('Review your Automated Job Loop setup');
+    expect(names()).toEqual(['get_existing']);
+  });
+});
+
+/**
  * PR 72's behaviour, with the prefilled name: a tab that remembered a draft for a setup that has since been saved keeps it (and shows it beside the saved setup) only when it
  * holds answers the saved setup does not. The prefilled name is not one of them. The saved setup's name is 'Alex Example'; the sign-up name is 'Alex E.'.
  */
