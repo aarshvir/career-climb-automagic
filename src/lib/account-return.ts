@@ -36,6 +36,21 @@ export function accountDestination(value: string | null): PrivateReturn | '/chec
   return value === '/dashboard' ? '/loop' : isPrivateReturn(value) ? value : '/loop';
 }
 
+/**
+ * Names the plan or pass that a validated pricing return path points at, for a line on the sign-in page.
+ * It reads only the output of accountDestination (the same validation the redirect uses), carries the
+ * plan name alone (never a price) and returns null for every other destination or any rejected value.
+ */
+export function pricingChoiceFromReturn(value: string | null): { product: 'loop' | 'pass'; name: string } | null {
+  const path = accountDestination(value);
+  if (!path.startsWith('/pricing?')) return null;
+  const query = new URLSearchParams(path.slice('/pricing?'.length));
+  const loop = subscriptionPlans.find(plan => plan.id === query.get('loopPlan'));
+  if (loop) return { product: 'loop', name: loop.name };
+  const pass = passPlans.find(plan => plan.key === query.get('plan'));
+  return pass ? { product: 'pass', name: pass.name } : null;
+}
+
 export function rememberLoopReturn(value: string | null, now = Date.now()): void {
   try {
     if (isPrivateReturn(value)) sessionStorage.setItem(KEY, JSON.stringify({ path: value, expiresAt: now + TTL }));

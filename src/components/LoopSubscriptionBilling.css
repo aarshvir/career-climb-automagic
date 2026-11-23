@@ -12,3 +12,6 @@
 .loop-price-market p { grid-column:1/-1; font-size:13px; line-height:1.7; }
 @media(max-width:580px) { .loop-subscription-billing [aria-label="Current Automated Job Loop subscription"],.loop-subscription-billing [aria-label="Confirm Automated Job Loop purchase"] { padding:18px; } .loop-subscription-billing .product-button { max-width:100%; } }
 @media(max-width:580px) { .loop-price-market {grid-template-columns:1fr;} .loop-price-market select {font-size:16px;} }
+/* The consent wording is the renewal terms the customer agrees to, so it is body-size text. (Scrolling to the panel already clears the sticky header through html { scroll-padding-top } in index.css.) */
+.loop-subscription-billing label.jl-consent { font-size:16px; line-height:1.6; }
+.loop-subscription-billing .loop-checkout-reason { margin:10px 0 0; font-size:14px; line-height:1.5; color:var(--jv-ink-2); }
