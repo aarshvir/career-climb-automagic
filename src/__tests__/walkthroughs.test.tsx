@@ -12,6 +12,20 @@ function showWalkthrough(manifest: unknown={version:1,videos:[]}, path = '/walkt
 function readyAsset(patch: Partial<WalkthroughVideoAsset> = {}): WalkthroughVideoAsset {
   return { tutorialId: 'first-check', videoUrl: 'https://jobvance.io/walkthroughs/media/first-check.mp4', captionUrl: 'https://jobvance.io/walkthroughs/media/first-check.vtt', durationSeconds: 140, verifiedAt: '2026-10-13T12:00:00Z', usesFictionalData: true, contentKind: 'screen_recording', status: 'ready', ...patch };
 }
+/** The reviewed job-loop-start recording's measured metadata, with first-party URLs. The public manifest lists no recording
+ * while no compatible first-party media route exists, so the chapter and transcript behaviour is exercised with this fixture. */
+const jobLoopStartAsset: WalkthroughVideoAsset = {
+  tutorialId: 'job-loop-start', videoUrl: 'https://jobvance.io/walkthroughs/media/job-loop-start.mp4', captionUrl: 'https://jobvance.io/walkthroughs/media/job-loop-start.vtt', posterUrl: 'https://jobvance.io/walkthroughs/media/job-loop-start.jpg',
+  durationSeconds: 95.14999999999999, verifiedAt: '2026-10-14T06:36:04.832040+00:00', usesFictionalData: true, contentKind: 'screen_walkthrough', status: 'ready', hasBurnedCaptions: true,
+  presenterDisclosure: 'A digitally generated guide with synthetic narration. Product screens use an example career record; Automated Job Loop scenes illustrate the workflow without accessing a live account.',
+  chapters: [
+    { id: 'open', title: 'Open the saved workspace', startSeconds: 0 },
+    { id: 'source', title: 'Bring your existing text', startSeconds: 16.175 },
+    { id: 'details', title: 'Check three details and save privately', startSeconds: 34 },
+    { id: 'facts', title: 'Choose the fact’s real context', startSeconds: 51.25 },
+    { id: 'next', title: 'Add the vacancy you want', startSeconds: 74.6 },
+  ],
+};
 
 describe('honest interactive walkthroughs', () => {
   it('shows a fictional storyboard and full script without pretending a video exists', () => {
@@ -97,7 +111,7 @@ describe('honest interactive walkthroughs', () => {
 
   it('presents the selected task before choosing alternatives and distinguishes the released video from untimed steps', async () => {
     const user=userEvent.setup();
-    const { container } = showWalkthrough(publicWalkthroughVideoManifest, '/walkthroughs?tutorial=job-loop-start');
+    const { container } = showWalkthrough({ version: 1, videos: [jobLoopStartAsset] }, '/walkthroughs?tutorial=job-loop-start');
     const selected = screen.getByRole('region', { name: 'Selected walkthrough' });
     expect(selected).toHaveTextContent('Set up your reusable career record');
     expect(selected).toHaveTextContent('5 interactive steps · 1:35 captioned video');
@@ -177,9 +191,31 @@ describe('walkthrough scripts and public media boundary', () => {
     expect(isPublicWalkthroughMediaUrl('https://gvftdfriujrkpptdueyb.supabase.co/storage/v1/object/public/walkthroughs/check.webm', 'video')).toBe(true);
     for (const url of ['http://jobvance.io/walkthroughs/media/check.mp4', 'https://evil.example/check.mp4', 'https://jobvance.io.evil.example/walkthroughs/media/check.mp4', 'https://other.supabase.co/storage/v1/object/public/walkthroughs/check.mp4', 'https://jobvance.io/private/check.mp4', 'https://jobvance.io/walkthroughs/media/check.mp4?token=secret', 'https://user:password@jobvance.io/walkthroughs/media/check.mp4', 'javascript:alert(1)', 'https://jobvance.io/walkthroughs/media/check.svg', 'https://jobvance.io/walkthroughs/media/%2e%2e/check.mp4']) expect(isPublicWalkthroughMediaUrl(url, 'video')).toBe(false);
     expect(isPublicWalkthroughMediaUrl('https://jobvance.io/walkthroughs/media/check.mp4', 'captions')).toBe(false);
-    expect(isPublicWalkthroughMediaUrl('https://raw.githubusercontent.com/aarshvir/career-climb-automagic/main/docs/product-hardening/tutorial-assets/videos/first-check.mp4','video')).toBe(true);
-    expect(isPublicWalkthroughMediaUrl('https://raw.githubusercontent.com/other/career-climb-automagic/main/docs/product-hardening/tutorial-assets/videos/first-check.mp4','video')).toBe(false);
-    expect(isPublicWalkthroughMediaUrl('https://raw.githubusercontent.com/aarshvir/other/main/docs/product-hardening/tutorial-assets/videos/first-check.mp4','video')).toBe(false);
+  });
+
+  it('no longer accepts media hosted under a personal account, including the two reviewed recordings\' former locations', () => {
+    // The public identity is Jobvance only. Built from parts so this file does not itself carry the personal GitHub username or media host.
+    const personal = ['aar', 'shvir'].join('');
+    const mediaHost = ['raw.github', 'usercontent.com'].join('');
+    const personalFile = (name: string, ref: string) => `https://${mediaHost}/${personal}/career-climb-automagic/${ref}/docs/product-hardening/tutorial-assets/videos/${name}`;
+    for (const ref of ['main', 'fb3782a224759a8e0f4cb97b19845cac8dab3ef3']) {
+      for (const name of ['job-loop-start', 'source-review']) {
+        expect(isPublicWalkthroughMediaUrl(personalFile(`${name}.mp4`, ref), 'video')).toBe(false);
+        expect(isPublicWalkthroughMediaUrl(personalFile(`${name}.vtt`, ref), 'captions')).toBe(false);
+        expect(isPublicWalkthroughMediaUrl(personalFile(`${name}.jpg`, ref), 'poster')).toBe(false);
+      }
+    }
+    expect(isPublicWalkthroughMediaUrl(`https://${mediaHost}/other/career-climb-automagic/main/docs/product-hardening/tutorial-assets/videos/first-check.mp4`, 'video')).toBe(false);
+    const former = readyAsset({ tutorialId: 'job-loop-start', videoUrl: personalFile('job-loop-start.mp4', 'main'), captionUrl: personalFile('job-loop-start.vtt', 'main') });
+    expect(validateWalkthroughVideoManifest({ version: 1, videos: [former] }).videos).toEqual([]);
+  });
+
+  it('lists only first-party media in the public manifest', () => {
+    const firstParty = new Set(['https://jobvance.io', 'https://www.jobvance.io', 'https://gvftdfriujrkpptdueyb.supabase.co']);
+    for (const video of publicWalkthroughVideoManifest.videos) {
+      for (const url of [video.videoUrl, video.captionUrl, video.posterUrl, video.presenterVideoUrl]) if (url) expect(firstParty.has(new URL(url).origin), url).toBe(true);
+    }
+    expect(validateWalkthroughVideoManifest(publicWalkthroughVideoManifest)).toEqual(publicWalkthroughVideoManifest);
   });
   it('retains an integrated AI presenter disclosure and avoids duplicate native captions',async()=>{
     const user=userEvent.setup();
