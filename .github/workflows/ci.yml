@@ -51,5 +51,8 @@ jobs:
     - name: Verify hosting responses
       run: node scripts/check-host-worker.mjs
 
+    - name: Verify public output identity
+      run: PUBLIC_IDENTITY_REQUIRE_DIST=1 npx vitest run src/__tests__/public-output-identity.test.ts
+
     - name: Security audit
       run: npm audit --audit-level=moderate

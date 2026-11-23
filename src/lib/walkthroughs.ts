@@ -111,87 +111,13 @@ export function walkthroughTranscript(tutorial: WalkthroughTutorial, asset?: Wal
 
 /** Replace only with a reviewed public manifest after actual rendered assets exist. No startup fetch.
  * first-check, another-application and controls-and-recovery recordings show the retired six-step check,
- * so they stay unlisted (text-only steps) until re-recorded; see docs/product-hardening/tutorial-assets/RERECORD-3-STAGE.md. */
-export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = {
-  "version": 1,
-  "videos": [
-    {
-      "tutorialId": "job-loop-start",
-      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/fb3782a224759a8e0f4cb97b19845cac8dab3ef3/docs/product-hardening/tutorial-assets/videos/job-loop-start.mp4",
-      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/fb3782a224759a8e0f4cb97b19845cac8dab3ef3/docs/product-hardening/tutorial-assets/videos/job-loop-start.vtt",
-      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/fb3782a224759a8e0f4cb97b19845cac8dab3ef3/docs/product-hardening/tutorial-assets/videos/job-loop-start.jpg",
-      "durationSeconds": 95.14999999999999,
-      "verifiedAt": "2026-10-14T06:36:04.832040+00:00",
-      "usesFictionalData": true,
-      "contentKind": "screen_walkthrough",
-      "status": "ready",
-      "hasBurnedCaptions": true,
-      "presenterDisclosure": "A digitally generated guide with synthetic narration. Product screens use an example career record; Automated Job Loop scenes illustrate the workflow without accessing a live account.",
-      "chapters": [
-        {
-          "id": "open",
-          "title": "Open the saved workspace",
-          "startSeconds": 0.0
-        },
-        {
-          "id": "source",
-          "title": "Bring your existing text",
-          "startSeconds": 16.175
-        },
-        {
-          "id": "details",
-          "title": "Check three details and save privately",
-          "startSeconds": 34.0
-        },
-        {
-          "id": "facts",
-          "title": "Choose the fact’s real context",
-          "startSeconds": 51.25
-        },
-        {
-          "id": "next",
-          "title": "Add the vacancy you want",
-          "startSeconds": 74.6
-        }
-      ]
-    },
-    {
-      "tutorialId": "source-review",
-      "videoUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/fb3782a224759a8e0f4cb97b19845cac8dab3ef3/docs/product-hardening/tutorial-assets/videos/source-review.mp4",
-      "captionUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/fb3782a224759a8e0f4cb97b19845cac8dab3ef3/docs/product-hardening/tutorial-assets/videos/source-review.vtt",
-      "posterUrl": "https://raw.githubusercontent.com/aarshvir/career-climb-automagic/fb3782a224759a8e0f4cb97b19845cac8dab3ef3/docs/product-hardening/tutorial-assets/videos/source-review.jpg",
-      "durationSeconds": 78.425,
-      "verifiedAt": "2026-10-14T06:36:04.832040+00:00",
-      "usesFictionalData": true,
-      "contentKind": "screen_walkthrough",
-      "status": "ready",
-      "hasBurnedCaptions": true,
-      "presenterDisclosure": "A digitally generated guide with synthetic narration. Product screens use an example career record; Automated Job Loop scenes illustrate the workflow without accessing a live account.",
-      "chapters": [
-        {
-          "id": "complete",
-          "title": "Keep the complete statement",
-          "startSeconds": 0.0
-        },
-        {
-          "id": "context",
-          "title": "Keep project and work context distinct",
-          "startSeconds": 17.2
-        },
-        {
-          "id": "contribution",
-          "title": "Say what you personally did",
-          "startSeconds": 36.9
-        },
-        {
-          "id": "clear",
-          "title": "Confirm only what you can share",
-          "startSeconds": 55.25
-        }
-      ]
-    }
-  ]
-};
+ * so they stay unlisted (text-only steps) until re-recorded; see docs/product-hardening/tutorial-assets/RERECORD-3-STAGE.md.
+ * job-loop-start and source-review are unlisted too, for now: their only public location was a personal-account media host,
+ * which the Jobvance-only public identity rule no longer allows, and the Worker host cannot carry about 5.9 MB of video
+ * (its script limit is 3 MiB compressed and the Worker has no byte-range support). The reviewed files stay in
+ * docs/product-hardening/tutorial-assets/videos. Re-list them with first-party URLs only (see isPublicWalkthroughMediaUrl)
+ * once a compatible media route exists. */
+export const publicWalkthroughVideoManifest: WalkthroughVideoManifest = { version: 1, videos: [] };
 
 const mediaOrigins = new Map([
   ['https://jobvance.io', '/walkthroughs/media/'],
@@ -204,8 +130,7 @@ export function isPublicWalkthroughMediaUrl(value: unknown, kind: 'video' | 'cap
   try {
     const url = new URL(value);
     const prefix = mediaOrigins.get(url.origin);
-    const ownedGitMedia=url.origin==='https://raw.githubusercontent.com' && /^\/aarshvir\/career-climb-automagic\/(?:main|[a-f\d]{40})\/docs\/product-hardening\/tutorial-assets\/videos\/[a-z\d-]+\.(?:mp4|webm|vtt|jpg|png)$/i.test(url.pathname);
-    return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash && ((!!prefix && url.pathname.startsWith(prefix)) || ownedGitMedia) && !/%2f|%5c|%2e/i.test(url.pathname) && (kind === 'captions' ? /\.vtt$/i : kind==='poster'?/\.(jpg|png)$/i:/\.(mp4|webm)$/i).test(url.pathname);
+    return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash && !!prefix && url.pathname.startsWith(prefix) && !/%2f|%5c|%2e/i.test(url.pathname) && (kind === 'captions' ? /\.vtt$/i : kind==='poster'?/\.(jpg|png)$/i:/\.(mp4|webm)$/i).test(url.pathname);
   } catch { return false; }
 }
 
