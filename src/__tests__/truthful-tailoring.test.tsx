@@ -142,7 +142,7 @@ describe('public AI tailoring page', () => {
     expect(validateRewrite('Oversaw reporting run rate', ['Supported reporting run rate'])).toMatch(/stronger ownership/);
     expect(validateRewrite('Supported the reporting run rate', ['Supported reporting run rate'])).toBeNull();
     // An all-capitals name reads as a heading, so the contact line under it is plain text and can be reworded.
-    const caps = ['AARSH GUPTA', 'Dubai | a@b.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join(nl);
+    const caps = ['ANIKA RAO', 'Dubai | a@b.com', '', 'EXPERIENCE', 'Analyst, Acme', '- Prepared monthly reports'].join(nl);
     expect(sourceLines(caps).map(line => line.kind).slice(0, 2)).toEqual(['heading', 'text']);
     expect(assembleTailoredCv(caps, { rewrites: [{ n: 2, text: 'Dubai | a@b.com | open to relocation' }] }).changes.map(change => change.kind)).toEqual(['rewrite']);
     // With no recognised name or contact line and no profile heading, a valid profile is left out and counted.
