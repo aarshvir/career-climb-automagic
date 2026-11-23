@@ -29,3 +29,6 @@
 .loop-onboarding .oq-quick-pick { min-height: 44px; max-width: 100%; padding: 8px 14px; border: 1px solid var(--jv-line-input); border-radius: 22px; background: #fff; color: var(--jv-brand); font: inherit; font-size: 14px; line-height: 1.3; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
 .loop-onboarding .oq-quick-pick:hover { background: var(--jv-bg-subtle); }
 .loop-onboarding .oq-quick-pick:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 2px; }
+/* Why Save is not available yet: a line of its own just above the Back and Save buttons in the fixed bar, so it never squeezes them on a narrow phone. */
+.loop-onboarding .oq-actions { flex-wrap: wrap; }
+.loop-onboarding .oq-save-reason { order: -1; flex: 1 0 100%; margin: 0; text-align: right; font-size: .85rem; line-height: 1.4; color: var(--jl-muted); }
