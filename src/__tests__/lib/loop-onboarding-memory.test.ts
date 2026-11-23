@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { blankLoopProfile } from '@/lib/job-loop-audiences';
 import { blankLoopCvAnswers } from '@/lib/loop-cv-builder';
-import { retainOnboardingDraft, recoverOnboardingDraft, type OnboardingDraft } from '@/lib/loop-onboarding-memory';
+import { retainOnboardingDraft, recoverOnboardingDraft, moveRetainedOnboardingStep, type OnboardingDraft } from '@/lib/loop-onboarding-memory';
 import { clearTrackingDraftMemory, setTrackingDraftOwner, setTrackingLoopGeneration, trackingDraftAuthority } from '@/lib/tracking-draft-memory';
 
 const draft = (): OnboardingDraft => ({ profile: { ...blankLoopProfile(), targetTitles: ['Director, Engineering'] }, answers: { ...blankLoopCvAnswers(), education: 'Studied biology.' }, step: 1, roleQuery: '', locationQuery: 'Portland, Maine', rolesEdited: true, suggestionSource: '' });
@@ -48,6 +48,57 @@ describe('onboarding route memory under actual auth and lifecycle authority', ()
   it('rejects stale or wrong owner writers while preserving the current valid draft', () => {
     retain(); retainOnboardingDraft({ owner: 'owner-b', authority: authority(), generation: null }, { ...draft(), roleQuery: 'wrong owner' });
     retainOnboardingDraft({ owner: 'owner-a', authority: authority() - 1, generation: null }, { ...draft(), roleQuery: 'old session' });
+    expect(recover()).toEqual(draft());
+  });
+});
+
+describe('a navigation-only step change (PR 72, round 2)', () => {
+  const scope = (generation: number | null = null) => ({ owner: 'owner-a', authority: authority(), generation });
+  const MINUTE = 60 * 1000;
+
+  it('moves only the step and does not renew the 30 minutes', () => {
+    retainOnboardingDraft(scope(), { ...draft(), touched: ['name'] });
+    vi.advanceTimersByTime(29 * MINUTE);
+    moveRetainedOnboardingStep(scope(), 4);
+    expect(recover()).toEqual({ ...draft(), step: 4, touched: ['name'] });   // every other answer, and the provenance, exactly as they were
+    vi.advanceTimersByTime(MINUTE);
+    expect(recover()).toBeNull();                                           // gone at the original minute 30, not minute 59
+  });
+
+  it('keeps the original expiry itself, not only its timer: a timer that runs late cannot extend it', () => {
+    retainOnboardingDraft(scope(), draft(), 1_000);
+    moveRetainedOnboardingStep(scope(), 4, 1_000 + 29 * MINUTE);              // navigation at minute 29, with no timer delivered in between
+    expect(recoverOnboardingDraft('owner-a', authority(), null, 1_000 + 29 * MINUTE + 59_000)?.step).toBe(4);
+    expect(recoverOnboardingDraft('owner-a', authority(), null, 1_000 + 30 * MINUTE)).toBeNull();      // minute 30, not 59
+  });
+
+  it('never brings back an expired draft, even when the expiry timer has not run yet', () => {
+    retainOnboardingDraft(scope(), draft(), 1_000);
+    vi.setSystemTime(1_000 + 31 * MINUTE);                                    // time passed, the timer callback has not been delivered (a throttled background tab)
+    moveRetainedOnboardingStep(scope(), 4);                                   // it must drop the expired draft itself, not leave it for a later read
+    vi.setSystemTime(1_000);                                                  // read the clock as earlier again: nothing may be left to recover
+    expect(recover()).toBeNull();
+  });
+
+  it('says whether it remembered the draft, so a draft that was not remembered is not mistaken for one with a deadline', () => {
+    expect(retainOnboardingDraft(scope(), draft())).toBe(true);
+    expect(retainOnboardingDraft({ owner: 'owner-b', authority: authority(), generation: null }, draft())).toBe(false);
+    expect(retainOnboardingDraft({ owner: 'owner-a', authority: authority() - 1, generation: null }, draft())).toBe(false);
+    expect(retainOnboardingDraft(scope(), { ...draft(), step: 6 })).toBe(false);
+    expect(retainOnboardingDraft(scope(7), draft())).toBe(false);
+    expect(recover()).toEqual(draft());                                       // the rejected writers left the remembered draft alone
+  });
+
+  it('does nothing when nothing is remembered, for another account, a stale session or a lifecycle that does not match, or a step out of range', () => {
+    moveRetainedOnboardingStep(scope(), 2);
+    expect(recover()).toBeNull();
+    retain();
+    moveRetainedOnboardingStep({ owner: 'owner-b', authority: authority(), generation: null }, 2);
+    moveRetainedOnboardingStep({ owner: 'owner-a', authority: authority() - 1, generation: null }, 2);
+    moveRetainedOnboardingStep(scope(7), 2);
+    moveRetainedOnboardingStep(scope(), 9);
+    moveRetainedOnboardingStep(scope(), -1);
+    moveRetainedOnboardingStep(scope(), 1.5);
     expect(recover()).toEqual(draft());
   });
 });
