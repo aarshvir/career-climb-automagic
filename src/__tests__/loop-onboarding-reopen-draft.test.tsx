@@ -367,7 +367,7 @@ describe('control (c): the existing 30-minute memory, never longer', () => {
  * Round 2 (23 Nov), finding 2: pressing Back or Next on a reopened draft is navigation, not an answer. The draft keeps the 30 minutes it had; the step is remembered,
  * the expiry does not move. A real edit of an answer still starts a new 30 minutes.
  */
-describe('round 2: Back and Next do not renew the 30 minutes of a reopened draft', () => {
+describe('round 2: Back and Next do not renew the 30 minutes of a reopened draft (made general in round 3 below)', () => {
   const saved = () => { const value = record(); value.commit(baseProfile()); return value; };
   const withSaved = () => script({ existing: async () => ({ snapshot: saved().snap() }) });
   const stepLine = () => screen.getByText(/^Step \d of 6$/).textContent;
@@ -466,18 +466,6 @@ describe('round 2: Back and Next do not renew the 30 minutes of a reopened draft
     expect(memory()).toBeNull();
     fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value: 'Alex Again' } });   // an edit on the open page starts a new 30
     expect(memory()?.profile.name).toBe('Alex Again');
-  });
-
-  it('the same navigation on a page that is not a reopened draft behaves as before (unchanged from main): it is remembered', async () => {
-    vi.useFakeTimers();
-    script({ existing: async () => ({ snapshot: { lifecycleGeneration: 0, recordVersion: 0, profile: null } }) });
-    remember({ answers: { summary: NOTE } });
-    await reopen();                                                  // an empty record, no saved setup: the ordinary recovered draft
-    expect(panel()).not.toBeInTheDocument();
-    await advance(20 * MINUTE);
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
-    await advance(15 * MINUTE);                                      // 35 minutes after the draft, 15 after Back
-    expect(JSON.stringify(memory())).toContain(NOTE);
   });
 });
 
@@ -588,3 +576,177 @@ describe('round 2: an intentional clear or reset survives reopening', () => {
   });
 });
 
+/**
+ * Round 3 (23 Nov): Back and Next are navigation at ANY time, not only on a draft that was just reopened. The deadline of a remembered draft is set by the last real change to an
+ * answer; navigation after one (or after any number of them, reopened or not) keeps that deadline, and the next real change starts another 30 minutes. Codex's round-2 review of d294ecb:
+ * reopen at minute 29, press Back, edit the name (due minute 59), press Next at minute 58 without changing an answer: the draft must be gone at 59.
+ */
+describe('round 3: navigation after a real edit keeps the deadline that edit set', () => {
+  const saved = () => { const value = record(); value.commit(baseProfile()); return value; };
+  const withSaved = () => script({ existing: async () => ({ snapshot: saved().snap() }) });
+  const withEmptyRecord = () => script({ existing: async () => ({ snapshot: { lifecycleGeneration: 0, recordVersion: 0, profile: null } }) });
+  const stepLine = () => screen.getByText(/^Step \d of 6$/).textContent;
+  const back = () => fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+  const next = () => fireEvent.click(screen.getByRole('button', { name: /^Next/ }));
+  const editName = (value: string) => fireEvent.change(screen.getByLabelText('Name on your CV'), { target: { value } });
+  const editContact = (value: string) => fireEvent.change(screen.getByLabelText('Contact line for your CV (optional)'), { target: { value } });
+  /** A draft remembered at minute 0, setup reopened beside a saved setup at `minute`, and put on the Your CV step (the review step is step 6; Back goes to it). */
+  async function reopenedAt(minute: number) {
+    vi.useFakeTimers();
+    remember({ answers: { summary: NOTE } });
+    await advance(minute * MINUTE);
+    withSaved();
+    await reopen();
+    expect(panel()).toBeInTheDocument();
+    back(); await flush();
+    expect(stepLine()).toBe('Step 5 of 6');
+  }
+
+  it('CODEX SEQUENCE: reopen at 29, Back, edit the name (due 59), Next at 58 without changing an answer: gone at 59', async () => {
+    await reopenedAt(29);
+    editName('Alex Revised');                                        // a real edit at minute 29: a new period, due at minute 59
+    expect(memory()?.profile.name).toBe('Alex Revised');
+    await advance(29 * MINUTE);                                       // minute 58
+    expect(memory()?.profile.name).toBe('Alex Revised');
+    next(); await flush();                                            // navigation only
+    expect(stepLine()).toBe('Step 6 of 6');
+    expect(memory()?.step).toBe(5);                                   // the step is remembered ...
+    await advance(59_000);                                            // minute 58:59
+    expect(memory()?.profile.name).toBe('Alex Revised');
+    await advance(1_000);                                             // ... the deadline is not moved: minute 59
+    expect(memory()).toBeNull();
+    expect(names().every(name => name === 'get_existing')).toBe(true);
+  });
+
+  it('edit, then Back at minute 58: gone at 59 (and nothing is brought back by walking on)', async () => {
+    await reopenedAt(29);
+    editName('Alex Revised');
+    await advance(29 * MINUTE);
+    back(); await flush();
+    expect(stepLine()).toBe('Step 4 of 6');
+    await advance(MINUTE);
+    expect(memory()).toBeNull();
+    next(); await flush(); back(); await flush();
+    expect(memory()).toBeNull();
+  });
+
+  it('edit, then several Back and Next presses spread over the period: gone at the minute the edit set, not later', async () => {
+    await reopenedAt(5);
+    editName('Alex Revised');                                         // due minute 35
+    await advance(5 * MINUTE); back(); await flush();                 // minute 10
+    await advance(5 * MINUTE); next(); await flush();                 // minute 15
+    await advance(5 * MINUTE); next(); await flush();                 // minute 20
+    await advance(14 * MINUTE + 59_000); back(); await flush();       // minute 34:59
+    expect(memory()?.profile.name).toBe('Alex Revised');
+    await advance(1_000);                                             // minute 35
+    expect(memory()).toBeNull();
+  });
+
+  it('two edits with navigation between them: each edit sets the deadline, the navigation between does not move it', async () => {
+    await reopenedAt(29);
+    editName('Alex Revised');                                         // due 59
+    await advance(11 * MINUTE); back(); await flush();                // minute 40: navigation, deadline stays 59
+    await advance(MINUTE); next(); await flush();                     // minute 41
+    await advance(9 * MINUTE);                                        // minute 50
+    expect(memory()?.profile.name).toBe('Alex Revised');             // still inside the first period
+    editContact('alex.second@example.invalid');                       // a second real edit: a new period, due 80
+    expect(memory()?.profile.contactLine).toBe('alex.second@example.invalid');
+    await advance(10 * MINUTE);                                       // minute 60: past the first deadline, inside the second
+    expect(memory()?.profile.contactLine).toBe('alex.second@example.invalid');
+    await advance(19 * MINUTE); next(); await flush();                // minute 79: navigation only
+    await advance(59_000);
+    expect(memory()?.profile.contactLine).toBe('alex.second@example.invalid');
+    await advance(1_000);                                             // minute 80, not 109
+    expect(memory()).toBeNull();
+  });
+
+  it('an edit after navigation restarts the period: navigation first does not start one, the edit does', async () => {
+    await reopenedAt(10);                                             // minute 10; Back already pressed (navigation, no renewal)
+    await advance(10 * MINUTE);                                       // minute 20
+    editName('Alex Revised');                                         // a real edit: due minute 50, not the original 30
+    await advance(15 * MINUTE);                                       // minute 35: the original deadline has passed, the edit's has not
+    expect(memory()?.profile.name).toBe('Alex Revised');
+    await advance(14 * MINUTE + 59_000);                              // minute 49:59
+    expect(memory()?.profile.name).toBe('Alex Revised');
+    await advance(1_000);
+    expect(memory()).toBeNull();
+  });
+
+  it.each([29, 30, 31])('navigation %i minutes after an edit never extends it (and never brings an expired draft back)', async offset => {
+    await reopenedAt(10);
+    editName('Alex Revised');                                         // minute 10, due minute 40
+    await advance(offset * MINUTE);
+    if (offset < 30) expect(memory()?.profile.name).toBe('Alex Revised'); else expect(memory()).toBeNull();
+    next(); await flush();                                            // navigation only, at +29, +30 or +31 minutes
+    expect(stepLine()).toBe('Step 6 of 6');
+    if (offset < 30) { expect(memory()?.profile.name).toBe('Alex Revised'); await advance(MINUTE); }
+    expect(memory()).toBeNull();                                      // gone at +30 in every case
+    back(); await flush(); next(); await flush();
+    await advance(35 * MINUTE);
+    expect(memory()).toBeNull();                                      // and stays gone
+  });
+
+  it('a real edit after the deadline passed starts a new period, and navigation after that edit keeps that one', async () => {
+    await reopenedAt(10);
+    editName('Alex Revised');                                         // due minute 40
+    await advance(31 * MINUTE);                                       // minute 41: expired while the page stayed open
+    expect(memory()).toBeNull();
+    next(); await flush();                                            // navigation does not revive it
+    expect(memory()).toBeNull();
+    back(); await flush();
+    editName('Alex Again');                                           // a real edit: a new period, due minute 71
+    expect(memory()?.profile.name).toBe('Alex Again');
+    await advance(20 * MINUTE); next(); await flush();                // minute 61: navigation only
+    await advance(10 * MINUTE - 1_000);                               // minute 70:59
+    expect(memory()?.profile.name).toBe('Alex Again');
+    await advance(1_000);                                             // minute 71
+    expect(memory()).toBeNull();
+  });
+
+  // The same rule on a page that was never reopened beside a saved setup (an ordinary recovered draft), because the rule is about navigation, not about reopening.
+  it('a draft that was never reopened beside a saved setup: Back and Next after remembering it never extend it', async () => {
+    vi.useFakeTimers();
+    withEmptyRecord();
+    remember({ answers: { summary: NOTE } });                          // minute 0
+    await reopen();                                                    // an empty record, no saved setup: the ordinary recovered draft
+    expect(panel()).not.toBeInTheDocument();
+    await advance(29 * MINUTE);
+    back(); await flush();
+    expect(JSON.stringify(memory())).toContain(NOTE);
+    await advance(MINUTE);                                             // minute 30, not 59
+    expect(memory()).toBeNull();
+  });
+
+  it('a draft that was never reopened: an edit, then Next, then the deadline of the edit', async () => {
+    vi.useFakeTimers();
+    withEmptyRecord();
+    remember({ answers: { summary: NOTE } });
+    await reopen();
+    await advance(20 * MINUTE);
+    back(); await flush();
+    editName('Alex Revised');                                          // minute 20, due 50
+    await advance(29 * MINUTE);                                        // minute 49
+    next(); await flush();
+    expect(memory()?.profile.name).toBe('Alex Revised');
+    await advance(MINUTE);                                             // minute 50
+    expect(memory()).toBeNull();
+  });
+
+  it('a page that starts blank: the first answer it remembers sets the deadline, and walking through the steps does not move it', async () => {
+    vi.useFakeTimers();
+    withEmptyRecord();
+    await reopen();                                                    // nothing remembered: the blank page
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Search or add a role'), { target: { value: 'Data analyst' } });   // a real change at minute 0
+    expect(memory()?.roleQuery).toBe('Data analyst');
+    await advance(25 * MINUTE);
+    next(); await flush();                                             // Next adds the typed role: that is a change to an answer and starts a new period (due 55)
+    expect(memory()?.profile.targetTitles).toContain('Data analyst');
+    await advance(25 * MINUTE);                                        // minute 50
+    expect(stepLine()).toBe('Step 2 of 6');
+    expect(memory()?.profile.targetTitles).toContain('Data analyst');
+    back(); await flush();                                             // navigation only
+    await advance(5 * MINUTE);                                         // minute 55
+    expect(memory()).toBeNull();
+  });
+});

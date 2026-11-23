@@ -29,8 +29,8 @@ const list = (value: string) => [...new Set(value.split(/[\n,]/).map(item => ite
 const EARLIER_SAVE_MESSAGE = 'Your earlier save arrived after all, so a setup is saved. Changes you made since are not saved and nothing was overwritten. Your newer answers are still below, unchanged.';
 const REOPENED_MESSAGE = 'A saved setup was found that this page had not seen. The answers this tab still held are retained below, unchanged. Nothing was overwritten and this page will not write.';
 /**
- * The remembered answers as one comparable value (the order is fixed), WITHOUT the step: a draft that was only reopened, or only moved with Back or Next, can be told from one
- * the person has since changed. Pressing Back or Next is navigation, not an answer, so it does not start another 30 minutes.
+ * The remembered answers as one comparable value (the order is fixed), WITHOUT the step: a draft whose answers are unchanged (it was only reopened, or only moved with Back or
+ * Next) can be told from one the person has since changed. Pressing Back or Next is navigation, not an answer, so it never starts another 30 minutes; only a change to an answer does.
  */
 const draftKey = (draft: OnboardingDraft) => JSON.stringify([draft.profile, draft.answers, draft.roleQuery, draft.locationQuery, draft.rolesEdited, draft.suggestionSource, [...(draft.touched ?? [])].sort()]);
 const PROFILE_PARTS: [keyof LoopProfileInput, string][] = [['targetTitles', 'Target roles'], ['locations', 'Cities or countries'], ['compensation', 'Compensation'], ['discreetSearch', 'Discreet search'], ['excludedTerms', 'Private terms'],
@@ -124,8 +124,9 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   // 'reopened': this page opened while a setup was already saved and this tab still remembered newer answers for the same account, session and lifecycle (see load).
   const [conflict, setConflict] = useState<{ kind: 'earlier' | 'other' | 'reopened'; saved: NonNullable<LoopSnapshot['profile']> } | null>(null);
   const [copied, setCopied] = useState('');
-  // The draft as it was when it was reopened beside a saved setup. Showing it does not renew its 30 minutes: only a change the person makes afterwards does.
-  const reopenedDraft = useRef<string | null>(null);
+  // The answers (draftKey, no step) of the draft this tab last put into its 30-minute memory, or reopened beside a saved setup. A change to a later render's answers is a real change and starts
+  // a new 30 minutes; the same answers on another step (Back or Next) only move the remembered step and keep the deadline the last real change set. Showing a reopened draft renews nothing.
+  const retainedKey = useRef<string | null>(null);
   // The profile fields this person has edited on this page (an edit they made: not a default, not a suggestion). Travels with the remembered draft, so a field they emptied on purpose is not mistaken for one nobody touched.
   const touched = useRef<Set<string>>(new Set());
   // The whole draft of the most recent write that was actually SENT: the profile plus what the page held besides it (CV builder answers, role/location text typed but not added).
@@ -198,7 +199,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
         }
       } else if (result.existingState !== 'absent') throw new Error('Your saved setup could not be verified. Retry loading it.');
       if (reopened) {
-        clearPreSignupAnswers(); restore(reopened.draft); reopenedDraft.current = draftKey(reopened.draft);
+        clearPreSignupAnswers(); restore(reopened.draft); retainedKey.current = draftKey(reopened.draft);
         setConflict({ kind: 'reopened', saved: reopened.saved }); setError(REOPENED_MESSAGE);
       } else if (!result.snapshot?.profile) {
         const recovered = recoverOnboardingDraft(owner, authority, result.snapshot?.lifecycleGeneration ?? null);
@@ -225,10 +226,11 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     if (!loaded || existing || saved || !current()) return;
     const held: OnboardingDraft = { profile, answers, step, roleQuery, locationQuery, rolesEdited: rolesEdited.current, suggestionSource, touched: [...touched.current].sort() };
     const scope = { owner, authority, generation: snapshot.current?.lifecycleGeneration ?? (absentGeneration.current === null && trackingLoopGeneration(owner) === 0 ? 0 : absentGeneration.current) };
-    // A draft that was only reopened beside a saved setup is not renewed by being shown, nor by Back or Next: it keeps the 30 minutes it had (the step is remembered, the expiry is not moved),
-    // and the first change to an answer the person makes starts a new 30.
-    if (reopenedDraft.current !== null) { if (draftKey(held) === reopenedDraft.current) { moveRetainedOnboardingStep(scope, step); return; } reopenedDraft.current = null; }
-    retainOnboardingDraft(scope, held);
+    // Back and Next are navigation, not answers, at any time: with the answers unchanged since the draft was last remembered (or reopened) only the step is remembered and the deadline is kept,
+    // so a draft shown beside a saved setup, or edited once and then walked through, still ends 30 minutes after the last change to an answer. A real change starts a new 30 minutes.
+    const key = draftKey(held);
+    if (retainedKey.current === key) { moveRetainedOnboardingStep(scope, step); return; }
+    if (retainOnboardingDraft(scope, held)) retainedKey.current = key;
   }, [loaded, existing, saved, profile, answers, step, roleQuery, locationQuery, suggestionSource]);
   function edit(patch: Partial<LoopProfileInput>) {
     if (!current() || saving.current || unconfirmed) return;

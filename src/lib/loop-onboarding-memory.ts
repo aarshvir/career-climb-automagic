@@ -32,13 +32,16 @@ export function syncOnboardingGeneration(owner: string, generation: number) {
 function matches(scope: Scope) {
   return !!context && scope.owner === context.owner && scope.authority >= 0 && scope.authority === context.authority && scope.generation === context.generation;
 }
-export function retainOnboardingDraft(scope: Scope, draft: OnboardingDraft, now = Date.now()) {
-  if (!matches(scope) || !Number.isInteger(draft.step) || draft.step < 0 || draft.step > 5) return;
+/** Remembers the draft for 30 minutes from now. Returns whether it was remembered (a draft for another account, session or lifecycle, or an invalid step, is not). */
+export function retainOnboardingDraft(scope: Scope, draft: OnboardingDraft, now = Date.now()): boolean {
+  if (!matches(scope) || !Number.isInteger(draft.step) || draft.step < 0 || draft.step > 5) return false;
   clearOnboardingDraft(); retained = { scope: { ...scope }, draft: structuredClone(draft), expires: now + TTL };
   timer = setTimeout(clearOnboardingDraft, TTL);
+  return true;
 }
 /**
- * A navigation-only change (the step) on a draft that is already remembered: the step moves, nothing else does, and the 30 minutes it had are NOT renewed.
+ * A navigation-only change (the step) on a draft that is already remembered, whether or not the person has edited an answer since it was first remembered or reopened: the step
+ * moves, nothing else does, and the deadline it has (set by the last real change to an answer) is NOT renewed.
  * It does nothing when no draft is remembered for this scope or the draft has expired, so it can never bring an expired draft back.
  */
 export function moveRetainedOnboardingStep(scope: Scope, step: number, now = Date.now()) {

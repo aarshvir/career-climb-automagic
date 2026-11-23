@@ -65,12 +65,28 @@ describe('a navigation-only step change (PR 72, round 2)', () => {
     expect(recover()).toBeNull();                                           // gone at the original minute 30, not minute 59
   });
 
+  it('keeps the original expiry itself, not only its timer: a timer that runs late cannot extend it', () => {
+    retainOnboardingDraft(scope(), draft(), 1_000);
+    moveRetainedOnboardingStep(scope(), 4, 1_000 + 29 * MINUTE);              // navigation at minute 29, with no timer delivered in between
+    expect(recoverOnboardingDraft('owner-a', authority(), null, 1_000 + 29 * MINUTE + 59_000)?.step).toBe(4);
+    expect(recoverOnboardingDraft('owner-a', authority(), null, 1_000 + 30 * MINUTE)).toBeNull();      // minute 30, not 59
+  });
+
   it('never brings back an expired draft, even when the expiry timer has not run yet', () => {
     retainOnboardingDraft(scope(), draft(), 1_000);
     vi.setSystemTime(1_000 + 31 * MINUTE);                                    // time passed, the timer callback has not been delivered (a throttled background tab)
     moveRetainedOnboardingStep(scope(), 4);                                   // it must drop the expired draft itself, not leave it for a later read
     vi.setSystemTime(1_000);                                                  // read the clock as earlier again: nothing may be left to recover
     expect(recover()).toBeNull();
+  });
+
+  it('says whether it remembered the draft, so a draft that was not remembered is not mistaken for one with a deadline', () => {
+    expect(retainOnboardingDraft(scope(), draft())).toBe(true);
+    expect(retainOnboardingDraft({ owner: 'owner-b', authority: authority(), generation: null }, draft())).toBe(false);
+    expect(retainOnboardingDraft({ owner: 'owner-a', authority: authority() - 1, generation: null }, draft())).toBe(false);
+    expect(retainOnboardingDraft(scope(), { ...draft(), step: 6 })).toBe(false);
+    expect(retainOnboardingDraft(scope(7), draft())).toBe(false);
+    expect(recover()).toEqual(draft());                                       // the rejected writers left the remembered draft alone
   });
 
   it('does nothing when nothing is remembered, for another account, a stale session or a lifecycle that does not match, or a step out of range', () => {
