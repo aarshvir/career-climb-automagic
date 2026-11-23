@@ -41,10 +41,10 @@ export function GuidesFeaturedAside({ category, title, minutes, className = "" }
   </div>;
 }
 
-/** Walkthroughs: a captioned video beside the interactive steps. */
-export function WalkthroughAside({ className = "" }: { className?: string }) {
+/** Walkthroughs: a captioned video beside the interactive steps; with no recording listed it says so and shows the written script. */
+export function WalkthroughAside({ className = "", hasVideo = true }: { className?: string; hasVideo?: boolean }) {
   return <div className={`pc-card pc-aside pc-walk ${className}`.trim()} aria-hidden="true">
-    <div className="pc-top"><span className="pc-caption">Example · captioned video</span><span className="pc-file"><FileText />Interactive steps</span></div>
+    <div className="pc-top"><span className="pc-caption">{hasVideo ? "Example · captioned video" : "Example · written script"}</span><span className="pc-file"><FileText />Interactive steps</span></div>
     <div className="pc-walk-screen"><span className="pc-walk-play"><Play /></span><span className="pc-walk-caption">Choose your roles and locations once.</span><span className="pc-walk-bar"><i /></span></div>
   </div>;
 }
