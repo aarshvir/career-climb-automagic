@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "method": "Each value in sha256 is the SHA-256 of a lowercase phrase of letters and digits, joined by one space or by nothing (scripts/public-identity.mjs hash). Each value in starts is only the first 16 bits of the hash of a phrase's first word, a speed filter that confirms nothing by itself. The phrases themselves are deliberately not stored.",
+  "limits": "Hashes of short names can be brute-forced by anyone who hashes a list of candidate names; this keeps the check from publishing the strings, not from being guessed. The check matches whole tokens and windows of up to four adjacent tokens, so a string glued to other letters or digits is not found.",
+  "entries": [
+    {
+      "label": "personal GitHub username",
+      "sha256": [
+        "865b493d29cc73df42b79a8fdc761ed66dee8784f4bb48756e7c6d0144bf9497"
+      ],
+      "starts": [
+        "865b"
+      ]
+    },
+    {
+      "label": "personal display name",
+      "sha256": [
+        "308a8905e6e688894301ab7cba516f96e39e919d2bc5c7796d16781d0657f59b",
+        "4b28c15ec2b5ac4d6adba4afff8fd8b1e30e04b9a5feada01148a21fb5285554",
+        "4c92220a4038c4b9655b3a08980eb0828db4a699db67a544fe8df942da6a1751",
+        "885350cc83584ef34fd7360e1d82c9914f8e1f2316920219f9ae450a1a25154b",
+        "b1567b0bf1fcd8c1e43c95dde2f02d9071b7dbc7a31a884c28c22321ecd5769d",
+        "bc34fa2d568012c4d6bc2b4de76fa35c13a7566cdd3e653c31ba9b321005755b",
+        "bff274e9bc74a504f8ae53094d3e0d15895553bf89bf42559a85aaa5c0082eca",
+        "c5ffad9dce68d68e06af265ea234c4b96cf2591264bdaab9a3cc153e671ae317",
+        "c7ba566f1c8f1b8a99d04bd1031a76e0eafa7c1a1bf047ff188fb016e6a9c42f"
+      ],
+      "starts": [
+        "df00",
+        "ebe4"
+      ]
+    },
+    {
+      "label": "personal-account media host",
+      "sha256": [
+        "2378f360e8334b43e0561fdf23c94e4dabd2b18aa74e1b13eca15182d93ce240",
+        "4c3442dc5bae09b368b9de075b6f40a3e68d4bea3b645755182c54a9c5892352"
+      ],
+      "starts": [
+        "d743"
+      ]
+    }
+  ]
+}

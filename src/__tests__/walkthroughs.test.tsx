@@ -38,6 +38,9 @@ describe('honest interactive walkthroughs', () => {
     expect(screen.getByText(/Planned narration 0:00–0:33/)).toBeInTheDocument();
     expect(container.querySelector('video, iframe')).toBeNull();
     expect(screen.queryByRole('button', { name: /watch|load recorded/i })).not.toBeInTheDocument();
+    // With no recording listed the page does not promise one: not in the lead, not in the decorative preview.
+    expect(screen.queryByText(/captioned video/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/follow the interactive steps at your own pace, with the written script beside them/)).toBeInTheDocument();
     expect(validateWalkthroughVideoManifest(publicWalkthroughVideoManifest).videos).toHaveLength(publicWalkthroughVideoManifest.videos.length);
   });
 
@@ -109,12 +112,39 @@ describe('honest interactive walkthroughs', () => {
     expect(container.querySelector('#wt-recorded, video')).toBeNull();
   });
 
+  it.each(['job-loop-start', 'source-review'])('keeps the %s text tour readable and navigable while its recording is unlisted', async id => {
+    const user = userEvent.setup();
+    const tutorial = walkthroughs.find(item => item.id === id)!;
+    const last = tutorial.scenes.length - 1;
+    expect(publicWalkthroughVideoManifest.videos.some(video => video.tutorialId === id)).toBe(false);
+    const { container } = showWalkthrough(publicWalkthroughVideoManifest, `/walkthroughs?tutorial=${id}`);
+    const selected = screen.getByRole('region', { name: 'Selected walkthrough' });
+    expect(selected).toHaveTextContent(tutorial.title);
+    expect(selected).toHaveTextContent(`${tutorial.scenes.length} interactive steps · written script`);
+    expect(within(selected).queryByRole('link', { name: 'Watch the video' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Load recorded walkthrough' })).not.toBeInTheDocument();
+    expect(container.querySelector('#wt-recorded, video, iframe')).toBeNull();
+    for (const [index, scene] of tutorial.scenes.entries()) {
+      expect(screen.getByRole('status')).toHaveTextContent(`Step ${index + 1} of ${tutorial.scenes.length}: ${scene.title}`);
+      expect(screen.getAllByText(scene.instruction, { exact: false }).length).toBeGreaterThan(0);
+      expect(screen.getByLabelText('Current step caption')).toHaveTextContent(scene.caption.slice(0, 30));
+      expect(screen.getAllByText(/Planned narration/).length).toBeGreaterThan(0);
+      if (index < last) await user.click(screen.getByRole('button', { name: 'Next step' }));
+    }
+    expect(screen.getByRole('button', { name: 'Next step' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Restart' }));
+    expect(screen.getByRole('status')).toHaveTextContent(`Step 1 of ${tutorial.scenes.length}: ${tutorial.scenes[0].title}`);
+    await user.click(within(screen.getByRole('list', { name: 'Walkthrough steps' })).getByRole('button', { name: new RegExp(tutorial.scenes[last].title) }));
+    expect(screen.getByRole('status')).toHaveTextContent(`Step ${last + 1} of ${tutorial.scenes.length}: ${tutorial.scenes[last].title}`);
+  });
+
   it('presents the selected task before choosing alternatives and distinguishes the released video from untimed steps', async () => {
     const user=userEvent.setup();
     const { container } = showWalkthrough({ version: 1, videos: [jobLoopStartAsset] }, '/walkthroughs?tutorial=job-loop-start');
     const selected = screen.getByRole('region', { name: 'Selected walkthrough' });
     expect(selected).toHaveTextContent('Set up your reusable career record');
     expect(selected).toHaveTextContent('5 interactive steps · 1:35 captioned video');
+    expect(screen.getByText('Choose a task, watch a captioned video or follow the interactive steps at your own pace.')).toBeInTheDocument();
     expect(within(selected).getByRole('link', { name: 'Watch the video' })).toHaveAttribute('href', '#wt-recorded');
     expect(within(selected).getByRole('link', { name: 'Follow interactive steps' })).toHaveAttribute('href', '#wt-interactive');
     expect(container.querySelector('#wt-task-options')).toHaveAttribute('hidden');
@@ -193,20 +223,18 @@ describe('walkthrough scripts and public media boundary', () => {
     expect(isPublicWalkthroughMediaUrl('https://jobvance.io/walkthroughs/media/check.mp4', 'captions')).toBe(false);
   });
 
-  it('no longer accepts media hosted under a personal account, including the two reviewed recordings\' former locations', () => {
-    // The public identity is Jobvance only. Built from parts so this file does not itself carry the personal GitHub username or media host.
-    const personal = ['aar', 'shvir'].join('');
-    const mediaHost = ['raw.github', 'usercontent.com'].join('');
-    const personalFile = (name: string, ref: string) => `https://${mediaHost}/${personal}/career-climb-automagic/${ref}/docs/product-hardening/tutorial-assets/videos/${name}`;
+  it('accepts no media host outside Jobvance, including the kind of raw-file URL the two reviewed recordings used to have', () => {
+    // The two recordings used to be served from a raw-file host under an individual account. Any such host, pinned to a commit or
+    // to a branch, is now rejected for every media kind. An invented owner and host stand in so this file names no real account.
+    const rawFile = (name: string, ref: string) => `https://raw-files.example.test/some-owner/career-climb-automagic/${ref}/docs/product-hardening/tutorial-assets/videos/${name}`;
     for (const ref of ['main', 'fb3782a224759a8e0f4cb97b19845cac8dab3ef3']) {
       for (const name of ['job-loop-start', 'source-review']) {
-        expect(isPublicWalkthroughMediaUrl(personalFile(`${name}.mp4`, ref), 'video')).toBe(false);
-        expect(isPublicWalkthroughMediaUrl(personalFile(`${name}.vtt`, ref), 'captions')).toBe(false);
-        expect(isPublicWalkthroughMediaUrl(personalFile(`${name}.jpg`, ref), 'poster')).toBe(false);
+        expect(isPublicWalkthroughMediaUrl(rawFile(`${name}.mp4`, ref), 'video')).toBe(false);
+        expect(isPublicWalkthroughMediaUrl(rawFile(`${name}.vtt`, ref), 'captions')).toBe(false);
+        expect(isPublicWalkthroughMediaUrl(rawFile(`${name}.jpg`, ref), 'poster')).toBe(false);
       }
     }
-    expect(isPublicWalkthroughMediaUrl(`https://${mediaHost}/other/career-climb-automagic/main/docs/product-hardening/tutorial-assets/videos/first-check.mp4`, 'video')).toBe(false);
-    const former = readyAsset({ tutorialId: 'job-loop-start', videoUrl: personalFile('job-loop-start.mp4', 'main'), captionUrl: personalFile('job-loop-start.vtt', 'main') });
+    const former = readyAsset({ tutorialId: 'job-loop-start', videoUrl: rawFile('job-loop-start.mp4', 'main'), captionUrl: rawFile('job-loop-start.vtt', 'main') });
     expect(validateWalkthroughVideoManifest({ version: 1, videos: [former] }).videos).toEqual([]);
   });
 
