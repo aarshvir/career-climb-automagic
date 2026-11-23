@@ -215,4 +215,88 @@ describe('one overall discovery time budget, in deterministic virtual time, thro
     expect(reserve).toHaveBeenCalledTimes(2); expect(settle).toHaveBeenCalledTimes(2);
     expect(lanes.find(l => l.name === 'Broad web search')).toMatchObject({ status: 'completed' });
   });
+
+  // ---- Reservation latency: the allowance is rechecked AFTER the asynchronous reservation, immediately before a NEW paid request ----
+  const noBoards = '[]';
+  const searchOnly = () => { const base = searchHarness(); return base; };
+  const tavilyCalls = (fetcher: { mock: { calls: unknown[][] } }) => fetcher.mock.calls.filter(([url]) => String(url).includes('api.tavily.com'));
+  const delayedReserve = (reserve: ReturnType<typeof searchHarness>['reserve'], delay: number, reply: Record<string, unknown> = { id: 'reservation-1', is_new: true, status: 'reserved' }) => reserve.mockImplementation(async () => { await wait(delay); return reply as never; });
+  const searchLane = (h: ReturnType<typeof harness>) => h.run.data.lanes?.find(l => l.name === 'Broad web search');
+
+  it.each([6000, 30000])('a %i ms reservation delay (eight Lever boards end at 90 s): the search no longer fits, so the provider is not called, the NEW reservation is settled at zero once, and the search is reported not attempted', async delay => {
+    const { h, reserve, settle } = searchHarness();
+    delayedReserve(reserve, delay);
+    const fetcher = vi.fn(async (url: unknown) => { if (String(url).includes('api.tavily.com')) { await wait(14900); return tavily(); } await wait(7500); return page(); });
+    const end = await drainVirtual(h, searchEnv(leverBoards(8)), fetcher);
+    expect(tavilyCalls(fetcher)).toHaveLength(0);
+    expect(end).toBe(90000); // the last provider request is the last board page; nothing is started after the budget can no longer cover it
+    expect(reserve).toHaveBeenCalledTimes(1); // the second query is not even reserved: the pre-check fails first
+    expect(settle).toHaveBeenCalledTimes(1);
+    expect(settle).toHaveBeenCalledWith('reservation-1', 0, expect.objectContaining({ error: expect.stringMatching(/^Not started/) }));
+    expect(settle.mock.calls.some(call => call[1] === null || (call as unknown[])[3] === true)).toBe(false); // never retained as uncertain, never a second release
+    expect(searchLane(h)).toMatchObject({ status: 'partial', message: expect.stringMatching(/0 bounded title\/location queries attempted of 2 target titles\. Not attempted: time budget \(2 of 2 queries\)/) });
+  });
+  it('boundary: a reservation that returns with exactly the search timeout left (15.000 s) still starts the search, and the clock never cancels it', async () => {
+    const { h, reserve, settle } = searchHarness();
+    delayedReserve(reserve, 5000); // boards end at 90.000 s, the reservation returns at 95.000 s: exactly 15.000 s left
+    let searchStart = -1; const origin = Date.now();
+    const fetcher = vi.fn(async (url: unknown) => { if (String(url).includes('api.tavily.com')) { searchStart = Date.now() - origin; await wait(15000); return tavily(); } await wait(7500); return page(); });
+    await drainVirtual(h, searchEnv(leverBoards(8)), fetcher);
+    expect(searchStart).toBe(95000);
+    expect(tavilyCalls(fetcher)).toHaveLength(1); // it ends at 110.000 s, the same instant the budget aborts; the search is not attached to that abort
+    expect(reserve).toHaveBeenCalledTimes(1);
+    expect(settle).toHaveBeenCalledTimes(1);
+    expect(settle).toHaveBeenCalledWith('reservation-1', expect.any(Number), expect.anything()); // settled with its actual usage, not zero and not uncertain
+    expect((settle.mock.calls[0] as unknown[])[1]).not.toBe(0);
+    expect(searchLane(h)).toMatchObject({ status: 'partial', message: expect.stringMatching(/1 bounded title\/location queries attempted of 2 target titles\. Not attempted: time budget \(1 of 2 queries\)/) });
+  });
+  it('boundary: one millisecond less (14.999 s left) does not start the search', async () => {
+    const { h, reserve, settle } = searchHarness();
+    delayedReserve(reserve, 5001);
+    const fetcher = vi.fn(async (url: unknown) => { if (String(url).includes('api.tavily.com')) { await wait(15000); return tavily(); } await wait(7500); return page(); });
+    await drainVirtual(h, searchEnv(leverBoards(8)), fetcher);
+    expect(tavilyCalls(fetcher)).toHaveLength(0);
+    expect(settle).toHaveBeenCalledTimes(1);
+    expect(settle).toHaveBeenCalledWith('reservation-1', 0, expect.objectContaining({ error: expect.stringMatching(/^Not started/) }));
+    expect(searchLane(h)).toMatchObject({ status: 'partial', message: expect.stringMatching(/Not attempted: time budget \(2 of 2 queries\)/) });
+  });
+  it('control: a prior SETTLED result is replayed after any wait with no provider call, no settlement and no release', async () => {
+    const { h, reserve, settle } = searchHarness();
+    delayedReserve(reserve, 60000, { id: 'prior', is_new: false, status: 'settled', result: { results: [], actualMicros: 8000, error: null } });
+    const fetcher = vi.fn(async () => page());
+    await drainVirtual(h, searchEnv(noBoards), fetcher);
+    expect(tavilyCalls(fetcher)).toHaveLength(0);
+    expect(reserve).toHaveBeenCalledTimes(2);
+    expect(settle).not.toHaveBeenCalled();
+    expect(searchLane(h)).toMatchObject({ status: 'completed', message: expect.stringMatching(/^2 bounded title\/location queries attempted of 2 target titles\./) });
+  });
+  it('control: a prior UNCONFIRMED call stays retained: no provider call, no release, no zero settlement, reported as a failure of that query', async () => {
+    const { h, reserve, settle } = searchHarness();
+    delayedReserve(reserve, 30000, { id: 'prior', is_new: false, status: 'reserved' });
+    const fetcher = vi.fn(async () => page());
+    await drainVirtual(h, searchEnv(noBoards), fetcher);
+    expect(tavilyCalls(fetcher)).toHaveLength(0);
+    expect(settle).not.toHaveBeenCalled();
+    expect(h.run.data.messages?.join(' ')).toMatch(/prior provider call is unconfirmed/);
+    expect(searchLane(h)).toMatchObject({ status: 'partial' });
+    expect(searchLane(h)?.message).not.toMatch(/Not attempted: time budget/);
+  });
+  it('control: a STARTED call that fails stays uncertain (budget retained), never zero, and is not touched by the new check', async () => {
+    const { h, reserve, settle } = searchHarness();
+    delayedReserve(reserve, 1000);
+    const fetcher = vi.fn(async (url: unknown) => { if (String(url).includes('api.tavily.com')) { await wait(2000); throw new TypeError('network down'); } return page(); });
+    await drainVirtual(h, searchEnv(noBoards), fetcher);
+    expect(tavilyCalls(fetcher)).toHaveLength(2);
+    expect(settle).toHaveBeenCalledTimes(2);
+    for (const call of settle.mock.calls) { expect(call[1]).toBeNull(); expect(call[2]).toBeNull(); expect((call as unknown[])[3]).toBe(true); }
+    expect(settle.mock.calls.some(call => call[1] === 0)).toBe(false);
+  });
+  it('control: an ordinary search with a prompt reservation is unchanged: reserved, called, settled with its actual usage once per query', async () => {
+    const { h, reserve, settle } = searchHarness();
+    const fetcher = vi.fn(async (url: unknown) => { if (String(url).includes('api.tavily.com')) { await wait(1000); return tavily(); } return page(); });
+    await drainVirtual(h, searchEnv(noBoards), fetcher);
+    expect(reserve).toHaveBeenCalledTimes(2); expect(settle).toHaveBeenCalledTimes(2); expect(tavilyCalls(fetcher)).toHaveLength(2);
+    for (const call of settle.mock.calls) expect(call[1]).not.toBe(0);
+    expect(searchLane(h)).toMatchObject({ status: 'completed' });
+  });
 });
