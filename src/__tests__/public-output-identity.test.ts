@@ -100,10 +100,70 @@ describe('the identity check proves itself on an invented handle and display nam
   });
 });
 
+describe('a standalone first name is matched as a whole token only', () => {
+  // An invented first name, run through the same strict hashing the committed first-name entry uses.
+  const first = 'Marisol';
+  const strictLookup = lookupFrom([entryFor('invented first name', [first], { strict: true })]);
+  const hit = (text: string) => findIdentityLabels(text, strictLookup);
+
+  it('matches the whole word in any case, with possessives, adjacent punctuation, escapes and tags', () => {
+    for (const text of [
+      'Marisol', 'marisol', 'MARISOL', 'mArIsOl', 'Hello Marisol and the team', 'Marisol.', 'Marisol,', '(Marisol)', '"Marisol"', 'Marisol: hello', 'by-Marisol', 'Marisol-Wavecrest', 'thanks, Marisol!',
+      "Marisol's", 'Marisol\u2019s', 'Marisol\u2018s', "MARISOL'S", "marisol\u2019S", "Marisol' notes", 'Marisol&rsquo;s', 'Marisol&#8217;s', 'Marisol&apos;s', 'Marisol%E2%80%99s',
+      '"Marisol\u2019s"', '"\u201cMarisol\u201d"', 'Hi\nMarisol', 'say\u00a0Marisol', 'Marisol&nbsp;here', '%0AMarisol',
+      '<b>Marisol</b>', '<p class="x">Marisol</p>', "<span>Marisol</span>'s", '<h1>Hello <em>Marisol</em></h1>', 'Mari<wbr>sol', 'Mari<span>sol</span>', 'Mari<!-- -->sol', '{"name":"Marisol"}', 'name=Marisol&x=1', 'user_Marisol_2',
+    ]) expect(hit(text), text).toEqual(['invented first name']);
+  });
+
+  it('does not match inside a longer word, with digits, or across a camelCase join or spaced-out letters', () => {
+    for (const text of [
+      'Marisolina', 'Marisols', 'Remarisol', 'xmarisol', 'marisolx', 'unmarisolable', 'Marisol2', '2Marisol', 'marisol99', 'Marisolve', 'amarisolb',
+      'MarisolWave', 'wavecrestMarisol', 'XMarisol', 'MARISOLWAVE', 'Mari sol', 'Mari-sol', 'M a r i s o l', 'Mari\u00a0sol', 'Maris ol', 'marisol_x'.replace('_', ''),
+      '', 'Jobvance builds your career record.', 'Wavecrest', 'Marisa', 'Marissol',
+    ]) expect(hit(text), text).toEqual([]);
+  });
+
+  it('does not match a run-together phrase or a split of the word, in markup or not', () => {
+    expect(hit('Mari Sol')).toEqual([]);
+    expect(hit('<i>Mar</i><b>isolx</b>')).toEqual([]);
+    expect(hit('Ma<span>risolx</span>')).toEqual([]);
+  });
+
+  it('combines with the display-name and handle entries, each under its own label', () => {
+    const lookup = lookupFrom([entryFor('invented display name', ['Marisol Wavecrest']), entryFor('invented first name', [first], { strict: true })]);
+    expect(findIdentityLabels('Marisol Wavecrest', lookup).sort()).toEqual(['invented display name', 'invented first name']);
+    expect(findIdentityLabels('Wavecrest alone', lookup)).toEqual([]);
+    expect(findIdentityLabels('MarisolWavecrest', lookup)).toEqual(['invented display name']);
+    expect(findIdentityLabels('Hello Marisol', lookup)).toEqual(['invented first name']);
+  });
+
+  it('refuses to build a strict entry from more than one word', () => {
+    expect(() => entryFor('invented', ['Marisol Wavecrest'], { strict: true })).toThrow(/one whole word/);
+  });
+
+  it('fails a built-output scan when a built file holds the first name, and passes clean output', () => {
+    const leaky = writeTree({
+      'index.html': '<!doctype html><html><body><p>Hello from <strong>Marisol</strong>\u2019s team</p></body></html>',
+      'assets/app-abc12345.js': 'export const owner="Marisol\u2019s";',
+      'assets/unrelated.js': 'export const a="Marisolina and remarisol";',
+      'server/index.js': 'const m="MARISOL";',
+    });
+    expect(scanPaths([leaky], strictLookup, { relativeTo: leaky }).found.sort()).toEqual([
+      'assets/app-abc12345.js: invented first name',
+      'index.html: invented first name',
+      'server/index.js: invented first name',
+    ]);
+    const clean = writeTree({ 'index.html': '<h1>Jobvance</h1><p>Marisolina</p>', 'assets/app.js': 'export const a=1;' });
+    expect(scanPaths([clean], strictLookup, { relativeTo: clean })).toEqual({ found: [], scanned: 2 });
+  });
+});
+
 describe('public output carries a Jobvance-only identity', () => {
   it('keeps the committed hashes free of the strings they stand for and in a usable shape', () => {
     const entries = committedEntries();
-    expect(entries.map((entry: { label: string }) => entry.label)).toEqual(['personal GitHub username', 'personal display name', 'personal-account media host']);
+    expect(entries.map((entry: { label: string }) => entry.label)).toEqual(['personal GitHub username', 'personal display name', 'personal first name', 'personal-account media host']);
+    // The standalone first name is a strict, single-word entry; the others are not.
+    expect(entries.filter((entry: { strict?: boolean }) => entry.strict).map((entry: { label: string; sha256: string[] }) => [entry.label, entry.sha256.length])).toEqual([['personal first name', 1]]);
     for (const entry of entries) {
       expect(entry.sha256.length).toBeGreaterThan(0);
       for (const hash of entry.sha256) expect(hash).toMatch(/^[a-f\d]{64}$/);

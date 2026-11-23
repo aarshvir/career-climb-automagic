@@ -12,11 +12,16 @@
 //    "xzephyrquill77x") is not found, and nor is any string inside a token longer than MAX_JOINED characters.
 //  - It catches the handle and the listed name forms, not every possible way to refer to a person.
 //
+// A `strict` entry is one whole word (a standalone first name). It matches only as a complete token, in any case and beside
+// any punctuation, including a possessive ("name's", straight or curly apostrophe, which tokenise as the name plus "s"). It
+// does not match inside a longer word ("name" in "namesake", "xname", "name2") and not across a camelCase join or as part of a
+// run-together phrase, so it cannot fire on unrelated words. Multi-word names and the handle keep the looser forms above.
+//
 // `starts` holds only the first 16 bits of the hash of each phrase's first token. It is a speed filter (a window is hashed in
 // full only if its first token passes) and, at 16 bits, confirms nothing about any guessed name.
 //
 // Usage:
-//   node scripts/public-identity.mjs hash "label=phrase" ["label=phrase" ...]   print hash entries for new phrases
+//   node scripts/public-identity.mjs hash "label=phrase" ["strict:label=word" ...] print hash entries for new phrases
 //   node scripts/public-identity.mjs scan <path> [<path> ...]                   scan files or folders with the committed hashes
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -32,8 +37,9 @@ export const hashesFile = join(here, 'public-identity-hashes.json');
 const sha256 = value => createHash('sha256').update(value, 'utf8').digest('hex');
 const startOf = token => sha256(token).slice(0, 4);
 
-/** Separators that carry a space in markup, URLs and JSON, made visible before tokenising. */
-const spaceLike = /&nbsp;|&#160;|&#xa0;|%20|%c2%a0|\\u00a0|\\u0020/gi;
+/** Separators that carry a space in markup, URLs and code (entities, percent and unicode escapes, string escapes), made visible
+ * before tokenising so an escape never glues itself to the word beside it. */
+const spaceLike = /&nbsp;|&#160;|&#xa0;|%[0-9a-f]{2}|\\u[0-9a-f]{4}|\\x[0-9a-f]{2}|\\[nrtbfv]/gi;
 
 /** Lowercase alphanumeric tokens. With `splitCase`, lower-to-upper changes ("ZephyrQuill") also start a new token. */
 export function tokensOf(text, splitCase = false) {
@@ -42,29 +48,32 @@ export function tokensOf(text, splitCase = false) {
   return value.toLowerCase().match(/[a-z\d]+/g) ?? [];
 }
 
-/** One committed entry for a label: the hashes of each phrase (spaced and run-together) and its first-token filter. */
-export function entryFor(label, phrases) {
+/** One committed entry for a label: the hashes of each phrase (spaced and run-together) and its first-token filter. A strict
+ * entry takes one whole word per phrase and is matched only as a complete token. */
+export function entryFor(label, phrases, { strict = false } = {}) {
   const hashes = new Set();
   const starts = new Set();
   for (const phrase of phrases) {
     const tokens = tokensOf(phrase);
     if (!tokens.length) throw new Error('A phrase needs at least one letter or digit.');
+    if (strict && tokens.length !== 1) throw new Error('A strict entry is one whole word.');
     hashes.add(sha256(tokens.join(' ')));
-    hashes.add(sha256(tokens.join('')));
+    if (!strict) hashes.add(sha256(tokens.join('')));
     starts.add(startOf(tokens[0]));
   }
-  return { label, sha256: [...hashes].sort(), starts: [...starts].sort() };
+  return { label, ...(strict ? { strict: true } : {}), sha256: [...hashes].sort(), starts: [...starts].sort() };
 }
 
 /** Build the lookup from committed entries, or from synthetic entries in a test. The first entry wins when two labels share a hash. */
 export function lookupFrom(entries) {
   const labels = new Map();
+  const strict = new Set();
   const starts = new Set();
   for (const entry of entries) {
-    for (const hash of entry.sha256) if (!labels.has(hash)) labels.set(hash, entry.label);
+    for (const hash of entry.sha256) if (!labels.has(hash)) { labels.set(hash, entry.label); if (entry.strict) strict.add(hash); }
     for (const start of entry.starts) starts.add(start);
   }
-  return { labels, starts };
+  return { labels, strict, starts };
 }
 
 export function committedEntries() {
@@ -75,7 +84,8 @@ export function committedEntries() {
 
 export const committedLookup = () => lookupFrom(committedEntries());
 
-/** Labels of every known identity string found in `text`. Text that contains markup is also read with the tags removed, so words split by tags still join. */
+/** Labels of every known identity string found in `text`. Text that contains markup is also read with the tags replaced by a space
+ * and with them removed, so words split by tags (or by a tag inside a word) still join. */
 export function findIdentityLabels(text, lookup) {
   const found = new Set();
   const startCache = new Map();
@@ -85,12 +95,14 @@ export function findIdentityLabels(text, lookup) {
     if (known === undefined) { known = lookup.starts.has(startOf(token)); startCache.set(token, known); }
     return known;
   };
-  const labelOf = phrase => {
+  const labelOf = (phrase, size, splitCase) => {
     let hash = hashCache.get(phrase);
     if (hash === undefined) { hash = sha256(phrase); hashCache.set(phrase, hash); }
-    return lookup.labels.get(hash);
+    const label = lookup.labels.get(hash);
+    // A strict (single whole word) entry counts only as one real token, never from a camelCase split or a run-together window.
+    return label !== undefined && lookup.strict.has(hash) && (size > 1 || splitCase) ? undefined : label;
   };
-  const streams = text.includes('<') ? [text, text.replace(/<[^>]*>/g, ' ')] : [text];
+  const streams = text.includes('<') ? [text, text.replace(/<[^>]*>/g, ' '), text.replace(/<[^>]*>/g, '')] : [text];
   for (const stream of streams) {
     for (const splitCase of [false, true]) {
       const tokens = tokensOf(stream, splitCase);
@@ -99,9 +111,9 @@ export function findIdentityLabels(text, lookup) {
         let spaced = tokens[start];
         let joined = tokens[start];
         for (let size = 1; ; size++) {
-          const label = labelOf(spaced);
+          const label = labelOf(spaced, size, splitCase);
           if (label) found.add(label);
-          if (size > 1) { const other = labelOf(joined); if (other) found.add(other); }
+          if (size > 1) { const other = labelOf(joined, size, splitCase); if (other) found.add(other); }
           const next = tokens[start + size];
           if (size >= WINDOW_TOKENS || next === undefined || joined.length + next.length > MAX_JOINED) break;
           spaced += ` ${next}`;
@@ -143,19 +155,25 @@ export function scanPaths(paths, lookup, { isException = () => false, relativeTo
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [command, ...args] = process.argv.slice(2);
   if (command === 'hash') {
-    const phrases = new Map();
-    for (const arg of args) {
+    const groups = new Map();
+    for (const raw of args) {
+      const strict = raw.startsWith('strict:');
+      const arg = strict ? raw.slice('strict:'.length) : raw;
       const at = arg.indexOf('=');
-      if (at < 1) throw new Error('Use label=phrase.');
-      phrases.set(arg.slice(0, at), [...(phrases.get(arg.slice(0, at)) ?? []), arg.slice(at + 1)]);
+      if (at < 1) throw new Error('Use label=phrase or strict:label=word.');
+      const label = arg.slice(0, at);
+      const group = groups.get(label) ?? { strict, phrases: [] };
+      if (group.strict !== strict) throw new Error('A label is either strict or not.');
+      group.phrases.push(arg.slice(at + 1));
+      groups.set(label, group);
     }
-    console.log(JSON.stringify([...phrases].map(([label, list]) => entryFor(label, list)), null, 2));
+    console.log(JSON.stringify([...groups].map(([label, group]) => entryFor(label, group.phrases, { strict: group.strict })), null, 2));
   } else if (command === 'scan' && args.length) {
     const { found, scanned } = scanPaths(args, committedLookup());
     console.log(JSON.stringify({ scanned, matches: found }, null, 2));
     process.exitCode = found.length ? 1 : 0;
   } else {
-    console.error('Usage: public-identity.mjs hash "label=phrase" ... | scan <path> ...');
+    console.error('Usage: public-identity.mjs hash "label=phrase" "strict:label=word" ... | scan <path> ...');
     process.exitCode = 2;
   }
 }

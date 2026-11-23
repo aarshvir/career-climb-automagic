@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "method": "Each value in sha256 is the SHA-256 of a lowercase phrase of letters and digits, joined by one space or by nothing (scripts/public-identity.mjs hash). Each value in starts is only the first 16 bits of the hash of a phrase's first word, a speed filter that confirms nothing by itself. The phrases themselves are deliberately not stored.",
+  "method": "Each value in sha256 is the SHA-256 of a lowercase phrase of letters and digits, joined by one space or by nothing (scripts/public-identity.mjs hash). An entry marked strict is one whole word (a standalone first name) and is matched only as a complete token. Each value in starts is only the first 16 bits of the hash of a phrase's first word, a speed filter that confirms nothing by itself. The phrases themselves are deliberately not stored.",
   "limits": "Hashes of short names can be brute-forced by anyone who hashes a list of candidate names; this keeps the check from publishing the strings, not from being guessed. The check matches whole tokens and windows of up to four adjacent tokens, so a string glued to other letters or digits is not found.",
   "entries": [
     {
@@ -28,6 +28,16 @@
       "starts": [
         "df00",
         "ebe4"
+      ]
+    },
+    {
+      "label": "personal first name",
+      "strict": true,
+      "sha256": [
+        "df00dfca443576f9ef1c2cc407843ba8257c085709c3c9649b2a624db298a3c7"
+      ],
+      "starts": [
+        "df00"
       ]
     },
     {
