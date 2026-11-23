@@ -2,6 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { DEFAULT_EMPLOYER_FEEDS, DISCOVERY_BUDGET, EMPLOYER_FEED_LIMITS, EMPLOYER_REQUEST_TIMEOUT_MS, EMPLOYER_RETAINED_CHARACTER_BOUND, SEARCH_REQUEST_TIMEOUT_MS, employerFeeds, employerFeedsConfig, readEmployerFeed, readEmployerFeeds, startDiscoveryBudget, type EmployerFeed } from '../functions/_shared/job-loop-providers.ts';
 import type { LoopProfileInput } from '../functions/_shared/job-loop-types.ts';
+import { realWorkInFlight, virtually } from './virtual-time.ts';
 
 const profile: LoopProfileInput = { audience:'professional', name:'Created candidate', contactLine:'', targetTitles:['Software Developer'],locations:['US'],experienceYears:4,languages:[],pageTarget:1,discreetSearch:false,sourceText:'Created test experience only. Implemented software and reviewed product changes with a team.',excludedTerms:[],compensation:{currency:'USD',period:'annual',minimum:80000} };
 const description = 'Software development and product collaboration. At least 3 years of experience required. Base salary USD 90,000–120,000 per year.';
@@ -118,11 +119,23 @@ describe('reading the configured boards in one run', () => {
 
 describe('the overall discovery time budget (deterministic virtual time; a cap by design, not a hosted measurement)', () => {
   const realNow = Date.now.bind(Date); // the real clock, kept before any fake timers (used only to prove nothing waited in real time)
+  const realSetTimeout = globalThis.setTimeout.bind(globalThis); // the real timer, kept before any fake timers (used only to inject REAL latency)
   const VIRTUAL_EPOCH = Date.UTC(2026, 10, 23, 0, 0, 0); // every fake clock below starts here; budgets and assertions are relative to it
   const wait = (ms: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => { const timer = setTimeout(resolve, ms); signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('aborted', 'AbortError')); }); });
   const leverPage = () => Response.json(Array.from({ length: 100 }, (_, i) => ({ id: `p-${i}`, text: 'Warehouse Operator', hostedUrl: `https://jobs.example.com/${i}`, descriptionPlain: 'Pick and pack orders at a fictional depot.', categories: { location: 'Austin, TX' } })));
   const lever = (slug: string): EmployerFeed => ({ provider: 'lever', board: slug, company: `Created ${slug}` });
-  async function virtually<T>(work: Promise<T>): Promise<T> { let done = false; const tracked = work.finally(() => { done = true; }); for (let guard = 0; !done && guard < 6000; guard++) await vi.advanceTimersByTimeAsync(100); return tracked; }
+  // `virtually` (./virtual-time.ts) advances virtual time and the REAL asynchronous work together; see that file for the root cause of the CI flake.
+  /** Boards a, hangs, c at concurrency two with a 20 s budget; the hanging request is released only by the budget's own abort. */
+  async function hangScenario(): Promise<string[]> {
+    const budget = startDiscoveryBudget(20000);
+    const fetcher = vi.fn(async (url: unknown, init?: RequestInit) => {
+      if (slugOf(url) === 'hangs') { await new Promise<void>((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))); }
+      await wait(1000); return json({ jobs: [row(1)] });
+    });
+    const results = await virtually(readEmployerFeeds([board('a'), board('hangs'), board('c')], fetcher, profile, 2, budget));
+    budget.dispose();
+    return results.map(result => result.status);
+  }
 
   it('states the numbers and the margin: 110 s of phase time inside a 150 s Free worker lifetime and the unchanged 180 s lease', () => {
     expect(DISCOVERY_BUDGET).toEqual({ workerLifetimeMs: 150000, reserveMs: 40000, totalMs: 110000 });
@@ -181,18 +194,22 @@ describe('the overall discovery time budget (deterministic virtual time; a cap b
     const realStart = realNow();
     vi.useFakeTimers({ now: VIRTUAL_EPOCH });
     try {
-      const budget = startDiscoveryBudget(20000);
-      const fetcher = vi.fn(async (url: unknown, init?: RequestInit) => {
-        if (slugOf(url) === 'hangs') { await new Promise<void>((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))); }
-        await wait(1000); return json({ jobs: [row(1)] });
-      });
-      const feeds = [board('a'), board('hangs'), board('c')];
-      const results = await virtually(readEmployerFeeds(feeds, fetcher, profile, 2, budget));
-      expect(results.map(result => result.status)).toEqual(['fulfilled', 'skipped', 'fulfilled']);
+      expect(await hangScenario()).toEqual(['fulfilled', 'skipped', 'fulfilled']);
       // Released by the budget's own abort in virtual time, not by the request's real 12 s timeout (which would take 12 real seconds).
       expect(realNow() - realStart).toBeLessThan(6000);
-      budget.dispose();
     } finally { vi.useRealTimers(); }
+  });
+  it('root-cause control: 300 ms of REAL digest latency (the thread-pool work behind every retained opportunity) cannot make virtual time run ahead of it', async () => {
+    // Every fulfilled board awaits crypto.subtle.digest through stableUuid. With the old stepping loop even 20 ms of real latency
+    // there made board c start after the budget could no longer cover it ("skipped") instead of read; the lockstep helper must not care.
+    const subtle = globalThis.crypto.subtle; const original = subtle.digest.bind(subtle) as (...args: unknown[]) => Promise<ArrayBuffer>;
+    const slow = vi.spyOn(subtle, 'digest').mockImplementation((async (...args: unknown[]) => { await new Promise<void>(resolve => realSetTimeout(resolve, 300)); return original(...args); }) as never);
+    vi.useFakeTimers({ now: VIRTUAL_EPOCH });
+    try {
+      expect(await hangScenario()).toEqual(['fulfilled', 'skipped', 'fulfilled']);
+      expect(slow).toHaveBeenCalledTimes(2); // boards a and c each retained one opportunity, so each awaited one slow digest
+      expect(realWorkInFlight()).toBe(0);
+    } finally { vi.useRealTimers(); slow.mockRestore(); }
   });
   it('without a budget the earlier behavior is unchanged', async () => {
     const fetcher = vi.fn(async () => json({ jobs: [row(1)] }));

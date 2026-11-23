@@ -5,6 +5,7 @@ import { LoopRepository,type RecordRow,type RunRow,type RunState } from '../func
 import { digest, DISCOVERY_BUDGET } from '../functions/_shared/job-loop-providers.ts';
 import { ApiError } from '../functions/_shared/core.ts';
 import type { LoopPacket,LoopOpportunity } from '../functions/_shared/job-loop-types.ts';
+import { virtually } from './virtual-time.ts';
 const owner='11111111-1111-4111-a111-111111111111';const id='22222222-2222-4222-a222-222222222222';const hash='a'.repeat(64);
 function harness(){
   const opportunity:LoopOpportunity={id:'33333333-3333-4333-a333-333333333333',title:'Graduate analyst',company:'Fictional employer',location:'Dubai',url:'https://careers.example.com/graduate',description:'Analyse a new domain and communicate findings. The candidate may have transferable coursework evidence but this posting asks for different tools.',contact:null,source:'manual',sourceKey:'manual:explicit',checkedAt:'2026-10-11T00:00:00Z',verification:'user_provided',status:'saved',followUpAt:null,notes:''};
@@ -151,11 +152,10 @@ describe('one overall discovery time budget, in deterministic virtual time, thro
     vi.useFakeTimers({ now: VIRTUAL_EPOCH });
     try {
       if (Date.now() !== VIRTUAL_EPOCH) throw new Error('The virtual clock is not frozen at the epoch.');
-      const started = VIRTUAL_EPOCH; let lastEnd = 0, done = false;
+      const started = VIRTUAL_EPOCH; let lastEnd = 0;
       const timed = async (url: unknown, init?: RequestInit) => { const response = await fetcher(url, init); lastEnd = Date.now() - started; return response; };
-      const work = (async () => { for (let n = 0; n < 14; n++) if (!await processLoopPhase(h.repo, id, env, timed as never)) break; })().finally(() => { done = true; });
-      for (let guard = 0; !done && guard < 6000; guard++) await vi.advanceTimersByTimeAsync(100);
-      await work;
+      const work = (async () => { for (let n = 0; n < 14; n++) if (!await processLoopPhase(h.repo, id, env, timed as never)) break; })();
+      await virtually(work); // advances virtual time and the real asynchronous work (digests) together
       return lastEnd;
     } finally { vi.useRealTimers(); }
   }
