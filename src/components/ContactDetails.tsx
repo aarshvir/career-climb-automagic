@@ -131,8 +131,13 @@ export function ContactGate({ children }: { children: ReactNode }) {
     <div key={key ?? admitted.current ?? 'contact-guest'} ref={content} hidden={blocked} aria-hidden={blocked || undefined} style={blocked ? { display: 'none' } : undefined} onClickCapture={guard} onSubmitCapture={guard} onKeyDownCapture={guard} onPointerDownCapture={guard}>
       {mountChildren && children}
     </div>
+    {/* While the account state is unknown (no user yet) this panel stands in for the page it blocks. Loading: a plain status, as the pages themselves show (no Retry: nothing has failed).
+        Failed (authError, no longer loading): an alert with Retry, which takes focus so Enter or Space works at once. The Help, Plans and Account recovery links stay in every state,
+        so a request that never resolves (no timeout turns it into an error) still leaves a way out. */}
     {blocked && createPortal(<div ref={gate} role="dialog" aria-modal="true" aria-labelledby={user ? 'contact-title' : undefined} aria-label={user ? undefined : 'Restore your sign-in'} tabIndex={-1} style={{ position: 'fixed', inset: 0, zIndex: 100, overflowY: 'auto', background: '#fff', pointerEvents: 'auto' }}>
-      {user ? <Suspense fallback={<p className="p-8" role="status">Opening your account details…</p>}><ContactForm key={key ?? priorScope.current ?? user.id} user={user} onSaved={acknowledge} onEdited={() => { editing.current = true; }} /></Suspense> : <div className="p-8"><p role="status">Restoring your sign-in before opening your workspace…</p><button type="button" onClick={auth.retryConnection}>Retry sign-in recovery</button></div>}
+      {user ? <Suspense fallback={<p className="p-8" role="status">Opening your account details…</p>}><ContactForm key={key ?? priorScope.current ?? user.id} user={user} onSaved={acknowledge} onEdited={() => { editing.current = true; }} /></Suspense> : <div className="p-8">{auth.loading
+        ? <p role="status">Opening your account…</p>
+        : <><p role="alert">Your sign-in could not be restored.</p><button type="button" autoFocus onClick={auth.retryConnection}>Retry sign-in recovery</button></>}</div>}
       <nav aria-label="Account help" className="flex flex-wrap justify-center gap-6 p-4"><Link to="/help">Help</Link><Link to="/pricing">Plans</Link><Link to="/auth/forgot-password">Account recovery</Link></nav>
     </div>, document.body)}
   </>;
