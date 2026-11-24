@@ -103,6 +103,7 @@ describe('lock and enable behaviour is the same wherever the copy differs', () =
   const FRESH_TICKED = { plans: [false, false, false], selects: [false, false], consent: { disabled: false, checked: true }, main: false, refreshBilling: false, refreshPrice: true };
   const LOCKED = { plans: [false, true, true], selects: [true, true], consent: { disabled: false, checked: false }, main: true, refreshBilling: false, refreshPrice: false };
   const LOCKED_TICKED = { ...LOCKED, consent: { disabled: false, checked: true }, main: false };
+  const LINK_PENDING = { plans: [false, true, true], selects: [true, true], consent: null, main: null, refreshBilling: false, refreshPrice: false };
   const IN_FLIGHT = { plans: [true, true, true], selects: [true, true], consent: { disabled: true, checked: false }, main: true, refreshBilling: true, refreshPrice: false };
   it('ordinary visit: nothing is locked and the checkout button follows the consent box', async () => {
     show(); await tick(); expect(flags()).toEqual(FRESH_TICKED);
@@ -125,9 +126,9 @@ describe('lock and enable behaviour is the same wherever the copy differs', () =
     world.checkout = server(); show(); await panelBox(); expect(flags()).toEqual(LOCKED);
     await tick(); expect(flags()).toEqual(LOCKED_TICKED);
   });
-  it('a server row without a hosted link locks the same controls', async () => {
-    world.checkout = server({ status: 'uncertain', checkoutUrl: null }); show(); await panelBox(); expect(flags()).toEqual(LOCKED);
-    await tick(); expect(flags()).toEqual(LOCKED_TICKED);
+  it.each(['creating', 'uncertain'])('a %s server order with no hosted link keeps the same plan and market locks, and has no consent box or resume button to enable', async state => {
+    world.checkout = server({ status: state, checkoutUrl: null }); show(); await screen.findByText(/checkout request is recorded/);
+    expect(flags()).toEqual(LINK_PENDING);
   });
   it('after a receipt the same controls stay locked', async () => {
     show(); await tick(); fireEvent.click(main()); await waitFor(() => expect(m.open).toHaveBeenCalledTimes(1));
@@ -215,10 +216,6 @@ describe('server-confirmed hosted session keeps the existing resume wording', ()
     world.checkout = server({ pricing: { ...gbp(null), country: null, currency: 'USD', amountMinor: 2900, catalogVersion: 'legacy-usd-v1' } }); show('/pricing?loopPlan=weekly&country=other&currency=USD'); await panelBox();
     expect(screen.getByText(OLD.fixedNoCountry)).toBeInTheDocument(); expect(main().textContent).toBe(OLD.resume);
   });
-  it('a server row that has no hosted link yet is outside this change and keeps its existing wording', async () => {
-    world.checkout = server({ status: 'uncertain', checkoutUrl: null }); show(); await panelBox();
-    expect(main().textContent).toBe(OLD.resume); expect(screen.getByText(OLD.fixed)).toBeInTheDocument(); expect(screen.queryByText(NEW.note)).not.toBeInTheDocument();
-  });
   it('a refresh that finds the open hosted checkout of the same request switches to the resume wording and keeps every lock', async () => {
     world.mode = 'http500'; await failFirstAttempt();
     expect(main().textContent).toBe(NEW.retry);
@@ -280,6 +277,74 @@ describe('the confirm button keeps three distinct recorded labels (merged with t
   });
 });
 
+describe('a server order without a usable hosted link (creating or uncertain)', () => {
+  const RETRY_LABELS = [OLD.resume, OLD.resumeTrial, NEW.retry, NEW.retryTrial];
+  const LINK_TEXT = 'Your Starter checkout request is recorded, but its checkout link is not ready. Contact support if it stays unavailable, the billing country is wrong or you need help confirming payment.';
+  const LINK_PENDING = { plans: [false, true, true], selects: [true, true], consent: null, main: null, refreshBilling: false, refreshPrice: false };
+  const showPending = async (state: string, path = PATH) => { world.checkout = server({ status: state, checkoutUrl: null }); show(path); await screen.findByText(/checkout request is recorded/); };
+  const actions = () => world.calls.map(call => call.action).filter(action => action !== 'status');
+  it.each(['creating', 'uncertain'])('%s: says the checkout link is not ready, keeps everything locked, offers Refresh billing and no dead resume action', async state => {
+    await showPending(state);
+    expect(screen.getByText(/checkout request is recorded/).closest('p')!.textContent).toBe(LINK_TEXT);
+    expect(document.getElementById('loop-link-not-ready-note')?.textContent).toBe('There is nothing to resume yet. Select Refresh billing to check again for the checkout link.');
+    expect(screen.queryByRole('button', { name: /Resume original|Retry your original|Continue to secure|Start 7-day/ })).not.toBeInTheDocument();
+    expect(main()).toBeNull(); expect(box()).toBeNull(); expect(document.getElementById('loop-checkout-reason')).toBeNull(); expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Refresh billing' })).toBeEnabled();
+    expect(screen.getByText(NEW.kept)).toBeInTheDocument(); expect(countryLine()).toBe(`Billing country United Kingdom. ${NEW.country}`);
+    expect(screen.getByText(/Original request price:/).textContent).toBe('Original request price: £22 GBP each month, tax included. The original request keeps this price and currency.');
+    expectNoHostedWording(); expect(document.body.textContent).not.toMatch(/when you resume it/);
+    expect(flags()).toEqual(LINK_PENDING); expect(actions()).toEqual([]); expect(m.open).not.toHaveBeenCalled();
+  });
+  it('the same state with the trial offer shows no trial resume button either', async () => {
+    world.trial = true; world.checkout = server({ status: 'uncertain', checkoutUrl: null, trialDays: 7 }); show(); await screen.findByText(/checkout request is recorded/);
+    expect(screen.queryByRole('button', { name: /Resume original|Retry your original|Start 7-day/ })).not.toBeInTheDocument(); expect(main()).toBeNull();
+  });
+  it('Refresh billing with no link only reads status: no order, no quote, no consent, no navigation, nothing unlocked', async () => {
+    await showPending('creating');
+    await refreshBilling(); await refreshBilling();
+    expect(actions()).toEqual([]); expect(m.open).not.toHaveBeenCalled(); expect(box()).toBeNull(); expect(flags()).toEqual(LINK_PENDING);
+    expect(screen.getByText(/checkout request is recorded/)).toBeInTheDocument();
+  });
+  it.each(['creating', 'uncertain'])('%s, then a read-only refresh supplies the usable original link: a deliberate resume under the existing consent checks, once, for the same order', async state => {
+    await showPending(state);
+    world.checkout = server({ status: 'ready' }); await refreshBilling();
+    const consent = await panelBox();
+    expect(consent).not.toBeChecked(); expect(main().textContent).toBe(OLD.resume); expect(main()).toBeDisabled();
+    expect(checkoutCalls()).toHaveLength(0); expect(m.open).not.toHaveBeenCalled();
+    expect(flags()).toEqual({ plans: [false, true, true], selects: [true, true], consent: { disabled: false, checked: false }, main: true, refreshBilling: false, refreshPrice: false });
+    fireEvent.click(main()); expect(checkoutCalls()).toHaveLength(0);
+    await tick(); fireEvent.click(main());
+    await waitFor(() => expect(m.open).toHaveBeenCalledTimes(1));
+    expect(checkoutCalls()).toHaveLength(1); expect(checkoutCalls()[0]).toMatchObject({ requestId: id(33), plan: 'weekly', quoteId: id(41) });
+    expect(world.calls.filter(call => call.action === 'quote')).toHaveLength(0);
+  });
+  it('an ambiguous local attempt, then a refresh that finds an order with no link: no second request is possible, and the link arriving resumes the same request', async () => {
+    world.mode = 'http500'; await failFirstAttempt();
+    expect(main().textContent).toBe(NEW.retry);
+    const first = checkoutCalls()[0];
+    world.checkout = server({ requestId: first.requestId, status: 'uncertain', checkoutUrl: null, pricing: gbp(first.quoteId) });
+    await refreshBilling(); await screen.findByText(/checkout request is recorded/);
+    expect(main()).toBeNull(); expect(box()).toBeNull(); expect(flags()).toEqual(LINK_PENDING); expect(checkoutCalls()).toHaveLength(1);
+    world.mode = 'ok'; world.checkout = server({ requestId: first.requestId, status: 'ready', pricing: gbp(first.quoteId) });
+    await refreshBilling(); await tick();
+    expect(main().textContent).toBe(OLD.resume);
+    fireEvent.click(main()); await waitFor(() => expect(m.open).toHaveBeenCalledTimes(1));
+    expect(checkoutCalls()).toHaveLength(2); expect(checkoutCalls()[1]).toEqual(first);
+  });
+  it('a local-only ambiguous attempt still retries the same request, and a verified hosted link still resumes', async () => {
+    world.mode = 'network'; await failFirstAttempt(); world.mode = 'ok';
+    expect(main().textContent).toBe(NEW.retry); await tick(); fireEvent.click(main()); await waitFor(() => expect(m.open).toHaveBeenCalledTimes(1));
+    expect(checkoutCalls()[1]).toEqual(checkoutCalls()[0]);
+    cleanup(); world.checkout = server(); show(); await panelBox(); expect(main().textContent).toBe(OLD.resume);
+  });
+  it('Refresh billing has its own fixed recorded label, which is none of the four retry labels', async () => {
+    await showPending('uncertain');
+    const label = screen.getByRole('button', { name: 'Refresh billing' }).getAttribute('data-analytics-label');
+    expect(label).toBe('Refresh billing'); expect(RETRY_LABELS).not.toContain(label);
+    cleanup(); world.checkout = null; show(); await panelBox(); expect(screen.getByRole('button', { name: 'Refresh billing' })).toHaveAttribute('data-analytics-label', 'Refresh billing');
+  });
+});
+
 describe('copy that is unchanged', () => {
   it('a fresh checkout keeps its first-time wording and notes', async () => {
     show(); await panelBox();
@@ -294,14 +359,20 @@ describe('copy that is unchanged', () => {
   });
 });
 
-describe('the wording flag is never used by a lock, guard or retry', () => {
+describe('the wording and visibility flags are never used by a lock, guard or retry', () => {
   const source = readFileSync(resolve(__dirname, '../components/LoopSubscriptionBilling.tsx'), 'utf8');
   const between = (from: string, to: string) => { const start = source.indexOf(from), end = source.indexOf(to, start); expect(start).toBeGreaterThan(-1); expect(end).toBeGreaterThan(start); return source.slice(start, end); };
-  it('is read only by the retry note, the two labels, the two notes under them and the description', () => {
-    expect(source.match(/unconfirmedAttempt/g)).toHaveLength(7);
-    for (const expression of source.match(/disabled=\{[^}]*\}/g) ?? []) expect(expression).not.toContain('unconfirmedAttempt');
-    for (const [from, to] of [['const refresh=useCallback', 'const sub=status?.subscription'], ['const quoteCurrent', 'const purchaseFingerprint'], ['function changeMarket', 'async function cancel'], ['async function resumeCheckout', 'return <section']])
-      expect(between(from, to)).not.toContain('unconfirmedAttempt');
+  it('unconfirmedAttempt, noHostedSession and linkPending only choose words and what is shown', () => {
+    expect(source.match(/unconfirmedAttempt/g)).toHaveLength(6);
+    expect(source.match(/noHostedSession/g)).toHaveLength(3);
+    expect(source.match(/linkPending/g)).toHaveLength(5);
+    for (const token of ['unconfirmedAttempt', 'noHostedSession', 'linkPending']) {
+      for (const expression of source.match(/disabled=\{[^}]*\}/g) ?? []) expect(expression, token).not.toContain(token);
+      for (const [from, to] of [['const refresh=useCallback', 'const sub=status?.subscription'], ['const quoteCurrent', 'const purchaseFingerprint'], ['function changeMarket', 'async function cancel'], ['async function resumeCheckout', 'return <section']])
+        expect(between(from, to), token).not.toContain(token);
+    }
+    expect(source).toContain('const linkPending=checkoutPending&&!status.checkout.checkoutUrl;');
+    expect(source).toContain('const originalRecovery=checkoutPending||hasLocalAttempt;');
   });
   it('records a receipt for the request only once the server has answered, and only the wording flag reads it', () => {
     expect(source.match(/receiptIntent/g)).toHaveLength(3);

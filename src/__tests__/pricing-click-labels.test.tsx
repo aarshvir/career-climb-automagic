@@ -380,6 +380,34 @@ describe('keyboard activation records exactly one click, and a retry is its own 
     await waitFor(() => expect(m.open).toHaveBeenCalled()); await flush();
     expect(labels().slice(2)).toEqual([TRIAL_CONSENT, 'Retry your original trial request']);
   });
+
+  // A server order with no hosted link (creating or uncertain) has nothing to resume: the only status action is Refresh billing, which is not a retry.
+  const order = (state: string, url: string | null) => ({ requestId: '00000000-0000-4000-8000-000000000033', plan: 'weekly', status: state, checkoutUrl: url, pricing: price('weekly', 'GBP', '00000000-0000-4000-8000-000000000041', 'GB'), trialDays: 0 });
+  const FOUR_RETRY_LABELS = ['Resume original secure checkout', 'Resume original secure trial checkout', 'Retry your original request', 'Retry your original trial request'];
+  it.each(['creating', 'uncertain'])('a %s order with no hosted link: Refresh billing is recorded as itself and never as a retry; the link arriving leads to one distinct resume click', async state => {
+    m.read.mockResolvedValue(status({ checkout: order(state, null) }));
+    const path = loopPath('GBP', 'weekly');
+    view(path); await screen.findByText(/checkout link is not ready/); await settle();
+    await startTracker(path);
+    const actor = user();
+    const reads = () => m.read.mock.calls.length;
+    let before = reads();
+    await actor.click(screen.getByRole('button', { name: 'Refresh billing' })); await waitFor(() => expect(reads()).toBeGreaterThan(before)); await flush();
+    expect(labels()).toEqual(['Refresh billing']);
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument(); expect(m.checkout).not.toHaveBeenCalled(); expect(m.open).not.toHaveBeenCalled();
+    m.read.mockResolvedValue(status({ checkout: order('ready', 'https://checkout.dodopayments.com/session/cks_fixture') }));
+    before = reads();
+    await actor.click(screen.getByRole('button', { name: 'Refresh billing' })); await waitFor(() => expect(reads()).toBeGreaterThan(before));
+    const box = await screen.findByRole('checkbox', { name: /I choose Starter/ });
+    expect(box).not.toBeChecked(); expect(m.checkout).not.toHaveBeenCalled(); expect(m.open).not.toHaveBeenCalled();
+    await waitFor(() => expect(box).toBeEnabled()); await settle(); await actor.click(box); await waitFor(() => expect(box).toBeChecked());
+    m.checkout.mockImplementationOnce(async (_scope, intent) => receipt(intent));
+    await actor.click(screen.getByRole('button', { name: 'Resume original secure checkout' }));
+    await waitFor(() => expect(m.open).toHaveBeenCalledTimes(1)); await flush();
+    expect(labels()).toEqual(['Refresh billing', 'Refresh billing', 'I choose Starter and automatic monthly renewal', 'Resume original secure checkout']);
+    expect(labels().filter(label => FOUR_RETRY_LABELS.includes(label ?? ''))).toEqual(['Resume original secure checkout']);
+    expect(m.checkout).toHaveBeenCalledTimes(1);
+  });
 });
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
