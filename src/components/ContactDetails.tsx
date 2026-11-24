@@ -31,11 +31,35 @@ export function ContactFields({ value, onChange, disabled, errors }: { value: Co
 
 const PRIVATE = /^\/(loop|onboarding|dashboard|applications|check)(\/|$)/;
 
+/** How long the opening panel waits in silence before it says the visitor can reload. An ordinary restore answers in well under a second, and the slowest answered restore measured in the fixture (5 s) must stay quiet. */
+export const SLOW_WAIT_MS = 10_000;
+/** Field names that mark an address as an auth return (OAuth, email and recovery returns, the mailbox return): reloading such an address could repeat or discard the exchange, so no reload is suggested there. */
+const AUTH_RETURN_NAMES = new Set(['code', 'error', 'error_code', 'error_description', 'access_token', 'refresh_token', 'provider_token', 'token_hash', 'type', 'gmail_ticket']);
+/**
+ * True when the query or the fragment carries one of those names. The names are read the way the browser and the installed auth client read them (URLSearchParams on the query and on the
+ * fragment after '#', so percent-encoded names such as error%5Fdescription are decoded first) and compared without regard to case. An address that cannot be read counts as an auth return.
+ */
+function carriesAuthReturn(search: string, hash: string): boolean {
+  try {
+    for (const source of [search, hash.startsWith('#') ? hash.slice(1) : hash]) {
+      for (const name of new URLSearchParams(source).keys()) if (AUTH_RETURN_NAMES.has(name.toLowerCase())) return true;
+    }
+    return false;
+  } catch { return true; }
+}
+
+/** Display only: text, no button, no timer-driven reload, no SDK call. It mounts with the opening panel, so every new loading stretch starts its own count. */
+function SlowWaitHint() {
+  const [late, setLate] = useState(false);
+  useEffect(() => { const timer = window.setTimeout(() => setLate(true), SLOW_WAIT_MS); return () => window.clearTimeout(timer); }, []);
+  return late ? <p role="status">This is taking longer than usual. You can reload the page to try again.</p> : null;
+}
+
 /** Every signed-in account gives a name before using the private pages. A mobile number is optional. */
 export function ContactGate({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const { user } = auth;
-  const { pathname } = useLocation();
+  const { pathname, search, hash } = useLocation();
   const authority = useMemo(() => captureContactAuthority(user, auth.session, auth.loading, auth.authError), [user, auth.session, auth.loading, auth.authError]);
   const key = authority ? contactAuthorityKey(authority) : null;
   const [saved, setSaved] = useState<ContactReceipt | null>(null);
@@ -48,6 +72,8 @@ export function ContactGate({ children }: { children: ReactNode }) {
   const complete = !!authority && currentContactAuthority(authority) && (!editing.current && hasContactDetails(user?.user_metadata) || !!saved && contactAuthorityKey(saved) === key && savedAgainst.current === user);
   if (complete) admitted.current = key;
   const blocked = privatePage && !signedOut && !complete;
+  // The hint is only for the entry that was verified: the ordinary /onboarding address, before the page behind the panel was ever mounted (so there is nothing typed that a reload could discard), and not on an auth-return address.
+  const reloadHint = pathname === '/onboarding' && admitted.current === null && !carriesAuthReturn(search, hash);
   // An already mounted stable-session route stays alive while details are added.
   // A newly blocked route is never mounted merely to hide it afterwards.
   const mountChildren = !privatePage || signedOut || admitted.current !== null;
@@ -131,8 +157,14 @@ export function ContactGate({ children }: { children: ReactNode }) {
     <div key={key ?? admitted.current ?? 'contact-guest'} ref={content} hidden={blocked} aria-hidden={blocked || undefined} style={blocked ? { display: 'none' } : undefined} onClickCapture={guard} onSubmitCapture={guard} onKeyDownCapture={guard} onPointerDownCapture={guard}>
       {mountChildren && children}
     </div>
+    {/* While the account state is unknown (no user yet) this panel stands in for the page it blocks. Loading: a plain status, as the pages themselves show (no Retry: nothing has failed).
+        Failed (authError, no longer loading): an alert with Retry, which takes focus so Enter or Space works at once. The Help, Plans and Account recovery links stay in every state,
+        so a request that never resolves (no timeout turns it into an error) still leaves a way out. On the /onboarding entry a long loading stretch also says, as text only, that
+        the visitor can reload (the fixture showed a deliberate reload restores the same entry and account once the service is back). */}
     {blocked && createPortal(<div ref={gate} role="dialog" aria-modal="true" aria-labelledby={user ? 'contact-title' : undefined} aria-label={user ? undefined : 'Restore your sign-in'} tabIndex={-1} style={{ position: 'fixed', inset: 0, zIndex: 100, overflowY: 'auto', background: '#fff', pointerEvents: 'auto' }}>
-      {user ? <Suspense fallback={<p className="p-8" role="status">Opening your account details…</p>}><ContactForm key={key ?? priorScope.current ?? user.id} user={user} onSaved={acknowledge} onEdited={() => { editing.current = true; }} /></Suspense> : <div className="p-8"><p role="status">Restoring your sign-in before opening your workspace…</p><button type="button" onClick={auth.retryConnection}>Retry sign-in recovery</button></div>}
+      {user ? <Suspense fallback={<p className="p-8" role="status">Opening your account details…</p>}><ContactForm key={key ?? priorScope.current ?? user.id} user={user} onSaved={acknowledge} onEdited={() => { editing.current = true; }} /></Suspense> : <div className="p-8">{auth.loading
+        ? <><p role="status">Opening your account…</p>{reloadHint && <SlowWaitHint />}</>
+        : <><p role="alert">Your sign-in could not be restored.</p><button type="button" autoFocus onClick={auth.retryConnection}>Retry sign-in recovery</button></>}</div>}
       <nav aria-label="Account help" className="flex flex-wrap justify-center gap-6 p-4"><Link to="/help">Help</Link><Link to="/pricing">Plans</Link><Link to="/auth/forgot-password">Account recovery</Link></nav>
     </div>, document.body)}
   </>;

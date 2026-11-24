@@ -184,7 +184,7 @@ describe('protected legacy workspace return through real app routes', () => {
   it('waits for auth resolution and strips unrelated query and hash data from the return', async () => {
     state.loading = true;
     const view = open('/dashboard?email=private@example.test&tab=tracker&next=https://evil.example#private-fragment');
-    expect(screen.getByRole('status')).toHaveTextContent('Restoring your sign-in');
+    expect(screen.getByRole('status')).toHaveTextContent('Opening your account');
     expect(window.location.pathname).toBe('/dashboard');
     await act(async () => { state.loading = false; view.rerender(<MvpApp />); });
     await screen.findByRole('heading', { name: 'Sign in to Jobvance', level: 2 });
