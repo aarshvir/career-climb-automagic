@@ -58,6 +58,6 @@ describe('independent localized UI authority review',()=>{
   it('keeps an unknown checkout write bound to the original request and price without requesting another quote',async()=>{
     mock.checkout.mockRejectedValue(new LoopBillingError('Outcome unknown.','UNCONFIRMED'));render(page());fireEvent.click(await screen.findByRole('checkbox',{name:/I choose Starter/}));fireEvent.click(screen.getByRole('button',{name:/Continue to secure checkout/}));
     await screen.findByRole('alert');expect(screen.getByRole('combobox',{name:'Billing country or region'})).toBeDisabled();expect(mock.quote).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole('checkbox',{name:/I choose Starter/}));fireEvent.click(screen.getByRole('button',{name:'Resume original secure checkout'}));await waitFor(()=>expect(mock.checkout).toHaveBeenCalledTimes(2));expect(mock.checkout.mock.calls[1][1]).toEqual(mock.checkout.mock.calls[0][1]);expect(mock.checkout.mock.calls[1][0].pricing).toEqual(mock.checkout.mock.calls[0][0].pricing);
+    fireEvent.click(screen.getByRole('checkbox',{name:/I choose Starter/}));fireEvent.click(screen.getByRole('button',{name:'Retry your original request'}));await waitFor(()=>expect(mock.checkout).toHaveBeenCalledTimes(2));expect(mock.checkout.mock.calls[1][1]).toEqual(mock.checkout.mock.calls[0][1]);expect(mock.checkout.mock.calls[1][0].pricing).toEqual(mock.checkout.mock.calls[0][0].pricing);
   });
 });

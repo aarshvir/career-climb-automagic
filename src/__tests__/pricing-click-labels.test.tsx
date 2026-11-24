@@ -107,14 +107,14 @@ const STATES: Record<string, (market: MarketName) => Promise<string>> = {
     m.checkout.mockRejectedValue(new Error('network down'));
     view(loopPath(market, 'active')); await giveConsent(await screen.findByRole('checkbox', { name: /I choose Advanced/ }));
     fireEvent.click(await screen.findByRole('button', { name: /Continue to secure checkout/ }));
-    await screen.findByRole('button', { name: 'Resume original secure checkout' });
+    await screen.findByRole('button', { name: 'Retry your original request' });
     await giveConsent(screen.getByRole('checkbox', { name: /I choose Advanced/ })); return loopPath(market, 'active');
   },
   'after a failed trial checkout, consent ticked again': async market => {
     m.read.mockResolvedValue(status({ trial: { available: true, eligible: true, days: 7 } })); m.checkout.mockRejectedValue(new Error('network down'));
     view(loopPath(market, 'weekly')); await giveConsent(await screen.findByRole('checkbox', { name: /I start a 7-day free trial of Starter/ }));
     fireEvent.click(await screen.findByRole('button', { name: /Start 7-day free trial/ }));
-    await screen.findByRole('button', { name: 'Resume original secure trial checkout' });
+    await screen.findByRole('button', { name: 'Retry your original trial request' });
     await giveConsent(screen.getByRole('checkbox', { name: /I start a 7-day free trial of Starter/ })); return loopPath(market, 'weekly');
   },
   'subscribed, in a free trial, cancel consent ticked': async market => {
@@ -161,8 +161,8 @@ const EXPECT: Record<string, { match: (row: Row) => boolean; recorded: string[] 
     { match: row => row.tag === 'button' && row.text.startsWith('Start 7-day free trial'), recorded: ['Start 7-day free trial · card required'] },
     { match: row => row.tag === 'input' && row.type === 'checkbox', recorded: [TRIAL_CONSENT] },
   ],
-  'after a failed checkout, consent ticked again': [{ match: row => row.tag === 'button' && row.text.startsWith('Resume original'), recorded: ['Resume original secure checkout'] }],
-  'after a failed trial checkout, consent ticked again': [{ match: row => row.tag === 'button' && row.text.startsWith('Resume original'), recorded: ['Resume original secure trial checkout'] }],
+  'after a failed checkout, consent ticked again': [{ match: row => row.tag === 'button' && row.text.startsWith('Retry your original'), recorded: ['Retry your original request'] }],
+  'after a failed trial checkout, consent ticked again': [{ match: row => row.tag === 'button' && row.text.startsWith('Retry your original'), recorded: ['Retry your original trial request'] }],
   'subscribed, in a free trial, cancel consent ticked': [
     { match: row => row.tag === 'label' && row.text.startsWith('Cancel this free trial'), recorded: [] },
     { match: row => row.tag === 'input' && row.type === 'checkbox', recorded: ['Cancel this free trial so the first charge is not taken'] },
@@ -356,12 +356,12 @@ describe('keyboard activation records exactly one click, and a retry is its own 
     m.checkout.mockRejectedValueOnce(new Error('network down')).mockRejectedValueOnce(new Error('network down')).mockImplementationOnce(async (_scope, intent) => receipt(intent));
     const tick = async () => { await waitFor(() => expect(box).toBeEnabled()); await settle(); await actor.click(screen.getByText(/I choose Advanced at/)); await waitFor(() => expect(box).toBeChecked()); };
     await tick(); await actor.click(screen.getByRole('button', { name: /Continue to secure checkout/ }));
-    await screen.findByRole('button', { name: 'Resume original secure checkout' });
-    await tick(); await actor.click(screen.getByRole('button', { name: 'Resume original secure checkout' }));
+    await screen.findByRole('button', { name: 'Retry your original request' });
+    await tick(); await actor.click(screen.getByRole('button', { name: 'Retry your original request' }));
     await waitFor(() => expect(m.checkout).toHaveBeenCalledTimes(2)); await waitFor(() => expect(box).toBeEnabled());
-    await tick(); await actor.click(screen.getByRole('button', { name: 'Resume original secure checkout' }));
+    await tick(); await actor.click(screen.getByRole('button', { name: 'Retry your original request' }));
     await waitFor(() => expect(m.open).toHaveBeenCalledTimes(1)); await flush();
-    expect(labels()).toEqual([CONSENT, 'Continue to secure checkout', CONSENT, 'Resume original secure checkout', CONSENT, 'Resume original secure checkout']);
+    expect(labels()).toEqual([CONSENT, 'Continue to secure checkout', CONSENT, 'Retry your original request', CONSENT, 'Retry your original request']);
     // The retry reuses the original request (existing behaviour, untouched): only the measurement is under test here.
     expect(new Set(m.checkout.mock.calls.map(call => call[1].requestId)).size).toBe(1);
   });
@@ -372,13 +372,41 @@ describe('keyboard activation records exactly one click, and a retry is its own 
     m.checkout.mockRejectedValueOnce(new Error('network down'));
     await actor.click(box); await waitFor(() => expect(box).toBeChecked());
     await actor.click(screen.getByRole('button', { name: /Start 7-day free trial/ }));
-    await screen.findByRole('button', { name: 'Resume original secure trial checkout' }); await flush();
+    await screen.findByRole('button', { name: 'Retry your original trial request' }); await flush();
     expect(labels()).toEqual([TRIAL_CONSENT, 'Start 7-day free trial · card required']);
     await waitFor(() => expect(box).toBeEnabled()); await settle(); await actor.click(box); await waitFor(() => expect(box).toBeChecked());
     m.checkout.mockImplementationOnce(async (_scope, intent) => receipt(intent));
-    await actor.click(screen.getByRole('button', { name: 'Resume original secure trial checkout' }));
+    await actor.click(screen.getByRole('button', { name: 'Retry your original trial request' }));
     await waitFor(() => expect(m.open).toHaveBeenCalled()); await flush();
-    expect(labels().slice(2)).toEqual([TRIAL_CONSENT, 'Resume original secure trial checkout']);
+    expect(labels().slice(2)).toEqual([TRIAL_CONSENT, 'Retry your original trial request']);
+  });
+
+  // A server order with no hosted link (creating or uncertain) has nothing to resume: the only status action is Refresh billing, which is not a retry.
+  const order = (state: string, url: string | null) => ({ requestId: '00000000-0000-4000-8000-000000000033', plan: 'weekly', status: state, checkoutUrl: url, pricing: price('weekly', 'GBP', '00000000-0000-4000-8000-000000000041', 'GB'), trialDays: 0 });
+  const FOUR_RETRY_LABELS = ['Resume original secure checkout', 'Resume original secure trial checkout', 'Retry your original request', 'Retry your original trial request'];
+  it.each(['creating', 'uncertain'])('a %s order with no hosted link: Refresh billing is recorded as itself and never as a retry; the link arriving leads to one distinct resume click', async state => {
+    m.read.mockResolvedValue(status({ checkout: order(state, null) }));
+    const path = loopPath('GBP', 'weekly');
+    view(path); await screen.findByText(/checkout link is not ready/); await settle();
+    await startTracker(path);
+    const actor = user();
+    const reads = () => m.read.mock.calls.length;
+    let before = reads();
+    await actor.click(screen.getByRole('button', { name: 'Refresh billing' })); await waitFor(() => expect(reads()).toBeGreaterThan(before)); await flush();
+    expect(labels()).toEqual(['Refresh billing']);
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument(); expect(m.checkout).not.toHaveBeenCalled(); expect(m.open).not.toHaveBeenCalled();
+    m.read.mockResolvedValue(status({ checkout: order('ready', 'https://checkout.dodopayments.com/session/cks_fixture') }));
+    before = reads();
+    await actor.click(screen.getByRole('button', { name: 'Refresh billing' })); await waitFor(() => expect(reads()).toBeGreaterThan(before));
+    const box = await screen.findByRole('checkbox', { name: /I choose Starter/ });
+    expect(box).not.toBeChecked(); expect(m.checkout).not.toHaveBeenCalled(); expect(m.open).not.toHaveBeenCalled();
+    await waitFor(() => expect(box).toBeEnabled()); await settle(); await actor.click(box); await waitFor(() => expect(box).toBeChecked());
+    m.checkout.mockImplementationOnce(async (_scope, intent) => receipt(intent));
+    await actor.click(screen.getByRole('button', { name: 'Resume original secure checkout' }));
+    await waitFor(() => expect(m.open).toHaveBeenCalledTimes(1)); await flush();
+    expect(labels()).toEqual(['Refresh billing', 'Refresh billing', 'I choose Starter and automatic monthly renewal', 'Resume original secure checkout']);
+    expect(labels().filter(label => FOUR_RETRY_LABELS.includes(label ?? ''))).toEqual(['Resume original secure checkout']);
+    expect(m.checkout).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -407,7 +435,7 @@ describe('the rule at the capture', () => {
   });
 
   it('stable wording on /pricing is untouched: plan names, verbs, trial and recovery wording, FAQ questions', async () => {
-    const wording = ['Choose Pro Job Seeker', 'Choose Starter', 'Sign in to buy Job Search', 'Buy Career Move', 'Start 7-day free trial · card required', 'Resume original secure checkout', 'Resume original secure trial checkout', 'Continue to secure checkout', 'Refresh monthly price', 'Questions about pricing', '300 AI-tailored CVs', 'Use them within 30 days', 'What if a pass isn’t right for me?'];
+    const wording = ['Choose Pro Job Seeker', 'Choose Starter', 'Sign in to buy Job Search', 'Buy Career Move', 'Start 7-day free trial · card required', 'Resume original secure checkout', 'Resume original secure trial checkout', 'Retry your original request', 'Retry your original trial request', 'Continue to secure checkout', 'Refresh monthly price', 'Questions about pricing', '300 AI-tailored CVs', 'Use them within 30 days', 'What if a pass isn’t right for me?'];
     const out = await recordOn('/pricing', wording.map(text => `<button>${text}</button>`).join(''));
     expect(out.map(item => item.recorded)).toEqual(wording.map(text => [text]));
   });
