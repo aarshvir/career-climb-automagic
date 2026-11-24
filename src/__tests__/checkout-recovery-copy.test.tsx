@@ -253,6 +253,33 @@ describe('server-confirmed hosted session keeps the existing resume wording', ()
   });
 });
 
+describe('the confirm button keeps three distinct recorded labels (merged with the fixed click wording)', () => {
+  const label = () => main().getAttribute('data-analytics-label');
+  it('a first checkout, a retry of an unconfirmed local request and a resume of a usable hosted checkout are three different labels, equal to the start of the visible wording', async () => {
+    show(); await panelBox();
+    expect(label()).toBe('Continue to secure checkout'); expect(main().textContent).toBe('Continue to secure checkout · £22/month');
+    cleanup(); world.mode = 'network'; await failFirstAttempt();
+    expect(label()).toBe(NEW.retry); expect(main().textContent).toBe(NEW.retry);
+    cleanup(); world.mode = 'ok'; world.checkout = server(); show(); await panelBox();
+    expect(label()).toBe(OLD.resume); expect(main().textContent).toBe(OLD.resume);
+  });
+  it('the trial variants are three different labels as well', async () => {
+    world.trial = true; show(); await panelBox();
+    expect(label()).toBe('Start 7-day free trial · card required'); expect(main().textContent).toBe('Start 7-day free trial · card required');
+    cleanup(); world.mode = 'capacity'; await failFirstAttempt();
+    expect(label()).toBe(NEW.retryTrial); expect(main().textContent).toBe(NEW.retryTrial);
+    cleanup(); world.mode = 'ok'; world.checkout = server({ trialDays: 7 }); show(); await screen.findByRole('checkbox', { name: /I start a 7-day free trial of Starter/ });
+    expect(label()).toBe(OLD.resumeTrial); expect(main().textContent).toBe(OLD.resumeTrial);
+  });
+  it('a request answered with a receipt is recorded as a resume, not a retry', async () => {
+    show(); await tick(); fireEvent.click(main()); await waitFor(() => expect(m.open).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(label()).toBe(OLD.resume));
+  });
+  it('no label of the confirm button carries an amount or a currency', async () => {
+    for (const mode of ['ok', 'capacity'] as Mode[]) { cleanup(); world.mode = mode; if (mode === 'ok') { show(); await panelBox(); } else await failFirstAttempt(); expect(label()).not.toMatch(/\p{Sc}|\d|GBP|USD/u); }
+  });
+});
+
 describe('copy that is unchanged', () => {
   it('a fresh checkout keeps its first-time wording and notes', async () => {
     show(); await panelBox();
