@@ -11,6 +11,7 @@ import AuthCallback from '@/pages/AuthCallback';
 import { rememberLoopReturn, peekLoopReturn } from '@/lib/account-return';
 import { detectInAppBrowser } from '@/lib/in-app-browser';
 import { clearUserAuthCache } from '@/utils/authUtils';
+import { authRateLimiter } from '@/lib/security';
 import MvpHeader from '@/components/layout/MvpHeader';
 
 vi.unmock('@/contexts/AuthContext');
@@ -651,5 +652,373 @@ describe('password recovery return navigation', () => {
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Forgot your password?' }));
     expect(route().pathname).toBe('/auth/forgot-password');
     expect(route().searchParams.get('next')).toBe('/loop');
+  });
+});
+
+
+describe('submission messages sit beside the action, and the confirmation view comes into view once (phone repair)', () => {
+  const open = (path = '/auth?mode=signup') => render(<AuthProvider><MemoryRouter initialEntries={[path]}><Auth /></MemoryRouter></AuthProvider>);
+  const submit = () => document.querySelector<HTMLButtonElement>('form.ap-auth-form button[type="submit"]')!;
+  const form = () => document.querySelector<HTMLFormElement>('form.ap-auth-form')!;
+  async function fillSignUp(user: ReturnType<typeof userEvent.setup>, email = 'beside-action@example.test') {
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Email address'), email);
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+  }
+  const rejected = (message: string) => sdk.signUp.mockResolvedValue({ data: { user: null, session: null }, error: { message } });
+  const scrollIntoView = vi.fn();
+  beforeEach(() => { scrollIntoView.mockClear(); Element.prototype.scrollIntoView = scrollIntoView; });
+  afterEach(() => { delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView; });
+
+  it.each([
+    ['a short message', 'Database error saving new user'],
+    ['a long message', 'Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz, ABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789. Please choose another one and try again.'],
+  ])('shows a provider rejection (%s) as the only alert, directly above the submit button, with what was typed kept', async (_name, message) => {
+    rejected(message);
+    open();
+    const user = userEvent.setup();
+    await fillSignUp(user, `provider-${message.length}@example.test`);
+    await user.click(submit());
+    const alert = await screen.findByRole('alert');
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(alert).toHaveTextContent(message);
+    expect(alert.closest('form')).toBe(form());
+    expect(alert.nextElementSibling).toBe(submit());
+    expect(screen.getByLabelText('Full name')).toHaveValue('Casey Person');
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveValue('Password123');
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the attempt-limit message beside the submit button as well, without a provider request', async () => {
+    const email = 'limit-beside-action@example.test';
+    for (let i = 0; i < 5; i++) expect(authRateLimiter.check(email)).toBe(true);
+    open();
+    const user = userEvent.setup();
+    await fillSignUp(user, email);
+    await user.click(submit());
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Too many attempts. Please try again in a minute.');
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(alert.nextElementSibling).toBe(submit());
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    authRateLimiter.reset(email);
+  });
+
+  it('shows a lost connection beside the submit button', async () => {
+    rejected('Failed to fetch');
+    open();
+    const user = userEvent.setup();
+    await fillSignUp(user, 'offline-beside-action@example.test');
+    await user.click(submit());
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Failed to fetch');
+    expect(alert.nextElementSibling).toBe(submit());
+  });
+
+  it('does the same on the sign-in path: a rejected sign-in is directly above the Sign in button', async () => {
+    sdk.signInWithPassword.mockResolvedValue({ data: { user: null, session: null }, error: { message: 'Invalid login credentials' } });
+    open('/auth');
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Email address'), 'sign-in-beside-action@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.click(submit());
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Invalid login credentials');
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(alert.nextElementSibling).toBe(submit());
+  });
+
+  it('keeps field validation where it was: the summary stays at the top, outside the form, the first invalid field is focused, marked and described', async () => {
+    open();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Create account' }));
+    const alert = screen.getByRole('alert');
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(alert).toHaveTextContent('Please fix the 3 highlighted fields below.');
+    expect(alert.closest('form')).toBeNull();
+    const name = screen.getByLabelText('Full name');
+    expect(name).toHaveFocus(); expect(name).toHaveAttribute('aria-invalid', 'true');
+    expect(document.getElementById(name.getAttribute('aria-describedby')!)).toHaveTextContent('Please enter your full name.');
+  });
+
+  it('moves between the two places without ever showing two alerts: a rejection, then a validation failure, then a rejection again', async () => {
+    rejected('Database error saving new user');
+    open();
+    const user = userEvent.setup();
+    await fillSignUp(user, 'two-places@example.test');
+    await user.click(submit());
+    expect((await screen.findByRole('alert')).closest('form')).toBe(form());
+    await user.clear(screen.getByLabelText('Email address'));
+    await user.click(submit());
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(screen.getByRole('alert').closest('form')).toBeNull();
+    await user.type(screen.getByLabelText('Email address'), 'two-places@example.test');
+    await user.click(submit());
+    expect((await screen.findByRole('alert')).nextElementSibling).toBe(submit());
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+  });
+
+  it('keeps a page-level message (a failed sign-in return) at the top', async () => {
+    open('/auth?mode=signup&error=access_denied');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Sign-in could not be completed');
+    expect(alert.closest('form')).toBeNull();
+  });
+
+  it('lets the visitor retry after a rejection: the message goes and the second attempt is a second request', async () => {
+    rejected('Database error saving new user');
+    open();
+    const user = userEvent.setup();
+    await fillSignUp(user, 'retry-after-rejection@example.test');
+    await user.click(submit());
+    await screen.findByRole('alert');
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    await user.click(submit());
+    expect(await screen.findByRole('heading', { name: 'Check your email' })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(sdk.signUp).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows a failed continue step directly above the Continue button, once', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    sdk.signInWithPassword.mockResolvedValue({ data: { user: null, session: null }, error: { message: 'Email not confirmed' } });
+    open();
+    const user = userEvent.setup();
+    await fillSignUp(user, 'continue-beside-action@example.test');
+    await user.click(submit());
+    const next = await screen.findByRole('button', { name: /confirmed my email, continue/ });
+    await user.click(next);
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Your email is not confirmed yet.');
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(alert.closest('form')).toBeNull();
+    expect(alert.nextElementSibling).toBe(screen.getByRole('button', { name: /confirmed my email, continue/ }));
+  });
+
+  it('leaves the ordinary entry alone: no focusable heading, no focus move and no scrolling before the confirmation', async () => {
+    open();
+    const heading = await screen.findByRole('heading', { name: 'Create your Jobvance account', level: 2 });
+    expect(heading).not.toHaveAttribute('tabindex');
+    expect(heading).not.toHaveFocus();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('brings the Check your email heading into view and focuses it once, and leaves later renders and manual scrolling alone', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    sdk.signInWithPassword.mockResolvedValue({ data: { user: null, session: null }, error: { message: 'Email not confirmed' } });
+    open();
+    const user = userEvent.setup();
+    await fillSignUp(user, 'heading-focus@example.test');
+    await user.click(submit());
+    const heading = await screen.findByRole('heading', { name: 'Check your email', level: 2 });
+    expect(heading).toHaveFocus();
+    expect(heading).toHaveAttribute('tabindex', '-1');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toBe(heading);
+    expect(scrollIntoView).toHaveBeenLastCalledWith({ block: 'start' });
+    // Later renders (the continue step goes busy, then shows its message) neither re-focus the heading nor scroll again.
+    await user.click(screen.getByRole('button', { name: /confirmed my email, continue/ }));
+    await screen.findByRole('alert');
+    expect(heading).not.toHaveFocus();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not move focus or scroll when the sign-up signs the visitor in at once', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: signedIn }, error: null });
+    open();
+    const user = userEvent.setup();
+    await fillSignUp(user, 'immediate-session@example.test');
+    await user.click(submit());
+    await waitFor(() => expect(sdk.signUp).toHaveBeenCalledTimes(1));
+    expect(screen.queryByRole('heading', { name: 'Check your email' })).not.toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('a rejection presented outside the usable viewport is brought into view once (phone keyboard repair)', () => {
+  const MESSAGE = 'Database error saving new user';
+  const rect = { alert: { top: 0, bottom: 0 }, header: 0 };
+  let geometry: { mockRestore(): void };
+  const scrollIntoView = vi.fn();
+  const originalHeight = window.innerHeight;
+  const setViewport = (height: number, visual?: { offsetTop: number; height: number }) => {
+    Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: height });
+    Object.defineProperty(window, 'visualViewport', { configurable: true, writable: true, value: visual });
+  };
+  const open = (path = '/auth?mode=signup') => render(<><header className="jv-header" /><AuthProvider><MemoryRouter initialEntries={[path]}><Auth /></MemoryRouter></AuthProvider></>);
+  const submit = () => document.querySelector<HTMLButtonElement>('form.ap-auth-form button[type="submit"]')!;
+  const rejected = (message = MESSAGE) => sdk.signUp.mockResolvedValue({ data: { user: null, session: null }, error: { message } });
+  // Everything but the alert and the sticky header reports an empty box, as in jsdom; those two report the box the test sets.
+  beforeEach(() => {
+    rect.alert = { top: 0, bottom: 0 }; rect.header = 0; scrollIntoView.mockClear(); setViewport(568);
+    Element.prototype.scrollIntoView = scrollIntoView;
+    geometry = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      const box = this.getAttribute('role') === 'alert' ? rect.alert : this.matches('header.jv-header') ? { top: 0, bottom: rect.header } : { top: 0, bottom: 0 };
+      return { ...box, left: 0, right: 0, width: 0, height: box.bottom - box.top, x: 0, y: box.top, toJSON: () => ({}) } as DOMRect;
+    });
+  });
+  afterEach(() => {
+    geometry.mockRestore(); delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
+    Object.defineProperty(window, 'innerHeight', { configurable: true, writable: true, value: originalHeight });
+    delete (window as { visualViewport?: unknown }).visualViewport;
+  });
+  // The reported case: every other field valid, the name corrected, then Enter pressed from the name field itself.
+  async function correctNameThenEnter(user: ReturnType<typeof userEvent.setup>, email: string) {
+    await user.type(await screen.findByLabelText('Email address'), email);
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.click(submit());
+    const name = screen.getByLabelText('Full name');
+    expect(name).toHaveFocus();
+    await user.type(name, 'Casey Person{Enter}');
+  }
+
+  it('scrolls a rejection that arrives below the screen into view once, after Enter from the corrected name field', async () => {
+    rejected(); rect.alert = { top: 737, bottom: 791 };
+    open();
+    await correctNameThenEnter(userEvent.setup(), 'enter-from-name@example.test');
+    const alert = await screen.findByRole('alert');
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(alert).toHaveTextContent(MESSAGE);
+    expect(alert.nextElementSibling).toBe(submit());
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toBe(alert);
+    expect(scrollIntoView).toHaveBeenLastCalledWith({ block: 'nearest' });
+  });
+
+  it('scrolls again for a second identical rejection after a deliberate retry, and not for a re-render of the same one', async () => {
+    rejected(); rect.alert = { top: 737, bottom: 791 };
+    open();
+    const user = userEvent.setup();
+    await correctNameThenEnter(user, 'retry-same-message@example.test');
+    await screen.findByRole('alert');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    // Typing elsewhere re-renders the page with the same alert in place: that is not a new rejection.
+    await user.type(screen.getByLabelText('Email address'), 'x');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    await user.type(screen.getByLabelText('Full name'), '{Enter}');
+    await waitFor(() => expect(sdk.signUp).toHaveBeenCalledTimes(2));
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(MESSAGE);
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(2));
+    expect(scrollIntoView.mock.contexts[1]).toBe(alert);
+  });
+
+  it('scrolls again when the identical message is shown again without the alert ever leaving the page (the attempt limit)', async () => {
+    const email = 'limit-twice@example.test';
+    for (let i = 0; i < 5; i++) expect(authRateLimiter.check(email)).toBe(true);
+    rect.alert = { top: 737, bottom: 791 };
+    open();
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Email address'), email);
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123{Enter}');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Too many attempts');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    await user.type(screen.getByLabelText('Password', { exact: true }), '{Enter}');
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(2));
+    expect(sdk.signUp).not.toHaveBeenCalled();
+    authRateLimiter.reset(email);
+  });
+
+  it('does not scroll when the alert is already fully inside the usable viewport (a tap on the button)', async () => {
+    rejected(); rect.alert = { top: 427, bottom: 481 }; rect.header = 61;
+    open();
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Email address'), 'visible-tap@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.click(submit());
+    expect(await screen.findByRole('alert')).toHaveTextContent(MESSAGE);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['clipped at the bottom edge', { top: 802, bottom: 856 }],
+    ['hidden under the sticky header', { top: 40, bottom: 94 }],
+    ['above the screen', { top: -300, bottom: -246 }],
+  ])('scrolls an alert that is %s', async (_name, box) => {
+    rejected(); rect.alert = box; rect.header = 61; setViewport(844);
+    open();
+    await correctNameThenEnter(userEvent.setup(), 'edges@example.test');
+    await screen.findByRole('alert');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves an alert alone when it just fits between the sticky header and the lower edge', async () => {
+    rejected(); rect.header = 61; setViewport(844);
+    open();
+    rect.alert = { top: 61, bottom: 844 };
+    await correctNameThenEnter(userEvent.setup(), 'edges-fit@example.test');
+    await screen.findByRole('alert');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('measures against the visual viewport, so an alert hidden by the on-screen keyboard is brought into view', async () => {
+    rejected(); rect.alert = { top: 300, bottom: 354 }; rect.header = 61; setViewport(740, { offsetTop: 0, height: 320 });
+    open();
+    await correctNameThenEnter(userEvent.setup(), 'visual-viewport@example.test');
+    await screen.findByRole('alert');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the same alert alone when the visual viewport is not reduced', async () => {
+    rejected(); rect.alert = { top: 300, bottom: 354 }; rect.header = 61; setViewport(740, { offsetTop: 0, height: 740 });
+    open();
+    await correctNameThenEnter(userEvent.setup(), 'visual-viewport-closed@example.test');
+    await screen.findByRole('alert');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('does the same on the sign-in path: Enter from the password field with the alert below the screen', async () => {
+    sdk.signInWithPassword.mockResolvedValue({ data: { user: null, session: null }, error: { message: 'Invalid login credentials' } });
+    rect.alert = { top: 610, bottom: 664 };
+    open('/auth');
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Email address'), 'sign-in-enter@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123{Enter}');
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Invalid login credentials');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toBe(alert);
+  });
+
+  it('does the same for a failed continue step: the heading comes into view, then the rejection beside Continue, each once', async () => {
+    sdk.signUp.mockResolvedValue({ data: { user: signedIn.user, session: null }, error: null });
+    sdk.signInWithPassword.mockResolvedValue({ data: { user: null, session: null }, error: { message: 'Email not confirmed' } });
+    open();
+    const user = userEvent.setup();
+    await user.type(await screen.findByLabelText('Full name'), 'Casey Person');
+    await user.type(screen.getByLabelText('Email address'), 'continue-below@example.test');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'Password123');
+    await user.click(submit());
+    const heading = await screen.findByRole('heading', { name: 'Check your email', level: 2 });
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toBe(heading);
+    rect.alert = { top: 640, bottom: 694 };
+    await user.click(screen.getByRole('button', { name: /confirmed my email, continue/ }));
+    const alert = await screen.findByRole('alert');
+    expect(alert.nextElementSibling).toBe(screen.getByRole('button', { name: /confirmed my email, continue/ }));
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
+    expect(scrollIntoView.mock.contexts[1]).toBe(alert);
+  });
+
+  it('leaves field validation alone: the first invalid field takes focus, nothing scrolls the summary, and no request is made', async () => {
+    rect.alert = { top: 737, bottom: 791 };
+    open();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Create account' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Please fix the 3 highlighted fields below.');
+    expect(screen.getByLabelText('Full name')).toHaveFocus();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(sdk.signUp).not.toHaveBeenCalled();
+  });
+
+  it('does not scroll for a page-level message at the top (a failed sign-in return)', async () => {
+    rect.alert = { top: 737, bottom: 791 };
+    open('/auth?mode=signup&error=access_denied');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Sign-in could not be completed');
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });

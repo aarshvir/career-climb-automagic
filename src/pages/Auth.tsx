@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,7 +30,16 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [contact, setContact] = useState(() => blankContact());
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setErrorText] = useState('');
+  const [errorAt, setErrorAt] = useState<'top' | 'action'>('top');
+  // Counts each completed rejection of a submission, so the same message returned after a deliberate retry is still a new event.
+  const [rejections, setRejections] = useState(0);
+  // A message about the submission itself (the provider's answer, the attempt limit, a lost connection, the continue step) is shown beside the action that caused it,
+  // directly above the button, where a phone visitor is looking. Every other message stays at the top of the panel.
+  const setError = useCallback((message: string, at: 'top' | 'action' = 'top') => {
+    setErrorText(message); setErrorAt(at);
+    if (at === 'action' && message) setRejections(count => count + 1);
+  }, []);
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -47,6 +56,10 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   // Continuation is deliberate; focus/visibility never starts a password login.
   const pending = useRef<{ email:string; password:string; expiresAt:number; epoch:number } | null>(null);
   const alive = useRef(true), continuing = useRef(false), attempt = useRef(0);
+  // Set before the first await of a valid submit, so overlapping submits (a script or autofill helper can fire several in one task, before React has disabled the form) share one attempt.
+  const inFlight = useRef(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const actionAlertRef = useRef<HTMLDivElement>(null);
   useEffect(() => { alive.current = true; return () => { alive.current = false; pending.current = null; attempt.current++; }; }, []);
   useEffect(() => { if (user || authLoading || authError) { pending.current = null; attempt.current++; } }, [user, authLoading, authError]);
 
@@ -58,7 +71,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     pending.current = null; attempt.current++;
     setMode(requestedMode); setPassword(''); setConfirmationSent(false);
     setFieldErrors({}); setError(''); setCopied(false);
-  }, [embedded, location.key, location.search, requestedMode]);
+  }, [embedded, location.key, location.search, requestedMode, setError]);
 
   useEffect(() => {
     if (user && !authLoading && !embedded) navigate(accountDestination(searchParams.get('next')), { replace: true });
@@ -66,11 +79,34 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
 
   useEffect(() => {
     if (searchParams.get('error')) setError('Sign-in could not be completed. Please try again or request a new email link.');
-  }, [searchParams]);
+  }, [searchParams, setError]);
+
+  // On the move to "Check your email" the heading takes focus and comes into view once, so the instruction is on screen on a short phone. Later renders leave the visitor's scrolling alone.
+  useEffect(() => {
+    if (!confirmationSent) return;
+    const heading = headingRef.current;
+    heading?.focus({ preventScroll: true });
+    heading?.scrollIntoView?.({ block: 'start' });
+  }, [confirmationSent]);
+
+  // A submission can be rejected while the visitor is still looking at a field (Enter from Full name, for instance), with the button and its message below the screen.
+  // Each rejection checks once whether its alert is inside the usable viewport (below the sticky header, above the visual viewport's lower edge) and scrolls it in only when it is not.
+  useEffect(() => {
+    if (!rejections) return;
+    const alert = actionAlertRef.current;
+    if (!alert) return;
+    const { top, bottom } = alert.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const header = document.querySelector('header.jv-header')?.getBoundingClientRect().bottom ?? 0;
+    const upper = Math.max(header, viewport?.offsetTop ?? 0);
+    const lower = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+    if (top >= upper && bottom <= lower) return;
+    alert.scrollIntoView?.({ block: 'nearest' });
+  }, [rejections]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (busy || configurationError) return;
+    if (busy || inFlight.current || configurationError) return;
     setError('');
     // Native validation bubbles are transient and unannounced. Every failing field gets its own message, and focus moves to the first one.
     const form = event.currentTarget as HTMLFormElement;
@@ -99,8 +135,9 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       return;
     }
     setFieldErrors({});
+    inFlight.current = true;
     // The limiter counts real attempts only: it runs once every field has passed, immediately before the network call (blank or wrong submits never use one up).
-    if (!authRateLimiter.check(email.trim().toLowerCase())) { setError('Too many attempts. Please try again in a minute.'); return; }
+    if (!authRateLimiter.check(email.trim().toLowerCase())) { inFlight.current = false; setError('Too many attempts. Please try again in a minute.', 'action'); return; }
     setBusy(true);
     const turn = ++attempt.current, epoch = trackingAuthEpoch();
     // A valid, real (not rate-limited) sign-up submit: one content-free funnel-intent signal per attempt, before the network call.
@@ -111,7 +148,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       if (mode === 'sign-up') {
         const result = await signUpWithEmail(email, password, details ?? undefined);
         if (!alive.current || attempt.current !== turn || trackingAuthEpoch() !== epoch) return;
-        if (result.error) setError(result.error);
+        if (result.error) setError(result.error, 'action');
         else if (result.requiresEmailConfirmation) {
           pending.current = { email:email.trim(), password, expiresAt:Date.now()+10*60*1000, epoch };
           setConfirmationSent(true);
@@ -119,11 +156,11 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
         }
       } else {
         const result = await signInWithEmail(email, password);
-        if (result.error) setError(result.error);
+        if (result.error) setError(result.error, 'action');
       }
     } catch {
-      setError('We could not connect. Please try again.');
-    } finally { setBusy(false); }
+      setError('We could not connect. Please try again.', 'action');
+    } finally { inFlight.current = false; setBusy(false); }
   };
 
   const handleGoogle = async () => {
@@ -152,16 +189,16 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     const details = pending.current;
     if (!details || details.epoch !== trackingAuthEpoch() || details.expiresAt <= Date.now()) {
       pending.current = null; setConfirmationSent(false); setMode('sign-in');
-      setError('Sign in with your email and password to continue. Your setup destination is unchanged.'); return;
+      setError('Sign in with your email and password to continue. Your setup destination is unchanged.', 'action'); return;
     }
     continuing.current = true; setBusy(true); setError('');
     const turn = ++attempt.current;
     try {
       const result = await signInWithEmail(details.email, details.password);
       if (!alive.current || pending.current !== details || attempt.current !== turn) return;
-      if (result.error) setError(/confirm/i.test(result.error) ? 'Your email is not confirmed yet. Open the confirmation email, then return and continue.' : result.error);
+      if (result.error) setError(/confirm/i.test(result.error) ? 'Your email is not confirmed yet. Open the confirmation email, then return and continue.' : result.error, 'action');
       else pending.current = null;
-    } catch { if (alive.current && pending.current === details && attempt.current === turn) setError('We could not connect. Please try again.'); }
+    } catch { if (alive.current && pending.current === details && attempt.current === turn) setError('We could not connect. Please try again.', 'action'); }
     finally { continuing.current = false; if (alive.current) setBusy(false); }
   }
 
@@ -193,7 +230,10 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     </div>
   );
 
-  const visibleError = configurationError || error || authError;
+  // One alert at a time: a submission message sits beside its action, anything else at the top.
+  const atAction = !configurationError && !!error && errorAt === 'action';
+  const visibleError = atAction ? '' : configurationError || error || authError;
+  const actionAlert = atAction ? <Alert ref={actionAlertRef} variant="destructive" role="alert" id={`${fieldId}-error`} className="ap-auth-alert"><AlertDescription>{error}</AlertDescription></Alert> : null;
   // The outcome card leads on the loop headline (onboarding entry and sign-up), never beside a different lead.
   const showBenefits = !embedded && !confirmationSent && (loopEntry || mode === 'sign-up');
 
@@ -218,7 +258,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
       <div className="ap-auth-panel">
         <div className="ap-auth-heading">
           {!embedded && <p className="ap-eyebrow ap-eyebrow--form"><span className="ap-dot" aria-hidden="true" />{checkEntry ? 'Your free CV Check' : loopEntry ? 'Your Automated Job Loop' : 'Your Jobvance workspace'}</p>}
-          <Title>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
+          <Title ref={headingRef} tabIndex={confirmationSent ? -1 : undefined}>{confirmationSent ? 'Check your email' : mode === 'sign-up' ? 'Create your Jobvance account' : 'Sign in to Jobvance'}</Title>
           {!showBenefits && <p>{confirmationSent ? 'Confirm your email to finish creating your account.' : embedded ? 'Sign in here to save your reviewed check privately.' : 'Keep your reviewed CVs and applications in one place.'}</p>}
           {chosen && !confirmationSent && <p className="ap-chosen">{mode === 'sign-up' ? 'Create your account to continue with' : 'Sign in to continue with'} the <strong>{chosen.name}</strong> {chosen.product === 'pass' ? 'pass' : 'plan'}.</p>}
           {/* A visitor from the free CV Check ad is told about the CV Check, never the Job Loop's outcome list. */}
@@ -247,6 +287,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
             <div className="ap-confirmation">
               <p role="status">If this address can be registered, confirmation instructions will be sent to <strong>{email.trim()}</strong>. Check your spam folder. Open the link in this browser when possible.</p>
               <p>If the email opens a different browser, confirm there, then return here and press Continue. After ten minutes or a page reload, sign in with your password instead. If you already have an account, sign in or reset your password.</p>
+              {actionAlert}
               <Button className="ap-primary ap-auth-submit" disabled={busy} onClick={() => void continueSignup()}>{busy ? 'Checking…' : "I’ve confirmed my email, continue"}</Button>
               <Button variant="link" disabled={busy} onClick={changeMode}>Back to sign in <ArrowRight size={16} aria-hidden="true" /></Button>
             </div>
@@ -275,6 +316,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
                   {fieldErrors.password && <p id={`${fieldId}-password-error`} className="ap-field-error"><CircleAlert size={15} aria-hidden="true" />{fieldErrors.password}</p>}
                   {mode === 'sign-up' && <p id={`${fieldId}-password-help`} className="ap-field-help">Use at least 8 characters, uppercase and lowercase letters, and a number.</p>}
                 </div>
+                {actionAlert}
                 <Button type="submit" className="ap-primary ap-auth-submit" disabled={busy || !!configurationError}>
                   {busy ? <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />Please wait...</> : <>{mode === 'sign-up' ? 'Create account' : 'Sign in'}<ArrowRight size={17} aria-hidden="true" /></>}
                 </Button>
