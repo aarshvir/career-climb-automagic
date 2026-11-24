@@ -501,3 +501,5 @@
 .jv-account--standalone .ap-loop-entry.ap-check-entry { display: block; }
 /* Names the plan or pass chosen on Pricing, above the form. */
 .jv-account .ap-auth-heading > p.ap-chosen { padding: 10px 14px; border-radius: 10px; background: var(--jv-brand-tint); color: var(--ap-ink); font-weight: 500; }
+/* The heading takes focus once when the page moves to "Check your email"; the focus is for assistive technology and the scroll, not a ring around a title. */
+.jv-account .ap-auth-heading :is(h2, h3)[tabindex="-1"]:focus { outline: none; }

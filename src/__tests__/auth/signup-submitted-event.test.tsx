@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -158,5 +158,84 @@ describe('sign-up submitted funnel event', () => {
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByText('Check your email')).toBeInTheDocument();
     expect(window.fbq).toBeUndefined();
+  });
+});
+
+
+describe('overlapping submissions are coalesced before anything is spent or sent', () => {
+  const form = () => document.querySelector<HTMLFormElement>('form.ap-auth-form')!;
+  const button = () => screen.getByRole('button', { name: 'Create account' });
+
+  it('three submissions inside one task make one provider request, one limiter attempt and one SignupSubmitted', async () => {
+    open();
+    const user = userEvent.setup();
+    await fill(user);
+    const limiter = vi.spyOn(authRateLimiter, 'check');
+    await act(async () => { form().requestSubmit(button()); form().requestSubmit(button()); form().requestSubmit(button()); });
+    expect(await screen.findByRole('heading', { name: 'Check your email' })).toBeInTheDocument();
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+    expect(limiter).toHaveBeenCalledTimes(1);
+    expect(submitted()).toHaveLength(1);
+  });
+
+  it('shares one attempt between script-fired submits and a real tap while the request is pending', async () => {
+    let finish!: (value: unknown) => void;
+    sdk.signUp.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+    open();
+    const user = userEvent.setup();
+    await fill(user);
+    const limiter = vi.spyOn(authRateLimiter, 'check');
+    await act(async () => { form().requestSubmit(button()); form().requestSubmit(button()); });
+    await user.click(screen.getByRole('button', { name: 'Please wait...' }));
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+    expect(limiter).toHaveBeenCalledTimes(1);
+    await act(async () => { finish({ data: { user: { id: 'account-a', email: 'person@example.test' }, session: null }, error: null }); });
+    expect(await screen.findByRole('heading', { name: 'Check your email' })).toBeInTheDocument();
+    expect(submitted()).toHaveLength(1);
+  });
+
+  it('releases the guard after a failure: a retry is a second request, a second attempt and a second SignupSubmitted', async () => {
+    sdk.signUp.mockResolvedValueOnce({ data: { user: null, session: null }, error: { message: 'Database error saving new user' } });
+    open();
+    const user = userEvent.setup();
+    await fill(user);
+    const limiter = vi.spyOn(authRateLimiter, 'check');
+    await act(async () => { form().requestSubmit(button()); form().requestSubmit(button()); });
+    await screen.findByRole('alert');
+    expect(sdk.signUp).toHaveBeenCalledTimes(1); expect(limiter).toHaveBeenCalledTimes(1); expect(submitted()).toHaveLength(1);
+    await user.click(button());
+    expect(await screen.findByRole('heading', { name: 'Check your email' })).toBeInTheDocument();
+    expect(sdk.signUp).toHaveBeenCalledTimes(2); expect(limiter).toHaveBeenCalledTimes(2); expect(submitted()).toHaveLength(2);
+  });
+
+  it('releases the guard when the limiter blocks a submit: once the limit clears, the next submit goes through', async () => {
+    const email = 'person@example.test';
+    for (let i = 0; i < 5; i++) expect(authRateLimiter.check(email)).toBe(true);
+    open();
+    const user = userEvent.setup();
+    await fill(user);
+    await user.click(button());
+    expect(await screen.findByRole('alert')).toHaveTextContent('Too many attempts');
+    expect(sdk.signUp).not.toHaveBeenCalled(); expect(submitted()).toHaveLength(0);
+    authRateLimiter.reset(email);
+    await user.click(button());
+    expect(await screen.findByRole('heading', { name: 'Check your email' })).toBeInTheDocument();
+    expect(sdk.signUp).toHaveBeenCalledTimes(1); expect(submitted()).toHaveLength(1);
+  });
+
+  it('keeps the mode boundary: after a finished sign-up, a sign-in makes its own single request and sends no SignupSubmitted', async () => {
+    sdk.signUp.mockResolvedValueOnce({ data: { user: null, session: null }, error: { message: 'Database error saving new user' } });
+    sdk.signInWithPassword.mockResolvedValue({ data: { user: null, session: null }, error: { message: 'Invalid login credentials' } });
+    open();
+    const user = userEvent.setup();
+    await fill(user);
+    await user.click(button());
+    await screen.findByRole('alert');
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+    await user.type(await screen.findByLabelText('Password', { exact: true }), 'Password123');
+    await act(async () => { form().requestSubmit(); form().requestSubmit(); });
+    await waitFor(() => expect(sdk.signInWithPassword).toHaveBeenCalledTimes(1));
+    expect(sdk.signUp).toHaveBeenCalledTimes(1);
+    expect(submitted()).toHaveLength(1); // the earlier sign-up attempt only
   });
 });
