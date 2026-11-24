@@ -33,8 +33,20 @@ const PRIVATE = /^\/(loop|onboarding|dashboard|applications|check)(\/|$)/;
 
 /** How long the opening panel waits in silence before it says the visitor can reload. An ordinary restore answers in well under a second, and the slowest answered restore measured in the fixture (5 s) must stay quiet. */
 export const SLOW_WAIT_MS = 10_000;
-/** An address that carries a one-time code, a token or an auth error (OAuth, email and recovery returns, the mailbox return): reloading it could repeat or discard that exchange, so no reload is suggested there. */
-const AUTH_RETURN = /[?#&](code|error|error_code|error_description|access_token|refresh_token|provider_token|token_hash|type|gmail_ticket)=/i;
+/** Field names that mark an address as an auth return (OAuth, email and recovery returns, the mailbox return): reloading such an address could repeat or discard the exchange, so no reload is suggested there. */
+const AUTH_RETURN_NAMES = new Set(['code', 'error', 'error_code', 'error_description', 'access_token', 'refresh_token', 'provider_token', 'token_hash', 'type', 'gmail_ticket']);
+/**
+ * True when the query or the fragment carries one of those names. The names are read the way the browser and the installed auth client read them (URLSearchParams on the query and on the
+ * fragment after '#', so percent-encoded names such as error%5Fdescription are decoded first) and compared without regard to case. An address that cannot be read counts as an auth return.
+ */
+function carriesAuthReturn(search: string, hash: string): boolean {
+  try {
+    for (const source of [search, hash.startsWith('#') ? hash.slice(1) : hash]) {
+      for (const name of new URLSearchParams(source).keys()) if (AUTH_RETURN_NAMES.has(name.toLowerCase())) return true;
+    }
+    return false;
+  } catch { return true; }
+}
 
 /** Display only: text, no button, no timer-driven reload, no SDK call. It mounts with the opening panel, so every new loading stretch starts its own count. */
 function SlowWaitHint() {
@@ -61,7 +73,7 @@ export function ContactGate({ children }: { children: ReactNode }) {
   if (complete) admitted.current = key;
   const blocked = privatePage && !signedOut && !complete;
   // The hint is only for the entry that was verified: the ordinary /onboarding address, before the page behind the panel was ever mounted (so there is nothing typed that a reload could discard), and not on an auth-return address.
-  const reloadHint = pathname === '/onboarding' && admitted.current === null && !AUTH_RETURN.test(`${search}${hash}`);
+  const reloadHint = pathname === '/onboarding' && admitted.current === null && !carriesAuthReturn(search, hash);
   // An already mounted stable-session route stays alive while details are added.
   // A newly blocked route is never mounted merely to hide it afterwards.
   const mountChildren = !privatePage || signedOut || admitted.current !== null;

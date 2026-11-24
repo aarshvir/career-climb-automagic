@@ -97,6 +97,7 @@ describe('slow-wait hint on the opening panel', () => {
     expect(window.location.href).toBe(location);
   });
 
+  // Names are read as the browser and the installed auth client read them (URLSearchParams, percent-decoded, in the query and in the fragment), compared without regard to case.
   it.each([
     ['an OAuth or PKCE code in the query', '/onboarding?code=synthetic-code&utm_source=meta'],
     ['an auth error in the query', '/onboarding?error=access_denied&error_code=otp_expired'],
@@ -105,12 +106,45 @@ describe('slow-wait hint on the opening panel', () => {
     ['a token hash in the query', '/onboarding?token_hash=synthetic&type=email'],
     ['an auth error in the hash', '/onboarding#error=access_denied&error_description=expired'],
     ['a mailbox return ticket in the hash', '/onboarding#gmail_ticket=synthetic'],
+    ['a refresh token in the query', '/onboarding?refresh_token=synthetic'],
+    ['a provider token in the query', '/onboarding?provider_token=synthetic'],
+    ['a recovery type alone in the query', '/onboarding?type=recovery'],
+    ['a percent-encoded error field name in the query (error%5Fdescription)', '/onboarding?error%5Fdescription=fixture'],
+    ['a percent-encoded error field name in the fragment (error%5Fdescription)', '/onboarding#error%5Fdescription=fixture'],
+    ['a mixed-case error field name in the query', '/onboarding?Error_Description=fixture'],
+    ['an upper-case error field name in the fragment', '/onboarding#ERROR_DESCRIPTION=fixture'],
+    ['an error alone in the query', '/onboarding?error=access_denied'],
+    ['a token hash alone in the query', '/onboarding?token_hash=synthetic'],
+    ['an upper-case code in the query', '/onboarding?CODE=synthetic-code'],
+    ['an upper-case code in the fragment', '/onboarding#CODE=synthetic-code'],
+    ['a name whose first letter is percent-encoded in the query (%63ode)', '/onboarding?%63ode=synthetic'],
+    ['a name whose first letter is percent-encoded in the fragment (%72efresh_token)', '/onboarding#%72efresh_token=synthetic'],
+    ['an encoded name and an upper-case type in the fragment', '/onboarding#access%5Ftoken=synthetic&TYPE=recovery'],
+    ['an encoded error code beside the campaign tags in the query', '/onboarding?utm_source=meta&utm_medium=paid_social&utm_campaign=test_entry&error%5Fcode=otp_expired'],
+    ['an error code in the fragment', '/onboarding#error_code=otp_expired'],
   ])('is not offered on an address with %s', async (_name, path) => {
     auth({ loading: true });
     render(tree(path));
     expect(within(dialog()).getByRole('status')).toHaveTextContent('Opening your account…');
     await advance(SLOW_WAIT_MS * 3);
     expect(hint()).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['the ordinary entry with the five campaign tags', '/onboarding?utm_source=meta&utm_medium=paid_social&utm_campaign=test_entry&utm_content=C_partner_first&utm_term=000'],
+    ['campaign tags whose values look like auth names', '/onboarding?utm_content=code&utm_term=error_description'],
+    ['names that only contain or extend an auth name', '/onboarding?mycode=1&codes=2&error_description_extra=3&typed=1'],
+    ['a plain fragment', '/onboarding?utm_source=meta#section-one'],
+    ['an unrelated key in the fragment', '/onboarding#utm_source=meta'],
+    ['a plus sign, which is a space in a decoded name, not an underscore', '/onboarding?error+description=x'],
+    ['no query at all', '/onboarding'],
+  ])('is still offered after the threshold on %s', async (_name, path) => {
+    auth({ loading: true });
+    render(tree(path));
+    await advance(SLOW_WAIT_MS - 1);
+    expect(hint()).not.toBeInTheDocument();
+    await advance(1);
+    expect(hint()).toBeInTheDocument();
   });
 
   it.each(['/dashboard', '/loop', '/check', '/applications'])('is not offered on %s, which was not part of the verified entry', async path => {
