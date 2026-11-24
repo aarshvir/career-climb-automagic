@@ -58,6 +58,8 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
   const status=authReady&&loadedScope===`${user.id}:${authority}`?storedStatus:null;
   const [consent,setConsent]=useState(false),[cancelConfirm,setCancelConfirm]=useState(false);
   const checkoutIntent=useRef<Readonly<LoopCheckoutIntent>|null>(null),cancelIntent=useRef<Readonly<LoopCancelIntent>|null>(null);
+  // Copy only. The request that the server answered with a validated hosted-checkout receipt in this page. It is never read by any guard, lock, retry or request-id decision.
+  const receiptIntent=useRef<Readonly<LoopCheckoutIntent>|null>(null);
   const attemptedPrice=useRef<LoopPricing|null>(null),quoteSequence=useRef(0);
   const [quoteState,setQuoteState]=useState<{key:string;value:LoopPriceQuote}|null>(null),[quoteLoading,setQuoteLoading]=useState(false),[quoteError,setQuoteError]=useState(''),[quoteRefresh,setQuoteRefresh]=useState(0),[quoteExpired,setQuoteExpired]=useState(false);
   const purchaseConsentScope=useRef<string|null>(null),cancelConsentScope=useRef<string|null>(null),refreshSequence=useRef(0);
@@ -101,6 +103,9 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
   const payablePrice=pendingPrice??(hasLocalAttempt?attemptedPrice.current:null)??(market.country==='other'&&selected?legacyPrice(selected.id):freshQuote?quotePricing(freshQuote):null);
   const checkoutCountry=isLoopLocalCountry(payablePrice?.country)?LOOP_LOCAL_COUNTRIES[payablePrice.country].label:null;
   const originalRecovery=checkoutPending||hasLocalAttempt;
+  // Copy only. Hosted-checkout wording ("open checkout", "Resume original secure checkout") is reserved for server evidence: an open checkout in the status read, or a validated receipt for this request.
+  // A local attempt with neither is unconfirmed: its outcome is unknown or it was refused, so the panel describes a retry of the original request. Nothing below reads this to lock, unlock or retry anything.
+  const unconfirmedAttempt=hasLocalAttempt&&!checkoutPending&&receiptIntent.current!==checkoutIntent.current;
   const quoteCurrent=market.country==='other'||!!freshQuote&&!quoteExpired&&Date.parse(freshQuote.expiresAt)>Date.now();
   const available=!!status?.billingConfigured&&!status.fulfillmentPending&&status.generation!==null&&status.plans.some(item=>item.id===chosen)&&!!payablePrice&&(originalRecovery||quoteCurrent);
   const panelShown=!subscriptionOpen&&!!selected&&available;
@@ -138,7 +143,7 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
     if(original&&(original.plan!==selected.id||original.expectedGeneration!==status.generation||original.quoteId!==(payablePrice.quoteId??undefined)||(original.trial===true)!==offerTrial)){setError('Confirm the previous checkout with Refresh billing before choosing another plan or currency.');return;}
     const intent=original??captureLoopCheckoutIntent(selected.id,status.generation,checkoutPending?status.checkout.requestId:crypto.randomUUID(),payablePrice.quoteId??undefined,offerTrial);
     checkoutIntent.current=intent;attemptedPrice.current=payablePrice;purchaseConsentScope.current=null;lock.current=true;setBusy(true);setConsent(false);setError('');
-    try{const receipt=await createLoopSubscriptionCheckout(scope,intent,valid);if(!valid())return;await reportMetaCheckout(receipt.requestId,scope.ownerId);if(!valid())return;await openPaymentCheckout(receipt,()=>undefined);if(valid())setMessage(intent.trial?'Checkout opened. Your free trial starts only after Dodo Payments confirms your card. Nothing is charged today.':'Checkout opened. Access starts only after payment is confirmed.');}
+    try{const receipt=await createLoopSubscriptionCheckout(scope,intent,valid);if(!valid())return;receiptIntent.current=intent;await reportMetaCheckout(receipt.requestId,scope.ownerId);if(!valid())return;await openPaymentCheckout(receipt,()=>undefined);if(valid())setMessage(intent.trial?'Checkout opened. Your free trial starts only after Dodo Payments confirms your card. Nothing is charged today.':'Checkout opened. Access starts only after payment is confirmed.');}
     catch(failure){if(valid()){
       // These explicit server codes prove the provider checkout was never sent.
       // Unknown failures retain their original identity to prevent a second charge.
@@ -186,7 +191,7 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
           {Object.entries(LOOP_LOCAL_CURRENCIES).map(([code,item])=><option key={code} value={code}>{code} · {item.label}</option>)}
         </select>
       </label>
-      {originalRecovery?<p>{checkoutCountry?'Billing country and currency are fixed for the open checkout.':'The open checkout keeps its original price and currency.'}</p>:market.country==='other'?<p>Pay in US dollars. Enter your actual billing country at secure checkout.</p>:<p>Choose the country on your billing address before opening checkout.</p>}
+      {originalRecovery?<p>{unconfirmedAttempt?checkoutCountry?'Billing country and currency are kept for your original request.':'Your original request keeps its original price and currency.':checkoutCountry?'Billing country and currency are fixed for the open checkout.':'The open checkout keeps its original price and currency.'}</p>:market.country==='other'?<p>Pay in US dollars. Enter your actual billing country at secure checkout.</p>:<p>Choose the country on your billing address before opening checkout.</p>}
     </div>}
     {!compact&&<div className="product-proposed-grid">{subscriptionPlans.map((item,index)=>{const money={currency:market.currency,amountMinor:LOOP_LOCAL_CURRENCIES[market.currency].amounts[item.id],exponent:LOOP_LOCAL_CURRENCIES[market.currency].exponent};return <article className={`pricing-card${index===1?' pricing-card--featured jv-dark':''}`} key={item.id} data-reveal><div className="pricing-card-head"><h3>{item.name}</h3>{index===1&&<span className="pricing-flag">For an active search</span>}</div><p className="pricing-cadence"><span aria-hidden="true"><strong>{cadence[item.id][0]}</strong> {cadence[item.id][1]}</span><span className="jv-sr-only">{item.features[0]}</span></p><span className="pricing-week" aria-hidden="true">{weekDays.map((day,dayIndex)=><i key={dayIndex} className={cadenceDays[item.id].includes(dayIndex)?'is-on':''}>{day}</i>)}</span><p className="pricing-price"><span className="pricing-amount">{formatLoopPrice(money)}</span><span className="pricing-unit">{money.currency} / month</span></p><p className="pricing-desc">{item.description}</p><ul className="pricing-points" aria-label={`${item.name} includes`}><li><Check size={16} aria-hidden="true"/>{item.features[0]}</li><li><Check size={16} aria-hidden="true"/>Tailored CVs for matching roles</li><li><Check size={16} aria-hidden="true"/>Matched jobs in your dashboard</li></ul>{authReady?<button type="button" className={`jv-btn jv-btn--block ${index===1?'jv-btn--primary':'jv-btn--secondary'}`} onClick={()=>choose(item.id)} disabled={busy||status?.fulfillmentPending||subscriptionOpen||originalRecovery&&chosen!==item.id} aria-pressed={chosen===item.id}>{chosen===item.id?'Selected':`Choose ${item.name}`}</button>:<Link className={`jv-btn jv-btn--block ${index===1?'jv-btn--primary':'jv-btn--secondary'}`} to={`/auth?next=${encodeURIComponent(loopPricingReturn(item.id,market))}`}>Choose {item.name}</Link>}</article>;})}</div>}
     {!compact&&<p className="pricing-billed-line">{trialsOn?<>Billed monthly until you cancel. Tax included. {LOOP_TRIAL_PUBLIC_LINE}</>:'Billed monthly until you cancel. Tax included. No trial or subscription starts automatically.'}</p>}
@@ -221,7 +226,7 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
         <h3 ref={panelHeadingRef} tabIndex={-1}>{selected.name} · {offerTrial?`${LOOP_TRIAL_DAYS}-day free trial, then ${formatLoopPrice(payablePrice)} ${payablePrice.currency} / month`:`${formatLoopPrice(payablePrice)} ${payablePrice.currency} / month`}</h3>
         {checkoutCountry&&<p>
           Billing country <strong>{checkoutCountry}</strong>.
-          {originalRecovery?' This checkout keeps its original country.':compact?<>{' '}<Link to={loopPricingReturn(selected.id,market)}>Change on Pricing</Link></>:<>{' '}<a href="#billing-market" className="pricing-market-link" onClick={event=>{
+          {originalRecovery?unconfirmedAttempt?' Your original request keeps its original country.':' This checkout keeps its original country.':compact?<>{' '}<Link to={loopPricingReturn(selected.id,market)}>Change on Pricing</Link></>:<>{' '}<a href="#billing-market" className="pricing-market-link" onClick={event=>{
             const countrySelect=billingMarket.current?.querySelector('select');
             if(!countrySelect||countrySelect.disabled)return;
             event.preventDefault();
@@ -237,13 +242,14 @@ export default function LoopSubscriptionBilling({ compact=false }: {compact?:boo
             <li>Cancel in billing settings: tick the confirmation, then select Cancel free trial.</li>
           </ul>
         </>}
+        {unconfirmedAttempt&&!busy&&<p id="loop-original-request-note">We have not confirmed that your original request opened a secure checkout. Retrying sends that same request again, not a new one.</p>}
         <label className="jl-consent">
           <input type="checkbox" checked={consent} disabled={busy||loading||quoteLoading&&!originalRecovery} onChange={event=>{purchaseConsentScope.current=event.target.checked?purchaseFingerprint():null;setConsent(event.target.checked);}}/>
           {offerTrial
             ?<span>I start a {LOOP_TRIAL_DAYS}-day free trial of {selected.name}. A card is required and is not charged today. Unless I cancel before {loopTrialDay(trialDates.trialEndsAt)}, I will be charged {formatLoopPrice(payablePrice)} {payablePrice.currency}, with tax included, on {loopTrialDay(trialDates.firstChargeAt)} and then every month until I cancel. I have read the <Link to="/terms">terms</Link> and <Link to="/refund">refund policy</Link>.</span>
             :<span>I choose {selected.name} at {formatLoopPrice(payablePrice)} {payablePrice.currency} each month, with tax included, and automatic monthly renewal until I cancel. I have read the <Link to="/terms">terms</Link> and <Link to="/refund">refund policy</Link>.</span>}
         </label>
-        <button type="button" className="product-button" aria-describedby={!consent&&!busy&&!loading?'loop-checkout-reason':undefined} disabled={busy||loading||!consent||checkoutPending&&status.checkout.plan!==selected.id} onClick={()=>void(checkoutPending?resumeCheckout():checkout())}>{busy?'Confirming checkout…':offerTrial?(originalRecovery?'Resume original secure trial checkout':`Start ${LOOP_TRIAL_DAYS}-day free trial · card required`):originalRecovery?'Resume original secure checkout':`Continue to secure checkout · ${formatLoopPrice(payablePrice)}/month`}</button>
+        <button type="button" className="product-button" aria-describedby={[unconfirmedAttempt&&!busy?'loop-original-request-note':'',!consent&&!busy&&!loading?'loop-checkout-reason':''].filter(Boolean).join(' ')||undefined} disabled={busy||loading||!consent||checkoutPending&&status.checkout.plan!==selected.id} onClick={()=>void(checkoutPending?resumeCheckout():checkout())}>{busy?'Confirming checkout…':offerTrial?(originalRecovery?unconfirmedAttempt?'Retry your original trial request':'Resume original secure trial checkout':`Start ${LOOP_TRIAL_DAYS}-day free trial · card required`):originalRecovery?unconfirmedAttempt?'Retry your original request':'Resume original secure checkout':`Continue to secure checkout · ${formatLoopPrice(payablePrice)}/month`}</button>
         {!consent&&!busy&&!loading&&<p id="loop-checkout-reason" className="loop-checkout-reason">Tick the box above to continue.</p>}
       </div>}
       {!subscriptionOpen&&selected&&available&&!offerTrial&&status?.trial?.available&&!status.trial.eligible&&!originalRecovery&&<p className="jl-help">This account has already had an Automated Job Loop subscription, free trial or free place, so this checkout is charged today.</p>}
