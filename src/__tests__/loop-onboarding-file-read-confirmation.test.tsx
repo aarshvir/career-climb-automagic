@@ -28,6 +28,11 @@ const choose = (input: HTMLInputElement, selected: File[] = [file()]) => fireEve
 const settle = async () => { await act(async () => { for (let index = 0; index < 8; index += 1) await Promise.resolve(); }); };
 const deferred = () => { let resolve!: (value: string) => void, reject!: (error: Error) => void; const promise = new Promise<string>((done, fail) => { resolve = done; reject = fail; }); return { promise, resolve, reject }; };
 const box = () => screen.getByLabelText('Your CV text') as HTMLTextAreaElement;
+const note = (input: HTMLInputElement) => input.nextElementSibling as HTMLElement;
+const words = (value: string | null | undefined) => (value ?? '').replace(/\s+/g, ' ').trim();
+const CV_FULL = 'Readable PDF, DOCX or TXT, up to 5 MB. Your file is read on this device; review the extracted text below.';
+const EARLY_FULL = 'PDF, DOCX or TXT, up to 5 MB. Read locally on this device.';
+const AFTER = 'PDF, DOCX or TXT, up to 5 MB, on this device.';
 
 async function toCvStep() {
   const view = open(); await screen.findByLabelText('Search or add a role');
@@ -56,7 +61,8 @@ describe('(a) a file is read and its text applied: the line appears, beside the 
       const region = live(), input = cvStepInput();
       expect(region).toHaveAttribute('aria-live', 'polite'); expect(region).toHaveAttribute('aria-atomic', 'true');
       expect(region).toBeEmptyDOMElement();                                          // present and empty BEFORE the read: a content change is announced
-      expect(input.nextElementSibling).toBe(region);                                  // directly beside (under) the upload control
+      expect(input.nextElementSibling).toContainElement(region);                      // inside the guidance paragraph directly under the upload control
+      expect(input.nextElementSibling?.tagName).toBe('P');
       input.focus(); scrolled.mockClear();
       choose(input, [file('private-cv-name.pdf')]);
       await waitFor(() => expect(box()).toHaveValue(FIRST));
@@ -79,7 +85,7 @@ describe('(a) a file is read and its text applied: the line appears, beside the 
     fireEvent.click(screen.getByText('Suggest roles from my CV (optional)'));
     state.extract.mockResolvedValue(FIRST);
     const input = earlyInput(), region = live();
-    expect(region).toBeEmptyDOMElement(); expect(input.nextElementSibling).toBe(region);
+    expect(region).toBeEmptyDOMElement(); expect(input.nextElementSibling).toContainElement(region);
     choose(input);
     await waitFor(() => expect(screen.getByLabelText('Paste your CV for role suggestions')).toHaveValue(FIRST));
     expect(region.textContent?.trim()).toBe(MESSAGE);
@@ -89,6 +95,64 @@ describe('(a) a file is read and its text applied: the line appears, beside the 
     expect(live()).toBeEmptyDOMElement();                                             // that read was on another step
   });
 
+});
+
+/**
+ * Round 2 (Codex, review of 2f070cc): a separate line pushed the imported text under the fixed action bar (45 px of the CV box visible became 16.7 px, 3.7 px for the first line).
+ * The confirmation now lives in the existing guidance paragraph, which keeps the file types, the size limit and "on this device" in fewer words, so nothing is taller than before.
+ * jsdom has no layout: these tests pin the structure and the words; the phone measurement (320, 360 and 390 px) is in the browser harness.
+ */
+describe('the confirmation is part of the existing guidance paragraph', () => {
+  it('CV step: the default guidance is exactly as before; after a read the paragraph is shorter, has the same elements around it and still says the types, the limit and "on this device"', async () => {
+    await toCvStep();
+    state.extract.mockResolvedValue(FIRST);
+    const input = cvStepInput(), field = input.parentElement as HTMLElement;
+    expect(words(note(input).textContent)).toBe(CV_FULL);
+    const beforeChildren = field.children.length, beforeLength = words(note(input).textContent).length;
+    choose(input); await waitFor(() => expect(live().textContent?.trim()).toBe(MESSAGE));
+    expect(field.children.length).toBe(beforeChildren);                                // no new element between the control and the CV box
+    expect(words(note(input).textContent)).toBe(`${MESSAGE} ${AFTER}`);
+    expect(words(note(input).textContent).length).toBeLessThan(beforeLength);          // fewer characters than before: never more lines
+    for (const kept of ['PDF, DOCX or TXT', 'up to 5 MB', 'on this device']) expect(note(input).textContent).toContain(kept);
+  });
+  it('early CV box: the default guidance is exactly as before; after a read it has the same elements and keeps the types, the limit and "on this device"', async () => {
+    open(); await screen.findByLabelText('Search or add a role');
+    fireEvent.click(screen.getByText('Suggest roles from my CV (optional)'));
+    state.extract.mockResolvedValue(FIRST);
+    const input = earlyInput(), field = input.parentElement as HTMLElement;
+    expect(words(note(input).textContent)).toBe(EARLY_FULL);
+    const beforeChildren = field.children.length;
+    choose(input); await waitFor(() => expect(live().textContent?.trim()).toBe(MESSAGE));
+    expect(field.children.length).toBe(beforeChildren);
+    expect(words(note(input).textContent)).toBe(`${MESSAGE} ${AFTER}`);
+    for (const kept of ['PDF, DOCX or TXT', 'up to 5 MB', 'on this device']) expect(note(input).textContent).toContain(kept);
+  });
+  it('only the sentence is announced: the live region is a span inside the paragraph, the paragraph is not live, and the region never holds the guidance', async () => {
+    await toCvStep();
+    state.extract.mockResolvedValue(FIRST);
+    const input = cvStepInput(), paragraph = note(input), region = live();
+    const seen: string[] = [];
+    new MutationObserver(() => seen.push(words(region.textContent))).observe(region, { childList: true, characterData: true, subtree: true });
+    expect(region.tagName).toBe('SPAN'); expect(paragraph.contains(region)).toBe(true);
+    expect(paragraph).not.toHaveAttribute('aria-live'); expect(paragraph).not.toHaveAttribute('role');
+    choose(input); await waitFor(() => expect(region.textContent?.trim()).toBe(MESSAGE));
+    fireEvent.change(box(), { target: { value: `${FIRST} edited` } });               // the guidance text changes back too, which must not announce anything
+    await settle();
+    expect(seen.length).toBeGreaterThan(0);
+    for (const value of seen) expect([MESSAGE, '']).toContain(value);                  // every change to the live region is the sentence appearing or going
+    expect(region).toBeEmptyDOMElement();
+  });
+  it('when the line goes (typing, a failed read, a new read, a step change) the full guidance is back', async () => {
+    await toCvStep();
+    const input = cvStepInput();
+    state.extract.mockResolvedValueOnce(FIRST); choose(input); await waitFor(() => expect(live().textContent?.trim()).toBe(MESSAGE));
+    fireEvent.change(box(), { target: { value: `${FIRST} edited` } });
+    expect(words(note(input).textContent)).toBe(CV_FULL);
+    state.extract.mockResolvedValueOnce(FIRST); choose(input); await waitFor(() => expect(live().textContent?.trim()).toBe(MESSAGE));
+    state.extract.mockRejectedValueOnce(new Error('Fictional unreadable file. Paste your CV text instead.')); choose(input);
+    await screen.findByRole('button', { name: 'Paste my CV text instead' });
+    expect(words(note(input).textContent)).toBe(CV_FULL);
+  });
 });
 
 describe('(b) a picker that is cancelled says nothing', () => {

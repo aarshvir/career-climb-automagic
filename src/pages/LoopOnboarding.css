@@ -43,6 +43,6 @@
 /* The confirmed-save screen: the primary action and the optional return to the plan the person came from (not the fixed form bar). */
 .loop-onboarding .oq-saved-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
 .loop-onboarding .oq-plan-note { margin-top: 12px; color: var(--jl-muted); font-size: 14px; line-height: 1.6; }
-/* A file read worked: one short line under the upload control. The live region is always present and has no size while it is empty. The scroll margins are the header and the fixed action bar (81 px plus the device safe area) with a few px to spare: the page moves only if the line would otherwise sit under one of them, and by no more than that. */
-.loop-onboarding .oq-card .jl-field p.oq-read-ok { display: flex; align-items: center; gap: 6px; margin: 8px 0 0; font-size: .9rem; font-weight: 600; line-height: 1.4; color: var(--jv-brand); scroll-margin-top: 120px; scroll-margin-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-.loop-onboarding .oq-read-ok svg { flex-shrink: 0; }
+/* A file read worked: the guidance paragraph under the upload control starts with one sentence and carries shorter guidance, so it is never taller. The live region around the sentence is always present and has no size while empty. The scroll margins are the header and the fixed action bar (81 px plus the device safe area) with 9 px to spare: the page moves only if the sentence would otherwise sit under one of them, and by no more than that. */
+.loop-onboarding .oq-read-ok { font-weight: 600; color: var(--jv-brand); white-space: nowrap; scroll-margin-top: 120px; scroll-margin-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
+.loop-onboarding .oq-read-ok svg { display: inline-block; vertical-align: -3px; margin-right: 2px; }
