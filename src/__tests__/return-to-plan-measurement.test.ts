@@ -63,6 +63,53 @@ describe('the plan on /onboarding in first-party analytics', () => {
     expect(bodies().every(body => cleanBatch(body) !== null)).toBe(true);
     expect(bodies().every(body => !JSON.stringify(body.context).includes('GBP') && !JSON.stringify(body.context).includes('country'))).toBe(true);
   });
+
+  // The plan and market travel in the address, so the address is untrusted input to measurement. Whatever it carries, the tracker (the real path cleaner,
+  // the landing context, internal and external link destinations, and the intake validator the batches go through) may record only ONE plan id on the
+  // allowlist, and on /onboarding only from a carrier the app itself accepts. The billing country and currency are never recorded.
+  const FREE = 'zz-free-form-value';
+  const ATTRIBUTION = 'utm_source=meta&utm_campaign=c01';
+  const cases: { label: string; search: string; onboarding: string; pricing: string }[] = [
+    { label: 'a valid Advanced choice', search: '?loopPlan=active&country=GB&currency=GBP', onboarding: '/onboarding?loopPlan=active', pricing: '/pricing?loopPlan=active' },
+    { label: 'a valid choice with campaign attribution', search: `?${ATTRIBUTION}&loopPlan=active&country=GB&currency=GBP`, onboarding: `/onboarding?${ATTRIBUTION}&loopPlan=active`, pricing: `/pricing?${ATTRIBUTION}&loopPlan=active` },
+    { label: 'an unknown plan', search: `?loopPlan=${FREE}&country=GB&currency=GBP`, onboarding: '/onboarding', pricing: '/pricing' },
+    { label: 'a plan written as sentence-like text', search: '?loopPlan=Alex%20Example%20private%20CV&country=GB&currency=GBP', onboarding: '/onboarding', pricing: '/pricing' },
+    { label: 'two different valid plans', search: '?loopPlan=active&loopPlan=daily&country=GB&currency=GBP', onboarding: '/onboarding', pricing: '/pricing' },
+    { label: 'a valid plan and an unknown one', search: `?loopPlan=active&loopPlan=${FREE}&country=GB&currency=GBP`, onboarding: '/onboarding', pricing: '/pricing' },
+    { label: 'the same plan twice', search: '?loopPlan=active&loopPlan=active&country=GB&currency=GBP', onboarding: '/onboarding', pricing: '/pricing' },
+    { label: 'an empty plan', search: '?loopPlan=&country=GB&currency=GBP', onboarding: '/onboarding', pricing: '/pricing' },
+    { label: 'a plan in the wrong case', search: '?loopPlan=ACTIVE&country=GB&currency=GBP', onboarding: '/onboarding', pricing: '/pricing' },
+    { label: 'a valid plan with a free-form billing country (not a carrier the app accepts)', search: `?loopPlan=active&country=${FREE}&currency=GBP`, onboarding: '/onboarding', pricing: '/pricing?loopPlan=active' },
+    { label: 'a valid plan with a free-form currency', search: `?loopPlan=active&country=GB&currency=${FREE}`, onboarding: '/onboarding', pricing: '/pricing?loopPlan=active' },
+    { label: 'a free-form market and no plan', search: `?country=${FREE}&currency=${FREE}`, onboarding: '/onboarding', pricing: '/pricing' },
+  ];
+
+  it.each(cases)('cleanPath records $label as at most one validated plan id and never the market', ({ search, onboarding, pricing }) => {
+    expect(cleanPath({ pathname: '/onboarding', search })).toBe(onboarding);
+    expect(cleanPath({ pathname: '/onboarding/', search })).toBe(onboarding.replace('/onboarding', '/onboarding/'));
+    expect(cleanPath({ pathname: '/pricing', search })).toBe(pricing);
+    for (const path of [cleanPath({ pathname: '/onboarding', search }), cleanPath({ pathname: '/pricing', search })]) expect(path).not.toMatch(/country|currency|GBP|zz-free|Alex|private/);
+  });
+
+  it.each(cases)('through the tracker, $label: page path, landing context and link destinations carry nothing free-form', async ({ search, onboarding, pricing }) => {
+    window.history.replaceState(null, '', `/onboarding${search}`);
+    startAnalytics({ inTests: true }); trackPage(window.location); await settle();
+    const link = (href: string) => { const node = document.createElement('a'); node.href = href; node.textContent = 'link'; node.addEventListener('click', event => event.preventDefault()); document.body.appendChild(node); node.click(); };
+    link(`/onboarding${search}`); link(`/pricing${search}`); link(`https://other.example/offer${search}`);
+    window.dispatchEvent(new Event('pagehide')); await settle();
+    const sent = events();
+    expect(sent.filter(event => event.kind === 'page_view').map(event => event.path)).toEqual([onboarding]);
+    expect(sent.filter(event => event.kind === 'click').map(event => ({ path: event.path, href: event.href }))).toEqual([
+      { path: onboarding, href: onboarding },
+      { path: onboarding, href: pricing },
+      { path: onboarding, href: 'other.example/offer' },
+    ]);
+    expect(bodies().map(body => body.context.landing)).toEqual(bodies().map(() => onboarding));
+    const everything = JSON.stringify(bodies());
+    for (const forbidden of [FREE, 'country', 'currency', 'GBP', 'Alex', 'private', 'daily']) expect(everything, forbidden).not.toContain(forbidden);
+    // The intake accepts these batches; the client cleaner is what keeps the value out.
+    expect(bodies().every(body => cleanBatch(body) !== null)).toBe(true);
+  });
 });
 
 describe('the plan on /onboarding and the Meta Pixel', () => {
