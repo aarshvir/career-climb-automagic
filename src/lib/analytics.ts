@@ -2,6 +2,8 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { cvVariantSessionIdentity } from '@/lib/loop-cv-variant-recovery';
 import { cleanTrackContext } from '../../supabase/functions/_shared/jobvance-track';
+import { pricingReturnFromOnboarding } from '@/lib/account-return';
+import { isLoopSubscriptionPlan } from '@/lib/subscription-plans';
 
 /** Best-effort measurement: immutable original actor/visit, credentials in memory only,
  * and incremental visible time belonging to a particular page exposure. */
@@ -24,12 +26,25 @@ function write(key: string, value: unknown, tab = false) { try { (tab ? window.s
 function record(value: unknown): value is Record<string, unknown> { return !!value && typeof value === 'object' && !Array.isArray(value); }
 function endpoint(): string | null { const base = import.meta.env.VITE_SUPABASE_URL as string | undefined; return base && /^https:\/\//.test(base) ? `${base.replace(/\/$/, '')}/functions/v1/jobvance-track` : null; }
 
+/**
+ * The pricing plan a visit carries (`loopPlan`) is an identifier, never free text: it is recorded only as exactly ONE value on the plan allowlist (an unknown
+ * value, or two or more values even if one is valid, are dropped, never "the first"). On /onboarding, where the plan travels with a billing market, it is recorded
+ * only from a carrier the app itself accepts (pricingReturnFromOnboarding), so the measured path matches what the page acts on. The billing country and
+ * currency are not among the kept parameters and are never recorded.
+ */
+function keptPlan(source: URLSearchParams, path: string, search: string): string {
+  const plans = source.getAll('loopPlan');
+  if (plans.length !== 1 || !isLoopSubscriptionPlan(plans[0])) return '';
+  if (/^\/onboarding(?:\/|$)/.test(path) && pricingReturnFromOnboarding(search) === null) return '';
+  return plans[0];
+}
+
 export function cleanPath(value: { pathname: string; search: string }): string {
   let path = value.pathname.startsWith('/') && !value.pathname.startsWith('//') ? value.pathname.replace(/[\u0000-\u001f\u007f\\#]/g, '') : '/';
   if (path.length > 250) path = '/';
   const source = new URLSearchParams(value.search), kept = new URLSearchParams();
   for (const key of KEPT_PARAMS) {
-    const item = text(source.get(key) ?? '', 100);
+    const item = key === 'loopPlan' ? keptPlan(source, path, value.search) : text(source.get(key) ?? '', 100);
     if (!item) continue;
     kept.set(key, item);
     if (path.length + kept.toString().length + 1 > 300) kept.delete(key);

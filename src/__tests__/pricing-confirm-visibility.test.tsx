@@ -275,7 +275,7 @@ describe('Setup required (billing generation null): the same one-time reveal goe
     expect(scrolls).toHaveLength(1);
     expect(scrolls[0].el).toBe(action.closest('p'));
     expect(scrolls[0].options).toMatchObject({ block: 'start', behavior: 'smooth' });
-    expect(action).toHaveAttribute('href', '/onboarding');
+    expect(action).toHaveAttribute('href', '/onboarding?loopPlan=active&country=GB&currency=GBP');
     // Payment eligibility and consent are exactly as before: no panel, no consent box, no Continue, nothing requested.
     expect(panel()).toBeNull();
     expect(screen.queryByRole('checkbox')).toBeNull();

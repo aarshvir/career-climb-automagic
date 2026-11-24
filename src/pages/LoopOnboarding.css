@@ -40,3 +40,6 @@
 .loop-onboarding .oq-recovery .jl-button { min-height: 44px; }
 /* Where focus lands after the last quick pick is gone (the tenth entry was chosen): the list of what was chosen. */
 .loop-onboarding .oq-choice-list:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 4px; border-radius: 8px; }
+/* The confirmed-save screen: the primary action and the optional return to the plan the person came from (not the fixed form bar). */
+.loop-onboarding .oq-saved-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.loop-onboarding .oq-plan-note { margin-top: 12px; color: var(--jl-muted); font-size: 14px; line-height: 1.6; }
