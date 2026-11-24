@@ -187,10 +187,39 @@ function observeSession(next: Session | null) {
   if (nextActor.userId && segment && lastLocation && !lastLocation.pathname.startsWith('/admin')) emit(segment, page?.id ?? uuid(), { kind: 'identify', path: cleanPath(lastLocation), label: 'Signed in' });
   seal(); void dispatch();
 }
+/**
+ * A pricing or billing control may state its action in FIXED wording (`data-analytics-label`: a plan name and a verb, set where the control is written), so that a
+ * quoted price, a currency, a date the quote implies, or a block of card copy never becomes a click label. A checkbox inside a label that carries it takes the same
+ * wording (it has no text of its own). Private routes ignore all of this and keep the tag name only.
+ */
+function fixedWording(element: Element): string {
+  const own = element.getAttribute('data-analytics-label');
+  if (own !== null) return own;
+  return element.tagName === 'INPUT' ? element.closest('label')?.getAttribute('data-analytics-label') ?? '' : '';
+}
+/**
+ * On the pricing route a click label never reads as an amount: a currency symbol, or a three-letter code next to a number, in any script. A label that still does
+ * (a control nobody gave fixed wording) is reduced to its tag name, as on a private route, rather than recorded. Other public pages are unchanged.
+ */
+const MONEY = /\p{Sc}|\p{Lu}{3}[\s\p{Cf}]*\p{Nd}|\p{Nd}[\s\p{Cf}]*\p{Lu}{3}(?!\p{L})|\p{Script=Arabic}[\s\p{Cf}.]*\p{Nd}|\p{Nd}[\s\p{Cf}.]*\p{Script=Arabic}/u;
+function controlLabel(element: Element, path: string): string {
+  if (!publicPath(path)) return element.tagName.toLowerCase();
+  const label = text(fixedWording(element) || element.getAttribute('aria-label') || element.textContent || element.getAttribute('title') || element.tagName, 100);
+  return /^\/pricing(?:[/?]|$)/.test(path) && MONEY.test(label) ? element.tagName.toLowerCase() : label;
+}
 function describe(element: Element): { label: string; href?: string } {
-  const label = !publicPath(page?.path ?? '/') ? element.tagName.toLowerCase() : text(element.getAttribute('aria-label') || element.textContent || element.getAttribute('title') || element.tagName, 100);
+  const label = controlLabel(element, page?.path ?? '/');
   const anchor = element.closest('a'), href = anchor ? destination(anchor.getAttribute('href') ?? '') : undefined;
   return { label: label || 'Control', ...(href ? { href } : {}) };
+}
+/**
+ * One tap on a consent control is one click. A label that carries fixed wording and names a checkbox or radio stands aside: the browser then clicks the box itself, and
+ * that click (one per tap on the words, per tap on the box, and per Space on the box) is the one recorded, with the label's wording. Every other label is recorded as before.
+ */
+function labelStandsAside(target: Element): boolean {
+  if (target.tagName !== 'LABEL' || !target.hasAttribute('data-analytics-label')) return false;
+  const control = (target as HTMLLabelElement).control;
+  return !!control && control.tagName === 'INPUT' && ['checkbox', 'radio'].includes((control as HTMLInputElement).type);
 }
 
 /** Synchronous route boundaries keep rapid routes and Back clicks in their own exposure. */
@@ -213,7 +242,7 @@ export function startAnalytics({ inTests = false } = {}) {
   function listen(target: EventTarget, name: string, handler: EventListener, options?: AddEventListenerOptions) { target.addEventListener(name, handler, options); disposers.push(() => target.removeEventListener(name, handler, options)); }
   listen(document, 'click', event => {
     const target = event.target instanceof Element ? event.target.closest('a, button, [role="button"], summary, label, select, input[type="checkbox"], input[type="radio"], input[type="submit"]') : null;
-    if (!target || !page || target.closest('[data-analytics="off"]')) return;
+    if (!target || !page || target.closest('[data-analytics="off"]') || labelStandsAside(target)) return;
     activity(); if (page) emit(page.segment, page.id, { kind: 'click', path: page.path, ...describe(target) });
   }, { capture: true });
   listen(document, 'submit', event => {
