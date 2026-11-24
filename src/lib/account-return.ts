@@ -1,8 +1,8 @@
 import { isSavedCheckContinuationPath, type SavedCheckContinuationPath } from './saved-check-continuation';
 import { isApplicationSourcePath, type ApplicationSourcePath } from './application-source-selection';
 import { passPlans, type PassPlanKey } from './pass-plans';
-import { subscriptionPlans, type LoopSubscriptionPlan } from './subscription-plans';
-import {isLocalizedLoopPricingReturn,type LocalizedLoopPricingReturn} from './loop-local-prices';
+import { isLoopSubscriptionPlan, subscriptionPlans, type LoopSubscriptionPlan } from './subscription-plans';
+import {isLocalizedLoopPricingReturn,isLoopLocalCountry,isLoopLocalCurrency,loopPricingReturn,type LocalizedLoopPricingReturn,type LoopPriceMarket} from './loop-local-prices';
 
 const KEY = 'jobvance_account_return_v1';
 const TTL = 30 * 60 * 1000;
@@ -49,6 +49,30 @@ export function pricingChoiceFromReturn(value: string | null): { product: 'loop'
   if (loop) return { product: 'loop', name: loop.name };
   const pass = passPlans.find(plan => plan.key === query.get('plan'));
   return pass ? { product: 'pass', name: pass.name } : null;
+}
+
+/**
+ * Where "Continue my setup" goes when the person came from a specific plan: /onboarding with the three values of the pricing return
+ * (plan, billing country, currency), all taken from state the pricing page already validates. Anything that does not validate
+ * gives the plain /onboarding, so a setup link never carries a value the pricing page would not accept.
+ */
+export function onboardingPathForChoice(plan: LoopSubscriptionPlan, market: LoopPriceMarket): string {
+  try { return `/onboarding${loopPricingReturn(plan, market).slice('/pricing'.length)}`; } catch { return '/onboarding'; }
+}
+
+/**
+ * The pricing return an onboarding address points back to, or null. Only exactly one plan, one billing country and one currency, each on the
+ * pricing allowlists, is read (other query values, such as advertising tags, are ignored). The result is built by loopPricingReturn and must pass the
+ * same two checks as a sign-in return (isLocalizedLoopPricingReturn and accountDestination), so it is a path the pricing page itself accepts.
+ */
+export function pricingReturnFromOnboarding(search: string): LocalizedLoopPricingReturn | null {
+  const query = new URLSearchParams(search);
+  const plans = query.getAll('loopPlan'), countries = query.getAll('country'), currencies = query.getAll('currency');
+  if (plans.length !== 1 || countries.length !== 1 || currencies.length !== 1) return null;
+  const [plan] = plans, [country] = countries, [currency] = currencies;
+  if (!isLoopSubscriptionPlan(plan) || !isLoopLocalCurrency(currency) || !(isLoopLocalCountry(country) || country === 'other' && currency === 'USD')) return null;
+  const path = loopPricingReturn(plan, { country, currency });
+  return isLocalizedLoopPricingReturn(path) && accountDestination(path) === path ? path : null;
 }
 
 export function rememberLoopReturn(value: string | null, now = Date.now()): void {

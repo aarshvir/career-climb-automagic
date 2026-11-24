@@ -15,6 +15,7 @@ import { accountFullName, accountRoleSuggestions, cvRoleSuggestions, roleChoices
 import { retainOnboardingDraft, moveRetainedOnboardingStep, recoverOnboardingDraft, clearOnboardingDraft, type OnboardingDraft } from '@/lib/loop-onboarding-memory';
 import { draftState, holdsUnsavedAnswers, lateSaveOutcome, submittedForm, type DraftState } from '@/lib/loop-onboarding-readback';
 import { adAttributionQuery } from '@/lib/meta-pixel';
+import { pricingChoiceFromReturn, pricingReturnFromOnboarding } from '@/lib/account-return';
 import { clearPreSignupAnswers, takePreSignupAnswers } from '@/lib/pre-signup-quiz';
 import './JobLoop.css';
 import './LoopOnboarding.css';
@@ -112,10 +113,11 @@ export default function LoopOnboarding() {
   // two questions shown before sign-up. Ad campaign tags survive the redirect.
   if (!user) return <Navigate to={`/auth?mode=signup&next=%2Fonboarding${adAttributionQuery(search)}`} replace />;
   registerTrackingDraftOwner(user.id);
-  return <OwnedQuiz key={`${user.id}:${trackingDraftAuthority(user.id)}`} owner={user.id} metadata={user.user_metadata} />;
+  // The plan the person came from, only if the address carries a valid one (see pricingReturnFromOnboarding). It is a navigation target, not account state: nothing is stored.
+  return <OwnedQuiz key={`${user.id}:${trackingDraftAuthority(user.id)}`} owner={user.id} metadata={user.user_metadata} planReturn={pricingReturnFromOnboarding(search)} />;
 }
 
-function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
+function OwnedQuiz({ owner, metadata, planReturn }: { owner: string; metadata: unknown; planReturn: string | null }) {
   const authority = trackingDraftAuthority(owner);
   // The name asked for in step 5 is taken from the sign-up details when there is one. It is the page's own starting value, NOT an edit: it stays out of `touched`
   // and holdsUnsavedAnswers compares against it (see loop-onboarding-readback.ts), so it is never mistaken for a newer answer. It is still saved only after the confirmation tick.
@@ -397,6 +399,8 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
   }
   // Save is disabled for other reasons too (saving, an unconfirmed save, a setup saved elsewhere), each with its own message; only the missing tick is explained here.
   const needsTick = !consent && !busy && !unconfirmed && !conflict;
+  // Offered only on the confirmed-save screen (`saved` is set only by a confirmed readback), and only when the address carried a valid plan.
+  const planChoice = saved && planReturn ? pricingChoiceFromReturn(planReturn) : null;
   return <main className="loop-onboarding">
     <Helmet><title>Set up your Automated Job Loop | Jobvance</title><meta name="robots" content="noindex,nofollow" /></Helmet>
     <header><Link to="/loop" className="oq-back"><ArrowLeft size={16} /> Back to your Automated Job Loop</Link><p className="oq-eyebrow">AUTOMATED JOB LOOP SETUP</p>
@@ -408,7 +412,7 @@ function OwnedQuiz({ owner, metadata }: { owner: string; metadata: unknown }) {
     {unconfirmed && !busy && !saved && !existing && <><p className="oq-note" role="note">Your answers are locked while we are unsure whether the save arrived, so a check can never be compared with a changed draft. The check unlocks them; your dashboard is always available above.</p><button type="button" className="jl-button jl-button--primary" onClick={() => void checkSaved()}>Check whether my setup was saved</button></>}
     {!busy && !loaded && <button className="jl-button" onClick={() => void load()}>Retry loading my setup</button>}
     {existing && <section className="oq-card"><p>Your saved CV and preferences are already in your account. Continue there to preserve your current drafts, facts and schedule.</p><Link className="jl-button jl-button--primary" to="/loop">Open my Automated Job Loop <ArrowRight size={16} /></Link></section>}
-    {saved && <section className="oq-card"><Check size={32} /><h2>Next: review your facts and run your first search.</h2><p>Review useful facts copied from your CV, then deliberately start a search with your saved preferences. Add CV variants and a recurring schedule when you are ready.</p><p>Saving this setup has not started a search, activated a schedule or sent your CV to an AI provider.</p><Link className="jl-button jl-button--primary" to="/loop" state={{ onboardingSaved: true, owner, generation: snapshot.current?.lifecycleGeneration, authority }}>Continue to my Automated Job Loop <ArrowRight size={16} /></Link></section>}
+    {saved && <section className="oq-card"><Check size={32} /><h2>Next: review your facts and run your first search.</h2><p>Review useful facts copied from your CV, then deliberately start a search with your saved preferences. Add CV variants and a recurring schedule when you are ready.</p><p>Saving this setup has not started a search, activated a schedule or sent your CV to an AI provider.</p><div className="oq-saved-actions"><Link className="jl-button jl-button--primary" to="/loop" state={{ onboardingSaved: true, owner, generation: snapshot.current?.lifecycleGeneration, authority }}>Continue to my Automated Job Loop <ArrowRight size={16} /></Link>{planChoice && <Link className="jl-button" to={planReturn!}>Return to the {planChoice.name} plan <ArrowRight size={16} /></Link>}</div>{planChoice && <p className="oq-plan-note">You were choosing the {planChoice.name} plan. Returning shows its current price and asks you to confirm again; nothing is bought until you do.</p>}</section>}
     {conflict && !saved && !existing && (() => {
       const retained = conflict.kind === 'reopened', prefilled = accountFullName(metadata);
       const draft = unsavedDraft(conflict.saved, profile, answers as unknown as Record<string, string>, roleQuery, locationQuery, retained, retained && prefilled !== '' && !touched.current.has('name') && profile.name.trim() === prefilled);
