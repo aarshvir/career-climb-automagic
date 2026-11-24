@@ -32,9 +32,14 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   const [busy, setBusy] = useState(false);
   const [error, setErrorText] = useState('');
   const [errorAt, setErrorAt] = useState<'top' | 'action'>('top');
+  // Counts each completed rejection of a submission, so the same message returned after a deliberate retry is still a new event.
+  const [rejections, setRejections] = useState(0);
   // A message about the submission itself (the provider's answer, the attempt limit, a lost connection, the continue step) is shown beside the action that caused it,
   // directly above the button, where a phone visitor is looking. Every other message stays at the top of the panel.
-  const setError = useCallback((message: string, at: 'top' | 'action' = 'top') => { setErrorText(message); setErrorAt(at); }, []);
+  const setError = useCallback((message: string, at: 'top' | 'action' = 'top') => {
+    setErrorText(message); setErrorAt(at);
+    if (at === 'action' && message) setRejections(count => count + 1);
+  }, []);
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -54,6 +59,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   // Set before the first await of a valid submit, so overlapping submits (a script or autofill helper can fire several in one task, before React has disabled the form) share one attempt.
   const inFlight = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const actionAlertRef = useRef<HTMLDivElement>(null);
   useEffect(() => { alive.current = true; return () => { alive.current = false; pending.current = null; attempt.current++; }; }, []);
   useEffect(() => { if (user || authLoading || authError) { pending.current = null; attempt.current++; } }, [user, authLoading, authError]);
 
@@ -82,6 +88,21 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
     heading?.focus({ preventScroll: true });
     heading?.scrollIntoView?.({ block: 'start' });
   }, [confirmationSent]);
+
+  // A submission can be rejected while the visitor is still looking at a field (Enter from Full name, for instance), with the button and its message below the screen.
+  // Each rejection checks once whether its alert is inside the usable viewport (below the sticky header, above the visual viewport's lower edge) and scrolls it in only when it is not.
+  useEffect(() => {
+    if (!rejections) return;
+    const alert = actionAlertRef.current;
+    if (!alert) return;
+    const { top, bottom } = alert.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const header = document.querySelector('header.jv-header')?.getBoundingClientRect().bottom ?? 0;
+    const upper = Math.max(header, viewport?.offsetTop ?? 0);
+    const lower = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+    if (top >= upper && bottom <= lower) return;
+    alert.scrollIntoView?.({ block: 'nearest' });
+  }, [rejections]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -212,7 +233,7 @@ const Auth = ({ embedded = false, onBeforeGoogle }: { embedded?: boolean; onBefo
   // One alert at a time: a submission message sits beside its action, anything else at the top.
   const atAction = !configurationError && !!error && errorAt === 'action';
   const visibleError = atAction ? '' : configurationError || error || authError;
-  const actionAlert = atAction ? <Alert variant="destructive" role="alert" id={`${fieldId}-error`} className="ap-auth-alert"><AlertDescription>{error}</AlertDescription></Alert> : null;
+  const actionAlert = atAction ? <Alert ref={actionAlertRef} variant="destructive" role="alert" id={`${fieldId}-error`} className="ap-auth-alert"><AlertDescription>{error}</AlertDescription></Alert> : null;
   // The outcome card leads on the loop headline (onboarding entry and sign-up), never beside a different lead.
   const showBenefits = !embedded && !confirmationSent && (loopEntry || mode === 'sign-up');
 

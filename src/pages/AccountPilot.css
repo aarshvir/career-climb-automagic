@@ -82,7 +82,8 @@
 .ap-mode-link { height: auto; min-height: 44px; padding: 0 3px; margin-left: 3px; font-size: var(--t-sm); color: var(--jv-brand); font-weight: 650; }
 .ap-auth-footnote { display: flex; align-items: flex-start; gap: 7px; margin: 26px 0 0; font-size: var(--t-xs); color: var(--ap-muted); line-height: 1.8; }
 .ap-auth-footnote svg { margin-top: 2px; }
-.ap-auth-alert { font-size: var(--t-xs); line-height: 1.8; border-radius: 9px; background: var(--jv-danger-tint); color: var(--jv-danger); border-color: var(--jv-danger-line); }
+/* overflow-wrap: inside the form's grid, an unbreakable word in a provider message (the 26-letter alphabet in the weak-password text) would otherwise widen every field and the button past the card at 320 px. */
+.ap-auth-alert { font-size: var(--t-xs); line-height: 1.8; border-radius: 9px; background: var(--jv-danger-tint); color: var(--jv-danger); border-color: var(--jv-danger-line); overflow-wrap: anywhere; }
 .ap-auth-notice { border: 1px solid var(--jv-line); border-radius: 9px; padding: 14px; background: var(--jv-bg-muted); color: var(--ap-ink); font-size: var(--t-sm); line-height: 1.8; margin: 0; }
 .ap-confirmation { display: grid; gap: 20px; font-size: var(--t-small); line-height: 1.8; overflow-wrap: anywhere; }
 .ap-confirmation p { margin: 0; }
@@ -434,6 +435,8 @@
 .jv-account .ap-field-error svg { margin-top: 2px; }
 .jv-account .ap-field input[aria-invalid="true"], .jv-account .ap-phone-field input[aria-invalid="true"] { border-color: var(--jv-danger); box-shadow: 0 0 0 1px var(--jv-danger); }
 .jv-account .ap-field :is(input, select) { scroll-margin-top: 96px; }
+/* When a rejection has to be scrolled in, leave room below the alert for the submit button that answers it (alert-to-button gap plus the button's height). */
+.jv-account .ap-auth-alert { scroll-margin-bottom: 80px; }
 /* Benefits: regular weight, one 600 lead phrase. */
 .ap-benefits li { font-weight: var(--fw-regular); color: var(--jv-ink-2); }
 .ap-benefits strong { font-weight: 600; color: var(--jv-ink); }
