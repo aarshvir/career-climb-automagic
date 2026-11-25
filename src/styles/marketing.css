@@ -641,6 +641,8 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 .pricing-passes-disclosure > summary::after { content: "+"; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--jv-line-strong); border-radius: 50%; color: var(--jv-ink); font-size: 18px; line-height: 1; }
 .pricing-passes-disclosure[open] > summary::after { content: "\2212"; background: var(--jv-brand); border-color: var(--jv-brand); color: #fff; }
 .pricing-passes-disclosure > summary:focus-visible { outline: 2px solid var(--jv-brand); outline-offset: 4px; }
+/* The CV Check passes link moves focus to this section as a position marker (RouteNavigation); the ring stays on the controls inside it, which keep theirs. */
+.pricing-passes[tabindex="-1"]:focus { outline: none; }
 .pricing-passes-lead { display: grid; gap: 12px; }
 .pricing-passes-title { display: block; color: var(--jv-ink); font-weight: var(--fw-heading); line-height: 1.2; letter-spacing: var(--ls-h3); text-wrap: balance; }
 .pricing-passes-sub { max-width: 52ch; color: var(--jv-ink-2); font-size: var(--t-body-sm); line-height: 1.5; }

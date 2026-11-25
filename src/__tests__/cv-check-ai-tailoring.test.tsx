@@ -117,7 +117,7 @@ describe('AI tailoring in the check', () => {
     show(); fill();
     fireEvent.click(screen.getByRole('button', { name: /Tailor my CV for this job/ }));
     const link = await screen.findByRole('link', { name: 'See passes from $9' });
-    expect(link).toHaveAttribute('href', '/pricing');
+    expect(link).toHaveAttribute('href', '/pricing#one-time-passes');
     expect(screen.getByRole('status')).toHaveTextContent(/3 free AI-tailored CVs this month.*so you can edit it yourself/);
     expect(reviewed()).toContain('Prepared monthly stakeholder reports using Excel.');
     expect(screen.getByRole('heading', { name: 'Review changes' })).toBeInTheDocument();
