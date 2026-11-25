@@ -153,13 +153,20 @@ const relatedFor: Partial<Record<Kind, string[]>> = { privacy: ["/faq", "/contac
 export default function ProductPage({ kind }: { kind: Kind }) {
   const { user } = useAuth();
   useReveal();
-  // Back from the one-time passes (reached through the link in the pricing introduction) puts focus back on that link, so the next Tab continues in the introduction instead of sending the visitor down the page again.
-  const { hash } = useLocation();
-  const onPassesFragment = useRef(false);
+  // The link in the pricing introduction records the history entry it was followed from (its key) in the state of the entry it creates. Returning to exactly that entry
+  // (Back, once or after several steps) puts focus back on the link, wherever focus had gone inside the passes, so the next Tab continues with Start free instead of
+  // jumping down the page. The key identifies the entry: a push to some other entry, a direct arrival at the fragment, or a later return after the first one never matches.
+  const location = useLocation();
+  const { hash } = location;
+  const passLinkOrigin = useRef<string | null>(null);
   useEffect(() => {
-    const wasOnPasses = onPassesFragment.current; onPassesFragment.current = hash === "#one-time-passes";
-    if (kind === "pricing" && wasOnPasses && hash === "" && document.activeElement?.id === "one-time-passes") document.getElementById("pricing-pass-link")?.focus({ preventScroll: true });
-  }, [hash, kind]);
+    const from = (location.state as { passLinkFrom?: unknown } | null)?.passLinkFrom;
+    if (hash === "#one-time-passes") { if (typeof from === "string" && from) passLinkOrigin.current = from; return; }
+    if (kind === "pricing" && hash === "" && passLinkOrigin.current !== null && location.key === passLinkOrigin.current) {
+      passLinkOrigin.current = null;
+      document.getElementById("pricing-pass-link")?.focus({ preventScroll: true });
+    }
+  }, [location.key, location.state, hash, kind]);
   const start = user ? "/loop" : "/onboarding";
   const support = import.meta.env.VITE_SUPPORT_EMAIL as string | undefined;
   const legal = kind === "privacy" || kind === "terms" || kind === "refund";
@@ -180,7 +187,7 @@ export default function ProductPage({ kind }: { kind: Kind }) {
     <Helmet><title>{meta?.title ?? `${titles[kind]} | Jobvance`}</title><meta name="description" content={meta?.description ?? intros[kind]} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}{meta && <meta property="og:title" content={meta.title} />}{meta && <meta property="og:description" content={meta.description} />}{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" />{kind === 'notfound' && <meta name="robots" content="noindex,follow" />}</Helmet>
     {kind === "home" ? <HomePage /> : <>
       <div className="jv-page product-inner">
-        <header className={`jv-page-head product-page-heading${visual ? " jv-page-head--split" : ""}${kind === "about" || kind === "pricing" ? " jv-page-head--forest jv-dark" : ""}${kind === "faq" ? " jv-page-head--center" : ""}`}><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title jv-enter-h1">{nb(titles[kind])}</h1><p className="jv-lead product-page-intro jv-enter" style={{ "--d": "60ms" } as React.CSSProperties}>{nb(intros[kind] ?? "")}{kind === "pricing" && <> <Link id="pricing-pass-link" className="pricing-intro-link" to="/pricing#one-time-passes" data-analytics-label="See one-time CV tailoring passes">See one-time CV tailoring passes</Link></>}</p>
+        <header className={`jv-page-head product-page-heading${visual ? " jv-page-head--split" : ""}${kind === "about" || kind === "pricing" ? " jv-page-head--forest jv-dark" : ""}${kind === "faq" ? " jv-page-head--center" : ""}`}><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title jv-enter-h1">{nb(titles[kind])}</h1><p className="jv-lead product-page-intro jv-enter" style={{ "--d": "60ms" } as React.CSSProperties}>{nb(intros[kind] ?? "")}{kind === "pricing" && <> <Link id="pricing-pass-link" className="pricing-intro-link" to="/pricing#one-time-passes" state={{ passLinkFrom: location.key }} data-analytics-label="See one-time CV tailoring passes">See one-time CV tailoring passes</Link></>}</p>
           {(band || kind === "pricing") && <div className="jv-page-actions"><StartLink to={start}>{kind === "pricing" ? "Start free" : undefined}</StartLink><TextLink to="/cv-check">Try the free CV Check</TextLink></div>}
           {visual && <div className="jv-page-visual" {...(visualDecor ? { "aria-hidden": true } : {})}>{visual}</div>}
         </header>

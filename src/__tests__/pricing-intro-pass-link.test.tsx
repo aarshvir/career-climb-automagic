@@ -54,7 +54,7 @@ function Nav() {
   router.go = useNavigate();
   return <button type="button">Some other control</button>;
 }
-const pricing = (path = '/pricing') => render(<HelmetProvider><MemoryRouter initialEntries={[path]}><RouteNavigation /><Nav /><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
+const pricing = (path: string | string[] = '/pricing', index?: number) => render(<HelmetProvider><MemoryRouter initialEntries={Array.isArray(path) ? path : [path]} initialIndex={index}><RouteNavigation /><Nav /><ProductPage kind="pricing" /></MemoryRouter></HelmetProvider>);
 const intro = () => document.querySelector('.product-page-intro') as HTMLElement;
 const section = () => document.getElementById('one-time-passes') as HTMLElement | null;
 const disclosure = () => document.querySelector('details.pricing-passes-disclosure') as HTMLDetailsElement | null;
@@ -207,6 +207,124 @@ describe('Back, then Tab', () => {
     expect(document.activeElement).toBe(document.body);
     expect(disclosure()).not.toHaveAttribute('open');
     expect(m.scroll).not.toHaveBeenCalled();
+  });
+});
+
+describe('Back returns focus to the intro link from wherever focus went in the offer', () => {
+  const summary = () => document.querySelector('.pricing-passes-disclosure > summary') as HTMLElement;
+  const arrive = async () => {
+    const user = userEvent.setup({ delay: null });
+    pricing();
+    await user.click(link());
+    await waitFor(() => expect(document.activeElement).toBe(section()));
+    return user;
+  };
+  // Back, then ONE Tab: focus is on the intro link (the passes closed again) and the next Tab reaches Start free, with no scroll back down to the passes.
+  const backThenTab = async (user: ReturnType<typeof userEvent.setup>) => {
+    m.scroll.mockClear();
+    await history.back();
+    await waitFor(() => expect(document.activeElement).toBe(link()));
+    expect(disclosure()).not.toHaveAttribute('open');
+    await user.tab();
+    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'Start free' }));
+    expect(m.scroll).not.toHaveBeenCalled();
+  };
+
+  it('immediately after arrival', async () => { await backThenTab(await arrive()); });
+
+  it('after Tab once, to the disclosure summary', async () => {
+    const user = await arrive();
+    summary().focus();   // jsdom's Tab skips <summary>; a browser's first Tab from the section lands on it
+    expect(document.activeElement).toBe(summary());
+    await backThenTab(user);
+  });
+
+  it('after Tab twice, into the pass list (the free CV Check link inside the section)', async () => {
+    const user = await arrive();
+    await user.tab(); await user.tab();
+    expect(section()).toContainElement(document.activeElement as HTMLElement);
+    expect(document.activeElement).not.toBe(summary());
+    await backThenTab(user);
+  });
+
+  it('with focus on a control inside the pass list, signed out (a pass sign-in link)', async () => {
+    const user = await arrive();
+    const control = screen.getByRole('link', { name: 'Sign in to buy Job Search' });
+    control.focus(); expect(document.activeElement).toBe(control);
+    await backThenTab(user);
+  });
+
+  it('with focus on a control inside the pass list, signed in (a Buy button, never pressed)', async () => {
+    m.auth = SIGNED_IN;
+    const user = await arrive();
+    const control = screen.getByRole('button', { name: 'Buy Sprint' });
+    control.focus(); expect(document.activeElement).toBe(control);
+    await backThenTab(user);
+    expect(m.invoke).not.toHaveBeenCalled(); expect(m.open).not.toHaveBeenCalled(); expect(m.checkout).not.toHaveBeenCalled();
+  });
+
+  it('when the browser has already dropped focus to the page because the list closed', async () => {
+    const user = await arrive();
+    await user.tab(); await user.tab();
+    (document.activeElement as HTMLElement).blur(); expect(document.activeElement).toBe(document.body);
+    await backThenTab(user);
+  });
+
+  it('every time: Back, Forward and Back again each return to the link (Forward refocuses the section in between)', async () => {
+    const user = await arrive();
+    await user.tab();
+    await history.back(); await waitFor(() => expect(document.activeElement).toBe(link()));
+    await history.forward(); await waitFor(() => expect(document.activeElement).toBe(section()));
+    expect(disclosure()).toHaveAttribute('open');
+    await user.tab();
+    await backThenTab(user);
+  });
+
+  it('takes no focus when a push to some other entry leaves the fragment, even if the section still holds focus', async () => {
+    await arrive();
+    expect(document.activeElement).toBe(section());
+    await history.plain();
+    await waitFor(() => expect(disclosure()).not.toHaveAttribute('open'));
+    expect(document.activeElement).not.toBe(link());
+  });
+
+  it('takes no focus when the visitor later returns to that entry after the first return, having gone through an unrelated entry', async () => {
+    const user = await arrive();
+    await history.back(); await waitFor(() => expect(document.activeElement).toBe(link()));
+    const other = screen.getByRole('button', { name: 'Some other control' });
+    await user.click(other);
+    await history.plain();                 // an unrelated entry
+    await history.back();                  // back to the original entry: not a return from the link
+    expect(document.activeElement).toBe(other);
+  });
+
+  it('leaves the entry it returns to alone when that entry has a fragment of its own (route navigation keeps the focus it set)', async () => {
+    const user = userEvent.setup({ delay: null });
+    pricing('/pricing#billing-details');
+    await waitFor(() => expect(document.activeElement).toBe(document.getElementById('billing-details')));
+    await user.click(link());
+    await waitFor(() => expect(document.activeElement).toBe(section()));
+    await history.back();
+    await waitFor(() => expect(disclosure()).not.toHaveAttribute('open'));
+    expect(document.activeElement).toBe(document.getElementById('billing-details'));
+    expect(document.activeElement).not.toBe(link());
+  });
+
+  it('takes no focus on a direct arrival at the fragment (no history entry of the link), when going back', async () => {
+    pricing(['/pricing', '/pricing#one-time-passes'], 1);
+    await waitFor(() => expect(document.activeElement).toBe(section()));
+    expect(disclosure()).toHaveAttribute('open');
+    await history.back();
+    await waitFor(() => expect(disclosure()).not.toHaveAttribute('open'));
+    expect(document.activeElement).not.toBe(link());
+  });
+
+  it('keeps the CV Check deep link as it was: a bare /pricing#one-time-passes entry carries no origin, so Back from it to /pricing does not move focus', async () => {
+    pricing(['/check', '/pricing', '/pricing#one-time-passes'], 2);
+    await waitFor(() => expect(document.activeElement).toBe(section()));
+    await history.back();
+    await waitFor(() => expect(disclosure()).not.toHaveAttribute('open'));
+    expect(document.activeElement).not.toBe(link());
   });
 });
 
