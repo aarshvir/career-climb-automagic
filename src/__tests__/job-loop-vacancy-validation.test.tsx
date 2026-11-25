@@ -26,6 +26,7 @@ const REMEDY = { title: 'Add a title of at least 2 characters.', link: 'Paste th
 const BANNER = 'Add a title, a real HTTPS vacancy link and the full job description (at least 80 characters).';
 const CONTACT_BANNER = 'Add a named contact, source link and source passage, then confirm the contact yourself. An email format is not verification.';
 let current: LoopSnapshot;
+let serverFailure: string | null = null;   // when set, the dashboard service refuses an add_opportunity with this message (a genuine server failure)
 
 function snapshot(): LoopSnapshot {
   return {
@@ -69,9 +70,14 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.auth.user = { id: 'validation-owner' }; mocks.auth.loading = false; mocks.auth.authError = null;
   clearLoopWorkingDraft(); clearTrackingDraftMemory(); setTrackingDraftOwner('validation-owner');
-  mocks.cvs.mockResolvedValue([]); mocks.list.mockResolvedValue([]);
+  mocks.cvs.mockResolvedValue([]); mocks.list.mockResolvedValue([]); serverFailure = null;
   mocks.call.mockImplementation(async (_owner: string, action: LoopAction): Promise<LoopResponse> => {
     if (action.action === 'get') return { snapshot: structuredClone(current) };
+    if (action.action === 'add_opportunity' && serverFailure) throw new Error(serverFailure);
+    if (action.action === 'link_saved_check') {
+      current = { ...current, recordVersion: current.recordVersion + 1, opportunities: [...current.opportunities, { id: 'op-linked', sourceCheckId: action.checkId, ...action.opportunity, source: 'manual', sourceKey: 'saved-check:' + action.checkId, checkedAt: '2026-11-25T09:00:00Z', verification: 'user_provided', status: 'saved', followUpAt: null, notes: '' } as LoopOpportunity] };
+      return { snapshot: structuredClone(current), checkLink: { checkId: action.checkId, opportunityId: 'op-linked', reused: false } } as LoopResponse;
+    }
     if (action.action === 'add_opportunity') {
       const o = action.opportunity;
       current = { ...current, recordVersion: current.recordVersion + 1, opportunities: [...current.opportunities, { id: 'op-1', ...o, source: 'manual', sourceKey: 'manual:fictional', checkedAt: '2026-11-25T09:00:00Z', verification: 'user_provided', status: 'saved', followUpAt: null, notes: '' } as LoopOpportunity] };
@@ -323,5 +329,129 @@ describe('regression controls: the other branches of the shared handler are unch
       expect(document.querySelectorAll('.jl-field-error')).toHaveLength(0); expect(document.querySelectorAll('[aria-invalid="true"]')).toHaveLength(0);
       expect(writes()).toHaveLength(0);
     });
+  });
+});
+
+describe('round 2: the feedback belongs to the draft that produced it', () => {
+  const id = '11111111-1111-4111-8111-111111111111';
+  const vacancy = 'Prepare weekly operations reports using Excel. Explain the reporting definitions to colleagues, review data quality and coordinate the weekly checklist.';
+  const finalText = ['Alex Reviewed', 'alex.reviewed@example.invalid', 'EXPERIENCE', 'Prepared weekly Excel reports for a local operations team and explained reporting definitions.'].join(String.fromCharCode(10));
+  const saved = (): FreeCvCheck => ({ id, user_id: 'validation-owner', request_id: id, job_title: 'Operations Analyst', company: 'Saved Employer Fixture', job_description: vacancy, original_text: finalText + String.fromCharCode(10) + 'PRIVATE_DETAIL_REMOVED_FROM_FINAL', reviewed_text: finalText, status: 'approved', method_version: 'fixture-method', created_at: '2026-10-15T00:00:00Z', updated_at: '2026-10-15T00:00:00Z' }) as FreeCvCheck;
+  const flagged = () => document.querySelectorAll('[aria-invalid="true"]').length;
+  const remedies = () => document.querySelectorAll('.jl-field-error').length;
+
+  it('a manual refusal, then a saved CV check: the imported values carry no old flag or remedy, nothing is sent, and the saved-check consent and source checks still work', async () => {
+    current = { ...snapshot(), profile: null, claims: [] }; mocks.list.mockResolvedValue([saved()]);
+    render(tree('/loop?fromCheck=' + id));
+    await waitFor(() => expect(screen.getByLabelText('Saved CV check')).toHaveValue(id));
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    fireEvent.click(f.save()); await flushFrames();
+    expect(flagged()).toBe(3); expect(f.title()).toHaveFocus();
+    fireEvent.click(screen.getByRole('button', { name: 'My CV & experience' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Use this saved check' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Opportunities' }));
+    expect(f.title()).toHaveValue('Operations Analyst'); expect(f.description()).toHaveValue(vacancy); expect(f.link()).toHaveValue('');
+    expect(writes()).toHaveLength(0);
+    expect([f.title(), f.link(), f.description()].map(node => node.getAttribute('aria-invalid'))).toEqual([null, null, null]);
+    expect(remedies()).toBe(0); expect(flagged()).toBe(0); expect(screen.queryAllByRole('alert')).toHaveLength(0);
+    const scrollsBefore = scrolled.mock.calls.length; await flushFrames(); expect(scrolled.mock.calls.length).toBe(scrollsBefore);   // the old request does not replay into the new draft
+    // saved-check consent branch: unchanged
+    expect(screen.getByRole('button', { name: 'Save linked vacancy' })).toBeDisabled();
+    fireEvent.submit(screen.getByRole('button', { name: 'Save linked vacancy' }).closest('form') as HTMLFormElement); await flushFrames();
+    expect(pageAlert()).toHaveTextContent('Review the saved-check link and confirm your choice before saving.'); expect(writes()).toHaveLength(0);
+    // consent ticked, link still missing: its own page-level message, still no field-level feedback
+    fireEvent.click(screen.getByLabelText(/Save this vacancy privately and link it to this saved check/));
+    fireEvent.click(screen.getByRole('button', { name: 'Save linked vacancy' })); await flushFrames();
+    expect(pageAlert()).toHaveTextContent(BANNER); expect(remedies()).toBe(0); expect(flagged()).toBe(0); expect(writes()).toHaveLength(0);
+    // source validation: an edited title no longer matches the saved check
+    fireEvent.change(f.title(), { target: { value: 'Operations Analyst II' } });
+    expect(screen.getByText(/The title, company or description differs from the saved check/)).toBeInTheDocument();
+    fireEvent.change(f.title(), { target: { value: 'Operations Analyst' } });
+    // the link is added and the deliberate save sends exactly one link request
+    fireEvent.change(f.link(), { target: { value: LINK } });
+    fireEvent.click(screen.getByLabelText(/Save this vacancy privately and link it to this saved check/));
+    fireEvent.click(screen.getByRole('button', { name: 'Save linked vacancy' }));
+    await waitFor(() => expect(writes()).toHaveLength(1));
+    expect(writes()[0]).toMatchObject({ action: 'link_saved_check', checkId: id, linkConsent: true, opportunity: { title: 'Operations Analyst', description: vacancy, url: LINK } });
+  });
+
+  async function rejectedTitle() {
+    current = snapshot(); const view = render(tree());
+    fireEvent.click(await screen.findByRole('button', { name: 'Opportunities' })); await screen.findByRole('button', { name: 'Save opportunity' });
+    fill({ ...valid, title: 'A' }); fireEvent.click(f.save()); await flushFrames();
+    expect(f.title()).toHaveAttribute('aria-invalid', 'true');
+    return view;
+  }
+  it('signing out and back in starts from a clean form', async () => {
+    const view = await rejectedTitle();
+    mocks.auth.user = null; view.rerender(tree());
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Save opportunity' })).not.toBeInTheDocument());
+    mocks.auth.user = { id: 'validation-owner' }; view.rerender(tree());
+    fireEvent.click(await screen.findByRole('button', { name: 'Opportunities' }));
+    await screen.findByRole('button', { name: 'Save opportunity' });
+    expect(f.title()).toHaveValue(''); expect(flagged()).toBe(0); expect(remedies()).toBe(0); expect(screen.queryAllByRole('alert')).toHaveLength(0);
+  });
+
+  it('a user switch in the same page starts from a clean form', async () => {
+    const view = await rejectedTitle();
+    mocks.auth.user = { id: 'another-owner' }; setTrackingDraftOwner('another-owner'); view.rerender(tree());
+    await waitFor(() => expect(f.title()).toHaveValue(''));
+    expect(f.company()).toHaveValue(''); expect(flagged()).toBe(0); expect(remedies()).toBe(0); expect(screen.queryAllByRole('alert')).toHaveLength(0);
+  });
+
+  it('the same account in a new record lifetime starts from a clean form', async () => {
+    await openForm(); fill({ ...valid, link: '' });
+    fireEvent.click(f.save()); await flushFrames();
+    expect(f.link()).toHaveAttribute('aria-invalid', 'true');
+    current = { ...current, lifecycleGeneration: 1, recordVersion: 4 };
+    fireEvent.click(screen.getByRole('button', { name: /Refresh records/ }));
+    await waitFor(() => expect(f.title()).toHaveValue(''));
+    expect(flagged()).toBe(0); expect(remedies()).toBe(0); expect(screen.queryAllByRole('alert')).toHaveLength(0); expect(writes()).toHaveLength(0);
+  });
+});
+
+describe('round 2: a superseded contact instruction goes, a real failure stays', () => {
+  const tickContact = () => fireEvent.click(screen.getByRole('checkbox', { name: /Add a named contact I have checked/ }));
+
+  it('untick the declined contact: its instruction goes at once, then a refused link shows one alert and nothing else', async () => {
+    await openForm(); fill(valid); tickContact();
+    fireEvent.click(f.save()); await flushFrames();
+    expect(pageAlert()).toHaveTextContent(CONTACT_BANNER); expect(writes()).toHaveLength(0); expect(screen.getAllByRole('alert')).toHaveLength(1);
+    tickContact();                                                                                // the visitor declines the contact
+    expect(pageAlert()).toBeNull(); expect(screen.queryAllByRole('alert')).toHaveLength(0);
+    fill({ link: '' });
+    await userEvent.setup().click(f.title()); await userEvent.keyboard('{Enter}'); await flushFrames();
+    expect(f.link()).toHaveFocus(); expect(f.link()).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getAllByRole('alert')).toHaveLength(1); expect(screen.getAllByRole('alert')[0]).toHaveTextContent(REMEDY.link);
+    expect(pageAlert()).toBeNull(); expect(screen.queryByText(CONTACT_BANNER)).not.toBeInTheDocument();
+    expect(writes()).toHaveLength(0);
+    fill({ link: LINK }); fireEvent.click(f.save());                                              // one deliberate valid Save sends exactly one vacancy, with no contact
+    await waitFor(() => expect(writes()).toHaveLength(1));
+    expect(writes()[0]).toMatchObject({ action: 'add_opportunity', opportunity: { contact: null, url: LINK } });
+  });
+
+  it('a new refusal on another field replaces the contact instruction even while the contact stays ticked, and the contact rule applies again once the fields pass', async () => {
+    await openForm(); fill(valid); tickContact();
+    fireEvent.click(f.save()); await flushFrames();
+    expect(pageAlert()).toHaveTextContent(CONTACT_BANNER);
+    fill({ link: '' }); fireEvent.click(f.save()); await flushFrames();
+    expect(pageAlert()).toBeNull(); expect(screen.getAllByRole('alert')).toHaveLength(1); expect(f.link()).toHaveFocus();
+    fill({ link: LINK }); fireEvent.click(f.save()); await flushFrames();
+    expect(pageAlert()).toHaveTextContent(CONTACT_BANNER); expect(writes()).toHaveLength(0);       // the contact is still ticked and still blank
+  });
+
+  it('a genuine server failure keeps its own feedback through the contact tick and a new field refusal', async () => {
+    serverFailure = 'Only public HTTPS sources without credentials are allowed.';
+    await openForm(); fill({ ...valid, link: 'https://localhost/jobs/1' });
+    fireEvent.click(f.save());
+    await waitFor(() => expect(pageAlert()).toHaveTextContent(serverFailure as string));
+    expect(writes()).toHaveLength(1);
+    tickContact(); tickContact();                                                                  // ticking and declining a contact must not clear a server failure
+    expect(pageAlert()).toHaveTextContent(serverFailure);
+    fill({ title: '' }); fireEvent.click(f.save()); await flushFrames();
+    expect(f.title()).toHaveFocus(); expect(f.title()).toHaveAttribute('aria-invalid', 'true');
+    expect(pageAlert()).toHaveTextContent(serverFailure);                                          // the server's message is still there, beside the field's own remedy
+    expect(screen.getAllByRole('alert')).toHaveLength(2);
+    expect(writes()).toHaveLength(1);                                                              // the refused Save sent nothing more
   });
 });
