@@ -200,6 +200,8 @@
 .jl-cv-builder { scroll-margin-top:100px; }
 .jl-cv-builder > .jl-button { margin-top:18px; }
 #jl-recurring-panel { scroll-margin-top:100px; }
+/* The vacancy form heading lands under the sticky header (about 60 px): the page's scroll padding of 96 px plus this margin, which replaces the 96 px margin every [tabindex] element gets in marketing.css. */
+#jl-add-opportunity-heading { scroll-margin-top:16px; }
 @media (max-width:650px) { .jl-progress-path.jl-progress-path--three { grid-template-columns:1fr; } }
 .jl-variant-preparation { display: grid; gap: 16px; min-width: 0; }
 .jl-variant-preparation h3 { margin-top: 12px; font-size: 1.05rem; }
