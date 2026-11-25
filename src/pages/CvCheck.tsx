@@ -631,7 +631,7 @@ function CvCheckWorkspace() {
     </aside>
     <div className="check-workarea">
     {error && <Alert id="check-validation-error" variant="destructive" role="alert" className="mb-5"><AlertDescription>{error}</AlertDescription></Alert>}
-    {notice && <p role="status" className="mb-5 rounded-xl border bg-muted/40 px-4 py-3 text-sm leading-6">{notice}{notice === passOfferNotice && <> <Link className="font-medium underline underline-offset-4" to="/pricing">See passes from $9</Link></>}</p>}
+    {notice && <p role="status" className="mb-5 rounded-xl border bg-muted/40 px-4 py-3 text-sm leading-6">{notice}{notice === passOfferNotice && <> <Link className="font-medium underline underline-offset-4" to="/pricing#one-time-passes">See passes from $9</Link></>}</p>}
     {previousReplacement && previousReplacement.ownerId === owner.current && <section className="mb-5 rounded-xl border p-4" aria-label="Source replacement undo"><Button type="button" variant="outline" disabled={!!busy} onClick={undoSourceReplacement}>Undo source replacement</Button><p className="mt-2 text-sm">Restore the source CV, final edits and application details from before this replacement. Review is required again. Undo lasts while this page stays open.</p></section>}
     {previousApplication && previousApplication.ownerId === owner.current && <div className="check-undo-application"><Button type="button" variant="outline" disabled={!!busy} onClick={undoNewApplication}>Undo new application</Button><p>Restore the previous CV, vacancy and edits for a fresh review. Undo is kept only on this page; leaving or refreshing loses it.</p></div>}
     {busy && <p role="status" className="mb-4 flex items-center gap-2 text-sm"><Loader2 size={16} className="animate-spin" />{busy}</p>}

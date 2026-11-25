@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Check, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { currentOffer } from '@/lib/current-offer';
@@ -36,6 +36,8 @@ const cheapestPass = Math.min(...passPlans.map(plan => plan.price));
 export default function SubscriptionPricing() {
   const { user } = useAuth();
   const [params] = useSearchParams();
+  // The CV Check's "See passes from $9" link names this section; the page opens it (RouteNavigation then scrolls to it and focuses it). An ordinary visit has no fragment and stays closed.
+  const passesRequested = useLocation().hash === '#one-time-passes';
   const requested = params.get('plan');
   const picked = isPassPlanKey(requested) ? requested : null;
   const [busy, setBusy] = useState<PassPlanKey | null>(null);
@@ -65,8 +67,8 @@ export default function SubscriptionPricing() {
 
   return <>
     <LoopSubscriptionBilling />
-    <section className="jv-section pricing-passes" aria-labelledby="passes-title" data-reveal>
-      <details className="pricing-passes-disclosure" open={picked || params.get('checkout') === 'cancelled' ? true : undefined}>
+    <section id="one-time-passes" className="jv-section pricing-passes" aria-labelledby="passes-title" data-reveal>
+      <details className="pricing-passes-disclosure" open={picked || passesRequested || params.get('checkout') === 'cancelled' ? true : undefined}>
       <summary data-analytics-label="Prefer a one-off? See one-time passes"><span className="pricing-passes-lead"><span className="jv-caption">AI CV tailoring · one-time passes from ${cheapestPass}</span><span id="passes-title" className="pricing-passes-title">Prefer a one-off? See one-time passes</span><span className="pricing-passes-sub">{currentOffer.check}</span><span className="pricing-passes-prices" aria-label="One-time pass prices">{passPlans.map(plan => <span key={plan.key}><strong>${plan.price}</strong> {plan.name} · {plan.tailoredCvs} CVs · {plan.days} days</span>)}</span></span></summary>
       <div className="pricing-passes-body">
       <p className="pricing-note pricing-note--lead">These optional one-time CV Check passes are priced in US dollars. The currency selector in Billing details applies to your Automated Job Loop subscriptions.</p>
