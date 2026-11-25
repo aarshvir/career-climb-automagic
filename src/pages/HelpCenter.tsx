@@ -156,7 +156,7 @@ export const helpTopics: HelpTopic[] = [
     summary: 'Add the employer posting you want to apply for, then check the deadline, location and application instructions at the original source.',
     steps: [
       'Open Opportunities, or select Add a vacancy I already found on Today.',
-      'In Add an opportunity, enter Vacancy title and Company. Add Location, the Vacancy HTTPS link and the Full vacancy description from the actual posting. The description needs at least 80 characters.',
+      'In Add an opportunity, three things are needed: the Vacancy title (at least 2 characters), the Vacancy HTTPS link (a valid link to the posting, starting with https://) and the Full vacancy description (at least 80 characters from the actual posting). Company and Location are optional; add them from the posting if you have them.',
       'Leave Add a named contact I have checked (optional) unchecked unless you have a real source. If you add a contact, preserve the supporting source passage and check identity and role yourself. Use an email address only when you have checked its source.',
       'Select Save opportunity. In Your opportunities, select Open vacancy yourself and verify the closing date, location, pay, work authorization and required qualifications against the original source.',
       'On Today, read Know where your shortlist comes from and Run history & source coverage. Inspect each source’s actual result, date and message. Added vacancies can remain useful when discovery is unavailable.',

@@ -84,9 +84,32 @@ function explanation(value: string): string {
   return reasons[value] ?? (/^[A-Z0-9_]+$/.test(value) ? display(value.toLowerCase()).replace(/^./, letter => letter.toUpperCase()) + '. Review this condition before proceeding.' : value);
 }
 
-function Field({ label, value, onChange, multiline = false, type = 'text', maxLength = 500, help, disabled = false, readOnly = false }: { label: string; value: string; onChange: (value: string) => void; multiline?: boolean; type?: string; maxLength?: number; help?: string; disabled?: boolean; readOnly?: boolean }) {
-  const id = useId();
-  return <div className="jl-field"><label htmlFor={id}>{label}</label>{multiline ? <textarea id={id} value={value} onChange={event => onChange(event.target.value)} maxLength={maxLength} disabled={disabled} readOnly={readOnly} aria-describedby={help ? `${id}-help` : undefined} /> : <input id={id} type={type} step={type === 'number' ? 'any' : undefined} value={value} onChange={event => onChange(event.target.value)} maxLength={maxLength} disabled={disabled} readOnly={readOnly} aria-describedby={help ? `${id}-help` : undefined} />}{help && <p id={`${id}-help`}>{help}</p>}</div>;
+/** What the manual vacancy form needs before it sends (the page's existing rules, unchanged): a title of at least 2 characters, a valid https link and a description of at least 80 characters. */
+const VACANCY_FIELD_IDS = { title: 'jl-opportunity-title', link: 'jl-opportunity-link', description: 'jl-opportunity-description' } as const;
+type VacancyField = keyof typeof VACANCY_FIELD_IDS;
+const VACANCY_ORDER: readonly VacancyField[] = ['title', 'link', 'description'];
+const VACANCY_REMEDY: Record<VacancyField, string> = {
+  title: 'Add a title of at least 2 characters.',
+  link: 'Paste the full link to the posting. It must be a valid https:// link.',
+  description: 'Paste more of the posting: at least 80 characters are needed.',
+};
+const VACANCY_VALID: Record<VacancyField, (value: string) => boolean> = {
+  title: value => value.trim().length >= 2,
+  link: value => isLoopHttpsUrl(value),
+  description: value => value.trim().length >= 80,
+};
+/** True only while the page itself moves focus to a refused field (it scrolls the whole field into view itself); reaching a flagged field any other way (Tab, tap) brings label, box and remedy into view. */
+const focusScroll = { skip: false };
+function vacancyFieldIssues(title: string, link: string, description: string): Partial<Record<VacancyField, string>> {
+  const values: Record<VacancyField, string> = { title, link, description }, issues: Partial<Record<VacancyField, string>> = {};
+  for (const field of VACANCY_ORDER) if (!VACANCY_VALID[field](values[field])) issues[field] = VACANCY_REMEDY[field];
+  return issues;
+}
+function Field({ label, value, onChange, multiline = false, type = 'text', maxLength = 500, help, disabled = false, readOnly = false, id: fixedId, error, errorAlert = false, errorKey = 0 }: { label: string; value: string; onChange: (value: string) => void; multiline?: boolean; type?: string; maxLength?: number; help?: string; disabled?: boolean; readOnly?: boolean; id?: string; error?: string; errorAlert?: boolean; errorKey?: number }) {
+  const generated = useId(), id = fixedId ?? generated;
+  const describedBy = [error ? `${id}-error` : '', help ? `${id}-help` : ''].filter(Boolean).join(' ') || undefined;
+  const reveal = error ? (event: { currentTarget: HTMLElement }) => { if (!focusScroll.skip) (event.currentTarget.closest('.jl-field') ?? event.currentTarget).scrollIntoView?.({ block: 'nearest', behavior: smoothBehavior() }); } : undefined;
+  return <div className="jl-field"><label htmlFor={id}>{label}</label>{multiline ? <textarea id={id} value={value} onChange={event => onChange(event.target.value)} maxLength={maxLength} disabled={disabled} readOnly={readOnly} aria-describedby={describedBy} aria-invalid={error ? true : undefined} onFocus={reveal} /> : <input id={id} type={type} step={type === 'number' ? 'any' : undefined} value={value} onChange={event => onChange(event.target.value)} maxLength={maxLength} disabled={disabled} readOnly={readOnly} aria-describedby={describedBy} aria-invalid={error ? true : undefined} onFocus={reveal} />}{error && <p id={`${id}-error`} key={errorKey} className="jl-field-error" role={errorAlert ? 'alert' : undefined}>{error}</p>}{help && <p id={`${id}-help`}>{help}</p>}</div>;
 }
 function Select({ label, value, onChange, children, disabled = false }: { label: string; value: string; onChange: (value: string) => void; children: ReactNode; disabled?: boolean }) {
   const id = useId(); return <div className="jl-field"><label htmlFor={id}>{label}</label><select id={id} value={value} onChange={event => onChange(event.target.value)} disabled={disabled}>{children}</select></div>;
@@ -146,6 +169,10 @@ export default function JobLoop() {
   const [erasureOwner, setErasureOwner] = useState<string | null>(null);
   /** A pending "Add a vacancy I already found" arrival: where focus was, the account and the session it was made in. Null = nothing pending (see openVacancyForm). */
   const [vacancyArrival, setVacancyArrival] = useState<{ from: Element | null; owner: string | null; generation: number } | null>(null);
+  /** The short remedy shown at each failing ordinary field (title, link, description) after a manual Save was refused; empty = none. A field's entry is removed when that field is corrected. */
+  const [vacancyIssues, setVacancyIssues] = useState<Partial<Record<VacancyField, string>>>({});
+  /** The field whose remedy carries the one live announcement of the latest refusal, and a counter that makes a repeated refusal a new announcement and a new search for the first failing field. */
+  const [vacancyAlert, setVacancyAlert] = useState<{ field: VacancyField; seq: number } | null>(null);
   const [profile, setProfile] = useState<LoopProfileInput>(() => blankProfile(initialAudience.current)), [profileDirty, setProfileDirty] = useState(false), [saveConsent, setSaveConsent] = useState(false), [cvs, setCvs] = useState<CvDocument[]>([]), [cvError, setCvError] = useState('');
   const [lists, setLists] = useState(() => listInputs(blankProfile(initialAudience.current)));
   const [excludedFacts, setExcludedFacts] = useState<Set<string>>(() => new Set()), [factConsent, setFactConsent] = useState(false), [quickStart, setQuickStart] = useState<'' | 'saving' | 'pending-run'>(''), [suggestionsEmpty, setSuggestionsEmpty] = useState(false);
@@ -485,7 +512,12 @@ export default function JobLoop() {
   async function addOpportunity(event: FormEvent) {
     event.preventDefault(); if (!snapshot) return;
     if (pendingCheckLink && (!savedCheckScopeCurrent(pendingCheckLink) || !checkVacancyMatches || !linkConsent || linkConsentRevision.current !== opportunityDraftRevision.current || (existingCheckLinks.length > 0 && !existingCheckLink))) { setError('Review the saved-check link and confirm your choice before saving.'); return; }
-    if (title.trim().length < 2 || description.trim().length < 80 || !isLoopHttpsUrl(jobUrl)) { setError('Add a title, a real HTTPS vacancy link and the full job description (at least 80 characters).'); return; }
+    if (!pendingCheckLink) {
+      // A manual Save: refused here, at the fields, by exactly the rules the page always applied (title, https link, description). The remedy sits at each failing field and the first one takes focus.
+      const issues = vacancyFieldIssues(title, jobUrl, description), first = VACANCY_ORDER.find(field => issues[field]);
+      if (first) { setVacancyIssues(issues); setVacancyAlert(previous => ({ field: first, seq: (previous?.seq ?? 0) + 1 })); return; }
+      if (Object.keys(vacancyIssues).length) setVacancyIssues({});
+    } else if (title.trim().length < 2 || description.trim().length < 80 || !isLoopHttpsUrl(jobUrl)) { setError('Add a title, a real HTTPS vacancy link and the full job description (at least 80 characters).'); return; }
     if (withContact && (!contact.name.trim() || !contact.sourceQuote.trim() || !isLoopHttpsUrl(contact.sourceUrl) || !contact.confirmedByUser || (contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)))) { setError('Add a named contact, source link and source passage, then confirm the contact yourself. An email format is not verification.'); return; }
     const revision = opportunityDraftRevision.current;
     const opportunity = { title, company, location, url: jobUrl, description, contact: withContact ? contact : null };
@@ -494,7 +526,7 @@ export default function JobLoop() {
       : { action: 'add_opportunity', expectedVersion: snapshot.recordVersion, opportunity };
     const result = await perform(action, pendingCheckLink ? 'Vacancy linked to your saved check. Existing progress is kept. No preparation, application or outreach was started.' : 'Opportunity saved as user-provided. No application or outreach was sent.');
     if (result && revision === opportunityDraftRevision.current && (!pendingCheckLink || savedCheckScopeCurrent(pendingCheckLink))) {
-      opportunityDraftRevision.current++; setPendingCheckLink(null); setLinkConsent(false);
+      opportunityDraftRevision.current++; setPendingCheckLink(null); setLinkConsent(false); setVacancyIssues({}); setVacancyAlert(null);
       setTitle(''); setCompany(''); setLocation(''); setJobUrl(''); setDescription(''); setWithContact(false); setContact({ name: '', title: '', email: '', sourceUrl: '', sourceQuote: '', confirmedByUser: false, inExistingThread: false });
     }
   }
@@ -612,6 +644,27 @@ export default function JobLoop() {
     });
     return () => window.cancelAnimationFrame(frame);
   }, [vacancyArrival, tab]);
+  // After a manual Save is refused by the page's own rules: once the remedies have rendered, focus the first failing field in form order and bring its label, box and remedy into view together.
+  // Runs once per refusal (a repeated refusal is a new request); typing never triggers it.
+  useEffect(() => {
+    if (!vacancyAlert) return;
+    const frame = window.requestAnimationFrame(() => {
+      if (!mounted.current) return;
+      const field = document.getElementById(VACANCY_FIELD_IDS[vacancyAlert.field]);
+      if (!field) return;
+      focusScroll.skip = true;
+      try { field.focus({ preventScroll: true }); } finally { focusScroll.skip = false; }
+      (field.closest('.jl-field') ?? field).scrollIntoView?.({ block: 'center', behavior: smoothBehavior() });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [vacancyAlert]);
+  /** Typing in a vacancy field clears that field's remedy as soon as the value satisfies its rule; it never moves focus and never sends anything. */
+  function editVacancy(field: VacancyField, set: (value: string) => void) {
+    return (value: string) => {
+      set(value);
+      if (vacancyIssues[field] && VACANCY_VALID[field](value)) setVacancyIssues(current => { const next = { ...current }; delete next[field]; return next; });
+    };
+  }
   const searchBlock = authLoading || authError || trackingAuthority < 0 || !importAuthReady.current ? 'Reconnect your sign-in before starting a search.'
     : !snapshot?.profile ? 'Save your CV and search preferences first.'
     : uncommitted ? 'Save or discard your CV and fact edits before searching.'
@@ -735,7 +788,7 @@ export default function JobLoop() {
       </div>}
       {snapshot && <div className="jl-tab-panel" hidden={tab !== 'opportunities'}>
         <Link className="jl-text-link" to="/help#job-loop-vacancies">Help adding a real vacancy <ArrowRight size={14} aria-hidden="true" /></Link>
-        <section className="jl-panel"><h2 id="jl-add-opportunity-heading" tabIndex={-1}>Add an opportunity</h2><p>Paste the actual vacancy. A user-provided link is not independently verified as open. No guessed contact details.</p><form className="jl-profile-form" onChangeCapture={event => { opportunityDraftRevision.current++; if (!(event.target as HTMLElement).closest('[data-link-consent]')) setLinkConsent(false); }} onSubmit={event => void addOpportunity(event)}><fieldset className="jl-form-fields" disabled={!!busy}><div className="jl-form-grid"><Field label="Vacancy title" value={title} onChange={setTitle} /><Field label="Company" value={company} onChange={setCompany} /></div><Field label="Location" value={location} onChange={setLocation} /><Field label="Vacancy HTTPS link" type="url" value={jobUrl} onChange={setJobUrl} maxLength={2000} /><Field label="Full vacancy description" multiline value={description} onChange={setDescription} maxLength={20000} help="Paste at least 80 characters from the actual posting." /><Consent checked={withContact} onChange={setWithContact}>Add a named contact I have checked (optional).</Consent>{withContact && <div className="jl-contact-fields"><Field label="Contact name" value={contact.name} onChange={name => setContact(current => ({ ...current, name, confirmedByUser: false }))} /><Field label="Contact title" value={contact.title} onChange={title => setContact(current => ({ ...current, title, confirmedByUser: false }))} /><Field label="Contact email (optional, never guessed)" type="email" value={contact.email} onChange={email => setContact(current => ({ ...current, email, confirmedByUser: false }))} /><Field label="Public contact source HTTPS link" type="url" value={contact.sourceUrl} onChange={sourceUrl => setContact(current => ({ ...current, sourceUrl, confirmedByUser: false }))} maxLength={2000} /><Field label="Source passage supporting this contact" multiline value={contact.sourceQuote} onChange={sourceQuote => setContact(current => ({ ...current, sourceQuote, confirmedByUser: false }))} maxLength={60000} /><Consent checked={contact.confirmedByUser} onChange={confirmedByUser => setContact(current => ({ ...current, confirmedByUser }))}>I checked the name, role and supplied email against this source. Email syntax alone does not verify identity.</Consent><Consent checked={contact.inExistingThread} onChange={inExistingThread => setContact(current => ({ ...current, inExistingThread }))}>I already have an existing thread with this person; do not treat them as a cold contact.</Consent></div>}{pendingCheckLink && <section aria-label="Saved-check vacancy link">
+        <section className="jl-panel"><h2 id="jl-add-opportunity-heading" tabIndex={-1}>Add an opportunity</h2><p>Paste the actual vacancy. A user-provided link is not independently verified as open. No guessed contact details.</p><form className="jl-profile-form" onChangeCapture={event => { opportunityDraftRevision.current++; if (!(event.target as HTMLElement).closest('[data-link-consent]')) setLinkConsent(false); }} onSubmit={event => void addOpportunity(event)}><fieldset className="jl-form-fields" disabled={!!busy}><div className="jl-form-grid"><Field id={VACANCY_FIELD_IDS.title} label="Vacancy title" value={title} onChange={editVacancy('title', setTitle)} help="Required. At least 2 characters." error={vacancyIssues.title} errorAlert={vacancyAlert?.field === 'title'} errorKey={vacancyAlert?.seq} /><Field label="Company" value={company} onChange={setCompany} help="Optional." /></div><Field label="Location" value={location} onChange={setLocation} help="Optional." /><Field id={VACANCY_FIELD_IDS.link} label="Vacancy HTTPS link" type="url" value={jobUrl} onChange={editVacancy('link', setJobUrl)} maxLength={2000} help="Required. The full link to the posting, starting with https://." error={vacancyIssues.link} errorAlert={vacancyAlert?.field === 'link'} errorKey={vacancyAlert?.seq} /><Field id={VACANCY_FIELD_IDS.description} label="Full vacancy description" multiline value={description} onChange={editVacancy('description', setDescription)} maxLength={20000} help="Required. Paste at least 80 characters from the actual posting." error={vacancyIssues.description} errorAlert={vacancyAlert?.field === 'description'} errorKey={vacancyAlert?.seq} /><Consent checked={withContact} onChange={setWithContact}>Add a named contact I have checked (optional).</Consent>{withContact && <div className="jl-contact-fields"><Field label="Contact name" value={contact.name} onChange={name => setContact(current => ({ ...current, name, confirmedByUser: false }))} /><Field label="Contact title" value={contact.title} onChange={title => setContact(current => ({ ...current, title, confirmedByUser: false }))} /><Field label="Contact email (optional, never guessed)" type="email" value={contact.email} onChange={email => setContact(current => ({ ...current, email, confirmedByUser: false }))} /><Field label="Public contact source HTTPS link" type="url" value={contact.sourceUrl} onChange={sourceUrl => setContact(current => ({ ...current, sourceUrl, confirmedByUser: false }))} maxLength={2000} /><Field label="Source passage supporting this contact" multiline value={contact.sourceQuote} onChange={sourceQuote => setContact(current => ({ ...current, sourceQuote, confirmedByUser: false }))} maxLength={60000} /><Consent checked={contact.confirmedByUser} onChange={confirmedByUser => setContact(current => ({ ...current, confirmedByUser }))}>I checked the name, role and supplied email against this source. Email syntax alone does not verify identity.</Consent><Consent checked={contact.inExistingThread} onChange={inExistingThread => setContact(current => ({ ...current, inExistingThread }))}>I already have an existing thread with this person; do not treat them as a cold contact.</Consent></div>}{pendingCheckLink && <section aria-label="Saved-check vacancy link">
           <p>This vacancy came from <strong>{pendingCheckLink.vacancy.title} · {pendingCheckLink.vacancy.company || 'Company not supplied'}</strong>. Saving it here can keep it together with that exact saved check in Applications.</p>
           {existingCheckLink && <p role="status">Already linked: {existingCheckLink.title} · {display(existingCheckLink.status)}. Saving again keeps its current wording, notes and progress; it does not replace them. <Link to={`/loop?opportunity=${encodeURIComponent(existingCheckLink.id)}&generation=${pendingCheckLink.generation}`}>Open linked vacancy and progress</Link></p>}
           {existingCheckLinks.length > 0 && !existingCheckLink && <p role="alert">The saved relationship is inconsistent. Refresh records before continuing; these records will not be merged.</p>}
