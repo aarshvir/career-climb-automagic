@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { buildLoopCvText, type LoopCvAnswers } from '@/lib/loop-cv-builder';
 
 const prompts: { key: keyof LoopCvAnswers; label: string; help: string; max: number }[] = [
@@ -11,12 +11,25 @@ const prompts: { key: keyof LoopCvAnswers; label: string; help: string; max: num
 ];
 
 /** Local guided answers become a reviewable draft, never a save or approval. */
-export default function LoopCvBuilder({ answers, onChange, source, onUse, disabled }: {
+export default function LoopCvBuilder({ answers, onChange, source, onUse, disabled, focusRequest = 0, onFocusHandled }: {
   answers: LoopCvAnswers; onChange: (answers: LoopCvAnswers) => void;
   source: string; onUse: (text: string) => boolean; disabled: boolean;
+  /** Each increase opens the builder and puts the cursor in its first field (the person can still collapse and reopen it). It changes nothing else. */
+  focusRequest?: number;
+  /** Called once after a request has been handled, so the owner can clear it: a request belongs to ONE deliberate activation and must not be replayed when this component mounts again. */
+  onFocusHandled?: () => void;
 }) {
   const id = useId();
-  const revision = useRef(0);
+  const revision = useRef(0), box = useRef<HTMLDetailsElement>(null), firstField = useRef<HTMLInputElement>(null);
+  const handled = useRef(onFocusHandled);   // the latest callback, so a new function identity never re-runs the request below
+  useEffect(() => { handled.current = onFocusHandled; });
+  useEffect(() => {
+    if (focusRequest <= 0) return;
+    if (box.current) box.current.open = true;
+    firstField.current?.focus({ preventScroll: true });
+    firstField.current?.scrollIntoView?.({ block: 'center', behavior: 'auto' });
+    handled.current?.();
+  }, [focusRequest]);
   const [preview, setPreview] = useState<{ text: string; revision: number; source: string; answersKey: string } | null>(null);
   const [replace, setReplace] = useState(false), [message, setMessage] = useState('');
   const [undo, setUndo] = useState<{ before: string; after: string } | null>(null);
@@ -30,12 +43,12 @@ export default function LoopCvBuilder({ answers, onChange, source, onUse, disabl
     try { setPreview({ text: buildLoopCvText(answers), revision: revision.current, source, answersKey: JSON.stringify(answers) }); setReplace(false); setMessage(''); }
     catch (error) { setMessage(error instanceof Error ? error.message : 'Check your answers before creating a draft.'); }
   }
-  return <details className="jl-panel jl-cv-builder"><summary>No CV yet? Build one with guided questions</summary>
+  return <details className="jl-panel jl-cv-builder" ref={box}><summary>No CV yet? Build one with guided questions</summary>
     <p>Answer in your own words. We arrange your answers into a CV draft without adding facts. Your answers stay in this tab until you choose to save your reviewed career record.</p>
     <div className="jl-profile-form">{prompts.map(prompt => <div className="jl-field" key={prompt.key}>
       <label htmlFor={`${id}-${prompt.key}`}>{prompt.label}</label>
       {prompt.key === 'name' || prompt.key === 'contact'
-        ? <input id={`${id}-${prompt.key}`} value={answers[prompt.key]} maxLength={prompt.max} disabled={disabled} onChange={event => change(prompt.key, event.target.value)} aria-describedby={`${id}-${prompt.key}-help`} />
+        ? <input id={`${id}-${prompt.key}`} ref={prompt.key === 'name' ? firstField : undefined} value={answers[prompt.key]} maxLength={prompt.max} disabled={disabled} onChange={event => change(prompt.key, event.target.value)} aria-describedby={`${id}-${prompt.key}-help`} />
         : <textarea id={`${id}-${prompt.key}`} value={answers[prompt.key]} maxLength={prompt.max} disabled={disabled} onChange={event => change(prompt.key, event.target.value)} aria-describedby={`${id}-${prompt.key}-help`} />}
       <p id={`${id}-${prompt.key}-help`}>{prompt.help}</p>
     </div>)}</div>
