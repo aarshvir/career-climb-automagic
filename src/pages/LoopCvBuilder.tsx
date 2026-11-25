@@ -11,19 +11,24 @@ const prompts: { key: keyof LoopCvAnswers; label: string; help: string; max: num
 ];
 
 /** Local guided answers become a reviewable draft, never a save or approval. */
-export default function LoopCvBuilder({ answers, onChange, source, onUse, disabled, focusRequest = 0 }: {
+export default function LoopCvBuilder({ answers, onChange, source, onUse, disabled, focusRequest = 0, onFocusHandled }: {
   answers: LoopCvAnswers; onChange: (answers: LoopCvAnswers) => void;
   source: string; onUse: (text: string) => boolean; disabled: boolean;
   /** Each increase opens the builder and puts the cursor in its first field (the person can still collapse and reopen it). It changes nothing else. */
   focusRequest?: number;
+  /** Called once after a request has been handled, so the owner can clear it: a request belongs to ONE deliberate activation and must not be replayed when this component mounts again. */
+  onFocusHandled?: () => void;
 }) {
   const id = useId();
   const revision = useRef(0), box = useRef<HTMLDetailsElement>(null), firstField = useRef<HTMLInputElement>(null);
+  const handled = useRef(onFocusHandled);   // the latest callback, so a new function identity never re-runs the request below
+  useEffect(() => { handled.current = onFocusHandled; });
   useEffect(() => {
     if (focusRequest <= 0) return;
     if (box.current) box.current.open = true;
     firstField.current?.focus({ preventScroll: true });
     firstField.current?.scrollIntoView?.({ block: 'center', behavior: 'auto' });
+    handled.current?.();
   }, [focusRequest]);
   const [preview, setPreview] = useState<{ text: string; revision: number; source: string; answersKey: string } | null>(null);
   const [replace, setReplace] = useState(false), [message, setMessage] = useState('');

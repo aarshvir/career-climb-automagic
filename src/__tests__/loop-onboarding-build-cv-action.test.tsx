@@ -273,3 +273,122 @@ describe('the rest of the flow is the existing one: preview, a deliberate Use, r
     expect(nameInBuilder()).toHaveValue('');
   });
 });
+
+/**
+ * Round 2 (Codex, review of 598401b): the request to open and focus the builder was kept in the page, so when the CV step was entered again (Back then Next, or Back from Review) the
+ * builder mounted again, saw the old positive request and opened itself again with another focus and scroll. A request now belongs to ONE deliberate activation: the builder tells the
+ * page when it has acted and the page clears it. A later deliberate click, after a new refusal, still opens and focuses.
+ */
+describe('one request per deliberate activation', () => {
+  const heading = () => screen.getByRole('heading', { level: 1 });
+  const education = () => screen.getByLabelText('What have you studied or trained in?') as HTMLTextAreaElement;
+  const back = () => fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+  function watch() {
+    const scrolled = vi.fn(), focused = vi.fn(); const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollIntoView');
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', { configurable: true, value: scrolled });
+    const listener = (event: Event) => { if (event.target instanceof HTMLInputElement && event.target.closest('details.jl-cv-builder') && event.target.id.endsWith('-name')) focused(); };
+    document.addEventListener('focusin', listener);
+    const onField = () => scrolled.mock.contexts.filter(context => context instanceof HTMLInputElement && (context as HTMLElement).closest('details.jl-cv-builder')).length;
+    return { onField, focusedCount: () => focused.mock.calls.length, reset: () => { scrolled.mockClear(); focused.mockClear(); },
+      stop: () => { document.removeEventListener('focusin', listener); if (original) Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', original); else Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView'); } };
+  }
+
+  it('(1) open with the button, type, collapse, Back to the privacy step, Next: the builder stays closed, nothing is focused or scrolled, the step heading has the cursor, the answers are kept', async () => {
+    const watcher = watch();
+    try {
+      await toCvStep();
+      next(); fireEvent.click(action() as HTMLElement);
+      expect(builder().open).toBe(true); expect(document.activeElement).toBe(nameInBuilder());
+      fireEvent.change(education(), { target: { value: EDUCATION } });
+      builder().open = false;
+      watcher.reset();
+      back();
+      expect(heading()).toHaveTextContent('What should stay private?');
+      next();
+      expect(heading()).toHaveTextContent('Bring your experience');
+      expect(builder().open).toBe(false);                                              // not reopened
+      expect(document.activeElement).toBe(heading());                                  // the ordinary step-heading focus
+      expect(watcher.focusedCount()).toBe(0); expect(watcher.onField()).toBe(0);       // no stray focus or scroll on the builder
+      expect(education()).toHaveValue(EDUCATION); expect(nameInBuilder()).toHaveValue('Casey Fictional');   // the typed answers survived
+      expect(cvBox()).toHaveValue(''); expect(writes()).toHaveLength(0);
+    } finally { watcher.stop(); }
+  });
+
+  it('(2) returning from Review to the CV step does not replay it either, and the draft that was used is still there; one deliberate Save writes once', async () => {
+    const user = userEvent.setup(); const watcher = watch();
+    try {
+      await toCvStep();
+      next(); fireEvent.click(action() as HTMLElement);
+      await user.click(education()); await user.keyboard(EDUCATION);
+      fireEvent.click(screen.getByRole('button', { name: 'Preview my CV draft' })); fireEvent.click(screen.getByRole('button', { name: 'Use this CV draft' }));
+      next();
+      expect(heading()).toHaveTextContent('Review your Automated Job Loop setup');
+      watcher.reset();
+      back();
+      expect(heading()).toHaveTextContent('Bring your experience');
+      expect(builder().open).toBe(false);
+      expect(document.activeElement).toBe(heading());
+      expect(watcher.focusedCount()).toBe(0); expect(watcher.onField()).toBe(0);
+      expect(cvBox().value).toBe(`Casey Fictional\n\nEducation\n${EDUCATION}`);
+      expect(writes()).toHaveLength(0);
+      next();
+      fireEvent.click(screen.getByRole('checkbox', { name: /Save this CV text/ })); fireEvent.click(screen.getByRole('button', { name: 'Save my setup' }));
+      await screen.findByRole('heading', { name: 'Your setup is saved.' });
+      expect(writes()).toHaveLength(1);
+    } finally { watcher.stop(); }
+  });
+
+  it('(3) a later deliberate click, after a new refusal and after the first request was consumed, opens and focuses again, once each time', async () => {
+    const watcher = watch();
+    try {
+      await toCvStep();
+      next(); fireEvent.click(action() as HTMLElement);                                // first activation
+      expect(watcher.focusedCount()).toBe(1); expect(watcher.onField()).toBe(1);
+      builder().open = false;
+      back(); next();                                                                  // leave and come back: nothing replays
+      expect(builder().open).toBe(false); expect(watcher.focusedCount()).toBe(1); expect(watcher.onField()).toBe(1);
+      next();                                                                          // a new refusal on the re-entered step
+      expect(screen.getByRole('alert')).toHaveTextContent(EMPTY); expect(action()).toBeInTheDocument();
+      fireEvent.click(action() as HTMLElement);                                        // a new deliberate click
+      expect(builder().open).toBe(true); expect(document.activeElement).toBe(nameInBuilder());
+      expect(watcher.focusedCount()).toBe(2); expect(watcher.onField()).toBe(2);
+      builder().open = false;
+      fireEvent.click(action() as HTMLElement);                                        // and again, without leaving
+      expect(builder().open).toBe(true); expect(document.activeElement).toBe(nameInBuilder()); expect(watcher.onField()).toBe(3);   // (jsdom keeps the cursor in the hidden field, so only the scroll is counted here)
+      builder().open = false;
+      back(); next();                                                                  // the last request is consumed too
+      expect(builder().open).toBe(false); expect(watcher.focusedCount()).toBe(2); expect(watcher.onField()).toBe(3);
+      expect(writes()).toHaveLength(0);
+    } finally { watcher.stop(); }
+  });
+
+  it('the request is cleared once handled: the builder reports it handled once per request and a remount with no pending request does nothing', async () => {
+    const { default: LoopCvBuilder } = await import('@/pages/LoopCvBuilder');
+    const props = { answers: blankLoopCvAnswers(), onChange: vi.fn(), source: '', onUse: vi.fn(() => true), disabled: false };
+    const handled = vi.fn();
+    const view = render(<LoopCvBuilder {...props} focusRequest={1} onFocusHandled={handled} />);
+    expect(handled).toHaveBeenCalledTimes(1); expect((document.querySelector('details.jl-cv-builder') as HTMLDetailsElement).open).toBe(true);
+    view.rerender(<LoopCvBuilder {...props} focusRequest={1} onFocusHandled={handled} />);
+    expect(handled).toHaveBeenCalledTimes(1);                                          // the same request is not handled twice
+    view.rerender(<LoopCvBuilder {...props} focusRequest={0} onFocusHandled={handled} />);
+    expect(handled).toHaveBeenCalledTimes(1);                                          // 0 means nothing pending
+    view.rerender(<LoopCvBuilder {...props} focusRequest={1} onFocusHandled={handled} />);
+    expect(handled).toHaveBeenCalledTimes(2);                                          // a new request after the clear is handled
+    view.unmount();
+    render(<LoopCvBuilder {...props} focusRequest={0} onFocusHandled={handled} />);
+    expect((document.querySelector('details.jl-cv-builder') as HTMLDetailsElement).open).toBe(false); expect(handled).toHaveBeenCalledTimes(2);
+  });
+
+  it('a new callback identity never replays a request, and the newest callback is the one told when the next request arrives', async () => {
+    const { default: LoopCvBuilder } = await import('@/pages/LoopCvBuilder');
+    const props = { answers: blankLoopCvAnswers(), onChange: vi.fn(), source: '', onUse: vi.fn(() => true), disabled: false };
+    const first = vi.fn(), second = vi.fn(), third = vi.fn();
+    const view = render(<LoopCvBuilder {...props} focusRequest={1} onFocusHandled={first} />);
+    expect(first).toHaveBeenCalledTimes(1);
+    view.rerender(<LoopCvBuilder {...props} focusRequest={1} onFocusHandled={second} />);   // same request, new function: nothing happens again
+    view.rerender(<LoopCvBuilder {...props} focusRequest={1} onFocusHandled={third} />);
+    expect(first).toHaveBeenCalledTimes(1); expect(second).not.toHaveBeenCalled(); expect(third).not.toHaveBeenCalled();
+    view.rerender(<LoopCvBuilder {...props} focusRequest={2} onFocusHandled={third} />);    // a new request reaches the newest callback only
+    expect(third).toHaveBeenCalledTimes(1); expect(first).toHaveBeenCalledTimes(1); expect(second).not.toHaveBeenCalled();
+  });
+});
