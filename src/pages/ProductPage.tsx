@@ -1,5 +1,5 @@
-import { Children, cloneElement, Fragment, isValidElement, useEffect, useState, type ReactElement, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Children, cloneElement, Fragment, isValidElement, useEffect, useRef, useState, type ReactElement, type ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowRight, ArrowUpRight, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -153,6 +153,13 @@ const relatedFor: Partial<Record<Kind, string[]>> = { privacy: ["/faq", "/contac
 export default function ProductPage({ kind }: { kind: Kind }) {
   const { user } = useAuth();
   useReveal();
+  // Back from the one-time passes (reached through the link in the pricing introduction) puts focus back on that link, so the next Tab continues in the introduction instead of sending the visitor down the page again.
+  const { hash } = useLocation();
+  const onPassesFragment = useRef(false);
+  useEffect(() => {
+    const wasOnPasses = onPassesFragment.current; onPassesFragment.current = hash === "#one-time-passes";
+    if (kind === "pricing" && wasOnPasses && hash === "" && document.activeElement?.id === "one-time-passes") document.getElementById("pricing-pass-link")?.focus({ preventScroll: true });
+  }, [hash, kind]);
   const start = user ? "/loop" : "/onboarding";
   const support = import.meta.env.VITE_SUPPORT_EMAIL as string | undefined;
   const legal = kind === "privacy" || kind === "terms" || kind === "refund";
@@ -173,7 +180,7 @@ export default function ProductPage({ kind }: { kind: Kind }) {
     <Helmet><title>{meta?.title ?? `${titles[kind]} | Jobvance`}</title><meta name="description" content={meta?.description ?? intros[kind]} />{meta && <link rel="canonical" href={SITE_ORIGIN + meta.path} />}{meta && <meta property="og:title" content={meta.title} />}{meta && <meta property="og:description" content={meta.description} />}{meta && <meta property="og:url" content={SITE_ORIGIN + meta.path} />}<meta property="og:type" content="website" />{kind === 'notfound' && <meta name="robots" content="noindex,follow" />}</Helmet>
     {kind === "home" ? <HomePage /> : <>
       <div className="jv-page product-inner">
-        <header className={`jv-page-head product-page-heading${visual ? " jv-page-head--split" : ""}${kind === "about" || kind === "pricing" ? " jv-page-head--forest jv-dark" : ""}${kind === "faq" ? " jv-page-head--center" : ""}`}><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title jv-enter-h1">{nb(titles[kind])}</h1><p className="jv-lead product-page-intro jv-enter" style={{ "--d": "60ms" } as React.CSSProperties}>{nb(intros[kind] ?? "")}</p>
+        <header className={`jv-page-head product-page-heading${visual ? " jv-page-head--split" : ""}${kind === "about" || kind === "pricing" ? " jv-page-head--forest jv-dark" : ""}${kind === "faq" ? " jv-page-head--center" : ""}`}><p className="jv-caption">{labels[kind]}</p><h1 className="jv-page-title jv-enter-h1">{nb(titles[kind])}</h1><p className="jv-lead product-page-intro jv-enter" style={{ "--d": "60ms" } as React.CSSProperties}>{nb(intros[kind] ?? "")}{kind === "pricing" && <> <Link id="pricing-pass-link" className="pricing-intro-link" to="/pricing#one-time-passes" data-analytics-label="See one-time CV tailoring passes">See one-time CV tailoring passes</Link></>}</p>
           {(band || kind === "pricing") && <div className="jv-page-actions"><StartLink to={start}>{kind === "pricing" ? "Start free" : undefined}</StartLink><TextLink to="/cv-check">Try the free CV Check</TextLink></div>}
           {visual && <div className="jv-page-visual" {...(visualDecor ? { "aria-hidden": true } : {})}>{visual}</div>}
         </header>

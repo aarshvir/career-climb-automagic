@@ -936,6 +936,8 @@ main .ap-phone-field[class] select { padding-right: 34px; background-position: r
 /* /about and /pricing open on a forest stage; the about rows keep one eyebrow-to-heading gap. */
 .product-page--pricing .jv-page-head--forest .pc-aside { box-shadow: 0 40px 90px -24px rgb(var(--jv-ink-rgb) / .55), 0 0 0 1px rgb(255 255 255 / .06); }
 .product-page--pricing .jv-page-head--forest .jv-lead { max-width: 34em; }
+/* The one link to the one-time passes sits inside the pricing introduction. Underlined, so it reads as a link in a sentence and stays apart from the free CV Check link below. */
+.product-page--pricing .product-page-intro .pricing-intro-link { color: #fff; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
 @media (min-width: 1024px) {
   .jv-story { grid-template-rows: auto 1fr; row-gap: 16px; }
   .jv-story > .jv-caption { grid-row: 1; align-self: end; }
